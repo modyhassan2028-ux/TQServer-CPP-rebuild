@@ -9,6 +9,7 @@
 #include "MsgMonster.h"
 #include "NetCore.h"
 #include "StringPacker.h"
+#include "Account.h"
 
 #include <cstring>
 #include <cstdio>
@@ -62,8 +63,31 @@ void CMsgConnect::Process(uint32_t dwSender, void* pContext) {
     auto* pClient = static_cast<CNetClient*>(pContext);
     if (!pClient) return;
 
-    printf("[LOGIN] Session %u: account='%s' (auth v1: accepted)\n",
-           dwSender, m_account.c_str());
+    // real account validation: salted SHA-256 store (accounts.dat)
+    uint32_t dwAccountId = 0;
+    auto result = CAccountManager::Instance().Validate(m_account, m_password, dwAccountId);
+    if (result == CAccountManager::Result::WrongPassword) {
+        printf("[LOGIN] Session %u: account='%s' REJECTED (wrong password)\n", dwSender, m_account.c_str());
+        CMsgTalk err;
+        if (err.Create("SYSTEM", m_account, "Invalid password for this account.", CMsgTalk::Channel_Talk))
+            pClient->Send(err.GetBuf(), err.GetSize());
+        return; // do not spawn a player
+    }
+    if (result == CAccountManager::Result::Banned) {
+        printf("[LOGIN] Session %u: account='%s' REJECTED (banned)\n", dwSender, m_account.c_str());
+        CMsgTalk err;
+        if (err.Create("SYSTEM", m_account, "This account is banned.", CMsgTalk::Channel_Talk))
+            pClient->Send(err.GetBuf(), err.GetSize());
+        return;
+    }
+    if (result == CAccountManager::Result::NoSuchAccount) {
+        printf("[LOGIN] Session %u: account='%s' REJECTED (no such account)\n", dwSender, m_account.c_str());
+        CMsgTalk err;
+        if (err.Create("SYSTEM", m_account, "Account does not exist.", CMsgTalk::Channel_Talk))
+            pClient->Send(err.GetBuf(), err.GetSize());
+        return;
+    }
+    printf("[LOGIN] Session %u: account='%s' authenticated (id %u)\n", dwSender, m_account.c_str(), dwAccountId);
 
     // Create the player bound to this socket session
     auto pUser = std::make_shared<CUser>(dwSender);

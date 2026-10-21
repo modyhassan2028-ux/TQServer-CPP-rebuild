@@ -13,7 +13,7 @@ WARN="-Wno-unused-parameter"
 mkdir -p build
 
 echo "[1/6] MsgServer.exe (net core + packet handlers)..."
-$CC $INC $WARN Exe/MsgServer/main.cpp Exe/MsgServer/NetCore.cpp Exe/MsgServer/BattleSystem.cpp \
+$CC $INC $WARN Exe/MsgServer/main.cpp Exe/MsgServer/NetCore.cpp Exe/MsgServer/Account.cpp Exe/MsgServer/BattleSystem.cpp \
     Exe/MsgServer/GameMap.cpp Exe/MsgServer/Guild.cpp Exe/MsgServer/MapManager.cpp Exe/MsgServer/Monster.cpp Exe/MsgServer/MonsterManager.cpp Exe/MsgServer/MsgMonster.cpp Exe/MsgServer/MsgConnect.cpp \
     Exe/MsgServer/MsgAction.cpp \
     Exe/MsgServer/MsgInteract.cpp Exe/MsgServer/MsgItem.cpp Exe/MsgServer/MsgTalk.cpp Exe/MsgServer/MsgUserAttrib.cpp \
