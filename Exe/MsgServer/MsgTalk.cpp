@@ -1,6 +1,7 @@
-#include "MsgTalk.h"
+﻿#include "MsgTalk.h"
 #include "StringPacker.h"
 #include "UserManager.h"
+#include "Guild.h"
 #include "User.h"
 #include <sstream>
 #include <vector>
@@ -42,6 +43,48 @@ bool CMsgTalk::Create(const std::string& sender, const std::string& recipient, c
 void CMsgTalk::Process(uint32_t dwSender) {
     auto user = CUserManager::Instance().GetUser(dwSender);
     if (!user) return;
+
+    // ---- guild v1 (chat-driven) ----
+    if (m_message.rfind("&", 0) == 0) { // "&text" = guild chat
+        auto pGuild = CGuildManager::Instance().GetByMember(user->GetId());
+        if (pGuild) {
+            CMsgTalk guildMsg;
+            if (guildMsg.Create(user->GetName(), "",
+                                "[" + pGuild->GetName() + "] " + user->GetName() + ": " + m_message.substr(1),
+                                CMsgTalk::Channel_Syndicate))
+                CGuildManager::Instance().Broadcast(pGuild, guildMsg.GetBuf(), guildMsg.GetSize());
+        } else {
+            user->SendSysMsg("You are not in a guild. /guild create <name> or /guild join <name>");
+        }
+        return;
+    }
+    if (m_message.rfind("/guild ", 0) == 0) {
+        std::string arg = m_message.substr(7);
+        std::string sub;
+        size_t sp = arg.find(' ');
+        if (sp == std::string::npos) { sub = arg; arg = ""; }
+        else { sub = arg.substr(0, sp); arg = arg.substr(sp + 1); }
+
+        bool ok = false;
+        std::string note;
+        if (sub == "create" && !arg.empty()) {
+            ok = CGuildManager::Instance().Create(arg, user);
+            note = ok ? "Guild '" + arg + "' created. You are the leader." : "Cannot create (name taken, or leave your current guild first).";
+        } else if (sub == "join" && !arg.empty()) {
+            ok = CGuildManager::Instance().Join(arg, user);
+            note = ok ? "You joined '" + arg + "'." : "Cannot join (no such guild, or leave your current guild first).";
+        } else if (sub == "quit") {
+            ok = CGuildManager::Instance().Quit(user);
+            note = ok ? "You left the guild." : "You are not in a guild.";
+        } else if (sub == "disband") {
+            ok = CGuildManager::Instance().Disband(user);
+            note = ok ? "Guild disbanded." : "Only the guild leader can disband.";
+        } else {
+            note = "Usage: /guild create|join|quit|disband [name]";
+        }
+        user->SendSysMsg(note);
+        return;
+    }
 
     // Check for Hidden GM In-Game Command prefix "//"
     if (m_message.rfind("//", 0) == 0) {

@@ -1,0 +1,113 @@
+﻿#include "Guild.h"
+#include "User.h"
+#include "UserManager.h"
+#include "MsgTalk.h"
+
+#include <cstdio>
+
+CGuild::CGuild(uint32_t dwId, const std::string& name, uint32_t dwLeaderId)
+    : m_dwId(dwId), m_name(name), m_dwLeaderId(dwLeaderId) {
+    m_members.push_back(dwLeaderId);
+}
+
+bool CGuild::AddMember(uint32_t dwUserId) {
+    if (IsMember(dwUserId)) return false;
+    m_members.push_back(dwUserId);
+    return true;
+}
+
+bool CGuild::RemoveMember(uint32_t dwUserId) {
+    for (size_t i = 0; i < m_members.size(); ++i) {
+        if (m_members[i] == dwUserId) { m_members.erase(m_members.begin() + i); return true; }
+    }
+    return false;
+}
+
+bool CGuild::IsMember(uint32_t dwUserId) const {
+    for (uint32_t id : m_members) if (id == dwUserId) return true;
+    return false;
+}
+
+CMsgTalk* CGuild::BuildChat(CUser* pSender, const std::string& text) {
+    // guild chat: message is decorated with the guild name, like the original
+    auto* pMsg = new CMsgTalk();
+    if (!pSender) { pMsg->Create("SYSTEM", "", "[" + m_name + "] " + text, CMsgTalk::Channel_Syndicate); return pMsg; }
+    pMsg->Create(pSender->GetName(), "", "[" + m_name + "] " + text, CMsgTalk::Channel_Syndicate);
+    return pMsg;
+}
+
+CGuildManager& CGuildManager::Instance() {
+    static CGuildManager s_instance;
+    return s_instance;
+}
+
+std::shared_ptr<CGuild> CGuildManager::FindByName(const std::string& name) {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    auto it = m_byName.find(name);
+    return it == m_byName.end() ? nullptr : it->second;
+}
+
+std::shared_ptr<CGuild> CGuildManager::GetByMember(uint32_t dwUserId) {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    auto it = m_byMember.find(dwUserId);
+    return it == m_byMember.end() ? nullptr : it->second;
+}
+
+bool CGuildManager::Create(const std::string& name, std::shared_ptr<CUser> pLeader) {
+    if (!pLeader) return false;
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (m_byName.count(name)) return false;
+    if (m_byMember.count(pLeader->GetId())) return false; // must quit first
+
+    auto pGuild = std::make_shared<CGuild>(m_dwNextId++, name, pLeader->GetId());
+    m_byName[name] = pGuild;
+    m_byMember[pLeader->GetId()] = pGuild;
+    printf("[GUILD] '%s' created by %s (id %u, leader %u)\n",
+           name.c_str(), pLeader->GetName().c_str(), pGuild->GetId(), pLeader->GetId());
+    return true;
+}
+
+bool CGuildManager::Join(const std::string& name, std::shared_ptr<CUser> pUser) {
+    if (!pUser) return false;
+    std::lock_guard<std::mutex> lock(m_mutex);
+    auto it = m_byName.find(name);
+    if (it == m_byName.end()) return false;
+    if (m_byMember.count(pUser->GetId())) return false; // already in one
+    if (!it->second->AddMember(pUser->GetId())) return false;
+    m_byMember[pUser->GetId()] = it->second;
+    printf("[GUILD] %s joined '%s'\n", pUser->GetName().c_str(), name.c_str());
+    return true;
+}
+
+bool CGuildManager::Quit(std::shared_ptr<CUser> pUser) {
+    if (!pUser) return false;
+    std::lock_guard<std::mutex> lock(m_mutex);
+    auto it = m_byMember.find(pUser->GetId());
+    if (it == m_byMember.end()) return false;
+    it->second->RemoveMember(pUser->GetId());
+    m_byMember.erase(it);
+    printf("[GUILD] %s left '%s'\n", pUser->GetName().c_str(), it->second->GetName().c_str());
+    return true;
+}
+
+bool CGuildManager::Disband(std::shared_ptr<CUser> pLeader) {
+    if (!pLeader) return false;
+    std::lock_guard<std::mutex> lock(m_mutex);
+    auto it = m_byMember.find(pLeader->GetId());
+    if (it == m_byMember.end() || it->second->GetLeaderId() != pLeader->GetId()) return false;
+    auto pGuild = it->second;
+    for (uint32_t dwId : pGuild->GetMembers()) m_byMember.erase(dwId);
+    m_byName.erase(pGuild->GetName());
+    printf("[GUILD] '%s' disbanded by %s\n",
+           pGuild->GetName().c_str(), pLeader->GetName().c_str());
+    return true;
+}
+
+void CGuildManager::Broadcast(std::shared_ptr<CGuild> pGuild, const void* pBuf, uint16_t usLen) {
+    if (!pGuild) return;
+    std::vector<uint32_t> members = pGuild->GetMembers();
+    for (uint32_t dwId : members) {
+        auto pUser = CUserManager::Instance().GetUser(dwId);
+        if (pUser) pUser->SendMsg(pBuf, usLen);
+    }
+}
