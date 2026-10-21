@@ -29,6 +29,9 @@ public:
     uint32_t GetWarScore() const { return m_dwWarScore; }
     void AddWarScore(uint32_t v) { m_dwWarScore += v; }
     void ResetWarScore() { m_dwWarScore = 0; }
+
+    uint64_t GetFund() const { return m_dwFund; }
+    void AddFund(uint64_t v) { m_dwFund += v; }
     const std::vector<uint32_t>& GetMembers() const { return m_members; }
 
     // send a chat packet to every online member (id+name of sender passed in)
@@ -41,6 +44,7 @@ private:
     std::string m_announcement;
     std::vector<uint32_t> m_members;
     uint32_t m_dwWarScore{0};
+    uint64_t m_dwFund{0};
 };
 
 class CGuildManager {
@@ -62,6 +66,8 @@ public:
     bool DeclareWar(std::shared_ptr<CUser> pLeader, const std::string& strTargetGuild);
     void OnWarKill(uint32_t dwKillerGuildId, uint32_t dwVictimGuildId);
     bool IsAtWar(uint32_t dwGuildId) const;
+    // settles expired wars, announces the winner and pays the reward
+    void TickWars();
 
 private:
     CGuildManager() = default;

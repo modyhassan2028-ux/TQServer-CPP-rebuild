@@ -43,6 +43,7 @@ bool CMsgTalk::Create(const std::string& sender, const std::string& recipient, c
 }
 
 void CMsgTalk::Process(uint32_t dwSender) {
+    CGuildManager::Instance().TickWars(); // settle expired wars (v1)
     auto user = CUserManager::Instance().GetUser(dwSender);
     if (!user) return;
 
@@ -142,6 +143,9 @@ void CMsgTalk::Process(uint32_t dwSender) {
         } else if (sub == "war" && !arg.empty()) {
             ok = CGuildManager::Instance().DeclareWar(user, arg);
             note = ok ? "War declared for 30 minutes!" : "War failed (be a leader, target a real guild, no active war).";
+        } else if (sub == "fund") {
+            auto g = CGuildManager::Instance().GetByMember(user->GetId());
+            note = g ? "Guild fund: " + std::to_string(g->GetFund()) : "You are not in a guild.";
         } else if (sub == "warstatus") {
             auto g = CGuildManager::Instance().GetByMember(user->GetId());
             note = (g && CGuildManager::Instance().IsAtWar(g->GetId()))

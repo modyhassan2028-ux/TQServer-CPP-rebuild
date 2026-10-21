@@ -193,3 +193,62 @@ bool CGuildManager::IsAtWar(uint32_t dwGuildId) const {
     }
     return false;
 }
+
+void CGuildManager::TickWars() {
+    std::vector<uint32_t> finished;
+    struct Result { uint32_t winner, loser; uint32_t score; };
+    std::vector<Result> results;
+    {
+        std::lock_guard<std::mutex> lock(g_warMutex);
+        auto now = (uint64_t)std::chrono::steady_clock::now().time_since_epoch().count();
+        for (auto it = g_wars.begin(); it != g_wars.end();) {
+            if (now > it->second.ullEndTick) {
+                std::shared_ptr<CGuild> gA, gB;
+                for (auto& kv : m_byName) {
+                    if (kv.second->GetId() == it->second.dwGuildA) gA = kv.second;
+                    if (kv.second->GetId() == it->second.dwGuildB) gB = kv.second;
+                }
+                if (gA && gB) {
+                    uint32_t sa = gA->GetWarScore(), sb = gB->GetWarScore();
+                    bool draw = (sa == sb);
+                    auto pWinner = (!draw && sa > sb) ? gA : gB;
+                    auto pLoser  = (!draw && sa > sb) ? gB : gA;
+                    if (!draw) {
+                        pWinner->AddFund(500000); // war chest for the winner
+                        results.push_back({pWinner->GetId(), pLoser->GetId(),
+                                           std::max(sa, sb)});
+                    } else {
+                        results.push_back({0, 0, sa});
+                    }
+                }
+                it = g_wars.erase(it);
+            } else ++it;
+        }
+    }
+    // announce outside the lock
+    auto tell = [](std::shared_ptr<CGuild> g, const std::string& text) {
+        if (!g) return;
+        for (uint32_t id : g->GetMembers()) {
+            auto u = CUserManager::Instance().GetUser(id);
+            if (u) u->SendSysMsg(text);
+        }
+    };
+    for (auto& r : results) {
+        if (r.winner == 0) {
+            for (auto& kv : m_byName) {
+                if (kv.second->GetId() == r.loser || (r.loser == 0)) {}
+            }
+            continue;
+        }
+        std::shared_ptr<CGuild> pW, pL;
+        for (auto& kv : m_byName) {
+            if (kv.second->GetId() == r.winner) pW = kv.second;
+            if (kv.second->GetId() == r.loser) pL = kv.second;
+        }
+        if (pW && pL) {
+            tell(pW, "[GUILD WAR] Victory over '" + pL->GetName() + "' with " +
+                 std::to_string(r.score) + " kills! +500000 guild fund.");
+            tell(pL, "[GUILD WAR] Defeat against '" + pW->GetName() + "'. Regroup!");
+        }
+    }
+}

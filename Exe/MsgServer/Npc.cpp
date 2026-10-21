@@ -84,6 +84,32 @@ void CNpcManager::SpawnDefaults() {
     pDesertToTc->m_dwLookface = 8304;
     m_npcs[pDesertToTc->GetId()] = pDesertToTc;
 
+    // Twin City hub: gates to every base map (coords land on walkable dmap cells
+    // once real maps are indexed; synthetic maps fall back to these values)
+    struct Gate { const char* name; uint32_t dest, x, y; };
+    static const Gate kGates[] = {
+        {"DesertGate",    1000, 500, 600},
+        {"CanyonGate",    1001, 500, 600},
+        {"BirdIslandGate",1015, 200, 300},
+        {"ApeMountainGate",1020, 200, 300},
+    };
+    uint32_t dwGateId = NPC_ID_BASE + 10;
+    for (const auto& g : kGates) {
+        auto pGate = std::make_shared<CNpc>(dwGateId++, g.name,
+            CNpc::Type::Teleporter, 1002, 330, 270 + (uint16_t)(dwGateId - NPC_ID_BASE));
+        pGate->m_dwDestMap = g.dest; pGate->m_usDestX = g.x; pGate->m_usDestY = g.y;
+        pGate->m_dwLookface = 8300 + (dwGateId - NPC_ID_BASE);
+        pGate->m_strDialog = "Traveler! Step through and I will send you on your way.";
+        m_npcs[pGate->GetId()] = pGate;
+        // return gate on the destination map
+        auto pBack = std::make_shared<CNpc>(dwGateId++, g.name,
+            CNpc::Type::Teleporter, g.dest, (uint16_t)(g.x + 5), (uint16_t)(g.y + 5));
+        pBack->m_dwDestMap = 1002; pBack->m_usDestX = 335; pBack->m_usDestY = 275;
+        pBack->m_dwLookface = 8300 + (dwGateId - NPC_ID_BASE);
+        pBack->m_strDialog = "Back to Twin City!";
+        m_npcs[pBack->GetId()] = pBack;
+    }
+
     printf("[NPC] Spawned %zu default NPC(s).\n", m_npcs.size());
 }
 
