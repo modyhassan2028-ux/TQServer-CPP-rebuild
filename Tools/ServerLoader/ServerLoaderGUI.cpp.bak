@@ -1,0 +1,728 @@
+#include <windows.h>
+#include <commctrl.h>
+#include <string>
+#include <vector>
+#include <thread>
+#include <atomic>
+#include <iostream>
+#include "HookInjector.h"
+
+#pragma comment(lib, "comctl32.lib")
+
+// Control IDs
+#define IDC_LAUNCH      1001
+#define IDC_STATUS      1002
+#define IDC_LOG         1003
+#define IDC_CMD         1004
+#define IDC_SEND        1005
+#define IDC_STOP        1006
+
+// GM Control IDs
+#define IDC_GM_NAME     2001
+#define IDC_GM_TC       2002
+#define IDC_GM_PC       2003
+#define IDC_GM_AC       2004
+#define IDC_GM_DC       2005
+#define IDC_GM_BI       2006
+#define IDC_GM_MARKET   2007
+#define IDC_GM_JAIL     2008
+#define IDC_GM_MAP      2009
+#define IDC_GM_X        2010
+#define IDC_GM_Y        2011
+#define IDC_GM_TP_CUSTOM 2012
+
+#define IDC_GM_CP_50K   2013
+#define IDC_GM_CP_500K  2014
+#define IDC_GM_SILVER   2015
+#define IDC_GM_AMOUNT   2016
+#define IDC_GM_GIVE_CP  2017
+#define IDC_GM_GIVE_SIL 2018
+
+#define IDC_GM_LVL140   2019
+#define IDC_GM_REBORN2  2020
+#define IDC_GM_VIP6     2021
+#define IDC_GM_GODMODE  2022
+#define IDC_GM_INVIS    2023
+#define IDC_GM_ITEM_ID  2024
+#define IDC_GM_SPAWN_IT 2025
+
+#define WM_APPEND_LOG   (WM_USER + 1)
+
+static HWND g_hWnd = nullptr;
+static HWND g_hBtnLaunch = nullptr;
+static HWND g_hBtnStop = nullptr;
+static HWND g_hStatus = nullptr;
+static HWND g_hLogEdit = nullptr;
+static HWND g_hCmdEdit = nullptr;
+static HWND g_hBtnSend = nullptr;
+
+// GM Controls
+static HWND g_hGmName = nullptr;
+static HWND g_hGmMap = nullptr;
+static HWND g_hGmX = nullptr;
+static HWND g_hGmY = nullptr;
+static HWND g_hGmAmount = nullptr;
+static HWND g_hGmItemId = nullptr;
+
+static HBRUSH g_hDarkBrush = nullptr;
+static HBRUSH g_hHeaderBrush = nullptr;
+static HBRUSH g_hPanelBrush = nullptr;
+static HFONT g_hMonoFont = nullptr;
+static HFONT g_hUiFont = nullptr;
+static HFONT g_hBoldFont = nullptr;
+
+static std::atomic<bool> g_bServerRunning{ false };
+static std::atomic<bool> g_bStopThreads{ false };
+static PROCESS_INFORMATION g_piMsg{};
+static PROCESS_INFORMATION g_piAccount{};
+static PROCESS_INFORMATION g_piNpc{};
+
+void AppendLog(const std::string& text) {
+    if (!g_hLogEdit || text.empty()) return;
+    char* pMsg = _strdup(text.c_str());
+    PostMessageA(g_hWnd, WM_APPEND_LOG, 0, (LPARAM)pMsg);
+}
+
+void PipeReaderThread() {
+    std::string pipeName = "\\\\.\\pipe\\RevampedHookLog";
+    HANDLE hPipe = INVALID_HANDLE_VALUE;
+
+    for (int i = 0; i < 40 && !g_bStopThreads; i++) {
+        hPipe = CreateFileA(pipeName.c_str(), GENERIC_READ, 0, nullptr, OPEN_EXISTING, 0, nullptr);
+        if (hPipe != INVALID_HANDLE_VALUE) break;
+        Sleep(200);
+    }
+
+    if (hPipe == INVALID_HANDLE_VALUE) {
+        AppendLog("[Loader] Note: Standalone pipe monitoring idle\r\n");
+        return;
+    }
+
+    AppendLog("[Loader] Connected to RevampedHook log pipe\r\n");
+
+    char buffer[1024];
+    DWORD bytesRead = 0;
+    while (!g_bStopThreads) {
+        BOOL ok = ReadFile(hPipe, buffer, sizeof(buffer) - 1, &bytesRead, nullptr);
+        if (!ok || bytesRead == 0) break;
+        buffer[bytesRead] = '\0';
+        AppendLog(buffer);
+    }
+
+    CloseHandle(hPipe);
+}
+
+void ProcessWatchdogThread() {
+    while (!g_bStopThreads) {
+        if (g_bServerRunning && g_piMsg.hProcess) {
+            DWORD exitCode = 0;
+            if (GetExitCodeProcess(g_piMsg.hProcess, &exitCode) && exitCode != STILL_ACTIVE) {
+                g_bServerRunning = false;
+                AppendLog("\r\n[Loader] Server process has exited (Code " + std::to_string(exitCode) + ")\r\n");
+                SetWindowTextA(g_hStatus, "Server process exited");
+                EnableWindow(g_hBtnLaunch, TRUE);
+                EnableWindow(g_hBtnStop, FALSE);
+            }
+        }
+        Sleep(500);
+    }
+}
+
+void SendCommandToPipe(const std::string& cmd) {
+    if (cmd.empty()) return;
+
+    std::string pipeName = "\\\\.\\pipe\\RevampedHookCmd";
+    HANDLE hPipe = CreateFileA(pipeName.c_str(), GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
+
+    if (hPipe != INVALID_HANDLE_VALUE) {
+        DWORD written = 0;
+        WriteFile(hPipe, cmd.c_str(), (DWORD)cmd.length(), &written, nullptr);
+        CloseHandle(hPipe);
+        AppendLog("[Pipe Command Sent] " + cmd + "\r\n");
+    }
+}
+
+bool SendCustomGmPipeCommand(const std::string& cmd) {
+    if (cmd.empty()) return false;
+    std::string pipeName = "\\\\.\\pipe\\TQCustomGmCmd";
+    HANDLE hPipe = CreateFileA(pipeName.c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
+    if (hPipe != INVALID_HANDLE_VALUE) {
+        DWORD written = 0;
+        WriteFile(hPipe, cmd.c_str(), static_cast<DWORD>(cmd.length()), &written, nullptr);
+        char resp[256]{};
+        DWORD bytesRead = 0;
+        ReadFile(hPipe, resp, sizeof(resp) - 1, &bytesRead, nullptr);
+        CloseHandle(hPipe);
+        AppendLog("[Live Teleport Result] " + std::string(resp));
+        return true;
+    }
+    return false;
+}
+
+std::string GetTargetPlayerName() {
+    char buf[128]{};
+    GetWindowTextA(g_hGmName, buf, sizeof(buf) - 1);
+    std::string name = buf;
+    if (name.empty()) name = "all";
+    return name;
+}
+
+bool ExecuteGmSql(const std::string& sql, const std::string& logDesc) {
+    std::string mysqlExe = "C:\\AppServ\\MySQL\\bin\\mysql.exe";
+    std::string cmdLine = "\"" + mysqlExe + "\" -u root -p12345678 -e \"" + sql + "\"";
+
+    STARTUPINFOA si{};
+    si.cb = sizeof(si);
+    si.dwFlags = STARTF_USESHOWWINDOW;
+    si.wShowWindow = SW_HIDE;
+    PROCESS_INFORMATION pi{};
+
+    std::vector<char> cmdBuf(cmdLine.begin(), cmdLine.end());
+    cmdBuf.push_back('\0');
+
+    if (CreateProcessA(nullptr, cmdBuf.data(), nullptr, nullptr, FALSE, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi)) {
+        WaitForSingleObject(pi.hProcess, 4000);
+        DWORD exitCode = 0;
+        GetExitCodeProcess(pi.hProcess, &exitCode);
+        CloseHandle(pi.hProcess);
+        CloseHandle(pi.hThread);
+        if (exitCode == 0) {
+            AppendLog("[GM Success] " + logDesc + "\r\n");
+            return true;
+        } else {
+            AppendLog("[GM Error] MySQL returned code " + std::to_string(exitCode) + "\r\n");
+            return false;
+        }
+    } else {
+        AppendLog("[GM Error] Failed to invoke MySQL CLI (Error " + std::to_string(GetLastError()) + ")\r\n");
+        return false;
+    }
+}
+
+std::string BuildWhereClause(const std::string& player) {
+    if (player.empty() || player == "all") {
+        return "";
+    }
+    // Matches player by character name, account name, or account ID
+    return " WHERE (name = '" + player + "' "
+           "OR account_id = (SELECT id FROM accounts WHERE name = '" + player + "' LIMIT 1) "
+           "OR account_id = '" + player + "')";
+}
+
+void GmGiveCps(const std::string& player, uint32_t amount) {
+    std::string whereClause = BuildWhereClause(player);
+    std::string sql = "USE cq1; "
+        "UPDATE cq_user SET "
+        "chk_sum = (((CASE (emoney + " + std::to_string(amount) + ") % 3 WHEN 0 THEN 29565076 WHEN 1 THEN 3118018 WHEN 2 THEN 9581781 END) + (emoney_mono & account_id) + account_id) ^ (emoney + " + std::to_string(amount) + ")), "
+        "emoney = emoney + " + std::to_string(amount) + whereClause + "; "
+        "INSERT INTO cq_mail (receiver_id, Sender_name, title, content, money, emoney, action, expiration_date) "
+        "SELECT id, 'GM Control', 'GM Reward', 'Claim +" + std::to_string(amount) + " CPs!', 0, " + std::to_string(amount) + ", 0, UNIX_TIMESTAMP() + 864000 "
+        "FROM cq_user" + whereClause + ";";
+
+    ExecuteGmSql(sql, "Granted +" + std::to_string(amount) + " CPs to " + (player.empty() ? "all players" : player) + " (In-game Mail + DB Updated with valid Checksum)");
+}
+
+void GmGiveSilvers(const std::string& player, uint64_t amount) {
+    std::string whereClause = BuildWhereClause(player);
+    std::string sql = "USE cq1; "
+        "UPDATE cq_user SET money = money + " + std::to_string(amount) + whereClause + "; "
+        "INSERT INTO cq_mail (receiver_id, Sender_name, title, content, money, emoney, action, expiration_date) "
+        "SELECT id, 'GM Control', 'GM Reward', 'Claim +" + std::to_string(amount) + " Silvers!', " + std::to_string(amount) + ", 0, 0, UNIX_TIMESTAMP() + 864000 "
+        "FROM cq_user" + whereClause + ";";
+
+    ExecuteGmSql(sql, "Granted +" + std::to_string(amount) + " Silvers to " + (player.empty() ? "all players" : player) + " (In-game Mail + DB Updated)");
+}
+
+void GmSetLevel(const std::string& player, int level) {
+    std::string whereClause = BuildWhereClause(player);
+    std::string sql = "USE cq1; UPDATE cq_user SET level = " + std::to_string(level) + whereClause + ";";
+    ExecuteGmSql(sql, "Set Level to " + std::to_string(level) + " for " + (player.empty() ? "all players" : player));
+}
+
+void GmSetReborn(const std::string& player, int rb) {
+    std::string whereClause = BuildWhereClause(player);
+    std::string sql = "USE cq1; UPDATE cq_user SET metempsychosis = " + std::to_string(rb) + ", level = 140" + whereClause + ";";
+    ExecuteGmSql(sql, "Set Rebirth to " + std::to_string(rb) + " (Level 140) for " + (player.empty() ? "all players" : player));
+}
+
+void GmSetVip(const std::string& player, int vip) {
+    std::string whereClause = BuildWhereClause(player);
+    std::string sql = "USE cq1; "
+        "UPDATE cq_user SET vip_value = " + std::to_string(vip) + whereClause + "; "
+        "UPDATE accounts SET vip = " + std::to_string(vip) + " WHERE id IN (SELECT account_id FROM cq_user" + whereClause + "); "
+        "INSERT INTO vips (account_id, vip_level, days_left, vip_expires) "
+        "SELECT account_id, " + std::to_string(vip) + ", 365, DATE_ADD(NOW(), INTERVAL 365 DAY) FROM cq_user" + whereClause + " "
+        "ON DUPLICATE KEY UPDATE vip_level = " + std::to_string(vip) + ", days_left = 365, vip_expires = DATE_ADD(NOW(), INTERVAL 365 DAY);";
+
+    ExecuteGmSql(sql, "Set VIP " + std::to_string(vip) + " (365 Days) for " + (player.empty() ? "all players" : player));
+}
+
+void GmTeleport(const std::string& player, int mapId, int x, int y, const std::string& locName, const std::string& scrollCode) {
+    std::string whereClause = BuildWhereClause(player);
+    std::string sql = "USE cq1; UPDATE cq_user SET recordmap_id = " + std::to_string(mapId) +
+        ", recordx = " + std::to_string(x) + ", recordy = " + std::to_string(y) + whereClause + ";";
+
+    ExecuteGmSql(sql, "Teleport set for " + (player.empty() ? "all players" : player) + " to " + locName + " (Map " + std::to_string(mapId) + ": " + std::to_string(x) + ", " + std::to_string(y) + ")");
+
+    std::string cmd = scrollCode.empty() ? ("/scroll " + std::to_string(mapId) + " " + std::to_string(x) + " " + std::to_string(y)) : ("/scroll " + scrollCode);
+    AppendLog("[In-Game Live Command] " + cmd + "\r\n");
+    AppendLog("[Notice] If already logged in, type " + cmd + " in chat to teleport instantly!\r\n");
+}
+
+void GmSpawnItem(const std::string& player, uint32_t itemId) {
+    std::string whereClause = BuildWhereClause(player);
+    std::string sql = "USE cq1; "
+        "INSERT INTO cq_item (type, owner_id, player_id, amount, amount_limit, position, gem1, gem2, magic3) "
+        "SELECT " + std::to_string(itemId) + ", id, id, 100, 100, 0, 255, 255, 12 FROM cq_user" + whereClause + ";";
+
+    ExecuteGmSql(sql, "Spawned Super +12 (Double Socket Super Gems) Item ID " + std::to_string(itemId) + " for " + (player.empty() ? "all players" : player));
+}
+
+void LaunchCluster() {
+    std::string baseDir = "G:\\Malfat conquer\\RealCo\\Source - Copy";
+    std::string accountDir = "G:\\Malfat conquer\\RealCo\\AccountServer";
+
+    EnableWindow(g_hBtnLaunch, FALSE);
+    SetWindowTextA(g_hStatus, "Server launching - connecting cluster...");
+
+    // 1. AccountServer
+    STARTUPINFOA siAcc{};
+    siAcc.cb = sizeof(siAcc);
+    std::string accExe = accountDir + "\\AccountServerBinary2015.exe";
+    char cmdAcc[MAX_PATH];
+    strncpy_s(cmdAcc, accExe.c_str(), sizeof(cmdAcc) - 1);
+
+    AppendLog("[Loader] Checking AccountServer...\r\n");
+    if (!g_piAccount.hProcess) {
+        if (CreateProcessA(nullptr, cmdAcc, nullptr, nullptr, FALSE, 0, nullptr, accountDir.c_str(), &siAcc, &g_piAccount)) {
+            AppendLog("[Loader] Started AccountServer (PID: " + std::to_string(g_piAccount.dwProcessId) + ")\r\n");
+        }
+    }
+
+    // 2. MsgServer with RevampedHook injection
+    std::string msgExe = baseDir + "\\MsgServer.exe";
+    std::string hookDll = baseDir + "\\RevampedHook.dll";
+
+    AppendLog("[Loader] Creating MsgServer.exe (suspended)...\r\n");
+
+    bool success = loader::CHookInjector::LaunchAndInject(
+        msgExe,
+        baseDir,
+        hookDll,
+        g_piMsg
+    );
+
+    if (!success) {
+        AppendLog("[Error] Failed to create or inject MsgServer.exe!\r\n");
+        SetWindowTextA(g_hStatus, "Launch FAILED - check log");
+        EnableWindow(g_hBtnLaunch, TRUE);
+        return;
+    }
+
+    AppendLog("[Loader] Injected RevampedHook.dll (HWID Verified OK)\r\n");
+    AppendLog("[Loader] Server resumed cleanly\r\n");
+
+    g_bServerRunning = true;
+    g_bStopThreads = false;
+    SetWindowTextA(g_hStatus, "Server Running (Online) - GM Control Active");
+    EnableWindow(g_hBtnStop, TRUE);
+
+    std::thread(PipeReaderThread).detach();
+    std::thread(ProcessWatchdogThread).detach();
+
+    // 3. NpcServer
+    Sleep(2000);
+    STARTUPINFOA siNpc{};
+    siNpc.cb = sizeof(siNpc);
+    std::string npcExe = baseDir + "\\NpcServer.exe";
+    char cmdNpc[MAX_PATH];
+    strncpy_s(cmdNpc, npcExe.c_str(), sizeof(cmdNpc) - 1);
+    if (CreateProcessA(nullptr, cmdNpc, nullptr, nullptr, FALSE, 0, nullptr, baseDir.c_str(), &siNpc, &g_piNpc)) {
+        AppendLog("[Loader] Started NpcServer.exe (PID: " + std::to_string(g_piNpc.dwProcessId) + ")\r\n");
+    }
+}
+
+void StopCluster() {
+    AppendLog("[Loader] Stopping server processes...\r\n");
+    if (g_piMsg.hProcess) {
+        TerminateProcess(g_piMsg.hProcess, 0);
+        CloseHandle(g_piMsg.hProcess);
+        CloseHandle(g_piMsg.hThread);
+        g_piMsg.hProcess = nullptr;
+    }
+    if (g_piNpc.hProcess) {
+        TerminateProcess(g_piNpc.hProcess, 0);
+        CloseHandle(g_piNpc.hProcess);
+        CloseHandle(g_piNpc.hThread);
+        g_piNpc.hProcess = nullptr;
+    }
+    g_bServerRunning = false;
+    SetWindowTextA(g_hStatus, "Server Stopped");
+    EnableWindow(g_hBtnLaunch, TRUE);
+    EnableWindow(g_hBtnStop, FALSE);
+    AppendLog("[Loader] Server processes stopped.\r\n");
+}
+
+LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+    switch (msg) {
+    case WM_CREATE: {
+        g_hDarkBrush = CreateSolidBrush(RGB(18, 18, 18));
+        g_hHeaderBrush = CreateSolidBrush(RGB(28, 28, 28));
+        g_hPanelBrush = CreateSolidBrush(RGB(22, 24, 28));
+
+        g_hMonoFont = CreateFontA(
+            14, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+            DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+            CLEARTYPE_QUALITY, FIXED_PITCH | FF_MODERN, "Consolas"
+        );
+
+        g_hUiFont = CreateFontA(
+            14, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+            DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+            CLEARTYPE_QUALITY, DEFAULT_PITCH | FF_SWISS, "Segoe UI"
+        );
+
+        g_hBoldFont = CreateFontA(
+            15, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
+            DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+            CLEARTYPE_QUALITY, DEFAULT_PITCH | FF_SWISS, "Segoe UI"
+        );
+
+        // --- LEFT PANEL: SERVER CONTROLS & LIVE LOG ---
+        g_hBtnLaunch = CreateWindowExA(0, "BUTTON", "Launch Server",
+            WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+            12, 12, 130, 32, hWnd, (HMENU)IDC_LAUNCH, nullptr, nullptr);
+
+        g_hBtnStop = CreateWindowExA(0, "BUTTON", "Stop Server",
+            WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_DISABLED,
+            148, 12, 110, 32, hWnd, (HMENU)IDC_STOP, nullptr, nullptr);
+
+        g_hStatus = CreateWindowExA(0, "STATIC", "Ready to Launch",
+            WS_CHILD | WS_VISIBLE | SS_LEFT,
+            268, 18, 380, 24, hWnd, (HMENU)IDC_STATUS, nullptr, nullptr);
+
+        g_hLogEdit = CreateWindowExA(WS_EX_CLIENTEDGE, "EDIT", "",
+            WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY,
+            12, 52, 640, 560, hWnd, (HMENU)IDC_LOG, nullptr, nullptr);
+
+        CreateWindowExA(0, "STATIC", ">",
+            WS_CHILD | WS_VISIBLE | SS_CENTER,
+            12, 622, 20, 24, hWnd, nullptr, nullptr, nullptr);
+
+        g_hCmdEdit = CreateWindowExA(WS_EX_CLIENTEDGE, "EDIT", "",
+            WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL,
+            34, 620, 535, 26, hWnd, (HMENU)IDC_CMD, nullptr, nullptr);
+
+        g_hBtnSend = CreateWindowExA(0, "BUTTON", "Send",
+            WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+            575, 619, 76, 28, hWnd, (HMENU)IDC_SEND, nullptr, nullptr);
+
+        // --- RIGHT PANEL: GM GOD MODE CONTROL PANEL ---
+        int gx = 665;
+        HWND hGmTitle = CreateWindowExA(0, "STATIC", "--- [ GM GOD MODE CONTROL PANEL ] ---",
+            WS_CHILD | WS_VISIBLE | SS_CENTER,
+            gx, 16, 430, 24, hWnd, nullptr, nullptr, nullptr);
+        SendMessageA(hGmTitle, WM_SETFONT, (WPARAM)g_hBoldFont, TRUE);
+
+        // Player Name Target
+        CreateWindowExA(0, "STATIC", "Target Player:", WS_CHILD | WS_VISIBLE, gx + 5, 50, 100, 22, hWnd, nullptr, nullptr, nullptr);
+        g_hGmName = CreateWindowExA(WS_EX_CLIENTEDGE, "EDIT", "", WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL,
+            gx + 110, 48, 200, 24, hWnd, (HMENU)IDC_GM_NAME, nullptr, nullptr);
+        CreateWindowExA(0, "STATIC", "(Leave empty for current player)", WS_CHILD | WS_VISIBLE, gx + 315, 52, 120, 20, hWnd, nullptr, nullptr, nullptr);
+
+        // Teleportation Group
+        HWND hTpGroup = CreateWindowExA(0, "BUTTON", "Instant Teleportation", WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+            gx, 80, 435, 140, hWnd, nullptr, nullptr, nullptr);
+        SendMessageA(hTpGroup, WM_SETFONT, (WPARAM)g_hBoldFont, TRUE);
+
+        CreateWindowExA(0, "BUTTON", "Twin City", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, gx + 15, 105, 95, 28, hWnd, (HMENU)IDC_GM_TC, nullptr, nullptr);
+        CreateWindowExA(0, "BUTTON", "Phoenix Castle", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, gx + 118, 105, 95, 28, hWnd, (HMENU)IDC_GM_PC, nullptr, nullptr);
+        CreateWindowExA(0, "BUTTON", "Ape Mountain", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, gx + 221, 105, 95, 28, hWnd, (HMENU)IDC_GM_AC, nullptr, nullptr);
+        CreateWindowExA(0, "BUTTON", "Desert City", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, gx + 324, 105, 95, 28, hWnd, (HMENU)IDC_GM_DC, nullptr, nullptr);
+
+        CreateWindowExA(0, "BUTTON", "Bird Island", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, gx + 15, 140, 95, 28, hWnd, (HMENU)IDC_GM_BI, nullptr, nullptr);
+        CreateWindowExA(0, "BUTTON", "Market", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, gx + 118, 140, 95, 28, hWnd, (HMENU)IDC_GM_MARKET, nullptr, nullptr);
+        CreateWindowExA(0, "BUTTON", "NPC Jail (5000)", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, gx + 221, 140, 198, 28, hWnd, (HMENU)IDC_GM_JAIL, nullptr, nullptr);
+
+        CreateWindowExA(0, "STATIC", "Map:", WS_CHILD | WS_VISIBLE, gx + 15, 182, 35, 20, hWnd, nullptr, nullptr, nullptr);
+        g_hGmMap = CreateWindowExA(WS_EX_CLIENTEDGE, "EDIT", "1002", WS_CHILD | WS_VISIBLE | ES_NUMBER, gx + 52, 178, 50, 24, hWnd, (HMENU)IDC_GM_MAP, nullptr, nullptr);
+        CreateWindowExA(0, "STATIC", "X:", WS_CHILD | WS_VISIBLE, gx + 110, 182, 18, 20, hWnd, nullptr, nullptr, nullptr);
+        g_hGmX = CreateWindowExA(WS_EX_CLIENTEDGE, "EDIT", "430", WS_CHILD | WS_VISIBLE | ES_NUMBER, gx + 130, 178, 45, 24, hWnd, (HMENU)IDC_GM_X, nullptr, nullptr);
+        CreateWindowExA(0, "STATIC", "Y:", WS_CHILD | WS_VISIBLE, gx + 185, 182, 18, 20, hWnd, nullptr, nullptr, nullptr);
+        g_hGmY = CreateWindowExA(WS_EX_CLIENTEDGE, "EDIT", "380", WS_CHILD | WS_VISIBLE | ES_NUMBER, gx + 205, 178, 45, 24, hWnd, (HMENU)IDC_GM_Y, nullptr, nullptr);
+        CreateWindowExA(0, "BUTTON", "Custom Teleport", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, gx + 260, 176, 160, 28, hWnd, (HMENU)IDC_GM_TP_CUSTOM, nullptr, nullptr);
+
+        // Economy & Currency Spawner
+        HWND hEcoGroup = CreateWindowExA(0, "BUTTON", "Currency & Economy Spawner", WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+            gx, 230, 435, 130, hWnd, nullptr, nullptr, nullptr);
+        SendMessageA(hEcoGroup, WM_SETFONT, (WPARAM)g_hBoldFont, TRUE);
+
+        CreateWindowExA(0, "BUTTON", "+50,000 CPs", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, gx + 15, 255, 125, 28, hWnd, (HMENU)IDC_GM_CP_50K, nullptr, nullptr);
+        CreateWindowExA(0, "BUTTON", "+500,000 CPs", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, gx + 150, 255, 125, 28, hWnd, (HMENU)IDC_GM_CP_500K, nullptr, nullptr);
+        CreateWindowExA(0, "BUTTON", "+100M Silvers", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, gx + 285, 255, 135, 28, hWnd, (HMENU)IDC_GM_SILVER, nullptr, nullptr);
+
+        CreateWindowExA(0, "STATIC", "Custom Amount:", WS_CHILD | WS_VISIBLE, gx + 15, 300, 100, 20, hWnd, nullptr, nullptr, nullptr);
+        g_hGmAmount = CreateWindowExA(WS_EX_CLIENTEDGE, "EDIT", "100000", WS_CHILD | WS_VISIBLE | ES_NUMBER, gx + 120, 296, 110, 24, hWnd, (HMENU)IDC_GM_AMOUNT, nullptr, nullptr);
+        CreateWindowExA(0, "BUTTON", "Give CPs", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, gx + 240, 294, 90, 28, hWnd, (HMENU)IDC_GM_GIVE_CP, nullptr, nullptr);
+        CreateWindowExA(0, "BUTTON", "Give Silvers", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, gx + 338, 294, 85, 28, hWnd, (HMENU)IDC_GM_GIVE_SIL, nullptr, nullptr);
+
+        // Power Boosts & God Mode
+        HWND hPwrGroup = CreateWindowExA(0, "BUTTON", "Power Boosts & Stealth", WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+            gx, 370, 435, 130, hWnd, nullptr, nullptr, nullptr);
+        SendMessageA(hPwrGroup, WM_SETFONT, (WPARAM)g_hBoldFont, TRUE);
+
+        CreateWindowExA(0, "BUTTON", "Set Level 140", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, gx + 15, 395, 125, 28, hWnd, (HMENU)IDC_GM_LVL140, nullptr, nullptr);
+        CreateWindowExA(0, "BUTTON", "2nd Rebirth", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, gx + 150, 395, 125, 28, hWnd, (HMENU)IDC_GM_REBORN2, nullptr, nullptr);
+        CreateWindowExA(0, "BUTTON", "Set VIP 6", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, gx + 285, 395, 135, 28, hWnd, (HMENU)IDC_GM_VIP6, nullptr, nullptr);
+
+        CreateWindowExA(0, "BUTTON", "Toggle God Mode (Invulnerable)", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, gx + 15, 432, 200, 30, hWnd, (HMENU)IDC_GM_GODMODE, nullptr, nullptr);
+        CreateWindowExA(0, "BUTTON", "Toggle Ghost (Invisibility)", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, gx + 225, 432, 195, 30, hWnd, (HMENU)IDC_GM_INVIS, nullptr, nullptr);
+
+        // Super Gear Spawner
+        HWND hItemGroup = CreateWindowExA(0, "BUTTON", "Instant Item Generator", WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+            gx, 510, 435, 95, hWnd, nullptr, nullptr, nullptr);
+        SendMessageA(hItemGroup, WM_SETFONT, (WPARAM)g_hBoldFont, TRUE);
+
+        CreateWindowExA(0, "STATIC", "Item ID (e.g. 410309):", WS_CHILD | WS_VISIBLE, gx + 15, 540, 140, 20, hWnd, nullptr, nullptr, nullptr);
+        g_hGmItemId = CreateWindowExA(WS_EX_CLIENTEDGE, "EDIT", "410309", WS_CHILD | WS_VISIBLE | ES_NUMBER, gx + 155, 536, 100, 24, hWnd, (HMENU)IDC_GM_ITEM_ID, nullptr, nullptr);
+        CreateWindowExA(0, "BUTTON", "Spawn Super +12 Gear", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, gx + 265, 534, 155, 28, hWnd, (HMENU)IDC_GM_SPAWN_IT, nullptr, nullptr);
+        CreateWindowExA(0, "STATIC", "Tip: In-game you can also type //tc, //givecp 50000, //godmode in chat!", WS_CHILD | WS_VISIBLE, gx + 15, 574, 405, 20, hWnd, nullptr, nullptr, nullptr);
+
+        // Apply Fonts
+        SendMessageA(g_hBtnLaunch, WM_SETFONT, (WPARAM)g_hUiFont, TRUE);
+        SendMessageA(g_hBtnStop, WM_SETFONT, (WPARAM)g_hUiFont, TRUE);
+        SendMessageA(g_hStatus, WM_SETFONT, (WPARAM)g_hUiFont, TRUE);
+        SendMessageA(g_hLogEdit, WM_SETFONT, (WPARAM)g_hMonoFont, TRUE);
+        SendMessageA(g_hCmdEdit, WM_SETFONT, (WPARAM)g_hMonoFont, TRUE);
+        SendMessageA(g_hBtnSend, WM_SETFONT, (WPARAM)g_hUiFont, TRUE);
+        SendMessageA(g_hGmName, WM_SETFONT, (WPARAM)g_hUiFont, TRUE);
+        SendMessageA(g_hGmMap, WM_SETFONT, (WPARAM)g_hUiFont, TRUE);
+        SendMessageA(g_hGmX, WM_SETFONT, (WPARAM)g_hUiFont, TRUE);
+        SendMessageA(g_hGmY, WM_SETFONT, (WPARAM)g_hUiFont, TRUE);
+        SendMessageA(g_hGmAmount, WM_SETFONT, (WPARAM)g_hUiFont, TRUE);
+        SendMessageA(g_hGmItemId, WM_SETFONT, (WPARAM)g_hUiFont, TRUE);
+
+        AppendLog("=========================================================================================\r\n");
+        AppendLog("       Conquer Online Master Server Launcher & Hidden GM God Mode Control Panel          \r\n");
+        AppendLog("       (Dual Mode: In-App Desktop Buttons + In-Game // Chat Commands Active)             \r\n");
+        AppendLog("=========================================================================================\r\n");
+        AppendLog("Click [Launch Server] to initialize cluster, or use GM controls on the right panel.\r\n\r\n");
+        return 0;
+    }
+
+    case WM_COMMAND: {
+        int id = LOWORD(wParam);
+        if (id == IDC_LAUNCH) {
+            std::thread(LaunchCluster).detach();
+        } else if (id == IDC_STOP) {
+            std::thread(StopCluster).detach();
+        } else if (id == IDC_SEND) {
+            char buf[512]{};
+            GetWindowTextA(g_hCmdEdit, buf, sizeof(buf) - 1);
+            if (strlen(buf) > 0) {
+                SendCommandToPipe(buf);
+                SetWindowTextA(g_hCmdEdit, "");
+            }
+        }
+        // GM Teleport Actions
+        else if (id == IDC_GM_TC) {
+            std::string p = GetTargetPlayerName();
+            std::thread([p]() { GmTeleport(p, 1002, 430, 380, "Twin City", "tc"); }).detach();
+        } else if (id == IDC_GM_PC) {
+            std::string p = GetTargetPlayerName();
+            std::thread([p]() { GmTeleport(p, 1011, 236, 234, "Phoenix Castle", "pc"); }).detach();
+        } else if (id == IDC_GM_AC) {
+            std::string p = GetTargetPlayerName();
+            std::thread([p]() { GmTeleport(p, 1020, 565, 565, "Ape Mountain", "ac"); }).detach();
+        } else if (id == IDC_GM_DC) {
+            std::string p = GetTargetPlayerName();
+            std::thread([p]() { GmTeleport(p, 1000, 500, 650, "Desert City", "dc"); }).detach();
+        } else if (id == IDC_GM_BI) {
+            std::string p = GetTargetPlayerName();
+            std::thread([p]() { GmTeleport(p, 1015, 715, 570, "Bird Island", "bi"); }).detach();
+        } else if (id == IDC_GM_MARKET) {
+            std::string p = GetTargetPlayerName();
+            std::thread([p]() { GmTeleport(p, 1036, 211, 196, "Market", "ma"); }).detach();
+        } else if (id == IDC_GM_JAIL) {
+            std::string p = GetTargetPlayerName();
+            std::thread([p]() { GmTeleport(p, 5000, 50, 50, "NPC Jail", "jail"); }).detach();
+        } else if (id == IDC_GM_TP_CUSTOM) {
+            char map[16]{}, x[16]{}, y[16]{};
+            GetWindowTextA(g_hGmMap, map, sizeof(map) - 1);
+            GetWindowTextA(g_hGmX, x, sizeof(x) - 1);
+            GetWindowTextA(g_hGmY, y, sizeof(y) - 1);
+            int m = atoi(map), px = atoi(x), py = atoi(y);
+            if (m > 0 && px > 0 && py > 0) {
+                std::string p = GetTargetPlayerName();
+                std::thread([p, m, px, py]() { GmTeleport(p, m, px, py, "Custom Coords (" + std::to_string(m) + ")", std::to_string(m) + " " + std::to_string(px) + " " + std::to_string(py)); }).detach();
+            } else {
+                AppendLog("[GM Warning] Invalid custom map/x/y coordinates.\r\n");
+            }
+        }
+        // GM Economy Actions
+        else if (id == IDC_GM_CP_50K) {
+            std::string p = GetTargetPlayerName();
+            std::thread([p]() { GmGiveCps(p, 50000); }).detach();
+        } else if (id == IDC_GM_CP_500K) {
+            std::string p = GetTargetPlayerName();
+            std::thread([p]() { GmGiveCps(p, 500000); }).detach();
+        } else if (id == IDC_GM_SILVER) {
+            std::string p = GetTargetPlayerName();
+            std::thread([p]() { GmGiveSilvers(p, 100000000); }).detach();
+        } else if (id == IDC_GM_GIVE_CP) {
+            char amt[32]{};
+            GetWindowTextA(g_hGmAmount, amt, sizeof(amt) - 1);
+            uint32_t val = (uint32_t)strtoul(amt, nullptr, 10);
+            if (val > 0) {
+                std::string p = GetTargetPlayerName();
+                std::thread([p, val]() { GmGiveCps(p, val); }).detach();
+            } else {
+                AppendLog("[GM Warning] Enter a valid positive CP amount.\r\n");
+            }
+        } else if (id == IDC_GM_GIVE_SIL) {
+            char amt[32]{};
+            GetWindowTextA(g_hGmAmount, amt, sizeof(amt) - 1);
+            uint64_t val = (uint64_t)_strtoui64(amt, nullptr, 10);
+            if (val > 0) {
+                std::string p = GetTargetPlayerName();
+                std::thread([p, val]() { GmGiveSilvers(p, val); }).detach();
+            } else {
+                AppendLog("[GM Warning] Enter a valid positive Silver amount.\r\n");
+            }
+        }
+        // GM Power Boosts
+        else if (id == IDC_GM_LVL140) {
+            std::string p = GetTargetPlayerName();
+            std::thread([p]() { GmSetLevel(p, 140); }).detach();
+        } else if (id == IDC_GM_REBORN2) {
+            std::string p = GetTargetPlayerName();
+            std::thread([p]() { GmSetReborn(p, 2); }).detach();
+        } else if (id == IDC_GM_VIP6) {
+            std::string p = GetTargetPlayerName();
+            std::thread([p]() { GmSetVip(p, 6); }).detach();
+        } else if (id == IDC_GM_GODMODE) {
+            std::string p = GetTargetPlayerName();
+            std::thread([p]() {
+                std::string whereClause = BuildWhereClause(p);
+                ExecuteGmSql("USE cq1; UPDATE cq_user SET god_status = 1" + whereClause + ";", "Enabled God Mode for " + (p.empty() ? "all players" : p));
+            }).detach();
+        } else if (id == IDC_GM_INVIS) {
+            std::string p = GetTargetPlayerName();
+            std::thread([p]() {
+                std::string whereClause = BuildWhereClause(p);
+                ExecuteGmSql("USE cq1; UPDATE cq_user SET god_status = 2" + whereClause + ";", "Enabled Ghost Invisibility for " + (p.empty() ? "all players" : p));
+            }).detach();
+        } else if (id == IDC_GM_SPAWN_IT) {
+            char item[32]{};
+            GetWindowTextA(g_hGmItemId, item, sizeof(item) - 1);
+            uint32_t it = (uint32_t)strtoul(item, nullptr, 10);
+            if (it == 0) it = 410309; // Default Super Corundum Blade
+            std::string p = GetTargetPlayerName();
+            std::thread([p, it]() { GmSpawnItem(p, it); }).detach();
+        }
+        return 0;
+    }
+
+    case WM_APPEND_LOG: {
+        char* text = (char*)lParam;
+        if (text) {
+            int len = GetWindowTextLengthA(g_hLogEdit);
+            SendMessageA(g_hLogEdit, EM_SETSEL, (WPARAM)len, (LPARAM)len);
+            SendMessageA(g_hLogEdit, EM_REPLACESEL, FALSE, (LPARAM)text);
+            SendMessageA(g_hLogEdit, WM_VSCROLL, SB_BOTTOM, 0);
+            free(text);
+        }
+        return 0;
+    }
+
+    case WM_CTLCOLORSTATIC:
+    case WM_CTLCOLOREDIT: {
+        HDC hdc = (HDC)wParam;
+        HWND hCtrl = (HWND)lParam;
+        if (hCtrl == g_hLogEdit || hCtrl == g_hCmdEdit || hCtrl == g_hGmName ||
+            hCtrl == g_hGmMap || hCtrl == g_hGmX || hCtrl == g_hGmY ||
+            hCtrl == g_hGmAmount || hCtrl == g_hGmItemId) {
+            SetTextColor(hdc, RGB(220, 220, 220));
+            SetBkColor(hdc, RGB(18, 18, 18));
+            return (LRESULT)g_hDarkBrush;
+        } else if (hCtrl == g_hStatus) {
+            SetTextColor(hdc, RGB(0, 200, 255));
+            SetBkColor(hdc, RGB(28, 28, 28));
+            return (LRESULT)g_hHeaderBrush;
+        } else {
+            SetTextColor(hdc, RGB(220, 220, 220));
+            SetBkColor(hdc, RGB(28, 28, 28));
+            return (LRESULT)g_hHeaderBrush;
+        }
+    }
+
+    case WM_ERASEBKGND: {
+        HDC hdc = (HDC)wParam;
+        RECT rc;
+        GetClientRect(hWnd, &rc);
+        FillRect(hdc, &rc, g_hHeaderBrush);
+        return 1;
+    }
+
+    case WM_DESTROY: {
+        g_bStopThreads = true;
+        if (g_hDarkBrush) DeleteObject(g_hDarkBrush);
+        if (g_hHeaderBrush) DeleteObject(g_hHeaderBrush);
+        if (g_hPanelBrush) DeleteObject(g_hPanelBrush);
+        if (g_hMonoFont) DeleteObject(g_hMonoFont);
+        if (g_hUiFont) DeleteObject(g_hUiFont);
+        if (g_hBoldFont) DeleteObject(g_hBoldFont);
+        PostQuitMessage(0);
+        return 0;
+    }
+    }
+    return DefWindowProcA(hWnd, msg, wParam, lParam);
+}
+
+int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+    WNDCLASSEXA wc{};
+    wc.cbSize = sizeof(wc);
+    wc.lpfnWndProc = WndProc;
+    wc.hInstance = hInstance;
+    wc.lpszClassName = "TQServerLoaderWnd";
+    wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+
+    if (!RegisterClassExA(&wc)) return 1;
+
+    int screenW = GetSystemMetrics(SM_CXSCREEN);
+    int screenH = GetSystemMetrics(SM_CYSCREEN);
+    int winW = 1120;
+    int winH = 700;
+    int x = (screenW - winW) / 2;
+    int y = (screenH - winH) / 2;
+
+    g_hWnd = CreateWindowExA(
+        0,
+        "TQServerLoaderWnd",
+        "Conquer Online Master Server Launcher & Hidden GM Control Panel",
+        WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
+        x, y, winW, winH,
+        nullptr, nullptr, hInstance, nullptr
+    );
+
+    if (!g_hWnd) return 1;
+
+    ShowWindow(g_hWnd, SW_SHOWNORMAL);
+    UpdateWindow(g_hWnd);
+
+    MSG msg;
+    while (GetMessageA(&msg, nullptr, 0, 0)) {
+        if (msg.message == WM_KEYDOWN && msg.wParam == VK_RETURN) {
+            HWND focus = GetFocus();
+            if (focus == g_hCmdEdit) {
+                SendMessageA(g_hWnd, WM_COMMAND, MAKEWPARAM(IDC_SEND, BN_CLICKED), (LPARAM)g_hBtnSend);
+                continue;
+            }
+        }
+        TranslateMessage(&msg);
+        DispatchMessageA(&msg);
+    }
+
+    return (int)msg.wParam;
+}

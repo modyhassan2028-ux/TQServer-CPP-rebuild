@@ -1,0 +1,6 @@
+.vs/
+x64/
+build/
+*.pdb
+*.lib
+*.o
