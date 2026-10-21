@@ -4,6 +4,8 @@
 #include "User.h"
 #include "UserManager.h"
 #include "MapManager.h"
+#include "MonsterManager.h"
+#include "MsgMonster.h"
 #include "NetCore.h"
 #include "StringPacker.h"
 
@@ -84,6 +86,14 @@ void CMsgConnect::Process(uint32_t dwSender, void* pContext) {
     CMsgUserAttrib msgAttrib;
     if (msgAttrib.Create(pUser->GetId(), attribs))
         pUser->SendMsg(msgAttrib.GetBuf(), msgAttrib.GetSize());
+
+    // 20001: spawn the map's monsters for the new client
+    for (auto& pMon : CMonsterManager::Instance().GetMapMonsters(pUser->GetMapId())) {
+        if (!pMon || !pMon->IsAlive()) continue;
+        CMsgMonsterInfo info;
+        if (info.Create(pMon->GetId(), pMon->GetTypeId(), pMon->GetX(), pMon->GetY(), pMon->GetDir()))
+            pUser->SendMsg(info.GetBuf(), info.GetSize());
+    }
 
     // 1004: welcome
     CMsgTalk talk;

@@ -1,5 +1,6 @@
 ﻿#include "NetCore.h"
 #include "MapManager.h"
+#include "MonsterManager.h"
 #include <iostream>
 #include <chrono>
 #include <thread>
@@ -27,6 +28,7 @@ int main(int argc, char* argv[]) {
     }
 
     CMapManager::Instance().RegisterDefaultMaps();
+    CMonsterManager::Instance().Start();
     std::cout << "[STATUS] World initialized. Listening on port " << port << " - Ctrl+C to stop." << std::endl;
 
     while (g_running.load()) {

@@ -87,7 +87,11 @@
     <ClInclude Include="NetCore.h" />
     <ClInclude Include="MsgConnect.h" />
     <ClInclude Include="MapManager.h" />
+    <ClInclude Include="MonsterManager.h" />
+    <ClInclude Include="MsgMonster.h" />
     <ClCompile Include="Monster.cpp" />
+    <ClCompile Include="MonsterManager.cpp" />
+    <ClCompile Include="MsgMonster.cpp" />
     <ClCompile Include="MsgConnect.cpp" />
     <ClCompile Include="MsgAction.cpp" />
     <ClCompile Include="MsgItem.cpp" />

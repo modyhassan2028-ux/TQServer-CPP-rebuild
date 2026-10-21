@@ -40,7 +40,7 @@ Outputs in `build/`:
 **Roadmap order (matching the original's architecture):**
 1. Login handshake + AccountServer connection (reference: decompiled `AccountServer` C# + MsgServer login path)
 2. Map group + map data loading (`.dmap` etc.)
-3. Monster spawn/AI (reference: `MonsterAI` functions in decompilation)
+3. ~~Monster spawn/AI~~ **done (v1)**: built-in spawn table, AI thread (2s ticks, roam + leash + respawn), MsgMonsterInfo 20001 / MsgMonsterJump 20002 extracted from the decompiled Create functions, monsters spawn to clients on login and broadcast movement to the map
 4. Item/inventory system (1009), user attributes (1017), action/movement (1010)
 5. Chat channels (1004) beyond echo, guild, trade, team, quest systems
 
