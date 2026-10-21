@@ -84,12 +84,14 @@
     <ClCompile Include="BattleSystem.cpp" />
     <ClCompile Include="GameMap.cpp" />
     <ClCompile Include="Guild.cpp" />
+    <ClCompile Include="Trade.cpp" />
     <ClCompile Include="MapManager.cpp" />
     <ClInclude Include="NetCore.h" />
     <ClInclude Include="MsgConnect.h" />
     <ClInclude Include="MapManager.h" />
     <ClInclude Include="MonsterManager.h" />
     <ClInclude Include="Guild.h" />
+    <ClInclude Include="Trade.h" />
     <ClInclude Include="MsgMonster.h" />
     <ClInclude Include="MsgInteract.h" />
     <ClCompile Include="Monster.cpp" />

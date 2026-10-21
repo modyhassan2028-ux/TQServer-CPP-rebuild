@@ -2,6 +2,7 @@
 #include "StringPacker.h"
 #include "UserManager.h"
 #include "Guild.h"
+#include "Trade.h"
 #include "User.h"
 #include <sstream>
 #include <vector>
@@ -55,6 +56,32 @@ void CMsgTalk::Process(uint32_t dwSender) {
                 CGuildManager::Instance().Broadcast(pGuild, guildMsg.GetBuf(), guildMsg.GetSize());
         } else {
             user->SendSysMsg("You are not in a guild. /guild create <name> or /guild join <name>");
+        }
+        return;
+    }
+    if (m_message.rfind("/trade", 0) == 0) {
+        std::string arg = m_message.length() > 6 ? m_message.substr(7) : "";
+        std::string sub;
+        size_t sp = arg.find(' ');
+        if (sp == std::string::npos) { sub = arg; arg = ""; }
+        else { sub = arg.substr(0, sp); arg = arg.substr(sp + 1); }
+
+        if (sub.empty()) {
+            user->SendSysMsg("Usage: /trade <player>, /trade add <itemId>, /trade money <amount>, /trade ok, /trade confirm, /trade cancel");
+        } else if (sub == "add" || sub == "money") {
+            uint32_t dwVal = static_cast<uint32_t>(strtoul(arg.c_str(), nullptr, 10));
+            sub == "add" ? CTradeManager::Instance().AddItem(user, dwVal)
+                         : CTradeManager::Instance().AddMoney(user, dwVal);
+        } else if (sub == "ok") {
+            CTradeManager::Instance().Lock(user);
+        } else if (sub == "confirm") {
+            CTradeManager::Instance().Confirm(user);
+        } else if (sub == "cancel") {
+            CTradeManager::Instance().Cancel(user);
+        } else {
+            auto pTarget = CUserManager::Instance().GetUserByName(sub);
+            if (pTarget) CTradeManager::Instance().Request(user, pTarget);
+            else user->SendSysMsg("Player not online: " + sub);
         }
         return;
     }
