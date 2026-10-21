@@ -4,6 +4,7 @@
 #include "MapManager.h"
 #include "MonsterManager.h"
 #include "Npc.h"
+#include "Guild.h"
 #include "MsgTalk.h"
 
 #include <cstring>
@@ -83,6 +84,13 @@ void CMsgInteract::Process(uint32_t dwSender) {
         if (dwLife == 0) {
             // killer gains PK points; the victim respawns in Twin City
             pAttacker->AddPkPoints(10);
+            // guild war scoring: kill counts if both are in warring guilds
+            auto pKillerGuild = CGuildManager::Instance().GetByMember(pAttacker->GetId());
+            auto pVictimGuild = CGuildManager::Instance().GetByMember(pTarget->GetId());
+            if (pKillerGuild && pVictimGuild && pKillerGuild->GetId() != pVictimGuild->GetId()) {
+                if (CGuildManager::Instance().IsAtWar(pKillerGuild->GetId()))
+                    CGuildManager::Instance().OnWarKill(pKillerGuild->GetId(), pVictimGuild->GetId());
+            }
             CMapManager::Instance().Broadcast(pAttacker->GetMapId(), resp.GetBuf(), resp.GetSize());
             CMsgTalk notice;
             if (notice.Create("SYSTEM", "",
@@ -129,6 +137,10 @@ void CMsgInteract::Process(uint32_t dwSender) {
         // attacker rewards (v1): money drops straight to the killer
         pAttacker->AddMoney(50);
         pAttacker->AddConquerPoints(1);
+        // pk decay (v1): monster kills shed 1 PK point, red names fade over time
+        if (pAttacker->GetPkPoints() > 0) {
+            pAttacker->SetPkPoints(pAttacker->GetPkPoints() - 1);
+        }
         printf("[BATTLE] %s killed %s (+50 money, +1 CP)\n",
                pAttacker->GetName().c_str(), pMonster->GetName().c_str());
     }

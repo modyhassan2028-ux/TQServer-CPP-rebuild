@@ -139,8 +139,16 @@ void CMsgTalk::Process(uint32_t dwSender) {
         } else if (sub == "disband") {
             ok = CGuildManager::Instance().Disband(user);
             note = ok ? "Guild disbanded." : "Only the guild leader can disband.";
+        } else if (sub == "war" && !arg.empty()) {
+            ok = CGuildManager::Instance().DeclareWar(user, arg);
+            note = ok ? "War declared for 30 minutes!" : "War failed (be a leader, target a real guild, no active war).";
+        } else if (sub == "warstatus") {
+            auto g = CGuildManager::Instance().GetByMember(user->GetId());
+            note = (g && CGuildManager::Instance().IsAtWar(g->GetId()))
+                   ? "Your guild is at war. Current score: " + std::to_string(g->GetWarScore())
+                   : "Your guild is not at war.";
         } else {
-            note = "Usage: /guild create|join|quit|disband [name]";
+            note = "Usage: /guild create|join|quit|disband|war|warstatus [name]";
         }
         user->SendSysMsg(note);
         return;

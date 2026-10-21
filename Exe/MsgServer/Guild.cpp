@@ -1,4 +1,10 @@
 ﻿#include "Guild.h"
+#include <map>
+#include "User.h"
+#include "UserManager.h"
+#include "MsgTalk.h"
+#include <chrono>
+#include <thread>
 #include "User.h"
 #include "UserManager.h"
 #include "MsgTalk.h"
@@ -110,4 +116,80 @@ void CGuildManager::Broadcast(std::shared_ptr<CGuild> pGuild, const void* pBuf, 
         auto pUser = CUserManager::Instance().GetUser(dwId);
         if (pUser) pUser->SendMsg(pBuf, usLen);
     }
+}
+
+// ---------------- guild war (v1) ----------------
+namespace {
+struct WarState {
+    uint32_t dwGuildA{0}, dwGuildB{0};
+    uint64_t ullEndTick{0};
+};
+std::map<uint32_t, WarState> g_wars; // key: min(guildA,guildB)
+std::mutex g_warMutex;
+}
+
+bool CGuildManager::DeclareWar(std::shared_ptr<CUser> pLeader, const std::string& strTargetGuild) {
+    if (!pLeader) return false;
+    auto pAttacker = GetByMember(pLeader->GetId());
+    auto pDefender = FindByName(strTargetGuild);
+    if (!pAttacker || !pDefender) return false;
+    if (pAttacker->GetId() == pDefender->GetId()) return false;
+    if (pAttacker->GetLeaderId() != pLeader->GetId()) return false; // leader only
+
+    auto announce = [](std::shared_ptr<CGuild> g, const std::string& text) {
+        CMsgTalk msg;
+        if (msg.Create("SYSTEM", g->GetName(), "[GUILD WAR] " + text, CMsgTalk::Channel_Talk)) {
+            for (uint32_t id : g->GetMembers()) {
+                auto u = CUserManager::Instance().GetUser(id);
+                if (u) u->SendMsg(msg.GetBuf(), msg.GetSize());
+            }
+        }
+    };
+
+    std::lock_guard<std::mutex> lock(g_warMutex);
+    uint32_t key = std::min(pAttacker->GetId(), pDefender->GetId());
+    if (g_wars.count(key)) {
+        pLeader->SendSysMsg("A war is already running for those guilds.");
+        return false;
+    }
+    WarState war;
+    war.dwGuildA = pAttacker->GetId();
+    war.dwGuildB = pDefender->GetId();
+    war.ullEndTick = (uint64_t)std::chrono::steady_clock::now().time_since_epoch().count()
+                   + uint64_t(30 * 60) * 1000000000ULL; // 30 minutes
+    g_wars[key] = war;
+    pAttacker->ResetWarScore();
+    pDefender->ResetWarScore();
+
+    announce(pAttacker, "War declared against '" + pDefender->GetName() + "'! 30 minutes. Kills score.");
+    announce(pDefender, "'" + pAttacker->GetName() + "' declared war on us! Fight!");
+    return true;
+}
+
+void CGuildManager::OnWarKill(uint32_t dwKillerGuildId, uint32_t dwVictimGuildId) {
+    std::lock_guard<std::mutex> lock(g_warMutex);
+    uint32_t key = std::min(dwKillerGuildId, dwVictimGuildId);
+    auto it = g_wars.find(key);
+    if (it == g_wars.end()) return;
+    WarState& war = it->second;
+    if ((dwKillerGuildId != war.dwGuildA && dwKillerGuildId != war.dwGuildB) ||
+        (dwVictimGuildId != war.dwGuildA && dwVictimGuildId != war.dwGuildB)) return;
+
+    auto now = (uint64_t)std::chrono::steady_clock::now().time_since_epoch().count();
+    if (now > war.ullEndTick) { g_wars.erase(it); return; }
+
+    auto pGuild = GetByMember(0);
+    (void)pGuild;
+    // award the killer's guild
+    for (auto& kv : m_byName) {
+        if (kv.second->GetId() == dwKillerGuildId) kv.second->AddWarScore(1);
+    }
+}
+
+bool CGuildManager::IsAtWar(uint32_t dwGuildId) const {
+    std::lock_guard<std::mutex> lock(const_cast<std::mutex&>(g_warMutex));
+    for (auto& kv : g_wars) {
+        if (kv.second.dwGuildA == dwGuildId || kv.second.dwGuildB == dwGuildId) return true;
+    }
+    return false;
 }
