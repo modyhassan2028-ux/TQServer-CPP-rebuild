@@ -37,6 +37,18 @@ public:
     bool CreateAccount(const std::string& name, const std::string& password, uint32_t& dwIdOut);
     void SetAutoCreate(bool b) { m_bAutoCreate = b; }
 
+    // character persistence (cq_user), MySQL mode only
+    struct CharacterRecord {
+        uint32_t dwLevel{1};
+        uint64_t dwMoney{100000}, dwCp{5000}, dwBank{0};
+        uint32_t dwPkPoints{0};
+        uint32_t dwMapId{1002};
+        uint16_t usX{315}, usY{275};
+    };
+    // returns true if a saved character was found and loaded into 'out'
+    bool LoadCharacter(uint32_t dwAccountId, CharacterRecord& out);
+    void SaveCharacter(uint32_t dwAccountId, const CharacterRecord& in);
+
     // connect to MySQL (cq_account/cq_user); returns false -> flat-file mode
     bool TryMySQL(const std::string& host, uint16_t port, const std::string& user,
                    const std::string& password, const std::string& database);

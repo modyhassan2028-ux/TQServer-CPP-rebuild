@@ -14,6 +14,9 @@ public:
     uint32_t GetId() const { return m_dwId; }
     const std::string& GetName() const { return m_name; }
     void SetName(const std::string& name) { m_name = name; }
+    // owning cq_account id (0 = dev/flat mode, unsaved to MySQL)
+    void SetAccountId(uint32_t id) { m_dwAccountId = id; }
+    uint32_t GetAccountId() const { return m_dwAccountId; }
 
     uint16_t GetX() const { return m_usX; }
     uint16_t GetY() const { return m_usY; }
@@ -108,6 +111,7 @@ private:
     uint64_t m_dwBank{0};
     uint32_t m_dwPkPoints{0};
     uint32_t m_dwTalkingNpc{0};
+    uint32_t m_dwAccountId{0};
     uint32_t m_dwEmoney{0};
     uint8_t m_ucLevel{1};
     uint8_t m_ucReborn{0};

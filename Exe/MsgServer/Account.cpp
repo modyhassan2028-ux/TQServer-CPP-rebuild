@@ -243,7 +243,44 @@ bool CAccountManager::TryMySQL(const std::string& host, uint16_t port, const std
         return false;
     }
     m_bMySQL = true;
-    printf("[DB] MySQL connected: %s:%u/%s - accounts persist to cq_account (cq_user character sync lands in the next sprint).\n",
+    printf("[DB] MySQL connected: %s:%u/%s - accounts (cq_account) and characters (cq_user) persist to MySQL.\n",
            host.c_str(), port, database.c_str());
     return true;
+}
+
+// ---------------- cq_user character persistence ----------------
+bool CAccountManager::LoadCharacter(uint32_t dwAccountId, CharacterRecord& out) {
+    if (!m_bMySQL || !m_pDB) return false;
+    std::lock_guard<std::mutex> dbLock(m_dbMutex);
+    if (!m_pDB->Query("SELECT level, money, cp, bank, pk_points, recordmap_id, recordx, recordy "
+                      "FROM cq_user WHERE account_id=" + std::to_string(dwAccountId)) ||
+        m_pDB->GetRows().empty())
+        return false;
+    auto& row = m_pDB->GetRows()[0];
+    out.dwLevel    = (uint32_t)strtoul(row[0].c_str(), nullptr, 10);
+    out.dwMoney    = strtoull(row[1].c_str(), nullptr, 10);
+    out.dwCp       = strtoull(row[2].c_str(), nullptr, 10);
+    out.dwBank     = strtoull(row[3].c_str(), nullptr, 10);
+    out.dwPkPoints = (uint32_t)strtoul(row[4].c_str(), nullptr, 10);
+    out.dwMapId    = (uint32_t)strtoul(row[5].c_str(), nullptr, 10);
+    out.usX        = (uint16_t)strtoul(row[6].c_str(), nullptr, 10);
+    out.usY        = (uint16_t)strtoul(row[7].c_str(), nullptr, 10);
+    return true;
+}
+
+void CAccountManager::SaveCharacter(uint32_t dwAccountId, const CharacterRecord& in) {
+    if (!m_bMySQL || !m_pDB) return;
+    std::string sql = "INSERT INTO cq_user (account_id, name, level, money, cp, bank, pk_points, "
+                      "recordmap_id, recordx, recordy) VALUES (" +
+        std::to_string(dwAccountId) + ", '" + m_pDB->Escape(std::to_string(dwAccountId) + "_char") + "', " +
+        std::to_string(in.dwLevel) + ", " + std::to_string(in.dwMoney) + ", " +
+        std::to_string(in.dwCp) + ", " + std::to_string(in.dwBank) + ", " +
+        std::to_string(in.dwPkPoints) + ", " + std::to_string(in.dwMapId) + ", " +
+        std::to_string(in.usX) + ", " + std::to_string(in.usY) + ") "
+        "ON DUPLICATE KEY UPDATE level=VALUES(level), money=VALUES(money), cp=VALUES(cp), "
+        "bank=VALUES(bank), pk_points=VALUES(pk_points), recordmap_id=VALUES(recordmap_id), "
+        "recordx=VALUES(recordx), recordy=VALUES(recordy)";
+    std::lock_guard<std::mutex> dbLock(m_dbMutex);
+    if (!m_pDB->Query(sql))
+        printf("[DB] cq_user save failed: %s\n", m_pDB->GetError().c_str());
 }

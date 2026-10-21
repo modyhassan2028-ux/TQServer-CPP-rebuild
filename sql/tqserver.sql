@@ -9,11 +9,12 @@ CREATE TABLE IF NOT EXISTS cq_account (
 );
 CREATE TABLE IF NOT EXISTS cq_user (       -- character sync lands in the next sprint
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  account_id INT UNSIGNED NOT NULL,
+  account_id INT UNSIGNED NOT NULL UNIQUE,
   name VARCHAR(32) UNIQUE NOT NULL,
   level INT DEFAULT 1,
   money BIGINT DEFAULT 0,
   cp BIGINT DEFAULT 0,
+  bank BIGINT DEFAULT 0,
   pk_points INT DEFAULT 0,
   recordmap_id INT DEFAULT 1002,
   recordx INT DEFAULT 315,

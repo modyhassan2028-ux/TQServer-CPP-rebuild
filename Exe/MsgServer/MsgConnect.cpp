@@ -92,13 +92,30 @@ void CMsgConnect::Process(uint32_t dwSender, void* pContext) {
     // Create the player bound to this socket session
     auto pUser = std::make_shared<CUser>(dwSender);
     pUser->SetName(m_account.empty() ? ("Guest" + std::to_string(dwSender)) : m_account);
+    pUser->SetAccountId(dwAccountId);
     pUser->SetLevel(1);
     pUser->SetLife(1000);
     pUser->SetMoney(100000);
     pUser->SetConquerPoints(5000);
+
+    // restore a saved character from cq_user when MySQL is live
+    uint32_t dwSpawnMap = 1002;
+    CAccountManager::CharacterRecord rec;
+    if (dwAccountId && CAccountManager::Instance().LoadCharacter(dwAccountId, rec)) {
+        pUser->SetLevel((uint8_t)rec.dwLevel);
+        pUser->SetMoney(rec.dwMoney);
+        pUser->SetConquerPoints((uint32_t)rec.dwCp);
+        pUser->SetBank(rec.dwBank);
+        pUser->SetPkPoints(rec.dwPkPoints);
+        pUser->SetLife(1000);
+        pUser->SetPos(rec.usX, rec.usY);
+        dwSpawnMap = rec.dwMapId;
+        printf("[LOGIN] Account %u: character restored (level %u, money %llu, map %u)\n",
+               dwAccountId, rec.dwLevel, (unsigned long long)rec.dwMoney, rec.dwMapId);
+    }
     pUser->BindNet(pClient);
     CUserManager::Instance().AddUser(pUser);
-    CMapManager::Instance().GetOrCreate(1002, "Twin City")->AddUser(pUser); // spawn in Twin City
+    CMapManager::Instance().GetOrCreate(dwSpawnMap, "Twin City")->AddUser(pUser);
 
     // 1017: push core attributes so the client sees a live character
     std::vector<AttribPair> attribs = {

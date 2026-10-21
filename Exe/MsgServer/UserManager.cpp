@@ -1,4 +1,5 @@
 ﻿#include "UserManager.h"
+#include "Account.h"
 
 CUserManager& CUserManager::Instance() {
     static CUserManager s_instance;
@@ -17,7 +18,21 @@ bool CUserManager::RemoveUser(uint32_t dwId) {
     std::lock_guard<std::mutex> lock(m_mutex);
     auto it = m_users.find(dwId);
     if (it != m_users.end()) {
-        m_names.erase(it->second->GetName());
+        // persist the character to cq_user before it leaves (MySQL mode)
+        auto pUser = it->second;
+        if (pUser && pUser->GetAccountId()) {
+            CAccountManager::CharacterRecord rec;
+            rec.dwLevel = pUser->GetLevel();
+            rec.dwMoney = pUser->GetMoney();
+            rec.dwCp = pUser->GetConquerPoints();
+            rec.dwBank = pUser->GetBank();
+            rec.dwPkPoints = pUser->GetPkPoints();
+            rec.dwMapId = pUser->GetMapId();
+            rec.usX = pUser->GetX();
+            rec.usY = pUser->GetY();
+            CAccountManager::Instance().SaveCharacter(pUser->GetAccountId(), rec);
+        }
+        m_names.erase(pUser->GetName());
         m_users.erase(it);
         return true;
     }
