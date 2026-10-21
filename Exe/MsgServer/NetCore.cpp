@@ -3,6 +3,7 @@
 #include "MsgConnect.h"
 #include "MsgAction.h"
 #include "MsgInteract.h"
+#include "MsgItem.h"
 #include "UserManager.h"
 
 #include <winsock2.h>
@@ -107,6 +108,14 @@ void CNetClient::Dispatch(tq::MsgHead head, const uint8_t* pPayload, uint16_t us
     }
     case 1022: { // MsgInteract - attack / interaction
         CMsgInteract msg;
+        msg.Clear();
+        msg.AppendRaw(reinterpret_cast<const uint8_t*>(&head), sizeof(head));
+        msg.AppendRaw(pPayload, static_cast<uint16_t>(head.length - sizeof(head)));
+        msg.Process(m_dwSessionId);
+        break;
+    }
+    case 1009: { // MsgItem - inventory actions
+        CMsgItem msg;
         msg.Clear();
         msg.AppendRaw(reinterpret_cast<const uint8_t*>(&head), sizeof(head));
         msg.AppendRaw(pPayload, static_cast<uint16_t>(head.length - sizeof(head)));

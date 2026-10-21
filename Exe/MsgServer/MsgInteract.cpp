@@ -3,7 +3,6 @@
 #include "UserManager.h"
 #include "MapManager.h"
 #include "MonsterManager.h"
-#include <chrono>
 
 #include <cstring>
 #include <cstdio>
@@ -15,8 +14,6 @@ bool CMsgInteract::Create(uint16_t usAction, uint32_t dwTargetId, uint32_t dwDat
     head.type = 1022; // 0x3FE
     head.length = sizeof(tq::MsgHead) + sizeof(InteractData); // 40 bytes
 
-    m_data.dwTimeStamp = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::steady_clock::now().time_since_epoch()).count());
     m_data.dwSenderId = dwSenderId;
     m_data.dwTargetId = dwTargetId;
     m_data.dwData = dwData;

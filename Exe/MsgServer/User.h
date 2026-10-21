@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Item.h"
 #include <string>
 #include <cstdint>
 
@@ -46,6 +47,19 @@ public:
     uint8_t GetVipLevel() const { return m_ucVip; }
     void SetVipLevel(uint8_t vip) { m_ucVip = vip; }
 
+    // ---- inventory (v1) ----
+    void AddItem(const ItemInfo& item) { m_items.push_back(item); }
+    ItemInfo* FindItem(uint32_t dwItemId) {
+        for (auto& it : m_items) if (it.dwId == dwItemId) return &it;
+        return nullptr;
+    }
+    void RemoveItem(uint32_t dwItemId) {
+        for (size_t i = 0; i < m_items.size(); ++i)
+            if (m_items[i].dwId == dwItemId) { m_items.erase(m_items.begin() + i); return; }
+    }
+    std::vector<ItemInfo>& GetInventory() { return m_items; }
+    uint32_t NextItemSeq() { return ++m_dwItemSeq; }
+
     void BindNet(CNetClient* pNet) { m_pNet = pNet; }
     CNetClient* NetClient() const { return m_pNet; }
 
@@ -78,4 +92,6 @@ private:
     bool m_bGodMode{false};
     bool m_bInvisible{false};
     CNetClient* m_pNet{nullptr};
+    std::vector<ItemInfo> m_items;
+    uint32_t m_dwItemSeq{0};
 };

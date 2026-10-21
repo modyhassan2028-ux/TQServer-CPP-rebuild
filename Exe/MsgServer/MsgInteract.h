@@ -8,18 +8,17 @@
 // head(4) + timestamp + sender + target + data + x + y + action + pad + data2 + data3 + zero.
 
 #pragma pack(push, 1)
-struct InteractData { // 36 bytes after MsgHead
-    uint32_t dwTimeStamp; // +4
-    uint32_t dwSenderId;  // +8
-    uint32_t dwTargetId;  // +12
-    uint32_t dwData;      // +16 (carries damage on responses)
-    uint16_t usX;         // +20
-    uint16_t usY;         // +22
-    uint16_t usAction;    // +24
-    uint16_t usPad;       // +26
-    uint32_t dwData2;     // +28
-    uint32_t dwData3;     // +32
-    uint32_t dwZero;      // +36
+struct InteractData { // 36 bytes after MsgHead (wire layout: sender@4, target@8)
+    uint32_t dwSenderId;  // +4
+    uint32_t dwTargetId;  // +8
+    uint32_t dwData;      // +12 (carries damage on responses)
+    uint16_t usX;         // +16
+    uint16_t usY;         // +18
+    uint16_t usAction;    // +20
+    uint16_t usPad;       // +22
+    uint32_t dwData2;     // +24
+    uint32_t dwData3;     // +28
+    uint32_t dwZero;      // +32
 };
 #pragma pack(pop)
 

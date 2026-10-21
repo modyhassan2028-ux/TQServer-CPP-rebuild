@@ -1,6 +1,7 @@
 ﻿#include "MsgConnect.h"
 #include "MsgTalk.h"
 #include "MsgUserAttrib.h"
+#include "MsgItem.h"
 #include "User.h"
 #include "UserManager.h"
 #include "MapManager.h"
@@ -86,6 +87,27 @@ void CMsgConnect::Process(uint32_t dwSender, void* pContext) {
     CMsgUserAttrib msgAttrib;
     if (msgAttrib.Create(pUser->GetId(), attribs))
         pUser->SendMsg(msgAttrib.GetBuf(), msgAttrib.GetSize());
+
+    // starting kit: weapon + armor + potions
+    struct KitDef { uint32_t type; uint16_t sort; const char* name; uint32_t amount; };
+    static const KitDef kit[] = {
+        { 410011, 1, "Sword",   1 },
+        { 900020, 2, "Armor",   1 },
+        { 100020, 0, "Potion",  5 },
+    };
+    for (const auto& k : kit) {
+        ItemInfo item;
+        item.dwId = MakeItemId(pUser->NextItemSeq());
+        item.dwType = k.type;
+        item.usSort = k.sort;
+        item.dwAmount = k.amount;
+        item.dwPosition = 255;
+        item.strName = k.name;
+        pUser->AddItem(item);
+        CMsgItem msgItem;
+        if (msgItem.Create(item, CMsgItem::Action_Buy))
+            pUser->SendMsg(msgItem.GetBuf(), msgItem.GetSize());
+    }
 
     // 20001: spawn the map's monsters for the new client
     for (auto& pMon : CMonsterManager::Instance().GetMapMonsters(pUser->GetMapId())) {
