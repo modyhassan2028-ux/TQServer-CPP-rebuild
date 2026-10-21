@@ -89,11 +89,13 @@
     <ClInclude Include="MapManager.h" />
     <ClInclude Include="MonsterManager.h" />
     <ClInclude Include="MsgMonster.h" />
+    <ClInclude Include="MsgInteract.h" />
     <ClCompile Include="Monster.cpp" />
     <ClCompile Include="MonsterManager.cpp" />
     <ClCompile Include="MsgMonster.cpp" />
     <ClCompile Include="MsgConnect.cpp" />
     <ClCompile Include="MsgAction.cpp" />
+    <ClCompile Include="MsgInteract.cpp" />
     <ClCompile Include="MsgItem.cpp" />
     <ClCompile Include="MsgTalk.cpp" />
     <ClCompile Include="MsgUserAttrib.cpp" />

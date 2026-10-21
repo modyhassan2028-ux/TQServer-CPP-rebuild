@@ -17,6 +17,8 @@ public:
     void Stop();
 
     std::vector<std::shared_ptr<CMonster>> GetMapMonsters(uint32_t dwMapId);
+    std::shared_ptr<CMonster> GetMonsterById(uint32_t dwMonsterId);
+    void OnMonsterKilled(std::shared_ptr<CMonster> pMonster); // schedules delayed respawn
 
 private:
     CMonsterManager() = default;
@@ -28,5 +30,6 @@ private:
     std::map<uint32_t, std::vector<std::shared_ptr<CMonster>>> m_byMap;
     std::mutex m_mutex;
     std::atomic<bool> m_bRunning{ false };
-    uint32_t m_dwNextId{ 400000000 }; // monster ids start above user ids
+    uint32_t m_dwNextId{ 400000000 };
+    std::map<uint32_t, int> m_respawnCountdown; // monsterId -> AI ticks left // monster ids start above user ids
 };

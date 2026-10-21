@@ -41,7 +41,8 @@ Outputs in `build/`:
 1. Login handshake + AccountServer connection (reference: decompiled `AccountServer` C# + MsgServer login path)
 2. Map group + map data loading (`.dmap` etc.)
 3. ~~Monster spawn/AI~~ **done (v1)**: built-in spawn table, AI thread (2s ticks, roam + leash + respawn), MsgMonsterInfo 20001 / MsgMonsterJump 20002 extracted from the decompiled Create functions, monsters spawn to clients on login and broadcast movement to the map
-4. Item/inventory system (1009), user attributes (1017), action/movement (1010)
+4. ~~Monster spawn/AI~~ done. ~~Battle v1~~ done: MsgInteract (1022, 40B) from the decompiled Create, melee damage vs monsters, strike broadcast to map, kill rewards (money/CPs) and ~16s respawn.
+5. Item/inventory system (1009), user attributes (1017), action/movement (1010) done
 5. Chat channels (1004) beyond echo, guild, trade, team, quest systems
 
 ## Layout

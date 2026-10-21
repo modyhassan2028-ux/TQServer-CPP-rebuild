@@ -46,6 +46,21 @@ void CMonsterManager::Start() {
     printf("[MONSTER] AI thread started.\n");
 }
 
+std::shared_ptr<CMonster> CMonsterManager::GetMonsterById(uint32_t dwMonsterId) {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    for (auto& kv : m_byMap)
+        for (auto& m : kv.second)
+            if (m && m->GetId() == dwMonsterId) return m;
+    return nullptr;
+}
+
+void CMonsterManager::OnMonsterKilled(std::shared_ptr<CMonster> pMonster) {
+    if (!pMonster) return;
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_respawnCountdown[pMonster->GetId()] = 8; // ~16s at 2s ticks
+    printf("[MONSTER] %s (%u) died, respawn in ~16s.\n", pMonster->GetName().c_str(), pMonster->GetId());
+}
+
 void CMonsterManager::Stop() {
     m_bRunning.store(false);
 }
@@ -73,7 +88,14 @@ void CMonsterManager::AILoop() {
         }
         for (auto& pM : all) {
             if (!pM) continue;
-            if (!pM->IsAlive()) { Respawn(pM); continue; }
+            if (!pM->IsAlive()) {
+                std::lock_guard<std::mutex> lock(m_mutex);
+                int& nLeft = m_respawnCountdown[pM->GetId()];
+                if (nLeft > 0) { --nLeft; continue; }
+                Respawn(pM);
+                m_respawnCountdown.erase(pM->GetId());
+                continue;
+            }
             // 1-in-4 chance per tick to take a roam step (original AI ticks per state machine)
             if (std::rand() % 4 == 0) Roam(pM);
         }
