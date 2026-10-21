@@ -15,5 +15,12 @@ bool CGameMap::RemoveUser(uint32_t dwUserId) {
 }
 
 bool CGameMap::IsPassable(uint16_t, uint16_t) const {
-    return true;
+    return true; // v1: free movement; real passability grid loads from .dmap files later
+}
+
+std::vector<uint32_t> CGameMap::GetUserIds() const {
+    std::vector<uint32_t> ids;
+    ids.reserve(m_users.size());
+    for (auto& kv : m_users) ids.push_back(kv.first);
+    return ids;
 }

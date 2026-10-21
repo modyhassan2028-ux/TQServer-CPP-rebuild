@@ -1,4 +1,5 @@
 ﻿#include "NetCore.h"
+#include "MapManager.h"
 #include <iostream>
 #include <chrono>
 #include <thread>
@@ -25,6 +26,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    CMapManager::Instance().RegisterDefaultMaps();
     std::cout << "[STATUS] World initialized. Listening on port " << port << " - Ctrl+C to stop." << std::endl;
 
     while (g_running.load()) {

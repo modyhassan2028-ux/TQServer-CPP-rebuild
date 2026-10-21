@@ -83,8 +83,10 @@
     <ClCompile Include="NetCore.cpp" />
     <ClCompile Include="BattleSystem.cpp" />
     <ClCompile Include="GameMap.cpp" />
+    <ClCompile Include="MapManager.cpp" />
     <ClInclude Include="NetCore.h" />
     <ClInclude Include="MsgConnect.h" />
+    <ClInclude Include="MapManager.h" />
     <ClCompile Include="Monster.cpp" />
     <ClCompile Include="MsgConnect.cpp" />
     <ClCompile Include="MsgAction.cpp" />

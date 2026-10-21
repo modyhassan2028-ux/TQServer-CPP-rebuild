@@ -3,6 +3,7 @@
 #include "MsgUserAttrib.h"
 #include "User.h"
 #include "UserManager.h"
+#include "MapManager.h"
 #include "NetCore.h"
 #include "StringPacker.h"
 
@@ -70,6 +71,7 @@ void CMsgConnect::Process(uint32_t dwSender, void* pContext) {
     pUser->SetConquerPoints(5000);
     pUser->BindNet(pClient);
     CUserManager::Instance().AddUser(pUser);
+    CMapManager::Instance().GetOrCreate(1002, "Twin City")->AddUser(pUser); // spawn in Twin City
 
     // 1017: push core attributes so the client sees a live character
     std::vector<AttribPair> attribs = {
