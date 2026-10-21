@@ -14,9 +14,13 @@ class CUser;
 // and chat commands.
 
 struct NpcOption {
-    enum class Action { Heal, BankBalance, BankDeposit, BankWithdraw, Teleport, Chat };
+    enum class Action { Heal, BankBalance, BankDeposit, BankWithdraw, Teleport, Chat,
+                         AcceptTask, TurnInTask };
     Action action{Action::Chat};
     std::string text;       // shown in the numbered menu
+    // hunt task the option assigns (AcceptTask)
+    uint32_t dwTaskMonsterType{0}, dwTaskCount{0}, dwTaskMoney{0}, dwTaskCp{0};
+
     // teleport destination
     uint32_t dwDestMap{0};
     uint16_t usDestX{0}, usDestY{0};

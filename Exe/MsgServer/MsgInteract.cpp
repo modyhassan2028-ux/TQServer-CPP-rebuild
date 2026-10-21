@@ -134,6 +134,17 @@ void CMsgInteract::Process(uint32_t dwSender) {
 
     if (dwLife == 0) {
         CMonsterManager::Instance().OnMonsterKilled(pMonster);
+        // hunt task progress (type 0 = any monster)
+        if (pAttacker->HasActiveTask() &&
+            (pAttacker->m_task.dwMonsterType == 0 ||
+             pAttacker->m_task.dwMonsterType == pMonster->GetTypeId()) &&
+            pAttacker->m_task.dwDone < pAttacker->m_task.dwNeeded) {
+            ++pAttacker->m_task.dwDone;
+            pAttacker->SendSysMsg("Task progress: " + std::to_string(pAttacker->m_task.dwDone) +
+                                  "/" + std::to_string(pAttacker->m_task.dwNeeded) +
+                                  (pAttacker->m_task.dwDone == pAttacker->m_task.dwNeeded
+                                   ? " - return to the TaskMaster!" : ""));
+        }
         // attacker rewards (v1): money drops straight to the killer
         pAttacker->AddMoney(50);
         pAttacker->AddConquerPoints(1);

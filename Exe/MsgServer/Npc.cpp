@@ -78,6 +78,38 @@ bool CNpc::ChooseOption(std::shared_ptr<CUser> pUser, uint32_t dwIndex) {
     case NpcOption::Action::Teleport:
         pUser->Teleport(o.dwDestMap, o.usDestX, o.usDestY);
         break;
+    case NpcOption::Action::AcceptTask:
+        if (pUser->HasActiveTask()) {
+            pUser->SendSysMsg("Finish your current task first!");
+        } else {
+            pUser->m_task.dwNpcId = m_dwId;
+            pUser->m_task.dwMonsterType = o.dwTaskMonsterType;
+            pUser->m_task.dwNeeded = o.dwTaskCount;
+            pUser->m_task.dwDone = 0;
+            pUser->m_task.dwRewardMoney = o.dwTaskMoney;
+            pUser->m_task.dwRewardCp = o.dwTaskCp;
+            pUser->SendSysMsg("Task accepted! Kill " + std::to_string(o.dwTaskCount) +
+                              " monsters (type " + std::to_string(o.dwTaskMonsterType) +
+                              ") then return to me.");
+        }
+        break;
+    case NpcOption::Action::TurnInTask:
+        if (!pUser->HasActiveTask() || pUser->m_task.dwNpcId != m_dwId) {
+            pUser->SendSysMsg("You have no task with me. Pick one from my menu.");
+        } else if (pUser->m_task.dwDone < pUser->m_task.dwNeeded) {
+            pUser->SendSysMsg("Not done yet: " + std::to_string(pUser->m_task.dwDone) + "/" +
+                              std::to_string(pUser->m_task.dwNeeded) + " killed.");
+        } else {
+            pUser->AddMoney(pUser->m_task.dwRewardMoney);
+            pUser->AddConquerPoints(pUser->m_task.dwRewardCp);
+            pUser->SendSysMsg("Task complete! Reward: " +
+                              std::to_string(pUser->m_task.dwRewardMoney) + " money, " +
+                              std::to_string(pUser->m_task.dwRewardCp) + " CP.");
+            pUser->m_task = {};
+            printf("[TASK] %s turned in a hunt task at %s\n",
+                   pUser->GetName().c_str(), m_name.c_str());
+        }
+        break;
     case NpcOption::Action::Chat:
     default:
         if (!o.text.empty()) pUser->SendSysMsg(o.text);
@@ -184,6 +216,33 @@ void CNpcManager::SpawnDefaults() {
             pBack->m_options.push_back(op);
         }
         m_npcs[pBack->GetId()] = pBack;
+    }
+
+    // TaskMaster: v1 hunt-quest giver (the real 6159 task scripts attach here)
+    {
+        auto pTm = std::make_shared<CNpc>(NPC_ID_BASE + 5, "TaskMaster",
+            CNpc::Type::Healer, 1002, 315, 260); // type unused; menu-driven
+        pTm->m_dwLookface = 8305;
+        pTm->m_strDialog = "Adventurer! I have work for hunters of any skill.";
+        NpcOption t1;
+        t1.action = NpcOption::Action::AcceptTask;
+        t1.text = "Hunt: kill 5 monsters for 500 money + 2 CP";
+        t1.dwTaskMonsterType = 0; t1.dwTaskCount = 5; t1.dwTaskMoney = 500; t1.dwTaskCp = 2;
+        pTm->m_options.push_back(t1);
+        NpcOption t2;
+        t2.action = NpcOption::Action::AcceptTask;
+        t2.text = "Hunt: kill 15 monsters for 2000 money + 10 CP";
+        t2.dwTaskMonsterType = 0; t2.dwTaskCount = 15; t2.dwTaskMoney = 2000; t2.dwTaskCp = 10;
+        pTm->m_options.push_back(t2);
+        NpcOption ti;
+        ti.action = NpcOption::Action::TurnInTask;
+        ti.text = "I finished my task - pay me!";
+        pTm->m_options.push_back(ti);
+        NpcOption no;
+        no.action = NpcOption::Action::Chat;
+        no.text = "Maybe later.";
+        pTm->m_options.push_back(no);
+        m_npcs[pTm->GetId()] = pTm;
     }
 
     printf("[NPC] Spawned %zu default NPC(s).\n", m_npcs.size());

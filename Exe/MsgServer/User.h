@@ -37,6 +37,17 @@ public:
     void AddPkPoints(uint32_t v) { m_dwPkPoints += v; }
     void SetPkPoints(uint32_t v) { m_dwPkPoints = v; }
     bool IsRedName() const { return m_dwPkPoints >= 30; }
+    // active hunt task (v1 quest system)
+    bool HasActiveTask() const { return m_task.dwNeeded > 0; }
+    struct Task {
+        uint32_t dwNpcId{0};        // task giver to return to
+        uint32_t dwMonsterType{0}; // target monster type id
+        uint32_t dwNeeded{0};
+        uint32_t dwDone{0};
+        uint32_t dwRewardMoney{0};
+        uint32_t dwRewardCp{0};
+    } m_task;
+
     // last NPC the player talked to; digit replies route to its dialog menu
     void SetTalkingNpc(uint32_t id) { m_dwTalkingNpc = id; }
     uint32_t GetTalkingNpc() const { return m_dwTalkingNpc; }
