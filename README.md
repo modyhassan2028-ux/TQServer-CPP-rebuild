@@ -28,10 +28,11 @@ Outputs in `build/`:
 
 **Working:**
 - Full solution builds cleanly (C++17) to Windows binaries.
-- MsgServer: real socket listener, client accept/recv loops, packet framing, dispatch table, chat echo round-trip (type 1004).
+- MsgServer: real socket listener, client accept/recv loops, packet framing, dispatch table (1001/1004).
+- Login v1: MsgConnect (1001) creates the player session, registers in CUserManager, pushes attributes (1017: life/level/money/CPs) and a welcome message (1004). Auth is accepted as-is (real SRP6/AccountServer flow is on the roadmap).
 
 **Implemented as stubs (porting from the decompiled reference is the roadmap):**
-- Login/auth handshake (1001/1082), account DB (MySQL via `Core/DB`), character creation
+- Real account validation (AccountServer/SRP6), account DB (MySQL via `Core/DB`), character creation
 - Map/NPC/monster world loading from the original data files
 - Battle, item, attribute, guild/syndicate systems (classes exist with placeholder formulas)
 - NpcServer is a placeholder main only

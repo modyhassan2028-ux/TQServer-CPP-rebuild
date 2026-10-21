@@ -1,8 +1,9 @@
-#pragma once
+﻿#pragma once
 #include <string>
 #include <cstdint>
 
 class CGameMap;
+class CNetClient;
 
 class CUser {
 public:
@@ -45,6 +46,9 @@ public:
     uint8_t GetVipLevel() const { return m_ucVip; }
     void SetVipLevel(uint8_t vip) { m_ucVip = vip; }
 
+    void BindNet(CNetClient* pNet) { m_pNet = pNet; }
+    CNetClient* NetClient() const { return m_pNet; }
+
     bool IsGodMode() const { return m_bGodMode; }
     void SetGodMode(bool god) { m_bGodMode = god; }
 
@@ -73,4 +77,5 @@ private:
     uint8_t m_ucVip{0};
     bool m_bGodMode{false};
     bool m_bInvisible{false};
+    CNetClient* m_pNet{nullptr};
 };

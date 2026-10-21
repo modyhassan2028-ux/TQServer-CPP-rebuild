@@ -2,6 +2,7 @@
 #include "Network/MsgHead.h"
 #include <vector>
 #include <cstring>
+#include <cstdint>
 
 namespace tq {
     class __declspec(dllexport) CMsg {
@@ -18,6 +19,10 @@ namespace tq {
         uint16_t GetSize() const;
         uint16_t GetType() const;
         bool IsValid();
+
+        // raw wire helpers: build a packet from received bytes
+        void Clear();
+        void AppendRaw(const uint8_t* pData, uint16_t usLen);
 
         virtual void Process(uint32_t dwSender);
         virtual void Process(uint32_t dwSender, void* pContext);

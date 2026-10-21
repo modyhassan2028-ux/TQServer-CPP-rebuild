@@ -48,4 +48,22 @@ namespace tq {
     void CMsg::Process(uint32_t) {}
     void CMsg::Process(uint32_t, void*) {}
     void CMsg::Process(void*) {}
+
+    void CMsg::Clear() {
+        m_buffer.clear();
+        m_nType = 0;
+        m_nSize = 0;
+    }
+
+    void CMsg::AppendRaw(const uint8_t* pData, uint16_t usLen) {
+        if (!pData || usLen == 0) return;
+        m_buffer.insert(m_buffer.end(), reinterpret_cast<const char*>(pData),
+                        reinterpret_cast<const char*>(pData) + usLen);
+        m_nSize = static_cast<uint16_t>(m_buffer.size());
+        if (m_buffer.size() >= sizeof(MsgHead)) {
+            MsgHead head;
+            std::memcpy(&head, m_buffer.data(), sizeof(head));
+            m_nType = head.type;
+        }
+    }
 }

@@ -1,5 +1,6 @@
 ﻿#include "NetCore.h"
 #include "MsgTalk.h"
+#include "MsgConnect.h"
 #include "UserManager.h"
 
 #include <winsock2.h>
@@ -71,10 +72,27 @@ void CNetClient::RecvLoop() {
 void CNetClient::Dispatch(tq::MsgHead head, const uint8_t* pPayload, uint16_t usPayloadLen) {
     (void)usPayloadLen;
     switch (head.type) {
-    case 1004: { // MsgTalk: echo back as system chat so we see a full round trip
+    case 1001: { // MsgConnect - login handshake
+        CMsgConnect login;
+        login.Clear();
+        login.AppendRaw(reinterpret_cast<const uint8_t*>(&head), sizeof(head));
+        login.AppendRaw(pPayload, static_cast<uint16_t>(head.length - sizeof(head)));
+        login.Process(m_dwSessionId, this);
+        break;
+    }
+    case 1004: { // MsgTalk - chat channels
         CMsgTalk msg;
-        if (msg.Create("SYSTEM", "", "Server: packet received on C++ rebuild.", CMsgTalk::Channel_Talk))
-            Send(msg.GetBuf(), msg.GetSize());
+        msg.Clear();
+        msg.AppendRaw(reinterpret_cast<const uint8_t*>(&head), sizeof(head));
+        msg.AppendRaw(pPayload, static_cast<uint16_t>(head.length - sizeof(head)));
+        auto pUser = CUserManager::Instance().GetUser(m_dwSessionId);
+        if (pUser) {
+            msg.Process(m_dwSessionId);
+        } else {
+            CMsgTalk reply;
+            if (reply.Create("SYSTEM", "", "Not logged in. Send MsgConnect (1001) first.", CMsgTalk::Channel_Talk))
+                Send(reply.GetBuf(), reply.GetSize());
+        }
         break;
     }
     default:

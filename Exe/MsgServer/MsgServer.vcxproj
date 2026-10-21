@@ -84,7 +84,9 @@
     <ClCompile Include="BattleSystem.cpp" />
     <ClCompile Include="GameMap.cpp" />
     <ClInclude Include="NetCore.h" />
+    <ClInclude Include="MsgConnect.h" />
     <ClCompile Include="Monster.cpp" />
+    <ClCompile Include="MsgConnect.cpp" />
     <ClCompile Include="MsgAction.cpp" />
     <ClCompile Include="MsgItem.cpp" />
     <ClCompile Include="MsgTalk.cpp" />

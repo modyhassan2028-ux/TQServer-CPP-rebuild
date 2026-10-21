@@ -14,7 +14,8 @@ mkdir -p build
 
 echo "[1/6] MsgServer.exe (net core + packet handlers)..."
 $CC $INC $WARN Exe/MsgServer/main.cpp Exe/MsgServer/NetCore.cpp Exe/MsgServer/BattleSystem.cpp \
-    Exe/MsgServer/GameMap.cpp Exe/MsgServer/Monster.cpp Exe/MsgServer/MsgAction.cpp \
+    Exe/MsgServer/GameMap.cpp Exe/MsgServer/Monster.cpp Exe/MsgServer/MsgConnect.cpp \
+    Exe/MsgServer/MsgAction.cpp \
     Exe/MsgServer/MsgItem.cpp Exe/MsgServer/MsgTalk.cpp Exe/MsgServer/MsgUserAttrib.cpp \
     Exe/MsgServer/User.cpp Exe/MsgServer/UserManager.cpp Exe/MsgServer/CrossServer/CrossMsgAction.cpp \
     Core/CQBase/Msg.cpp Core/CQBase/StringPacker.cpp Core/CQBase/Timer.cpp \
