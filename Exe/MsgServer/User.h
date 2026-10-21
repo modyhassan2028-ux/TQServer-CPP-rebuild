@@ -31,6 +31,12 @@ public:
 
     // GM & Economy attributes
     uint64_t GetMoney() const { return m_dwMoney; }
+    uint64_t GetBank() const { return m_dwBank; }
+    void SetBank(uint64_t v) { m_dwBank = v; }
+    uint32_t GetPkPoints() const { return m_dwPkPoints; }
+    void AddPkPoints(uint32_t v) { m_dwPkPoints += v; }
+    void SetPkPoints(uint32_t v) { m_dwPkPoints = v; }
+    bool IsRedName() const { return m_dwPkPoints >= 30; }
     void SetMoney(uint64_t money) { m_dwMoney = money; }
     void AddMoney(int64_t amount) { m_dwMoney = (amount < 0 && (uint64_t)(-amount) > m_dwMoney) ? 0 : m_dwMoney + amount; }
 
@@ -85,6 +91,8 @@ private:
 
     // Economy & Special State
     uint64_t m_dwMoney{0};
+    uint64_t m_dwBank{0};
+    uint32_t m_dwPkPoints{0};
     uint32_t m_dwEmoney{0};
     uint8_t m_ucLevel{1};
     uint8_t m_ucReborn{0};

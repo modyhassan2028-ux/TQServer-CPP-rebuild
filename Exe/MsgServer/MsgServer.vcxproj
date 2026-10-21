@@ -82,6 +82,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NetCore.cpp" />
     <ClCompile Include="Account.cpp" />
+    <ClCompile Include="Npc.cpp" />
     <ClCompile Include="BattleSystem.cpp" />
     <ClCompile Include="DMap.cpp" />
     <ClCompile Include="GameMap.cpp" />

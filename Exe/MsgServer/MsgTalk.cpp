@@ -3,6 +3,7 @@
 #include "UserManager.h"
 #include "Guild.h"
 #include "Trade.h"
+#include "Npc.h"
 #include "User.h"
 #include <sstream>
 #include <vector>
@@ -57,6 +58,38 @@ void CMsgTalk::Process(uint32_t dwSender) {
         } else {
             user->SendSysMsg("You are not in a guild. /guild create <name> or /guild join <name>");
         }
+        return;
+    }
+    if (m_message.rfind("/npc", 0) == 0) {
+        std::string arg = m_message.length() > 4 ? m_message.substr(5) : "";
+        CNpcManager::Instance().SpawnDefaults();
+        if (arg == "list") {
+            auto list = CNpcManager::Instance().GetNpcsOnMap(user->GetMapId());
+            if (list.empty()) user->SendSysMsg("No NPCs on this map.");
+            for (auto& p : list)
+                user->SendSysMsg(p->GetName() + " (id " + std::to_string(p->GetId()) +
+                                 ") at (" + std::to_string(p->GetX()) + "," + std::to_string(p->GetY()) + ")");
+        } else if (!arg.empty()) {
+            uint32_t dwId = static_cast<uint32_t>(strtoul(arg.c_str(), nullptr, 10));
+            auto pNpc = CNpcManager::Instance().GetNpc(dwId);
+            if (pNpc) pNpc->Interact(user);
+            else user->SendSysMsg("No such NPC. /npc list");
+        } else {
+            user->SendSysMsg("Usage: /npc list, /npc <id>");
+        }
+        return;
+    }
+    if (m_message.rfind("/bank", 0) == 0) {
+        std::string arg = m_message.length() > 5 ? m_message.substr(6) : "";
+        std::string sub;
+        size_t sp = arg.find(' ');
+        if (sp == std::string::npos) { sub = arg; arg = ""; }
+        else { sub = arg.substr(0, sp); arg = arg.substr(sp + 1); }
+        uint32_t dwAmount = static_cast<uint32_t>(strtoul(arg.c_str(), nullptr, 10));
+        if (sub == "deposit") CNpcManager::Instance().BankDeposit(user, dwAmount);
+        else if (sub == "withdraw") CNpcManager::Instance().BankWithdraw(user, dwAmount);
+        else user->SendSysMsg("Bank: " + std::to_string(user->GetBank()) +
+                              ". Usage: /bank deposit|withdraw <amount>");
         return;
     }
     if (m_message.rfind("/trade", 0) == 0) {

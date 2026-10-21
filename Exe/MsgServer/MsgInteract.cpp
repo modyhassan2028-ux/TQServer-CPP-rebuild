@@ -3,6 +3,8 @@
 #include "UserManager.h"
 #include "MapManager.h"
 #include "MonsterManager.h"
+#include "Npc.h"
+#include "MsgTalk.h"
 
 #include <cstring>
 #include <cstdio>
@@ -50,9 +52,58 @@ void CMsgInteract::Process(uint32_t dwSender) {
     if (!pAttacker) return;
     if (pAttacker->GetId() != m_data.dwSenderId && m_data.dwSenderId != 0) return; // spoof guard
 
+    // NPC interaction: ids >= CNpcManager::NPC_ID_BASE route to the NPC system
+    if (m_data.dwTargetId >= CNpcManager::NPC_ID_BASE) {
+        CNpcManager::Instance().SpawnDefaults();
+        auto pNpc = CNpcManager::Instance().GetNpc(m_data.dwTargetId);
+        if (pNpc) pNpc->Interact(pAttacker);
+        else pAttacker->SendSysMsg("There is no such NPC. /npc list");
+        return;
+    }
+
+    // ---- PvP v1: interact aimed at another player ----
+    auto pTarget = CUserManager::Instance().GetUser(m_data.dwTargetId);
+    if (pTarget && pTarget->GetId() != pAttacker->GetId()) {
+        if (pTarget->GetMapId() != pAttacker->GetMapId()) return;
+        if (pTarget->GetLife() == 0) return; // corpse guard
+
+        uint32_t dwDamage = 20 + pAttacker->GetLevel() * 4 + (std::rand() % 25);
+        uint32_t dwLife = pTarget->GetLife() > dwDamage ? pTarget->GetLife() - dwDamage : 0;
+        pTarget->SetLife(dwLife);
+
+        CMsgInteract resp;
+        resp.Create(m_data.usAction, pTarget->GetId(), dwDamage,
+                    m_data.usX, m_data.usY, pAttacker->GetId());
+        CMapManager::Instance().Broadcast(pAttacker->GetMapId(), resp.GetBuf(), resp.GetSize());
+
+        printf("[PVP] %s hits %s for %u dmg (life %u)\n",
+               pAttacker->GetName().c_str(), pTarget->GetName().c_str(),
+               dwDamage, dwLife);
+
+        if (dwLife == 0) {
+            // killer gains PK points; the victim respawns in Twin City
+            pAttacker->AddPkPoints(10);
+            CMapManager::Instance().Broadcast(pAttacker->GetMapId(), resp.GetBuf(), resp.GetSize());
+            CMsgTalk notice;
+            if (notice.Create("SYSTEM", "",
+                               pAttacker->GetName() + " has killed " + pTarget->GetName() +
+                               (pAttacker->IsRedName() ? " (RED NAME!)" : ""),
+                               CMsgTalk::Channel_Talk))
+                CMapManager::Instance().Broadcast(pAttacker->GetMapId(), notice.GetBuf(), notice.GetSize());
+            pTarget->SetLife(pTarget->GetMaxLife());
+            pTarget->Teleport(1002, 315, 275);
+            pTarget->SendSysMsg("You were defeated and respawned in Twin City.");
+            pAttacker->SendSysMsg("You killed " + pTarget->GetName() + " (+10 PK points, total " +
+                                  std::to_string(pAttacker->GetPkPoints()) + ")");
+            printf("[PVP] %s killed %s (+10 PK)\n",
+                   pAttacker->GetName().c_str(), pTarget->GetName().c_str());
+        }
+        return;
+    }
+
     // v1: any interact aimed at a monster id is resolved as a melee hit
     auto pMonster = CMonsterManager::Instance().GetMonsterById(m_data.dwTargetId);
-    if (!pMonster) return; // user-vs-user interact comes with the PvP system
+    if (!pMonster) return;
 
     if (!pMonster->IsAlive()) return;
     if (pMonster->GetMapId() != pAttacker->GetMapId()) return;
