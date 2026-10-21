@@ -32,7 +32,7 @@ bool CMySQLClient::RecvPacket(std::vector<uint8_t>& out, uint8_t& seqOut) {
     uint8_t hdr[4];
     size_t got = 0;
     while (got < 4) {
-        ssize_t n = recv(m_sock, hdr + got, 4 - got, 0);
+        ssize_t n = recv((tq_sock_t)m_sock, (char*)hdr + got, (int)(4 - got), 0);
         if (n <= 0) { m_strError = "socket closed reading header"; return false; }
         got += (size_t)n;
     }
@@ -41,7 +41,7 @@ bool CMySQLClient::RecvPacket(std::vector<uint8_t>& out, uint8_t& seqOut) {
     out.resize(len);
     got = 0;
     while (got < len) {
-        ssize_t n = recv(m_sock, out.data() + got, len - got, 0);
+        ssize_t n = recv((tq_sock_t)m_sock, (char*)out.data() + got, (int)(len - got), 0);
         if (n <= 0) { m_strError = "socket closed reading body"; return false; }
         got += (size_t)n;
     }
@@ -51,8 +51,8 @@ bool CMySQLClient::RecvPacket(std::vector<uint8_t>& out, uint8_t& seqOut) {
 bool CMySQLClient::SendPacket(uint8_t seq, const void* pBuf, size_t n) {
     uint8_t hdr[4] = { (uint8_t)(n & 0xff), (uint8_t)((n >> 8) & 0xff),
                        (uint8_t)((n >> 16) & 0xff), seq };
-    if (send(m_sock, hdr, 4, 0) != 4) return false;
-    if (n && send(m_sock, pBuf, n, 0) != (ssize_t)n) return false;
+    if (send((tq_sock_t)m_sock, (const char*)hdr, 4, 0) != 4) return false;
+    if (n && send((tq_sock_t)m_sock, (const char*)pBuf, (int)n, 0) != (ssize_t)n) return false;
     return true;
 }
 
@@ -208,7 +208,7 @@ bool CMySQLClient::Connect(const std::string& host, uint16_t port,
         return false;
     }
     int one = 1;
-    setsockopt(m_sock, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
+    setsockopt((tq_sock_t)m_sock, IPPROTO_TCP, TCP_NODELAY, (const char*)&one, sizeof(one));
 
     std::string salt;
     if (!ReadHandshake(salt)) return false;
