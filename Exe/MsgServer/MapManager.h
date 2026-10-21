@@ -12,6 +12,9 @@ public:
 
     std::shared_ptr<CGameMap> GetMap(uint32_t dwId);
     std::shared_ptr<CGameMap> GetOrCreate(uint32_t dwId, const std::string& name);
+
+    // scan <mapDir> recursively for .DMap files and index them by map id
+    void ScanDMaps(const std::string& mapDir = "map");
     void RegisterDefaultMaps();
 
     // send a packet to every user on a map (optionally skipping one id)
@@ -21,4 +24,6 @@ private:
     CMapManager() = default;
     std::map<uint32_t, std::shared_ptr<CGameMap>> m_maps;
     std::mutex m_mutex;
+    std::unordered_map<uint32_t, std::string> m_dmapFiles;
+    bool m_bScanned{false};
 };

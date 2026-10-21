@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
+#include "DMap.h"
 
 class CUser;
 class CMonster;
@@ -21,8 +22,13 @@ public:
     bool IsPassable(uint16_t usX, uint16_t usY) const;
     std::vector<uint32_t> GetUserIds() const;
 
+    // load real collision data from a .DMap file (original client maps)
+    bool LoadCollision(const std::string& dmapPath);
+    bool HasRealCollision() const { return m_dmap.IsLoaded(); }
+
 private:
     uint32_t m_dwId;
     std::string m_name;
     std::unordered_map<uint32_t, std::shared_ptr<CUser>> m_users;
+    CDMap m_dmap;
 };

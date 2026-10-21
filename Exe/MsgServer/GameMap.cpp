@@ -14,8 +14,14 @@ bool CGameMap::RemoveUser(uint32_t dwUserId) {
     return m_users.erase(dwUserId) > 0;
 }
 
-bool CGameMap::IsPassable(uint16_t, uint16_t) const {
-    return true; // v1: free movement; real passability grid loads from .dmap files later
+bool CGameMap::LoadCollision(const std::string& dmapPath) {
+    return m_dmap.Load(dmapPath);
+}
+
+bool CGameMap::IsPassable(uint16_t usX, uint16_t usY) const {
+    if (m_dmap.IsLoaded())
+        return m_dmap.IsWalkable(usX, usY); // real terrain from the original .DMap
+    return true; // no dmap on disk: free movement (synthetic v1)
 }
 
 std::vector<uint32_t> CGameMap::GetUserIds() const {
