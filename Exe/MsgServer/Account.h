@@ -3,6 +3,8 @@
 #include <map>
 #include <mutex>
 #include <cstdint>
+#include <memory>
+#include <mutex>
 
 // Real account validation (v2 of the login flow).
 // Storage format is one record per line in "accounts.dat":
@@ -35,6 +37,12 @@ public:
     bool CreateAccount(const std::string& name, const std::string& password, uint32_t& dwIdOut);
     void SetAutoCreate(bool b) { m_bAutoCreate = b; }
 
+    // connect to MySQL (cq_account/cq_user); returns false -> flat-file mode
+    bool TryMySQL(const std::string& host, uint16_t port, const std::string& user,
+                   const std::string& password, const std::string& database);
+    bool IsMySQLMode() const { return m_bMySQL; }
+    class CMySQLClient* GetDB() { return m_pDB.get(); }
+
     static std::string Sha256Hex(const std::string& input);
     static std::string RandomSaltHex();
 
@@ -45,4 +53,8 @@ private:
     uint32_t m_dwNextId{ 10000 };
     bool m_bAutoCreate{ true };
     bool m_bLoaded{ false };
+    // MySQL persistence (falls back to accounts.dat when unreachable)
+    std::unique_ptr<class CMySQLClient> m_pDB;
+    bool m_bMySQL{ false };
+    std::mutex m_dbMutex;
 };

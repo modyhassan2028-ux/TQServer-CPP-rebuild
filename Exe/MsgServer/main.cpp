@@ -2,6 +2,7 @@
 #include "MapManager.h"
 #include "MonsterManager.h"
 #include "Account.h"
+#include <cstdlib>
 #include <iostream>
 #include <chrono>
 #include <thread>
@@ -30,6 +31,13 @@ int main(int argc, char* argv[]) {
 
     CMapManager::Instance().RegisterDefaultMaps();
     CAccountManager::Instance().Load();
+    // MySQL persistence: TQ_DB_HOST/PORT/USER/PASS/NAME override the defaults
+    CAccountManager::Instance().TryMySQL(
+        getenv("TQ_DB_HOST") ? getenv("TQ_DB_HOST") : "127.0.0.1",
+        (uint16_t)(getenv("TQ_DB_PORT") ? atoi(getenv("TQ_DB_PORT")) : 3306),
+        getenv("TQ_DB_USER") ? getenv("TQ_DB_USER") : "tqserver",
+        getenv("TQ_DB_PASS") ? getenv("TQ_DB_PASS") : "tqpass123",
+        getenv("TQ_DB_NAME") ? getenv("TQ_DB_NAME") : "tqserver");
     CMonsterManager::Instance().Start();
     std::cout << "[STATUS] World initialized. Listening on port " << port << " - Ctrl+C to stop." << std::endl;
 

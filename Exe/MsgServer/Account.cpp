@@ -1,4 +1,6 @@
 ﻿#include "Account.h"
+#include "MySQLClient.h"
+#include <cstdlib>
 
 #include <cstdio>
 #include <cstring>
@@ -171,6 +173,39 @@ CAccountManager::Result CAccountManager::Validate(const std::string& name, const
     std::string key = name;
     std::transform(key.begin(), key.end(), key.begin(), ::tolower);
 
+    // MySQL mode: cq_account is authoritative; flat files stay untouched
+    if (m_bMySQL && m_pDB) {
+        std::lock_guard<std::mutex> dbLock(m_dbMutex);
+        if (m_pDB->Query("SELECT id, password FROM cq_account WHERE name='" +
+                         m_pDB->Escape(name) + "'") && !m_pDB->GetRows().empty()) {
+            auto& row = m_pDB->GetRows()[0];
+            uint32_t dwId = (uint32_t)strtoul(row[0].c_str(), nullptr, 10);
+            // stored hash = sha256(salt + password), salt embedded as "salt$hash"
+            std::string stored = row[1];
+            size_t sep = stored.find('$');
+            if (sep == std::string::npos ||
+                Sha256Hex(stored.substr(0, sep) + password) != stored.substr(sep + 1)) {
+                printf("[DB] Bad password for account '%s'.\n", name.c_str());
+                return Result::WrongPassword;
+            }
+            dwIdOut = dwId;
+            return Result::Ok;
+        }
+        if (!m_bAutoCreate) return Result::NoSuchAccount;
+        // dev mode: register into cq_account
+        std::string salt = RandomSaltHex();
+        std::string hash = Sha256Hex(salt + password);
+        if (!m_pDB->Query("INSERT INTO cq_account (name, password) VALUES ('" +
+                          m_pDB->Escape(name) + "', '" + m_pDB->Escape(salt + "$" + hash) + "')")) {
+            printf("[DB] cq_account insert failed: %s\n", m_pDB->GetError().c_str());
+            return Result::NoSuchAccount;
+        }
+        std::string idStr = m_pDB->Scalar("SELECT LAST_INSERT_ID()", "10000");
+        dwIdOut = (uint32_t)strtoul(idStr.c_str(), nullptr, 10);
+        printf("[DB] New account '%s' registered in MySQL (id %u).\n", name.c_str(), dwIdOut);
+        return Result::Ok;
+    }
+
     std::lock_guard<std::mutex> lock(m_mutex);
     auto it = m_byName.find(key);
     if (it == m_byName.end()) {
@@ -195,4 +230,20 @@ CAccountManager::Result CAccountManager::Validate(const std::string& name, const
         return Result::WrongPassword;
     dwIdOut = it->second.dwId;
     return Result::Ok;
+}
+
+// ---------------- MySQL mode ----------------
+bool CAccountManager::TryMySQL(const std::string& host, uint16_t port, const std::string& user,
+                               const std::string& password, const std::string& database) {
+    if (!m_pDB) m_pDB = std::make_unique<CMySQLClient>();
+    if (!m_pDB->Connect(host, port, user, password, database)) {
+        printf("[DB] MySQL unavailable (%s) - staying in flat-file mode.\n",
+               m_pDB->GetError().c_str());
+        m_bMySQL = false;
+        return false;
+    }
+    m_bMySQL = true;
+    printf("[DB] MySQL connected: %s:%u/%s - accounts persist to cq_account (cq_user character sync lands in the next sprint).\n",
+           host.c_str(), port, database.c_str());
+    return true;
 }

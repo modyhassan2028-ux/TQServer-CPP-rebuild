@@ -84,8 +84,10 @@
     <ClCompile Include="Account.cpp" />
     <ClCompile Include="Npc.cpp" />
     <ClCompile Include="MsgNpcInfo.cpp" />
+    <ClCompile Include="MySQLClient.cpp" />
     <ClCompile Include="BattleSystem.cpp" />
     <ClCompile Include="DMap.cpp" />
+    <ClCompile Include="..\..\Core\CQBase\SHA1.cpp" />
     <ClCompile Include="GameMap.cpp" />
     <ClCompile Include="Guild.cpp" />
     <ClCompile Include="Trade.cpp" />
@@ -96,6 +98,7 @@
     <ClInclude Include="MonsterManager.h" />
     <ClInclude Include="Guild.h" />
     <ClInclude Include="DMap.h" />
+    <ClInclude Include="..\..\Core\CQBase\SHA1.h" />
     <ClInclude Include="Trade.h" />
     <ClInclude Include="MsgMonster.h" />
     <ClInclude Include="MsgInteract.h" />
