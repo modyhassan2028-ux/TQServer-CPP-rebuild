@@ -30,6 +30,11 @@ public:
     uint32_t GetMapId() const { return m_dwMapId; }
     uint16_t GetX() const { return m_usX; }
     uint16_t GetY() const { return m_usY; }
+    uint32_t GetLookface() const { return m_dwLookface; }
+    uint16_t GetDir() const { return m_usDir; }
+
+    uint32_t m_dwLookface{0}; // client c3 mesh id (placeholder values until matched to the client ini)
+    uint16_t m_usDir{2};
 
     // teleporter destination (only meaningful for Type::Teleporter)
     uint32_t m_dwDestMap{0};

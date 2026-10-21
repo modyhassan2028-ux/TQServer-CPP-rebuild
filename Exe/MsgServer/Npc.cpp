@@ -66,10 +66,14 @@ void CNpcManager::SpawnDefaults() {
         "Welcome! I can restore your health, free of charge.");
     add(NPC_ID_BASE + 2, "WarehouseMan", CNpc::Type::Warehouse, 1002, 300, 270,
         "I keep your money safe. You can deposit or withdraw anytime.");
+    // placeholder client mesh ids; the real values come from the client npc ini
+    m_npcs[NPC_ID_BASE + 1]->m_dwLookface = 8301;  // pharmacist
+    m_npcs[NPC_ID_BASE + 2]->m_dwLookface = 8302;  // warehouse
     auto pTcToDesert = std::make_shared<CNpc>(NPC_ID_BASE + 3, "CityGuard",
         CNpc::Type::Teleporter, 1002, 320, 270);
     pTcToDesert->m_dwDestMap = 1000; pTcToDesert->m_usDestX = 500; pTcToDesert->m_usDestY = 600;
     pTcToDesert->m_strDialog = "Need a ride to the Desert? Off you go!";
+    pTcToDesert->m_dwLookface = 8303;
     m_npcs[pTcToDesert->GetId()] = pTcToDesert;
 
     // Desert (1000): way back to Twin City
@@ -77,6 +81,7 @@ void CNpcManager::SpawnDefaults() {
         CNpc::Type::Teleporter, 1000, 505, 605);
     pDesertToTc->m_dwDestMap = 1002; pDesertToTc->m_usDestX = 315; pDesertToTc->m_usDestY = 275;
     pDesertToTc->m_strDialog = "Back to Twin City it is!";
+    pDesertToTc->m_dwLookface = 8304;
     m_npcs[pDesertToTc->GetId()] = pDesertToTc;
 
     printf("[NPC] Spawned %zu default NPC(s).\n", m_npcs.size());
@@ -89,6 +94,7 @@ std::shared_ptr<CNpc> CNpcManager::GetNpc(uint32_t dwId) {
 }
 
 std::vector<std::shared_ptr<CNpc>> CNpcManager::GetNpcsOnMap(uint32_t dwMapId) {
+    SpawnDefaults();
     std::lock_guard<std::mutex> lock(m_mutex);
     std::vector<std::shared_ptr<CNpc>> out;
     for (auto& kv : m_npcs)

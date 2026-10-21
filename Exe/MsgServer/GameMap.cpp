@@ -1,10 +1,20 @@
 ﻿#include "GameMap.h"
 #include "User.h"
+#include "Npc.h"
+#include "MsgNpcInfo.h"
 
 CGameMap::CGameMap(uint32_t dwId, const std::string& name) : m_dwId(dwId), m_name(name) {}
 CGameMap::~CGameMap() = default;
 
 bool CGameMap::AddUser(std::shared_ptr<CUser> user) {
+    if (!user) return false;
+    // announce every NPC on this map to the joining client (CMsgNpcInfo 2030)
+    for (auto& pNpc : CNpcManager::Instance().GetNpcsOnMap(m_dwId)) {
+        CMsgNpcInfo info;
+        if (info.Create(pNpc->GetId(), pNpc->GetLookface(), pNpc->GetX(), pNpc->GetY(),
+                        pNpc->GetDir(), pNpc->GetName()))
+            user->SendMsg(info.GetBuf(), info.GetSize());
+    }
     if (!user) return false;
     m_users[user->GetId()] = user;
     return true;

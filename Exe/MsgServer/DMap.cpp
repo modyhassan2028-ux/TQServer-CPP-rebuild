@@ -4,6 +4,7 @@
 #include <cstring>
 #include <fstream>
 #include <algorithm>
+#include <cstdlib>
 
 bool CDMap::PeekMapId(const std::string& path, uint32_t& dwIdOut) {
     std::ifstream in(path, std::ios::binary);
@@ -76,4 +77,14 @@ bool CDMap::Load(const std::string& path) {
 bool CDMap::IsWalkable(uint32_t x, uint32_t y) const {
     if (!m_bLoaded || x >= m_dwWidth || y >= m_dwHeight) return false;
     return m_access[(size_t)y * m_dwWidth + x] == 1;
+}
+
+bool CDMap::RandomWalkable(uint32_t& xOut, uint32_t& yOut, uint32_t dwTries) const {
+    if (!m_bLoaded || m_dwWidth == 0 || m_dwHeight == 0) return false;
+    for (uint32_t i = 0; i < dwTries; ++i) {
+        uint32_t x = std::rand() % m_dwWidth;
+        uint32_t y = std::rand() % m_dwHeight;
+        if (IsWalkable(x, y)) { xOut = x; yOut = y; return true; }
+    }
+    return false;
 }

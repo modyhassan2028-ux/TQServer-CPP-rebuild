@@ -25,6 +25,7 @@ public:
     // load real collision data from a .DMap file (original client maps)
     bool LoadCollision(const std::string& dmapPath);
     bool HasRealCollision() const { return m_dmap.IsLoaded(); }
+    bool RandomWalkableCell(uint32_t& xOut, uint32_t& yOut) { return m_dmap.RandomWalkable(xOut, yOut); }
 
 private:
     uint32_t m_dwId;

@@ -1,4 +1,6 @@
 ﻿#include "MonsterManager.h"
+#include "MapManager.h"
+#include "GameMap.h"
 #include "MsgMonster.h"
 #include "MapManager.h"
 #include "UserManager.h"
@@ -26,9 +28,16 @@ void CMonsterManager::SpawnDefaults() {
         { 1001, 20, "Bandit",     400, 400, 15, 500 },
     };
     for (const auto& s : kSpawns) {
+        // when the map has real terrain (.dmap), snap the spawn to a walkable cell
+        uint16_t spawnX = s.x, spawnY = s.y;
+        auto pMap = CMapManager::Instance().GetMap(s.map);
+        if (pMap && pMap->HasRealCollision()) {
+            uint32_t rx = 0, ry = 0;
+            if (pMap->RandomWalkableCell(rx, ry)) { spawnX = (uint16_t)rx; spawnY = (uint16_t)ry; }
+        }
         auto p = std::make_shared<CMonster>(m_dwNextId++, s.type, s.name);
         p->SetMapId(s.map);
-        p->SetSpawn(s.x, s.y);
+        p->SetSpawn(spawnX, spawnY);
         p->SetLevel(s.level);
         p->SetLife(s.life);
         p->SetMaxLife(s.life);

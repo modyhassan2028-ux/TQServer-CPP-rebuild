@@ -34,6 +34,9 @@ public:
     uint32_t GetHeight() const { return m_dwHeight; }
     const Header& GetHeader() const { return m_header; }
 
+    // pick a random walkable cell (monster spawning); false if none found
+    bool RandomWalkable(uint32_t& xOut, uint32_t& yOut, uint32_t dwTries = 200) const;
+
     // real collision query; false outside the grid
     bool IsWalkable(uint32_t x, uint32_t y) const;
 
