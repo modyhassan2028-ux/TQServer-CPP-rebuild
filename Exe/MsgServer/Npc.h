@@ -13,6 +13,15 @@ class CUser;
 // this core later; v1 NPCs are fully functional server-side via interact ids
 // and chat commands.
 
+struct NpcOption {
+    enum class Action { Heal, BankBalance, BankDeposit, BankWithdraw, Teleport, Chat };
+    Action action{Action::Chat};
+    std::string text;       // shown in the numbered menu
+    // teleport destination
+    uint32_t dwDestMap{0};
+    uint16_t usDestX{0}, usDestY{0};
+};
+
 class CNpc {
 public:
     enum class Type {
@@ -41,10 +50,14 @@ public:
     uint16_t m_usDestX{0};
     uint16_t m_usDestY{0};
 
+    std::vector<NpcOption> m_options; // numbered dialog menu
+
     // dialog text shown on interaction
     std::string m_strDialog;
 
-    void Interact(std::shared_ptr<CUser> pUser);
+    void Interact(std::shared_ptr<CUser> pUser); // shows the greeting + numbered menu
+    // player picked option n (1-based); returns false if out of range
+    bool ChooseOption(std::shared_ptr<CUser> pUser, uint32_t dwIndex);
 
 private:
     uint32_t m_dwId;

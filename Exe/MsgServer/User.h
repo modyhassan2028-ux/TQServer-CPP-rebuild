@@ -37,6 +37,9 @@ public:
     void AddPkPoints(uint32_t v) { m_dwPkPoints += v; }
     void SetPkPoints(uint32_t v) { m_dwPkPoints = v; }
     bool IsRedName() const { return m_dwPkPoints >= 30; }
+    // last NPC the player talked to; digit replies route to its dialog menu
+    void SetTalkingNpc(uint32_t id) { m_dwTalkingNpc = id; }
+    uint32_t GetTalkingNpc() const { return m_dwTalkingNpc; }
     void SetMoney(uint64_t money) { m_dwMoney = money; }
     void AddMoney(int64_t amount) { m_dwMoney = (amount < 0 && (uint64_t)(-amount) > m_dwMoney) ? 0 : m_dwMoney + amount; }
 
@@ -93,6 +96,7 @@ private:
     uint64_t m_dwMoney{0};
     uint64_t m_dwBank{0};
     uint32_t m_dwPkPoints{0};
+    uint32_t m_dwTalkingNpc{0};
     uint32_t m_dwEmoney{0};
     uint8_t m_ucLevel{1};
     uint8_t m_ucReborn{0};

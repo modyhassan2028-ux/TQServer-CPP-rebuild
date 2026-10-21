@@ -61,7 +61,15 @@ void CMsgTalk::Process(uint32_t dwSender) {
         }
         return;
     }
-    if (m_message.rfind("/npc", 0) == 0) {
+    // plain digits route to the open NPC dialog menu (original 6159 interaction)
+    if (!m_message.empty() && m_message.find_first_not_of("0123456789") == std::string::npos) {
+        uint32_t dwNpc = user->GetTalkingNpc();
+        if (dwNpc >= CNpcManager::NPC_ID_BASE) {
+            auto pNpc = CNpcManager::Instance().GetNpc(dwNpc);
+            if (pNpc) { pNpc->ChooseOption(user, static_cast<uint32_t>(strtoul(m_message.c_str(), nullptr, 10))); return; }
+        }
+    }
+if (m_message.rfind("/npc", 0) == 0) {
         std::string arg = m_message.length() > 4 ? m_message.substr(5) : "";
         CNpcManager::Instance().SpawnDefaults();
         if (arg == "list") {

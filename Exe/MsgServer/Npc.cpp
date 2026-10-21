@@ -16,8 +16,18 @@ void CNpc::Interact(std::shared_ptr<CUser> pUser) {
         pUser->SendSysMsg("That NPC is not on your map.");
         return;
     }
+    pUser->SetTalkingNpc(GetId()); // digit replies now route to this NPC
     if (!m_strDialog.empty()) pUser->SendSysMsg(m_strDialog);
+    // numbered menu (original 6159 style: pick by replying with the number)
+    if (!m_options.empty()) {
+        std::string menu = "Options:";
+        uint32_t i = 1;
+        for (auto& o : m_options)
+            menu += "\n  " + std::to_string(i++) + ". " + o.text;
+        pUser->SendSysMsg(menu);
+    }
 
+    if (!m_options.empty()) return; // menu-driven NPCs act on choice
     switch (m_type) {
     case Type::Healer:
         pUser->SetLife(pUser->GetMaxLife());
@@ -42,6 +52,42 @@ void CNpc::Interact(std::shared_ptr<CUser> pUser) {
     }
 }
 
+
+bool CNpc::ChooseOption(std::shared_ptr<CUser> pUser, uint32_t dwIndex) {
+    if (!pUser) return false;
+    if (dwIndex == 0 || dwIndex > m_options.size()) {
+        pUser->SendSysMsg("No such option. Talk to me again (/npc " +
+                          std::to_string(m_dwId) + ").");
+        return false;
+    }
+    const NpcOption& o = m_options[dwIndex - 1];
+    switch (o.action) {
+    case NpcOption::Action::Heal:
+        pUser->SetLife(pUser->GetMaxLife());
+        pUser->SendSysMsg("Life fully restored!");
+        break;
+    case NpcOption::Action::BankBalance:
+        pUser->SendSysMsg("Bank balance: " + std::to_string(pUser->GetBank()));
+        break;
+    case NpcOption::Action::BankDeposit:
+        pUser->SendSysMsg("How much? /bank deposit <amount>");
+        break;
+    case NpcOption::Action::BankWithdraw:
+        pUser->SendSysMsg("How much? /bank withdraw <amount>");
+        break;
+    case NpcOption::Action::Teleport:
+        pUser->Teleport(o.dwDestMap, o.usDestX, o.usDestY);
+        break;
+    case NpcOption::Action::Chat:
+    default:
+        if (!o.text.empty()) pUser->SendSysMsg(o.text);
+        break;
+    }
+    printf("[NPC] %s chose option %u on %s\n",
+           pUser->GetName().c_str(), dwIndex, m_name.c_str());
+    return true;
+}
+
 CNpcManager& CNpcManager::Instance() {
     static CNpcManager s_instance;
     return s_instance;
@@ -62,8 +108,18 @@ void CNpcManager::SpawnDefaults() {
 
     // Twin City (1002) - v1 roster, coords approximate until the MsgNpc
     // spawn packet port makes them visible client-side
-    add(NPC_ID_BASE + 1, "Pharmacist", CNpc::Type::Healer, 1002, 310, 265,
-        "Welcome! I can restore your health, free of charge.");
+    {
+        auto pHealer = std::make_shared<CNpc>(NPC_ID_BASE + 1, "Pharmacist",
+            CNpc::Type::Healer, 1002, 310, 265);
+        pHealer->m_dwLookface = 8301;
+        pHealer->m_strDialog = "Welcome! I can restore your health, free of charge.";
+        NpcOption heal; heal.action = NpcOption::Action::Heal;
+        heal.text = "Heal me, please.";
+        pHealer->m_options.push_back(heal);
+        NpcOption bye; bye.action = NpcOption::Action::Chat; bye.text = "I am fine, thanks.";
+        pHealer->m_options.push_back(bye);
+        m_npcs[pHealer->GetId()] = pHealer;
+    }
     add(NPC_ID_BASE + 2, "WarehouseMan", CNpc::Type::Warehouse, 1002, 300, 270,
         "I keep your money safe. You can deposit or withdraw anytime.");
     // placeholder client mesh ids; the real values come from the client npc ini
@@ -99,14 +155,34 @@ void CNpcManager::SpawnDefaults() {
             CNpc::Type::Teleporter, 1002, 330, 270 + (uint16_t)(dwGateId - NPC_ID_BASE));
         pGate->m_dwDestMap = g.dest; pGate->m_usDestX = g.x; pGate->m_usDestY = g.y;
         pGate->m_dwLookface = 8300 + (dwGateId - NPC_ID_BASE);
-        pGate->m_strDialog = "Traveler! Step through and I will send you on your way.";
+        pGate->m_strDialog = "Traveler! Where to?";
+        {
+            NpcOption op;
+            op.action = NpcOption::Action::Teleport;
+            op.text = std::string("Travel to map ") + std::to_string(g.dest);
+            op.dwDestMap = g.dest; op.usDestX = g.x; op.usDestY = g.y;
+            pGate->m_options.push_back(op);
+        }
+        {
+            NpcOption op;
+            op.action = NpcOption::Action::Chat;
+            op.text = "Just passing by.";
+            pGate->m_options.push_back(op);
+        }
         m_npcs[pGate->GetId()] = pGate;
         // return gate on the destination map
         auto pBack = std::make_shared<CNpc>(dwGateId++, g.name,
             CNpc::Type::Teleporter, g.dest, (uint16_t)(g.x + 5), (uint16_t)(g.y + 5));
         pBack->m_dwDestMap = 1002; pBack->m_usDestX = 335; pBack->m_usDestY = 275;
         pBack->m_dwLookface = 8300 + (dwGateId - NPC_ID_BASE);
-        pBack->m_strDialog = "Back to Twin City!";
+        pBack->m_strDialog = "Done out here?";
+        {
+            NpcOption op;
+            op.action = NpcOption::Action::Teleport;
+            op.text = "Return to Twin City";
+            op.dwDestMap = 1002; op.usDestX = 335; op.usDestY = 275;
+            pBack->m_options.push_back(op);
+        }
         m_npcs[pBack->GetId()] = pBack;
     }
 
