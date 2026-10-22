@@ -17,6 +17,11 @@ public:
     ~CUser();
 
     uint32_t GetId() const { return m_dwId; }
+
+    // ORIGINAL FUN_140167b70: server-side "OS user" gate (used by TaskDetail
+    // module CreateTask/DeleteTask and map guards): id above 0xee69a15e AND
+    // the OS-user flag (CUser+0x12fc) set.
+    bool IsOsUser() const { return m_dwId > 0xee69a15e && m_bOsUser; }
     const std::string& GetName() const { return m_name; }
     void SetName(const std::string& name) { m_name = name; }
     // owning cq_account id (0 = dev/flat mode, unsaved to MySQL)
@@ -351,6 +356,7 @@ public:
 
 private:
     uint32_t m_dwId{0};
+    bool     m_bOsUser{false}; // ORIGINAL CUser+0x12fc (set when OS users exist)
     std::string m_name;
     uint32_t m_dwMapId{1002}; // Twin City default
     uint16_t m_usX{400};

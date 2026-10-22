@@ -155,6 +155,39 @@ bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogE
         printf("[DIALOG] 1003: FlyMap error, Action[%u]\n", pNode->dwId);
         return false;
     }
+    case 1056: { // ORIGINAL switch case 0x30: task new / delete / isexit
+        char szOp[256] = {0}; uint32_t dwTok2 = 0, dwMinutes = 0;
+        int nTok = sscanf(pNode->strParam.c_str(), "%s %u %u", szOp, &dwTok2, &dwMinutes);
+        if (nTok <= 0) {
+            // ORIGINAL: log_InlineLogDBERROR "Wrong param number" (gameaction.cpp
+            // case 0x30) -> LAB_14013a784, action fails
+            return false;
+        }
+        if (nTok < 3) {
+            // ORIGINAL fallback: token 2 becomes the USER id and token 3 zero.
+            // Both stay unused by the three operations below (the task id
+            // always comes from cq_action.data), so this is dead in practice.
+            dwTok2 = pUser->GetId();
+            dwMinutes = 0;
+        }
+        // task id from the ACTION record (vtable+0x48 == cq_action.data)
+        uint32_t dwTaskId = pNode->dwData;
+        auto& mgr = CUserTaskManager::Instance();
+        if (_stricmp(szOp, "isexit") == 0)   // vtable +0x20: record lookup
+            return mgr.HasTask(pUser, dwTaskId);
+        if (_stricmp(szOp, "new") == 0)      // vtable +0x10: CreateTask(user, task, minutes)
+            return mgr.CreateTask(pUser, dwTaskId, dwMinutes);
+        if (_stricmp(szOp, "delete") == 0) { // vtable +0x18: DeleteTask(user, task)
+            // ORIGINAL FUN_1403a0250 -> mgr slot 0 (type column) == 1:
+            // the client tracks this task, so notify it (FUN_14016d6c0
+            // with 0xc) BEFORE the delete.
+            if (mgr.GetTaskState(pUser, dwTaskId) == 1)
+                printf("[TASK] user %u task %u state==1 -> client notice 12\n",
+                       pUser->GetId(), dwTaskId);
+            return mgr.DeleteTask(pUser, dwTaskId);
+        }
+        return false; // ORIGINAL: unknown op -> 0
+    }
     case 1057: { // ORIGINAL switch case 0x31: task-detail variables
         char szField[256] = {0}, szOp[256] = {0}; int nVal = 0;
         if (sscanf(pNode->strParam.c_str(), "%s %s %d", szField, szOp, &nVal) < 3) {

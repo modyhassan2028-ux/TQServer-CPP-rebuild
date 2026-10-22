@@ -7,6 +7,7 @@
 #include "Npc.h"
 #include "Dialog.h"
 #include "GameAction.h"
+#include "ResStrings.h"
 #include "MsgDialog.h"
 #include "MsgTalk.h"
 #include "User.h"
@@ -277,8 +278,11 @@ int main() {
 
     // --- 1057 (case 0x31): task_detail variables, real cq_action params ---
     // seed the ORIGINAL task_detail row for our test user + task 2418 (the
-    // task behind the real rows "data1 == 6/7/8" in cq_action)
-    pDB->Query("INSERT IGNORE INTO task_detail (user_id, task_id, complete_flag, notify_flag,"
+    // task behind the real rows "data1 == 6/7/8" in cq_action).
+    // NOTE: task_detail has NO unique key, so INSERT IGNORE never dedupes -
+    // clean up first or reruns accumulate rows.
+    pDB->Query("DELETE FROM task_detail WHERE user_id=999001");
+    pDB->Query("INSERT INTO task_detail (user_id, task_id, complete_flag, notify_flag,"
                " data1, data2, data3, data4, data5, data6, data7, task_overtime)"
                " VALUES (999001, 2418, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0)");
     auto u8 = std::make_shared<CUser>(999001);
@@ -312,6 +316,62 @@ int main() {
     assert(atoi(pDB->GetRows()[0][1].c_str()) == 1);
     assert(atoi(pDB->GetRows()[0][2].c_str()) == 1);
     printf("[ok] 1057 task_detail variables match FUN_140118220 vtable ops\n");
+
+// --- 1056 (case 0x30): task new/delete/isexit, real cq_action rows ---
+    // cleanup the ORIGINAL task_detail rows of the 1056 test user
+    pDB->Query("DELETE FROM task_detail WHERE user_id=999002");
+    CResStrings::Instance().LoadFromFile("data/En_Res.ini");
+    assert(CResStrings::Instance().Get("STR_TASK_DETAIL_NUM_MAX") ==
+           "You can`t accept more quests.");
+    auto u9 = std::make_shared<CUser>(999002);
+    auto mk1056 = [](uint32_t id, uint32_t task, const char* param) {
+        CDialogEngine::Node n; n.dwType = 1056; n.dwId = id; n.dwData = task;
+        n.strParam = param; return n; };
+    // real rows: 401100 (task 6350, "isexit"), 9576121 (task 651, "new"),
+    // 9570010 (task 600, "delete")
+    { auto n = mk1056(401100, 6350, "isexit"); assert(!CGameAction::ProcessActionUser(u9, &n)); }
+    { auto n = mk1056(9576121, 651, "new");    assert( CGameAction::ProcessActionUser(u9, &n)); }
+    { auto n = mk1056(401100, 6350, "isexit"); assert(!CGameAction::ProcessActionUser(u9, &n)); }
+    { auto n = mk1056(9570010, 600, "new");    assert( CGameAction::ProcessActionUser(u9, &n)); }
+    { auto n = mk1056(401100, 600, "isexit"); assert( CGameAction::ProcessActionUser(u9, &n)); }
+    // ORIGINAL FUN_1418bc2b0: creating an already-tracked task fails
+    { auto n = mk1056(9570010, 600, "new");    assert(!CGameAction::ProcessActionUser(u9, &n)); }
+    // persistence: complete_flag starts at 0 on creation
+    pDB->Query("SELECT complete_flag, task_overtime FROM task_detail"
+               " WHERE user_id=999002 AND task_id=600");
+    assert(!pDB->GetRows().empty());
+    assert(atoi(pDB->GetRows()[0][0].c_str()) == 0);
+    // ORIGINAL FUN_1418b5b80: timed-range task (30001..39999) can't be deleted
+    { auto n = mk1056(9570010, 30001, "new");    assert( CGameAction::ProcessActionUser(u9, &n)); }
+    { auto n = mk1056(9570010, 30001, "delete");assert(!CGameAction::ProcessActionUser(u9, &n)); }
+    { auto n = mk1056(9570010, 30001, "isexit"); assert( CGameAction::ProcessActionUser(u9, &n)); }
+    // delete a normal task, then isexit must fail again
+    { auto n = mk1056(9570010, 600, "delete"); assert( CGameAction::ProcessActionUser(u9, &n)); }
+    { auto n = mk1056(401100, 600, "isexit"); assert(!CGameAction::ProcessActionUser(u9, &n)); }
+    pDB->Query("SELECT COUNT(*) FROM task_detail WHERE user_id=999002 AND task_id=600");
+    assert(atoi(pDB->GetRows()[0][0].c_str()) == 0);
+    // ORIGINAL FUN_1418b8110: max 20 INCOMPLETE tasks per category (0x14);
+    // u9 already tracks 651 + 30001 (one normal + one timed) -> 19 more normal
+    // fill the normal category to 20, then the 21st fails
+    for (uint32_t t = 1000; t < 1019; ++t) {
+        CDialogEngine::Node n; n.dwType = 1056; n.dwId = 9576121; n.dwData = t;
+        n.strParam = "new";
+        assert(CGameAction::ProcessActionUser(u9, &n));
+    }
+    { auto n = mk1056(9576121, 2000, "new");    assert(!CGameAction::ProcessActionUser(u9, &n)); }
+    // completing one task frees a slot for the cap (complete set via 1057)
+    { CDialogEngine::Node n; n.dwType = 1057; n.dwId = 1; n.dwData = 1000;
+      n.strParam = "complete set 1";
+      assert(CGameAction::ProcessActionUser(u9, &n)); }
+    { auto n = mk1056(9576121, 2000, "new");    assert( CGameAction::ProcessActionUser(u9, &n)); }
+    // GetTaskState == 1 (type column) mirrors FUN_1403a0250: notice branch
+    pDB->Query("UPDATE task_detail SET type=1 WHERE user_id=999002 AND task_id=651");
+    { auto n = mk1056(9570010, 651, "delete"); assert( CGameAction::ProcessActionUser(u9, &n)); }
+    // unknown op fails; malformed param hits the ORIGINAL DBERROR path
+    { auto n = mk1056(401100, 6350, "noop");    assert(!CGameAction::ProcessActionUser(u9, &n)); }
+    { auto n = mk1056(401100, 6350, "");        assert(!CGameAction::ProcessActionUser(u9, &n)); }
+    pDB->Query("DELETE FROM task_detail WHERE user_id=999002");
+    printf("[ok] 1056 task new/delete/isexit match TaskDetail.dll FUN_1418b1a90/e80/3210\n");
 
     printf("DIALOG FIDELITY TEST PASSED\n");
     return 0;

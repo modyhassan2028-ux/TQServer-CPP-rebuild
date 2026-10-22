@@ -11,6 +11,7 @@
 #include "Item.h"
 #include "PlayerMagic.h"
 #include "Account.h"
+#include "ResStrings.h"
 #include <cstdlib>
 #include <iostream>
 #include <chrono>
@@ -52,6 +53,8 @@ int main(int argc, char* argv[]) {
     // cq_itemtype first (DB), data/items.ini as fallback
     if (!CItemLibrary::Instance().LoadFromDB(CAccountManager::Instance().GetDB()))
         CItemLibrary::Instance().LoadFromFile("data/items.ini");
+        // ORIGINAL [Language] StringFile = ini\En_Res.ini (string manager)
+        CResStrings::Instance().LoadFromFile("data/En_Res.ini");
     CItemLibrary::Instance().LoadDropsFromDB(CAccountManager::Instance().GetDB());
     CMagicTypePool::Instance().LoadFromDB(CAccountManager::Instance().GetDB());
     if (!CItemLibrary::Instance().LoadAdditionsFromDB(CAccountManager::Instance().GetDB()))
