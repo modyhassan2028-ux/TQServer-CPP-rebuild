@@ -4,3 +4,4 @@ build/
 *.pdb
 *.lib
 *.o
+vendor/lua/*.o

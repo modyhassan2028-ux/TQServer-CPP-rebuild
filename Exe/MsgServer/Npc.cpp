@@ -1,5 +1,6 @@
 ﻿#include "Npc.h"
 #include "Dialog.h"
+#include "LuaScript/LuaVM.h"
 #include "Item.h"
 #include "MySQLClient.h"
 #include "Account.h"
@@ -134,6 +135,17 @@ bool CNpc::ChooseOption(std::shared_ptr<CUser> pUser, uint32_t dwIndex) {
             case 5: { // shop: list cq_itemtype wares with prices
                 pUser->SetDialogNode(0);
                 pUser->SendSysMsg(CItemLibrary::Instance().ShopListText());
+                return true;
+            }
+            case 6: { // lua: param = script name (data/lua/<name>.lua)
+                std::string strErr;
+                if (!CLuaVM::Instance().LoadScript(pOpt->strParam, strErr)) {
+                    pUser->SendSysMsg("Script failed: " + strErr);
+                    return true;
+                }
+                pUser->SetDialogNode(0);
+                if (!CLuaVM::Instance().CallUserFunc("on_talk", pUser.get(), strErr))
+                    pUser->SendSysMsg("Script error: " + strErr);
                 return true;
             }
             case 4: { // teleport: param = "map,x,y"

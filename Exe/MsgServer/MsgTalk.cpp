@@ -18,6 +18,7 @@
 #include "Item.h"
 #include "ItemUpgrade.h"
 #include "Activity/ActivityManager.h"
+#include "LuaScript/LuaVM.h"
 #include "MsgItem.h"
 #include "MySQLClient.h"
 #include <sstream>
@@ -424,6 +425,19 @@ if (m_message.rfind("/npc", 0) == 0) {
                          "  Mining: " + std::to_string(user->GetOreMined()) + " digs - " +
                          CUser::ProfRank(user->GetOreMined()) + " (+" +
                          std::to_string(CUser::ProfBonus(user->GetOreMined()) - 100) + "% pay)");
+        return;
+    }
+
+    // ---- scripted NPCs: /luarun <name> runs data/lua/<name>.lua ----
+    if (m_message.rfind("/luarun ", 0) == 0) {
+        std::string strName = m_message.substr(9);
+        std::string strErr;
+        if (!CLuaVM::Instance().LoadScript(strName, strErr)) {
+            user->SendSysMsg("Script failed: " + strErr);
+            return;
+        }
+        if (!CLuaVM::Instance().CallUserFunc("on_talk", user.get(), strErr))
+            user->SendSysMsg("Script error: " + strErr);
         return;
     }
 

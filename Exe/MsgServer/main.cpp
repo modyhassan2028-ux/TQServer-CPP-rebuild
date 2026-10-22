@@ -3,6 +3,7 @@
 #include "MapManager.h"
 #include "MonsterManager.h"
 #include "Activity/ActivityManager.h"
+#include "LuaScript/LuaVM.h"
 #include "GroundItems.h"
 #include "UserManager.h"
 #include "Guild.h"
@@ -113,6 +114,8 @@ int main(int argc, char* argv[]) {
     }).detach();
     CMonsterManager::Instance().Start();
     // cross-server hub link (data/cross.ini, ENABLED=0 keeps it off)
+    // Lua VM for scripted NPCs (data/lua/*.lua)
+    CLuaVM::Instance().Init();
     // scheduled activities from cq_activity (double xp, boss rush, ...)
     CActivityManager::Instance().Load(CAccountManager::Instance().GetDB());
     // cross-realm beasts from cq_cross_monster (announced hub-wide on kill)
