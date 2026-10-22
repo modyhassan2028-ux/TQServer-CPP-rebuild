@@ -12,7 +12,7 @@ INC="-Iinclude -ICore/CQBase -ICore/DB -ICore/Root -IExe/MsgServer -IExe/NpcServ
 WARN="-Wno-unused-parameter"
 mkdir -p build
 
-echo "[1/6] MsgServer.exe (net core + packet handlers)..."
+echo "[1/7] MsgServer.exe (net core + packet handlers)..."
 mkdir -p build/luaobj
 for f in vendor/lua/*.c; do
     $ZIG cc -target x86_64-windows-gnu -O2 -Ivendor/lua -c "$f" -o "build/luaobj/$(basename ${f%.c}).o" || exit 1
@@ -23,19 +23,25 @@ $CC $INC $WARN -Ivendor/lua -IExe/CQCrossServer \
     Exe/MsgServer/CrossServer/*.cpp Core/CQBase/*.cpp Core/DB/*.cpp Core/Root/*.cpp \
     build/liblua.a -lws2_32 -o build/MsgServer.exe
 
-echo "[2/6] NpcServer.exe..."
+echo "[2/7] CQCrossServer.exe (cross hub)..."
+$CC $INC $WARN -IExe/CQCrossServer Exe/CQCrossServer/main.cpp Exe/CQCrossServer/CrossKernel.cpp \
+    -lws2_32 -o build/CQCrossServer.exe
+
+echo "[3/7] NpcServer.exe...
+# renumber handled below
+
 $CC $INC $WARN Exe/NpcServer/main.cpp -o build/NpcServer.exe
 
-echo "[3/6] Syndicate.dll..."
+echo "[4/7] Syndicate.dll..."
 $CC $INC $WARN -shared Modules/Syndicate/Syndicate.cpp -o build/Syndicate.dll
 
-echo "[4/6] Trade.dll..."
+echo "[5/7] Trade.dll..."
 $CC $INC $WARN -shared Modules/Trade/Trade.cpp -o build/Trade.dll
 
-echo "[5/6] CustomGM.dll..."
+echo "[6/7] CustomGM.dll..."
 $CC $INC $WARN -shared Tools/CustomGM/CustomGM.cpp -o build/CustomGM.dll
 
-echo "[6/6] ServerLoader.exe..."
+echo "[7/7] ServerLoader.exe..."
 $CC $INC $WARN Tools/ServerLoader/main.cpp Tools/ServerLoader/ConfigManager.cpp \
     Tools/ServerLoader/HookInjector.cpp Tools/ServerLoader/ProcessManager.cpp \
     Tools/ServerLoader/ServerLoaderGUI.cpp -lshlwapi -lcomctl32 -lgdi32 -luser32 -o build/ServerLoader.exe
