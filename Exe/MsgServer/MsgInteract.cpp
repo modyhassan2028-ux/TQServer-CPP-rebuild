@@ -74,6 +74,13 @@ void CMsgInteract::Process(uint32_t dwSender) {
         if (pTarget->GetMapId() != pAttacker->GetMapId()) return;
         if (pTarget->GetLife() == 0) return; // corpse guard
 
+        // safe zone: no PK damage inside protected cities (Twin City)
+        auto pCurMap = CMapManager::Instance().GetMap(pAttacker->GetMapId());
+        if (pCurMap && pCurMap->IsSafeZone()) {
+            pAttacker->SendSysMsg("This is a safe zone - you cannot attack players here.");
+            return;
+        }
+
         uint32_t dwDamage = 20 + pAttacker->GetLevel() * 4 + (std::rand() % 25);
         uint32_t dwLife = pTarget->GetLife() > dwDamage ? pTarget->GetLife() - dwDamage : 0;
         pTarget->SetLife(dwLife);

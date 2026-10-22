@@ -26,6 +26,7 @@ std::shared_ptr<CGameMap> CMapManager::GetOrCreate(uint32_t dwId, const std::str
         pMap = std::make_shared<CGameMap>(dwId, name);
         if (itD != m_dmapFiles.end())
             pMap->LoadCollision(itD->second); // real terrain from the original .DMap
+        pMap->SetSafeZone(dwId == 1002); // Twin City: PK-safe city
     }
     return pMap;
 }

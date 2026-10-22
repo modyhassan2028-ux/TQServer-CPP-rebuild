@@ -11,6 +11,10 @@ class CMonster;
 
 class CGameMap {
 public:
+    // safe zone = no PK damage and no monster attacks (classic city protection)
+    bool IsSafeZone() const { return m_bSafeZone; }
+    void SetSafeZone(bool b) { m_bSafeZone = b; }
+public:
     CGameMap(uint32_t dwId, const std::string& name);
     ~CGameMap();
 
@@ -32,4 +36,5 @@ private:
     std::string m_name;
     std::unordered_map<uint32_t, std::shared_ptr<CUser>> m_users;
     CDMap m_dmap;
+    bool m_bSafeZone{false};
 };

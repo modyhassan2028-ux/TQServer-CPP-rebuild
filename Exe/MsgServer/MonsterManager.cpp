@@ -224,6 +224,7 @@ void CMonsterManager::Aggro(std::shared_ptr<CMonster> pM) {
     if (!pM || !pM->IsAlive()) return;
     auto pMap = CMapManager::Instance().GetMap(pM->GetMapId());
     if (!pMap) return;
+    if (pMap->IsSafeZone()) return; // monsters hold their fire in safe zones
     for (auto pUser : CUserManager::Instance().GetAllUsers()) {
         if (!pUser || pUser->GetMapId() != pM->GetMapId() || pUser->GetLife() == 0) continue;
         int dx = (int)pUser->GetX() - (int)pM->GetX();
