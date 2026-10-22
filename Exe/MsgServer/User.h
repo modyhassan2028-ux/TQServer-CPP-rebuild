@@ -301,6 +301,10 @@ public:
     // going to the socket (system tests assert on real packet bytes)
     void SetPacketSink(std::function<void(const void*, uint16_t)> sink) { m_packetSink = std::move(sink); }
     void SendSysMsg(const std::string& message);
+    // ORIGINAL cq_action 1010 (gameaction.cpp case 9): talk message on the
+    // channel given by the action's data column (0 -> 2000) via the CUser
+    // vtable+0x150 sender ("SYSTEM" -> player, MsgTalk type 1004).
+    bool SendTalkMsg(const std::string& strText, uint32_t dwChannel);
 
 private:
     uint32_t m_dwId{0};

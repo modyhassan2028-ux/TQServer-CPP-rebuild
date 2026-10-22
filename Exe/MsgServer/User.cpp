@@ -28,6 +28,14 @@ void CUser::Teleport(uint32_t dwMapId, uint16_t usX, uint16_t usY) {
     }
 }
 
+bool CUser::SendTalkMsg(const std::string& strText, uint32_t dwChannel) {
+    CMsgTalk talk;
+    if (!talk.Create("SYSTEM", m_name, strText, (CMsgTalk::ChannelType)dwChannel))
+        return false;
+    SendMsg(talk.GetBuf(), talk.GetSize());
+    return true;
+}
+
 void CUser::SendSysMsg(const std::string& message) {
     CMsgTalk talk;
     if (talk.Create("SYSTEM", m_name, "[GM Control] " + message, CMsgTalk::Channel_Broadcast))

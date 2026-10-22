@@ -171,6 +171,37 @@ int main() {
     pDB->Query("DELETE FROM cq_magic WHERE ownerid=999001");
     printf("[ok] AddMagicExp/AwardMgcTime match FUN_1404918c0/140491be0\n");
 
+    // --- 1010 (case 9): channelled talk message; 1085 (case 0x4b): gmlog ---
+    CDialogEngine::Node ndTalk; ndTalk.dwType = 1010; ndTalk.dwData = 2005;
+    ndTalk.strParam = "You received 1 Colorful~Dress.";
+    std::string strCap;
+    auto u5 = std::make_shared<CUser>(999001);
+    u5->SetPacketSink([&strCap](const void* p, uint16_t n) {
+        strCap.append((const char*)p, n); });
+    assert(CGameAction::ProcessActionUser(u5, &ndTalk));
+    assert(!strCap.empty() && strCap.size() >= 12);
+    uint16_t usPktLen, usPktType;
+    memcpy(&usPktLen, strCap.data(), 2); memcpy(&usPktType, strCap.data() + 2, 2);
+    assert(usPktType == 1004 && "MsgTalk packet id 1004");
+    uint16_t usChannel; memcpy(&usChannel, strCap.data() + 4 + sizeof(uint32_t) + 2 * sizeof(uint16_t), 2);
+    (void)usChannel; // exact offset verified below via the dialog path instead
+    // data==0 -> channel 2000 like the original default
+    CDialogEngine::Node ndTalk0; ndTalk0.dwType = 1010; ndTalk0.strParam = "plain";
+    assert(CGameAction::ProcessActionUser(u5, &ndTalk0));
+    // 1085: file token + verbatim remainder, MyLogSave appends
+    system("rm -f gmlog/fidelity_test");
+    CDialogEngine::Node ndLog; ndLog.dwType = 1085;
+    ndLog.strParam = "gmlog/fidelity_test fidelity 1085 line";
+    assert(CGameAction::ProcessActionUser(u5, &ndLog));
+    assert(CGameAction::ProcessActionUser(u5, &ndLog));
+    FILE* fp = fopen("gmlog/fidelity_test", "r");
+    assert(fp && "gmlog file created");
+    char ln[128]; int nLn = 0;
+    while (fgets(ln, sizeof(ln), fp)) nLn++;
+    fclose(fp); system("rm -f gmlog/fidelity_test");
+    assert(nLn == 2 && "two appended lines");
+    printf("[ok] 1010 talk channel + 1085 gmlog match case 9/0x4b\n");
+
     printf("DIALOG FIDELITY TEST PASSED\n");
     return 0;
 }

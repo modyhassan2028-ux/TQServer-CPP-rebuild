@@ -2,6 +2,7 @@
 #include "MsgDialog.h"
 #include "User.h"
 #include "PlayerMagic.h"
+#include "Log.h"
 #include "Dialog.h"
 #include "Npc.h"
 #include "Npc.h" // CNpcManager lives here
@@ -119,6 +120,26 @@ bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogE
     switch (pNode->dwType) {
     case 1001: // ORIGINAL switch case 0: user data condition ("field op value")
         return ProcessDataCondition(pUser, pNode->strParam);
+    case 1010: { // ORIGINAL switch case 9: talk message on a channel
+        // vtable+0x150(user, data?data:2000, "%s", param) -> MsgTalk (1004)
+        pUser->SendTalkMsg(pNode->strParam, pNode->dwData ? pNode->dwData : 2000);
+        return true;
+    }
+    case 1085: { // ORIGINAL switch case 0x4b: gmlog write
+        // "%s %s": first token = log file, remainder = the line (kept verbatim,
+        // including extra spacing, like the original post-strlen pointer walk)
+        const std::string& strParam = pNode->strParam;
+        size_t t = strParam.find_first_not_of(" \t");
+        if (t == std::string::npos) {
+            // ORIGINAL: sscanf == 0 -> log_InlineLogDBERROR (gameaction.cpp:0x27f?)
+            return false;
+        }
+        size_t e = strParam.find_first_of(" \t", t);
+        std::string strFile = strParam.substr(t, (e == std::string::npos) ? std::string::npos : e - t);
+        std::string strRest = (e == std::string::npos) ? std::string() : strParam.substr(e + 1);
+        tq::MyLogSave(strFile.c_str(), "%s", strRest.c_str());
+        return true;
+    }
     case 1020: { // ORIGINAL switch case 0xe: magic ops ("check/learn/uplevel/del/addexp")
         char szCmd[256] = {0}; int nType = 0, nLevel = 0;
         int n = sscanf(pNode->strParam.c_str(), "%255s %d %d", szCmd, &nType, &nLevel);
