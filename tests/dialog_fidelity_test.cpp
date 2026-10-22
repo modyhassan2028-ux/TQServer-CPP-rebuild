@@ -869,6 +869,35 @@ int main() {
         { auto n = mkMgc(0, 532, "5 0 0 604800 121 0 0"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
         printf("[ok] 532 quench matches ProcessActionItemQuench (0x214)\n");
     }
+    // ---- 306: map attributes (case 0x132) ----
+    {
+        auto upR = std::make_shared<CUser>(999026); upR->SetName("Map306");
+        CUser& r = *upR;
+        r.SetMapId(1002); r.SetHomeMapId(1001);
+        auto pMap = CMapManager::Instance().GetMap(1002); assert(pMap);
+        // synid set + ==
+        { auto n = mkMgc(0, 306, "synid = 77 1002"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 306, "synid == 77 1002"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 306, "synid == 78 1002"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        // status test/set/reset
+        { auto n = mkMgc(0, 306, "status set 4 1002"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 306, "status test 4 1002"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 306, "status test 8 1002"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 306, "status reset 4 1002"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 306, "status test 4 1002"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        // res_lev <, ==, = with %user_home_id substitution (home = 1001)
+        { auto n = mkMgc(0, 306, "res_lev = 3 %user_home_id"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 306, "res_lev == 3 %user_home_id"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 306, "res_lev < 2 %user_home_id"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        // mapdoc
+        { auto n = mkMgc(0, 306, "mapdoc = 900000 1001"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 306, "mapdoc == 900000 1001"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        // mapid 0 = current map (1002)
+        { auto n = mkMgc(0, 306, "synid == 77"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        // missing map
+        { auto n = mkMgc(0, 306, "synid == 77 999999"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        printf("[ok] 306 map attributes match case 0x132\n");
+    }
     // ---- 517: item attr set/compare (case 0x205) ----
     {
         auto upR = std::make_shared<CUser>(999020); upR->SetName("Attr517");

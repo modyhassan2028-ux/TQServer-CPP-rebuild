@@ -936,6 +936,54 @@ bool bAll = (llAll == 1);
         (void)dwScene; // ORIGINAL: the 1018 scene/doc id rides FUN_14037c800
         return true;
     }
+    case 306: { // ORIGINAL case 0x132: map attribute ops "attr op value [mapid]"
+        // sscanf "%s %s %d %u" = (attr, op, value, mapid). mapid 0 = the
+        // user's current map (0x1040 blob vcall+0x160). Vars (%user_home_id)
+        // resolve first. Missing map -> DBERR "MAP_ATTRIB fail" + false.
+        // Ops (matched -> true; unmatched -> break -> false):
+        // synid ==/=: res_lev ==/</=: mapdoc ==/=: type test:
+        // status test/set/reset: portal0_x/portal0_y =:
+        std::string strP = pNode->strParam;
+        pUser->ResolveActionVars(strP);
+        char szAttr[64] = {0}, szOp[64] = {0}; int32_t v = 0; uint32_t dwMap = 0;
+        if (sscanf(strP.c_str(), "%63s %63s %d %u", szAttr, szOp, &v, &dwMap) < 3) {
+            printf("[DBERR] cq_action %u type 306 param error\n", pNode->dwId);
+            return false;
+        }
+        auto pMap = dwMap ? CMapManager::Instance().GetMap(dwMap)
+                          : CMapManager::Instance().GetMap(pUser->GetMapId());
+        if (!pMap) {
+            printf("[DBERR] MAP_ATTRIB fail, Action[%u], Can't Find Map[%u]\n",
+                   pNode->dwId, dwMap ? dwMap : pUser->GetMapId());
+            return false;
+        }
+        if (!stricmp(szAttr, "synid")) {
+            if (!stricmp(szOp, "==")) { if (pMap->GetSynId() == (uint32_t)v) return true; }
+            else if (!stricmp(szOp, "=")) { pMap->SetSynId((uint32_t)v); return true; }
+        } else if (!stricmp(szAttr, "status")) {
+            if (!stricmp(szOp, "test")) { if (pMap->TestStatus((uint32_t)v)) return true; }
+            else if (!stricmp(szOp, "set")) { pMap->SetStatus((uint32_t)v, true); return true; }
+            else if (!stricmp(szOp, "reset")) { pMap->SetStatus((uint32_t)v, false); return true; }
+        } else if (!stricmp(szAttr, "type")) {
+            if (!stricmp(szOp, "test")) {
+                if (pMap->GetTypeFlag() & (uint32_t)v) return true; // ORIGINAL tag-4 bitmask
+            }
+        } else if (!stricmp(szAttr, "res_lev")) {
+            if (!stricmp(szOp, "==")) { if (pMap->GetMapInfo(0xf) == v) return true; }
+            else if (!stricmp(szOp, "<")) { if (pMap->GetMapInfo(0xf) < v) return true; }
+            else if (!stricmp(szOp, "=")) {
+                pMap->SetMapInfo(0xf, v); /* ORIGINAL vcall+0x70 save */ return true;
+            }
+        } else if (!stricmp(szAttr, "mapdoc")) {
+            if (!stricmp(szOp, "==")) { if (pMap->GetMapInfo(3) == v) return true; }
+            else if (!stricmp(szOp, "=")) { pMap->SetMapInfo(3, v); return true; } // FUN_1402d6040
+        } else if (!stricmp(szAttr, "portal0_x")) {
+            if (!stricmp(szOp, "=")) { pMap->SetMapInfo(0xb, v); return true; }
+        } else if (!stricmp(szAttr, "portal0_y")) {
+            if (!stricmp(szOp, "=")) { pMap->SetMapInfo(0xc, v); return true; }
+        }
+        return false; // ORIGINAL: unmatched attr/op -> break -> false
+    }
     case 303: { // ORIGINAL case 0x12f: SYSTEM/ALLUSERS world broadcast (formatted)
         // ORIGINAL: FUN_14015b240(buf) setup, FUN_14015b300(buf,"SYSTEM",
         // "ALLUSERS", param) - the same broadcast machinery as 125; 0 -> DBERR
@@ -954,7 +1002,9 @@ bool bAll = (llAll == 1);
         // (user vcall+0x28); parse failure -> DBERR + false; missing region ->
         // false; packet build failure -> LOGERR 0xd8c but still true.
         uint32_t dwMap = 0; int32_t nX = 0, nY = 0; char szName[256] = {0};
-        if (sscanf(pNode->strParam.c_str(), "%u %d %d %255s", &dwMap, &nX, &nY, szName) != 4) {
+        std::string strEff = pNode->strParam;
+        pUser->ResolveActionVars(strEff); // %user_map_id / %iter rows
+        if (sscanf(strEff.c_str(), "%u %d %d %255s", &dwMap, &nX, &nY, szName) != 4) {
             printf("[DBERR] cq_action %u type 312 param error\n", pNode->dwId);
             return false;
         }
@@ -976,7 +1026,7 @@ bool bAll = (llAll == 1);
     }
     case 517: { // ORIGINAL case 0x205: item attr set/compare (with %iter_var_data)
         std::string strP = pNode->strParam;
-        pUser->ResolveIterVars(strP); // ORIGINAL: vars resolved before the case runs
+        pUser->ResolveActionVars(strP); // ORIGINAL: vars resolved before the case runs
         int32_t aPos = 0, aAttr = 0, aVal = 0, aSync = 0;
         char szOp[64] = {0};
         int nGot = sscanf(strP.c_str(), "%d %d %63s %d %d", &aPos, &aAttr, szOp, &aVal, &aSync);

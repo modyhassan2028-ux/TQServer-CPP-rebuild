@@ -520,6 +520,21 @@ public:
     uint32_t m_dwQuenchMaterialId{0};
     void SetIterVarData(uint32_t n, int64_t v) { if (n && n < 65) m_arIterVarData[n] = v; }
     int64_t GetIterVarData(uint32_t n) const { return (n && n < 65) ? m_arIterVarData[n] : 0; }
+    uint32_t m_dwHomeMapId{0}; // %user_home_id (house system feeds this)
+    uint32_t GetHomeMapId() const { return m_dwHomeMapId; }
+    void SetHomeMapId(uint32_t m) { m_dwHomeMapId = m; }
+    // ORIGINAL: action vars resolve centrally before the case runs
+    void ResolveActionVars(std::string& s) const {
+        ResolveIterVars(s);
+        // %user_map_id -> current map; %user_home_id -> house map
+        for (const char* szTok : {"%user_map_id", "%user_home_id"}) {
+            size_t p = 0;
+            while ((p = s.find(szTok, p)) != std::string::npos) {
+                uint32_t v = (strcmp(szTok, "%user_map_id") == 0) ? m_dwMapId : m_dwHomeMapId;
+                s.replace(p, strlen(szTok), std::to_string(v));
+            }
+        }
+    }
     void ResolveIterVars(std::string& s) const {
         const char* szTok = "%iter_var_data";
         size_t p = 0;
