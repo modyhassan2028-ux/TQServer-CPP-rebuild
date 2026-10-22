@@ -10,6 +10,7 @@
 #include "Team.h"
 #include "GroundItems.h"
 #include "MsgInteract.h"
+#include "CrossServer/CrossClient.h"
 #include "MonsterManager.h"
 #include "BattleSystem.h"
 #include "Npc.h"
@@ -421,6 +422,26 @@ if (m_message.rfind("/npc", 0) == 0) {
                          "  Mining: " + std::to_string(user->GetOreMined()) + " digs - " +
                          CUser::ProfRank(user->GetOreMined()) + " (+" +
                          std::to_string(CUser::ProfBonus(user->GetOreMined()) - 100) + "% pay)");
+        return;
+    }
+
+    // ---- cross-server hub link: /cross <text>, /crosswho ----
+    if (m_message.rfind("/cross ", 0) == 0) {
+        std::string text = m_message.substr(7);
+        if (text.empty()) { user->SendSysMsg("Usage: /cross <text>"); return; }
+        if (!cross::CCrossClient::Instance().IsLinked()) {
+            user->SendSysMsg("Cross hub is not linked."); return;
+        }
+        cross::CCrossClient::Instance().SendTalk(user->GetName(), text);
+        user->SendSysMsg("[Cross] " + user->GetName() + ": " + text);
+        return;
+    }
+    if (m_message == "/crosswho") {
+        if (!cross::CCrossClient::Instance().IsLinked()) {
+            user->SendSysMsg("Cross hub is not linked."); return;
+        }
+        cross::CCrossClient::Instance().RequestWho(user->GetId());
+        user->SendSysMsg("Asking the cross hub... (roster incoming)");
         return;
     }
 

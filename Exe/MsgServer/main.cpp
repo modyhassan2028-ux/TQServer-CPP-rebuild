@@ -1,4 +1,5 @@
 ﻿#include "NetCore.h"
+#include "CrossServer/CrossClient.h"
 #include "MapManager.h"
 #include "MonsterManager.h"
 #include "GroundItems.h"
@@ -104,6 +105,8 @@ int main(int argc, char* argv[]) {
         }
     }).detach();
     CMonsterManager::Instance().Start();
+    // cross-server hub link (data/cross.ini, ENABLED=0 keeps it off)
+    cross::CCrossClient::Instance().Start();
     CGroundItemManager::Instance().Start();
     std::cout << "[STATUS] World initialized. Listening on port " << port << " - Ctrl+C to stop." << std::endl;
 
