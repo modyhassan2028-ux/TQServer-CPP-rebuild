@@ -2,6 +2,7 @@
 -- Mirrors the original 6159 NpcServer data model: option rows hang off their
 -- parent node; type 2 = accept task (param = cq_task.id), 3 = turn-in, 4 = teleport (param = "map,x,y")
 USE tqserver;
+DELETE FROM cq_action WHERE id BETWEEN 5000 AND 5299;
 INSERT INTO cq_action VALUES
  (5000, 0,    0, 1, '', 'Adventurer! The legion has work for hunters.'),
  (5001, 5000, 0, 0, '', 'Tell me about the available hunts'),
@@ -13,18 +14,44 @@ INSERT INTO cq_action VALUES
  (5012, 5010, 0, 2, '1002', 'Accept BanditBounty (10 bandits, 5000 money + 25 CP)'),
  (5013, 5010, 0, 0, '', 'Back'),
  (5020, 5003, 0, 1, '', 'Come back when your blade is ready.');
+DELETE FROM cq_task;
 INSERT INTO cq_task VALUES
  (1001, 'RatRumble',   1000005, 0,    5, 500,  2,  1),
  (1002, 'BanditBounty',1000005, 1001, 10, 5000, 25, 20);
--- bind the TaskMaster NPC to the tree root
-UPDATE cq_npc SET action_id = 5000 WHERE id = 1000005;
+-- full v1 NPC world in the original data model
+-- type: 0=generic(dialog-driven), 1=healer, 2=warehouse, 3=teleporter
+DELETE FROM cq_npc;
 INSERT INTO cq_npc (id, name, type, map_id, x, y, lookface, action_id) VALUES
- (1000005, 'TaskMaster', 0, 1002, 315, 260, 8305, 5000)
-ON DUPLICATE KEY UPDATE action_id = 5000;
+ (1000001, 'Pharmacist',   1, 1002, 310, 265, 8301, 5100),
+ (1000002, 'WarehouseMan', 2, 1002, 300, 270, 8302, 0),
+ (1000003, 'CityGuard',    3, 1002, 320, 270, 8303, 5200),
+ (1000004, 'DesertGuard',  3, 1000, 505, 605, 8304, 5210),
+ (1000005, 'TaskMaster',   0, 1002, 315, 260, 8305, 5000);
+
+-- Pharmacist dialog tree (v1 keeps its built-in heal; tree adds flavor)
+INSERT INTO cq_action VALUES
+ (5100, 0,    0, 1, '', 'Welcome! I can restore your health, free of charge.'),
+ (5101, 5100, 0, 0, '', 'Heal me, please.'),
+ (5102, 5100, 0, 0, '', 'I am fine, thanks.'),
+ (5110, 5101, 0, 1, '', 'There you go - healthy as an ox. Come back any time.'),
+ (5111, 5102, 0, 1, '', 'Stay safe out there.');
+
+-- gate trees: type 4 = teleport, param = "map,x,y"
+INSERT INTO cq_action VALUES
+ (5200, 0,    0, 1, '', 'Need a lift? My gates reach every land.'),
+ (5201, 5200, 0, 4, '1000,500,600', 'To the Desert'),
+ (5202, 5200, 0, 4, '1001,400,400', 'To Ape Mountain'),
+ (5203, 5200, 0, 4, '1002,315,275', 'Back to Twin City'),
+ (5204, 5200, 0, 0, '', 'Not now.'),
+ (5210, 0,    0, 1, '', 'The city gates never close. Where to?'),
+ (5211, 5210, 0, 4, '1002,315,275', 'Back to Twin City'),
+ (5212, 5210, 0, 0, '', 'Stay in the desert.');
 
 -- monster world mirroring the built-in v1 spawn table
+DELETE FROM cq_monstertype;
 INSERT INTO cq_monstertype VALUES (1, 'Pheasant', 1, 30), (2, 'RoamingRat', 2, 50),
                                    (10, 'SandMonk', 12, 400), (20, 'Bandit', 15, 500);
+DELETE FROM cq_generator;
 INSERT INTO cq_generator VALUES (1, 1, 1002, 2, 650, 320, 700, 380),
                                 (2, 2, 1002, 2, 560, 400, 620, 450),
                                 (3, 10, 1000, 1, 500, 300, 500, 300),

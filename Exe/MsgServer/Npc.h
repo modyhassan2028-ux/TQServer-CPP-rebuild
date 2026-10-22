@@ -13,6 +13,8 @@ class CUser;
 // this core later; v1 NPCs are fully functional server-side via interact ids
 // and chat commands.
 
+class CMySQLClient;
+
 struct NpcOption {
     enum class Action { Heal, BankBalance, BankDeposit, BankWithdraw, Teleport, Chat,
                          AcceptTask, TurnInTask };
@@ -100,6 +102,10 @@ public:
     // warehouse (bank) operations, shared by /bank chat commands and the NPC
     bool BankDeposit(std::shared_ptr<CUser> pUser, uint32_t dwAmount);
     bool BankWithdraw(std::shared_ptr<CUser> pUser, uint32_t dwAmount);
+
+    // original model: spawn every NPC from the cq_npc table.
+    // returns spawned count (0 -> keep the built-in roster)
+    uint32_t SpawnNpcsFromDB(CMySQLClient* pDB);
 
     // loads data/tasks.ini into the task library; returns count
     uint32_t LoadTasks(const std::string& path);

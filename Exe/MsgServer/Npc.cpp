@@ -1,5 +1,6 @@
 ﻿#include "Npc.h"
 #include "Dialog.h"
+#include "MySQLClient.h"
 #include "Account.h"
 #include "User.h"
 #include "UserManager.h"
@@ -261,10 +262,56 @@ CNpcManager& CNpcManager::Instance() {
     return s_instance;
 }
 
+
+// original 6159 model: every NPC lives in cq_npc
+//  id, name, type, map_id, x, y, lookface, action_id
+// type: 0=generic(dialog-driven), 1=healer, 2=warehouse, 3=teleporter
+uint32_t CNpcManager::SpawnNpcsFromDB(CMySQLClient* pDB) {
+    if (!pDB) return 0;
+    if (!pDB->Query("SELECT id, name, type, map_id, x, y, lookface, action_id FROM cq_npc")) {
+        printf("[NPC] cq_npc load failed: %s\n", pDB->GetError().c_str());
+        return 0;
+    }
+    std::lock_guard<std::mutex> lock(m_mutex);
+    uint32_t spawned = 0;
+    for (auto& row : pDB->GetRows()) {
+        if (row.size() < 8) continue;
+        uint32_t id = (uint32_t)strtoul(row[0].c_str(), nullptr, 10);
+        uint32_t type = (uint32_t)strtoul(row[2].c_str(), nullptr, 10);
+        uint32_t mapId = (uint32_t)strtoul(row[3].c_str(), nullptr, 10);
+        uint16_t x = (uint16_t)strtoul(row[4].c_str(), nullptr, 10);
+        uint16_t y = (uint16_t)strtoul(row[5].c_str(), nullptr, 10);
+        uint32_t lookface = (uint32_t)strtoul(row[6].c_str(), nullptr, 10);
+        uint32_t actionId = (uint32_t)strtoul(row[7].c_str(), nullptr, 10);
+        if (!id || !mapId) continue;
+        CNpc::Type eType = (type == 1) ? CNpc::Type::Healer
+                        : (type == 2) ? CNpc::Type::Warehouse
+                        : (type == 3) ? CNpc::Type::Teleporter
+                        : CNpc::Type::Healer; // generic NPCs default to Healer shell; dialogs drive behavior
+        auto p = std::make_shared<CNpc>(id, row[1], eType, mapId, x, y);
+        p->m_dwLookface = lookface;
+        p->m_dwActionId = actionId; // cq_action tree root (0 = plain text greeting)
+        m_npcs[id] = p;
+        ++spawned;
+    }
+    printf("[NPC] cq_npc: spawned %u NPCs from MySQL.\n", spawned);
+    return spawned;
+}
+
 void CNpcManager::SpawnDefaults() {
     std::lock_guard<std::mutex> lock(m_mutex);
     if (m_bSpawned) return;
     m_bSpawned = true;
+
+    // original data model first: every NPC from cq_npc
+    if (CAccountManager::Instance().IsMySQLMode() &&
+        SpawnNpcsFromDB(CAccountManager::Instance().GetDB()) > 0) {
+        LoadTasks("data/tasks.ini");
+        if (CAccountManager::Instance().GetDB())
+            CDialogEngine::Instance().LoadFromDB(CAccountManager::Instance().GetDB());
+        return; // DB world wins; built-in roster skipped
+    }
+
 
     auto add = [&](uint32_t dwId, const std::string& name, CNpc::Type type,
                    uint32_t dwMapId, uint16_t x, uint16_t y,
