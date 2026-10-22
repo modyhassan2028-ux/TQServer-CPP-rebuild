@@ -220,3 +220,29 @@ std::string CUser::DoReborn() {
     printf("[REBORN] %s reborn #%u\n", m_name.c_str(), m_dwRebornCount);
     return "";
 }
+
+// daily bank interest: 2% of the bank balance, capped at 50,000/day,
+// credited once per calendar day (same rollover marker as the login reward).
+uint64_t CUser::GrantDailyBankInterest() {
+    char dayBuf[16];
+    time_t now = time(nullptr);
+    struct tm lt;
+#ifdef _WIN32
+    localtime_s(&lt, &now);
+#else
+    localtime_r(&now, &lt);
+#endif
+    strftime(dayBuf, sizeof(dayBuf), "%Y-%m-%d", &lt);
+    std::string today(dayBuf);
+    if (m_strLastRewardDay == today)
+        return 0; // already paid today
+    uint64_t interest = m_dwBank / 50;            // 2%
+    if (interest > 50000) interest = 50000;       // cap
+    if (interest > 0) {
+        m_dwBank += interest;
+        SendSysMsg("Daily bank interest: +" + std::to_string(interest) +
+                   " money (" + std::to_string(m_dwBank) + " saved).");
+        printf("[BANK] %s interest +%llu\n", m_name.c_str(), (unsigned long long)interest);
+    }
+    return interest;
+}

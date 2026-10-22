@@ -118,6 +118,8 @@ public:
     // daily login reward: returns true when a reward was granted (a new UTC day)
     bool GrantDailyReward();
     const std::string& GetLastRewardDay() const { return m_strLastRewardDay; }
+    // daily bank interest: pays once per calendar day at login
+    uint64_t GrantDailyBankInterest();
     void SetLastRewardDay(const std::string& d) { m_strLastRewardDay = d; }
 
     // rebirth: at level 130 /reborn restarts at 15 with permanent growth

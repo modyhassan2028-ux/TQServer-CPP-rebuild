@@ -128,6 +128,7 @@ void CMsgConnect::Process(uint32_t dwSender, void* pContext) {
     pUser->SetLife(pUser->GetMaxLife());
     pUser->SnapshotBaseStats();
     pUser->BindNet(pClient);
+    pUser->GrantDailyBankInterest(); // same-day gate, pays before the reward save
     if (pUser->GrantDailyReward())
         CAccountManager::Instance().SaveRewardDay(dwAccountId, pUser->GetLastRewardDay());
     {   // sync the stamina bar
