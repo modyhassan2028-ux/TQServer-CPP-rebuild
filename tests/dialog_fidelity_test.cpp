@@ -426,6 +426,44 @@ int main() {
     { auto n = mkVar(0, 1060, "var(1) < 8");  assert( CGameAction::ProcessActionUser(u8, &n)); } // 8 == 8 via quirk
     printf("[ok] 1060/1061/1062/1063/1064/1065 var-cluster actions verified\n");
 
+    // --- 1020 (case 0xe) magic ops + 1021 (case 0xf) weaponskill ops ---
+    auto mkMgc = [](uint32_t id, uint32_t t, const char* param) {
+        CDialogEngine::Node n; n.dwType = t; n.dwId = id; n.strParam = param; return n; };
+    pDB->Query("DELETE FROM cq_magic WHERE ownerid=999003");
+    pDB->Query("INSERT INTO cq_magic (ownerid, type, level, exp) VALUES (999003, 1000, 0, 0)");
+    auto u11 = std::make_shared<CUser>(999003);
+    assert(u11->LoadMagicsFromDB(pDB));
+    { auto n = mkMgc(41087, 1020, "check 8002 0"); assert(!CGameAction::ProcessActionUser(u11, &n)); } // real row, magic missing
+    { auto n = mkMgc(0, 1020, "check 1000");    assert( CGameAction::ProcessActionUser(u11, &n)); } // 2-arg: has magic
+    { auto n = mkMgc(0, 1020, "check 1000 0"); assert( CGameAction::ProcessActionUser(u11, &n)); } // level EXACT equality
+    { auto n = mkMgc(0, 1020, "check 1000 4"); assert(!CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1020, "learn 1005 0"); assert( CGameAction::ProcessActionUser(u11, &n)); } // stage (1005,0) exists
+    { auto n = mkMgc(0, 1020, "learn 1005 0"); assert(!CGameAction::ProcessActionUser(u11, &n)); } // can't learn twice
+    { auto n = mkMgc(0, 1020, "check 1005 0"); assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1020, "learn 1000 4"); assert(!CGameAction::ProcessActionUser(u11, &n)); } // no stage (1000,4) in cq_magictype
+    { auto n = mkMgc(0, 1020, "bogus 5 0");    assert( CGameAction::ProcessActionUser(u11, &n)); } // unknown op -> 1 (quirk)
+    { auto n = mkMgc(0, 1020, "check");       assert(!CGameAction::ProcessActionUser(u11, &n)); } // 1 token
+    // weapon skills (cq_weapon_skill rows, real ids from cq_weapon_skill_up)
+    pDB->Query("DELETE FROM cq_weapon_skill WHERE owner_id=999003");
+    pDB->Query("INSERT INTO cq_weapon_skill (owner_id, type, level, exp) VALUES (999003, 410, 3, 0)");
+    u11->LoadWeaponSkillsFromDB(pDB);
+    { auto n = mkMgc(0, 1021, "check 410 3"); assert( CGameAction::ProcessActionUser(u11, &n)); } // req <= current
+    { auto n = mkMgc(0, 1021, "check 410 4"); assert(!CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1021, "check 410 0"); assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1021, "learn 410 5"); assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1021, "check 410 5"); assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1021, "learn 410 250"); assert(!CGameAction::ProcessActionUser(u11, &n)); } // over max level
+    { auto n = mkMgc(0, 1021, "learn 420 1"); assert( CGameAction::ProcessActionUser(u11, &n)); } // no row: logged no-op, still 1
+    assert(u11->FindWeaponSkill(420) == nullptr);
+    { auto n = mkMgc(0, 1021, "addexp 410 1200"); assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1021, "addlevtime 410 3"); assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1021, "check 410 6"); assert( CGameAction::ProcessActionUser(u11, &n)); } // level 5 -> exp+up -> 6
+    { auto n = mkMgc(0, 1021, "uplevel 410"); assert(!CGameAction::ProcessActionUser(u11, &n)); } // not handled by 1021
+    { auto n = mkMgc(0, 1021, "check 410");  assert(!CGameAction::ProcessActionUser(u11, &n)); } // 2 tokens
+    pDB->Query("DELETE FROM cq_weapon_skill WHERE owner_id=999003");
+    pDB->Query("DELETE FROM cq_magic WHERE ownerid=999003");
+    printf("[ok] 1020/1021 magic + weaponskill ops match cases 0xe/0xf\n");
+
 // --- 1027 (case 0x13): ORIGINAL FUN_140164440 = mate-id check ---
     // mirror real row 1211265 ("self angelwing"); the param is dead code
     auto mk1027 = [](uint32_t id, const char* param) {

@@ -476,6 +476,136 @@ bool CUser::AddMagicExp(uint32_t dwType, int nAmount) {
 }
 
 // ---------------------------------------------------------------------------
+// ORIGINAL weapon-skill records (cq_weapon_skill) for action type 1021
+// (case 0xf "ACTION_USER_WEAPONSKILL" in gameaction.cpp).
+
+bool CUser::LoadWeaponSkillsFromDB(CMySQLClient* pDB) {
+    m_bWSkillsLoaded = true;
+    if (!pDB) return false;
+    if (!pDB->Query("SELECT id, type, level, exp FROM cq_weapon_skill WHERE owner_id=" +
+                    std::to_string(m_dwId))) return false;
+    m_oWeaponSkills.clear();
+    for (auto& row : pDB->GetRows()) {
+        if (row.size() < 4) continue;
+        WeaponSkillRec r;
+        r.dwId    = (uint32_t)strtoul(row[0].c_str(), nullptr, 10);
+        r.dwType  = (uint32_t)strtoul(row[1].c_str(), nullptr, 10);
+        r.ucLevel = (uint8_t)strtoul(row[2].c_str(), nullptr, 10);
+        r.dwExp   = (uint32_t)strtoul(row[3].c_str(), nullptr, 10);
+        m_oWeaponSkills[r.dwType] = r;
+    }
+    return true;
+}
+
+CUser::WeaponSkillRec* CUser::FindWeaponSkill(uint32_t dwType) {
+    // ORIGINAL FUN_140162320: lookup in the in-memory record map
+    if (!m_bWSkillsLoaded)
+        LoadWeaponSkillsFromDB(CAccountManager::Instance().GetDB());
+    auto it = m_oWeaponSkills.find(dwType);
+    return it == m_oWeaponSkills.end() ? nullptr : &it->second;
+}
+
+uint32_t CUser::GetWeaponSkillMaxLevel(uint32_t dwType) {
+    // ORIGINAL mapgroup singleton (vtable+0x98): highest cq_weapon_skill_up
+    // stage for this weapon type.
+    auto* pDB = CAccountManager::Instance().GetDB();
+    if (!pDB) return 0;
+    if (!pDB->Query("SELECT MAX(level) FROM cq_weapon_skill_up WHERE weapontype=" +
+                    std::to_string(dwType))) return 0;
+    auto& rows = pDB->GetRows();
+    if (rows.empty() || rows[0].empty() || rows[0][0].empty()) return 0;
+    return (uint32_t)strtoul(rows[0][0].c_str(), nullptr, 10);
+}
+
+bool CUser::AwardWeaponSkill(uint32_t dwType, uint32_t dwLevel) {
+    // ORIGINAL FUN_140170ae0 CUser::AwardWeaponSkill(type, level)
+    auto* pDB = CAccountManager::Instance().GetDB();
+    uint32_t dwMax = GetWeaponSkillMaxLevel(dwType);
+    if ((int)dwMax < (int)dwLevel) {
+        printf("[WEAPONSKILL] CUser::AwardWeaponSkill(), Award Level(%u) Greater Than Max Level(%u).\n",
+               dwLevel, dwMax);
+        return false;
+    }
+    WeaponSkillRec* pS = FindWeaponSkill(dwType);
+    if (pS) {
+        // ORIGINAL FUN_14039d7f0: set level + write the "level" column back
+        pS->ucLevel = (uint8_t)dwLevel;
+        pS->dwExp = 0;
+        if (pDB)
+            pDB->Query("UPDATE cq_weapon_skill SET level=" + std::to_string(dwLevel) +
+                       ", exp=0 WHERE id=" + std::to_string(pS->dwId));
+        printf("[WEAPONSKILL] user %u skill %u set to level %u (client sync)\n",
+               m_dwId, dwType, dwLevel);
+        return true;
+    }
+    // ORIGINAL: SELECT id FROM cq_weapon_skill WHERE owner_id=%u && type=%d;
+    // the row id binds the new in-memory record. Missing row -> the create
+    // fails (logged) but the ORIGINAL still returns 1.
+    if (pDB && pDB->Query("SELECT id FROM cq_weapon_skill WHERE owner_id=" +
+                          std::to_string(m_dwId) + " && type=" + std::to_string(dwType))) {
+        auto& rows = pDB->GetRows();
+        if (!rows.empty() && !rows[0].empty()) {
+            WeaponSkillRec r;
+            r.dwId = (uint32_t)strtoul(rows[0][0].c_str(), nullptr, 10);
+            r.dwType = dwType;
+            r.ucLevel = (uint8_t)dwLevel;
+            r.dwExp = 0;
+            m_oWeaponSkills[dwType] = r;
+            pDB->Query("UPDATE cq_weapon_skill SET level=" + std::to_string(dwLevel) +
+                       ", exp=0 WHERE id=" + std::to_string(r.dwId));
+            printf("[WEAPONSKILL] user %u skill %u bound to row %u level %u (client sync)\n",
+                   m_dwId, dwType, r.dwId, dwLevel);
+            return true;
+        }
+    }
+    printf("[WEAPONSKILL] AwardWeaponSkill: no cq_weapon_skill row for user %u type %u\n",
+           m_dwId, dwType);
+    return true; // ORIGINAL quirk: row missing still returns success
+}
+
+void CUser::AddWeaponSkillExp(uint32_t dwType, uint32_t dwAmount) {
+    // ORIGINAL FUN_140183e30 (mode 1): find skill, add exp, level up along the
+    // cq_weapon_skill_up curve (carrying the remainder).
+    auto* pDB = CAccountManager::Instance().GetDB();
+    WeaponSkillRec* pS = FindWeaponSkill(dwType);
+    if (!pS) return;
+    pS->dwExp += dwAmount;
+    for (;;) {
+        uint32_t dwNext = (uint32_t)pS->ucLevel + 1;
+        if (!pDB || !pDB->Query("SELECT req_exp FROM cq_weapon_skill_up WHERE weapontype=" +
+                                std::to_string(dwType) + " && level=" + std::to_string(dwNext)))
+            break;
+        auto& rows = pDB->GetRows();
+        if (rows.empty() || rows[0].empty()) break;
+        uint32_t dwNeed = (uint32_t)strtoul(rows[0][0].c_str(), nullptr, 10);
+        if (pS->dwExp < dwNeed) break;
+        pS->dwExp -= dwNeed;
+        pS->ucLevel = (uint8_t)dwNext;
+        printf("[WEAPONSKILL] user %u skill %u level up -> %u\n", m_dwId, dwType, dwNext);
+    }
+    if (pDB)
+        pDB->Query("UPDATE cq_weapon_skill SET level=" + std::to_string((unsigned)pS->ucLevel) +
+                   ", exp=" + std::to_string(pS->dwExp) + " WHERE id=" + std::to_string(pS->dwId));
+}
+
+bool CUser::AwardWeaponSkillTime(uint32_t dwType, int nAmount) {
+    // ORIGINAL case 0xf addlevtime: the parsed amount only gates >= 1 (its
+    // value is never used); a skill below max nets one level-up, a skill at
+    // max returns 0, a missing skill returns 1 after a no-op add.
+    WeaponSkillRec* pS = FindWeaponSkill(dwType);
+    if (!pS) return true;
+    if ((int)GetWeaponSkillMaxLevel(dwType) <= (int)pS->ucLevel) return false;
+    pS->ucLevel = (uint8_t)(pS->ucLevel + 1);
+    auto* pDB = CAccountManager::Instance().GetDB();
+    if (pDB)
+        pDB->Query("UPDATE cq_weapon_skill SET level=" + std::to_string((unsigned)pS->ucLevel) +
+                   " WHERE id=" + std::to_string(pS->dwId));
+    printf("[WEAPONSKILL] user %u skill %u addlevtime -> level %u\n",
+           m_dwId, dwType, (unsigned)pS->ucLevel);
+    return true;
+}
+
+// ---------------------------------------------------------------------------
 // ORIGINAL FUN_140491be0 CPlayerMagic::AwardMgcTime(user, type, ms)
 // Converts ms to exp through the ORIGINAL CalcTimeToExp (FUN_1402f1340,
 // CWeaponSkillUp): time = need_time*(exp/need_exp) + ms, walk stages while

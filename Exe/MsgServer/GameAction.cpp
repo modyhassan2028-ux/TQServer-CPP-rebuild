@@ -243,6 +243,25 @@ bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogE
         if (strcmp(szOp, "^=") == 0)   { pUser->SetActionVar(nIdx, (long long)((uint64_t)nVar ^ (uint64_t)nValue)); return true; }
         return false; // ORIGINAL: unknown op -> LAB_14013a784 (log + 0)
     }
+    case 1021: { // ORIGINAL case 0xf: ACTION_USER_WEAPONSKILL ops
+        char szOp[64] = {0}; int nId = 0; unsigned uArg2 = 0;
+        if (sscanf(pNode->strParam.c_str(), "%63s %d %u", szOp, &nId, &uArg2) != 3) {
+            return false; // ORIGINAL: != 3 tokens -> log -> 0
+        }
+        if (_stricmp(szOp, "check") == 0) {
+            auto* pS = pUser->FindWeaponSkill(nId);
+            return pS && uArg2 <= pS->ucLevel; // required level <= current
+        }
+        if (_stricmp(szOp, "learn") == 0)                        // FUN_140170ae0
+            return pUser->AwardWeaponSkill(nId, uArg2);
+        if (_stricmp(szOp, "addexp") == 0) {                     // FUN_140183e30 mode 1
+            pUser->AddWeaponSkillExp(nId, uArg2);
+            return true;
+        }
+        if (_stricmp(szOp, "addlevtime") == 0)                   // amount only gates >= 1
+            return pUser->AwardWeaponSkillTime(nId, (int)uArg2);
+        return false; // uplevel/del/unknown -> ORIGINAL falls through -> 0
+    }
     case 1027: { // ORIGINAL switch case 0x13 -> FUN_140164440:
         // return (user->vtable+0x48)() != 0 - the mate id (cq_user.mateid).
         // NOTE: the cq_action param ("self angelwing", 3,379 rows) is NEVER

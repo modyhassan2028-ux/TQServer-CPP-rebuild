@@ -235,6 +235,26 @@ public:
     uint32_t GetMana() const { return m_dwMana; }
     // metempsychosis = reborn count (cq_user column)
     uint32_t GetMetempsychosis() const { return m_dwRebornCount; }
+    // ---- ORIGINAL weapon-skill records (cq_weapon_skill; type 1021 path,
+    // case 0xf "ACTION_USER_WEAPONSKILL") ----
+    struct WeaponSkillRec {
+        uint32_t dwId{0};     // cq_weapon_skill.id
+        uint32_t dwType{0};
+        uint8_t  ucLevel{0};  // record +0x18 (FUN_14039d7e0)
+        uint32_t dwExp{0};    // record +0x14 (FUN_14039d860)
+    };
+    bool LoadWeaponSkillsFromDB(CMySQLClient* pDB);
+    WeaponSkillRec* FindWeaponSkill(uint32_t dwType);
+    uint32_t GetWeaponSkillMaxLevel(uint32_t dwType); // mapgroup vtable+0x98
+    // FUN_140170ae0 CUser::AwardWeaponSkill(type, level): max-lev gate, then
+    // set-or-create the cq_weapon_skill record, client sync.
+    bool AwardWeaponSkill(uint32_t dwType, uint32_t dwLevel);
+    // FUN_140183e30 mode 1: add exp along the cq_weapon_skill_up curve.
+    void AddWeaponSkillExp(uint32_t dwType, uint32_t dwAmount);
+    // case 0xf addlevtime: amount only guards >=1 (the value itself is
+    // unused by the original); below max it nets one level-up.
+    bool AwardWeaponSkillTime(uint32_t dwType, int nAmount);
+
     // ---- ORIGINAL magic record API (CPlayerMagic, ported) ----
     // FUN_14048b5f0: first record with GetAttrib(rec,2) == dwType
     CPlayerMagic* FindMagic(uint32_t dwType);
@@ -421,6 +441,8 @@ private:
     uint16_t m_wProfession{0};   // cq_user.profession (short @ +0xef4)
     uint32_t m_dwMana{0};
     std::map<uint32_t, CPlayerMagic> m_oMagics; // type -> cq_magic record
+    std::map<uint32_t, WeaponSkillRec> m_oWeaponSkills; // cq_weapon_skill rows
+    bool m_bWSkillsLoaded{false};
     std::function<void(const void*, uint16_t)> m_packetSink;
     uint32_t m_dwAccountId{0};
     uint32_t m_dwEmoney{0};
