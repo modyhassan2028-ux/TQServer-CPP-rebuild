@@ -2,6 +2,7 @@
 #include "User.h"
 #include "UserManager.h"
 #include "MapManager.h"
+#include "Account.h"
 #include "MonsterManager.h"
 #include "Npc.h"
 #include "Guild.h"
@@ -95,12 +96,20 @@ void CMsgInteract::Process(uint32_t dwSender) {
                dwDamage, dwLife);
 
         if (dwLife == 0) {
+            // arena: map 1038 kills go to the cq_arena ladder, no PK penalty
+            bool bArena = (pAttacker->GetMapId() == 1038);
+            bool bJustice = false;
+            if (bArena) {
+                CAccountManager::Instance().RecordArenaKill(pAttacker->GetName(), pTarget->GetName());
+                pAttacker->SendSysMsg("Arena kill! Recorded on the ladder. /arena top");
+            } else {
             // justice kill: slaying a red-name earns no PK points
-            bool bJustice = pTarget->IsRedName();
+            bJustice = pTarget->IsRedName();
             // killer gains PK points; the victim respawns in Twin City
             if (!bJustice) pAttacker->AddPkPoints(10);
             // the victim drops 10% of carried money at the corpse
             CGroundItemManager::Instance().OnPlayerDeath(pTarget);
+            } // end non-arena death
             // guild war scoring: kill counts if both are in warring guilds
             auto pKillerGuild = CGuildManager::Instance().GetByMember(pAttacker->GetId());
             auto pVictimGuild = CGuildManager::Instance().GetByMember(pTarget->GetId());
@@ -118,9 +127,12 @@ void CMsgInteract::Process(uint32_t dwSender) {
             pTarget->SetLife(pTarget->GetMaxLife());
             pTarget->Teleport(1002, 315, 275);
             pTarget->SendSysMsg("You were defeated and respawned in Twin City.");
-            pAttacker->SendSysMsg("You killed " + pTarget->GetName() +
-                                  (bJustice ? " (JUSTICE KILL - no PK points)" :
-                                   " (+10 PK points, total " + std::to_string(pAttacker->GetPkPoints()) + ")"));
+            if (bArena)
+                pAttacker->SendSysMsg("You killed " + pTarget->GetName() + " (arena kill)");
+            else
+                pAttacker->SendSysMsg("You killed " + pTarget->GetName() +
+                                      (bJustice ? " (JUSTICE KILL - no PK points)" :
+                                       " (+10 PK points, total " + std::to_string(pAttacker->GetPkPoints()) + ")"));
             printf("[PVP] %s killed %s (+10 PK)\n",
                    pAttacker->GetName().c_str(), pTarget->GetName().c_str());
         }

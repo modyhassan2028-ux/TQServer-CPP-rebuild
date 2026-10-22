@@ -400,3 +400,30 @@ std::vector<CAccountManager::TopRow> CAccountManager::GetTopPlayers(const std::s
     }
     return out;
 }
+
+// arena kill: upsert both fighters in one pass (INSERT .. ON DUPLICATE KEY)
+void CAccountManager::RecordArenaKill(const std::string& strKiller, const std::string& strVictim) {
+    if (!m_bMySQL || !m_pDB) return;
+    std::lock_guard<std::mutex> dbLock(m_dbMutex);
+    m_pDB->Query("INSERT INTO cq_arena (name, kills) VALUES ('" + m_pDB->Escape(strKiller) +
+                 "',1) ON DUPLICATE KEY UPDATE kills = kills + 1");
+    m_pDB->Query("INSERT INTO cq_arena (name, deaths) VALUES ('" + m_pDB->Escape(strVictim) +
+                 "',1) ON DUPLICATE KEY UPDATE deaths = deaths + 1");
+}
+
+// top arena fighters by kills
+std::vector<CAccountManager::ArenaRow> CAccountManager::GetArenaLadder(uint32_t n) {
+    std::vector<ArenaRow> out;
+    if (!m_bMySQL || !m_pDB) return out;
+    std::lock_guard<std::mutex> dbLock(m_dbMutex);
+    if (!m_pDB->Query("SELECT name, kills, deaths FROM cq_arena ORDER BY kills DESC LIMIT " +
+                      std::to_string(n)))
+        return out;
+    for (auto& row : m_pDB->GetRows()) {
+        if (row.size() < 3) continue;
+        out.push_back({ row[0],
+                        (uint32_t)strtoul(row[1].c_str(), nullptr, 10),
+                        (uint32_t)strtoul(row[2].c_str(), nullptr, 10) });
+    }
+    return out;
+}

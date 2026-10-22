@@ -409,6 +409,38 @@ if (m_message.rfind("/npc", 0) == 0) {
     }
     // ---- rebirth at the level cap ----
     // ---- /fish + /catch: fish by the water for money/CP ----
+    // ---- /arena: free-PvP zone with a kill ladder ----
+    if (m_message.rfind("/arena", 0) == 0) {
+        std::string sub = m_message.size() > 7 ? m_message.substr(7) : "enter";
+        while (!sub.empty() && sub.front() == ' ') sub.erase(0, 1);
+        if (sub == "enter") {
+            user->Teleport(1038, 50, 50); // arena map
+            user->SendSysMsg("Welcome to the Arena! Kills here earn arena points, no PK penalty.");
+            return;
+        }
+        if (sub == "leave") {
+            user->Teleport(1002, 315, 275); // back to Twin City
+            user->SendSysMsg("You left the Arena.");
+            return;
+        }
+        if (sub == "top") {
+            auto rows = CAccountManager::Instance().GetArenaLadder();
+            if (rows.empty()) { user->SendSysMsg("No arena fights yet. Be the first!"); return; }
+            std::string out = "Arena top " + std::to_string(rows.size()) + ":";
+            int rank = 1;
+            for (auto& r : rows) {
+                out += "\n  " + std::to_string(rank++) + ". " + r.strName +
+                       " - " + std::to_string(r.dwKills) + " kills / " +
+                       std::to_string(r.dwDeaths) + " deaths";
+                if (out.size() > 380) { out += "\n  ..."; break; }
+            }
+            user->SendSysMsg(out);
+            return;
+        }
+        user->SendSysMsg("Usage: /arena enter | leave | top");
+        return;
+    }
+
     // ---- /mine + /dig: mine ore veins for money (profession v1) ----
     if (m_message == "/mine") {
         static const struct { uint16_t x, y, r; } kVeins[] = { // Twin City ore veins

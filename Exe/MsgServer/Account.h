@@ -56,6 +56,11 @@ public:
     bool SaveRewardDay(uint32_t dwAccountId, const std::string& strDay);
         bool UpdateSpouse(uint32_t dwAccountId, const std::string& strSpouse);
 
+        // ---- PvP arena ladder ----
+        void RecordArenaKill(const std::string& strKiller, const std::string& strVictim);
+        struct ArenaRow { std::string strName; uint32_t dwKills; uint32_t dwDeaths; };
+        std::vector<ArenaRow> GetArenaLadder(uint32_t n = 10);
+
         // top-N ranking by column (level|money|pk_points), with names
         struct TopRow { std::string strName; uint64_t qwValue; };
         std::vector<TopRow> GetTopPlayers(const std::string& strColumn, uint32_t n = 10);
