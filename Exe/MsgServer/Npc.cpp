@@ -1,5 +1,6 @@
 ﻿#include "Npc.h"
 #include "Dialog.h"
+#include "Item.h"
 #include "MySQLClient.h"
 #include "Account.h"
 #include "User.h"
@@ -128,6 +129,11 @@ bool CNpc::ChooseOption(std::shared_ptr<CUser> pUser, uint32_t dwIndex) {
                     ? "Not done yet: " + std::to_string(pUser->m_task.dwDone) + "/" +
                       std::to_string(pUser->m_task.dwNeeded) + " killed."
                     : "You have no task with me.");
+                return true;
+            }
+            case 5: { // shop: list cq_itemtype wares with prices
+                pUser->SetDialogNode(0);
+                pUser->SendSysMsg(CItemLibrary::Instance().ShopListText());
                 return true;
             }
             case 4: { // teleport: param = "map,x,y"

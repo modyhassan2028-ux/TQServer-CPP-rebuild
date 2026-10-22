@@ -92,6 +92,7 @@ void CMsgItem::Process(uint32_t dwSender) {
     case Action_Equip: { // 5: move to equipment slot
         if (pItem && pItem->usSort > 0) {
             pItem->dwPosition = m_data.dwParam; // slot the client asked for
+            pUser->RecalcEquipmentBonuses();
             CMsgItem resp;
             resp.Create(*pItem, Action_Equip, Result_Ok);
             pUser->SendMsg(resp.GetBuf(), resp.GetSize());
@@ -101,6 +102,7 @@ void CMsgItem::Process(uint32_t dwSender) {
     case Action_Unequip: { // 6: back to inventory
         if (pItem) {
             pItem->dwPosition = 255;
+            pUser->RecalcEquipmentBonuses();
             CMsgItem resp;
             resp.Create(*pItem, Action_Unequip, Result_Ok);
             pUser->SendMsg(resp.GetBuf(), resp.GetSize());

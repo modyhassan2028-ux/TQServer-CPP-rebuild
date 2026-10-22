@@ -92,3 +92,10 @@ CREATE TABLE IF NOT EXISTS cq_item (
   position INT NOT NULL DEFAULT 255,
   name VARCHAR(64) NOT NULL DEFAULT ''
 );
+
+-- equipment stat bonuses (original cq_itemaddition model)
+CREATE TABLE IF NOT EXISTS cq_itemaddition (
+  item_type INT PRIMARY KEY,
+  life INT NOT NULL DEFAULT 0,
+  attack INT NOT NULL DEFAULT 0
+);

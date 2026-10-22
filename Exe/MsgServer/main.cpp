@@ -46,6 +46,8 @@ int main(int argc, char* argv[]) {
     // cq_itemtype first (DB), data/items.ini as fallback
     if (!CItemLibrary::Instance().LoadFromDB(CAccountManager::Instance().GetDB()))
         CItemLibrary::Instance().LoadFromFile("data/items.ini");
+    if (!CItemLibrary::Instance().LoadAdditionsFromDB(CAccountManager::Instance().GetDB()))
+        CItemLibrary::Instance().LoadAdditionsFromFile("data/itemadditions.ini");
 
     std::thread([] {
         int nTicks = 0;

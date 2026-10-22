@@ -26,7 +26,8 @@ INSERT INTO cq_npc (id, name, type, map_id, x, y, lookface, action_id) VALUES
  (1000002, 'WarehouseMan', 2, 1002, 300, 270, 8302, 0),
  (1000003, 'CityGuard',    3, 1002, 320, 270, 8303, 5200),
  (1000004, 'DesertGuard',  3, 1000, 505, 605, 8304, 5210),
- (1000005, 'TaskMaster',   0, 1002, 315, 260, 8305, 5000);
+ (1000005, 'TaskMaster',   0, 1002, 315, 260, 8305, 5000),
+ (1000006, 'ShopKeeper',   0, 1002, 300, 255, 8306, 5300);
 
 -- Pharmacist dialog tree (v1 keeps its built-in heal; tree adds flavor)
 INSERT INTO cq_action VALUES
@@ -61,3 +62,13 @@ INSERT INTO cq_generator VALUES (1, 1, 1002, 2, 650, 320, 700, 380),
 DELETE FROM cq_itemtype;
 INSERT INTO cq_itemtype VALUES (410011, 'Sword', 1, 1000), (900020, 'Armor', 2, 800),
                                 (100020, 'HealingPotion', 0, 50);
+
+-- ShopKeeper tree: type 5 = shop (wares+prices come from cq_itemtype)
+INSERT INTO cq_action VALUES
+ (5300, 0,    0, 1, '', 'Welcome to my store! Finest goods in Twin City.'),
+ (5301, 5300, 0, 5, '', 'Browse wares'),
+ (5302, 5300, 0, 0, '', 'Just looking');
+
+-- equipment bonuses: sword adds attack, armor adds life
+DELETE FROM cq_itemaddition;
+INSERT INTO cq_itemaddition VALUES (410011, 0, 25), (900020, 300, 0);

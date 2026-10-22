@@ -5,6 +5,9 @@
 #include "Trade.h"
 #include "Npc.h"
 #include "User.h"
+#include "Item.h"
+#include "MsgItem.h"
+#include "MySQLClient.h"
 #include <sstream>
 #include <vector>
 #include <algorithm>
@@ -85,6 +88,83 @@ if (m_message.rfind("/npc", 0) == 0) {
         } else {
             user->SendSysMsg("Usage: /npc list, /npc <id>");
         }
+        return;
+    }
+    // ---- shop commands (prices from cq_itemtype / data/items.ini) ----
+    if (m_message.rfind("/shop", 0) == 0) {
+        user->SendSysMsg(CItemLibrary::Instance().ShopListText());
+        return;
+    }
+    if (m_message.rfind("/buy ", 0) == 0) {
+        std::istringstream iss(m_message.substr(5));
+        uint32_t dwType = 0, dwCount = 1;
+        iss >> dwType >> dwCount;
+        if (dwCount == 0) dwCount = 1;
+        auto* pDef = CItemLibrary::Instance().Lookup(dwType);
+        if (!pDef) { user->SendSysMsg("No such item type. /shop to list."); return; }
+        uint64_t ullTotal = (uint64_t)pDef->dwPrice * dwCount;
+        if (user->GetMoney() < ullTotal) {
+            user->SendSysMsg("Not enough money: need " + std::to_string(ullTotal) +
+                             ", you have " + std::to_string(user->GetMoney()) + ".");
+            return;
+        }
+        user->AddMoney(-(int64_t)ullTotal);
+        // stack with an existing stack of the same type first
+        uint32_t dwGiven = 0;
+        if (pDef->usSort == 0) { // consumables stack
+            for (auto& it : user->GetInventory()) {
+                if (it.dwType == dwType && it.dwAmount < 1000) {
+                    uint32_t room = 1000 - it.dwAmount;
+                    uint32_t add = (room < dwCount) ? room : dwCount;
+                    it.dwAmount += add; dwCount -= add; dwGiven += add;
+                    break;
+                }
+            }
+        }
+        while (dwCount > 0) {
+            uint32_t amt = (dwCount > 1000) ? 1000 : dwCount;
+            ItemInfo item;
+            item.dwId = MakeItemId(user->NextItemSeq());
+            item.dwType = dwType;
+            item.dwAmount = amt;
+            item.dwPosition = 255;
+            item.strName = pDef->strName;
+            item.usSort = pDef->usSort;
+            CItemLibrary::Instance().Apply(item);
+            user->AddItem(item);
+            dwCount -= amt; dwGiven += amt;
+            CMsgItem msgItem;
+            if (msgItem.Create(item, CMsgItem::Action_Buy))
+                user->SendMsg(msgItem.GetBuf(), msgItem.GetSize());
+        }
+        user->SendSysMsg("Bought " + std::to_string(dwGiven) + "x " + pDef->strName + " for " +
+                         std::to_string(ullTotal) + " money.");
+        return;
+    }
+    if (m_message.rfind("/sell ", 0) == 0) {
+        std::istringstream iss(m_message.substr(6));
+        uint32_t dwType = 0, dwCount = 1;
+        iss >> dwType >> dwCount;
+        if (dwCount == 0) dwCount = 1;
+        auto* pDef = CItemLibrary::Instance().Lookup(dwType);
+        if (!pDef) { user->SendSysMsg("No such item type."); return; }
+        uint32_t sold = 0;
+        auto& inv = user->GetInventory();
+        for (size_t i = 0; i < inv.size() && sold < dwCount; ) {
+            if (inv[i].dwType == dwType && inv[i].dwPosition == 255) {
+                uint32_t take = (inv[i].dwAmount <= dwCount - sold) ? inv[i].dwAmount : dwCount - sold;
+                inv[i].dwAmount -= take; sold += take;
+                uint32_t dwId = inv[i].dwId;
+                if (inv[i].dwAmount == 0) { user->RemoveItem(dwId); continue; }
+                else { CMsgItem m; if (m.Create(inv[i], CMsgItem::Action_Sell)) user->SendMsg(m.GetBuf(), m.GetSize()); }
+            }
+            ++i;
+        }
+        if (sold == 0) { user->SendSysMsg("You carry none of that."); return; }
+        uint64_t pay = (uint64_t)(pDef->dwPrice / 2) * sold;
+        user->AddMoney((int64_t)pay);
+        user->SendSysMsg("Sold " + std::to_string(sold) + "x " + pDef->strName + " for " +
+                         std::to_string(pay) + " money (half price).");
         return;
     }
     if (m_message.rfind("/bank", 0) == 0) {

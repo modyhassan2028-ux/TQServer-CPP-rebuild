@@ -153,6 +153,7 @@ void CMsgConnect::Process(uint32_t dwSender, void* pContext) {
             bGaveKit = true;
         }
     }
+    pUser->RecalcEquipmentBonuses(); // equipped restores now add cq_itemaddition stats
 
     // starting kit: weapon + armor + potions
     struct KitDef { uint32_t type; uint16_t sort; const char* name; uint32_t amount; };

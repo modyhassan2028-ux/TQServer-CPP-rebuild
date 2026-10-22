@@ -26,6 +26,12 @@ struct ItemTypeDef {
     uint32_t    dwPrice{0};
 };
 
+// cq_itemaddition record: stat bonuses an EQUIPPED item grants
+struct ItemAddition {
+    uint32_t dwLife{0};
+    uint32_t dwAttack{0};
+};
+
 class CItemLibrary {
 public:
     static CItemLibrary& Instance();
@@ -34,11 +40,19 @@ public:
     // fallback: data/items.ini ("type | name | sort | price")
     uint32_t LoadFromFile(const std::string& path);
     const ItemTypeDef* Lookup(uint32_t dwType) const;
+    // numbered shop listing with prices ("1. Sword - 1000 money" per line)
+    std::string ShopListText() const;
     size_t Size() const { return m_types.size(); }
     // applies name+sort from the library (keeps item fields when type unknown)
     void Apply(ItemInfo& item) const;
 
+    // cq_itemaddition: equipment bonuses
+    uint32_t LoadAdditionsFromDB(class CMySQLClient* pDB);
+    uint32_t LoadAdditionsFromFile(const std::string& path); // data/itemadditions.ini: type|life|attack
+    const ItemAddition* LookupAddition(uint32_t dwType) const;
+
 private:
     CItemLibrary() = default;
     std::map<uint32_t, ItemTypeDef> m_types;
+    std::map<uint32_t, ItemAddition> m_additions;
 };

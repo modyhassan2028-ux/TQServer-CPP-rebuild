@@ -27,6 +27,12 @@ public:
 
     uint32_t GetLife() const { return m_dwLife; }
     uint32_t GetMaxLife() const { return m_dwMaxLife; }
+    void SetMaxLife(uint32_t v) { m_dwMaxLife = v; }
+
+    // cq_itemaddition: snapshot the un-bonused stats (call once after character
+    // restore), then recalc whenever equipment changes
+    void SnapshotBaseStats() { m_dwBaseMaxLife = m_dwMaxLife; m_dwBaseBP = m_dwBattlePower; }
+    void RecalcEquipmentBonuses();
     void SetLife(uint32_t dwLife) { m_dwLife = dwLife; }
 
     uint32_t GetBattlePower() const { return m_dwBattlePower; }
@@ -107,6 +113,8 @@ private:
     uint16_t m_usY{400};
     uint32_t m_dwLife{1000};
     uint32_t m_dwMaxLife{1000};
+    uint32_t m_dwBaseMaxLife{1000};
+    uint32_t m_dwBaseBP{100};
     uint32_t m_dwBattlePower{100};
 
     // Economy & Special State

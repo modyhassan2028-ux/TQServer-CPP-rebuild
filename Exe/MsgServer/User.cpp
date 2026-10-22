@@ -1,4 +1,5 @@
 ﻿#include "User.h"
+#include "Item.h"
 #include "MsgTalk.h"
 #include <iostream>
 #include "NetCore.h"
@@ -34,4 +35,19 @@ void CUser::SendSysMsg(const std::string& message) {
 void CUser::SendMsg(const void* pBuf, uint16_t usSize) {
     if (m_pNet)
         static_cast<CNetClient*>(m_pNet)->Send(pBuf, usSize);
+}
+// sum cq_itemaddition bonuses over every equipped item (position != 255)
+void CUser::RecalcEquipmentBonuses() {
+    uint32_t bonusLife = 0, bonusAtk = 0;
+    for (const auto& it : m_items) {
+        if (it.dwPosition == 255) continue; // not equipped
+        auto* a = CItemLibrary::Instance().LookupAddition(it.dwType);
+        if (!a) continue;
+        bonusLife += a->dwLife;
+        bonusAtk += a->dwAttack;
+    }
+    uint32_t newMax = m_dwBaseMaxLife + bonusLife;
+    if (m_dwLife > newMax) m_dwLife = newMax;
+    m_dwMaxLife = newMax;
+    m_dwBattlePower = m_dwBaseBP + bonusAtk;
 }
