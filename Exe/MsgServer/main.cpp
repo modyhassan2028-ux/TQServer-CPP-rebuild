@@ -68,6 +68,8 @@ int main(int argc, char* argv[]) {
                         rec.dwMoney = pU->GetMoney();
                         rec.dwCp = pU->GetConquerPoints();
                         rec.dwBank = pU->GetBank();
+                        // PK decay: 1 point per 5 min online (original: slow redemption)
+                        if (pU->GetPkPoints() > 0) pU->SetPkPoints(pU->GetPkPoints() - 1);
                         rec.dwPkPoints = pU->GetPkPoints();
                         rec.dwMapId = pU->GetMapId();
                         rec.usX = pU->GetX();

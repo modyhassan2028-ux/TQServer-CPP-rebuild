@@ -1,4 +1,4 @@
-#include "GroundItems.h"
+﻿#include "GroundItems.h"
 #include "User.h"
 #include "Item.h"
 #include <thread>
@@ -116,4 +116,24 @@ std::string CGroundItemManager::ListNearby(std::shared_ptr<CUser> pUser) {
 size_t CGroundItemManager::GetDropCount() {
     std::lock_guard<std::mutex> lock(m_mutex);
     return m_drops.size();
+}
+
+// a slain player drops 10% of carried money at the corpse (original model:
+// red-name deaths drop items; money-only keeps v1 simple and fair)
+void CGroundItemManager::OnPlayerDeath(std::shared_ptr<CUser> pVictim) {
+    if (!pVictim) return;
+    uint64_t qwLoss = pVictim->GetMoney() / 10;
+    if (qwLoss == 0) return;
+    pVictim->AddMoney(-(int64_t)qwLoss);
+    std::lock_guard<std::mutex> lock(m_mutex);
+    GroundDrop d;
+    d.dwDropId = NextId();
+    d.dwMapId = pVictim->GetMapId();
+    d.usX = pVictim->GetX();
+    d.usY = pVictim->GetY();
+    d.qwMoney = qwLoss;
+    d.strName = "Money " + std::to_string(qwLoss);
+    m_drops[d.dwDropId] = d;
+    printf("[DROPS] %s dropped %llu money at their corpse.\n",
+           pVictim->GetName().c_str(), (unsigned long long)qwLoss);
 }

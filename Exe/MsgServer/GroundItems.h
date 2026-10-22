@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <cstdint>
 #include <map>
 #include <mutex>
@@ -30,6 +30,8 @@ public:
     void Stop();
     // monster death -> money scaled by level + 15% chance of a pill drop
     void OnMonsterDeath(uint32_t dwMapId, uint16_t usX, uint16_t usY, uint32_t dwMonsterLevel);
+    // slain player drops 10% of carried money at the corpse
+    void OnPlayerDeath(std::shared_ptr<CUser> pVictim);
     // pick the nearest drop within 3 cells; returns an error message or ""
     std::string Pick(std::shared_ptr<CUser> pUser);
     std::string ListNearby(std::shared_ptr<CUser> pUser);   // /drops
