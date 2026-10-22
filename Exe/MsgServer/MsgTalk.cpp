@@ -424,6 +424,20 @@ if (m_message.rfind("/npc", 0) == 0) {
         return;
     }
 
+    // ---- blacksmith: /repair restores equipped weapon/armor durability ----
+    if (m_message == "/repair") {
+        uint32_t cost = user->RepairCost();
+        if (cost == 0) { user->SendSysMsg("Your gear is already pristine."); return; }
+        if (user->GetMoney() < cost) {
+            user->SendSysMsg("Repair costs " + std::to_string(cost) + " money - you lack it."); return;
+        }
+        user->AddMoney(-(int64_t)cost);
+        user->DoRepair();
+        user->SendSysMsg("Your gear is restored to pristine. -" + std::to_string(cost) + " money.");
+        printf("[REPAIR] %s -%u money\n", user->GetName().c_str(), cost);
+        return;
+    }
+
     // ---- player market: /market list|sell <slot> <price>|buy <id> ----
     if (m_message == "/market" || m_message == "/market list") {
         auto rows = CAccountManager::Instance().LoadMarket();

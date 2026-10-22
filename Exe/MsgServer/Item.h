@@ -14,6 +14,7 @@ struct ItemInfo {
     uint32_t    dwPosition{255}; // inventory slot / equip position
     uint8_t     ucPlus{0};        // refinement level +0..+12
     uint16_t    usEnchant{0};    // enchant: bonus life added by gems (0..2048)
+    uint16_t    usDurability{1000}; // wear: 1000 = pristine, damage halves below 200
     std::string strName;
 };
 

@@ -101,6 +101,7 @@ CREATE TABLE IF NOT EXISTS cq_item (
   position INT NOT NULL DEFAULT 255,
   plus INT NOT NULL DEFAULT 0,
   name VARCHAR(64) NOT NULL DEFAULT ''
+  durability SMALLINT NOT NULL DEFAULT 1000,
 );
 
 -- equipment stat bonuses (original cq_itemaddition model)

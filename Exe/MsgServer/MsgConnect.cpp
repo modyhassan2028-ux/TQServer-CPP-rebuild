@@ -177,6 +177,7 @@ void CMsgConnect::Process(uint32_t dwSender, void* pContext) {
                 item.dwPosition = bWarehouse ? 255 : r.dwPosition;
                 item.strName = r.strName;
                 item.ucPlus = r.ucPlus;
+                item.usDurability = r.usDurability;
                 if (bWarehouse) { pUser->WarehouseStore(item); continue; }
                 pUser->AddItem(item);
                 CMsgItem msgItem;

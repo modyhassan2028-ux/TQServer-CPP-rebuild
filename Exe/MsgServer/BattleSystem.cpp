@@ -20,7 +20,9 @@ uint32_t CBattleSystem::CalcPhysicalDamage(CUser* pAttacker, CUser* pTarget) {
 // player -> monster: level + equipment attack vs monster defense
 uint32_t CBattleSystem::CalcMonsterDamage(CUser* pAttacker, CMonster* pTarget) {
     if (!pAttacker) return 0;
+    pAttacker->WearWeapon(); // each swing wears the equipped weapon
     uint32_t atk = 10 + pAttacker->GetLevel() * 3 + pAttacker->GetStrength() + pAttacker->GetEquipmentAttack();
+    if (pAttacker->WeaponIsBroken()) atk /= 2; // worn steel: half power
     uint32_t def = pTarget ? pTarget->GetDefense() : 0;
     if (def > atk * 4 / 5) def = atk * 4 / 5; // never fully negate
     uint32_t base = atk - def;

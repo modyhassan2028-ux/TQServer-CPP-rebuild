@@ -97,6 +97,36 @@ public:
         return false;
     }
 
+    // durability: equipped weapon wears on hits; broken steel hits at half power
+    void WearWeapon() {
+        for (auto& it : m_items)
+            if (it.usSort == 1 && it.dwPosition == 1) { // equipped weapon slot
+                if (it.usDurability > 0) --it.usDurability;
+                if (it.usDurability == 200)
+                    SendSysMsg("Your weapon is badly worn - /repair it soon!");
+                else if (it.usDurability == 0)
+                    SendSysMsg("Your weapon is broken! Damage halved until /repair.");
+                break;
+            }
+    }
+    bool WeaponIsBroken() const {
+        for (const auto& it : m_items)
+            if (it.usSort == 1 && it.dwPosition == 1) return it.usDurability < 200;
+        return false;
+    }
+    // repair cost: 2 money per point of wear (min 10 if not pristine)
+    uint32_t RepairCost() const {
+        uint32_t cost = 0;
+        for (const auto& it : m_items)
+            if (it.usSort <= 2 && it.dwPosition != 255 && 1000 > it.usDurability)
+                cost += (1000 - it.usDurability) * 2;
+        return cost;
+    }
+    void DoRepair() {
+        for (auto& it : m_items)
+            if (it.usSort <= 2 && it.dwPosition != 255) it.usDurability = 1000;
+    }
+
     // profession counters (ranks raise payouts): fish + mining
     uint32_t GetFishCaught() const { return m_dwFishCaught; }
     void AddFishCaught(uint32_t v) { m_dwFishCaught += v; }

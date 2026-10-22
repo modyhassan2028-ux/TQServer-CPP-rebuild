@@ -387,7 +387,7 @@ bool CAccountManager::BuyMarketItem(uint32_t dwId, const std::string& strBuyer, 
 bool CAccountManager::LoadItems(uint32_t dwAccountId, std::vector<ItemRow>& out) {
     if (!m_bMySQL || !m_pDB) return false;
     std::lock_guard<std::mutex> dbLock(m_dbMutex);
-    if (!m_pDB->Query("SELECT item_type, sort, amount, position, name, plus FROM cq_item WHERE account_id=" +
+    if (!m_pDB->Query("SELECT item_type, sort, amount, position, name, plus, durability FROM cq_item WHERE account_id=" +
                       std::to_string(dwAccountId)))
         return false;
     for (auto& row : m_pDB->GetRows()) {
@@ -398,6 +398,7 @@ bool CAccountManager::LoadItems(uint32_t dwAccountId, std::vector<ItemRow>& out)
         r.dwAmount   = (uint32_t)strtoul(row[2].c_str(), nullptr, 10);
         r.dwPosition = (uint32_t)strtoul(row[3].c_str(), nullptr, 10);
         r.strName    = row[4];
+        r.usDurability = (row.size() > 6) ? (uint16_t)strtoul(row[6].c_str(), nullptr, 10) : 1000;
         if (r.dwType) out.push_back(r);
     }
     return !out.empty();
@@ -411,11 +412,11 @@ void CAccountManager::SaveItems(uint32_t dwAccountId, const std::vector<ItemRow>
         return;
     }
     for (const auto& r : items) {
-        std::string sql = "INSERT INTO cq_item (account_id, item_type, sort, amount, position, name, plus) VALUES (" +
+        std::string sql = "INSERT INTO cq_item (account_id, item_type, sort, amount, position, name, plus, durability) VALUES (" +
             std::to_string(dwAccountId) + ", " + std::to_string(r.dwType) + ", " +
             std::to_string(r.usSort) + ", " + std::to_string(r.dwAmount) + ", " +
             std::to_string(r.dwPosition) + ", '" + m_pDB->Escape(r.strName) + "', " +
-                std::to_string(r.ucPlus) + ")";
+                std::to_string(r.ucPlus) + ", " + std::to_string(r.usDurability) + ")";
         if (!m_pDB->Query(sql))
             printf("[DB] cq_item insert failed: %s\n", m_pDB->GetError().c_str());
     }
