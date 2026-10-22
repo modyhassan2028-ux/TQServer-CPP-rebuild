@@ -7,6 +7,7 @@
 #include "Guild.h"
 #include "MsgItem.h"
 #include "BattleSystem.h"
+#include "Team.h"
 #include "Item.h"
 #include "MsgTalk.h"
 
@@ -148,7 +149,8 @@ void CMsgInteract::Process(uint32_t dwSender) {
                                   (pAttacker->m_task.dwDone == pAttacker->m_task.dwNeeded
                                    ? " - return to the TaskMaster!" : ""));
         }
-        // attacker rewards (v1): money drops straight to the killer
+        // attacker rewards: base bounty; teams split it among same-map members
+        CTeamManager::Instance().ShareKillReward(pAttacker, 50, 1);
         pAttacker->AddMoney(50);
         pAttacker->AddConquerPoints(1);
         // cq_dropitemrule: roll the monster's loot table (v1: straight to bag)

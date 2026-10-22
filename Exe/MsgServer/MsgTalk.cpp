@@ -3,6 +3,7 @@
 #include "UserManager.h"
 #include "Guild.h"
 #include "Trade.h"
+#include "Team.h"
 #include "Npc.h"
 #include "User.h"
 #include "Item.h"
@@ -165,6 +166,25 @@ if (m_message.rfind("/npc", 0) == 0) {
         user->AddMoney((int64_t)pay);
         user->SendSysMsg("Sold " + std::to_string(sold) + "x " + pDef->strName + " for " +
                          std::to_string(pay) + " money (half price).");
+        return;
+    }
+    // ---- team commands ----
+    if (m_message.rfind("/team", 0) == 0) {
+        std::string sub = m_message.size() > 6 ? m_message.substr(6) : "";
+        if (!sub.empty() && sub[0] == ' ') sub = sub.substr(1);
+        if (sub.rfind("invite ", 0) == 0) {
+            std::string target = sub.substr(7);
+            std::string err = CTeamManager::Instance().Invite(user, target);
+            if (!err.empty()) user->SendSysMsg(err);
+        } else if (sub == "accept") {
+            std::string err = CTeamManager::Instance().Accept(user);
+            if (!err.empty()) user->SendSysMsg(err);
+        } else if (sub == "quit" || sub == "leave") {
+            std::string err = CTeamManager::Instance().Quit(user);
+            if (!err.empty()) user->SendSysMsg(err);
+        } else { // list / help
+            user->SendSysMsg(CTeamManager::Instance().RosterText(user));
+        }
         return;
     }
     if (m_message.rfind("/bank", 0) == 0) {
