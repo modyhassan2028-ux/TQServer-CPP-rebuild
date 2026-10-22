@@ -361,3 +361,113 @@ bool CUser::DeleteMagic(uint32_t dwType) {
     pRec->Save(CAccountManager::Instance().GetDB());
     return true;
 }
+
+// ---------------------------------------------------------------------------
+// ORIGINAL FUN_1404918c0 CPlayerMagic::AddMagicExp(user, type, amount)
+// Gates (linked cq_magictype attrs of the record's stage):
+//   attr 0x76 (need_exp)  == -1/0  -> fail (chain end, no exp)
+//   attr 0x78 (need_level of the NEXT stage) vs the player's level: the
+//     session vtable+0x70 getter must reach it or no exp is gained
+//   attr 0x75 (need_prof mask) vs the user flag byte at +0xeee: not yet
+//     ported (our users carry no flag byte); need_prof==0 covers 1,195 of
+//     the 1,266 stages so the gate is passed until the flag byte lands.
+// Loop: while exp >= need_exp and the next stage exists -> FUN_14048fd10
+// (UpLevelMagic). Chain end / level gate inside the loop RESETS exp to 0.
+// Cap: 0xf4241 (1,000,001) iterations, then InlineLogERROR.
+// Exit: SetAttrib(rec, 4, exp) + Save + MsgMagic update packet (type 1104,
+// FUN_1403f0020 layout [u32 exp][u32][u16 type][u8 mode=1]; wire pending
+// the msg-class family port).
+bool CUser::AddMagicExp(uint32_t dwType, int nAmount) {
+    if (nAmount < 1) return false;                       // original: param_3 < 1 -> 0
+    CPlayerMagic* pRec = FindMagic(dwType);               // FUN_14048b5f0
+    if (!pRec) return false;
+    auto& pool = CMagicTypePool::Instance();
+    uint32_t dwLev = (uint32_t)pRec->GetAttrib(3);
+    const CMagicTypeInfo* pStage = pool.Find(dwType, dwLev);
+    if (!pStage || pStage->nNeedExp <= 0) return false;
+    const CMagicTypeInfo* pNext = pool.Find(dwType, dwLev + 1);
+    if (!pNext) return false;                            // chain end: no next gate
+    if ((int32_t)GetLevel() < (int32_t)pNext->dwNeedLevel) return false;
+    // TODO(port): need_prof mask vs user flag byte +0xeee (FUN_140480a00)
+
+    int nExp = pRec->GetAttrib(4) + nAmount;
+    int nLevels = 0;
+    do {
+        dwLev = (uint32_t)pRec->GetAttrib(3);
+        pStage = pool.Find(dwType, dwLev);
+        if (!pStage || pStage->nNeedExp <= 0) { nExp = 0; break; }
+        pNext = pool.Find(dwType, dwLev + 1);
+        if (!pNext || (int32_t)GetLevel() < (int32_t)pNext->dwNeedLevel) { nExp = 0; break; }
+        if (nExp < pStage->nNeedExp) break;
+        nExp -= pStage->nNeedExp;
+        UpLevelMagic(dwType);                             // FUN_14048fd10(user, type, 0)
+        nLevels++;
+        if (nLevels >= 1000001) {                        // 0xf4241
+            printf("[MAGIC] AddMagicExp: level loop overflow (type %u)\n", dwType);
+            break;
+        }
+    } while (true);
+    pRec->SetAttrib(4, nExp);                             // FUN_140418d90(rec, 4, exp)
+    pRec->Save(CAccountManager::Instance().GetDB());      // FUN_140418450(rec)
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+// ORIGINAL FUN_140491be0 CPlayerMagic::AwardMgcTime(user, type, ms)
+// Converts ms to exp through the ORIGINAL CalcTimeToExp (FUN_1402f1340,
+// CWeaponSkillUp): time = need_time*(exp/need_exp) + ms, walk stages while
+// time >= need_time (accumulate their need_exp), add the partial
+// need_exp*(time/need_time), floor at the current exp, and return the DELTA.
+// Delta capped at 0x7fffffff (log on overflow), then AddMagicExp.
+bool CUser::AwardMgcTime(uint32_t dwType, int nMs) {
+    if (nMs < 1) return false;                            // original: 0 < param_3
+    CPlayerMagic* pRec = FindMagic(dwType);
+    if (!pRec) return false;
+    auto& pool = CMagicTypePool::Instance();
+    int32_t nLevel = pRec->GetAttrib(3);                  // FUN_140418c50(rec, 3)
+    int32_t nExpCur = pRec->GetAttrib(4);                 // FUN_140418c50(rec, 4)
+
+    int64_t llGained = 0;                                 // lVar3
+    bool bPartial = false;                                // normal-exit flag
+    const CMagicTypeInfo* pStage = pool.Find(dwType, (uint32_t)nLevel);
+    if (pStage) {
+        float fNeedExp = (float)pStage->nNeedExp;
+        if (fNeedExp <= 0.0f) fNeedExp = 1.0f;            // iVar2 = 1 when need_exp <= 0
+        float fTime = (float)pStage->dwNeedTime * ((float)nExpCur / fNeedExp) + (float)nMs;
+        int32_t nLastNeedTime = (int32_t)pStage->dwNeedTime;
+        while (true) {
+            pStage = pool.Find(dwType, (uint32_t)nLevel);
+            if (!pStage) break;                           // goto out (skip partial)
+            int32_t nNeedTime = (int32_t)pStage->dwNeedTime;   // field 0x13
+            if (nNeedTime == -1 || nNeedTime == 0) break;      // goto out
+            if (fTime < (float)nNeedTime) {               // normal exit -> partial
+                nLastNeedTime = nNeedTime;
+                bPartial = true;
+                break;
+            }
+            fTime -= (float)nNeedTime;
+            int32_t nNeedExp = pStage->nNeedExp;           // field 0x12
+            nLevel++;
+            llGained += nNeedExp;
+            if (nLevel > 100) {                            // overflow guard -> out
+                printf("[MAGIC] CalcTimeToExp: level overflow (type %u)\n", dwType);
+                break;
+            }
+        }
+        if (bPartial) {
+            const CMagicTypeInfo* pCur = pool.Find(dwType, (uint32_t)nLevel);
+            if (pCur) {
+                int32_t nNeedTime = nLastNeedTime > 0 ? nLastNeedTime : 1;
+                llGained += (int64_t)((float)pCur->nNeedExp * (fTime / (float)nNeedTime));
+            }
+        }
+    }
+    if (llGained < nExpCur) llGained = nExpCur;           // never below current exp
+    int64_t llDelta = llGained - nExpCur;
+    if (llDelta > 0x7fffffffLL) {                         // 0x7fffffff cap + log
+        printf("[MAGIC] CPlayerMagic::AwardMgcTime, effect lost: %lld\n",
+               (long long)(llDelta - 0x7fffffff));
+        llDelta = 0x7fffffff;
+    }
+    return AddMagicExp(dwType, (int)llDelta);
+}

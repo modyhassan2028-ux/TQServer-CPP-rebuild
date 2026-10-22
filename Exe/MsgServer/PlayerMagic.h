@@ -51,6 +51,7 @@ struct CMagicTypeInfo {
     uint32_t dwNeedProf{0};
     int32_t  nNeedExp{0};
     uint32_t dwNeedLevel{0};
+    uint32_t dwNeedTime{0};   // cq_magictype.need_time (levtime per stage)
     uint32_t dwDelayMs{0};
     uint32_t dwWeaponSub{0};
 };

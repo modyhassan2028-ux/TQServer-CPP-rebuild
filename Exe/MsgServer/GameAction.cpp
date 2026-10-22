@@ -1,6 +1,7 @@
 ﻿#include "GameAction.h"
 #include "MsgDialog.h"
 #include "User.h"
+#include "PlayerMagic.h"
 #include "Dialog.h"
 #include "Npc.h"
 #include "Npc.h" // CNpcManager lives here
@@ -139,13 +140,21 @@ bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogE
             return pUser->UpLevelMagic((uint32_t)nType);
         if (!_stricmp(szCmd, "del"))                                       // FUN_1402f3960
             return pUser->DeleteMagic((uint32_t)nType);
-        // addexp / addlevtime need the full CPlayerMagic port (FUN_1402f3040/1402f3080)
-        static bool bLoggedExp = false;
-        if (!bLoggedExp) {
-            bLoggedExp = true;
-            printf("[DIALOG] 1020 '%s' not ported yet (CPlayerMagic pending)\n", szCmd);
+        if (!_stricmp(szCmd, "addexp")) {                               // FUN_1402f3040
+            if (n < 3) return false;
+            return pUser->AddMagicExp((uint32_t)nType, nLevel);
         }
-        return false;
+        if (!_stricmp(szCmd, "addlevtime")) {                             // FUN_1402f3080
+            if (n < 3) return false;
+            return pUser->AwardMgcTime((uint32_t)nType, nLevel);
+        }
+        // ORIGINAL: unknown command -> log_InlineLogDBERROR and return 1 (pass)
+        static bool bLoggedUnknown = false;
+        if (!bLoggedUnknown) {
+            bLoggedUnknown = true;
+            printf("[DIALOG] 1020 unknown command '%s' (gameaction.cpp:0x27f1)\n", szCmd);
+        }
+        return true;
     }
     default:
         return true; // pass-open until the case body is ported

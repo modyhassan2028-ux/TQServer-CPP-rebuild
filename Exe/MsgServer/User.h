@@ -220,6 +220,13 @@ public:
     // FUN_140493f70 DeleteMagic(user, type, mode=0): old_level = max(
     // old_level, level), unlearn = 1 (record kept, like original)
     bool DeleteMagic(uint32_t dwType);
+    // FUN_1404918c0 CPlayerMagic::AddMagicExp: award skill exp, auto level-up
+    // while the stage chain allows (need_exp>0, player level >= next stage's
+    // need_level); at chain end exp resets to 0; record saved (attr 4).
+    bool AddMagicExp(uint32_t dwType, int nAmount);
+    // FUN_140491be0 CPlayerMagic::AwardMgcTime: convert levtime ms to exp via
+    // CWeaponSkillUp::CalcTimeToExp (FUN_1402f1340) then AddMagicExp.
+    bool AwardMgcTime(uint32_t dwType, int nMs);
     uint32_t GetMagicCount() const { return (uint32_t)m_oMagics.size(); }
     // attr-0 counter (original CUser+0x88) for newly created records
     uint32_t m_dwMagicCounter{0};

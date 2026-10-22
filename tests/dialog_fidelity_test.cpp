@@ -134,6 +134,43 @@ int main() {
     pDB->Query("DELETE FROM cq_magic WHERE ownerid=999001"); // cleanup
     printf("[ok] LearnMagic/UpLevel/DeleteMagic match FUN_1404939c0 et al.\n");
 
+    // --- ORIGINAL AddMagicExp (FUN_1404918c0) / AwardMgcTime (FUN_140491be0) ---
+    pDB->Query("DELETE FROM cq_magic WHERE ownerid=999001");
+    // Thunder stage chain from the ORIGINAL dump: L0 need_exp=2000 need_time=47,
+    // L1 need_exp=113060 need_time=1177, L2 need_exp=326107, L3 need_exp=777950,
+    // L4 need_exp=0 (chain end). Player level gates: L0->1 needs level 10.
+    assert(u2.LearnMagic(1000, 0));
+    u2.SetLevel(10);
+    // exp 1999 < 2000: no level-up, exp kept
+    assert(u2.AddMagicExp(1000, 1999));
+    assert(u2.FindMagic(1000)->GetAttrib(3) == 0 && u2.FindMagic(1000)->GetAttrib(4) == 1999);
+    // +2 more exp crosses need_exp -> level 1; the IN-LOOP level gate (L1->2
+    // needs level 20) then RESETS exp to 0 - exactly the original flow
+    assert(u2.AddMagicExp(1000, 2));
+    assert(u2.FindMagic(1000)->GetAttrib(3) == 1 && u2.FindMagic(1000)->GetAttrib(4) == 0);
+    // the INITIAL gate (L1->2 needs level 20, player 10) fails the call outright:
+    // no exp change at all - exactly the original pre-loop return 0
+    assert(!u2.AddMagicExp(1000, 400000));
+    assert(u2.FindMagic(1000)->GetAttrib(3) == 1 && u2.FindMagic(1000)->GetAttrib(4) == 0);
+    // level 45 clears every gate; a massive amount walks L1->2->3 (L3->4 is
+    // chain end inside the loop -> exp resets to 0 at the max stage)
+    u2.SetLevel(45);
+    assert(u2.AddMagicExp(1000, 3000000));
+    // walks L1->2->3->4; stage L4 has need_exp=0 (chain end) -> exp resets to 0
+    assert(u2.FindMagic(1000)->GetAttrib(3) == 4 && u2.FindMagic(1000)->GetAttrib(4) == 0);
+    // AwardMgcTime: 1177ms on a fresh L0 record (exp 0) -> time 1177 = need_time
+    // -> crosses -> L1
+    pDB->Query("DELETE FROM cq_magic WHERE ownerid=999001");
+    auto up4 = std::make_shared<CUser>(999001);
+    assert(up4->LearnMagic(1000, 0)); up4->SetLevel(10);
+    assert(up4->AwardMgcTime(1000, 1177));
+    assert(up4->FindMagic(1000)->GetAttrib(3) == 1);
+    // negative/zero amounts fail exactly like the original (amount < 1 -> 0)
+    assert(!up4->AddMagicExp(1000, 0));
+    assert(!up4->AwardMgcTime(1000, 0));
+    pDB->Query("DELETE FROM cq_magic WHERE ownerid=999001");
+    printf("[ok] AddMagicExp/AwardMgcTime match FUN_1404918c0/140491be0\n");
+
     printf("DIALOG FIDELITY TEST PASSED\n");
     return 0;
 }

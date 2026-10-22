@@ -18,7 +18,7 @@ bool CMagicTypePool::LoadFromDB(CMySQLClient* pDB) {
     if (!pDB->Query(
             "SELECT id, type, sort, name, crime, ground, multi, target, level,"
             " use_mp, power, intone_speed, percent, step_secs, `range`, distance,"
-            " status, need_prof, need_exp, need_level, delay_ms, weapon_subtype"
+            " status, need_prof, need_exp, need_level, need_time, delay_ms, weapon_subtype"
             " FROM cq_magictype")) {
         printf("[MAGIC] cq_magictype load failed: %s\n", pDB->GetError().c_str());
         return false;
@@ -48,8 +48,9 @@ bool CMagicTypePool::LoadFromDB(CMySQLClient* pDB) {
         t.dwNeedProf = u32(17);
         t.nNeedExp = (int32_t)strtol(row[18].c_str(), nullptr, 10);
         t.dwNeedLevel = row.size() > 19 ? u32(19) : 0;
-        t.dwDelayMs = row.size() > 20 ? u32(20) : 0;
-        t.dwWeaponSub = row.size() > 21 ? u32(21) : 0;
+        t.dwNeedTime  = row.size() > 20 ? u32(20) : 0;
+        t.dwDelayMs = row.size() > 21 ? u32(21) : 0;
+        t.dwWeaponSub = row.size() > 22 ? u32(22) : 0;
         m_oTypes[((uint64_t)t.dwType << 16) | (uint16_t)t.dwLevel] = t;
     }
     printf("[MAGIC] cq_magictype: %zu stage(s) loaded.\n", m_oTypes.size());
