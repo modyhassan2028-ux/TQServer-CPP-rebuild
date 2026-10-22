@@ -373,6 +373,59 @@ int main() {
     pDB->Query("DELETE FROM task_detail WHERE user_id=999002");
     printf("[ok] 1056 task new/delete/isexit match TaskDetail.dll FUN_1418b1a90/e80/3210\n");
 
+    // --- 1061 (case 0x34) + 1065 (case 0x38) + 1062/1063/1060/1064 ---
+    auto mkVar = [](uint32_t id, uint32_t t, const char* param) {
+        CDialogEngine::Node n; n.dwType = t; n.dwId = id; n.strParam = param; return n; };
+    { auto n = mkVar(8003050, 1061, "var(1) set 3"); assert( CGameAction::ProcessActionUser(u8, &n));
+      assert(u8->GetActionVar(1) == 3); }
+    { auto n = mkVar(8003041, 1061, "var(0) set 2"); assert( CGameAction::ProcessActionUser(u8, &n));
+      assert(u8->GetActionVar(0) == 2); }
+    { auto n = mkVar(0, 1061, "var(5) set %user_map_x"); assert(!CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mkVar(0, 1061, "var(9) set 5"); assert( CGameAction::ProcessActionUser(u8, &n));
+      assert(u8->GetActionVar(0) == 2 && u8->GetActionVar(7) == 0); }
+    // 1065: equipped-item family check
+    { auto n = mkVar(5100105, 1065, "3 137"); assert(!CGameAction::ProcessActionUser(u8, &n)); }
+    ItemInfo dress; dress.dwType = 137010; dress.dwPosition = 3; dress.strName = "GMRobe";
+    u8->AddItem(dress);
+    { auto n = mkVar(5100105, 1065, "3 137"); assert( CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mkVar(0, 1065, "3 135"); assert(!CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mkVar(0, 1065, "4 481"); assert(!CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mkVar(0, 1065, "137");   assert(!CGameAction::ProcessActionUser(u8, &n)); }
+    // 1063: string set (op word ignored), 1062: "==" compare (strcmp when type==1062)
+    { auto n = mkVar(0, 1063, "var(1) set 4"); assert( CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mkVar(9023620, 1062, "var(1) == 4"); assert( CGameAction::ProcessActionUser(u8, &n)); } // 1062 compares the STRING slot ('4'=='4')
+    assert(u8->GetActionVar(1) == 3); // numeric slot untouched by 1063
+    { auto n = mkVar(0, 1063, "var(2) set CannonBarrage"); assert( CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mkVar(0, 1062, "var(2) == cannonbarrage"); assert(!CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mkVar(0, 1062, "var(2) == CannonBarrage"); assert( CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mkVar(0, 1062, "var(2) != x"); assert(!CGameAction::ProcessActionUser(u8, &n)); } // op must be ==
+    { auto n = mkVar(9977076, 1063, "var(5) set %accept0"); assert( CGameAction::ProcessActionUser(u8, &n));
+      assert(strcmp(u8->GetActionVarStr(5), "%accept0") == 0); }
+    { auto n = mkVar(0, 1063, "var(1) set"); assert(!CGameAction::ProcessActionUser(u8, &n)); }
+    // 1064: numeric arithmetic on var(1) (currently 3)
+    { auto n = mkVar(0, 1064, "var(1) += 10"); assert( CGameAction::ProcessActionUser(u8, &n));
+      assert(u8->GetActionVar(1) == 13); }
+    { auto n = mkVar(0, 1064, "var(1) -= 5"); assert( CGameAction::ProcessActionUser(u8, &n));
+      assert(u8->GetActionVar(1) == 8); }
+    { auto n = mkVar(0, 1064, "var(2) *= 3"); assert( CGameAction::ProcessActionUser(u8, &n));
+      assert(u8->GetActionVar(2) == 0); }
+    { auto n = mkVar(0, 1064, "var(7) /= 0");   assert(!CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mkVar(0, 1064, "var(7) mod= 0"); assert(!CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mkVar(0, 1064, "var(7) |= 12"); assert( CGameAction::ProcessActionUser(u8, &n));
+      assert(u8->GetActionVar(7) == 12); }
+    { auto n = mkVar(0, 1064, "var(7) ^= 10"); assert( CGameAction::ProcessActionUser(u8, &n));
+      assert(u8->GetActionVar(7) == 6); } // 12 ^ 10 = 6
+    { auto n = mkVar(0, 1064, "var(1) = 5");   assert(!CGameAction::ProcessActionUser(u8, &n)); } // unknown op
+    // 1060: compare, var(1) currently 8
+    { auto n = mkVar(0, 1060, "var(1) > 7");  assert( CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mkVar(0, 1060, "var(1) > 8");  assert(!CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mkVar(0, 1060, "var(1) >= 8"); assert( CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mkVar(0, 1060, "var(1) >= 9"); assert(!CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mkVar(0, 1060, "var(1) == 8"); assert( CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mkVar(0, 1060, "var(1) < 9");  assert(!CGameAction::ProcessActionUser(u8, &n)); } // ORIGINAL quirk: "<" acts as "=="
+    { auto n = mkVar(0, 1060, "var(1) < 8");  assert( CGameAction::ProcessActionUser(u8, &n)); } // 8 == 8 via quirk
+    printf("[ok] 1060/1061/1062/1063/1064/1065 var-cluster actions verified\n");
+
 // --- 1027 (case 0x13): ORIGINAL FUN_140164440 = mate-id check ---
     // mirror real row 1211265 ("self angelwing"); the param is dead code
     auto mk1027 = [](uint32_t id, const char* param) {

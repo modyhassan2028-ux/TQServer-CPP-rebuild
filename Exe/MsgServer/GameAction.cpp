@@ -205,6 +205,44 @@ bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogE
         pUser->SetActionVarStr(nIdx, szVal);
         return true;
     }
+    case 1060: { // ORIGINAL var-cluster case 0x33: numeric var compare
+        // sscanf "var(%d) %s %I64d" -> FUN_1401644d0 (int64 getter).
+        // ORIGINAL only distinguishes three ops: ">" (var > value),
+        // ">=" (var >= value), ANYTHING ELSE -> equality. ("<", "<=",
+        // "!=" rows therefore act as "==" in the original server.)
+        int nIdx = 0; char szOp[64] = {0}; long long nValue = 0;
+        if (sscanf(pNode->strParam.c_str(), "var(%d) %63s %lld", &nIdx, szOp, &nValue) != 3) {
+            return false; // ORIGINAL: log "Wrong param number" -> 0
+        }
+        long long nVar = pUser->GetActionVar(nIdx);
+        if (strcmp(szOp, ">") == 0)  return nVar > nValue;
+        if (strcmp(szOp, ">=") != 0) return nVar == nValue; // not ">=" -> equality
+        return nVar >= nValue;
+    }
+    case 1064: { // ORIGINAL var-cluster case 0x37: numeric var arithmetic
+        // sscanf "var(%d) %s %I64d" -> get/set on the int64 slot
+        // (FUN_1401644d0 / FUN_140164520). Unknown op -> log + 0.
+        int nIdx = 0; char szOp[64] = {0}; long long nValue = 0;
+        if (sscanf(pNode->strParam.c_str(), "var(%d) %63s %lld", &nIdx, szOp, &nValue) != 3) {
+            return false; // ORIGINAL: log "Wrong param number" -> 0
+        }
+        long long nVar = pUser->GetActionVar(nIdx);
+        if (strcmp(szOp, "+=") == 0)   { pUser->SetActionVar(nIdx, nVar + nValue);  return true; }
+        if (strcmp(szOp, "-=") == 0)   { pUser->SetActionVar(nIdx, nVar - nValue);  return true; }
+        if (strcmp(szOp, "*=") == 0)   { pUser->SetActionVar(nIdx, nVar * nValue); return true; }
+        if (strcmp(szOp, "/=") == 0) {
+            if (nValue == 0) return false; // ORIGINAL: divide by zero -> 0
+            pUser->SetActionVar(nIdx, nVar / nValue); return true;
+        }
+        if (strcmp(szOp, "mod=") == 0) {
+            if (nValue == 0) return false;
+            pUser->SetActionVar(nIdx, nVar % nValue); return true;
+        }
+        if (strcmp(szOp, "&=") == 0)   { pUser->SetActionVar(nIdx, (long long)((uint64_t)nVar & (uint64_t)nValue)); return true; }
+        if (strcmp(szOp, "|=") == 0)   { pUser->SetActionVar(nIdx, (long long)((uint64_t)nVar | (uint64_t)nValue)); return true; }
+        if (strcmp(szOp, "^=") == 0)   { pUser->SetActionVar(nIdx, (long long)((uint64_t)nVar ^ (uint64_t)nValue)); return true; }
+        return false; // ORIGINAL: unknown op -> LAB_14013a784 (log + 0)
+    }
     case 1027: { // ORIGINAL switch case 0x13 -> FUN_140164440:
         // return (user->vtable+0x48)() != 0 - the mate id (cq_user.mateid).
         // NOTE: the cq_action param ("self angelwing", 3,379 rows) is NEVER
