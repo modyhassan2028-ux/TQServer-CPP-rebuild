@@ -32,6 +32,10 @@ public:
     void SetLife(uint32_t dwLife) { m_dwLife = dwLife; }
     void SetMaxLife(uint32_t dwMax) { m_dwMaxLife = dwMax; }
     bool IsAlive() const { return m_dwLife > 0; }
+    uint32_t GetAttack() const { return m_dwAttack; }
+    uint32_t GetDefense() const { return m_dwDefense; }
+    void SetAttack(uint32_t v) { m_dwAttack = v; }
+    void SetDefense(uint32_t v) { m_dwDefense = v; }
 
     uint32_t GetLevel() const { return m_dwLevel; }
     void SetLevel(uint32_t dwLevel) { m_dwLevel = dwLevel; }
@@ -49,4 +53,6 @@ private:
     uint32_t m_dwLife{100};
     uint32_t m_dwMaxLife{100};
     uint32_t m_dwLevel{1};
+    uint32_t m_dwAttack{10};
+    uint32_t m_dwDefense{2};
 };

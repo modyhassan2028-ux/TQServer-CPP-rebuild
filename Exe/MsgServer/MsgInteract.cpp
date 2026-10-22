@@ -6,6 +6,7 @@
 #include "Npc.h"
 #include "Guild.h"
 #include "MsgItem.h"
+#include "BattleSystem.h"
 #include "Item.h"
 #include "MsgTalk.h"
 
@@ -120,7 +121,7 @@ void CMsgInteract::Process(uint32_t dwSender) {
 
     // simple v1 damage: base + level scale + random, replaces the full
     // BattleSystem formula (crit/dodge/weapon types) which ports later
-    uint32_t dwDamage = 15 + pAttacker->GetLevel() * 5 + (std::rand() % 20);
+    uint32_t dwDamage = CBattleSystem::Instance().CalcMonsterDamage(pAttacker.get(), pMonster.get());
     uint32_t dwLife = pMonster->GetLife() > dwDamage ? pMonster->GetLife() - dwDamage : 0;
     pMonster->SetLife(dwLife);
 

@@ -24,17 +24,22 @@ CMonsterManager& CMonsterManager::Instance() {
 uint32_t CMonsterManager::SpawnFromDB(CMySQLClient* pDB) {
     if (!pDB) return 0;
     // 1) monster types
-    std::map<uint32_t, std::pair<std::string, std::pair<uint32_t, uint32_t>>> types; // id -> (name, (level, life))
-    if (!pDB->Query("SELECT id, name, level, life FROM cq_monstertype")) {
+    struct TypeDef { std::string name; uint32_t level, life, attack, defense; };
+    std::map<uint32_t, TypeDef> types; // id -> def
+    if (!pDB->Query("SELECT id, name, level, life, attack, defense FROM cq_monstertype")) {
         printf("[MONSTER] cq_monstertype load failed: %s\n", pDB->GetError().c_str());
         return 0;
     }
     for (auto& row : pDB->GetRows()) {
         if (row.size() < 4) continue;
+        TypeDef d;
         uint32_t id = (uint32_t)strtoul(row[0].c_str(), nullptr, 10);
-        uint32_t level = (uint32_t)strtoul(row[2].c_str(), nullptr, 10);
-        uint32_t life = (uint32_t)strtoul(row[3].c_str(), nullptr, 10);
-        types[id] = { row[1], { level, life } };
+        d.name = row[1];
+        d.level = (uint32_t)strtoul(row[2].c_str(), nullptr, 10);
+        d.life = (uint32_t)strtoul(row[3].c_str(), nullptr, 10);
+        d.attack = (row.size() > 4) ? (uint32_t)strtoul(row[4].c_str(), nullptr, 10) : 10;
+        d.defense = (row.size() > 5) ? (uint32_t)strtoul(row[5].c_str(), nullptr, 10) : 2;
+        types[id] = d;
     }
     if (types.empty()) return 0;
     // 2) generators (spawners), like NpcServer: mask order
@@ -63,12 +68,14 @@ uint32_t CMonsterManager::SpawnFromDB(CMySQLClient* pDB) {
                 uint32_t rx = 0, ry = 0;
                 if (pMap->RandomWalkableCell(rx, ry)) { spawnX = (uint16_t)rx; spawnY = (uint16_t)ry; }
             }
-            auto p = std::make_shared<CMonster>(m_dwNextId++, typeId, def.first);
+            auto p = std::make_shared<CMonster>(m_dwNextId++, typeId, def.name);
             p->SetMapId(mapId);
             p->SetSpawn(spawnX, spawnY);
-            p->SetLevel(def.second.first);
-            p->SetLife(def.second.second);
-            p->SetMaxLife(def.second.second);
+            p->SetLevel(def.level);
+            p->SetLife(def.life);
+            p->SetMaxLife(def.life);
+            p->SetAttack(def.attack);
+            p->SetDefense(def.defense);
             m_byMap[mapId].push_back(p);
             ++spawned;
         }

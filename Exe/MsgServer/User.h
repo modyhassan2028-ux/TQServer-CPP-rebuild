@@ -36,6 +36,8 @@ public:
     void SetLife(uint32_t dwLife) { m_dwLife = dwLife; }
 
     uint32_t GetBattlePower() const { return m_dwBattlePower; }
+    // cq_itemaddition attack granted by currently equipped gear
+    uint32_t GetEquipmentAttack() const { return m_dwBattlePower - m_dwBaseBP; }
     void SetBattlePower(uint32_t dwBP) { m_dwBattlePower = dwBP; }
 
     // GM & Economy attributes

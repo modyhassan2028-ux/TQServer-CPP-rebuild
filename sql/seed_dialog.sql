@@ -50,8 +50,11 @@ INSERT INTO cq_action VALUES
 
 -- monster world mirroring the built-in v1 spawn table
 DELETE FROM cq_monstertype;
-INSERT INTO cq_monstertype VALUES (1, 'Pheasant', 1, 30), (2, 'RoamingRat', 2, 50),
-                                   (10, 'SandMonk', 12, 400), (20, 'Bandit', 15, 500);
+INSERT INTO cq_monstertype VALUES
+ (1, 'Pheasant', 1, 30, 5, 0),
+ (2, 'RoamingRat', 2, 50, 12, 3),
+ (10, 'SandMonk', 12, 400, 45, 20),
+ (20, 'Bandit', 15, 500, 65, 30);
 DELETE FROM cq_generator;
 INSERT INTO cq_generator VALUES (1, 1, 1002, 2, 650, 320, 700, 380),
                                 (2, 2, 1002, 2, 560, 400, 620, 450),

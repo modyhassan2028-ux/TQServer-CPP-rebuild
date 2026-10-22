@@ -1,5 +1,7 @@
 ﻿#include "BattleSystem.h"
 #include "User.h"
+#include "Monster.h"
+#include <cstdlib>
 #include <random>
 
 CBattleSystem& CBattleSystem::Instance() {
@@ -15,9 +17,14 @@ uint32_t CBattleSystem::CalcPhysicalDamage(CUser* pAttacker, CUser* pTarget) {
     return static_cast<uint32_t>(1000 * multiplier);
 }
 
-uint32_t CBattleSystem::CalcMonsterDamage(CUser* pAttacker, CMonster*) {
+// player -> monster: level + equipment attack vs monster defense
+uint32_t CBattleSystem::CalcMonsterDamage(CUser* pAttacker, CMonster* pTarget) {
     if (!pAttacker) return 0;
-    return 1500;
+    uint32_t atk = 10 + pAttacker->GetLevel() * 3 + pAttacker->GetEquipmentAttack();
+    uint32_t def = pTarget ? pTarget->GetDefense() : 0;
+    if (def > atk * 4 / 5) def = atk * 4 / 5; // never fully negate
+    uint32_t base = atk - def;
+    return base + rand() % (base / 2 + 1);
 }
 
 bool CBattleSystem::CheckHit(CUser*, CUser*) { return true; }
