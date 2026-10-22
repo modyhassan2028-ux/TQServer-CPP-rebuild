@@ -104,6 +104,26 @@ public:
     const std::string& GetSpouseName() const { return m_strSpouse; }
     void SetSpouseName(const std::string& n) { m_strSpouse = n; }
 
+    // ORIGINAL user.cpp action vars: int64[8] at CUser+0x2f0 (set by action
+    // 1061, read by 1060) and std::string[8] at CUser+0x1b0 (set by 1063,
+    // compared by 1062). FUN_140164520/4d0 + FUN_1401645e0/570.
+    bool SetActionVar(int nIdx, int64_t nValue) {
+        if (nIdx < 0 || nIdx > 7) return false; // ORIGINAL: log + no-op
+        m_anActionVars[nIdx] = nValue; return true;
+    }
+    int64_t GetActionVar(int nIdx) const {
+        if (nIdx < 0 || nIdx > 7) return 0;
+        return m_anActionVars[nIdx];
+    }
+    bool SetActionVarStr(int nIdx, const std::string& str) {
+        if (nIdx < 0 || nIdx > 7) return false;
+        m_astrActionVars[nIdx] = str; return true;
+    }
+    const char* GetActionVarStr(int nIdx) const {
+        if (nIdx < 0 || nIdx > 7) return "";
+        return m_astrActionVars[nIdx].c_str();
+    }
+
     // ORIGINAL CUser vtable+0x48: the mate ID (cq_user.mateid). Lazily
     // loaded from cq_user on first use; 0 = unmarried.
     uint32_t GetSpouseID();
@@ -378,6 +398,8 @@ private:
     std::string m_strLastRewardDay;
     std::string m_strSpouse;
     uint32_t m_dwMateId{0};     // ORIGINAL cq_user.mateid
+    int64_t     m_anActionVars[8]{};   // ORIGINAL CUser+0x2f0
+    std::string m_astrActionVars[8];  // ORIGINAL CUser+0x1b0
     bool     m_bMateLoaded{false};
     uint32_t m_dwFishUntil{0};
     uint32_t m_dwMineUntil{0};

@@ -155,6 +155,16 @@ bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogE
         printf("[DIALOG] 1003: FlyMap error, Action[%u]\n", pNode->dwId);
         return false;
     }
+    case 1061: { // ORIGINAL var-cluster case 0x34 (FUN_140164520):
+        // sscanf "var(%d) %s %I64d" -> unconditional numeric set, return 1.
+        // The op word ("set") is ignored by the original server.
+        int nIdx = 0; char szOp[64] = {0}; long long nValue = 0;
+        if (sscanf(pNode->strParam.c_str(), "var(%d) %63s %lld", &nIdx, szOp, &nValue) == 3) {
+            pUser->SetActionVar(nIdx, nValue); // out-of-range idx: log + no-op
+            return true;                        // ORIGINAL returns 1 regardless
+        }
+        return false; // ORIGINAL: log "Wrong param number" (LAB_14013a784) + 0
+    }
     case 1027: { // ORIGINAL switch case 0x13 -> FUN_140164440:
         // return (user->vtable+0x48)() != 0 - the mate id (cq_user.mateid).
         // NOTE: the cq_action param ("self angelwing", 3,379 rows) is NEVER
