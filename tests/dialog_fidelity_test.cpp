@@ -887,25 +887,27 @@ int main() {
         { auto n = mkMgc(0, 2003, "garbage"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
         printf("[ok] 2003/2004 compares match cases 0x7d3/0x7d4 with %%id\n");
     }
-    // ---- 2008: count users on map by name/gen_id (case 0x7d8) ----
+    // ---- 2008: count map monsters by name/type (case 0x7d8, pairs with 2006) ----
     {
-        auto upA = std::make_shared<CUser>(999028); upA->SetName("SwordMaster");
-        CUserManager::Instance().AddUser(upA);
-        auto pMap = CMapManager::Instance().GetMap(1002); assert(pMap);
-        pMap->AddUser(upA); upA->SetMapId(1002);
-        auto upB = std::make_shared<CUser>(999029); upB->SetName("Knight2");
-        CUserManager::Instance().AddUser(upB);
-        pMap->AddUser(upB); upB->SetMapId(1002); upB->SetGenId(10992);
-        auto upC = std::make_shared<CUser>(999030); upC->SetName("Knight3");
-        CUserManager::Instance().AddUser(upC);
-        pMap->AddUser(upC); upC->SetMapId(1002); upC->SetGenId(10992);
-        { auto n = mkMgc(0, 2008, "1002 name SwordMaster == 1"); assert(CGameAction::ProcessActionUser(upA, &n)); }
-        { auto n = mkMgc(0, 2008, "1002 name SwordMaster == 2"); assert(!CGameAction::ProcessActionUser(upA, &n)); }
-        { auto n = mkMgc(0, 2008, "1002 gen_id 10992 == 2"); assert(CGameAction::ProcessActionUser(upA, &n)); }
-        { auto n = mkMgc(0, 2008, "1002 gen_id 10992 < 3"); assert(CGameAction::ProcessActionUser(upA, &n)); }
-        { auto n = mkMgc(0, 2008, "1002 gen_id 10992 < 2"); assert(!CGameAction::ProcessActionUser(upA, &n)); }
-        { auto n = mkMgc(0, 2008, "1002 bogus X == 1"); assert(!CGameAction::ProcessActionUser(upA, &n)); }
-        printf("[ok] 2008 map user counts match case 0x7d8\n");
+        auto upA = std::make_shared<CUser>(999028); upA->SetName("Cmp2008");
+        CUser& r = *upA;
+        r.SetMapId(1002);
+        // spawn: "0 0 1002 495 713 10992 4194 0 Yaksa" (real DB row pattern)
+        { auto n = mkMgc(0, 2006, "0 0 1002 495 713 10992 4194 0 Yaksa");
+          assert(CGameAction::ProcessActionUser(upA, &n)); }
+        { auto n = mkMgc(0, 2008, "1002 gen_id 10992 == 1"); assert(CGameAction::ProcessActionUser(upA, &n)); }
+        { auto n = mkMgc(0, 2008, "1002 gen_id 10992 == 2"); assert(!CGameAction::ProcessActionUser(upA, &n)); }
+        { auto n = mkMgc(0, 2008, "1002 gen_id 10992 < 2"); assert(CGameAction::ProcessActionUser(upA, &n)); }
+        { auto n = mkMgc(0, 2008, "1002 name Yaksa == 1"); assert(CGameAction::ProcessActionUser(upA, &n)); }
+        // duplicate name is rejected (ORIGINAL FUN_14008a1d0)
+        { auto n = mkMgc(0, 2006, "0 0 1002 496 714 10992 4195 0 Yaksa");
+          assert(!CGameAction::ProcessActionUser(upA, &n)); }
+        // banned name word rejected (GBK 管理 banned substring)
+        { auto n = mkMgc(0, 2006, "0 0 1002 10 10 10992 4196 0 \xb9\xdc\xc0\xed");
+          assert(!CGameAction::ProcessActionUser(upA, &n)); }
+        // parse failure
+        { auto n = mkMgc(0, 2006, "0 0"); assert(!CGameAction::ProcessActionUser(upA, &n)); }
+        printf("[ok] 2006 spawn + 2008 monster counts match cases 0x7d6/0x7d8\n");
     }
     // ---- 2012: mass teleport src_map->dst_map (case 0x7dc) ----
     {

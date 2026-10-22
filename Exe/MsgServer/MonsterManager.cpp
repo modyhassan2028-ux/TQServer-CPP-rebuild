@@ -163,6 +163,28 @@ void CMonsterManager::Stop() {
     m_bRunning.store(false);
 }
 
+std::shared_ptr<CMonster> CMonsterManager::SpawnDynamic(uint32_t dwMapId, uint16_t usX,
+                                                              uint16_t usY, uint32_t dwTypeId,
+                                                              uint32_t dwGenId, const std::string& strName) {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    // ORIGINAL: cq_action 2006 passes a spawn struct to the map-object
+    // manager (FUN_1400e1d30 vcall+0x20); unnamed spawns use the type name.
+    auto p = std::make_shared<CMonster>(m_dwNextId++, dwTypeId, strName);
+    p->SetMapId(dwMapId);
+    p->SetSpawn(usX, usY);
+    p->SetGenId(dwGenId);
+    m_byMap[dwMapId].push_back(p);
+    return p;
+}
+
+std::shared_ptr<CMonster> CMonsterManager::FindMonsterByName(const std::string& strName) {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    for (auto& kv : m_byMap)
+        for (auto& p : kv.second)
+            if (p->GetName() == strName) return p;
+    return nullptr;
+}
+
 std::vector<std::shared_ptr<CMonster>> CMonsterManager::GetMapMonsters(uint32_t dwMapId) {
     std::lock_guard<std::mutex> lock(m_mutex);
     auto it = m_byMap.find(dwMapId);

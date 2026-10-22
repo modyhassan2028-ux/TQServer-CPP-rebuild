@@ -10,6 +10,8 @@
 #include "Dialog.h"
 #include "MsgAction.h"
 #include "UserManager.h"
+#include "MonsterManager.h"
+#include "NameStrCheck.h"
 #include "MsgTalk.h"
 #include "MsgData.h"
 #include "GroupSystem.h"
@@ -1022,20 +1024,16 @@ bool bAll = (llAll == 1);
             printf("[LOGERR] cq_action %u type 2008 param (0x326e)\n", pNode->dwId);
             return false;
         }
-        auto pMap = CMapManager::Instance().GetMap(dwMap);
-        if (!pMap) return false; // ORIGINAL: missing map contributes 0 count
+        // DB pairing with 2006 spawns ("0 0 1000 495 713 10992 4194 0 Yaksa"
+        // guarded by "1000 gen_id 10992 < 1"): the counted objects are the
+        // dynamically spawned monsters - count by name / by type (gen id).
+        auto vec = CMonsterManager::Instance().GetMapMonsters(dwMap);
         int iCount = 0;
         if (!stricmp(szKind, "name")) {
-            for (uint32_t uid : pMap->GetUserIds()) { // count by name
-                auto u = CUserManager::Instance().GetUser(uid);
-                if (u && !_stricmp(u->GetName().c_str(), szTarget)) iCount++;
-            }
+            for (auto& m : vec) if (!_stricmp(m->GetName().c_str(), szTarget)) iCount++;
         } else if (!stricmp(szKind, "gen_id")) {
             uint32_t dwGen = strtoul(szTarget, nullptr, 10);
-            for (uint32_t uid : pMap->GetUserIds()) { // count by generator id
-                auto u = CUserManager::Instance().GetUser(uid);
-                if (u && u->GetGenId() == dwGen) iCount++;
-            }
+            for (auto& m : vec) if (m->GetTypeId() == dwGen || m->GetGenId() == dwGen) iCount++;
         } else {
             return false; // ORIGINAL: unknown kind -> return 0
         }
@@ -1054,6 +1052,35 @@ bool bAll = (llAll == 1);
             CMapManager::Instance().BroadcastToAll(talk.GetBuf(), talk.GetSize());
         }
         return true;
+    }
+    case 2006: { // ORIGINAL case 0x7d6: dynamic monster spawn
+        // sscanf "%d %u %u %d %d %u %u %d %s" = (f1, f2, map, x, y, type, gen,
+        // f8, name); >= 7 fields required else DBERR -> false.
+        // Name: > 35 chars -> false; NameStrCheck fail -> false; existing
+        // monster name (FUN_14008a1d0) -> false; empty -> ACTIONSTR_NONE
+        // spawn (unnamed, uses the type's name). The spawn record goes to the
+        // map-object manager (FUN_1400e1d30 vcall+0x20) -> bool.
+        std::string strP = pNode->strParam; pUser->ResolveActionVars(strP);
+        int32_t f1 = 0, f8 = 0, nX = 0, nY = 0; uint32_t f2 = 0, dwMap = 0, dwType = 0, dwGen = 0;
+        char szName[256] = {0};
+        if (sscanf(strP.c_str(), "%d %u %u %d %d %u %u %d %255s",
+                   &f1, &f2, &dwMap, &nX, &nY, &dwType, &dwGen, &f8, szName) < 7) {
+            printf("[DBERR] cq_action %u type 2006 param error\n", pNode->dwId);
+            return false;
+        }
+        std::string strName = szName;
+        if (!strName.empty()) {
+            if (strName.size() > 0x23) return false; // ORIGINAL: > 35 -> return 0
+            if (!tq::NameStrCheck(strName.c_str(), false)) return false;
+            if (CMonsterManager::Instance().FindMonsterByName(strName)) return false; // FUN_14008a1d0
+            auto pM = CMonsterManager::Instance().SpawnDynamic(dwMap, (uint16_t)nX, (uint16_t)nY,
+                                                              dwType, dwGen, strName);
+            return pM != nullptr;
+        }
+        // ORIGINAL: empty name -> ACTIONSTR_NONE -> vcall+0x20(struct, 0)
+        auto pM = CMonsterManager::Instance().SpawnDynamic(dwMap, (uint16_t)nX, (uint16_t)nY,
+                                                           dwType, dwGen, strName);
+        return pM != nullptr;
     }
     case 2012: { // ORIGINAL case 0x7dc: mass teleport "src_map dst_map x y"
         // sscanf "%u %u %d %d" = (srcMap, dstMap, x, y). Iterates the global map

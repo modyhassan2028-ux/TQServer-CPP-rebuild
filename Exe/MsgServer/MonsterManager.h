@@ -26,6 +26,12 @@ public:
 
     std::vector<std::shared_ptr<CMonster>> GetMapMonsters(uint32_t dwMapId);
     std::shared_ptr<CMonster> GetMonsterById(uint32_t dwMonsterId);
+    // cq_action 2006 (case 0x7d6): dynamic monster spawn; returns 0 on a
+    // name collision (ORIGINAL FUN_14008a1d0 path)
+    std::shared_ptr<CMonster> SpawnDynamic(uint32_t dwMapId, uint16_t usX, uint16_t usY,
+                                            uint32_t dwTypeId, uint32_t dwGenId,
+                                            const std::string& strName);
+    std::shared_ptr<CMonster> FindMonsterByName(const std::string& strName);
     // nearby player -> attack (v1 proximity, no visual chase); called by the AI tick
     void Aggro(std::shared_ptr<CMonster> pMonster);
     // step a live monster one cell toward the nearest player in sight

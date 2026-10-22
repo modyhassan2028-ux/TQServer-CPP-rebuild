@@ -21,6 +21,8 @@ public:
     void SetPos(uint16_t usX, uint16_t usY) { m_usX = usX; m_usY = usY; }
     void SetSpawn(uint16_t usX, uint16_t usY) { m_usSpawnX = usX; m_usSpawnY = usY; SetPos(usX, usY); }
 
+    uint32_t GetGenId() const { return m_dwGenId; } // dynamic spawn gen (2006)
+    void SetGenId(uint32_t g) { m_dwGenId = g; }
     uint8_t GetDir() const { return m_ucDir; }
     // cross-realm beast: kill is announced on every server via the cross hub
     bool IsCross() const { return m_bCross; }
@@ -50,6 +52,7 @@ public:
 private:
     uint32_t m_dwId;
     uint32_t m_dwTypeId;
+    uint32_t m_dwGenId{0};
     std::string m_name;
     uint32_t m_dwMapId{1002};
     uint16_t m_usX{0};
