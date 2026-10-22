@@ -6,6 +6,7 @@
 #include "PlayerMagic.h"
 #include "Log.h"
 #include "Dialog.h"
+#include "Item.h"
 #include "Npc.h"
 #include "Npc.h" // CNpcManager lives here
 
@@ -120,9 +121,114 @@ bool CGameAction::ProcessActionOS(std::shared_ptr<CUser> pUser, const CDialogEng
 // Ported so far: 1001 (condition). Unknown types pass open exactly like
 // the pre-port walk did, until each case is translated from the decompile.
 // ---------------------------------------------------------------------------
+namespace {
+    // ORIGINAL FUN_1401188e0 (gameaction.cpp): the 501 award core.
+    // type-validate (FUN_14034a8d0) -> factory alloc (vtable+0x60) ->
+    // init from the info struct (FUN_140331120) -> inventory add + client
+    // sync (mgr vtable+0x130, mode 3). We mirror with CItemLibrary
+    // (cq_itemtype) + a runtime id allocator + CUser::AddItem.
+    uint32_t g_dwItemSeq = 100000;
+    bool AwardItem(std::shared_ptr<CUser> pUser, uint32_t dwType, const int64_t (&n)[19]) {
+        if (!pUser) return false; // ORIGINAL param_2 null check
+        const ItemTypeDef* pDef = CItemLibrary::Instance().Lookup(dwType);
+        if (!pDef) return false;  // FUN_14034a8d0 rejects unknown type
+        ItemInfo item;
+        item.dwId = MakeItemId(g_dwItemSeq++);
+        item.dwType = dwType;                 // struct[0]: cq_action.data
+        CItemLibrary::Instance().Apply(item);  // name/sort from cq_itemtype
+        if (n[0] > 0) item.usDurability = (uint16_t)n[0]; // field 1 ("4500")
+        item.dwPosition = n[3] ? (uint32_t)n[3] : 255;     // field 4: 255 = bag
+        item.dwAmount = 1;
+        printf("[USER] %u award item %u (%s) dur=%u pos=%u (item sync mode 3)\n",
+               pUser->GetId(), dwType, item.strName.c_str(), item.usDurability, item.dwPosition);
+        pUser->AddItem(item);
+        return true;
+    }
+}
+
+namespace {
+    // ORIGINAL 502/503 finders: by itemtype from the data column
+    // (FUN_14032f2e0(user, type, count, flag)) or by name from the param
+    // (FUN_14032f1a0(user, name, count)) - skipped when the name is the
+    // STR_NO_ITEM_NAME marker ("noname").
+    ItemInfo* FindActionItem(std::shared_ptr<CUser> pUser, uint32_t dwData,
+                             const char* szName) {
+        auto& inv = pUser->GetInventory();
+        if (dwData != 0) {
+            for (auto& it : inv) if (it.dwType == dwData) return &it;
+            return nullptr;
+        }
+        if (szName[0] != 0 && _stricmp(szName, "noname") != 0)
+            for (auto& it : inv)
+                if (_stricmp(it.strName.c_str(), szName) == 0) return &it;
+        return nullptr;
+    }
+}
+
 bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode) {
     if (!pUser || !pNode) return false;
     switch (pNode->dwType) {
+
+    case 501: { // ORIGINAL case 0x1f5 (FUN_140123590): award item
+        // Type = cq_action.data (node vtable GetData(4)). Param = the
+        // 19-field CItemInfo spec; the 2nd conversion (local_734 in the
+        // original) is the AWARD COUNT: 0/missing -> award once, return
+        // the award result; > 0 -> award up to N, first failure stops the
+        // loop and STILL returns true; < 0 -> fall out -> 0. Field 4 =
+        // position (255 = inventory), 8th struct field defaults to 3,
+        // fields 12/13 = gem slots ("... 3 3"). All 20,956 DB rows use
+        // count 0 (award once).
+        int64_t n[19] = {0};
+        sscanf(pNode->strParam.c_str(),
+               "%lld %lld %lld %lld %lld %lld %lld %lld %lld %lld %lld %lld"
+               " %lld %lld %lld %lld %lld %lld %lld",
+               &n[0], &n[1], &n[2], &n[3], &n[4], &n[5], &n[6], &n[7], &n[8],
+               &n[9], &n[10], &n[11], &n[12], &n[13], &n[14], &n[15], &n[16],
+               &n[17], &n[18]);
+        if (n[1] == 0)
+            return AwardItem(pUser, pNode->dwData, n);
+        if (n[1] > 0) {
+            for (int64_t i = 0; i < n[1]; i++)
+                if (!AwardItem(pUser, pNode->dwData, n)) return true; // ORIGINAL: stop, still true
+            return true;
+        }
+        return false;
+    }
+    case 502: { // ORIGINAL case 0x1f6: erase item by type (data col) or name
+        // sscanf "%s %d %d": name, count-ish (local_738, default 1) and the
+        // delete-all flag (3rd field == 1). Lookup by type uses the data
+        // column; lookup by NAME only when the param has a name and it is
+        // NOT the STR_NO_ITEM_NAME marker ("noname" in the original string
+        // table - DB rows carry "noname 0"/"noname 1"). Item must exist,
+        // then one delete (FUN_140340190(user, id, 1, 1)) -> true.
+        char szName[256] = {0};
+        int64_t llA = 1, llAll = 0;
+        sscanf(pNode->strParam.c_str(), "%255s %lld %lld", szName, &llA, &llAll);
+bool bAll = (llAll == 1);
+        auto& inv = pUser->GetInventory();
+        bool bRemoved = false;
+        for (size_t i2 = 0; i2 < inv.size(); ) {
+            if (FindActionItem(pUser, pNode->dwData, szName) == &inv[i2]) {
+                printf("[USER] %u erase item %u (%s)\n", pUser->GetId(), inv[i2].dwType, inv[i2].strName.c_str());
+                inv.erase(inv.begin() + i2);
+                bRemoved = true;
+                if (!bAll) break;
+                continue;
+            }
+            i2++;
+        }
+        return bRemoved; // not found -> ORIGINAL plVar12 == 0 -> false
+    }
+    case 503: { // ORIGINAL case 0x1f7: check user carries the item
+        // Same finder as 502 (type from data col / name from param,
+        // "noname" marker), then flag gates (FUN_1400ffc20,
+        // FUN_1400ff650(item,1|2), FUN_1403380a0, FUN_1400ffbe0) that all
+        // pass for an ordinary inventory item -> ported as "found".
+        char szName[256] = {0};
+        int64_t llA = 1, llAll = 0;
+        sscanf(pNode->strParam.c_str(), "%255s %lld %lld", szName, &llA, &llAll);
+        return FindActionItem(pUser, pNode->dwData, szName) != nullptr; // not found -> false
+    }
     case 1001: // ORIGINAL switch case 0: user data condition ("field op value")
         return ProcessDataCondition(pUser, pNode->strParam);
     case 1003: { // ORIGINAL switch case 2: teleport "mapid x y [force]"

@@ -35,6 +35,7 @@ int main() {
     assert(CDialogEngine::Instance().LoadFromDB(pDB) > 190000);
     printf("[ok] cq_action loaded\n");
     assert(CMagicTypePool::Instance().LoadFromDB(pDB));
+    assert(CItemLibrary::Instance().LoadFromDB(pDB) > 20000); // cq_itemtype
     printf("[ok] cq_magictype loaded (%zu stages)\n", CMagicTypePool::Instance().Count());
     // maps from the ORIGINAL cq_map table (map-doc materialization)
     CMapManager::Instance().LoadMapsFromDb(pDB);
@@ -503,6 +504,46 @@ int main() {
     { auto n = mkMgc(0, 1001, "crime == 0");     assert( CGameAction::ProcessActionUser(u11, &n)); }
     { auto n = mkMgc(0, 1001, "life");           assert(!CGameAction::ProcessActionUser(u11, &n)); } // 1 token -> 0
     printf("[ok] 1001 ACTION_USER_ATTR 47-field chain matches the original case-0 body\n");
+
+    // --- 501/502 (cases 0x1f5/0x1f6): award / erase item, real rows ---
+    { auto n = mkMgc(10026, 501, "0 0 0 0 0 0 0 0 0 0 0 3 3"); n.dwData = 1200000;
+      assert( CGameAction::ProcessActionUser(u11, &n)); } // real row 10026: SparrowBlade once
+    assert(u11->GetInventory().size() == 1);
+    assert(u11->GetInventory()[0].dwType == 1200000);
+    assert(u11->GetInventory()[0].dwPosition == 255);      // field 4 default: bag
+    { auto n = mkMgc(60241, 501, "4500"); n.dwData = 410139;
+      assert( CGameAction::ProcessActionUser(u11, &n)); }  // real row: PrayingStone(S), dur spec
+    assert(u11->GetInventory()[1].dwType == 410139);
+    assert(u11->GetInventory()[1].usDurability == 4500);
+    { auto n = mkMgc(0, 501, "0 3"); n.dwData = 721020;    // MoonBox x3 (count = field 2)
+      assert( CGameAction::ProcessActionUser(u11, &n)); }
+    assert(u11->CountItems(721020, 0) == 3);
+    { auto n = mkMgc(0, 501, "0 -1"); n.dwData = 1200000;  // negative count -> ORIGINAL fall -> 0
+      assert(!CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 501, ""); n.dwData = 999999999;    // unknown itemtype -> FUN_14034a8d0 fail
+      assert(!CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(3603581, 502, "MoonBox"); n.dwData = 0; // real row: erase by name
+      assert( CGameAction::ProcessActionUser(u11, &n)); }
+    assert(u11->CountItems(721020, 0) == 2);
+    { auto n = mkMgc(0, 502, "noname 1 1"); n.dwData = 721020; // name marker ignored, type-based, flag(3rd)=delete-all
+      assert( CGameAction::ProcessActionUser(u11, &n)); }
+    assert(u11->CountItems(721020, 0) == 0);
+    { auto n = mkMgc(0, 502, "MoonBox"); n.dwData = 0;      // nothing to erase -> false
+      assert(!CGameAction::ProcessActionUser(u11, &n)); }
+    // 503 (case 0x1f7): carry-check, real row shapes
+    { auto n = mkMgc(0, 503, "noname 0"); n.dwData = 1200000; // carrying SparrowBlade -> true
+      assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 503, "MoonBox"); n.dwData = 0;        // name-based, all erased -> false
+      assert(!CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 503, ""); n.dwData = 1080001;          // Emerald not carried -> false
+      assert(!CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 501, ""); n.dwData = 1080001;          // award Emerald (data-col row shape)
+      assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 503, ""); n.dwData = 1080001;          // now carried -> true
+      assert( CGameAction::ProcessActionUser(u11, &n)); }
+    printf("[ok] 503 carry-check matches case 0x1f7\n");
+
+    printf("[ok] 501/502 award/erase item matches cases 0x1f5/0x1f6\n");
 
 // --- 1027 (case 0x13): ORIGINAL FUN_140164440 = mate-id check ---
     // mirror real row 1211265 ("self angelwing"); the param is dead code
