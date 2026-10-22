@@ -542,6 +542,36 @@ int main() {
     { auto n = mkMgc(0, 503, ""); n.dwData = 1080001;          // now carried -> true
       assert( CGameAction::ProcessActionUser(u11, &n)); }
     printf("[ok] 503 carry-check matches case 0x1f7\n");
+    // --- 121 (case 0x79): chance check ---
+    { auto n = mkMgc(0, 121, "1000 1000"); assert( CGameAction::ProcessActionOS(u11, &n)); } // always
+    { auto n = mkMgc(0, 121, "0 1");      assert(!CGameAction::ProcessActionOS(u11, &n)); } // RandGet(1)=0 < 0 false
+    { auto n = mkMgc(0, 121, "13 1000"); // real row shape: 1.3% - accept either, but verify call works
+      auto n2 = n; (void)CGameAction::ProcessActionOS(u11, &n2); }
+    { auto n = mkMgc(0, 121, "30");       assert(!CGameAction::ProcessActionOS(u11, &n)); } // 1 field -> 0
+    // --- 122 (case 0x7a): one of 8 ids at random, always true ---
+    { auto n = mkMgc(0, 122, "0 0 0 0 0 0 0 0"); // real row shape: picks 0, no-op
+      assert( CGameAction::ProcessActionOS(u11, &n)); }
+    { auto n = mkMgc(0, 122, "0");        assert(!CGameAction::ProcessActionOS(u11, &n)); } // <8 -> 0
+    // --- 123 (case 0x7b): time windows ---
+    { auto n = mkMgc(0, 123, "2011-12-22 00:00 2012-01-12 23:59"); n.dwData = 0; // real row: expired
+      assert(!CGameAction::ProcessActionOS(u11, &n)); }
+    { auto n = mkMgc(0, 123, "0 00:00 6 23:59"); n.dwData = 3;    // full week -> always true
+      assert( CGameAction::ProcessActionOS(u11, &n)); }
+    { auto n = mkMgc(0, 123, "3 02:00 3 01:59"); n.dwData = 3;    // empty window -> false
+      assert(!CGameAction::ProcessActionOS(u11, &n)); }
+    { auto n = mkMgc(0, 123, "00:00 23:59"); n.dwData = 4;      // whole day -> true
+      assert( CGameAction::ProcessActionOS(u11, &n)); }
+    { auto n = mkMgc(0, 123, "5 5"); n.dwData = 5;                // bad mode -> false (ORIGINAL unknown -> 0)
+      n.dwData = 9; assert(!CGameAction::ProcessActionOS(u11, &n)); }
+    // --- 127 (case 0x7f): raw SQL ---
+    { auto n = mkMgc(0, 127, "INSERT INTO cq_log (user_id, task_id, time) VALUES (999003, 990, 1770000000)"); // valid -> true
+      assert( CGameAction::ProcessActionOS(u11, &n));
+      auto n2 = mkMgc(0, 127, "DELETE FROM cq_log WHERE task_id=990");
+      assert( CGameAction::ProcessActionOS(u11, &n2)); }
+    { auto n = mkMgc(0, 127, "INSERT INTO cq_log set user_id='%user_id'"); // real row: %user_id is broken SQL -> false
+      assert(!CGameAction::ProcessActionOS(u11, &n)); }
+    printf("[ok] 121/122/123/127 OS-side cases match 0x79/0x7a/0x7b/0x7f\n");
+
 
     printf("[ok] 501/502 award/erase item matches cases 0x1f5/0x1f6\n");
 

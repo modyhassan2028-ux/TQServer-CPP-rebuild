@@ -2,6 +2,8 @@
 #include "UserTask.h"
 #include "MsgDialog.h"
 #include "User.h"
+#include "Account.h"
+#include "MySQLClient.h"
 #include "MapManager.h"
 #include "PlayerMagic.h"
 #include "Log.h"
@@ -31,6 +33,8 @@
 namespace {
     // count guard like the original chain loop (it bails on runaway trees)
     constexpr uint32_t kMaxChainSteps = 128;
+    // ORIGINAL tq::RandGet(max): random value in [0, max)
+    uint32_t RandGet(uint32_t uMax) { return uMax ? (uint32_t)rand() % uMax : 0; }
 
     const char* FirstToken(const char* p) {
         while (p && *p == ' ') p++;
@@ -100,6 +104,100 @@ bool CGameAction::ProcessActionOS(std::shared_ptr<CUser> pUser, const CDialogEng
         if (!dlg.Create(CMsgDialog::Mode_Link, szText, 0, 0)) return false;
         pUser->SendMsg(dlg.GetBuf(), dlg.GetSize());
         return true;
+    }
+    case 121: { // ORIGINAL case 0x79: chance check "%d %d"
+        // ORIGINAL: if sscanf got 2 fields -> return tq::RandGet(p2) < p1;
+        // bad param -> DBERROR log + break (-> 0)
+        int p1 = 0, p2 = 0;
+        if (sscanf(param.c_str(), "%d %d", &p1, &p2) > 1)
+            return (int)RandGet((uint32_t)p2) < p1;
+        printf("[DIALOG] type 121 bad param (ORIGINAL log DBERROR)\n");
+        return false;
+    }
+    case 122: { // ORIGINAL case 0x7a: execute ONE of 8 action ids at random
+        // sscanf "%u %u %u %u %u %u %u %u" -> ids[RandGet(8)], then
+        // FUN_140145f60 executes that action and the case returns true.
+        // Zero ids (160 DB rows) execute the no-op action 0 like the original.
+        uint32_t ids[8] = {0};
+        if (sscanf(param.c_str(), "%u %u %u %u %u %u %u %u",
+                   &ids[0], &ids[1], &ids[2], &ids[3],
+                   &ids[4], &ids[5], &ids[6], &ids[7]) == 8) {
+            uint32_t dwPick = ids[RandGet(8)];
+            if (dwPick != 0 && CDialogEngine::Instance().HasNode(dwPick))
+                ProcessActionOS(pUser, CDialogEngine::Instance().GetNode(dwPick));
+            // ORIGINAL FUN_140145f60 chain-runs the picked id; our engine
+            // recursion mirrors the dispatch. Always true after.
+            return true;
+        }
+        printf("[DIALOG] type 122 bad param (ORIGINAL log DBERROR)\n");
+        return false;
+    }
+    case 123: { // ORIGINAL case 0x7b: time-window check (FUN_140088a30)
+        // mode = cq_action.data (GetData(4)). True when "now" is inside
+        // the window. Modes: 0 = full datetime, 1 = month-day (this year),
+        // 3 = weekday-of-week HH:MM, 4 = daily HH:MM, 5 = daily minutes.
+        time_t tNow = time(nullptr);
+        tm* ptm = localtime(&tNow);
+        if (!ptm) return false;
+        int n1, n2, n3, n4, n5, n6, n7, n8, n9, n10;
+        switch (pNode->dwData) {
+        case 0: // "%d-%d-%d %d:%d %d-%d-%d %d:%d"
+            if (sscanf(param.c_str(), "%d-%d-%d %d:%d %d-%d-%d %d:%d",
+                       &n1, &n2, &n3, &n4, &n5, &n6, &n7, &n8, &n9, &n10) != 10)
+                return false;
+            {
+                tm a = *ptm; a.tm_year = n1 - 1900; a.tm_mon = n2 - 1; a.tm_mday = n3;
+                a.tm_hour = n4; a.tm_min = n5; a.tm_sec = 0; a.tm_isdst = -1;
+                tm b = *ptm; b.tm_year = n6 - 1900; b.tm_mon = n7 - 1; b.tm_mday = n8;
+                b.tm_hour = n9; b.tm_min = n10; b.tm_sec = 59; b.tm_isdst = -1;
+                time_t ta = mktime(&a), tb = mktime(&b);
+                return tNow >= ta && tNow <= tb; // ORIGINAL: start <= now <= end(sec 59)
+            }
+        case 1: { // "%d-%d %d:%d %d-%d %d:%d" (current year)
+            if (sscanf(param.c_str(), "%d-%d %d:%d %d-%d %d:%d",
+                       &n1, &n2, &n3, &n4, &n5, &n6, &n7, &n8) != 8)
+                return false;
+            int y = ptm->tm_year + 1900;
+            tm a = *ptm; a.tm_year = y - 1900; a.tm_mon = n1 - 1; a.tm_mday = n2;
+            a.tm_hour = n3; a.tm_min = n4; a.tm_sec = 0; a.tm_isdst = -1;
+            tm b = *ptm; b.tm_year = y - 1900; b.tm_mon = n5 - 1; b.tm_mday = n6;
+            b.tm_hour = n7; b.tm_min = n8; b.tm_sec = 59; b.tm_isdst = -1;
+            time_t ta = mktime(&a), tb = mktime(&b);
+            return tNow >= ta && tNow <= tb;
+        }
+        case 3: { // "%d %d:%d %d %d:%d": weekday window, minutes-of-week
+            if (sscanf(param.c_str(), "%d %d:%d %d %d:%d",
+                       &n1, &n2, &n3, &n4, &n5, &n6) != 6) return false;
+            uint32_t dwCur = ((uint32_t)ptm->tm_wday * 24 + ptm->tm_hour) * 60 + ptm->tm_min;
+            uint32_t dwStart = ((uint32_t)n1 * 24 + n2) * 60 + n3;
+            uint32_t dwEnd = ((uint32_t)n4 * 24 + n5) * 60 + n6;
+            return dwCur >= dwStart && dwCur <= dwEnd; // ORIGINAL minutes-of-week
+        }
+        case 4: { // "%d:%d %d:%d": daily HH:MM window
+            if (sscanf(param.c_str(), "%d:%d %d:%d", &n1, &n2, &n3, &n4) != 4)
+                return false;
+            uint32_t dwCur = (uint32_t)ptm->tm_hour * 60 + ptm->tm_min;
+            return dwCur >= (uint32_t)(n1 * 60 + n2) && dwCur <= (uint32_t)(n3 * 60 + n4);
+        }
+        case 5: { // "%d %d": daily minute window
+            if (sscanf(param.c_str(), "%d %d", &n1, &n2) != 2) return false;
+            uint32_t dwCur = (uint32_t)ptm->tm_hour * 60 + ptm->tm_min;
+            return dwCur >= (uint32_t)n1 && dwCur <= (uint32_t)n2;
+        }
+        default:
+            return false; // ORIGINAL FUN_140088a30: unknown mode -> 0
+        }
+    }
+    case 127: { // ORIGINAL case 0x7f: raw SQL exec, param is the statement
+        // InstanceGet()->ExecuteSQL(param); failure logs "bad SQL" and
+        // returns false. Logging rows carry %user_id templates that fail
+        // as-is, exactly like the original engine (chain takes id_nextfail).
+        auto* pDB = CAccountManager::Instance().GetDB();
+        if (pDB && pDB->Query(param))
+            return true;
+        printf("[DIALOG] type 127 bad SQL: %s (ORIGINAL log DBERROR)\n",
+               pDB ? pDB->GetError().c_str() : "no db");
+        return false;
     }
     default: {
         // remaining OS types (106..132) not ported yet: log once per
