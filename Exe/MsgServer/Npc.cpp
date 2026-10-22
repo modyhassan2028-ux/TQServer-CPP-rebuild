@@ -1,4 +1,6 @@
 ﻿#include "Npc.h"
+#include "Dialog.h"
+#include "Account.h"
 #include "User.h"
 #include "UserManager.h"
 #include "MsgTalk.h"
@@ -10,6 +12,23 @@ CNpc::CNpc(uint32_t dwId, const std::string& name, Type type,
     : m_dwId(dwId), m_name(name), m_type(type),
       m_dwMapId(dwMapId), m_usX(usX), m_usY(usY) {}
 
+
+// shows a cq_action node: its text plus the numbered options beneath it
+static void ShowDialogNode(std::shared_ptr<CUser> pUser, uint32_t dwNodeId) {
+    auto& eng = CDialogEngine::Instance();
+    auto* pNode = eng.GetNode(dwNodeId);
+    if (!pNode) return;
+    pUser->SetDialogNode(dwNodeId);
+    if (!pNode->strText.empty()) pUser->SendSysMsg(pNode->strText);
+    auto opts = eng.GetOptions(dwNodeId);
+    if (!opts.empty()) {
+        std::string menu = "Options:";
+        uint32_t i = 1;
+        for (auto& o : opts) menu += "\n  " + std::to_string(i++) + ". " + o.strText;
+        pUser->SendSysMsg(menu);
+    }
+}
+
 void CNpc::Interact(std::shared_ptr<CUser> pUser) {
     if (!pUser) return;
     if (pUser->GetMapId() != m_dwMapId) {
@@ -17,6 +36,11 @@ void CNpc::Interact(std::shared_ptr<CUser> pUser) {
         return;
     }
     pUser->SetTalkingNpc(GetId()); // digit replies now route to this NPC
+    // cq_action dialog tree (original 6159 system) takes priority when loaded
+    if (m_dwActionId && CDialogEngine::Instance().HasNode(m_dwActionId)) {
+        ShowDialogNode(pUser, m_dwActionId);
+        return;
+    }
     if (!m_strDialog.empty()) pUser->SendSysMsg(m_strDialog);
     // numbered menu (original 6159 style: pick by replying with the number)
     if (!m_options.empty()) {
@@ -55,6 +79,75 @@ void CNpc::Interact(std::shared_ptr<CUser> pUser) {
 
 bool CNpc::ChooseOption(std::shared_ptr<CUser> pUser, uint32_t dwIndex) {
     if (!pUser) return false;
+    // cq_action tree: follow the numbered option the player picked
+    if (m_dwActionId && CDialogEngine::Instance().IsLoaded()) {
+        uint32_t dwCur = pUser->GetDialogNode();
+        if (!dwCur || !CDialogEngine::Instance().HasNode(dwCur)) dwCur = m_dwActionId;
+        auto opts = CDialogEngine::Instance().GetOptions(dwCur);
+        if (dwIndex >= 1 && dwIndex <= opts.size()) {
+            auto& o = opts[dwIndex - 1];
+            auto* pOpt = CDialogEngine::Instance().GetNode(o.dwTargetNode);
+            if (!pOpt) return false;
+            switch (pOpt->dwType) {
+            case 2: { // accept task: param = task id
+                uint32_t dwTaskId = (uint32_t)strtoul(pOpt->strParam.c_str(), nullptr, 10);
+                if (pUser->HasActiveTask()) { pUser->SendSysMsg("Finish your current task first!"); return true; }
+                // look the task up in the data library
+                auto& tasks = CNpcManager::Instance().GetTasks();
+                for (const auto& d : tasks) {
+                    if (d.dwId != dwTaskId) continue;
+                    if (pUser->GetLevel() < d.dwMinLevel) {
+                        pUser->SendSysMsg("Come back at level " + std::to_string(d.dwMinLevel) + ".");
+                        return true;
+                    }
+                    pUser->m_task.dwNpcId = GetId();
+                    pUser->m_task.dwMonsterType = d.dwMonsterType;
+                    pUser->m_task.dwNeeded = d.dwCount;
+                    pUser->m_task.dwDone = 0;
+                    pUser->m_task.dwRewardMoney = d.dwMoney;
+                    pUser->m_task.dwRewardCp = d.dwCp;
+                    pUser->SendSysMsg("Task accepted: " + d.strName + "! Kill " +
+                                      std::to_string(d.dwCount) + " monster(s), then return.");
+                    return true;
+                }
+                pUser->SendSysMsg("That task is not available.");
+                return true;
+            }
+            case 3: { // turn-in: reuse the v1 flow by delegating to a matching static option
+                if (pUser->HasActiveTask() && pUser->m_task.dwDone >= pUser->m_task.dwNeeded) {
+                    pUser->AddMoney(pUser->m_task.dwRewardMoney);
+                    pUser->AddConquerPoints(pUser->m_task.dwRewardCp);
+                    pUser->SendSysMsg("Task complete! Reward: " +
+                                      std::to_string(pUser->m_task.dwRewardMoney) + " money, " +
+                                      std::to_string(pUser->m_task.dwRewardCp) + " CP.");
+                    pUser->m_task = {};
+                    return true;
+                }
+                pUser->SendSysMsg(pUser->HasActiveTask()
+                    ? "Not done yet: " + std::to_string(pUser->m_task.dwDone) + "/" +
+                      std::to_string(pUser->m_task.dwNeeded) + " killed."
+                    : "You have no task with me.");
+                return true;
+            }
+            case 4: { // teleport: param = "map,x,y"
+                uint32_t map = 0; int x = 0, y = 0;
+                if (sscanf(pOpt->strParam.c_str(), "%u,%d,%d", &map, &x, &y) == 3 && map) {
+                    pUser->SetDialogNode(0);
+                    pUser->Teleport(map, (uint16_t)x, (uint16_t)y);
+                    return true;
+                }
+                pUser->SendSysMsg("This gate is broken (bad param).");
+                return true;
+            }
+            default: // 0/1: just walk the tree
+                pUser->SetDialogNode(0);
+                ShowDialogNode(pUser, pOpt->dwNext);
+                return true;
+            }
+        }
+        pUser->SendSysMsg("No such option. Talk to me again.");
+        return false;
+    }
     if (dwIndex == 0 || dwIndex > m_options.size()) {
         pUser->SendSysMsg("No such option. Talk to me again (/npc " +
                           std::to_string(m_dwId) + ").");
@@ -216,6 +309,9 @@ void CNpcManager::SpawnDefaults() {
     m_npcs[pDesertToTc->GetId()] = pDesertToTc;
 
     LoadTasks("data/tasks.ini"); // data-driven task library (before TaskMaster menu)
+    // original 6159 system: cq_action dialog trees from MySQL
+    if (CAccountManager::Instance().IsMySQLMode() && CAccountManager::Instance().GetDB())
+        CDialogEngine::Instance().LoadFromDB(CAccountManager::Instance().GetDB());
 
     // Twin City hub: gates to every base map (coords land on walkable dmap cells
     // once real maps are indexed; synthetic maps fall back to these values)
@@ -273,6 +369,7 @@ void CNpcManager::SpawnDefaults() {
         auto pTm = std::make_shared<CNpc>(NPC_ID_BASE + 5, "TaskMaster",
             CNpc::Type::Healer, 1002, 315, 260); // type unused; menu-driven
         pTm->m_dwLookface = 8305;
+        pTm->m_dwActionId = 5000; // cq_action tree root (sql/seed_dialog.sql)
         pTm->m_strDialog = "Adventurer! I have work for hunters of any skill.";
         for (const auto& d : m_taskDefs) {
             if (d.dwNpcId != pTm->GetId()) continue;

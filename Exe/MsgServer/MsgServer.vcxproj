@@ -85,6 +85,7 @@
     <ClCompile Include="Npc.cpp" />
     <ClCompile Include="MsgNpcInfo.cpp" />
     <ClCompile Include="MySQLClient.cpp" />
+    <ClCompile Include="Dialog.cpp" />
     <ClCompile Include="BattleSystem.cpp" />
     <ClCompile Include="DMap.cpp" />
     <ClCompile Include="..\..\Core\CQBase\SHA1.cpp" />

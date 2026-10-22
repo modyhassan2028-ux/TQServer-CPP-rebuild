@@ -54,6 +54,9 @@ public:
     // last NPC the player talked to; digit replies route to its dialog menu
     void SetTalkingNpc(uint32_t id) { m_dwTalkingNpc = id; }
     uint32_t GetTalkingNpc() const { return m_dwTalkingNpc; }
+    // cq_action dialog tree position (0 = no tree open)
+    void SetDialogNode(uint32_t id) { m_dwDialogNode = id; }
+    uint32_t GetDialogNode() const { return m_dwDialogNode; }
     void SetMoney(uint64_t money) { m_dwMoney = money; }
     void AddMoney(int64_t amount) { m_dwMoney = (amount < 0 && (uint64_t)(-amount) > m_dwMoney) ? 0 : m_dwMoney + amount; }
 
@@ -111,6 +114,7 @@ private:
     uint64_t m_dwBank{0};
     uint32_t m_dwPkPoints{0};
     uint32_t m_dwTalkingNpc{0};
+    uint32_t m_dwDialogNode{0};
     uint32_t m_dwAccountId{0};
     uint32_t m_dwEmoney{0};
     uint8_t m_ucLevel{1};

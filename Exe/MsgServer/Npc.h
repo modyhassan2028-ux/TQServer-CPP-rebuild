@@ -56,6 +56,8 @@ public:
 
     std::vector<NpcOption> m_options; // numbered dialog menu
 
+    uint32_t m_dwActionId{0}; // cq_action root node (dialog tree)
+
     // dialog text shown on interaction
     std::string m_strDialog;
 

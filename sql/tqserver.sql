@@ -24,3 +24,34 @@ CREATE TABLE IF NOT EXISTS cq_user (       -- character sync lands in the next s
 CREATE USER IF NOT EXISTS 'tqserver'@'localhost' IDENTIFIED BY 'tqpass123';
 GRANT ALL ON tqserver.* TO 'tqserver'@'localhost';
 FLUSH PRIVILEGES;
+
+-- original 6159 data model (as loaded from MySQL by NpcServer.exe)
+-- dialog trees: option rows reference their parent node; npc.action_id = greeting node
+CREATE TABLE IF NOT EXISTS cq_action (
+  id INT PRIMARY KEY,
+  parent_id INT NOT NULL DEFAULT 0,
+  id_next INT NOT NULL DEFAULT 0,
+  type INT NOT NULL DEFAULT 0,     -- 1=say, 2=accept task, 3=turn-in task, 4=teleport, 0=option
+  param VARCHAR(255) NOT NULL DEFAULT '',
+  text VARCHAR(255) NOT NULL DEFAULT ''
+);
+CREATE TABLE IF NOT EXISTS cq_task (
+  id INT PRIMARY KEY,
+  name VARCHAR(64) NOT NULL,
+  npc_id INT NOT NULL,
+  monster_type INT NOT NULL DEFAULT 0,
+  count INT NOT NULL DEFAULT 1,
+  money INT NOT NULL DEFAULT 0,
+  cp INT NOT NULL DEFAULT 0,
+  min_level INT NOT NULL DEFAULT 1
+);
+CREATE TABLE IF NOT EXISTS cq_npc (
+  id INT PRIMARY KEY,
+  name VARCHAR(64) NOT NULL,
+  type INT NOT NULL DEFAULT 0,
+  map_id INT NOT NULL DEFAULT 1002,
+  x INT NOT NULL DEFAULT 0,
+  y INT NOT NULL DEFAULT 0,
+  lookface INT NOT NULL DEFAULT 0,
+  action_id INT NOT NULL DEFAULT 0   -- cq_action greeting node
+);
