@@ -97,6 +97,9 @@ public:
 
     // rebirth: at level 130 /reborn restarts at 15 with permanent growth
     uint32_t GetRebornCount() const { return m_dwRebornCount; }
+    // classic reborn: at level 130, reset to 15 keeping power + 30 alloc points
+    // returns false with a reason string on failure
+    std::string DoReborn();
     void SetRebornCount(uint32_t v) { m_dwRebornCount = v; }
     // returns an error message, or "" on success
     std::string Reborn();

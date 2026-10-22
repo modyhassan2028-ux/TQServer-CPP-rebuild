@@ -198,3 +198,23 @@ bool CUser::GrantDailyReward() {
     printf("[DAILY] %s claimed the %s reward\n", m_name.c_str(), day);
     return true;
 }
+
+// reborn: level 130 characters reset to level 15 and keep 15% of the XP bar
+// progress, plus a permanent +500 base life bonus and 30 fresh stat points
+// per reborn. The classic 'start over stronger' loop.
+std::string CUser::DoReborn() {
+    if (m_ucLevel < 130)
+        return "You must be level 130 to reborn.";
+    if (m_dwRebornCount >= 2)
+        return "Maximum reborns (2) reached.";
+    ++m_dwRebornCount;
+    m_ucLevel = 15;
+    m_dwExperience = ExpForLevel(15) / 10; // a head start on the new life
+    m_dwBaseMaxLife += 500;                // permanent reborn bonus
+    m_dwStatPoints += 30;
+    RecalcEquipmentBonuses();
+    m_dwLife = m_dwMaxLife;
+    SendSysMsg("REBORN! You start a new life at level 15 with +500 max life and +30 stat points.");
+    printf("[REBORN] %s reborn #%u\n", m_name.c_str(), m_dwRebornCount);
+    return "";
+}
