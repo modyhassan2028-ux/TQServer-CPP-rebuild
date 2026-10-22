@@ -409,6 +409,36 @@ if (m_message.rfind("/npc", 0) == 0) {
     }
     // ---- rebirth at the level cap ----
     // ---- /fish + /catch: fish by the water for money/CP ----
+    // ---- riding: buy a horse once, then /ride on|off for free jumps ----
+    if (m_message == "/buyhorse") {
+        const uint64_t kHorsePrice = 100000;
+        if (user->HasHorse()) { user->SendSysMsg("You already own a horse."); return; }
+        if (user->GetMoney() < kHorsePrice) {
+            user->SendSysMsg("A horse costs " + std::to_string(kHorsePrice) + " money.");
+            return;
+        }
+        user->AddMoney(-(int64_t)kHorsePrice);
+        ItemInfo horse; horse.dwId = MakeItemId(user->NextItemSeq());
+        horse.dwType = 750; horse.usSort = 3; horse.strName = "Stallion"; horse.dwPosition = 253;
+        user->AddItem(horse);
+        user->SendSysMsg("You bought a Stallion! /ride on to mount.");
+        printf("[RIDE] %s bought a horse\n", user->GetName().c_str());
+        return;
+    }
+    if (m_message == "/ride on" || m_message == "/ride") {
+        if (!user->HasHorse()) { user->SendSysMsg("You need a horse first. /buyhorse"); return; }
+        if (user->IsRiding()) { user->SendSysMsg("You are already riding."); return; }
+        user->SetRiding(true);
+        user->SendSysMsg("You mount your horse. Jumps no longer cost stamina!");
+        return;
+    }
+    if (m_message == "/ride off") {
+        if (!user->IsRiding()) { user->SendSysMsg("You are not riding."); return; }
+        user->SetRiding(false);
+        user->SendSysMsg("You dismount.");
+        return;
+    }
+
     // ---- item warehouse: /whstore <id> /whlist /whtake <id> ----
     if (m_message.rfind("/whstore ", 0) == 0) {
         uint32_t id = strtoul(m_message.substr(9).c_str(), nullptr, 10);

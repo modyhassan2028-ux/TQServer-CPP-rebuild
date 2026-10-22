@@ -48,8 +48,8 @@ void CMsgAction::Process(uint32_t dwSender) {
                    user->GetName().c_str(), (int)sqrt((double)(nDx * nDx + nDy * nDy)));
             return;
         }
-        // fatigue gate: each jump costs 15 stamina (classic CO)
-        if (!user->SpendStamina(15)) {
+        // fatigue gate: each jump costs 15 stamina (classic CO) unless mounted
+        if (!user->IsRiding() && !user->SpendStamina(15)) {
             user->SendSysMsg("You are too tired to jump. Rest a moment.");
             return;
         }

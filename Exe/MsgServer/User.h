@@ -88,6 +88,15 @@ public:
     void SetQuestClaimed(bool b) { m_bQuestClaimed = b; }
     std::string m_strQuestDay; // YYYY-MM-DD the counter belongs to
 
+    // riding: mounted players jump for free (classic horse perk)
+    bool IsRiding() const { return m_bRiding; }
+    void SetRiding(bool b) { m_bRiding = b; }
+    bool HasHorse() const {
+        for (const auto& it : m_items)
+            if (it.dwType == 750 && it.dwPosition != 255) return true; // 750 = horse
+        return false;
+    }
+
     // mining: channel end time (0 = idle)
     uint32_t GetMineUntil() const { return m_dwMineUntil; }
     void SetMineUntil(uint32_t t) { m_dwMineUntil = t; }
@@ -205,6 +214,7 @@ private:
     std::string m_strSpouse;
     uint32_t m_dwFishUntil{0};
     uint32_t m_dwMineUntil{0};
+    bool m_bRiding{false};
     uint32_t m_dwQuestKills{0};
     bool m_bQuestClaimed{false};
     uint32_t m_dwBaseBP{100};
