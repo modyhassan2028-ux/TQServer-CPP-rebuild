@@ -151,6 +151,31 @@ bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogE
         printf("[DIALOG] 1003: FlyMap error, Action[%u]\n", pNode->dwId);
         return false;
     }
+    case 1073: { // ORIGINAL switch case 0x3f: stc(%u, %u) OP %d (check)
+        uint32_t dwType = 0, dwData = 0; char szOp[256] = {0}; int nOperand = 0;
+        if (sscanf(pNode->strParam.c_str(), "stc(%u, %u) %s %d", &dwType, &dwData, szOp, &nOperand) != 4) {
+            // ORIGINAL: log_InlineLogDBERROR (gameaction.cpp:0x1cc9) -> return 0
+            return false;
+        }
+        uint32_t nCount = pUser->CountItems(dwType, dwData);
+        if (strncmp(szOp, ">", 1) == 0 && szOp[1] == '\0')      // ">":  count > n
+            return nOperand < nCount;
+        if (strncmp(szOp, ">=", 2) == 0)                            // ">=": count >= n
+            return nOperand <= nCount;
+        return nCount == (uint32_t)nOperand;                        // "==" (and anything else)
+    }
+    case 1074: { // ORIGINAL switch case 0x40: stc(%u, %u) OP %d %d (set/add)
+        uint32_t dwType = 0, dwData = 0; char szOp[256] = {0}; int nAmount = 0, nFlag = 0;
+        if (sscanf(pNode->strParam.c_str(), "stc(%u, %u) %s %d %d", &dwType, &dwData, szOp, &nAmount, &nFlag) == 5) {
+            bool bAdd = strncmp(szOp, "+=", 2) == 0;
+            if (bAdd || (szOp[0] == '=' && szOp[1] == '\0')) {
+                (void)nFlag; // ORIGINAL passes it into FUN_140385de0 (sync flag)
+                return pUser->SetItemCount(dwType, dwData, (uint32_t)nAmount, bAdd);
+            }
+        }
+        // ORIGINAL: log_InlineLogDBERROR (gameaction.cpp:0x1ce2) -> return 0
+        return false;
+    }
     case 1010: { // ORIGINAL switch case 9: talk message on a channel
         // vtable+0x150(user, data?data:2000, "%s", param) -> MsgTalk (1004)
         pUser->SendTalkMsg(pNode->strParam, pNode->dwData ? pNode->dwData : 2000);

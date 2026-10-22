@@ -12,6 +12,7 @@
 #include "User.h"
 #include "PlayerMagic.h"
 #include "MapManager.h"
+#include "Item.h"
 #include "MySQLClient.h"
 #include <cassert>
 #include <cstring>
@@ -233,6 +234,45 @@ int main() {
     assert(u6->FlyMap(0, 111, 222, false) == 0);
     assert(u6->GetX() == 111 && u6->GetY() == 222);
     printf("[ok] 1003 teleport matches FlyMap FUN_1401c55b0 codes\n");
+
+    // --- 1073/1074 (cases 0x3f/0x40): stc(type, data) checks and set/add ---
+    auto u7 = std::make_shared<CUser>(999001);
+    u7->SetMoney(500);
+    u7->SetConquerPoints(77);
+    ItemInfo itGem; itGem.dwType = 42; itGem.dwData = 30; itGem.dwAmount = 12;
+    ItemInfo itGem2; itGem2.dwType = 107; itGem2.dwData = 31; itGem2.dwAmount = 1;
+    u7->AddItem(itGem); u7->AddItem(itGem2);
+    auto mk1073 = [](uint32_t id, const char* param) {
+        CDialogEngine::Node n; n.dwType = 1073; n.dwId = id; n.strParam = param; return n; };
+    // real cq_action params: "stc(42,30) >= 10", "stc(107,31) == 0", "stc(1,0) == 500"
+    { auto n = mk1073(9101, "stc(42,30) >= 10");    assert( CGameAction::ProcessActionUser(u7, &n)); }
+    { auto n = mk1073(9102, "stc(42,30) == 0");    assert(!CGameAction::ProcessActionUser(u7, &n)); }
+    { auto n = mk1073(9103, "stc(107,31) == 0");   assert(!CGameAction::ProcessActionUser(u7, &n)); }
+    { auto n = mk1073(9104, "stc(107,31) == 1");    assert( CGameAction::ProcessActionUser(u7, &n)); }
+    { auto n = mk1073(9105, "stc(1,0) == 500");    assert( CGameAction::ProcessActionUser(u7, &n)); }
+    { auto n = mk1073(9106, "stc(2,0) >= 77");     assert( CGameAction::ProcessActionUser(u7, &n)); }
+    { auto n = mk1073(9107, "stc(42,30) > 12");    assert(!CGameAction::ProcessActionUser(u7, &n)); }
+    { auto n = mk1073(9108, "stc(42,30) > 11");    assert( CGameAction::ProcessActionUser(u7, &n)); }
+    // malformed -> DBERROR path -> false
+    { auto n = mk1073(9301, "stc(42,30)");         assert(!CGameAction::ProcessActionUser(u7, &n)); }
+    // 1074 "+=": real param shape "stc(39,0) = 0 0" / add stack
+    CDialogEngine::Node ndAdd; ndAdd.dwType = 1074; ndAdd.dwId = 9201;
+    ndAdd.strParam = "stc(39,0) += 5 0";
+    assert(CGameAction::ProcessActionUser(u7, &ndAdd));
+    assert(u7->CountItems(39, 0) == 5);
+    assert(CGameAction::ProcessActionUser(u7, &ndAdd));
+    assert(u7->CountItems(39, 0) == 10);
+    CDialogEngine::Node ndSet; ndSet.dwType = 1074; ndSet.dwId = 9202;
+    ndSet.strParam = "stc(39,0) = 3 0";
+    assert(CGameAction::ProcessActionUser(u7, &ndSet));
+    assert(u7->CountItems(39, 0) == 3);
+    // money via 1074: "+=" on type 1
+    CDialogEngine::Node ndMoney; ndMoney.dwType = 1074; ndMoney.dwId = 9203;
+    ndMoney.strParam = "stc(1,0) += 250 0";
+    assert(CGameAction::ProcessActionUser(u7, &ndMoney));
+    assert(u7->GetMoney() == 750);
+    // malformed -> DBERROR path -> false
+    printf("[ok] 1073/1074 stc check/set match FUN_140385cf0/140385de0\n");
 
     printf("DIALOG FIDELITY TEST PASSED\n");
     return 0;

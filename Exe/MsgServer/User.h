@@ -260,6 +260,39 @@ public:
 
     // ---- inventory (v1) ----
     void AddItem(const ItemInfo& item) { m_items.push_back(item); }
+    // ORIGINAL FUN_140385cf0 CUser::ItemCount(type, data): total stack amount
+    // of the (type,data) container key. type 1 = silvers, 2 = CPs (pseudo
+    // items in the original item tree).
+    uint32_t CountItems(uint32_t dwType, uint32_t dwData) const {
+        if (dwType == 1) { (void)dwData; return (uint32_t)m_dwMoney; }
+        if (dwType == 2) { (void)dwData; return m_dwEmoney; }
+        uint32_t n = 0;
+        for (auto& it : m_items)
+            if (it.dwType == dwType && it.dwData == dwData) n += it.dwAmount;
+        return n;
+    }
+    // ORIGINAL FUN_140385de0 CUser::SetItemCount(type, data, count): 1074
+    // '+=' stacks onto the key, '=' replaces it; 0 removes the stack.
+    bool SetItemCount(uint32_t dwType, uint32_t dwData, uint32_t dwAmount, bool bAdd) {
+        if (dwType == 1) { (void)dwData;
+            if (bAdd) m_dwMoney += dwAmount;
+            else m_dwMoney = dwAmount;
+            return true; }
+        if (dwType == 2) { (void)dwData;
+            m_dwEmoney = bAdd ? m_dwEmoney + dwAmount : dwAmount;
+            return true; }
+        for (auto& it : m_items)
+            if (it.dwType == dwType && it.dwData == dwData) {
+                it.dwAmount = bAdd ? it.dwAmount + dwAmount : dwAmount;
+                if (it.dwAmount == 0) return true; // stack kept at 0 like an empty stack
+                return true;
+            }
+        if (dwAmount == 0) return true;
+        ItemInfo info; info.dwType = dwType; info.dwData = dwData; info.dwAmount = dwAmount;
+        info.dwPosition = 0; info.strName = "stc";
+        m_items.push_back(info);
+        return true;
+    }
     // eats one charge of a usable stack (by type id); false if not carried
     bool ConsumeByType(uint32_t dwType);
     // refine the equipped weapon; returns an error message or ""

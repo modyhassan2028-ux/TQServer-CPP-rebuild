@@ -9,6 +9,7 @@
 struct ItemInfo {
     uint32_t    dwId{0};       // unique runtime item id
     uint32_t    dwType{0};     // itemtype id
+    uint32_t    dwData{0};     // ORIGINAL item data (gem grade/+n/...): with dwType it is the (type,data) container key
     uint16_t    usSort{0};     // 0=consumable, 1=weapon, 2=armor ... (v1)
     uint32_t    dwAmount{1};
     uint32_t    dwPosition{255}; // inventory slot / equip position
