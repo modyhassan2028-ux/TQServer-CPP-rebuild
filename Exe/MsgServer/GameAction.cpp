@@ -709,6 +709,64 @@ bool bAll = (llAll == 1);
         if ((int)pNode->dwData < 1 || nCount + (int)pNode->dwData < 41) return true;
         return false; // original break -> false
     }
+    case 509: { // ORIGINAL case 0x1fd: equipment commands
+        // sscanf "%s %d" -> (cmd, position). NOTE: the v6159 binary only knows
+        // down_lev / down_one_lev / recover_dur. DB rows with up_lev /
+        // up_quality / up_levultra2 are NOT in this switch (dead rows) and hit
+        // the original DB-error branch -> false.
+        char szCmd[256] = {0}; int32_t nPos = 0;
+        if (sscanf(pNode->strParam.c_str(), "%255s %d", szCmd, &nPos) < 2) {
+            printf("[DBERR] cq_action %u type 509 param error\n", pNode->dwId);
+            return false;
+        }
+        ItemInfo* pItem = pUser->FindItemByPosition(nPos);
+        if (!pItem) {
+            printf("[DBERR] cq_action %u type 509 no item at pos %d\n", pNode->dwId, nPos);
+            return false; // ORIGINAL: mgr lookup 0 -> falls out -> false
+        }
+        uint32_t t = pItem->dwType;
+        uint32_t cls = (t % 10000000u) / 100000u; // ORIGINAL FUN_1400ff680 class digit
+        if (!stricmp(szCmd, "down_lev")) { // ORIGINAL FUN_140332590 -> FUN_140330470
+            if (t == 120063) return false;      // ORIGINAL 0x1d5ff excluded
+            if (t % 10 == 0) return false;      // ORIGINAL: quality 0 can't move
+            uint32_t lvl = (t / 10) % 100;
+            uint32_t target;
+            if (cls == 6 || cls == 1 || cls == 3) target = 0;
+            else if (cls == 7 || cls == 8) target = 1;
+            else if (cls == 2) target = 2;
+            else return false; // ORIGINAL FUN_1400f8840 gate (unlisted class)
+            uint32_t nt = t + (target - lvl) * 10; // ORIGINAL recompute
+            if (!CItemLibrary::Instance().Lookup(nt)) return false; // mgr vtable 0x70
+            printf("[USER] %u down_lev item %u -> %u (pos %d)\n",
+                   pUser->GetId(), t, nt, nPos);
+            pItem->dwType = nt;
+            return true;
+        } else if (!stricmp(szCmd, "down_one_lev")) { // ORIGINAL FUN_140332370
+            if (cls == 14 || cls == 10 || cls == 12 || cls == 13 || cls == 21 || cls == 22)
+                return false; // ORIGINAL skipped classes (0xe,10,0xc,0xd,0x15,0x16)
+            int32_t lvl = (int32_t)((t % 1000) / 10); // FUN_1400fee00
+            if (lvl <= 0) return false;
+            uint32_t nt = t - 10; // one level down (FUN_140330700)
+            if (!CItemLibrary::Instance().Lookup(nt)) return false;
+            printf("[USER] %u down_one_lev item %u -> %u (pos %d)\n",
+                   pUser->GetId(), t, nt, nPos);
+            pItem->dwType = nt;
+            return true;
+        } else if (!stricmp(szCmd, "recover_dur")) { // ORIGINAL FUN_14032c310
+            // NOTE: repair cost via FUN_140102030 + money spend (user vtable
+            // 0x178) is pending until that subsystem ports; restore only.
+            const ItemTypeDef* pDef = CItemLibrary::Instance().Lookup(t);
+            if (!pDef) return false;
+            pItem->usDurability = 1000; // restore to pristine (dur limit path)
+            printf("[USER] %u recover_dur item %u (pos %d) [cost formula pending]\n",
+                   pUser->GetId(), t, nPos);
+            return true;
+        } else {
+            printf("[DBERR] cq_action %u type 509 unknown command %s (dead row)\n",
+                   pNode->dwId, szCmd);
+            return false; // ORIGINAL: up_* rows are not handled in v6159
+        }
+    }
     case 510: { // ORIGINAL case 0x1fe: item attribute compare
         // sscanf "%d %s %s %d" -> (pos, attr, op, val)
         char szAttr[256] = {0}, szOp[256] = {0}; int32_t nPos = 0, nVal = 0;

@@ -785,6 +785,37 @@ int main() {
           assert(!CGameAction::ProcessActionOS(upR, &n)); } // bad attr
         printf("[ok] 110/111/112/113/114/128/129/130/136/137/144/150 match the original switch\n");
 
+    // ---- 509: equipment commands (case 0x1fd) ----
+    {
+        auto upR = std::make_shared<CUser>(999017); upR->SetName("Item509");
+        CUser& r = *upR;
+        // 700001: class 7 (target level 1), current level-in-id 0 -> 700011
+        ItemInfo eq; eq.dwType = 700001; eq.dwPosition = 1; eq.usDurability = 800;
+        r.AddItem(eq);
+        { auto n = mkMgc(0, 509, "down_lev 1"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 510, "1 quality == 1"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        // quality digit 0 -> down_lev false
+        ItemInfo q0; q0.dwType = 112300; q0.dwPosition = 2;
+        r.AddItem(q0);
+        { auto n = mkMgc(0, 509, "down_lev 2"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        // down_one_lev on 421338 (level 33) -> 421328 iff that type exists
+        {
+            ItemInfo wpn; wpn.dwType = 421338; wpn.dwPosition = 3;
+            r.AddItem(wpn);
+            auto n = mkMgc(0, 509, "down_one_lev 3");
+            bool bExpect = CItemLibrary::Instance().Lookup(421328) != nullptr;
+            assert(CGameAction::ProcessActionUser(upR, &n) == bExpect);
+        }
+        // recover_dur restores durability
+        { auto n = mkMgc(0, 509, "recover_dur 1"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 510, "1 durability == 10"); assert(CGameAction::ProcessActionUser(upR, &n)); } // 1000/100 = 10
+        { auto n = mkMgc(0, 510, "1 durability == 9"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        // dead command (up_lev rows are unhandled in v6159) -> false
+        { auto n = mkMgc(0, 509, "up_lev 1"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        // unknown position
+        { auto n = mkMgc(0, 509, "recover_dur 9"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        printf("[ok] 509 down_lev/down_one_lev/recover_dur match case 0x1fd\n");
+    }
     // ---- 506/507: erase/count N items in a type range (FUN_140344e80/FUN_140338940) ----
     {
         auto upR = std::make_shared<CUser>(999016); upR->SetName("Item506");
