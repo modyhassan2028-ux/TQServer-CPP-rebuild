@@ -887,6 +887,24 @@ int main() {
         { auto n = mkMgc(0, 2003, "garbage"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
         printf("[ok] 2003/2004 compares match cases 0x7d3/0x7d4 with %%id\n");
     }
+    // ---- 2011: set NPC property by id (case 0x7db) ----
+    {
+        auto upN = std::make_shared<CUser>(999034); upN->SetName("NpcSetter");
+        auto pNpc = std::make_shared<CNpc>(5001, "OldGate", CNpc::Type::Dialog, 1002, 300, 300);
+        CNpcManager::Instance().AddNpcForTest(pNpc);
+        { auto n = mkMgc(0, 2011, "5001 name GoldenEggKing");
+          assert(CGameAction::ProcessActionUser(upN, &n));
+          assert(pNpc->GetName() == "GoldenEggKing"); } // real row: 3026 name GoldenEggKing
+        { auto n = mkMgc(0, 2011, "5001 type 2");
+          assert(CGameAction::ProcessActionUser(upN, &n));
+          assert(pNpc->GetType() == static_cast<CNpc::Type>(2)); } // row: 4025 type 2
+        { auto n = mkMgc(0, 2011, "5001 id 5002");
+          assert(CGameAction::ProcessActionUser(upN, &n));
+          assert(pNpc->GetId() == 5002); }
+        { auto n = mkMgc(0, 2011, "99999998 name X"); assert(!CGameAction::ProcessActionUser(upN, &n)); }
+        { auto n = mkMgc(0, 2011, "5002 bogus 1"); assert(!CGameAction::ProcessActionUser(upN, &n)); }
+        printf("[ok] 2011 npc property setter matches case 0x7db\n");
+    }
     // ---- 2008: count map monsters by name/type (case 0x7d8, pairs with 2006) ----
     {
         auto upA = std::make_shared<CUser>(999028); upA->SetName("Cmp2008");

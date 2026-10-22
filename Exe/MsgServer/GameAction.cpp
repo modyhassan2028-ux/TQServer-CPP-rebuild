@@ -11,6 +11,7 @@
 #include "MsgAction.h"
 #include "UserManager.h"
 #include "MonsterManager.h"
+#include "Npc.h"
 #include "NameStrCheck.h"
 #include "MsgTalk.h"
 #include "MsgData.h"
@@ -1081,6 +1082,27 @@ bool bAll = (llAll == 1);
         auto pM = CMonsterManager::Instance().SpawnDynamic(dwMap, (uint16_t)nX, (uint16_t)nY,
                                                            dwType, dwGen, strName);
         return pM != nullptr;
+    }
+    case 2011: { // ORIGINAL case 0x7db: set NPC property by id
+        // sscanf "%u %s %s" = (npcId, kind, value); kinds: id | name | type.
+        // FUN_1400876b0 + vcall+0x10(npcId, 1) looks the NPC up; missing NPC
+        // or parse < 3 -> DBERR (log) -> false. Setters: FUN_1402cbdc0(id),
+        // FUN_1402cbbb0(name), FUN_1402cb9e0(type); each returns 1.
+        std::string strP = pNode->strParam; pUser->ResolveActionVars(strP);
+        uint32_t dwNpcId = 0; char szKind[32] = {0}, szValue[256] = {0};
+        if (sscanf(strP.c_str(), "%u %31s %255s", &dwNpcId, szKind, szValue) != 3) {
+            printf("[DBERR] cq_action %u type 2011 param error\n", pNode->dwId);
+            return false;
+        }
+        auto pNpc = CNpcManager::Instance().GetNpc(dwNpcId);
+        if (!pNpc) {
+            printf("[DBERR] cq_action %u type 2011 npc %u not found\n", pNode->dwId, dwNpcId);
+            return false;
+        }
+        if (!_stricmp(szKind, "id"))   { pNpc->SetId(strtoul(szValue, nullptr, 10)); return true; }
+        if (!_stricmp(szKind, "name")) { pNpc->SetName(szValue); return true; }
+        if (!_stricmp(szKind, "type")) { pNpc->SetTypeByRaw(strtoul(szValue, nullptr, 10)); return true; }
+        return false; // ORIGINAL: unmatched kind falls out (break -> false)
     }
     case 2012: { // ORIGINAL case 0x7dc: mass teleport "src_map dst_map x y"
         // sscanf "%u %u %d %d" = (srcMap, dstMap, x, y). Iterates the global map

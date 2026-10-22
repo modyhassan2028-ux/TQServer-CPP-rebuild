@@ -41,6 +41,10 @@ public:
          uint32_t dwMapId, uint16_t usX, uint16_t usY);
 
     uint32_t GetId() const { return m_dwId; }
+    // cq_action 2011 (case 0x7db): set NPC id/name/type at runtime
+    void SetId(uint32_t dwId) { m_dwId = dwId; }
+    void SetName(const std::string& n) { m_name = n; }
+    void SetTypeByRaw(uint32_t t) { m_type = static_cast<Type>(t); } // ORIGINAL raw type field
     const std::string& GetName() const { return m_name; }
     Type GetType() const { return m_type; }
     uint32_t GetMapId() const { return m_dwMapId; }
@@ -120,6 +124,8 @@ public:
 private:
     CNpcManager() = default;
     std::map<uint32_t, std::shared_ptr<CNpc>> m_npcs;
+public:
+    void AddNpcForTest(std::shared_ptr<CNpc> p) { m_npcs[p->GetId()] = p; } // tests
     std::vector<TaskDef> m_taskDefs;
     std::recursive_mutex m_mutex; // SpawnDefaults may re-enter via SpawnNpcsFromDB
     bool m_bSpawned{false};
