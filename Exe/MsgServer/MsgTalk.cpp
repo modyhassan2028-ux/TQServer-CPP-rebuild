@@ -409,6 +409,40 @@ if (m_message.rfind("/npc", 0) == 0) {
     }
     // ---- rebirth at the level cap ----
     // ---- /fish + /catch: fish by the water for money/CP ----
+    // ---- /lottery: spend 5 CP, roll for prizes ----
+    if (m_message == "/lottery") {
+        const uint32_t kCost = 5;
+        if (user->GetConquerPoints() < kCost) {
+            user->SendSysMsg("You need " + std::to_string(kCost) +
+                             " CP to play. (Earn CP from bosses, quests, mining gems.)");
+            return;
+        }
+        user->AddConquerPoints(-kCost);
+        int roll = std::rand() % 1000;
+        if (roll < 550) { // 55%: nothing
+            user->SendSysMsg("Lucky Lottery: better luck next time...");
+        } else if (roll < 800) { // 25%: small coins
+            user->AddMoney(3000);
+            user->SendSysMsg("Lucky Lottery: +3,000 money!");
+        } else if (roll < 920) { // 12%: CP back x2
+            user->AddConquerPoints(10);
+            user->SendSysMsg("Lucky Lottery: +10 CP!");
+        } else if (roll < 980) { // 6%: jackpot tier
+            user->AddMoney(30000);
+            user->SendSysMsg("Lucky Lottery: JACKPOT! +30,000 money!");
+        } else { // 2%: grand prize
+            user->AddMoney(50000);
+            user->AddConquerPoints(10);
+            user->SendSysMsg("Lucky Lottery: GRAND PRIZE! +50,000 money, +10 CP!");
+            CMsgTalk note;
+            if (note.Create("SYSTEM", "", user->GetName() + " hit the lottery GRAND PRIZE!",
+                            CMsgTalk::Channel_Broadcast))
+                CMapManager::Instance().BroadcastToAll(note.GetBuf(), note.GetSize());
+        }
+        printf("[LOTTERY] %s roll=%d\n", user->GetName().c_str(), roll);
+        return;
+    }
+
     // ---- /quest: daily hunt - kill 10 monsters, claim a reward ----
     if (m_message.rfind("/quest", 0) == 0) {
         // day rollover: reset the counter if the calendar day changed
