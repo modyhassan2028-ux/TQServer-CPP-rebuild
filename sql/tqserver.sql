@@ -55,3 +55,21 @@ CREATE TABLE IF NOT EXISTS cq_npc (
   lookface INT NOT NULL DEFAULT 0,
   action_id INT NOT NULL DEFAULT 0   -- cq_action greeting node
 );
+
+-- monster world (as loaded by NpcServer.exe: "SELECT * FROM cq_monstertype" / "cq_generator")
+CREATE TABLE IF NOT EXISTS cq_monstertype (
+  id INT PRIMARY KEY,
+  name VARCHAR(64) NOT NULL,
+  level INT NOT NULL DEFAULT 1,
+  life INT NOT NULL DEFAULT 100
+);
+CREATE TABLE IF NOT EXISTS cq_generator (
+  id INT PRIMARY KEY,
+  type_id INT NOT NULL,
+  map_id INT NOT NULL,
+  count INT NOT NULL DEFAULT 1,
+  x0 INT NOT NULL DEFAULT 0,
+  y0 INT NOT NULL DEFAULT 0,
+  x1 INT NOT NULL DEFAULT 0,
+  y1 INT NOT NULL DEFAULT 0
+);

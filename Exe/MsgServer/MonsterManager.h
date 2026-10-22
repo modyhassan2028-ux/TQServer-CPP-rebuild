@@ -9,12 +9,17 @@
 
 // Monster world manager: spawn tables, AI tick thread (roam + respawn).
 // v1 spawn table is built-in; loading the original cq monster config is on the roadmap.
+class CMySQLClient;
+
 class CMonsterManager {
 public:
     static CMonsterManager& Instance();
 
     void Start();   // spawns default monsters + starts the AI thread
     void Stop();
+    // original model: cq_monstertype + cq_generator from MySQL.
+    // returns spawned count (0 -> caller keeps the built-in table)
+    uint32_t SpawnFromDB(CMySQLClient* pDB);
 
     std::vector<std::shared_ptr<CMonster>> GetMapMonsters(uint32_t dwMapId);
     std::shared_ptr<CMonster> GetMonsterById(uint32_t dwMonsterId);

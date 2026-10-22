@@ -1,4 +1,6 @@
 ﻿#include "MonsterManager.h"
+#include "MySQLClient.h"
+#include "Account.h"
 #include "MapManager.h"
 #include "GameMap.h"
 #include "MsgMonster.h"
@@ -13,6 +15,67 @@
 CMonsterManager& CMonsterManager::Instance() {
     static CMonsterManager s_instance;
     return s_instance;
+}
+
+
+// original 6159 model (NpcServer.exe loads the same tables):
+//   cq_monstertype: id, name, level, life
+//   cq_generator:   id, type_id, map_id, count, x0, y0, x1, y1
+uint32_t CMonsterManager::SpawnFromDB(CMySQLClient* pDB) {
+    if (!pDB) return 0;
+    // 1) monster types
+    std::map<uint32_t, std::pair<std::string, std::pair<uint32_t, uint32_t>>> types; // id -> (name, (level, life))
+    if (!pDB->Query("SELECT id, name, level, life FROM cq_monstertype")) {
+        printf("[MONSTER] cq_monstertype load failed: %s\n", pDB->GetError().c_str());
+        return 0;
+    }
+    for (auto& row : pDB->GetRows()) {
+        if (row.size() < 4) continue;
+        uint32_t id = (uint32_t)strtoul(row[0].c_str(), nullptr, 10);
+        uint32_t level = (uint32_t)strtoul(row[2].c_str(), nullptr, 10);
+        uint32_t life = (uint32_t)strtoul(row[3].c_str(), nullptr, 10);
+        types[id] = { row[1], { level, life } };
+    }
+    if (types.empty()) return 0;
+    // 2) generators (spawners), like NpcServer: mask order
+    if (!pDB->Query("SELECT type_id, map_id, count, x0, y0, x1, y1 FROM cq_generator ORDER BY id")) {
+        printf("[MONSTER] cq_generator load failed: %s\n", pDB->GetError().c_str());
+        return 0;
+    }
+    uint32_t spawned = 0;
+    for (auto& row : pDB->GetRows()) {
+        if (row.size() < 7) continue;
+        uint32_t typeId = (uint32_t)strtoul(row[0].c_str(), nullptr, 10);
+        uint32_t mapId  = (uint32_t)strtoul(row[1].c_str(), nullptr, 10);
+        uint32_t count  = (uint32_t)strtoul(row[2].c_str(), nullptr, 10);
+        uint16_t x0 = (uint16_t)strtoul(row[3].c_str(), nullptr, 10);
+        uint16_t y0 = (uint16_t)strtoul(row[4].c_str(), nullptr, 10);
+        uint16_t x1 = (uint16_t)strtoul(row[5].c_str(), nullptr, 10);
+        uint16_t y1 = (uint16_t)strtoul(row[6].c_str(), nullptr, 10);
+        auto it = types.find(typeId);
+        if (it == types.end() || !count) continue;
+        auto& def = it->second;
+        for (uint32_t i = 0; i < count; ++i) {
+            uint16_t spawnX = (uint16_t)(x0 + (x1 > x0 ? rand() % (x1 - x0 + 1) : 0));
+            uint16_t spawnY = (uint16_t)(y0 + (y1 > y0 ? rand() % (y1 - y0 + 1) : 0));
+            auto pMap = CMapManager::Instance().GetMap(mapId);
+            if (pMap && pMap->HasRealCollision()) {
+                uint32_t rx = 0, ry = 0;
+                if (pMap->RandomWalkableCell(rx, ry)) { spawnX = (uint16_t)rx; spawnY = (uint16_t)ry; }
+            }
+            auto p = std::make_shared<CMonster>(m_dwNextId++, typeId, def.first);
+            p->SetMapId(mapId);
+            p->SetSpawn(spawnX, spawnY);
+            p->SetLevel(def.second.first);
+            p->SetLife(def.second.second);
+            p->SetMaxLife(def.second.second);
+            m_byMap[mapId].push_back(p);
+            ++spawned;
+        }
+    }
+    printf("[MONSTER] cq_generator: spawned %u monsters from MySQL (%zu types).\n",
+           spawned, types.size());
+    return spawned;
 }
 
 void CMonsterManager::SpawnDefaults() {
@@ -49,7 +112,11 @@ void CMonsterManager::SpawnDefaults() {
 
 void CMonsterManager::Start() {
     std::lock_guard<std::mutex> lock(m_mutex);
-    SpawnDefaults();
+    // original data model first: cq_monstertype + cq_generator from MySQL
+    uint32_t dwDbSpawned = 0;
+    if (CAccountManager::Instance().IsMySQLMode())
+        dwDbSpawned = SpawnFromDB(CAccountManager::Instance().GetDB());
+    if (dwDbSpawned == 0) SpawnDefaults();
     m_bRunning.store(true);
     std::thread(&CMonsterManager::AILoop, this).detach();
     printf("[MONSTER] AI thread started.\n");

@@ -21,3 +21,11 @@ UPDATE cq_npc SET action_id = 5000 WHERE id = 1000005;
 INSERT INTO cq_npc (id, name, type, map_id, x, y, lookface, action_id) VALUES
  (1000005, 'TaskMaster', 0, 1002, 315, 260, 8305, 5000)
 ON DUPLICATE KEY UPDATE action_id = 5000;
+
+-- monster world mirroring the built-in v1 spawn table
+INSERT INTO cq_monstertype VALUES (1, 'Pheasant', 1, 30), (2, 'RoamingRat', 2, 50),
+                                   (10, 'SandMonk', 12, 400), (20, 'Bandit', 15, 500);
+INSERT INTO cq_generator VALUES (1, 1, 1002, 2, 650, 320, 700, 380),
+                                (2, 2, 1002, 2, 560, 400, 620, 450),
+                                (3, 10, 1000, 1, 500, 300, 500, 300),
+                                (4, 20, 1001, 1, 400, 400, 400, 400);
