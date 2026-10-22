@@ -647,6 +647,62 @@ bool bAll = (llAll == 1);
         }
         return bRemoved; // not found -> ORIGINAL plVar12 == 0 -> false
     }
+    case 506: { // ORIGINAL case 0x1fa -> FUN_140350360 -> FUN_140344e80:
+        // erase N items of types in [from..to], partial stack amounts allowed.
+        // sscanf "%u %u %d %d %d": (from, to, N) - extra fields unused by data.
+        uint32_t uFrom = 0, uTo = 0; int32_t n[3] = {0, 0, 0};
+        int nGot = sscanf(pNode->strParam.c_str(), "%u %u %d %d %d",
+                          &uFrom, &uTo, &n[0], &n[1], &n[2]);
+        if (nGot < 3) {
+            printf("[LOGERR] cq_action %u type 506 wrong param number (4762)\n", pNode->dwId);
+            return false;
+        }
+        if (uFrom < 1) { // ORIGINAL: local_734 < 1 -> DB error + false
+            printf("[DBERR] cq_action %u type 506 amount < 1\n", pNode->dwId);
+            return false;
+        }
+        auto& inv = pUser->GetInventory();
+        // collect (index, take) until the requested amount is covered
+        std::vector<std::pair<size_t,int>> vTake;
+        int nNeed = n[0], nHave = 0;
+        for (size_t i = 0; i < inv.size() && nHave < nNeed; i++) {
+            if (inv[i].dwType >= uFrom && inv[i].dwType <= uTo) {
+                int nAmt = (int)inv[i].dwAmount; if (nAmt < 1) nAmt = 1;
+                int nTake = nNeed - nHave; if (nTake > nAmt) nTake = nAmt;
+                vTake.push_back({i, nTake});
+                nHave += nTake;
+            }
+        }
+        if (nHave < nNeed) return false; // ORIGINAL: collection incomplete -> 0
+        for (auto& pr : vTake) {
+            if ((int)inv[pr.first].dwAmount > pr.second) {
+                inv[pr.first].dwAmount -= pr.second; // reduce stack (SetAmount + sync)
+            } else {
+                printf("[USER] %u erase item %u (%s) type-506\n",
+                       pUser->GetId(), inv[pr.first].dwType, inv[pr.first].strName.c_str());
+                inv.erase(inv.begin() + pr.first); // FUN_140340190(user, id, 1, 1)
+            }
+        }
+        return true;
+    }
+    case 507: { // ORIGINAL case 0x1fb -> FUN_140338940:
+        // count stack amounts of item types in [from..to]; true when >= N.
+        uint32_t uFrom = 0, uTo = 0; int32_t n[3] = {0, 0, 0};
+        int nGot = sscanf(pNode->strParam.c_str(), "%u %u %d %d %d",
+                          &uFrom, &uTo, &n[0], &n[1], &n[2]);
+        if (nGot < 3) {
+            printf("[LOGERR] cq_action %u type 507 wrong param number (4782)\n", pNode->dwId);
+            return false;
+        }
+        int nSum = 0;
+        for (auto& it : pUser->GetInventory()) {
+            if (it.dwType >= uFrom && it.dwType <= uTo) {
+                nSum += (int)it.dwAmount; // FUN_140100000 = GetAmount, full stack
+                if (n[0] <= nSum) return true; // ORIGINAL: threshold reached -> 1
+            }
+        }
+        return false;
+    }
     case 508: { // ORIGINAL case 0x1fc: bag-space check
         // data<1 -> true; inventory count + data < 0x29(41) -> true
         int nCount = (int)pUser->GetInventory().size();

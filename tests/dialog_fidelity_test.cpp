@@ -785,6 +785,30 @@ int main() {
           assert(!CGameAction::ProcessActionOS(upR, &n)); } // bad attr
         printf("[ok] 110/111/112/113/114/128/129/130/136/137/144/150 match the original switch\n");
 
+    // ---- 506/507: erase/count N items in a type range (FUN_140344e80/FUN_140338940) ----
+    {
+        auto upR = std::make_shared<CUser>(999016); upR->SetName("Item506");
+        CUser& r = *upR;
+        ItemInfo a; a.dwType = 1088000; a.dwAmount = 12; a.dwPosition = 255; a.strName = "ExpBall";
+        ItemInfo b; b.dwType = 723700;  b.dwAmount = 5;  b.dwPosition = 255; b.strName = "GemPack";
+        r.AddItem(a); r.AddItem(b);
+        // 507 check: 12 of 1088000 -> true for N=12, false for 13
+        { auto n = mkMgc(0, 507, "1088000 1088000 12"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 507, "1088000 1088000 13"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        // range check 1072050..1072059: none -> false
+        { auto n = mkMgc(0, 507, "1072050 1072059 2"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        // 506 erase 7 of 1088000 -> stack reduced 12->5, true
+        { auto n = mkMgc(0, 506, "1088000 1088000 7"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 507, "1088000 1088000 5"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 507, "1088000 1088000 6"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        // 506 erase 5 (whole stack) -> item gone, true
+        { auto n = mkMgc(0, 506, "1088000 1088000 5"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 507, "1088000 1088000 1"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        // 506 erase more than owned (needs 6, has 5 of 723700) -> false, stack untouched
+        { auto n = mkMgc(0, 506, "723700 723700 6"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 507, "723700 723700 5"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        printf("[ok] 506/507 range erase/count match FUN_140344e80/FUN_140338940\n");
+    }
     // ---- 5xx item family: 508/510/511 (FUN_140123590 cases 0x1fc/0x1fe/0x1ff) ----
     {
         auto upR = std::make_shared<CUser>(999014); upR->SetName("Item5xx");
