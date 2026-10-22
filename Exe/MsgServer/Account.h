@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <string>
+#include <vector>
 #include <map>
 #include <mutex>
 #include <cstdint>
@@ -45,6 +46,12 @@ public:
         uint32_t dwMapId{1002};
         uint16_t usX{315}, usY{275};
     };
+    // inventory persistence (cq_item), MySQL mode only
+    // runtime ids regenerate on load (MakeItemId) - rows store types/amounts
+    struct ItemRow { uint32_t dwType; uint16_t usSort; uint32_t dwAmount; uint32_t dwPosition; std::string strName; };
+    bool LoadItems(uint32_t dwAccountId, std::vector<ItemRow>& out);
+    void SaveItems(uint32_t dwAccountId, const std::vector<ItemRow>& items);
+
     // returns true if a saved character was found and loaded into 'out'
     bool LoadCharacter(uint32_t dwAccountId, CharacterRecord& out);
     void SaveCharacter(uint32_t dwAccountId, const CharacterRecord& in);

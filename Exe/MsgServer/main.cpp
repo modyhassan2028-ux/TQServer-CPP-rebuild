@@ -69,6 +69,10 @@ int main(int argc, char* argv[]) {
                         rec.usX = pU->GetX();
                         rec.usY = pU->GetY();
                         CAccountManager::Instance().SaveCharacter(pU->GetAccountId(), rec);
+                        std::vector<CAccountManager::ItemRow> rows;
+                        for (const auto& it : pU->GetInventory())
+                            rows.push_back({ it.dwType, it.usSort, it.dwAmount, it.dwPosition, it.strName });
+                        CAccountManager::Instance().SaveItems(pU->GetAccountId(), rows);
                         ++saved;
                     }
                     if (saved) printf("[AUTOSAVE] %u character(s) saved to cq_user.\n", saved);

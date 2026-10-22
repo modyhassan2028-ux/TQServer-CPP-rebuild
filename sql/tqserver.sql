@@ -81,3 +81,14 @@ CREATE TABLE IF NOT EXISTS cq_itemtype (
   sort INT NOT NULL DEFAULT 0,   -- 0=consumable, 1=weapon, 2=armor
   price INT NOT NULL DEFAULT 0
 );
+
+-- per-character inventory (original cq_item model; one row per item stack)
+CREATE TABLE IF NOT EXISTS cq_item (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  account_id INT UNSIGNED NOT NULL,
+  item_type INT NOT NULL,
+  sort INT NOT NULL DEFAULT 0,
+  amount INT NOT NULL DEFAULT 1,
+  position INT NOT NULL DEFAULT 255,
+  name VARCHAR(64) NOT NULL DEFAULT ''
+);

@@ -130,6 +130,30 @@ void CMsgConnect::Process(uint32_t dwSender, void* pContext) {
     if (msgAttrib.Create(pUser->GetId(), attribs))
         pUser->SendMsg(msgAttrib.GetBuf(), msgAttrib.GetSize());
 
+    // restore the saved inventory when one exists (otherwise starter kit)
+    bool bGaveKit = false;
+    if (dwAccountId) {
+        std::vector<CAccountManager::ItemRow> rows;
+        if (CAccountManager::Instance().LoadItems(dwAccountId, rows)) {
+            for (const auto& r : rows) {
+                ItemInfo item;
+                item.dwId = MakeItemId(pUser->NextItemSeq());
+                item.dwType = r.dwType;
+                item.usSort = r.usSort;
+                item.dwAmount = r.dwAmount;
+                item.dwPosition = r.dwPosition;
+                item.strName = r.strName;
+                pUser->AddItem(item);
+                CMsgItem msgItem;
+                if (msgItem.Create(item, CMsgItem::Action_Buy))
+                    pUser->SendMsg(msgItem.GetBuf(), msgItem.GetSize());
+            }
+            printf("[LOGIN] Account %u: %zu item(s) restored from cq_item.\n",
+                   dwAccountId, rows.size());
+            bGaveKit = true;
+        }
+    }
+
     // starting kit: weapon + armor + potions
     struct KitDef { uint32_t type; uint16_t sort; const char* name; uint32_t amount; };
     static const KitDef kit[] = {
@@ -137,6 +161,7 @@ void CMsgConnect::Process(uint32_t dwSender, void* pContext) {
         { 900020, 2, "Armor",   1 },
         { 100020, 0, "Potion",  5 },
     };
+    if (!bGaveKit)
     for (const auto& k : kit) {
         ItemInfo item;
         item.dwId = MakeItemId(pUser->NextItemSeq());

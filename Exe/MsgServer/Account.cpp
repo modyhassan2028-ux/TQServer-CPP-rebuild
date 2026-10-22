@@ -284,3 +284,40 @@ void CAccountManager::SaveCharacter(uint32_t dwAccountId, const CharacterRecord&
     if (!m_pDB->Query(sql))
         printf("[DB] cq_user save failed: %s\n", m_pDB->GetError().c_str());
 }
+
+// ---------------- cq_item inventory persistence ----------------
+bool CAccountManager::LoadItems(uint32_t dwAccountId, std::vector<ItemRow>& out) {
+    if (!m_bMySQL || !m_pDB) return false;
+    std::lock_guard<std::mutex> dbLock(m_dbMutex);
+    if (!m_pDB->Query("SELECT item_type, sort, amount, position, name FROM cq_item WHERE account_id=" +
+                      std::to_string(dwAccountId)))
+        return false;
+    for (auto& row : m_pDB->GetRows()) {
+        if (row.size() < 5) continue;
+        ItemRow r;
+        r.dwType     = (uint32_t)strtoul(row[0].c_str(), nullptr, 10);
+        r.usSort     = (uint16_t)strtoul(row[1].c_str(), nullptr, 10);
+        r.dwAmount   = (uint32_t)strtoul(row[2].c_str(), nullptr, 10);
+        r.dwPosition = (uint32_t)strtoul(row[3].c_str(), nullptr, 10);
+        r.strName    = row[4];
+        if (r.dwType) out.push_back(r);
+    }
+    return !out.empty();
+}
+
+void CAccountManager::SaveItems(uint32_t dwAccountId, const std::vector<ItemRow>& items) {
+    if (!m_bMySQL || !m_pDB) return;
+    std::lock_guard<std::mutex> dbLock(m_dbMutex);
+    if (!m_pDB->Query("DELETE FROM cq_item WHERE account_id=" + std::to_string(dwAccountId))) {
+        printf("[DB] cq_item clear failed: %s\n", m_pDB->GetError().c_str());
+        return;
+    }
+    for (const auto& r : items) {
+        std::string sql = "INSERT INTO cq_item (account_id, item_type, sort, amount, position, name) VALUES (" +
+            std::to_string(dwAccountId) + ", " + std::to_string(r.dwType) + ", " +
+            std::to_string(r.usSort) + ", " + std::to_string(r.dwAmount) + ", " +
+            std::to_string(r.dwPosition) + ", '" + m_pDB->Escape(r.strName) + "')";
+        if (!m_pDB->Query(sql))
+            printf("[DB] cq_item insert failed: %s\n", m_pDB->GetError().c_str());
+    }
+}
