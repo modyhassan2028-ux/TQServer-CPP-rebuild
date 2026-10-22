@@ -92,6 +92,46 @@ if (m_message.rfind("/npc", 0) == 0) {
         }
         return;
     }
+    // ---- inventory: /inv to list, /sell <slot> [n] to sell back ----
+    if (m_message == "/inv" || m_message == "/inv2" || m_message == "/items") {
+        std::string out = "Inventory:";
+        uint32_t i = 1;
+        for (const auto& it : user->GetInventory()) {
+            if (out.size() > 350) { out += "\n  (use /inv2 for more)"; break; }
+            out += "\n  " + std::to_string(i) + ". " + it.strName;
+            if (it.dwAmount > 1) out += " x" + std::to_string(it.dwAmount);
+            if (it.dwPosition != 255) out += " (equipped)";
+            else if (it.ucPlus > 0) out += " +" + std::to_string(it.ucPlus);
+            ++i;
+        }
+        user->SendSysMsg(out);
+        return;
+    }
+    if (m_message.rfind("/sell ", 0) == 0) {
+        std::istringstream iss(m_message.substr(6));
+        uint32_t slot = 0, n = 1;
+        iss >> slot >> n;
+        if (slot == 0) { user->SendSysMsg("Usage: /sell <slot> [count] - /inv to list."); return; }
+        auto& inv = user->GetInventory();
+        if (slot > inv.size()) { user->SendSysMsg("No such slot. /inv to list."); return; }
+        auto& it = inv[slot - 1];
+        if (it.dwPosition != 255) { user->SendSysMsg("Unequip it first."); return; }
+        if (n == 0) n = 1;
+        if (n > it.dwAmount) n = it.dwAmount;
+        auto* pDef = CItemLibrary::Instance().Lookup(it.dwType);
+        uint64_t unit = pDef ? pDef->dwPrice / 2 : 0;   // shop buys at half price
+        if (pDef && pDef->dwPrice / 2 == 0) unit = 1;
+        uint64_t total = unit * n;
+        it.dwAmount -= n;
+        if (it.dwAmount == 0) inv.erase(inv.begin() + (slot - 1));
+        user->AddMoney(total);
+        user->SendSysMsg("Sold " + std::to_string(n) + " x " + it.strName +
+                         " for " + std::to_string(total) + " money.");
+        printf("[SHOP] %s sold %u x %s for %llu\n", user->GetName().c_str(), n,
+               it.strName.c_str(), (unsigned long long)total);
+        return;
+    }
+
     // ---- shop commands (prices from cq_itemtype / data/items.ini) ----
     if (m_message.rfind("/shop", 0) == 0) {
         user->SendSysMsg(CItemLibrary::Instance().ShopListText());
