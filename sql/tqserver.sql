@@ -99,3 +99,11 @@ CREATE TABLE IF NOT EXISTS cq_itemaddition (
   life INT NOT NULL DEFAULT 0,
   attack INT NOT NULL DEFAULT 0
 );
+
+-- monster loot tables (original cq_dropitemrule model)
+CREATE TABLE IF NOT EXISTS cq_dropitemrule (
+  monster_type INT NOT NULL,
+  item_type INT NOT NULL,
+  chance INT NOT NULL DEFAULT 100,  -- percent
+  PRIMARY KEY (monster_type, item_type)
+);

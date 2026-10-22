@@ -2,7 +2,7 @@
 -- Mirrors the original 6159 NpcServer data model: option rows hang off their
 -- parent node; type 2 = accept task (param = cq_task.id), 3 = turn-in, 4 = teleport (param = "map,x,y")
 USE tqserver;
-DELETE FROM cq_action WHERE id BETWEEN 5000 AND 5299;
+DELETE FROM cq_action WHERE id BETWEEN 5000 AND 5999;
 INSERT INTO cq_action VALUES
  (5000, 0,    0, 1, '', 'Adventurer! The legion has work for hunters.'),
  (5001, 5000, 0, 0, '', 'Tell me about the available hunts'),
@@ -72,3 +72,10 @@ INSERT INTO cq_action VALUES
 -- equipment bonuses: sword adds attack, armor adds life
 DELETE FROM cq_itemaddition;
 INSERT INTO cq_itemaddition VALUES (410011, 0, 25), (900020, 300, 0);
+
+-- loot: rats carry potions, bandits carry swords
+DELETE FROM cq_dropitemrule;
+INSERT INTO cq_dropitemrule VALUES
+ (2, 100020, 30),   -- RoamingRat: HealingPotion 30%
+ (20, 100020, 20),  -- Bandit: HealingPotion 20%
+ (20, 410011, 8);   -- Bandit: Sword 8%

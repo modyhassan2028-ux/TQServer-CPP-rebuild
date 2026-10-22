@@ -139,3 +139,29 @@ const ItemAddition* CItemLibrary::LookupAddition(uint32_t dwType) const {
     auto it = m_additions.find(dwType);
     return (it != m_additions.end()) ? &it->second : nullptr;
 }
+
+// ---------------- cq_dropitemrule ----------------
+uint32_t CItemLibrary::LoadDropsFromDB(CMySQLClient* pDB) {
+    m_drops.clear();
+    if (!pDB) return 0;
+    if (!pDB->Query("SELECT monster_type, item_type, chance FROM cq_dropitemrule")) {
+        printf("[ITEM] cq_dropitemrule load failed: %s\n", pDB->GetError().c_str());
+        return 0;
+    }
+    for (auto& row : pDB->GetRows()) {
+        if (row.size() < 3) continue;
+        uint32_t mt = (uint32_t)strtoul(row[0].c_str(), nullptr, 10);
+        DropRule r;
+        r.dwItemType = (uint32_t)strtoul(row[1].c_str(), nullptr, 10);
+        r.dwChance   = (uint32_t)strtoul(row[2].c_str(), nullptr, 10);
+        if (mt && r.dwItemType) m_drops[mt].push_back(r);
+    }
+    uint32_t types = (uint32_t)m_drops.size();
+    printf("[ITEM] cq_dropitemrule loaded: %u monster type(s).\n", types);
+    return types;
+}
+
+const std::vector<DropRule>* CItemLibrary::GetDropRules(uint32_t dwMonsterType) const {
+    auto it = m_drops.find(dwMonsterType);
+    return (it != m_drops.end()) ? &it->second : nullptr;
+}

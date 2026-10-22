@@ -5,6 +5,8 @@
 #include "MonsterManager.h"
 #include "Npc.h"
 #include "Guild.h"
+#include "MsgItem.h"
+#include "Item.h"
 #include "MsgTalk.h"
 
 #include <cstring>
@@ -148,6 +150,41 @@ void CMsgInteract::Process(uint32_t dwSender) {
         // attacker rewards (v1): money drops straight to the killer
         pAttacker->AddMoney(50);
         pAttacker->AddConquerPoints(1);
+        // cq_dropitemrule: roll the monster's loot table (v1: straight to bag)
+        auto* pRules = CItemLibrary::Instance().GetDropRules(pMonster->GetTypeId());
+        if (pRules) {
+            for (const auto& r : *pRules) {
+                if ((uint32_t)(rand() % 100) >= r.dwChance) continue;
+                auto* pDef = CItemLibrary::Instance().Lookup(r.dwItemType);
+                if (!pDef) continue;
+                // stack with an existing consumable stack
+                bool bStacked = false;
+                if (pDef->usSort == 0) {
+                    for (auto& it : pAttacker->GetInventory()) {
+                        if (it.dwType == r.dwItemType && it.dwAmount < 1000) {
+                            ++it.dwAmount; bStacked = true;
+                            CMsgItem m; if (m.Create(it, CMsgItem::Action_Buy))
+                                pAttacker->SendMsg(m.GetBuf(), m.GetSize());
+                            break;
+                        }
+                    }
+                }
+                if (!bStacked) {
+                    ItemInfo item;
+                    item.dwId = MakeItemId(pAttacker->NextItemSeq());
+                    item.dwType = r.dwItemType;
+                    item.usSort = pDef->usSort;
+                    item.dwAmount = 1;
+                    item.dwPosition = 255;
+                    item.strName = pDef->strName;
+                    pAttacker->AddItem(item);
+                    CMsgItem m; if (m.Create(item, CMsgItem::Action_Buy))
+                        pAttacker->SendMsg(m.GetBuf(), m.GetSize());
+                }
+                pAttacker->SendSysMsg("Lucky! " + pMonster->GetName() + " dropped " +
+                                       pDef->strName + ".");
+            }
+        }
         // pk decay (v1): monster kills shed 1 PK point, red names fade over time
         if (pAttacker->GetPkPoints() > 0) {
             pAttacker->SetPkPoints(pAttacker->GetPkPoints() - 1);

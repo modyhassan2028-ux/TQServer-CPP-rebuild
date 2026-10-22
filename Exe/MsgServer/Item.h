@@ -26,6 +26,12 @@ struct ItemTypeDef {
     uint32_t    dwPrice{0};
 };
 
+// cq_dropitemrule record: what a monster type may drop on death
+struct DropRule {
+    uint32_t dwItemType{0};
+    uint32_t dwChance{100}; // percent
+};
+
 // cq_itemaddition record: stat bonuses an EQUIPPED item grants
 struct ItemAddition {
     uint32_t dwLife{0};
@@ -51,8 +57,13 @@ public:
     uint32_t LoadAdditionsFromFile(const std::string& path); // data/itemadditions.ini: type|life|attack
     const ItemAddition* LookupAddition(uint32_t dwType) const;
 
+    // cq_dropitemrule: monster drops (monster_type -> rules)
+    uint32_t LoadDropsFromDB(class CMySQLClient* pDB);
+    const std::vector<DropRule>* GetDropRules(uint32_t dwMonsterType) const;
+
 private:
     CItemLibrary() = default;
     std::map<uint32_t, ItemTypeDef> m_types;
     std::map<uint32_t, ItemAddition> m_additions;
+    std::map<uint32_t, std::vector<DropRule>> m_drops;
 };

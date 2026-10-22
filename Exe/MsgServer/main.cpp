@@ -46,6 +46,7 @@ int main(int argc, char* argv[]) {
     // cq_itemtype first (DB), data/items.ini as fallback
     if (!CItemLibrary::Instance().LoadFromDB(CAccountManager::Instance().GetDB()))
         CItemLibrary::Instance().LoadFromFile("data/items.ini");
+    CItemLibrary::Instance().LoadDropsFromDB(CAccountManager::Instance().GetDB());
     if (!CItemLibrary::Instance().LoadAdditionsFromDB(CAccountManager::Instance().GetDB()))
         CItemLibrary::Instance().LoadAdditionsFromFile("data/itemadditions.ini");
 
