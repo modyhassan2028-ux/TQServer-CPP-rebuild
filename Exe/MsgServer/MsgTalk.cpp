@@ -409,6 +409,47 @@ if (m_message.rfind("/npc", 0) == 0) {
     }
     // ---- rebirth at the level cap ----
     // ---- /fish + /catch: fish by the water for money/CP ----
+    // ---- /quest: daily hunt - kill 10 monsters, claim a reward ----
+    if (m_message.rfind("/quest", 0) == 0) {
+        // day rollover: reset the counter if the calendar day changed
+        char dayBuf[16];
+        time_t now = time(nullptr);
+        struct tm lt;
+#ifdef _WIN32
+        localtime_s(&lt, &now);
+#else
+        localtime_r(&now, &lt);
+#endif
+        strftime(dayBuf, sizeof(dayBuf), "%Y-%m-%d", &lt);
+        std::string today(dayBuf);
+        if (user->m_strQuestDay != today) {
+            user->m_strQuestDay = today;
+            user->SetQuestClaimed(false);
+            user->SetQuestKills(0); // fresh counter for the new day
+        }
+        if (m_message == "/quest" || m_message == "/quest status") {
+            user->SendSysMsg("Daily hunt: kill 10 monsters today for 10,000 money + 10 CP."
+                             " Progress: " + std::to_string(user->GetQuestKills()) + "/10" +
+                             (user->IsQuestClaimed() ? " (claimed - come back tomorrow)" : ""));
+            return;
+        }
+        if (m_message == "/quest claim") {
+            if (user->IsQuestClaimed()) { user->SendSysMsg("You already claimed today's reward."); return; }
+            if (user->GetQuestKills() < 10) {
+                user->SendSysMsg("Not enough kills yet: " + std::to_string(user->GetQuestKills()) + "/10.");
+                return;
+            }
+            user->SetQuestClaimed(true);
+            user->AddMoney(10000);
+            user->AddConquerPoints(10);
+            user->SendSysMsg("Daily hunt complete! +10,000 money, +10 CP. See you tomorrow.");
+            printf("[QUEST] %s claimed the daily hunt\n", user->GetName().c_str());
+            return;
+        }
+        user->SendSysMsg("Usage: /quest | /quest claim");
+        return;
+    }
+
     // ---- /arena: free-PvP zone with a kill ladder ----
     if (m_message.rfind("/arena", 0) == 0) {
         std::string sub = m_message.size() > 7 ? m_message.substr(7) : "enter";

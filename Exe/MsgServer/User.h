@@ -80,6 +80,14 @@ public:
     const std::string& GetSpouseName() const { return m_strSpouse; }
     void SetSpouseName(const std::string& n) { m_strSpouse = n; }
 
+    // daily hunt quest: kills counted today, claim flag
+    uint32_t GetQuestKills() const { return m_dwQuestKills; }
+    void AddQuestKill() { ++m_dwQuestKills; }
+    void SetQuestKills(uint32_t v) { m_dwQuestKills = v; }
+    bool IsQuestClaimed() const { return m_bQuestClaimed; }
+    void SetQuestClaimed(bool b) { m_bQuestClaimed = b; }
+    std::string m_strQuestDay; // YYYY-MM-DD the counter belongs to
+
     // mining: channel end time (0 = idle)
     uint32_t GetMineUntil() const { return m_dwMineUntil; }
     void SetMineUntil(uint32_t t) { m_dwMineUntil = t; }
@@ -186,6 +194,8 @@ private:
     std::string m_strSpouse;
     uint32_t m_dwFishUntil{0};
     uint32_t m_dwMineUntil{0};
+    uint32_t m_dwQuestKills{0};
+    bool m_bQuestClaimed{false};
     uint32_t m_dwBaseBP{100};
     uint32_t m_dwBattlePower{100};
 

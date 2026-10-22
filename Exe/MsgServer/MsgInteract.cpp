@@ -208,6 +208,10 @@ void CMsgInteract::Process(uint32_t dwSender) {
         pAttacker->AddExperience(dwXp);
         // teammates on the same map each earn half the kill XP
         CTeamManager::Instance().ShareKillXp(pAttacker, dwXp);
+        // daily hunt quest: every monster kill counts
+        pAttacker->AddQuestKill();
+        if (!pAttacker->IsQuestClaimed() && pAttacker->GetQuestKills() == 10)
+            pAttacker->SendSysMsg("Daily hunt ready! /quest claim for your reward.");
         if (pMonster->IsBoss()) {
             CMsgTalk note;
             if (note.Create("SYSTEM", "", pAttacker->GetName() + std::string(" has slain the TerraDragon!"),
