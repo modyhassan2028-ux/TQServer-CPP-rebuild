@@ -56,6 +56,14 @@ int main(int argc, char* argv[]) {
         for (;;) {
             std::this_thread::sleep_for(std::chrono::seconds(30));
             try { CGuildManager::Instance().TickWars(); } catch (...) {}
+            try {
+                // stamina regen: everyone online regains 120 per 30s tick
+                // (4/sec) - the jump cost in MsgAction drains it
+                for (auto& pU : CUserManager::Instance().GetAllUsers()) {
+                    if (!pU) continue;
+                    if (pU->GetStamina() < 100) pU->RegenStamina(120);
+                }
+            } catch (...) {}
             if (++nTicks >= 10) { // 10 x 30s = 5 minutes
                 nTicks = 0;
                 try {

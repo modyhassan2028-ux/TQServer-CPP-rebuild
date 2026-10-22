@@ -1,4 +1,5 @@
 ﻿#include "MsgAction.h"
+#include "MsgUserAttrib.h"
 #include "UserManager.h"
 #include "MapManager.h"
 
@@ -34,9 +35,19 @@ void CMsgAction::Process(uint32_t dwSender) {
     auto pOldMap = CMapManager::Instance().GetMap(user->GetMapId());
 
     switch (pData->dwAction) {
-    case Action_Jump: { // 137: jump - validate target tile then move
+    case Action_Jump: { // 137: jump - validate target tile, then move
         auto pMap = CMapManager::Instance().GetMap(user->GetMapId());
         if (!pMap || !pMap->IsPassable(pData->usX, pData->usY)) return;
+        // fatigue gate: each jump costs 15 stamina (classic CO)
+        if (!user->SpendStamina(15)) {
+            user->SendSysMsg("You are too tired to jump. Rest a moment.");
+            return;
+        }
+        {
+            CMsgUserAttrib st;
+            if (st.Create(user->GetId(), { { CMsgUserAttrib::Attrib_Stamina, user->GetStamina() } }))
+                user->SendMsg(st.GetBuf(), st.GetSize());
+        }
         user->SetPos(pData->usX, pData->usY);
         break;
     }

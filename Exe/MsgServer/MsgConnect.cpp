@@ -129,6 +129,11 @@ void CMsgConnect::Process(uint32_t dwSender, void* pContext) {
     pUser->BindNet(pClient);
     if (pUser->GrantDailyReward())
         CAccountManager::Instance().SaveRewardDay(dwAccountId, pUser->GetLastRewardDay());
+    {   // sync the stamina bar
+        CMsgUserAttrib st;
+        if (st.Create(pUser->GetId(), { { CMsgUserAttrib::Attrib_Stamina, pUser->GetStamina() } }))
+            pUser->SendMsg(st.GetBuf(), st.GetSize());
+    }
     CUserManager::Instance().AddUser(pUser);
     CMapManager::Instance().GetOrCreate(dwSpawnMap, "Twin City")->AddUser(pUser);
 

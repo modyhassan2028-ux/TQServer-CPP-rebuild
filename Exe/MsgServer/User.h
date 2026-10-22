@@ -76,6 +76,16 @@ public:
     uint8_t GetLevel() const { return m_ucLevel; }
     void SetLevel(uint8_t level) { m_ucLevel = level; }
 
+    // stamina: 0..100 bar, -15 per jump, regen handled by the world tick
+    uint16_t GetStamina() const { return m_usStamina; }
+    void SetStamina(uint16_t v) { m_usStamina = v > 100 ? 100 : v; }
+    bool SpendStamina(uint16_t v) {
+        if (m_usStamina < v) return false;
+        m_usStamina -= v;
+        return true;
+    }
+    void RegenStamina(uint16_t v) { SetStamina((uint16_t)(m_usStamina + v)); }
+
     // daily login reward: returns true when a reward was granted (a new UTC day)
     bool GrantDailyReward();
     const std::string& GetLastRewardDay() const { return m_strLastRewardDay; }
@@ -156,6 +166,7 @@ private:
     uint32_t m_dwStrength{0};
     uint32_t m_dwVitality{0};
     uint32_t m_dwRebornCount{0};
+    uint16_t m_usStamina{100};
     std::string m_strLastRewardDay;
     uint32_t m_dwBaseBP{100};
     uint32_t m_dwBattlePower{100};
