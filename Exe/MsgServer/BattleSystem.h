@@ -11,6 +11,7 @@ public:
 
     uint32_t CalcPhysicalDamage(CUser* pAttacker, CUser* pTarget);
     uint32_t CalcMonsterDamage(CUser* pAttacker, CMonster* pTarget);
+    uint32_t CalcPlayerDamage(class CMonster* pAttacker, class CUser* pTarget);
     bool CheckHit(CUser* pAttacker, CUser* pTarget);
     bool CheckCritical(CUser* pAttacker);
 

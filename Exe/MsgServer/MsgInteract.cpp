@@ -7,6 +7,7 @@
 #include "Guild.h"
 #include "MsgItem.h"
 #include "BattleSystem.h"
+#include "MsgUserAttrib.h"
 #include "Team.h"
 #include "Item.h"
 #include "MsgTalk.h"
@@ -135,6 +136,29 @@ void CMsgInteract::Process(uint32_t dwSender) {
     printf("[BATTLE] %s hits %s for %u dmg (life %u/%u)\n",
            pAttacker->GetName().c_str(), pMonster->GetName().c_str(),
            dwDamage, dwLife, pMonster->GetMaxLife());
+
+    // the monster fights back: retaliation damage to the attacker
+    if (pMonster->IsAlive()) {
+        uint32_t back = CBattleSystem::Instance().CalcPlayerDamage(pMonster.get(), pAttacker.get());
+        uint32_t heroLife = pAttacker->GetLife() > back ? pAttacker->GetLife() - back : 0;
+        pAttacker->SetLife(heroLife);
+        std::vector<AttribPair> attribs = { { CMsgUserAttrib::Attrib_Life, heroLife } };
+        CMsgUserAttrib m;
+        if (m.Create(pAttacker->GetId(), attribs))
+            pAttacker->SendMsg(m.GetBuf(), m.GetSize());
+        pAttacker->SendSysMsg(pMonster->GetName() + " hits you for " + std::to_string(back) + "!");
+        if (heroLife == 0) {
+            // fallen hero: respawn in Twin City, monster resets to full life
+            pAttacker->SetLife(pAttacker->GetMaxLife());
+            pAttacker->Teleport(1002, 315, 275);
+            pMonster->SetLife(pMonster->GetMaxLife());
+            pAttacker->SendSysMsg("You were slain by " + pMonster->GetName() +
+                                  " and revived in Twin City.");
+            printf("[BATTLE] %s was slain by %s\n",
+                   pAttacker->GetName().c_str(), pMonster->GetName().c_str());
+            return;
+        }
+    }
 
     if (dwLife == 0) {
         CMonsterManager::Instance().OnMonsterKilled(pMonster);

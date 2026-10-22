@@ -29,3 +29,13 @@ uint32_t CBattleSystem::CalcMonsterDamage(CUser* pAttacker, CMonster* pTarget) {
 
 bool CBattleSystem::CheckHit(CUser*, CUser*) { return true; }
 bool CBattleSystem::CheckCritical(CUser*) { return false; }
+
+// monster -> player retaliation: monster attack vs the player's level defense
+uint32_t CBattleSystem::CalcPlayerDamage(CMonster* pAttacker, CUser* pTarget) {
+    if (!pAttacker) return 0;
+    uint32_t def = pTarget ? 2 + pTarget->GetLevel() * 2 : 0;
+    uint32_t atk = pAttacker->GetAttack();
+    if (def > atk * 4 / 5) def = atk * 4 / 5;
+    uint32_t base = atk - def;
+    return base + rand() % (base / 2 + 1);
+}
