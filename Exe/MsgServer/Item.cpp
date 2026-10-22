@@ -86,20 +86,36 @@ void CItemLibrary::Apply(ItemInfo& item) const {
 uint32_t CItemLibrary::LoadAdditionsFromDB(CMySQLClient* pDB) {
     m_additions.clear();
     if (!pDB) return 0;
-    if (!pDB->Query("SELECT item_type, life, attack FROM cq_itemaddition")) {
+    if (!pDB->Query("SELECT item_type, plus, life, attack FROM cq_itemaddition")) {
         printf("[ITEM] cq_itemaddition load failed: %s\n", pDB->GetError().c_str());
         return 0;
     }
+    uint32_t dwRows = 0;
     for (auto& row : pDB->GetRows()) {
-        if (row.size() < 3) continue;
+        if (row.size() < 4) continue;
         uint32_t t = (uint32_t)strtoul(row[0].c_str(), nullptr, 10);
+        int nPlus = atoi(row[1].c_str());
         ItemAddition a;
-        a.dwLife = (uint32_t)strtoul(row[1].c_str(), nullptr, 10);
-        a.dwAttack = (uint32_t)strtoul(row[2].c_str(), nullptr, 10);
-        if (t) m_additions[t] = a;
+        a.dwLife = (uint32_t)strtoul(row[2].c_str(), nullptr, 10);
+        a.dwAttack = (uint32_t)strtoul(row[3].c_str(), nullptr, 10);
+        if (t && nPlus >= 1 && nPlus <= 12) { m_additions[t][nPlus] = a; ++dwRows; }
     }
-    printf("[ITEM] cq_itemaddition loaded: %zu addition(s).\n", m_additions.size());
-    return (uint32_t)m_additions.size();
+    printf("[ITEM] cq_itemaddition loaded: %u per-plus row(s), %zu type(s).\n",
+           dwRows, m_additions.size());
+    return dwRows;
+}
+
+ItemAddition CItemLibrary::AdditionBonusAt(uint32_t dwType, uint8_t ucPlus) const {
+    ItemAddition total;
+    auto it = m_additions.find(dwType);
+    if (it == m_additions.end() || ucPlus == 0) return total;
+    for (int p = 1; p <= (int)ucPlus; ++p) {
+        auto ip = it->second.find(p);
+        if (ip == it->second.end()) continue;
+        total.dwLife += ip->second.dwLife;
+        total.dwAttack += ip->second.dwAttack;
+    }
+    return total;
 }
 
 uint32_t CItemLibrary::LoadAdditionsFromFile(const std::string& path) {
@@ -123,21 +139,17 @@ uint32_t CItemLibrary::LoadAdditionsFromFile(const std::string& path) {
             parts.push_back(b == std::string::npos ? "" : part.substr(b, e - b + 1));
             pos = bar + 1;
         }
-        if (parts.size() < 3) continue;
+        if (parts.size() < 4) continue;   // type | plus | life | attack
         uint32_t t = (uint32_t)strtoul(parts[0].c_str(), nullptr, 10);
+        int nPlus = atoi(parts[1].c_str());
         ItemAddition a;
-        a.dwLife = (uint32_t)strtoul(parts[1].c_str(), nullptr, 10);
-        a.dwAttack = (uint32_t)strtoul(parts[2].c_str(), nullptr, 10);
-        if (t) m_additions[t] = a;
+        a.dwLife = (uint32_t)strtoul(parts[2].c_str(), nullptr, 10);
+        a.dwAttack = (uint32_t)strtoul(parts[3].c_str(), nullptr, 10);
+        if (t && nPlus >= 1 && nPlus <= 12) m_additions[t][nPlus] = a;
     }
     fclose(f);
-    printf("[ITEM] %s: %zu addition(s).\n", path.c_str(), m_additions.size());
+    printf("[ITEM] %s: %zu addition type(s).\n", path.c_str(), m_additions.size());
     return (uint32_t)m_additions.size();
-}
-
-const ItemAddition* CItemLibrary::LookupAddition(uint32_t dwType) const {
-    auto it = m_additions.find(dwType);
-    return (it != m_additions.end()) ? &it->second : nullptr;
 }
 
 // ---------------- cq_dropitemrule ----------------

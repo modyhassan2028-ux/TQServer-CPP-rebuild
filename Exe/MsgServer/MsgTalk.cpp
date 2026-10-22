@@ -16,6 +16,7 @@
 #include "Npc.h"
 #include "User.h"
 #include "Item.h"
+#include "ItemUpgrade.h"
 #include "MsgItem.h"
 #include "MySQLClient.h"
 #include <sstream>
@@ -448,6 +449,56 @@ if (m_message.rfind("/npc", 0) == 0) {
         }
         cross::CCrossClient::Instance().RequestWho(user->GetId());
         user->SendSysMsg("Asking the cross hub... (roster incoming)");
+        return;
+    }
+
+    // ---- refinement: /up <slot> pushes an item +1 (max +12) ----
+    if (m_message.rfind("/up ", 0) == 0) {
+        std::istringstream iss(m_message.substr(4));
+        uint32_t slot = 0;
+        iss >> slot;
+        if (slot == 0) { user->SendSysMsg("Usage: /up <slot> - /inv to list."); return; }
+        auto& inv = user->GetInventory();
+        if (slot > inv.size()) { user->SendSysMsg("No such slot. /inv to list."); return; }
+        auto& it = inv[slot - 1];
+        if (it.dwPosition != 255) { user->SendSysMsg("Unequip it first."); return; }
+        if (it.usSort == 0) { user->SendSysMsg("Only weapons and armor can be refined."); return; }
+        if (it.ucPlus >= upgrade::kMaxPlus) {
+            user->SendSysMsg(it.strName + " is already +" + std::to_string(it.ucPlus) +
+                             " - it cannot be refined further.");
+            return;
+        }
+        auto* pDef = CItemLibrary::Instance().Lookup(it.dwType);
+        uint32_t dwPrice = pDef ? pDef->dwPrice : 1000;
+        uint64_t dwCost = upgrade::UpgradeCost(dwPrice, it.ucPlus);
+        uint32_t dwChance = upgrade::SuccessChance(it.ucPlus);
+        if (user->GetMoney() < dwCost) {
+            user->SendSysMsg("Refining to +" + std::to_string(it.ucPlus + 1) +
+                             " costs " + std::to_string(dwCost) + " silver - you do not have enough.");
+            return;
+        }
+        user->AddMoney(-(int64_t)dwCost);
+        uint32_t roll = rand() % 100;
+        if (roll < dwChance) {
+            ++it.ucPlus;
+            user->RecalcEquipmentBonuses();
+            std::string strMsg = user->GetName() + " refined " + it.strName +
+                                 " to +" + std::to_string(it.ucPlus) + "!";
+            user->SendSysMsg("Success! " + it.strName + " is now +" +
+                             std::to_string(it.ucPlus) + " (" + std::to_string(dwChance) +
+                             "% chance, cost " + std::to_string(dwCost) + " silver).");
+            if (it.ucPlus >= 7) {
+                CMsgTalk note;
+                if (note.Create("SYSTEM", "", strMsg, CMsgTalk::Channel_Broadcast))
+                    CMapManager::Instance().BroadcastToAll(note.GetBuf(), note.GetSize());
+            }
+            printf("[UPGRADE] %s %s -> +%u\n", user->GetName().c_str(),
+                   it.strName.c_str(), it.ucPlus);
+        } else {
+            user->SendSysMsg("The refinement failed (rolled " + std::to_string(roll) +
+                             " vs " + std::to_string(dwChance) + "%). The silver is lost, " +
+                             it.strName + " is unharmed at +" + std::to_string(it.ucPlus) + ".");
+        }
         return;
     }
 

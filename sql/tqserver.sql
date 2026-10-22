@@ -106,10 +106,12 @@ CREATE TABLE IF NOT EXISTS cq_item (
 
 -- equipment stat bonuses (original cq_itemaddition model)
 CREATE TABLE IF NOT EXISTS cq_itemaddition (
-  item_type INT PRIMARY KEY,
+  item_type INT NOT NULL,
+  plus INT NOT NULL,              -- bonus granted AT this plus level (totals are cumulative)
   life INT NOT NULL DEFAULT 0,
-  attack INT NOT NULL DEFAULT 0
-);
+  attack INT NOT NULL DEFAULT 0,
+  PRIMARY KEY (item_type, plus)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- monster loot tables (original cq_dropitemrule model)
 CREATE TABLE IF NOT EXISTS cq_dropitemrule (

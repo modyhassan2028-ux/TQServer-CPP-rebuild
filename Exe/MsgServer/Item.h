@@ -59,7 +59,9 @@ public:
     // cq_itemaddition: equipment bonuses
     uint32_t LoadAdditionsFromDB(class CMySQLClient* pDB);
     uint32_t LoadAdditionsFromFile(const std::string& path); // data/itemadditions.ini: type|life|attack
-    const ItemAddition* LookupAddition(uint32_t dwType) const;
+    // cq_itemaddition is per-plus: rows are (type, plus) and the bonus at +N
+    // is the SUM of rows for plus 1..N (a single plus-1 row acts as per-level)
+    ItemAddition AdditionBonusAt(uint32_t dwType, uint8_t ucPlus) const;
 
     // cq_dropitemrule: monster drops (monster_type -> rules)
     uint32_t LoadDropsFromDB(class CMySQLClient* pDB);
@@ -68,6 +70,6 @@ public:
 private:
     CItemLibrary() = default;
     std::map<uint32_t, ItemTypeDef> m_types;
-    std::map<uint32_t, ItemAddition> m_additions;
+    std::map<uint32_t, std::map<int, ItemAddition>> m_additions; // type -> plus -> bonus
     std::map<uint32_t, std::vector<DropRule>> m_drops;
 };

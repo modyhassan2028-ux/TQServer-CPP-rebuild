@@ -41,15 +41,16 @@ void CUser::RecalcEquipmentBonuses() {
     uint32_t bonusLife = 0, bonusAtk = 0;
     for (const auto& it : m_items) {
         if (it.dwPosition == 255) continue; // not equipped
-        auto* a = CItemLibrary::Instance().LookupAddition(it.dwType);
-        if (a) {
-            bonusLife += a->dwLife;
-            bonusAtk += a->dwAttack;
+        // cq_itemaddition is per-plus and cumulative: +N grants the sum of
+        // rows 1..N for this type; types without rows keep the flat v1 rates
+        auto a = CItemLibrary::Instance().AdditionBonusAt(it.dwType, it.ucPlus);
+        if (a.dwLife || a.dwAttack) {
+            bonusLife += a.dwLife;
+            bonusAtk += a.dwAttack;
+        } else {
+            if (it.usSort == 1) bonusAtk += it.ucPlus * 5;
+            else if (it.usSort == 2) bonusLife += it.ucPlus * 10;
         }
-        // refinement applies to ANY equipped item, with or without an addition record:
-        // weapons gain +5 attack per plus, armor +10 life per plus
-        if (it.usSort == 1) bonusAtk += it.ucPlus * 5;
-        else if (it.usSort == 2) bonusLife += it.ucPlus * 10;
         // enchant: gems add flat life to any equipped piece
         bonusLife += it.usEnchant;
     }
