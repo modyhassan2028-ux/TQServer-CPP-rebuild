@@ -869,6 +869,24 @@ int main() {
         { auto n = mkMgc(0, 532, "5 0 0 604800 121 0 0"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
         printf("[ok] 532 quench matches ProcessActionItemQuench (0x214)\n");
     }
+    // ---- 2003/2004: numeric compares with %id dialog ctx (0x7d3/0x7d4) ----
+    {
+        auto upR = std::make_shared<CUser>(999027); upR->SetName("Cmp2003");
+        CUser& r = *upR;
+        r.m_stDialogCtx.dwId = 7831; // talking to dynamic npc 7831
+        { auto n = mkMgc(0, 2003, "%id == 7831"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 2003, "%id == 9999"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 2003, "%id < 7832"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 2003, "%id <= 7831"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 2003, "%id <= 7830"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 2004, "%id == 7831"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 2004, "%id < 7832"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        // unknown op -> false
+        { auto n = mkMgc(0, 2003, "%id > 7831"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        // parse failure -> false
+        { auto n = mkMgc(0, 2003, "garbage"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        printf("[ok] 2003/2004 compares match cases 0x7d3/0x7d4 with %%id\n");
+    }
     // ---- 306: map attributes (case 0x132) ----
     {
         auto upR = std::make_shared<CUser>(999026); upR->SetName("Map306");

@@ -521,19 +521,41 @@ public:
     void SetIterVarData(uint32_t n, int64_t v) { if (n && n < 65) m_arIterVarData[n] = v; }
     int64_t GetIterVarData(uint32_t n) const { return (n && n < 65) ? m_arIterVarData[n] : 0; }
     uint32_t m_dwHomeMapId{0}; // %user_home_id (house system feeds this)
+    // ORIGINAL dialog/npc context resolved as %id/%data/%datastr/%name/
+    // %npc_life/%npc_ownerid/%npc_x/%npc_y (the central resolver reads the
+    // message dialog fields - the npc the player is interacting with)
+    struct DialogCtx {
+        uint32_t dwId{0}, dwData{0}, dwNpcLife{0}, dwNpcOwnerId{0};
+        uint16_t wX{0}, wY{0};
+        std::string strDatastr, strName;
+    } m_stDialogCtx;
     uint32_t GetHomeMapId() const { return m_dwHomeMapId; }
     void SetHomeMapId(uint32_t m) { m_dwHomeMapId = m; }
     // ORIGINAL: action vars resolve centrally before the case runs
     void ResolveActionVars(std::string& s) const {
         ResolveIterVars(s);
         // %user_map_id -> current map; %user_home_id -> house map
-        for (const char* szTok : {"%user_map_id", "%user_home_id"}) {
+        auto sub = [&](const char* szTok, const std::string& v) {
             size_t p = 0;
-            while ((p = s.find(szTok, p)) != std::string::npos) {
-                uint32_t v = (strcmp(szTok, "%user_map_id") == 0) ? m_dwMapId : m_dwHomeMapId;
-                s.replace(p, strlen(szTok), std::to_string(v));
-            }
-        }
+            while ((p = s.find(szTok, p)) != std::string::npos)
+                s.replace(p, strlen(szTok), v);
+        };
+        // ORIGINAL resolver token order (longest first: %datastr before %data)
+        sub("%user_map_id", std::to_string(m_dwMapId));
+        sub("%user_home_id", std::to_string(m_dwHomeMapId));
+        sub("%user_map_x", std::to_string(m_usX));
+        sub("%user_map_y", std::to_string(m_usY));
+        sub("%user_lev", std::to_string(m_ucLevel));
+        sub("%user_id", std::to_string(m_dwId));
+        sub("%user_name", m_name);
+        sub("%id", std::to_string(m_stDialogCtx.dwId));
+        sub("%datastr", m_stDialogCtx.strDatastr);
+        sub("%data", std::to_string(m_stDialogCtx.dwData));
+        sub("%name", m_stDialogCtx.strName);
+        sub("%npc_life", std::to_string(m_stDialogCtx.dwNpcLife));
+        sub("%npc_ownerid", std::to_string(m_stDialogCtx.dwNpcOwnerId));
+        sub("%npc_x", std::to_string(m_stDialogCtx.wX));
+        sub("%npc_y", std::to_string(m_stDialogCtx.wY));
     }
     void ResolveIterVars(std::string& s) const {
         const char* szTok = "%iter_var_data";

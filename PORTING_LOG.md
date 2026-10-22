@@ -483,3 +483,27 @@ FUN_14013d790 وما حولها، ~3,400 صف).
 
 ## 🏁 **عائلة B (كل الـ 3xx) اكتملت.** التالي: **عائلة D** (201، 974 صف —
 سلاسل كوست الخريطة 0x201 إذا) أو **E** (شروط 1xxx ~3,900) حسب الفحص.
+
+
+## 22. عائلة C — الجزء 1: 2003/2004 مقارنات رقمية + سياق الحوار (23 أكتوبر)
+
+- **اكتشاف مركزي:** محلل المتغيرات الأصلي (قبل السويتش) بيقرأ ~45 رمزاً
+  موثقاً من التفكيك: id/data/datastr/name/npc_life/npc_ownerid/npc_x/
+  npc_y (حقول سياق الحوار — الـ NPC اللاعب بيكلمه)، user_lev/user_sex/
+  user_team/user_meto/user_pro/user_id/user_name/user_map_id/user_map_x/
+  user_map_y/user_home_id/account_id/battle_lev/syn_id/syn_name/family_id/
+  mate_name/riding_points، iter_time/iter_rand/iter_var_data/iter_var_str/
+  iter_value، accept/accept_data، iter_game_card2-4، iter_cost_durrecover،
+  iter_police_wanted/iter_wanted، enemy_syn/ally_syn، map_owner_id/
+  map_owner_type، pk_bonus_*، iter_syn_*/iter_member_*، last_add_item_id/
+  type/last_del_item_id.
+- **2003 (0x7d3، 3,995 صف):** sscanf "%d %s %d" = (أ، عملية، ب) بالعمليات
+  الحرفية فقط ==/</<= (غير المطابق → false). أمثلة القاعدة "%id == 7831".
+- **2004 (0x7d4، 299 صف):** نفس المقارنة unsigned "%u %s %u".
+- **سياق الحوار على CUser (m_stDialogCtx):** معرف الـ NPC + data/datastr/
+  name/npc_life/npc_ownerid/npc_x/npc_y — %id بتتحل ليه (سلاسل الـ NPC
+  الديناميكية 7831+ بتعتمد عليها).
+- حل الرموز المضاف للـ resolver: %id/%data/%datastr/%name/%npc_* + %user_lev/
+  user_id/user_name/user_map_x/user_map_y (لعائلة E لاحقاً).
+- المتبقي في C: 2006 (534)، 2008 (212)، 2013 (101)، 2007 (54)، 2012 (44)،
+  2011 (15)، 2101 (103)، 2102 (12)، 2009 (77)، 2002/2201/2205 (9) = ~1,160 صف.

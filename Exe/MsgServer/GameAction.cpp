@@ -984,6 +984,31 @@ bool bAll = (llAll == 1);
         }
         return false; // ORIGINAL: unmatched attr/op -> break -> false
     }
+    case 2003: { // ORIGINAL case 0x7d3: signed compare "a op b" (op: == < <=)
+        // sscanf "%d %s %d"; vars resolve first (rows like "%id == 7831").
+        std::string strP = pNode->strParam; pUser->ResolveActionVars(strP);
+        int32_t a = 0, b = 0; char szOp[16] = {0};
+        if (sscanf(strP.c_str(), "%d %15s %d", &a, szOp, &b) != 3) {
+            printf("[DBERR] cq_action %u type 2003 param error\n", pNode->dwId);
+            return false;
+        }
+        if (!stricmp(szOp, "==")) return a == b;
+        if (!stricmp(szOp, "<"))  return a < b;
+        if (!stricmp(szOp, "<=")) return a <= b;
+        return false; // ORIGINAL: unmatched op -> break -> false
+    }
+    case 2004: { // ORIGINAL case 0x7d4: unsigned compare "a op b" (op: == < <=)
+        std::string strP = pNode->strParam; pUser->ResolveActionVars(strP);
+        uint32_t a = 0, b = 0; char szOp[16] = {0};
+        if (sscanf(strP.c_str(), "%u %15s %u", &a, szOp, &b) != 3) {
+            printf("[DBERR] cq_action %u type 2004 param error\n", pNode->dwId);
+            return false;
+        }
+        if (!stricmp(szOp, "==")) return a == b;
+        if (!stricmp(szOp, "<"))  return a < b;
+        if (!stricmp(szOp, "<=")) return a <= b;
+        return false;
+    }
     case 303: { // ORIGINAL case 0x12f: SYSTEM/ALLUSERS world broadcast (formatted)
         // ORIGINAL: FUN_14015b240(buf) setup, FUN_14015b300(buf,"SYSTEM",
         // "ALLUSERS", param) - the same broadcast machinery as 125; 0 -> DBERR
