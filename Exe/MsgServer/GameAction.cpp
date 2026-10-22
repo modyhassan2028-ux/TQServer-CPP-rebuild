@@ -896,6 +896,46 @@ bool bAll = (llAll == 1);
         }
         return ProcessItemQuench(pUser, pNode, pUser->m_dwQuenchItemId, pUser->m_dwQuenchMaterialId);
     }
+    case 301: { // ORIGINAL case 0x12d: teleport user to map/x/y (FUN_1402bf7a0)
+        // ORIGINAL flow: resolve the action user, vcall+0x298(0x1040) fetches
+        // the user core-status blob - byte[13] set => LOGERR 0xd9d + DBERR
+        // (teleport blocked state) -> false. sscanf "%u %d %d" must return 3,
+        // else DBERR + false. FUN_1402bf7a0(user, map, x, y): target map lookup
+        // (0 -> false), leave region, user fields x(+0x20)/y(+0x24)/map, enter
+        // region, true.
+        // Byte[13] core-state gate: our user has no core blob yet - gate
+        // defaults open (documented with the core-status subsystem).
+        uint32_t dwMap = 0; int32_t nX = 0, nY = 0;
+        if (sscanf(pNode->strParam.c_str(), "%u %d %d", &dwMap, &nX, &nY) != 3) {
+            printf("[DBERR] cq_action %u type 301 param error\n", pNode->dwId);
+            return false;
+        }
+        auto pMap = CMapManager::Instance().GetMap(dwMap);
+        if (!pMap) return false; // ORIGINAL: map lookup 0 -> out (break -> false)
+        pUser->Teleport(dwMap, (uint16_t)nX, (uint16_t)nY); // ORIGINAL FUN_1402bf7a0 move
+        return true;
+    }
+    case 304: { // ORIGINAL case 0x130: enter record/dynamic map at x,y
+        // sscanf "%u %u %d %d" = (mapid, scene_id 1018, x, y). ORIGINAL:
+        // GetMap(mapid,1) -> FUN_1402c99b0 stand check (same cell logic as
+        // 1003), FUN_140117c30() record-map (instance) manager, FUN_14037c800
+        // enter, then attach via mapmgr vcall+0x50/+0x20. Parse != 4 ->
+        // DBERR + false. The dynamic instance-copy system (FUN_14037c800) is
+        // pending: the enter lands on the static base map (documented).
+        uint32_t dwMap = 0, dwScene = 0; int32_t nX = 0, nY = 0;
+        if (sscanf(pNode->strParam.c_str(), "%u %u %d %d", &dwMap, &dwScene, &nX, &nY) != 4) {
+            printf("[DBERR] cq_action %u type 304 param error\n", pNode->dwId);
+            return false;
+        }
+        auto pMap = CMapManager::Instance().GetMap(dwMap);
+        if (!pMap) return false; // ORIGINAL: GetMap 0 -> out (break -> false)
+        if (!pMap->IsPassable((uint16_t)nX, (uint16_t)nY)) {
+            return false; // ORIGINAL: FUN_1402c99b0 stand check failed -> out
+        }
+        pUser->Teleport(dwMap, (uint16_t)nX, (uint16_t)nY);
+        (void)dwScene; // ORIGINAL: the 1018 scene/doc id rides FUN_14037c800
+        return true;
+    }
     case 303: { // ORIGINAL case 0x12f: SYSTEM/ALLUSERS world broadcast (formatted)
         // ORIGINAL: FUN_14015b240(buf) setup, FUN_14015b300(buf,"SYSTEM",
         // "ALLUSERS", param) - the same broadcast machinery as 125; 0 -> DBERR

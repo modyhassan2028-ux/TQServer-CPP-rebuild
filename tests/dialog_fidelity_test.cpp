@@ -800,6 +800,31 @@ int main() {
         g_bActionTestMode = false;
         printf("[ok] 513 transform matches case 0x201 (Transform2)\n");
     }
+    // ---- 301: teleport user to map/x/y (case 0x12d -> FUN_1402bf7a0) ----
+    {
+        auto upR = std::make_shared<CUser>(999024); upR->SetName("Tele301");
+        CUser& r = *upR;
+        { auto n = mkMgc(0, 301, "1002 430 378"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        assert(r.GetMapId() == 1002 && r.GetX() == 430 && r.GetY() == 378);
+        { auto n = mkMgc(0, 301, "1011 62 110"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        assert(r.GetMapId() == 1011);
+        // missing map -> false
+        { auto n = mkMgc(0, 301, "999999 1 1"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        // short param -> false
+        { auto n = mkMgc(0, 301, "1002 430"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        printf("[ok] 301 teleport matches case 0x12d (FUN_1402bf7a0)\n");
+    }
+    // ---- 304: enter record map at x,y (case 0x130) ----
+    {
+        auto upR = std::make_shared<CUser>(999025); upR->SetName("Rec304");
+        // dynamic map ids: pick a base map that exists for the enter path
+        { auto n = mkMgc(0, 304, "1002 1018 430 378"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        // short param -> false
+        { auto n = mkMgc(0, 304, "1002 1018"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        // missing map -> false
+        { auto n = mkMgc(0, 304, "999999 1018 1 1"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        printf("[ok] 304 record-map enter matches case 0x130\n");
+    }
     // ---- 303: SYSTEM/ALLUSERS broadcast (case 0x12f) ----
     {
         auto upR = std::make_shared<CUser>(999022); upR->SetName("Bcst303");
