@@ -1,4 +1,5 @@
 ﻿#include "GameAction.h"
+#include "UserTask.h"
 #include "MsgDialog.h"
 #include "User.h"
 #include "MapManager.h"
@@ -16,6 +17,9 @@
 // ORIGINAL uses _stricmp (MSVC); POSIX equivalent
 #ifndef _stricmp
 #define _stricmp strcasecmp
+#endif
+#ifndef _strnicmp
+#define _strnicmp strncasecmp
 #endif
 #ifndef _strtoi64
 #define _strtoi64 strtoll
@@ -150,6 +154,43 @@ bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogE
         // DAT_14070e870 and sends DAT_14070e850, then the action fails.
         printf("[DIALOG] 1003: FlyMap error, Action[%u]\n", pNode->dwId);
         return false;
+    }
+    case 1057: { // ORIGINAL switch case 0x31: task-detail variables
+        char szField[256] = {0}, szOp[256] = {0}; int nVal = 0;
+        if (sscanf(pNode->strParam.c_str(), "%s %s %d", szField, szOp, &nVal) < 3) {
+            // ORIGINAL: log_InlineLogDBERROR "Wrong param number"
+            return false;
+        }
+        // ORIGINAL FUN_140118220 + vtable+0x20: no record for this user/task -> fail
+        uint32_t dwTaskId = pNode->dwData; // cq_action.data = task id
+        auto& mgr = CUserTaskManager::Instance();
+        if (!mgr.HasTask(pUser, dwTaskId)) return false;
+        if (_strnicmp(szField, "data", 4) == 0) {
+            uint32_t idx = 0;
+            for (uint32_t i = 1; i <= 7; ++i) {
+                char name[8]; snprintf(name, sizeof(name), "data%u", i);
+                if (_stricmp(szField, name) == 0) { idx = i; break; }
+            }
+            if (idx == 0) return false; // ORIGINAL: unknown field -> 0
+            if (_stricmp(szOp, ">=") == 0)  return nVal <= mgr.GetData(pUser, dwTaskId, idx);
+            if (_stricmp(szOp, "<=") == 0)  return mgr.GetData(pUser, dwTaskId, idx) <= nVal;
+            if (_stricmp(szOp, "==") == 0)  return mgr.GetData(pUser, dwTaskId, idx) == nVal;
+            if (_stricmp(szOp, "+=") == 0)  return mgr.SetData(pUser, dwTaskId, idx,
+                                                     mgr.GetData(pUser, dwTaskId, idx) + nVal);
+            if (_stricmp(szOp, "set") == 0) return mgr.SetData(pUser, dwTaskId, idx, nVal);
+        } else if (_stricmp(szField, "notify") == 0) {
+            if (_stricmp(szOp, "==") == 0)  return mgr.GetNotify(pUser, dwTaskId) == (uint8_t)nVal;
+            if (_stricmp(szOp, "set") == 0) return mgr.SetNotify(pUser, dwTaskId, (uint8_t)nVal);
+        } else if (_stricmp(szField, "complete") == 0) {
+            if (_stricmp(szOp, "==") == 0)  return mgr.GetComplete(pUser, dwTaskId) == (uint16_t)nVal;
+            if (_stricmp(szOp, "set") == 0) return mgr.SetComplete(pUser, dwTaskId, (uint16_t)nVal);
+        } else if (_stricmp(szField, "overtime") == 0) {
+            if (_stricmp(szOp, "set") == 0) return mgr.SetOvertime(pUser, dwTaskId, (uint32_t)nVal);
+            if (_stricmp(szOp, "==") == 0)  return mgr.GetOvertime(pUser, dwTaskId) == (uint32_t)nVal;
+        } else if (_stricmp(szField, "isovertime") == 0) {
+            return mgr.IsOvertime(pUser, dwTaskId); // ORIGINAL vtable+0x90, op ignored
+        }
+        return false; // ORIGINAL: falls through to the 0 return
     }
     case 1073: { // ORIGINAL switch case 0x3f: stc(%u, %u) OP %d (check)
         uint32_t dwType = 0, dwData = 0; char szOp[256] = {0}; int nOperand = 0;

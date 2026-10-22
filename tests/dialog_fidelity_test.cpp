@@ -13,6 +13,7 @@
 #include "PlayerMagic.h"
 #include "MapManager.h"
 #include "Item.h"
+#include "UserTask.h"
 #include "MySQLClient.h"
 #include <cassert>
 #include <cstring>
@@ -273,6 +274,44 @@ int main() {
     assert(u7->GetMoney() == 750);
     // malformed -> DBERROR path -> false
     printf("[ok] 1073/1074 stc check/set match FUN_140385cf0/140385de0\n");
+
+    // --- 1057 (case 0x31): task_detail variables, real cq_action params ---
+    // seed the ORIGINAL task_detail row for our test user + task 2418 (the
+    // task behind the real rows "data1 == 6/7/8" in cq_action)
+    pDB->Query("INSERT IGNORE INTO task_detail (user_id, task_id, complete_flag, notify_flag,"
+               " data1, data2, data3, data4, data5, data6, data7, task_overtime)"
+               " VALUES (999001, 2418, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0)");
+    auto u8 = std::make_shared<CUser>(999001);
+    auto mk1057 = [](uint32_t id, uint32_t task, const char* param) {
+        CDialogEngine::Node n; n.dwType = 1057; n.dwId = id; n.dwData = task;
+        n.strParam = param; return n; };
+    // real params from cq_action rows 5031656/5031655 (task 2418)
+    { auto n = mk1057(5031656, 2418, "data1 == 7"); assert( CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mk1057(5031655, 2418, "data1 == 6"); assert(!CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mk1057(770001, 2418, "data1 set 8"); assert( CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mk1057(5031657, 2418, "data1 == 8"); assert( CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mk1057(770002, 2418, "data1 += 2"); assert( CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mk1057(770003, 2418, "data1 >= 10"); assert( CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mk1057(770004, 2418, "data1 <= 9"); assert(!CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mk1057(770005, 2418, "complete set 1"); assert( CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mk1057(3592222, 2418, "complete == 1"); assert( CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mk1057(770006, 2418, "notify set 1"); assert( CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mk1057(770007, 2418, "notify == 1"); assert( CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mk1057(770008, 2418, "overtime set 1"); assert( CGameAction::ProcessActionUser(u8, &n)); }
+    // isovertime: 3 tokens needed, else ORIGINAL sscanf<3 -> DBERROR -> fail
+    { auto n = mk1057(770009, 2418, "isovertime == 0"); assert( CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mk1057(770010, 2418, "isovertime"); assert(!CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mk1057(770012, 2418, "overtime set 0"); assert( CGameAction::ProcessActionUser(u8, &n)); } // real DB param
+    { auto n = mk1057(770013, 2418, "isovertime == 0"); assert(!CGameAction::ProcessActionUser(u8, &n)); }
+    { auto n = mk1057(770011, 6350, "complete set 1"); assert(!CGameAction::ProcessActionUser(u8, &n)); } // user has no task 6350 -> ORIGINAL vtable+0x20 fails
+    // persistence: read back from task_detail
+    pDB->Query("SELECT data1, complete_flag, notify_flag, task_overtime FROM task_detail"
+               " WHERE user_id=999001 AND task_id=2418");
+    assert(!pDB->GetRows().empty());
+    assert(atoi(pDB->GetRows()[0][0].c_str()) == 10);
+    assert(atoi(pDB->GetRows()[0][1].c_str()) == 1);
+    assert(atoi(pDB->GetRows()[0][2].c_str()) == 1);
+    printf("[ok] 1057 task_detail variables match FUN_140118220 vtable ops\n");
 
     printf("DIALOG FIDELITY TEST PASSED\n");
     return 0;
