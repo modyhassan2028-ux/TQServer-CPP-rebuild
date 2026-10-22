@@ -50,6 +50,8 @@ void CUser::RecalcEquipmentBonuses() {
         // weapons gain +5 attack per plus, armor +10 life per plus
         if (it.usSort == 1) bonusAtk += it.ucPlus * 5;
         else if (it.usSort == 2) bonusLife += it.ucPlus * 10;
+        // enchant: gems add flat life to any equipped piece
+        bonusLife += it.usEnchant;
     }
     uint32_t newMax = m_dwBaseMaxLife + bonusLife;
     if (m_dwLife > newMax) m_dwLife = newMax;

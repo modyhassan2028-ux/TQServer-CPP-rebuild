@@ -409,6 +409,37 @@ if (m_message.rfind("/npc", 0) == 0) {
     }
     // ---- rebirth at the level cap ----
     // ---- /fish + /catch: fish by the water for money/CP ----
+    // ---- /enchant: socket gems into equipped gear for bonus life ----
+    if (m_message.rfind("/enchant", 0) == 0) {
+        // find an equipped item (first equipped piece)
+        ItemInfo* pGear = nullptr;
+        for (auto& it : user->GetInventory())
+            if (it.dwPosition != 255) { pGear = &it; break; }
+        if (!pGear) { user->SendSysMsg("Equip a weapon or armor first."); return; }
+        uint16_t target = (uint16_t)(pGear->usEnchant == 0 ? 255 :
+                          pGear->usEnchant == 255 ? 512 :
+                          pGear->usEnchant == 512 ? 1024 : 2048);
+        if (pGear->usEnchant >= 2048) { user->SendSysMsg("This gear is fully enchanted."); return; }
+        // cost: current enchant tier * 20,000 money
+        uint32_t cost = (pGear->usEnchant == 0 ? 20000 :
+                         pGear->usEnchant == 255 ? 40000 :
+                         pGear->usEnchant == 512 ? 80000 : 160000);
+        if (user->GetMoney() < cost) {
+            user->SendSysMsg("Enchanting to +" + std::to_string(target) +
+                             " costs " + std::to_string(cost) + " money.");
+            return;
+        }
+        user->AddMoney(-cost);
+        pGear->usEnchant = target;
+        user->RecalcEquipmentBonuses();
+        user->SetLife(user->GetLife()); // clamp against the new max
+        user->SendSysMsg("Enchant succeeded! " + pGear->strName + " now grants +" +
+                         std::to_string(target) + " bonus life.");
+        printf("[ENCHANT] %s %s +%u\n", user->GetName().c_str(),
+               pGear->strName.c_str(), target);
+        return;
+    }
+
     // ---- /lottery: spend 5 CP, roll for prizes ----
     if (m_message == "/lottery") {
         const uint32_t kCost = 5;
