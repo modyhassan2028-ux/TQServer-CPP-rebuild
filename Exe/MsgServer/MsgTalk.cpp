@@ -4,6 +4,7 @@
 #include "Guild.h"
 #include "Trade.h"
 #include "Team.h"
+#include "GroundItems.h"
 #include "Npc.h"
 #include "User.h"
 #include "Item.h"
@@ -185,6 +186,16 @@ if (m_message.rfind("/npc", 0) == 0) {
         } else { // list / help
             user->SendSysMsg(CTeamManager::Instance().RosterText(user));
         }
+        return;
+    }
+    // ---- ground drops: /pick, /drops ----
+    if (m_message == "/pick" || m_message == "/pick up") {
+        std::string err = CGroundItemManager::Instance().Pick(user);
+        if (!err.empty()) user->SendSysMsg(err);
+        return;
+    }
+    if (m_message == "/drops") {
+        user->SendSysMsg(CGroundItemManager::Instance().ListNearby(user));
         return;
     }
     // ---- warehouse: /wh deposit|withdraw|info <amount> ----

@@ -93,6 +93,7 @@
     <ClCompile Include="Guild.cpp" />
     <ClCompile Include="Trade.cpp" />
     <ClCompile Include="Team.cpp" />
+    <ClCompile Include="GroundItems.cpp" />
     <ClCompile Include="MapManager.cpp" />
     <ClInclude Include="NetCore.h" />
     <ClInclude Include="MsgConnect.h" />
@@ -103,6 +104,7 @@
     <ClInclude Include="..\..\Core\CQBase\SHA1.h" />
     <ClInclude Include="Trade.h" />
     <ClInclude Include="Team.h" />
+    <ClInclude Include="GroundItems.h" />
     <ClInclude Include="MsgMonster.h" />
     <ClInclude Include="MsgInteract.h" />
     <ClCompile Include="Monster.cpp" />

@@ -1,6 +1,7 @@
 ﻿#include "NetCore.h"
 #include "MapManager.h"
 #include "MonsterManager.h"
+#include "GroundItems.h"
 #include "UserManager.h"
 #include "Guild.h"
 #include "Item.h"
@@ -84,6 +85,7 @@ int main(int argc, char* argv[]) {
         }
     }).detach();
     CMonsterManager::Instance().Start();
+    CGroundItemManager::Instance().Start();
     std::cout << "[STATUS] World initialized. Listening on port " << port << " - Ctrl+C to stop." << std::endl;
 
     while (g_running.load()) {

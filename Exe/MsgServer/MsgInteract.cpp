@@ -9,6 +9,7 @@
 #include "BattleSystem.h"
 #include "MsgUserAttrib.h"
 #include "Team.h"
+#include "GroundItems.h"
 #include "Item.h"
 #include "MsgTalk.h"
 
@@ -161,6 +162,10 @@ void CMsgInteract::Process(uint32_t dwSender) {
     }
 
     if (dwLife == 0) {
+        // the bounty falls on the floor - walk over and /pick it up
+        CGroundItemManager::Instance().OnMonsterDeath(pMonster->GetMapId(),
+                                                      pMonster->GetX(), pMonster->GetY(),
+                                                      pMonster->GetLevel());
         CMonsterManager::Instance().OnMonsterKilled(pMonster);
         // hunt task progress (type 0 = any monster)
         if (pAttacker->HasActiveTask() &&
