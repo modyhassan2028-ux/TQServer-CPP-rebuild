@@ -32,6 +32,12 @@ public:
 
     uint64_t GetFund() const { return m_dwFund; }
     void AddFund(uint64_t v) { m_dwFund += v; }
+    // warehouse: leader-only withdrawal from the shared fund
+    bool TakeFund(uint64_t v) {
+        if (v > m_dwFund) return false;
+        m_dwFund -= v;
+        return true;
+    }
     const std::vector<uint32_t>& GetMembers() const { return m_members; }
 
     // send a chat packet to every online member (id+name of sender passed in)

@@ -367,13 +367,45 @@ if (m_message.rfind("/npc", 0) == 0) {
         } else if (sub == "fund") {
             auto g = CGuildManager::Instance().GetByMember(user->GetId());
             note = g ? "Guild fund: " + std::to_string(g->GetFund()) : "You are not in a guild.";
+        } else if (sub == "deposit" && !arg.empty()) {
+            uint64_t n = strtoull(arg.c_str(), nullptr, 10);
+            auto g = CGuildManager::Instance().GetByMember(user->GetId());
+            if (!g) note = "You are not in a guild.";
+            else if (n == 0) note = "Usage: /guild deposit <amount>";
+            else if (user->GetMoney() < n) note = "You only have " + std::to_string(user->GetMoney()) + " money.";
+            else {
+                user->AddMoney(-(int64_t)n);
+                g->AddFund(n);
+                std::string what = "deposited " + std::to_string(n) + " (fund " + std::to_string(g->GetFund()) + ")";
+                CMsgTalk noteMsg;
+                if (noteMsg.Create("SYSTEM", "", user->GetName() + " " + what, CMsgTalk::Channel_Talk))
+                    CGuildManager::Instance().Broadcast(g, noteMsg.GetBuf(), noteMsg.GetSize());
+                note = "Deposited " + std::to_string(n) + ". Fund: " + std::to_string(g->GetFund());
+                ok = true;
+            }
+        } else if (sub == "withdraw" && !arg.empty()) {
+            uint64_t n = strtoull(arg.c_str(), nullptr, 10);
+            auto g = CGuildManager::Instance().GetByMember(user->GetId());
+            if (!g) note = "You are not in a guild.";
+            else if (g->GetLeaderId() != user->GetId()) note = "Only the leader can withdraw.";
+            else if (n == 0) note = "Usage: /guild withdraw <amount>";
+            else if (!g->TakeFund(n)) note = "Fund only has " + std::to_string(g->GetFund()) + ".";
+            else {
+                user->AddMoney(n);
+                std::string what = "withdrew " + std::to_string(n) + " (fund " + std::to_string(g->GetFund()) + ")";
+                CMsgTalk noteMsg;
+                if (noteMsg.Create("SYSTEM", "", user->GetName() + " " + what, CMsgTalk::Channel_Talk))
+                    CGuildManager::Instance().Broadcast(g, noteMsg.GetBuf(), noteMsg.GetSize());
+                note = "Withdrew " + std::to_string(n) + ". Fund: " + std::to_string(g->GetFund());
+                ok = true;
+            }
         } else if (sub == "warstatus") {
             auto g = CGuildManager::Instance().GetByMember(user->GetId());
             note = (g && CGuildManager::Instance().IsAtWar(g->GetId()))
                    ? "Your guild is at war. Current score: " + std::to_string(g->GetWarScore())
                    : "Your guild is not at war.";
         } else {
-            note = "Usage: /guild create|join|quit|disband|war|warstatus [name]";
+            note = "Usage: /guild create|join|quit|disband|war|warstatus|fund|deposit|withdraw [amount|name]";
         }
         user->SendSysMsg(note);
         return;
