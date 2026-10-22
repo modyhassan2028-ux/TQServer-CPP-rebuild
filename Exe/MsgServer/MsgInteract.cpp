@@ -191,7 +191,10 @@ void CMsgInteract::Process(uint32_t dwSender) {
                                    ? " - return to the TaskMaster!" : ""));
         }
         // experience scales with monster level (original model: harder mobs = more xp)
-        pAttacker->AddExperience(10 + pMonster->GetLevel() * 15);
+        uint32_t dwXp = 10 + pMonster->GetLevel() * 15;
+        pAttacker->AddExperience(dwXp);
+        // teammates on the same map each earn half the kill XP
+        CTeamManager::Instance().ShareKillXp(pAttacker, dwXp);
         // attacker rewards: base bounty; teams split it among same-map members
         CTeamManager::Instance().ShareKillReward(pAttacker, 50, 1);
         pAttacker->AddMoney(50);

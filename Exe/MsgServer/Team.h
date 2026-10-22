@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <cstdint>
 #include <map>
 #include <memory>
@@ -43,6 +43,8 @@ public:
     std::shared_ptr<CTeam> GetTeamOf(uint32_t dwUserId);
     // split a kill reward: members on the same map each get share of money/cp
     void ShareKillReward(const std::shared_ptr<CUser>& pKiller, uint32_t dwMoney, uint32_t dwCp);
+    // teammates on the same map get half the killer's XP each
+    void ShareKillXp(const std::shared_ptr<CUser>& pKiller, uint32_t dwXp);
 
 private:
     CTeamManager() = default;

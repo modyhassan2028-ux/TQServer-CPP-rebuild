@@ -1,4 +1,4 @@
-#include "Team.h"
+﻿#include "Team.h"
 #include "User.h"
 #include "UserManager.h"
 #include <cstdio>
@@ -145,5 +145,28 @@ void CTeamManager::ShareKillReward(const std::shared_ptr<CUser>& pKiller, uint32
         u->AddConquerPoints((int32_t)cpShare);
         u->SendSysMsg("Team share: +" + std::to_string(share) + " money, +" +
                       std::to_string(cpShare) + " CP.");
+    }
+}
+
+// team XP share: the killer keeps the full XP, every OTHER teammate standing
+// on the same map gains half of it (classic CO party xp model, v1 distance
+// unlimited within the map).
+void CTeamManager::ShareKillXp(const std::shared_ptr<CUser>& pKiller, uint32_t dwXp) {
+    if (!pKiller || dwXp == 0) return;
+    std::shared_ptr<CTeam> pTeam;
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        pTeam = FindTeamOf(pKiller->GetId());
+    }
+    if (!pTeam) return;
+    uint32_t dwShare = dwXp / 2;
+    if (dwShare == 0) return;
+    std::lock_guard<std::mutex> lock(m_mutex);
+    for (uint32_t dwId : pTeam->GetMembers()) {
+        if (dwId == pKiller->GetId()) continue;
+        auto pMate = CUserManager::Instance().GetUser(dwId);
+        if (!pMate || pMate->GetMapId() != pKiller->GetMapId()) continue;
+        pMate->AddExperience(dwShare);
+        pMate->SendSysMsg("Team XP: +" + std::to_string(dwShare));
     }
 }
