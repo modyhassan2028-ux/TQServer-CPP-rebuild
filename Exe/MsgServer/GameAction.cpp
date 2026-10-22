@@ -165,6 +165,22 @@ bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogE
         }
         return false; // ORIGINAL: log "Wrong param number" (LAB_14013a784) + 0
     }
+    case 1065: { // ORIGINAL var-cluster case 0x38: equipped-item family check
+        int nPos = 0, nFamily = 0;
+        if (sscanf(pNode->strParam.c_str(), "%d %d", &nPos, &nFamily) != 2) {
+            return false; // ORIGINAL: log_InlineLogDBERROR gameaction.cpp:0x1c34 -> 0
+        }
+        // ORIGINAL: FUN_140337820 walks the user's equipment map (CUser+0xd28)
+        // keyed by position and returns the worn item's type; the mapgroup
+        // singleton looks the type up; FUN_1400fed80 extracts the family
+        // (type % 1000000) / 1000: 111=helmet 117=earring 120/121=ring
+        // 130-139=armor/gown 141/142=bow 481/490=weapon 900=shield.
+        for (const auto& it : pUser->GetInventory()) {
+            if (it.dwPosition == (uint32_t)nPos)
+                return (int)((it.dwType % 1000000) / 1000) == nFamily;
+        }
+        return false; // nothing equipped there -> ORIGINAL lookup null -> 0
+    }
     case 1027: { // ORIGINAL switch case 0x13 -> FUN_140164440:
         // return (user->vtable+0x48)() != 0 - the mate id (cq_user.mateid).
         // NOTE: the cq_action param ("self angelwing", 3,379 rows) is NEVER
