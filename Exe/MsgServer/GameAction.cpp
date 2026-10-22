@@ -647,6 +647,49 @@ bool bAll = (llAll == 1);
         }
         return bRemoved; // not found -> ORIGINAL plVar12 == 0 -> false
     }
+    case 508: { // ORIGINAL case 0x1fc: bag-space check
+        // data<1 -> true; inventory count + data < 0x29(41) -> true
+        int nCount = (int)pUser->GetInventory().size();
+        if ((int)pNode->dwData < 1 || nCount + (int)pNode->dwData < 41) return true;
+        return false; // original break -> false
+    }
+    case 510: { // ORIGINAL case 0x1fe: item attribute compare
+        // sscanf "%d %s %s %d" -> (pos, attr, op, val)
+        char szAttr[256] = {0}, szOp[256] = {0}; int32_t nPos = 0, nVal = 0;
+        if (sscanf(pNode->strParam.c_str(), "%d %255s %255s %d", &nPos, szAttr, szOp, &nVal) != 4) {
+            printf("[LOGERR] cq_action %u type 510 wrong param number (4649)\n", pNode->dwId);
+            return false;
+        }
+        ItemInfo* pItem = pUser->FindItemByPosition(nPos); // FUN_14032b4b0 + mgr lookup
+        if (!pItem) return false; // original: falls through break -> false
+        uint32_t uType = pItem->dwType;
+        uint32_t uVal = 0;
+        if (!stricmp(szAttr, "level")) {
+            uVal = (uint32_t)((uType % 1000) / 10); // ORIGINAL FUN_1400fee00
+        } else if (!stricmp(szAttr, "quality")) {
+            uVal = uType % 10;                        // ORIGINAL FUN_1401011d0
+        } else if (!stricmp(szAttr, "durability")) {
+            if (nVal == -1) nVal = (int32_t)pItem->usDurability / 100; // ORIGINAL: -1 -> max dur
+            uVal = pItem->usDurability / 100;         // attr 4 / 100
+        } else if (!stricmp(szAttr, "max_dur")) {
+            if (nVal == -1) nVal = (int32_t)pItem->usDurability / 100; // ORIGINAL attr 0x7a
+            // ORIGINAL: (attr5 * 100) / (FUN_1400ff520(item,0) + 100) / 100
+            uVal = (uint32_t)(((uint32_t)pItem->usDurability * 100) /
+                               ((uint32_t)pItem->ucPlus * 100 + 100)) / 100;
+        } else {
+            printf("[DBERR] cq_action %u type 510 bad attr %s\n", pNode->dwId, szAttr);
+            return false;
+        }
+        if (!stricmp(szOp, "==")) return (int32_t)uVal == nVal;
+        if (!stricmp(szOp, "<=")) return (int32_t)uVal <= nVal;
+        if (!stricmp(szOp, ">=")) return nVal <= (int32_t)uVal;
+        printf("[DBERR] cq_action %u type 510 bad op %s\n", pNode->dwId, szOp);
+        return false;
+    }
+    case 511: { // ORIGINAL case 0x1ff: item-at-position check
+        ItemInfo* pItem = pUser->FindItemByPosition((int)pNode->dwData);
+        return pItem != nullptr;
+    }
     case 503: { // ORIGINAL case 0x1f7: check user carries the item
         // Same finder as 502 (type from data col / name from param,
         // "noname" marker), then flag gates (FUN_1400ffc20,

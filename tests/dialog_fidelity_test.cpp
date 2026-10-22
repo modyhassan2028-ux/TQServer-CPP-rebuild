@@ -784,6 +784,42 @@ int main() {
         { auto n = mkMgc(0, 150, "0 nodata == 1"); n.dwData = 7777;
           assert(!CGameAction::ProcessActionOS(upR, &n)); } // bad attr
         printf("[ok] 110/111/112/113/114/128/129/130/136/137/144/150 match the original switch\n");
+
+    // ---- 5xx item family: 508/510/511 (FUN_140123590 cases 0x1fc/0x1fe/0x1ff) ----
+    {
+        auto upR = std::make_shared<CUser>(999014); upR->SetName("Item5xx");
+        CUser& r = *upR;
+        // 508: empty bag -> room for anything (data<1 -> true; count+data<41 -> true)
+        { auto n = mkMgc(0, 508, ""); n.dwData = 0;  assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 508, ""); n.dwData = 10; assert(CGameAction::ProcessActionUser(upR, &n)); }
+        // fill the bag to 40 items -> +2 needs 42 -> false; +0 data -> true
+        for (int i = 0; i < 40; i++) {
+            ItemInfo it; it.dwType = 1000000 + i; it.dwPosition = 255;
+            r.AddItem(it);
+        }
+        { auto n = mkMgc(0, 508, ""); n.dwData = 2;  assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 508, ""); n.dwData = 0;  assert(CGameAction::ProcessActionUser(upR, &n)); }
+        // 510: equip an Elite blade at position 1: type 410339? quality digit + level
+        // level = (type%1000)/10, quality = type%10. Use 410246: level (246/10=24)... pick
+        // type 421338: level = 33, quality = 8.
+        ItemInfo wpn; wpn.dwType = 421338; wpn.dwPosition = 1; wpn.usDurability = 4500;
+        r.AddItem(wpn);
+        { auto n = mkMgc(0, 510, "1 level == 33"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 510, "1 level == 34"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 510, "1 quality == 8"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 510, "1 quality <= 8"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 510, "1 quality >= 9"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 510, "1 durability == 45"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 510, "9 quality == 8"); assert(!CGameAction::ProcessActionUser(upR, &n)); } // no item @9
+        { auto n = mkMgc(0, 510, "1 noattr == 1"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        // 511: position check (data = position)
+        { auto n = mkMgc(0, 511, ""); n.dwData = 1; assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 511, ""); n.dwData = 2; assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        // ORIGINAL: positions 21..29 fold to 1..9 (FUN_14032b4b0) - pos 21 hits the wpn at 1
+        { auto n = mkMgc(0, 511, ""); n.dwData = 21; assert(CGameAction::ProcessActionUser(upR, &n)); }
+        printf("[ok] 508/510/511 match cases 0x1fc/0x1fe/0x1ff (level+quality formulas exact)\n");
+    }
+
     }
 
     }

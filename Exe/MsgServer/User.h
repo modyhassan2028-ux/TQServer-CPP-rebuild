@@ -368,6 +368,15 @@ public:
             if (m_items[i].dwId == dwItemId) { m_items.erase(m_items.begin() + i); return; }
     }
     std::vector<ItemInfo>& GetInventory() { return m_items; }
+    // ORIGINAL FUN_14032b4b0: positions 21..29 (warehouse pages) fold to 1..9
+    // (pos%10), then position 1..19 indexes the user's position array.
+    ItemInfo* FindItemByPosition(int nPos) {
+        if (nPos >= 21 && nPos <= 29) nPos %= 10;
+        if (nPos < 1 || nPos > 19) return nullptr; // ORIGINAL: logs + 0
+        for (auto& it : m_items) if ((int)it.dwPosition == nPos) return &it;
+        for (auto& it : m_warehouse) if ((int)it.dwPosition == nPos) return &it;
+        return nullptr;
+    }
     // warehouse: a second, bank-like bag for long-term storage
     std::vector<ItemInfo>& GetWarehouse() { return m_warehouse; }
     void WarehouseStore(ItemInfo& item) { m_warehouse.push_back(item); }
