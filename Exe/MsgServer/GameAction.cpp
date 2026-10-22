@@ -9,6 +9,7 @@
 #include "Log.h"
 #include "Dialog.h"
 #include "MsgAction.h"
+#include "UserManager.h"
 #include "MsgTalk.h"
 #include "MsgData.h"
 #include "GroupSystem.h"
@@ -1008,6 +1009,51 @@ bool bAll = (llAll == 1);
         if (!stricmp(szOp, "<"))  return a < b;
         if (!stricmp(szOp, "<=")) return a <= b;
         return false;
+    }
+    case 2008: { // ORIGINAL case 0x7d8: count users on a map "mapid name|gen_id target op n"
+        // sscanf "%u %s %s %s %d" = (mapid, kind, target, op, count).
+        // name -> user mgr vcall+0xb0(mapid, name); gen_id ->
+        // strtoul(target) + vcall+0xb8(mapid, genid). Ops: <, ==.
+        // Parse != 5 -> LOGERR 0x326e + break -> false.
+        std::string strP = pNode->strParam; pUser->ResolveActionVars(strP);
+        uint32_t dwMap = 0; char szKind[32] = {0}, szTarget[256] = {0}, szOp[32] = {0};
+        int32_t n = 0;
+        if (sscanf(strP.c_str(), "%u %31s %255s %31s %d", &dwMap, szKind, szTarget, szOp, &n) != 5) {
+            printf("[LOGERR] cq_action %u type 2008 param (0x326e)\n", pNode->dwId);
+            return false;
+        }
+        auto pMap = CMapManager::Instance().GetMap(dwMap);
+        if (!pMap) return false; // ORIGINAL: missing map contributes 0 count
+        int iCount = 0;
+        if (!stricmp(szKind, "name")) {
+            for (uint32_t uid : pMap->GetUserIds()) { // count by name
+                auto u = CUserManager::Instance().GetUser(uid);
+                if (u && !_stricmp(u->GetName().c_str(), szTarget)) iCount++;
+            }
+        } else if (!stricmp(szKind, "gen_id")) {
+            uint32_t dwGen = strtoul(szTarget, nullptr, 10);
+            for (uint32_t uid : pMap->GetUserIds()) { // count by generator id
+                auto u = CUserManager::Instance().GetUser(uid);
+                if (u && u->GetGenId() == dwGen) iCount++;
+            }
+        } else {
+            return false; // ORIGINAL: unknown kind -> return 0
+        }
+        if (!stricmp(szOp, "<"))  return iCount < n;
+        if (!stricmp(szOp, "==")) return iCount == n;
+        return false; // ORIGINAL: unmatched op -> break -> false
+    }
+    case 2010: { // ORIGINAL case 0x7da: SYSTEM broadcast of the raw param
+        // FUN_14010b370(mgr,0,"SYSTEM",param_3); always returns 1. No rows in
+        // our cq_action copy, ported for completeness.
+        std::string strP = pNode->strParam; pUser->ResolveActionVars(strP);
+        CMsgTalk talk;
+        if (!talk.CreateBroadcast(strP)) {
+            printf("[DBERR] cq_action %u type 2010 broadcast failed\n", pNode->dwId);
+        } else {
+            CMapManager::Instance().BroadcastToAll(talk.GetBuf(), talk.GetSize());
+        }
+        return true;
     }
     case 303: { // ORIGINAL case 0x12f: SYSTEM/ALLUSERS world broadcast (formatted)
         // ORIGINAL: FUN_14015b240(buf) setup, FUN_14015b300(buf,"SYSTEM",

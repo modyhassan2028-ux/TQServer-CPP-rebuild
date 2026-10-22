@@ -521,6 +521,9 @@ public:
     void SetIterVarData(uint32_t n, int64_t v) { if (n && n < 65) m_arIterVarData[n] = v; }
     int64_t GetIterVarData(uint32_t n) const { return (n && n < 65) ? m_arIterVarData[n] : 0; }
     uint32_t m_dwHomeMapId{0}; // %user_home_id (house system feeds this)
+    uint32_t m_dwGenId{0}; // dynamic-user generator id (cq_action 2008 gen_id)
+    uint32_t GetGenId() const { return m_dwGenId; }
+    void SetGenId(uint32_t g) { m_dwGenId = g; }
     // ORIGINAL dialog/npc context resolved as %id/%data/%datastr/%name/
     // %npc_life/%npc_ownerid/%npc_x/%npc_y (the central resolver reads the
     // message dialog fields - the npc the player is interacting with)

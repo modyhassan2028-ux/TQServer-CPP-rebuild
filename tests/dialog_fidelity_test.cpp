@@ -887,6 +887,26 @@ int main() {
         { auto n = mkMgc(0, 2003, "garbage"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
         printf("[ok] 2003/2004 compares match cases 0x7d3/0x7d4 with %%id\n");
     }
+    // ---- 2008: count users on map by name/gen_id (case 0x7d8) ----
+    {
+        auto upA = std::make_shared<CUser>(999028); upA->SetName("SwordMaster");
+        CUserManager::Instance().AddUser(upA);
+        auto pMap = CMapManager::Instance().GetMap(1002); assert(pMap);
+        pMap->AddUser(upA); upA->SetMapId(1002);
+        auto upB = std::make_shared<CUser>(999029); upB->SetName("Knight2");
+        CUserManager::Instance().AddUser(upB);
+        pMap->AddUser(upB); upB->SetMapId(1002); upB->SetGenId(10992);
+        auto upC = std::make_shared<CUser>(999030); upC->SetName("Knight3");
+        CUserManager::Instance().AddUser(upC);
+        pMap->AddUser(upC); upC->SetMapId(1002); upC->SetGenId(10992);
+        { auto n = mkMgc(0, 2008, "1002 name SwordMaster == 1"); assert(CGameAction::ProcessActionUser(upA, &n)); }
+        { auto n = mkMgc(0, 2008, "1002 name SwordMaster == 2"); assert(!CGameAction::ProcessActionUser(upA, &n)); }
+        { auto n = mkMgc(0, 2008, "1002 gen_id 10992 == 2"); assert(CGameAction::ProcessActionUser(upA, &n)); }
+        { auto n = mkMgc(0, 2008, "1002 gen_id 10992 < 3"); assert(CGameAction::ProcessActionUser(upA, &n)); }
+        { auto n = mkMgc(0, 2008, "1002 gen_id 10992 < 2"); assert(!CGameAction::ProcessActionUser(upA, &n)); }
+        { auto n = mkMgc(0, 2008, "1002 bogus X == 1"); assert(!CGameAction::ProcessActionUser(upA, &n)); }
+        printf("[ok] 2008 map user counts match case 0x7d8\n");
+    }
     // ---- 306: map attributes (case 0x132) ----
     {
         auto upR = std::make_shared<CUser>(999026); upR->SetName("Map306");
