@@ -820,6 +820,28 @@ bool bAll = (llAll == 1);
                pUser->GetId(), f3, f1, f4);
         return true;
     }
+    case 518: { // ORIGINAL case 0x206: award item copies (FUN_14011cf20)
+        // data = item type; param = the same 19-field spec as 501 (all 0 when
+        // empty). sscanf field2 (n[1]) = copy count: >0 -> award that many
+        // (loop stops early if a copy fails, then true); 0 -> one copy.
+        int64_t n[19] = {0};
+        int nGot = sscanf(pNode->strParam.c_str(),
+            "%lld %lld %lld %lld %lld %lld %lld %lld %lld %lld %lld %lld %lld"
+            " %lld %lld %lld %lld %lld %lld",
+            &n[0],&n[1],&n[2],&n[3],&n[4],&n[5],&n[6],&n[7],&n[8],&n[9],
+            &n[10],&n[11],&n[12],&n[13],&n[14],&n[15],&n[16],&n[17],&n[18]);
+        (void)nGot; // ORIGINAL: sscanf result unchecked, missing fields stay 0
+        int nCount = (int)n[1]; // ORIGINAL local_734 (field 2)
+        if (nCount <= 0) {
+            // ORIGINAL: local_734 == 0 -> single FUN_14011cf20
+            return AwardItem(pUser, pNode->dwData, n);
+        }
+        // ORIGINAL: 0 < local_734 -> loop, early stop if a copy fails, true
+        for (int i = 0; i < nCount; i++) {
+            if (!AwardItem(pUser, pNode->dwData, n)) return true;
+        }
+        return true;
+    }
     case 510: { // ORIGINAL case 0x1fe: item attribute compare
         // sscanf "%d %s %s %d" -> (pos, attr, op, val)
         char szAttr[256] = {0}, szOp[256] = {0}; int32_t nPos = 0, nVal = 0;

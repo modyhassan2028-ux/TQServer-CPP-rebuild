@@ -800,6 +800,21 @@ int main() {
         g_bActionTestMode = false;
         printf("[ok] 513 transform matches case 0x201 (Transform2)\n");
     }
+    // ---- 518: award item copies (case 0x206 -> FUN_14011cf20) ----
+    {
+        auto upR = std::make_shared<CUser>(999019); upR->SetName("Item518");
+        CUser& r = *upR;
+        // empty param + data = item type (1200001): single copy
+        { auto n = mkMgc(0, 518, ""); n.dwData = 1200001; assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 507, "1200001 1200001 1"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        // 19-field spec, field2 = 2 -> two copies of 3003124 (data)
+        { auto n = mkMgc(0, 518, "0 2 0 0 0 0 0 0 0 0 0 3 3 0 0 0 0 0 0"); n.dwData = 3003124;
+          assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 507, "3003124 3003124 2"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        // item type not in cq_itemtype -> false
+        { auto n = mkMgc(0, 518, ""); n.dwData = 99999999; assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        printf("[ok] 518 award-copies matches case 0x206 (FUN_14011cf20)\n");
+    }
     // ---- 509: equipment commands (case 0x1fd) ----
     {
         auto upR = std::make_shared<CUser>(999017); upR->SetName("Item509");
