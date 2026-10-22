@@ -6,6 +6,7 @@
 #include <atomic>
 #include <memory>
 #include <condition_variable>
+#include <set>
 
 // Monster world manager: spawn tables, AI tick thread (roam + respawn).
 // v1 spawn table is built-in; loading the original cq monster config is on the roadmap.
@@ -30,6 +31,8 @@ public:
     // step a live monster one cell toward the nearest player in sight
     bool Chase(std::shared_ptr<CMonster> pMonster);
     void OnMonsterKilled(std::shared_ptr<CMonster> pMonster); // schedules delayed respawn
+    // ORIGINAL Transform2 lookup: cq_monstertype existence (loaded ids set)
+    bool HasMonsterType(uint32_t dwType);
 
 public:
     // hourly world boss: big XP + guaranteed drops (classic MMORPG event)
@@ -47,5 +50,6 @@ private:
     std::atomic<bool> m_bRunning{ false };
     uint32_t m_dwNextId{ 400000000 };
     std::map<uint32_t, int> m_respawnCountdown; // monsterId -> AI ticks left // monster ids start above user ids
+    std::set<uint32_t> m_loadedTypeIds; // cq_monstertype ids seen by SpawnFromDB
     std::map<uint32_t, int> m_crossRespawn;     // cross beasts: cq respawn_secs / 2s ticks
 };

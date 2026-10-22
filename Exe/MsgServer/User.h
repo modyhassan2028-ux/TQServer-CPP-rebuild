@@ -502,6 +502,9 @@ public:
     uint32_t GetLookface() const { return m_dwLookface; }
     void SetLookface(uint32_t v) { m_dwLookface = v; printf("[USER] %u lookface -> %u (client sync)\n", m_dwId, v); }
     int32_t  GetTransform() const { return m_nTransform; }
+    uint32_t m_dwTransformLookface{0}; // ORIGINAL: transform display look
+    uint32_t m_dwTransformMonsterType{0}; // ORIGINAL: cq_monstertype id of the transform
+    uint32_t m_dwTransformSecs{0}; // ORIGINAL: transform duration (timer system pending)
     void SetTransform(int32_t v) { m_nTransform = v; printf("[USER] %u transform -> %d\n", m_dwId, v); }
     uint32_t GetIteratorVar() const { return m_dwIterator; }
     void SetIteratorVar(uint32_t v) { m_dwIterator = v; }

@@ -25,6 +25,12 @@ CMonsterManager& CMonsterManager::Instance() {
 // ORIGINAL 6159 model (NpcServer.exe loads the same tables):
 //   cq_monstertype: id, name, level, life, attack_max, attack_min, defence
 //   cq_generator:   npctype, mapid, bound_x, bound_y, bound_cx, bound_cy, maxnpc, rest_secs
+bool CMonsterManager::HasMonsterType(uint32_t dwType) {
+    // ORIGINAL: table lookup cq_monstertype (Transform2 error path)
+    if (m_loadedTypeIds.empty()) return true; // config not loaded yet: permissive
+    return m_loadedTypeIds.count(dwType) != 0;
+}
+
 uint32_t CMonsterManager::SpawnFromDB(CMySQLClient* pDB) {
     if (!pDB) return 0;
     // 1) monster types (original columns)

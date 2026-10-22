@@ -43,7 +43,16 @@
 >   **509** (down_lev/down_one_lev/recover_dur — بمعادلات الفئة الحرفية)،
 >   **510** (level=(type%1000)/10، quality=type%10)، **511** (موقع مع طي
 >   21..29←1..9). الاكتشاف: up_lev/up_quality/up_levultra2 صفوف ميتة في v6159.
-> - **شروط المستخدم:** 1073 (stc عبر skill 42 بتقسيم 30)، 1061-1066
+> - **513 transform (case 0x201 → FUN_140172eb0 Transform2):** الحرس
+    (متحول بالفعل ← false عبر FUN_14016e3f0)، sscanf 4 معاملات
+    (lookface, 0, monstertype_id, seconds) مع الدليل: field3 هي monid
+    (91/247 صف موجود في cq_monstertype)، فحص وجود monstertype وإلا DB error
+    + false ("Transform2 can not find monstertype")، ثم SetTransform +
+    SetLookface. معلق موثق: user[0x151] (ركوب/قتال) ونظام المؤقت للمُدة.
+    ملاحظة بناء مهمة: أي تغيير في User.h (layout) يكسر ODR — لازم
+    **rebuild كامل** لكل .o (وسيبت من: Exe/MsgServer/CrossServer/*.cpp
+    وwinsock وكل tests_*.o ما عدا dialog_fidelity_test + stub_cross_client).
+- **شروط المستخدم:** 1073 (stc عبر skill 42 بتقسيم 30)، 1061-1066
 >   (متغيرات المستخدم int64)، 1056/1027 (Task Manager)، 1020/1021 (ماجيك/
 >   سلاح سكيل)، 1003.
 > - **متاجر/مهام/تنقل:** مذكورة في الأقسام 1-11 تحت.
@@ -51,10 +60,9 @@
 > ### المتبقي بالترتيب (مع الدالة الأصلية وعدد الصفوف)
 > | # | الشغل | المرجع | الصفوف |
 > |---|---|---|---|
-> | 1 | **513** transform | case 0x201 في السويتش الرئيسي (~سطر 238053+) → FUN_140172eb0 | 247 |
-> | 2 | **518** استدعاء/تعريف وحش (13 معامل) | case 0x206 | 2,114 |
-> | 3 | **517** %iter_var_data | محرك المتغيرات (اشرح FUN_1400eb8e0 عائلة) | 606 |
-> | 4 | **532** سلسلة if (عائلة F) | سلاسل بدون case حرفي | 252 |
+> | 1 | **518** استدعاء/تعريف وحش (13 معامل) | case 0x206 (~سطر 2382xx) | 2,114 |
+> | 2 | **517** %iter_var_data | محرك المتغيرات (اشرح FUN_1400eb8e0 عائلة) | 606 |
+> | 3 | **532** سلسلة if (عائلة F) | سلاسل بدون case حرفي | 252 |
 > | 5 | عائلة B: 301/303/304/306/312 | FUN_14013d790 | ~3,400 |
 > | 6 | عائلة C: 2003/2004/2006 تعبيرات متغيرات | FUN_14015b5d0 وأخواتها | ~4,900 |
 > | 7 | عائلة D: 201 داينامك | FUN_14013b950 | 974 |
@@ -326,3 +334,27 @@ transform عبر FUN_140172eb0)، **517** (606، %iter_var_data — محرك ا�
 المتبقي في العائلة A: **513** (247، transform عبر FUN_140172eb0)، **517**
 (606، %iter_var_data — محرك المتغيرات)، **518** (2114، استدعاء/تعريف وحش
 13 معامل)، **532** (252، عائلة F). بعدها العائلات B→F زي الخطة.
+
+
+## 15. عائلة العناصر 5xx — الجزء 4: 513 transform (23 أكتوبر)
+
+- **513 (0x201، 247 صف):** التحول لوحش عبر FUN_140172eb0 (Transform2):
+  - حرس FUN_14016e3f0: المستخدم متحول بالفعل (user+0x1100 != 0) → تخطي → false.
+  - sscanf "%d %d %d %d" = (lookface, 0, monstertype_id, seconds) — اكتشفنا
+    بالقاعدة إن field3 هي معرف cq_monstertype (91 صف موجود) مش field1.
+  - monstertype لازم موجود في cq_monstertype وإلا: DB error
+    "CUser::Transform2 can not find monstertype(id:%u)" + false.
+  - النجاح: SetTransform + SetLookface + تخزين النوع/المدة.
+  - معلقات موثقة: فحص user[0x151] (حالة ركوب/قتال)، ومؤقت انتهاء المدة.
+- **CMonsterManager::HasMonsterType** أضيف (id set محملة من SpawnFromDB؛
+  فارغ = permissive). في وضع الاختبار g_bActionTestMode الفحص على القاعدة
+  الحية مباشرة.
+- **درس ODR مهم:** تعديل User.h (حقول جديدة) يكسر كل .o القديمة — علامة
+  `pkts.size()==6` بتفشل في أول الاختبار. الحل: rebuild كامل مع استبعاد
+  Exe/MsgServer/CrossServer (winsock) وكل tests_*.o عدا dialog_fidelity_test
+  و stub_cross_client.
+- اختبارات 513: صف حقيقي "11155 0000 5045 60" (UndeadSoldier موجود) → true
+  + GetTransform/GetLookface، تكرار التحول → false، monid وهمي → false.
+  كلها خضراء.
+
+المتبقي في A: **518** (2,114)، **517** (606)، **532** (252). بعدها B→F.

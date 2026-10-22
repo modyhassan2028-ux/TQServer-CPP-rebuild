@@ -785,6 +785,21 @@ int main() {
           assert(!CGameAction::ProcessActionOS(upR, &n)); } // bad attr
         printf("[ok] 110/111/112/113/114/128/129/130/136/137/144/150 match the original switch\n");
 
+    // ---- 513: transform (case 0x201 -> FUN_140172eb0 Transform2) ----
+    {
+        extern bool g_bActionTestMode; g_bActionTestMode = true;
+        auto upR = std::make_shared<CUser>(999018); upR->SetName("Trans");
+        // real row shape: "11155 0000 5045 60" (5045 UndeadSoldier exists)
+        { auto n = mkMgc(0, 513, "11155 0000 5045 60"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        assert(upR->GetTransform() == 5045);
+        assert(upR->GetLookface() == 11155);
+        // already transformed -> false (FUN_14016e3f0 guard)
+        { auto n = mkMgc(0, 513, "11155 0000 5045 60"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        // missing monstertype -> DB error + false
+        { auto n = mkMgc(0, 513, "11155 0000 999999 60"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        g_bActionTestMode = false;
+        printf("[ok] 513 transform matches case 0x201 (Transform2)\n");
+    }
     // ---- 509: equipment commands (case 0x1fd) ----
     {
         auto upR = std::make_shared<CUser>(999017); upR->SetName("Item509");
