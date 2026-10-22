@@ -136,3 +136,19 @@ CREATE TABLE IF NOT EXISTS cq_arena (
   deaths INT NOT NULL DEFAULT 0,
   updated_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+-- player market: offline item offers, atomic purchase (is_sold 0 -> 1)
+CREATE TABLE IF NOT EXISTS cq_market (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  seller_name VARCHAR(64) NOT NULL,
+  item_type INT NOT NULL,
+  item_name VARCHAR(64) NOT NULL,
+  sort SMALLINT NOT NULL DEFAULT 255,
+  amount INT NOT NULL DEFAULT 1,
+  plus TINYINT NOT NULL DEFAULT 0,
+  enchant SMALLINT NOT NULL DEFAULT 0,
+  price INT NOT NULL,
+  is_sold TINYINT NOT NULL DEFAULT 0,
+  created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_sold (is_sold)
+) ENGINE=InnoDB;

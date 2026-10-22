@@ -424,6 +424,79 @@ if (m_message.rfind("/npc", 0) == 0) {
         return;
     }
 
+    // ---- player market: /market list|sell <slot> <price>|buy <id> ----
+    if (m_message == "/market" || m_message == "/market list") {
+        auto rows = CAccountManager::Instance().LoadMarket();
+        if (rows.empty()) { user->SendSysMsg("The market is empty. /market sell <slot> <price>"); return; }
+        std::string out = "Market (newest):";
+        for (auto& r : rows)
+            out += "\n  #" + std::to_string(r.dwId) + " " + r.strName + " x" + std::to_string(r.dwAmount) +
+                   " (+ " + std::to_string(r.dwPrice) + " money) - " + r.strSeller;
+        user->SendSysMsg(out);
+        return;
+    }
+    if (m_message.rfind("/market sell ", 0) == 0) {
+        // usage: /market sell <inventory slot> <money price>
+        std::istringstream iss(m_message.substr(13));
+        int slot = 0; uint64_t price = 0;
+        if (!(iss >> slot >> price) || slot < 0 || price == 0) {
+            user->SendSysMsg("Usage: /market sell <slot> <money price>"); return;
+        }
+        auto& inv = user->GetInventory();
+        if ((uint32_t)slot >= inv.size()) { user->SendSysMsg("No item in that slot."); return; }
+        auto& it = inv[slot];
+        if (it.dwPosition != 255) { user->SendSysMsg("Unequip it first."); return; }
+        if (it.dwType == 750) { user->SendSysMsg("Horses cannot be sold."); return; }
+        uint32_t id = 0;
+        if (!CAccountManager::Instance().SaveMarketListing(user->GetName(), it.dwType, it.strName,
+                                                          it.usSort, it.dwAmount, it.ucPlus,
+                                                          it.usEnchant, price, id)) {
+            user->SendSysMsg("Market listing failed."); return;
+        }
+        std::string nm = it.strName; uint32_t amt = it.dwAmount;
+        user->RemoveItem(it.dwId); // take the item out of the inventory
+        user->SendSysMsg("Listed " + nm + " x" + std::to_string(amt) + " on the market as #" +
+                         std::to_string(id) + " for " + std::to_string(price) + " money.");
+        printf("[MARKET] %s listed %s x%u for %llu\n", user->GetName().c_str(),
+               nm.c_str(), amt, (unsigned long long)price);
+        return;
+    }
+    if (m_message.rfind("/market buy ", 0) == 0) {
+        uint32_t id = strtoul(m_message.substr(12).c_str(), nullptr, 10);
+        if (!id) { user->SendSysMsg("Usage: /market buy <id>"); return; }
+        // price check before claiming: refuse offers the buyer cannot afford
+        auto rows = CAccountManager::Instance().LoadMarket();
+        const CAccountManager::MarketRow* pRow = nullptr;
+        for (auto& r : rows) if (r.dwId == id) { pRow = &r; break; }
+        if (!pRow) { user->SendSysMsg("Listing not found (or sold). /market list"); return; }
+        if (pRow->strSeller == user->GetName()) { user->SendSysMsg("You cannot buy your own listing."); return; }
+        if (user->GetMoney() < pRow->dwPrice) { user->SendSysMsg("Not enough money."); return; }
+        CAccountManager::MarketRow bought;
+        if (!CAccountManager::Instance().BuyMarketItem(id, user->GetName(), bought)) {
+            user->SendSysMsg("Too late - someone else bought it."); return;
+        }
+        // charge AFTER a successful claim (price from the claimed row)
+        user->AddMoney(-(int64_t)bought.dwPrice);
+        ItemInfo item;
+        item.dwId = MakeItemId(user->NextItemSeq());
+        item.dwType = bought.dwType;
+        item.usSort = bought.usSort;
+        item.dwAmount = bought.dwAmount;
+        item.dwPosition = 255;
+        item.ucPlus = bought.ucPlus;
+        item.usEnchant = bought.usEnchant;
+        item.strName = bought.strName;
+        user->AddItem(item);
+        CMsgItem mi; if (mi.Create(item, CMsgItem::Action_Buy))
+            user->SendMsg(mi.GetBuf(), mi.GetSize());
+        user->SendSysMsg("Bought " + bought.strName + " x" + std::to_string(bought.dwAmount) +
+                         " from " + bought.strSeller + " for " + std::to_string(bought.dwPrice) +
+                         " money. Seller paid via bank.");
+        printf("[MARKET] %s bought #%u from %s\n", user->GetName().c_str(), id,
+               bought.strSeller.c_str());
+        return;
+    }
+
     // ---- weapon skills v1: /skills, /thunder <id>, /fastblade ----
     if (m_message == "/skills") {
         user->SendSysMsg("Skills: /thunder <monsterid> (level 10+, 20 stamina, 2.5x damage)\n"

@@ -68,6 +68,15 @@ public:
 
         // ---- offline mail ----
         struct MailRow { uint32_t dwId; std::string strFrom; std::string strBody; };
+        // ---- player market (cq_market) ----
+        struct MarketRow { uint32_t dwId; std::string strSeller; uint32_t dwType; std::string strName;
+                           uint16_t usSort; uint32_t dwAmount; uint8_t ucPlus; uint16_t usEnchant; uint64_t dwPrice; };
+        std::vector<MarketRow> LoadMarket();
+        bool SaveMarketListing(const std::string& strSeller, uint32_t dwType, const std::string& strName,
+                               uint16_t usSort, uint32_t dwAmount, uint8_t ucPlus, uint16_t usEnchant,
+                               uint64_t dwPrice, uint32_t& outId);
+        bool BuyMarketItem(uint32_t dwId, const std::string& strBuyer, MarketRow& out);
+
         bool SendMail(const std::string& strTo, const std::string& strFrom, const std::string& strBody);
         std::vector<MailRow> LoadUnreadMail(const std::string& strTo);
         void MarkMailRead(const std::string& strTo);

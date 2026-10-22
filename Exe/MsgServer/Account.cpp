@@ -302,6 +302,87 @@ void CAccountManager::SaveCharacter(uint32_t dwAccountId, const CharacterRecord&
         printf("[DB] cq_user save failed: %s\n", m_pDB->GetError().c_str());
 }
 
+// ---------------- cq_market: the player market ----------------
+std::vector<CAccountManager::MarketRow> CAccountManager::LoadMarket() {
+    std::vector<MarketRow> out;
+    if (!m_bMySQL || !m_pDB) return out;
+    std::lock_guard<std::mutex> dbLock(m_dbMutex);
+    if (!m_pDB->Query("SELECT id, seller_name, item_type, item_name, sort, amount, plus, enchant, price "
+                      "FROM cq_market WHERE is_sold=0 ORDER BY id DESC LIMIT 25"))
+        return out;
+    for (auto& row : m_pDB->GetRows()) {
+        if (row.size() < 9) continue;
+        MarketRow r;
+        r.dwId       = (uint32_t)strtoul(row[0].c_str(), nullptr, 10);
+        r.strSeller  = row[1];
+        r.dwType     = (uint32_t)strtoul(row[2].c_str(), nullptr, 10);
+        r.strName    = row[3];
+        r.usSort     = (uint16_t)strtoul(row[4].c_str(), nullptr, 10);
+        r.dwAmount   = (uint32_t)strtoul(row[5].c_str(), nullptr, 10);
+        r.ucPlus     = (uint8_t)strtoul(row[6].c_str(), nullptr, 10);
+        r.usEnchant  = (uint16_t)strtoul(row[7].c_str(), nullptr, 10);
+        r.dwPrice    = strtoull(row[8].c_str(), nullptr, 10);
+        out.push_back(std::move(r));
+    }
+    return out;
+}
+
+bool CAccountManager::SaveMarketListing(const std::string& strSeller, uint32_t dwType,
+                                        const std::string& strName, uint16_t usSort,
+                                        uint32_t dwAmount, uint8_t ucPlus, uint16_t usEnchant,
+                                        uint64_t dwPrice, uint32_t& outId) {
+    if (!m_bMySQL || !m_pDB) return false;
+    std::lock_guard<std::mutex> dbLock(m_dbMutex);
+    if (!m_pDB->Query("INSERT INTO cq_market (seller_name, item_type, item_name, sort, amount, plus, enchant, price) "
+                      "VALUES ('" + m_pDB->Escape(strSeller) + "', " + std::to_string(dwType) + ", '" +
+                      m_pDB->Escape(strName) + "', " + std::to_string(usSort) + ", " +
+                      std::to_string(dwAmount) + ", " + std::to_string(ucPlus) + ", " +
+                      std::to_string(usEnchant) + ", " + std::to_string(dwPrice) + ")"))
+        return false;
+    if (!m_pDB->Query("SELECT LAST_INSERT_ID()") || m_pDB->GetRows().empty())
+        return false;
+    outId = (uint32_t)strtoul(m_pDB->GetRows()[0][0].c_str(), nullptr, 10);
+    return true;
+}
+
+// atomic purchase: one UPDATE claims the row (is_sold 0 -> 1); if affected
+// rows == 0 someone else bought it first. proceeds go straight to the
+// seller's BANK (works while the seller is offline), mail confirms it.
+bool CAccountManager::BuyMarketItem(uint32_t dwId, const std::string& strBuyer, MarketRow& out) {
+    if (!m_bMySQL || !m_pDB) return false;
+    std::lock_guard<std::mutex> dbLock(m_dbMutex);
+    // 1) claim the row
+    if (!m_pDB->Query("UPDATE cq_market SET is_sold=1 WHERE id=" + std::to_string(dwId) +
+                      " AND is_sold=0"))
+        return false;
+    if (m_pDB->GetAffectedRows() == 0)
+        return false; // gone: raced or never existed
+    // 2) fetch the claimed row
+    if (!m_pDB->Query("SELECT seller_name, item_type, item_name, sort, amount, plus, enchant, price "
+                      "FROM cq_market WHERE id=" + std::to_string(dwId)) ||
+        m_pDB->GetRows().empty())
+        return false;
+    auto& row = m_pDB->GetRows()[0];
+    if (row.size() < 8) return false;
+    out.dwId = dwId; out.strSeller = row[0];
+    out.dwType = (uint32_t)strtoul(row[1].c_str(), nullptr, 10);
+    out.strName = row[2];
+    out.usSort = (uint16_t)strtoul(row[3].c_str(), nullptr, 10);
+    out.dwAmount = (uint32_t)strtoul(row[4].c_str(), nullptr, 10);
+    out.ucPlus = (uint8_t)strtoul(row[5].c_str(), nullptr, 10);
+    out.usEnchant = (uint16_t)strtoul(row[6].c_str(), nullptr, 10);
+    out.dwPrice = strtoull(row[7].c_str(), nullptr, 10);
+    // 3) credit the seller's bank by name (offline-safe)
+    m_pDB->Query("UPDATE cq_user SET bank = bank + " + std::to_string(out.dwPrice) +
+                 " WHERE name='" + m_pDB->Escape(out.strSeller) + "'");
+    // 4) notify by in-game mail
+    m_pDB->Query("INSERT INTO cq_mail (to_name, from_name, body) VALUES ('" +
+                 m_pDB->Escape(out.strSeller) + "', 'MARKET', '" + m_pDB->Escape(strBuyer) +
+                 " bought your " + m_pDB->Escape(out.strName) + " for " +
+                 std::to_string(out.dwPrice) + " money (added to your bank).')");
+    return true;
+}
+
 // ---------------- cq_item inventory persistence ----------------
 bool CAccountManager::LoadItems(uint32_t dwAccountId, std::vector<ItemRow>& out) {
     if (!m_bMySQL || !m_pDB) return false;
