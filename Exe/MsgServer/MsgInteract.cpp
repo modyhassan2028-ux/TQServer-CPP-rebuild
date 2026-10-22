@@ -4,6 +4,7 @@
 #include "MapManager.h"
 #include "Account.h"
 #include "MonsterManager.h"
+#include "CrossServer/CrossClient.h"
 #include "Npc.h"
 #include "Guild.h"
 #include "MsgItem.h"
@@ -234,6 +235,21 @@ void CMsgInteract::ResolveMonsterHit(CUser* pAttacker, uint32_t dwTargetId,
             if (note.Create("SYSTEM", "", pAttacker->GetName() + std::string(" has slain the TerraDragon!"),
                             CMsgTalk::Channel_Broadcast))
                 CMapManager::Instance().BroadcastToAll(note.GetBuf(), note.GetSize());
+        }
+        // cross-realm beast: CP bounty + the whole realm hears the kill
+        if (pMonster->IsCross()) {
+            uint32_t dwCp = pMonster->GetCrossCp();
+            pAttacker->AddConquerPoints(dwCp);
+            std::string strMsg = pAttacker->GetName() + " has slain the cross beast " +
+                                 pMonster->GetName() + "! +" + std::to_string(dwCp) + " CP";
+            CMsgTalk note;
+            if (note.Create("SYSTEM", "", strMsg, CMsgTalk::Channel_Broadcast))
+                CMapManager::Instance().BroadcastToAll(note.GetBuf(), note.GetSize());
+            // hub relay: every game server in the realm announces it too
+            cross::CCrossClient::Instance().SendTalk("SYSTEM",
+                cross::CCrossClient::Instance().ServerName() + " - " + strMsg);
+            printf("[CROSS] %s slain %s (cross beast), +%u CP\n",
+                   pAttacker->GetName().c_str(), pMonster->GetName().c_str(), dwCp);
         }
         // attacker rewards: base bounty; teams split it among same-map members
         CTeamManager::Instance().ShareKillReward(pAttackerRef, 50, 1);

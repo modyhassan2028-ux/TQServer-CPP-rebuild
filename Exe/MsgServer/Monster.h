@@ -22,6 +22,11 @@ public:
     void SetSpawn(uint16_t usX, uint16_t usY) { m_usSpawnX = usX; m_usSpawnY = usY; SetPos(usX, usY); }
 
     uint8_t GetDir() const { return m_ucDir; }
+    // cross-realm beast: kill is announced on every server via the cross hub
+    bool IsCross() const { return m_bCross; }
+    void SetCross(bool b) { m_bCross = b; }
+    uint32_t GetCrossCp() const { return m_dwCrossCp; }
+    void SetCrossCp(uint32_t dw) { m_dwCrossCp = dw; }
     void SetDir(uint8_t ucDir) { m_ucDir = ucDir; }
 
     uint16_t GetSpawnX() const { return m_usSpawnX; }
@@ -49,6 +54,8 @@ private:
     uint32_t m_dwMapId{1002};
     uint16_t m_usX{0};
     uint16_t m_usY{0};
+    bool m_bCross{false};
+    uint32_t m_dwCrossCp{25};
     uint16_t m_usSpawnX{0};
     uint16_t m_usSpawnY{0};
     uint8_t  m_ucDir{0};

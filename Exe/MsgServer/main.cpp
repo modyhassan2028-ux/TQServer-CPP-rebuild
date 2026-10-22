@@ -106,6 +106,9 @@ int main(int argc, char* argv[]) {
     }).detach();
     CMonsterManager::Instance().Start();
     // cross-server hub link (data/cross.ini, ENABLED=0 keeps it off)
+    // cross-realm beasts from cq_cross_monster (announced hub-wide on kill)
+    CMonsterManager::Instance().SpawnCrossFromDB(
+        CAccountManager::Instance().GetDB());
     cross::CCrossClient::Instance().Start();
     CGroundItemManager::Instance().Start();
     std::cout << "[STATUS] World initialized. Listening on port " << port << " - Ctrl+C to stop." << std::endl;

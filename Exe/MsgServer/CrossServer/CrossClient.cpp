@@ -3,6 +3,8 @@
 #include "../User.h"
 #include "../MsgTalk.h"
 #include "../MapManager.h"
+#include "../Account.h"
+#include "../MySQLClient.h"
 
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -52,6 +54,17 @@ bool CCrossClient::Start() {
     m_strHubIp = ReadIni("data/cross.ini", "CROSS_IP", "127.0.0.1");
     m_usHubPort = (uint16_t)strtoul(ReadIni("data/cross.ini", "CROSS_PORT", "5820").c_str(),
                                     nullptr, 10);
+    // realm identity: cq_realm row for our SERVER_ID wins over the ini
+    auto* pDB = CAccountManager::Instance().GetDB();
+    if (pDB && pDB->Query("SELECT name FROM cq_realm WHERE id=" +
+                          std::to_string(m_dwServerId))) {
+        auto& rows = pDB->GetRows();
+        if (!rows.empty() && !rows[0].empty()) {
+            m_strServerName = rows[0][0];
+            printf("[CROSS] realm identity from cq_realm: '%s'\n",
+                   m_strServerName.c_str());
+        }
+    }
     printf("[CROSS] linking to hub %s:%u as '%s' (id %u)\n",
            m_strHubIp.c_str(), m_usHubPort, m_strServerName.c_str(), m_dwServerId);
     m_bRunning.store(true);

@@ -153,3 +153,26 @@ CREATE TABLE IF NOT EXISTS cq_market (
   created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_sold (is_sold)
 ) ENGINE=InnoDB;
+
+-- cross-server realm definitions (server group identity; the game server
+-- with SERVER_ID=N in data/cross.ini carries realm N's name on the hub)
+CREATE TABLE IF NOT EXISTS cq_realm (
+  id INT NOT NULL,
+  name VARCHAR(24) NOT NULL,
+  description VARCHAR(128) NOT NULL DEFAULT '',
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- cross-realm monsters: spawned by the owning game server; the kill is
+-- announced on every game server linked to the cross hub
+CREATE TABLE IF NOT EXISTS cq_cross_monster (
+  id INT NOT NULL AUTO_INCREMENT,
+  type_id INT NOT NULL,               -- cq_monstertype.id
+  map_id INT NOT NULL,
+  count INT NOT NULL DEFAULT 1,
+  x INT NOT NULL,
+  y INT NOT NULL,
+  respawn_secs INT NOT NULL DEFAULT 60,
+  cp_reward INT NOT NULL DEFAULT 25,  -- CP bounty for the killer
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

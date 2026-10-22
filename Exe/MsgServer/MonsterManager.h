@@ -20,6 +20,8 @@ public:
     // original model: cq_monstertype + cq_generator from MySQL.
     // returns spawned count (0 -> caller keeps the built-in table)
     uint32_t SpawnFromDB(CMySQLClient* pDB);
+    // cq_cross_monster: cross-realm beasts (kill announced hub-wide)
+    uint32_t SpawnCrossFromDB(CMySQLClient* pDB);
 
     std::vector<std::shared_ptr<CMonster>> GetMapMonsters(uint32_t dwMapId);
     std::shared_ptr<CMonster> GetMonsterById(uint32_t dwMonsterId);
@@ -45,4 +47,5 @@ private:
     std::atomic<bool> m_bRunning{ false };
     uint32_t m_dwNextId{ 400000000 };
     std::map<uint32_t, int> m_respawnCountdown; // monsterId -> AI ticks left // monster ids start above user ids
+    std::map<uint32_t, int> m_crossRespawn;     // cross beasts: cq respawn_secs / 2s ticks
 };

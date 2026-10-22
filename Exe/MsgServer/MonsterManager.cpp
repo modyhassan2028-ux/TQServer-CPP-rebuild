@@ -144,7 +144,11 @@ std::shared_ptr<CMonster> CMonsterManager::GetMonsterById(uint32_t dwMonsterId) 
 void CMonsterManager::OnMonsterKilled(std::shared_ptr<CMonster> pMonster) {
     if (!pMonster) return;
     std::lock_guard<std::mutex> lock(m_mutex);
-    m_respawnCountdown[pMonster->GetId()] = 8; // ~16s at 2s ticks
+    auto it = m_crossRespawn.find(pMonster->GetId());
+    if (pMonster->IsCross() && it != m_crossRespawn.end())
+        m_respawnCountdown[pMonster->GetId()] = it->second;
+    else
+        m_respawnCountdown[pMonster->GetId()] = 8; // ~16s at 2s ticks
     printf("[MONSTER] %s (%u) died, respawn in ~16s.\n", pMonster->GetName().c_str(), pMonster->GetId());
 }
 
@@ -310,6 +314,54 @@ bool CMonsterManager::Chase(std::shared_ptr<CMonster> pM) {
 
 // spawn the hourly world boss in Twin City with a world announcement.
 // boss = 20x the XP of a normal kill and flags a guaranteed drop bonus.
+// cq_cross_monster: JOIN cq_monstertype for stats, spawn on the realm map.
+// Cross beasts respawn on their own cq-configured cadence.
+uint32_t CMonsterManager::SpawnCrossFromDB(CMySQLClient* pDB) {
+    if (!pDB) return 0;
+    if (!pDB->Query("SELECT c.map_id, c.count, c.x, c.y, c.respawn_secs, c.cp_reward, "
+                    "t.name, t.level, t.life, t.attack, t.defense "
+                    "FROM cq_cross_monster c JOIN cq_monstertype t ON t.id = c.type_id")) {
+        printf("[CROSS] cq_cross_monster load failed: %s\n", pDB->GetError().c_str());
+        return 0;
+    }
+    // runs after Start(): the AI thread is live, guard the map
+    std::lock_guard<std::mutex> lock(m_mutex);
+    uint32_t dwSpawned = 0;
+    for (auto& row : pDB->GetRows()) {
+        if (row.size() < 9) continue;
+        uint32_t dwMapId  = (uint32_t)strtoul(row[0].c_str(), nullptr, 10);
+        uint32_t dwCount  = (uint32_t)strtoul(row[1].c_str(), nullptr, 10);
+        uint16_t usX      = (uint16_t)strtoul(row[2].c_str(), nullptr, 10);
+        uint16_t usY      = (uint16_t)strtoul(row[3].c_str(), nullptr, 10);
+        uint32_t dwResp   = (uint32_t)strtoul(row[4].c_str(), nullptr, 10);
+        uint32_t dwCp     = (uint32_t)strtoul(row[5].c_str(), nullptr, 10);
+        const std::string& strName = row[6];
+        uint32_t dwLevel  = (uint32_t)strtoul(row[7].c_str(), nullptr, 10);
+        uint32_t dwLife   = (uint32_t)strtoul(row[8].c_str(), nullptr, 10);
+        uint32_t dwAtk    = row.size() > 9 ? (uint32_t)strtoul(row[9].c_str(), nullptr, 10) : 10;
+        uint32_t dwDef    = row.size() > 10 ? (uint32_t)strtoul(row[10].c_str(), nullptr, 10) : 2;
+        for (uint32_t i = 0; i < dwCount && dwCount < 50; ++i) {
+            auto p = std::make_shared<CMonster>(m_dwNextId++, 0, strName);
+            p->SetMapId(dwMapId);
+            p->SetSpawn(usX, usY);
+            p->SetLevel(dwLevel);
+            p->SetLife(dwLife);
+            p->SetMaxLife(dwLife);
+            p->SetAttack(dwAtk);
+            p->SetDefense(dwDef);
+            p->SetCross(true);
+            p->SetCrossCp(dwCp);
+            // cross respawn cadence (fallback 60s)
+            m_crossRespawn[p->GetId()] = dwResp ? dwResp / 2 : 30; // AI ticks are 2s
+            m_byMap[dwMapId].push_back(p);
+            ++dwSpawned;
+        }
+    }
+    if (dwSpawned)
+        printf("[CROSS] %u cross-realm beasts spawned from cq_cross_monster\n", dwSpawned);
+    return dwSpawned;
+}
+
 void CMonsterManager::SpawnBoss() {
     auto pMap = CMapManager::Instance().GetMap(1002);
     uint16_t x = 550, y = 480;
