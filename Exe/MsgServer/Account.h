@@ -43,6 +43,7 @@ public:
         uint32_t dwLevel{1};
         uint64_t dwExperience{0};
         uint32_t dwStatPoints{0}, dwStrength{0}, dwVitality{0}, dwRebornCount{0};
+        std::string strLastRewardDay;
         uint64_t dwMoney{100000}, dwCp{5000}, dwBank{0};
         uint32_t dwPkPoints{0};
         uint32_t dwMapId{1002};
@@ -51,7 +52,8 @@ public:
     // inventory persistence (cq_item), MySQL mode only
     // runtime ids regenerate on load (MakeItemId) - rows store types/amounts
     struct ItemRow { uint32_t dwType; uint16_t usSort; uint32_t dwAmount; uint32_t dwPosition; std::string strName; uint8_t ucPlus{0}; };
-    bool LoadItems(uint32_t dwAccountId, std::vector<ItemRow>& out);
+    bool SaveRewardDay(uint32_t dwAccountId, const std::string& strDay);
+        bool LoadItems(uint32_t dwAccountId, std::vector<ItemRow>& out);
     void SaveItems(uint32_t dwAccountId, const std::vector<ItemRow>& items);
 
     // returns true if a saved character was found and loaded into 'out'

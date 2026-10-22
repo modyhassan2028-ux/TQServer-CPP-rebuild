@@ -253,7 +253,7 @@ bool CAccountManager::LoadCharacter(uint32_t dwAccountId, CharacterRecord& out) 
     if (!m_bMySQL || !m_pDB) return false;
     std::lock_guard<std::mutex> dbLock(m_dbMutex);
     if (!m_pDB->Query("SELECT level, money, cp, bank, pk_points, recordmap_id, recordx, recordy, experience, "
-                      "stat_points, strength, vitality, reborn_count "
+                      "stat_points, strength, vitality, reborn_count, last_reward_day "
                       "FROM cq_user WHERE account_id=" + std::to_string(dwAccountId)) ||
         m_pDB->GetRows().empty())
         return false;
@@ -271,6 +271,7 @@ bool CAccountManager::LoadCharacter(uint32_t dwAccountId, CharacterRecord& out) 
     out.dwStrength   = (row.size() > 10) ? (uint32_t)strtoul(row[10].c_str(), nullptr, 10) : 0;
     out.dwVitality   = (row.size() > 11) ? (uint32_t)strtoul(row[11].c_str(), nullptr, 10) : 0;
     out.dwRebornCount = (row.size() > 12) ? (uint32_t)strtoul(row[12].c_str(), nullptr, 10) : 0;
+    out.strLastRewardDay = (row.size() > 13) ? row[13] : "";
     return true;
 }
 
@@ -327,4 +328,13 @@ void CAccountManager::SaveItems(uint32_t dwAccountId, const std::vector<ItemRow>
         if (!m_pDB->Query(sql))
             printf("[DB] cq_item insert failed: %s\n", m_pDB->GetError().c_str());
     }
+}
+
+// persist the daily-reward day marker (kept separate from SaveCharacter
+// because it must survive logout even when nothing else changed)
+bool CAccountManager::SaveRewardDay(uint32_t dwAccountId, const std::string& strDay) {
+    if (!m_bMySQL || !m_pDB) return false;
+    std::lock_guard<std::mutex> dbLock(m_dbMutex);
+    return m_pDB->Query("UPDATE cq_user SET last_reward_day='" + m_pDB->Escape(strDay) +
+                        "' WHERE account_id=" + std::to_string(dwAccountId));
 }

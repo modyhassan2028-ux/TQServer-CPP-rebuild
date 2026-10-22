@@ -163,3 +163,38 @@ std::string CUser::UpgradeEquipped() {
     }
     return "";
 }
+
+// daily login reward: once per UTC day - 2000 money + 5 healing pills.
+// Day tracking is a plain YYYY-MM-DD string persisted in cq_user.
+bool CUser::GrantDailyReward() {
+    time_t now = time(nullptr);
+    tm t{};
+#ifdef _WIN32
+    gmtime_s(&t, &now);
+#else
+    gmtime_r(&now, &t);
+#endif
+    char day[16];
+    snprintf(day, sizeof(day), "%04d-%02d-%02d", t.tm_year + 1900, t.tm_mon + 1, t.tm_mday);
+    std::string strDay(day);
+    if (m_strLastRewardDay == strDay) return false;
+    m_strLastRewardDay = strDay;
+    AddMoney(2000);
+    // stack 5 healing pills (or start a fresh stack)
+    for (auto& it : m_items)
+        if (it.dwType == 725013 && it.dwAmount < 1000) {
+            uint32_t room = 1000 - it.dwAmount;
+            it.dwAmount += (room < 5) ? room : 5;
+            SendSysMsg("Daily reward: +2000 money, healing pills (x" + std::to_string(it.dwAmount) + ").");
+            printf("[DAILY] %s claimed the %s reward (stack)\n", m_name.c_str(), day);
+            return true;
+        }
+    ItemInfo pill;
+    pill.dwId = MakeItemId(NextItemSeq());
+    pill.dwType = 725013; pill.usSort = 50; pill.dwAmount = 5;
+    pill.strName = "HealingPill x5"; pill.dwPosition = 255;
+    m_items.push_back(pill);
+    SendSysMsg("Daily reward: +2000 money, +5 healing pills. Come back tomorrow!");
+    printf("[DAILY] %s claimed the %s reward\n", m_name.c_str(), day);
+    return true;
+}

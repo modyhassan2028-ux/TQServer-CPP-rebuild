@@ -76,6 +76,11 @@ public:
     uint8_t GetLevel() const { return m_ucLevel; }
     void SetLevel(uint8_t level) { m_ucLevel = level; }
 
+    // daily login reward: returns true when a reward was granted (a new UTC day)
+    bool GrantDailyReward();
+    const std::string& GetLastRewardDay() const { return m_strLastRewardDay; }
+    void SetLastRewardDay(const std::string& d) { m_strLastRewardDay = d; }
+
     // rebirth: at level 130 /reborn restarts at 15 with permanent growth
     uint32_t GetRebornCount() const { return m_dwRebornCount; }
     void SetRebornCount(uint32_t v) { m_dwRebornCount = v; }
@@ -151,6 +156,7 @@ private:
     uint32_t m_dwStrength{0};
     uint32_t m_dwVitality{0};
     uint32_t m_dwRebornCount{0};
+    std::string m_strLastRewardDay;
     uint32_t m_dwBaseBP{100};
     uint32_t m_dwBattlePower{100};
 

@@ -113,6 +113,7 @@ void CMsgConnect::Process(uint32_t dwSender, void* pContext) {
         pUser->SetStrength(rec.dwStrength);
         pUser->SetVitality(rec.dwVitality);
         pUser->SetRebornCount(rec.dwRebornCount);
+        pUser->SetLastRewardDay(rec.strLastRewardDay);
         pUser->SetLife(1000);
         // base max life scales with restored level (+20/level) and vitality (+5/point)
         pUser->SetMaxLife(1000 + (rec.dwLevel > 1 ? (rec.dwLevel - 1) * 20 : 0) +
@@ -126,6 +127,8 @@ void CMsgConnect::Process(uint32_t dwSender, void* pContext) {
     pUser->SetLife(pUser->GetMaxLife());
     pUser->SnapshotBaseStats();
     pUser->BindNet(pClient);
+    if (pUser->GrantDailyReward())
+        CAccountManager::Instance().SaveRewardDay(dwAccountId, pUser->GetLastRewardDay());
     CUserManager::Instance().AddUser(pUser);
     CMapManager::Instance().GetOrCreate(dwSpawnMap, "Twin City")->AddUser(pUser);
 
