@@ -273,6 +273,36 @@ if (m_message.rfind("/npc", 0) == 0) {
         return;
     }
     // ---- team commands ----
+    // ---- offline mail: /mail send <name> <text> (delivered at login) ----
+    if (m_message.rfind("/mail ", 0) == 0) {
+        std::string arg = m_message.substr(6);
+        if (arg.rfind("send ", 0) == 0) {
+            std::string rest = arg.substr(5);
+            size_t sp = rest.find(' ');
+            if (sp == std::string::npos) { user->SendSysMsg("Usage: /mail send <name> <text>"); return; }
+            std::string to = rest.substr(0, sp);
+            std::string body = rest.substr(sp + 1);
+            if (body.empty() || body.size() > 200) { user->SendSysMsg("Text too long (max 200)."); return; }
+            bool online = CUserManager::Instance().GetUserByName(to) != nullptr;
+            if (CAccountManager::Instance().SendMail(to, user->GetName(), body)) {
+                user->SendSysMsg("Mail sent to " + to + (online ? " (they are online - they will read it next login or /mail check)" : " (they will get it at next login)"));
+                printf("[MAIL] %s -> %s: %s\n", user->GetName().c_str(), to.c_str(), body.c_str());
+            } else {
+                user->SendSysMsg("Mail failed (no database).");
+            }
+        } else if (arg == "check") {
+            auto mails = CAccountManager::Instance().LoadUnreadMail(user->GetName());
+            if (mails.empty()) { user->SendSysMsg("You have no unread mail."); return; }
+            for (auto& m : mails)
+                user->SendSysMsg("[Mail from " + m.strFrom + "] " + m.strBody);
+            CAccountManager::Instance().MarkMailRead(user->GetName());
+            user->SendSysMsg("(inbox marked read)");
+        } else {
+            user->SendSysMsg("Usage: /mail send <name> <text> | /mail check");
+        }
+        return;
+    }
+
     // ---- marriage v1: /marry <name> propose, /marry accept, /divorce ----
     if (m_message.rfind("/marry", 0) == 0) {
         std::string arg = m_message.substr(6);

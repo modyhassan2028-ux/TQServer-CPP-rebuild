@@ -135,6 +135,15 @@ void CMsgConnect::Process(uint32_t dwSender, void* pContext) {
         if (st.Create(pUser->GetId(), { { CMsgUserAttrib::Attrib_Stamina, pUser->GetStamina() } }))
             pUser->SendMsg(st.GetBuf(), st.GetSize());
     }
+    {   // deliver offline mail once the character is in the world
+        auto mails = CAccountManager::Instance().LoadUnreadMail(pUser->GetName());
+        if (!mails.empty()) {
+            pUser->SendSysMsg("You have " + std::to_string(mails.size()) + " unread mail(s):");
+            for (auto& m : mails)
+                pUser->SendSysMsg("[Mail from " + m.strFrom + "] " + m.strBody);
+            CAccountManager::Instance().MarkMailRead(pUser->GetName());
+        }
+    }
     CUserManager::Instance().AddUser(pUser);
     CMapManager::Instance().GetOrCreate(dwSpawnMap, "Twin City")->AddUser(pUser);
 

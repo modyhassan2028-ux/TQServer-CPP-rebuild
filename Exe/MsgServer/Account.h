@@ -55,6 +55,12 @@ public:
     struct ItemRow { uint32_t dwType; uint16_t usSort; uint32_t dwAmount; uint32_t dwPosition; std::string strName; uint8_t ucPlus{0}; };
     bool SaveRewardDay(uint32_t dwAccountId, const std::string& strDay);
         bool UpdateSpouse(uint32_t dwAccountId, const std::string& strSpouse);
+
+        // ---- offline mail ----
+        struct MailRow { uint32_t dwId; std::string strFrom; std::string strBody; };
+        bool SendMail(const std::string& strTo, const std::string& strFrom, const std::string& strBody);
+        std::vector<MailRow> LoadUnreadMail(const std::string& strTo);
+        void MarkMailRead(const std::string& strTo);
         bool LoadItems(uint32_t dwAccountId, std::vector<ItemRow>& out);
     void SaveItems(uint32_t dwAccountId, const std::vector<ItemRow>& items);
 

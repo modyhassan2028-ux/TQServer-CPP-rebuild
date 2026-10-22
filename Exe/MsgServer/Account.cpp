@@ -347,3 +347,39 @@ bool CAccountManager::UpdateSpouse(uint32_t dwAccountId, const std::string& strS
     return m_pDB->Query("UPDATE cq_user SET spouse_name='" + m_pDB->Escape(strSpouse) +
                         "' WHERE account_id=" + std::to_string(dwAccountId));
 }
+
+// queue a mail for a player (delivered at their next login)
+bool CAccountManager::SendMail(const std::string& strTo, const std::string& strFrom,
+                               const std::string& strBody) {
+    if (!m_bMySQL || !m_pDB) return false;
+    std::lock_guard<std::mutex> dbLock(m_dbMutex);
+    return m_pDB->Query("INSERT INTO cq_mail (to_name, from_name, body) VALUES ('" +
+                        m_pDB->Escape(strTo) + "','" + m_pDB->Escape(strFrom) + "','" +
+                        m_pDB->Escape(strBody) + "')");
+}
+
+// fetch all unread mail addressed to this character
+std::vector<CAccountManager::MailRow> CAccountManager::LoadUnreadMail(const std::string& strTo) {
+    std::vector<MailRow> out;
+    if (!m_bMySQL || !m_pDB) return out;
+    std::lock_guard<std::mutex> dbLock(m_dbMutex);
+    if (!m_pDB->Query("SELECT id, from_name, body FROM cq_mail WHERE to_name='" +
+                      m_pDB->Escape(strTo) + "' AND is_read=0 ORDER BY id"))
+        return out;
+    for (auto& row : m_pDB->GetRows()) {
+        if (row.size() < 3) continue;
+        MailRow m;
+        m.dwId = (uint32_t)strtoul(row[0].c_str(), nullptr, 10);
+        m.strFrom = row[1];
+        m.strBody = row[2];
+        out.push_back(std::move(m));
+    }
+    return out;
+}
+
+// mark the whole inbox read once delivered
+void CAccountManager::MarkMailRead(const std::string& strTo) {
+    if (!m_bMySQL || !m_pDB) return;
+    std::lock_guard<std::mutex> dbLock(m_dbMutex);
+    m_pDB->Query("UPDATE cq_mail SET is_read=1 WHERE to_name='" + m_pDB->Escape(strTo) + "'");
+}

@@ -115,3 +115,13 @@ CREATE TABLE IF NOT EXISTS cq_dropitemrule (
   chance INT NOT NULL DEFAULT 100,  -- percent
   PRIMARY KEY (monster_type, item_type)
 );
+
+-- offline mail: delivered on the recipient's next login
+CREATE TABLE IF NOT EXISTS cq_mail (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  to_name VARCHAR(64) NOT NULL,
+  from_name VARCHAR(64) NOT NULL,
+  body VARCHAR(255) NOT NULL,
+  is_read TINYINT NOT NULL DEFAULT 0,
+  created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
