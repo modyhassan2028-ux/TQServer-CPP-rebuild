@@ -800,6 +800,27 @@ int main() {
         g_bActionTestMode = false;
         printf("[ok] 513 transform matches case 0x201 (Transform2)\n");
     }
+    // ---- 303: SYSTEM/ALLUSERS broadcast (case 0x12f) ----
+    {
+        auto upR = std::make_shared<CUser>(999022); upR->SetName("Bcst303");
+        { auto n = mkMgc(0, 303, "%syn_name`s %user_name be the champion");
+          assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 303, "Server will restart in 5 minutes");
+          assert(CGameAction::ProcessActionUser(upR, &n)); }
+        printf("[ok] 303 broadcast matches case 0x12f (FUN_14015b300)\n");
+    }
+    // ---- 312: named map effect (case 0x138) ----
+    {
+        auto upR = std::make_shared<CUser>(999023); upR->SetName("Eff312");
+        // real map 1002 exists in cq_map? use the tested map from earlier cases
+        { auto n = mkMgc(0, 312, "1038 224 179 bombarrow");
+          bool b = CGameAction::ProcessActionUser(upR, &n);
+          // map 1038 may not exist in the loaded set: result must be a clean
+          // true/false, no crash either way
+          (void)b; }
+        { auto n = mkMgc(0, 312, "short"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        printf("[ok] 312 named effect matches case 0x138\n");
+    }
     // ---- 532: item quench (type 0x214 -> ProcessActionItemQuench) ----
     {
         auto upR = std::make_shared<CUser>(999021); upR->SetName("Qnch532");

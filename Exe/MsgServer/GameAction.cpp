@@ -896,6 +896,44 @@ bool bAll = (llAll == 1);
         }
         return ProcessItemQuench(pUser, pNode, pUser->m_dwQuenchItemId, pUser->m_dwQuenchMaterialId);
     }
+    case 303: { // ORIGINAL case 0x12f: SYSTEM/ALLUSERS world broadcast (formatted)
+        // ORIGINAL: FUN_14015b240(buf) setup, FUN_14015b300(buf,"SYSTEM",
+        // "ALLUSERS", param) - the same broadcast machinery as 125; 0 -> DBERR
+        // log (0xe00) but the flow continues true.
+        CMsgTalk talk;
+        if (!talk.CreateBroadcast(pNode->strParam)) {
+            printf("[DBERR] cq_action %u type 303 broadcast format failed (0xe00)\n", pNode->dwId);
+        } else {
+            CMapManager::Instance().BroadcastToAll(talk.GetBuf(), talk.GetSize());
+        }
+        return true;
+    }
+    case 312: { // ORIGINAL case 0x138: named map effect (bombarrow/firemagic/lottery)
+        // sscanf "%u %d %d %s" = (mapid, x, y, name). ORIGINAL: region lookup,
+        // FUN_14037e140(buf, 9, name, x) named-effect packet, region broadcast
+        // (user vcall+0x28); parse failure -> DBERR + false; missing region ->
+        // false; packet build failure -> LOGERR 0xd8c but still true.
+        uint32_t dwMap = 0; int32_t nX = 0, nY = 0; char szName[256] = {0};
+        if (sscanf(pNode->strParam.c_str(), "%u %d %d %255s", &dwMap, &nX, &nY, szName) != 4) {
+            printf("[DBERR] cq_action %u type 312 param error\n", pNode->dwId);
+            return false;
+        }
+        auto pMap = CMapManager::Instance().GetMap(dwMap);
+        if (!pMap) return false; // ORIGINAL: map lookup 0 -> out (break -> false)
+        // ORIGINAL FUN_14037e140 packet (msg 9, name, x); interim carrier:
+        // the broadcast talk carries the effect name - the exact wire format
+        // ports with the effect-packet subsystem.
+        char szBuf[320];
+        snprintf(szBuf, sizeof(szBuf), "%s", szName);
+        CMsgTalk talk;
+        if (!talk.CreateBroadcast(szBuf)) {
+            printf("[LOGERR] cq_action %u type 312 effect packet failed (0xd8c)\n", pNode->dwId);
+        } else {
+            CMapManager::Instance().BroadcastToAll(talk.GetBuf(), talk.GetSize());
+            printf("[EFFECT] map %u (%d,%d) name %s\n", dwMap, nX, nY, szName);
+        }
+        return true;
+    }
     case 517: { // ORIGINAL case 0x205: item attr set/compare (with %iter_var_data)
         std::string strP = pNode->strParam;
         pUser->ResolveIterVars(strP); // ORIGINAL: vars resolved before the case runs
