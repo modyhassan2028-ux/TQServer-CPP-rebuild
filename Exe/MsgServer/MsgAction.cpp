@@ -6,17 +6,21 @@
 
 CMsgAction::CMsgAction() = default;
 
-bool CMsgAction::Create(uint32_t dwId, uint32_t dwData, uint16_t usX, uint16_t usY, ActionType action) {
+bool CMsgAction::Create(uint32_t dwId, uint16_t usX, uint16_t usY, uint8_t byDir,
+                        uint16_t usP6, uint32_t dwData, ActionType action) {
     tq::MsgHead head;
-    head.type = 10010; // 0x271A CMsgAction - dispatcher switchD_1400eb932_caseD_3fe + Create at MsgServer.exe.decompiled.c:111998
+    head.type = 10010; // 0x271A - ORIGINAL FUN_140362620 (CMsgAction::Create)
     head.length = sizeof(tq::MsgHead) + sizeof(ActionData);
 
     ActionData data{};
-    data.dwId = dwId;
-    data.dwData = dwData;
-    data.usX = usX;
-    data.usY = usY;
-    data.dwAction = static_cast<uint32_t>(action);
+    data.dwId = dwId;          // ORIGINAL +4
+    data.dwData = dwData;      // ORIGINAL +8  (param_7)
+    data.dwReserved = 0;        // ORIGINAL +0x0c never written
+    data.dwAction = static_cast<uint32_t>(action); // ORIGINAL +0x10 (param_8)
+    data.usP6 = usP6;          // ORIGINAL +0x14
+    data.usP5 = byDir;         // ORIGINAL +0x16 (param_5 = direction)
+    data.usX = usX;            // ORIGINAL +0x18 (param_3)
+    data.usY = usY;            // ORIGINAL +0x1a (param_4)
 
     m_buffer.resize(head.length);
     std::memcpy(m_buffer.data(), &head, sizeof(head));

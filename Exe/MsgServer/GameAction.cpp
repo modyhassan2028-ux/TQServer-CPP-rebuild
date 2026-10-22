@@ -8,6 +8,9 @@
 #include "PlayerMagic.h"
 #include "Log.h"
 #include "Dialog.h"
+#include "MsgAction.h"
+#include "MsgTalk.h"
+#include "MapManager.h"
 #include "Item.h"
 #include "Npc.h"
 #include "Npc.h" // CNpcManager lives here
@@ -202,6 +205,64 @@ bool CGameAction::ProcessActionOS(std::shared_ptr<CUser> pUser, const CDialogEng
         printf("[DIALOG] type 127 bad SQL: %s (ORIGINAL log DBERROR)\n",
                pDB ? pDB->GetError().c_str() : "no db");
         return false;
+    }
+    case 120: { // ORIGINAL case 0x78: task-menu dialog (mode 100)
+        // sscanf "%u" -> task id -> FUN_14039d300 registers it (empty text)
+        // -> FUN_1403a65f0(buf, 100, idx): dialog with uiMode=100 @offset
+        // 0xb and the registered index @offset 10 (MSGDIALOG_CREATE,
+        // CHECKF nAction == 100). No string is packed.
+        uint32_t dwTask = 0;
+        sscanf(param.c_str(), "%u", &dwTask);
+        uint32_t uIdx = pUser->PushDialogOption("", dwTask);
+        CMsgDialog dlg;
+        if (!dlg.Create(100, "", (uint8_t)uIdx, 0)) return false;
+        pUser->SendMsg(dlg.GetBuf(), dlg.GetSize());
+        return true;
+    }
+    case 124: { // ORIGINAL case 0x7c: CMsgAction 116 (0x74) refresh
+        // Create(id, x, y, dir, 0, mapgroup, 116): echoes the player state
+        auto pMap = CMapManager::Instance().GetMap(pUser->GetMapId());
+        CMsgAction act;
+        if (!act.Create(pUser->GetId(), pUser->GetX(), pUser->GetY(),
+                        pUser->GetDir(), 0, pMap ? pMap->GetId() : 0,
+                        CMsgAction::Action_ScreenEffect)) return false;
+        pUser->SendMsg(act.GetBuf(), act.GetSize());
+        return true;
+    }
+    case 125: { // ORIGINAL case 0x7d: SYSTEM/ALLUSERS world broadcast
+        // FUN_14015b300(buf,"SYSTEM","ALLUSERS",param) -> broadcast to all
+        // (vcall +0x68 with 0xffffffff); returns true unconditionally
+        CMsgTalk talk;
+        if (talk.CreateBroadcast(param))
+            CMapManager::Instance().BroadcastToAll(talk.GetBuf(), talk.GetSize());
+        return true;
+    }
+    case 126: { // ORIGINAL case 0x7e: world-effect + self action 159
+        // sscanf "%u %u %hu" (a, b, c); FUN_1400b8090(broadcast, a, b, 0)
+        // is a world-notice subsystem not yet ported (1 DB row);
+        // c != 0 sends the self packet: Create(id, 0, 0, dir, a, 0, 159)
+        uint32_t a = 0, b = 0; uint16_t c = 0;
+        if (sscanf(param.c_str(), "%u %u %hu", &a, &b, &c) != 3) return false;
+        if (c != 0) {
+            CMsgAction act;
+            if (!act.Create(pUser->GetId(), 0, 0, pUser->GetDir(), (uint16_t)a, 0,
+                            CMsgAction::Action_Shockwave)) return false;
+            pUser->SendMsg(act.GetBuf(), act.GetSize());
+        }
+        return true;
+    }
+    case 131: { // ORIGINAL case 0x83: CMsgAction 162 (0xa2) status update
+        // sscanf "%d %d %u %u" or "%d %d %u": Create(id, n1, n2, dir, u3, u4, 162)
+        int n1 = 0, n2 = 0; uint32_t u3 = 0, u4 = 0;
+        int n = sscanf(param.c_str(), "%d %d %u %u", &n1, &n2, &u3, &u4);
+        if (n < 3) return false; // ORIGINAL: bad param -> DBERROR log + break
+        if (n == 3) u4 = 0;
+        CMsgAction act;
+        if (!act.Create(pUser->GetId(), (uint16_t)n1, (uint16_t)n2,
+                        pUser->GetDir(), (uint16_t)u3, u4,
+                        CMsgAction::Action_UpdateStatus)) return false;
+        pUser->SendMsg(act.GetBuf(), act.GetSize());
+        return true;
     }
     default: {
         // remaining OS types (106..132) not ported yet: log once per

@@ -28,7 +28,7 @@
 
 CMsgTalk::CMsgTalk() = default;
 
-bool CMsgTalk::Create(const std::string& sender, const std::string& recipient, const std::string& message, ChannelType channel) {
+bool CMsgTalk::Create(const std::string& sender, const std::string& recipient, const std::string& message, ChannelType channel, uint32_t dwId) {
     m_sender = sender;
     m_recipient = recipient;
     m_message = message;
@@ -40,13 +40,17 @@ bool CMsgTalk::Create(const std::string& sender, const std::string& recipient, c
     packer.AddString(message.c_str());
 
     tq::MsgHead head;
-    head.type = 1004; // MsgTalk Packet ID
+    head.type = 1004; // MsgTalk Packet ID - ORIGINAL FUN_14015b300
     head.length = static_cast<uint16_t>(sizeof(tq::MsgHead) + sizeof(TalkData) + packer.GetSize());
 
     TalkData data{};
-    data.type = static_cast<uint16_t>(channel);
-    data.style = 0;
-    data.color = 0xFFFFFF;
+    data.dwId = dwId;          // ORIGINAL +4
+    data.usColor = 0xFFFF;     // ORIGINAL +8
+    data.usStyle = static_cast<uint16_t>(channel); // ORIGINAL +10: TQ style const
+    data.dwSysTime = static_cast<uint32_t>(time(nullptr)); // ORIGINAL +12
+    data.dwP9 = 0;             // ORIGINAL +20
+    data.dwP10 = 0;            // ORIGINAL +24
+    data.byP11 = 0;            // ORIGINAL +28
 
     m_buffer.resize(head.length);
     std::memcpy(m_buffer.data(), &head, sizeof(head));
@@ -58,9 +62,60 @@ bool CMsgTalk::Create(const std::string& sender, const std::string& recipient, c
     return true;
 }
 
+bool CMsgTalk::CreateBroadcast(const std::string& message) {
+    // ORIGINAL case 0x7d: FUN_14015b300(buf, "SYSTEM", "ALLUSERS", param_3)
+    tq::CStringPacker packer;
+    packer.AddString("SYSTEM");
+    packer.AddString("ALLUSERS");
+    packer.AddString("");        // suffix (ORIGINAL param_5)
+    packer.AddString(message.c_str());
+
+    tq::MsgHead head;
+    head.type = 1004;
+    head.length = static_cast<uint16_t>(sizeof(tq::MsgHead) + sizeof(TalkData) + packer.GetSize());
+
+    TalkData data{};
+    data.dwId = 0;
+    data.usColor = 0xFFFF;
+    data.usStyle = 0xFF;
+    data.dwSysTime = static_cast<uint32_t>(time(nullptr));
+    data.dwP9 = 0;
+    data.dwP10 = 0;
+    data.byP11 = 1;
+    m_sender = "SYSTEM"; m_recipient = "ALLUSERS"; m_message = message;
+
+    m_buffer.resize(head.length);
+    std::memcpy(m_buffer.data(), &head, sizeof(head));
+    std::memcpy(m_buffer.data() + sizeof(head), &data, sizeof(data));
+    packer.SetBuf(m_buffer.data() + sizeof(head) + sizeof(data), packer.GetSize(), true);
+    m_nType = head.type;
+    m_nSize = head.length;
+    return true;
+}
+
 void CMsgTalk::Process(uint32_t dwSender) {
     auto user = CUserManager::Instance().GetUser(dwSender);
     if (!user) return;
+
+    // ---- parse the received wire packet (ORIGINAL layout) ----
+    if (m_buffer.size() >= sizeof(tq::MsgHead) + sizeof(TalkData)) {
+        const char* strs = m_buffer.data() + sizeof(tq::MsgHead) + sizeof(TalkData);
+        size_t avail = m_buffer.size() - (sizeof(tq::MsgHead) + sizeof(TalkData));
+        unsigned count = (unsigned char)strs[0]; // StringPacker: [u8 count][u8 len][bytes]...
+        std::vector<std::string> parts;
+        size_t off = 1;
+        for (unsigned i = 0; i < count && off < avail; i++) {
+            unsigned len = (unsigned char)strs[off]; off++;
+            if (off + len > avail) break;
+            parts.emplace_back(strs + off, len); off += len;
+        }
+        if (parts.size() >= 4) {
+            m_sender = parts[0];
+            m_recipient = parts[1];
+            // parts[2] = suffix
+            m_message = parts[3];
+        }
+    }
 
     // ---- guild v1 (chat-driven) ----
     if (m_message.rfind("&", 0) == 0) { // "&text" = guild chat

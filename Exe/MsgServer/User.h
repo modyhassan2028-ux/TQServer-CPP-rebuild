@@ -31,6 +31,9 @@ public:
 
     uint16_t GetX() const { return m_usX; }
     uint16_t GetY() const { return m_usY; }
+    // ORIGINAL CUser ABI: x @+0x40, y @+0x48, direction @+0x50
+    uint8_t GetDir() const { return m_byDir; }
+    void SetDir(uint8_t byDir) { m_byDir = byDir; }
     void SetPos(uint16_t usX, uint16_t usY) { m_usX = usX; m_usY = usY; }
 
     uint32_t GetMapId() const { return m_dwMapId; }
@@ -415,6 +418,7 @@ private:
     uint32_t m_dwMapId{1002}; // Twin City default
     uint16_t m_usX{400};
     uint16_t m_usY{400};
+    uint8_t m_byDir{0};
     uint32_t m_dwLife{1000};
     uint32_t m_dwMaxLife{1000};
     uint32_t m_dwBaseMaxLife{1000};

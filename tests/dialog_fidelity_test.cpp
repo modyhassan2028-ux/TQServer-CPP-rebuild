@@ -11,6 +11,9 @@
 #include "MsgDialog.h"
 #include "MsgTalk.h"
 #include "User.h"
+#include "UserManager.h"
+#include "MsgTalk.h"
+#include "MsgAction.h"
 #include "PlayerMagic.h"
 #include "MapManager.h"
 #include "Item.h"
@@ -58,7 +61,11 @@ int main() {
 
     // --- walk the real 1501 chain: text, 3 options, listbox
     CGameAction::ProcessActionChain(up, 1501);
-    assert(pkts.size() == 5); // one packet per UI row, exactly like the original
+    assert(pkts.size() == 6); // text + 3 options + 10004 listbox + 10005 task-menu
+    // ORIGINAL: the chain continues to row 10005 (type 120, empty param):
+    // sscanf fails -> task id 0 -> NOT registered -> mode-100 packet with
+    // index byte 0xff, exactly like FUN_14039d300 returning -1
+    assert(pkts[5].mode == 100 && pkts[5].optIdx == 0xFF);
     assert(pkts[0].mode == CMsgDialog::Mode_Text);
     assert(pkts[0].text.find("magical arts") != std::string::npos);
     assert(pkts[1].mode == CMsgDialog::Mode_Option && pkts[1].text == "Will~you~teach~me?");
@@ -112,7 +119,8 @@ int main() {
         if (o.first == "Fire.~[Thunder~level~4]" && o.second == 31212) bFire = true;
     }
     assert(bThunder && bCure && bMeditation && bFire);
-    assert(pkts.size() == 6); // text + 4 options + 10004 listbox
+    assert(pkts.size() == 7); // text + 4 options + 10004 listbox + 10005 task-menu(0xff)
+    assert(pkts[6].mode == 100 && pkts[6].optIdx == 0xFF);
     printf("[ok] option reply maps back into the 1511 chain (1514 Thunder/Cure)\n");
 
     // A player who ALREADY knows Thunder (1000) must take the id_next branch
@@ -585,6 +593,98 @@ int main() {
     { auto n = mkMgc(0, 127, "INSERT INTO cq_log set user_id='%user_id'"); // real row: %user_id is broken SQL -> false
       assert(!CGameAction::ProcessActionOS(u11, &n)); }
     printf("[ok] 121/122/123/127 OS-side cases match 0x79/0x7a/0x7b/0x7f\n");
+
+    // ================= WIRE LAYOUT: CMsgAction / CMsgTalk (6159) =================
+    // original client jump packet: 28-byte body, action @+0x10, x @+0x18, y @+0x1a
+    {
+        auto upJ = std::make_shared<CUser>(999010); upJ->SetName("Jumper");
+        CUser& j = *upJ;
+        CUserManager::Instance().AddUser(upJ);
+        j.SetMapId(1002); j.SetPos(400, 400); j.SetStamina(100);
+        auto pMap = CMapManager::Instance().GetMap(1002);
+        uint16_t tx = 400, ty = 400;
+        if (pMap) {
+            pMap->RemoveUser(j.GetId()); pMap->AddUser(upJ);
+            bool found = false; // find a passable target within the 24-cell gate
+            for (int dx = 0; dx <= 20 && !found; dx++) for (int dy = 0; dy <= 20 && !found; dy++) {
+                tx = (uint16_t)(400 + dx); ty = (uint16_t)(400 + dy);
+                if (pMap->IsPassable(tx, ty)) found = true;
+            }
+            assert(found);
+        }
+        #pragma pack(push,1)
+        struct { uint32_t t; uint32_t id; uint32_t d; uint32_t pad; uint32_t act;
+                 uint16_t p6; uint16_t p5; uint16_t x; uint16_t y; } body{};
+        #pragma pack(pop)
+        body.act = 137; body.x = tx; body.y = ty;
+        CMsgAction act;
+        act.Clear();
+        tq::MsgHead h; h.type = 10010; h.length = (uint16_t)(sizeof(tq::MsgHead) + sizeof(body));
+        act.AppendRaw((const uint8_t*)&h, sizeof(h));
+        act.AppendRaw((const uint8_t*)&body, sizeof(body));
+        act.Process(999010);
+        assert(j.GetX() == tx && j.GetY() == ty); // ORIGINAL offsets parsed correctly
+        CUserManager::Instance().RemoveUser(999010);
+        printf("[ok] CMsgAction jump parses the original 28-byte wire layout\n");
+    }
+    // CMsgTalk: broadcast round-trip through the wire buffer
+    {
+        CMsgTalk out;
+        assert(out.CreateBroadcast("The Cash Rain is over!"));
+        CMsgTalk in;
+        in.Clear();
+        in.AppendRaw((const uint8_t*)out.GetBuf(), out.GetSize());
+        auto upP = std::make_shared<CUser>(999011); upP->SetName("Parser");
+        CUserManager::Instance().AddUser(upP);
+        in.Process(999011);
+        assert(in.GetMessage() == "The Cash Rain is over!");
+        assert(in.GetSender() == "SYSTEM" && in.GetRecipient() == "ALLUSERS");
+        CUserManager::Instance().RemoveUser(999011);
+        printf("[ok] CMsgTalk broadcast round-trips the original wire format\n");
+    }
+    // ---- new OS-side cases 120/124/125/126/131 ----
+    {
+        auto upO = std::make_shared<CUser>(999012); upO->SetName("OsCases");
+        CUser& o = *upO;
+        std::vector<uint16_t> types; std::vector<std::vector<uint8_t>> raws;
+        o.SetPacketSink([&](const void* p, uint16_t sz) {
+            types.push_back(GetPktType(p));
+            raws.emplace_back((const uint8_t*)p, (const uint8_t*)p + sz);
+        });
+        // 120: task-menu dialog, uiMode 100 + registered index byte
+        { auto n = mkMgc(0, 120, "4087070"); assert(CGameAction::ProcessActionOS(upO, &n)); }
+        assert(!types.empty() && types.back() == 2032);
+        assert(raws.back()[sizeof(tq::MsgHead)+11] == 100); // uiMode byte = 100
+        assert(raws.back()[sizeof(tq::MsgHead)+10] == 0);   // first registered option index
+        assert(o.GetDialogOptions().back().second == 4087070);
+        o.ClearDialogOptions();
+        // 131: action 162 with (x,y) from param, u3 in p6, u4 in data
+        { auto n = mkMgc(0, 131, "303 256 7676 11"); assert(CGameAction::ProcessActionOS(upO, &n)); }
+        assert(types.back() == 10010);
+        assert(*(uint32_t*)(raws.back().data()+sizeof(tq::MsgHead)+0x10) == 162);
+        assert(*(uint16_t*)(raws.back().data()+sizeof(tq::MsgHead)+0x18) == 303);
+        assert(*(uint16_t*)(raws.back().data()+sizeof(tq::MsgHead)+0x1a) == 256);
+        assert(*(uint16_t*)(raws.back().data()+sizeof(tq::MsgHead)+0x14) == 7676); // p6 = u3
+        assert(*(uint32_t*)(raws.back().data()+sizeof(tq::MsgHead)+8) == 11);     // data = u4
+        { auto n = mkMgc(0, 131, "195 205 0"); assert(CGameAction::ProcessActionOS(upO, &n)); } // 3-field
+        assert(*(uint32_t*)(raws.back().data()+sizeof(tq::MsgHead)+8) == 0);       // data = 0
+        { auto n = mkMgc(0, 131, "1"); assert(!CGameAction::ProcessActionOS(upO, &n)); } // <3 fields -> false
+        // 124: action 116 refresh (x,y,dir echoed, map id in data)
+        { auto n = mkMgc(0, 124, ""); assert(CGameAction::ProcessActionOS(upO, &n)); }
+        assert(types.back() == 10010 && *(uint32_t*)(raws.back().data()+sizeof(tq::MsgHead)+0x10) == 116);
+        // 126: c==0 -> packet suppressed; c!=0 -> action 159 with a in p6
+        size_t cnt = types.size();
+        { auto n = mkMgc(0, 126, "5 7 0"); assert(CGameAction::ProcessActionOS(upO, &n)); }
+        assert(types.size() == cnt); // c == 0: nothing sent
+        { auto n = mkMgc(0, 126, "5 7 9"); assert(CGameAction::ProcessActionOS(upO, &n)); }
+        assert(*(uint32_t*)(raws.back().data()+sizeof(tq::MsgHead)+0x10) == 159);
+        assert(*(uint16_t*)(raws.back().data()+sizeof(tq::MsgHead)+0x14) == 5);
+        // 125: SYSTEM/ALLUSERS broadcast (raw param text, exactly like the ORIGINAL)
+        { auto n = mkMgc(0, 125, "%user_name found an Earth CP Pearl!");
+          assert(CGameAction::ProcessActionOS(upO, &n)); }
+        printf("[ok] 120/124/125/126/131 OS-side cases match 0x78/0x7c/0x7d/0x7e/0x83\n");
+    }
+
 
 
     printf("[ok] 501/502 award/erase item matches cases 0x1f5/0x1f6\n");
