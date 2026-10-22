@@ -23,6 +23,8 @@ public:
 
     std::vector<std::shared_ptr<CMonster>> GetMapMonsters(uint32_t dwMapId);
     std::shared_ptr<CMonster> GetMonsterById(uint32_t dwMonsterId);
+    // nearby player -> attack (v1 proximity, no visual chase); called by the AI tick
+    void Aggro(std::shared_ptr<CMonster> pMonster);
     void OnMonsterKilled(std::shared_ptr<CMonster> pMonster); // schedules delayed respawn
 
 private:

@@ -1,4 +1,6 @@
 ﻿#include "MonsterManager.h"
+#include "MsgUserAttrib.h"
+#include "BattleSystem.h"
 #include "MySQLClient.h"
 #include "Account.h"
 #include "MapManager.h"
@@ -179,6 +181,8 @@ void CMonsterManager::AILoop() {
                 m_respawnCountdown.erase(pM->GetId());
                 continue;
             }
+            // aggro first: a player within 5 cells gets attacked (2s tick = cooldown)
+            Aggro(pM);
             // 1-in-4 chance per tick to take a roam step (original AI ticks per state machine)
             if (std::rand() % 4 == 0) Roam(pM);
         }
@@ -211,4 +215,35 @@ void CMonsterManager::Respawn(std::shared_ptr<CMonster> pM) {
     pM->SetPos(pM->GetSpawnX(), pM->GetSpawnY());
     printf("[MONSTER] Monster %s (%u) respawned at (%u,%u).\n",
            pM->GetName().c_str(), pM->GetId(), pM->GetSpawnX(), pM->GetSpawnY());
+}
+
+// v1 aggro: alive monster attacks any player within 5 cells on its map.
+// (visual chase + pathing comes with the port of the original MsgMonster walk)
+void CMonsterManager::Aggro(std::shared_ptr<CMonster> pM) {
+    if (!pM || !pM->IsAlive()) return;
+    auto pMap = CMapManager::Instance().GetMap(pM->GetMapId());
+    if (!pMap) return;
+    for (auto pUser : CUserManager::Instance().GetAllUsers()) {
+        if (!pUser || pUser->GetMapId() != pM->GetMapId() || pUser->GetLife() == 0) continue;
+        int dx = (int)pUser->GetX() - (int)pM->GetX();
+        int dy = (int)pUser->GetY() - (int)pM->GetY();
+        if (dx * dx + dy * dy > 25) continue; // 5-cell aggro radius
+
+        uint32_t back = CBattleSystem::Instance().CalcPlayerDamage(pM.get(), pUser.get());
+        uint32_t life = pUser->GetLife() > back ? pUser->GetLife() - back : 0;
+        pUser->SetLife(life);
+        std::vector<AttribPair> attribs = { { CMsgUserAttrib::Attrib_Life, life } };
+        CMsgUserAttrib m;
+        if (m.Create(pUser->GetId(), attribs))
+            CMapManager::Instance().Broadcast(pM->GetMapId(), m.GetBuf(), m.GetSize());
+        if (life == 0) {
+            pUser->SetLife(pUser->GetMaxLife());
+            pUser->Teleport(1002, 315, 275);
+            pUser->SendSysMsg("You were slain by " + pM->GetName() +
+                              " and revived in Twin City.");
+            pM->SetLife(pM->GetMaxLife());
+            printf("[AI] %s slew %s\n", pM->GetName().c_str(), pUser->GetName().c_str());
+        }
+        return; // one target per tick
+    }
 }
