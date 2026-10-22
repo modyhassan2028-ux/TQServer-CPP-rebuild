@@ -43,7 +43,6 @@ bool CMsgTalk::Create(const std::string& sender, const std::string& recipient, c
 }
 
 void CMsgTalk::Process(uint32_t dwSender) {
-    CGuildManager::Instance().TickWars(); // settle expired wars (v1)
     auto user = CUserManager::Instance().GetUser(dwSender);
     if (!user) return;
 

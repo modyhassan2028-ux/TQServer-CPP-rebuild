@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <memory>
 #include <mutex>
+#include <vector>
 #include "User.h"
 
 class CUserManager {
@@ -14,6 +15,8 @@ public:
     std::shared_ptr<CUser> GetUserByName(const std::string& name);
 
     size_t GetUserCount();
+    // snapshot of all online users (for autosave/sweeps)
+    std::vector<std::shared_ptr<CUser>> GetAllUsers();
 
 private:
     CUserManager() = default;

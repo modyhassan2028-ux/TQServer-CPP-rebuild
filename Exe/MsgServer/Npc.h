@@ -72,6 +72,19 @@ private:
     uint16_t m_usY;
 };
 
+// data-driven hunt task definition, loaded from data/tasks.ini
+// (cq_task-style: once official task data is extracted it drops in here)
+struct TaskDef {
+    uint32_t dwId{0};
+    std::string strName;
+    uint32_t dwNpcId{0};      // task giver / turn-in NPC
+    uint32_t dwMonsterType{0};// 0 = any monster
+    uint32_t dwCount{0};
+    uint32_t dwMoney{0};
+    uint32_t dwCp{0};
+    uint32_t dwMinLevel{1};
+};
+
 class CNpcManager {
 public:
     static CNpcManager& Instance();
@@ -86,11 +99,16 @@ public:
     bool BankDeposit(std::shared_ptr<CUser> pUser, uint32_t dwAmount);
     bool BankWithdraw(std::shared_ptr<CUser> pUser, uint32_t dwAmount);
 
+    // loads data/tasks.ini into the task library; returns count
+    uint32_t LoadTasks(const std::string& path);
+    const std::vector<TaskDef>& GetTasks() const { return m_taskDefs; }
+
     static constexpr uint32_t NPC_ID_BASE = 4000000;
 
 private:
     CNpcManager() = default;
     std::map<uint32_t, std::shared_ptr<CNpc>> m_npcs;
+    std::vector<TaskDef> m_taskDefs;
     std::mutex m_mutex;
     bool m_bSpawned{false};
 };

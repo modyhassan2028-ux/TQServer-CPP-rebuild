@@ -120,6 +120,49 @@ bool CNpc::ChooseOption(std::shared_ptr<CUser> pUser, uint32_t dwIndex) {
     return true;
 }
 
+
+// data/tasks.ini - one task per line:
+// id | name | npc_id | monster_type | count | money | cp | min_level
+uint32_t CNpcManager::LoadTasks(const std::string& path) {
+    m_taskDefs.clear();
+    FILE* f = fopen(path.c_str(), "r");
+    if (!f) { printf("[TASK] %s not found - keeping the built-in defaults.\n", path.c_str()); return 0; }
+    char line[512];
+    while (fgets(line, sizeof(line), f)) {
+        std::string ln(line);
+        // strip comments and newlines
+        size_t hash = ln.find_first_of("#\r\n");
+        if (hash != std::string::npos) ln = ln.substr(0, hash);
+        if (ln.find_first_not_of(" \t") == std::string::npos) continue;
+        std::vector<std::string> parts;
+        size_t pos = 0;
+        while (pos < ln.size()) {
+            size_t bar = ln.find('|', pos);
+            if (bar == std::string::npos) bar = ln.size();
+            std::string part = ln.substr(pos, bar - pos);
+            // trim
+            size_t b = part.find_first_not_of(" \t");
+            size_t e = part.find_last_not_of(" \t");
+            parts.push_back(b == std::string::npos ? "" : part.substr(b, e - b + 1));
+            pos = bar + 1;
+        }
+        if (parts.size() < 7) continue;
+        TaskDef d;
+        d.dwId          = (uint32_t)strtoul(parts[0].c_str(), nullptr, 10);
+        d.strName       = parts[1];
+        d.dwNpcId       = (uint32_t)strtoul(parts[2].c_str(), nullptr, 10);
+        d.dwMonsterType = (uint32_t)strtoul(parts[3].c_str(), nullptr, 10);
+        d.dwCount       = (uint32_t)strtoul(parts[4].c_str(), nullptr, 10);
+        d.dwMoney       = (uint32_t)strtoul(parts[5].c_str(), nullptr, 10);
+        d.dwCp          = (uint32_t)strtoul(parts[6].c_str(), nullptr, 10);
+        d.dwMinLevel    = parts.size() > 7 ? (uint32_t)strtoul(parts[7].c_str(), nullptr, 10) : 1;
+        if (d.dwId && d.dwCount) m_taskDefs.push_back(d);
+    }
+    fclose(f);
+    printf("[TASK] Loaded %zu task definition(s) from %s.\n", m_taskDefs.size(), path.c_str());
+    return (uint32_t)m_taskDefs.size();
+}
+
 CNpcManager& CNpcManager::Instance() {
     static CNpcManager s_instance;
     return s_instance;
@@ -172,6 +215,8 @@ void CNpcManager::SpawnDefaults() {
     pDesertToTc->m_dwLookface = 8304;
     m_npcs[pDesertToTc->GetId()] = pDesertToTc;
 
+    LoadTasks("data/tasks.ini"); // data-driven task library (before TaskMaster menu)
+
     // Twin City hub: gates to every base map (coords land on walkable dmap cells
     // once real maps are indexed; synthetic maps fall back to these values)
     struct Gate { const char* name; uint32_t dest, x, y; };
@@ -218,22 +263,29 @@ void CNpcManager::SpawnDefaults() {
         m_npcs[pBack->GetId()] = pBack;
     }
 
-    // TaskMaster: v1 hunt-quest giver (the real 6159 task scripts attach here)
+    // TaskMaster: menu built from the data-driven task library
+    // (built-in defaults mirror the original starter hunts; data/tasks.ini wins)
+    if (m_taskDefs.empty()) {
+        m_taskDefs.push_back({1001, "RatRumble",  NPC_ID_BASE + 5, 0, 5, 500, 2, 1});
+        m_taskDefs.push_back({1002, "WolfWhisper", NPC_ID_BASE + 5, 0, 15, 2000, 10, 10});
+    }
     {
         auto pTm = std::make_shared<CNpc>(NPC_ID_BASE + 5, "TaskMaster",
             CNpc::Type::Healer, 1002, 315, 260); // type unused; menu-driven
         pTm->m_dwLookface = 8305;
         pTm->m_strDialog = "Adventurer! I have work for hunters of any skill.";
-        NpcOption t1;
-        t1.action = NpcOption::Action::AcceptTask;
-        t1.text = "Hunt: kill 5 monsters for 500 money + 2 CP";
-        t1.dwTaskMonsterType = 0; t1.dwTaskCount = 5; t1.dwTaskMoney = 500; t1.dwTaskCp = 2;
-        pTm->m_options.push_back(t1);
-        NpcOption t2;
-        t2.action = NpcOption::Action::AcceptTask;
-        t2.text = "Hunt: kill 15 monsters for 2000 money + 10 CP";
-        t2.dwTaskMonsterType = 0; t2.dwTaskCount = 15; t2.dwTaskMoney = 2000; t2.dwTaskCp = 10;
-        pTm->m_options.push_back(t2);
+        for (const auto& d : m_taskDefs) {
+            if (d.dwNpcId != pTm->GetId()) continue;
+            NpcOption t;
+            t.action = NpcOption::Action::AcceptTask;
+            t.text = d.strName + ": kill " + std::to_string(d.dwCount) + " monsters for " +
+                     std::to_string(d.dwMoney) + " money + " + std::to_string(d.dwCp) + " CP";
+            t.dwTaskMonsterType = d.dwMonsterType;
+            t.dwTaskCount = d.dwCount;
+            t.dwTaskMoney = d.dwMoney;
+            t.dwTaskCp = d.dwCp;
+            pTm->m_options.push_back(t);
+        }
         NpcOption ti;
         ti.action = NpcOption::Action::TurnInTask;
         ti.text = "I finished my task - pay me!";

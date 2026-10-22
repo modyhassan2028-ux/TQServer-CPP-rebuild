@@ -55,3 +55,10 @@ size_t CUserManager::GetUserCount() {
     std::lock_guard<std::mutex> lock(m_mutex);
     return m_users.size();
 }
+std::vector<std::shared_ptr<CUser>> CUserManager::GetAllUsers() {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    std::vector<std::shared_ptr<CUser>> out;
+    out.reserve(m_users.size());
+    for (auto& kv : m_users) out.push_back(kv.second);
+    return out;
+}

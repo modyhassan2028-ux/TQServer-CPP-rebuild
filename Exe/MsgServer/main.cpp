@@ -1,6 +1,8 @@
 ﻿#include "NetCore.h"
 #include "MapManager.h"
 #include "MonsterManager.h"
+#include "UserManager.h"
+#include "Guild.h"
 #include "Account.h"
 #include <cstdlib>
 #include <iostream>
@@ -38,6 +40,37 @@ int main(int argc, char* argv[]) {
         getenv("TQ_DB_USER") ? getenv("TQ_DB_USER") : "tqserver",
         getenv("TQ_DB_PASS") ? getenv("TQ_DB_PASS") : "tqpass123",
         getenv("TQ_DB_NAME") ? getenv("TQ_DB_NAME") : "tqserver");
+
+    // background service thread: war settlement every 30s, character autosave every 5 min
+    std::thread([] {
+        int nTicks = 0;
+        for (;;) {
+            std::this_thread::sleep_for(std::chrono::seconds(30));
+            try { CGuildManager::Instance().TickWars(); } catch (...) {}
+            if (++nTicks >= 10) { // 10 x 30s = 5 minutes
+                nTicks = 0;
+                try {
+                    auto users = CUserManager::Instance().GetAllUsers();
+                    uint32_t saved = 0;
+                    for (auto& pU : users) {
+                        if (!pU || !pU->GetAccountId()) continue;
+                        CAccountManager::CharacterRecord rec;
+                        rec.dwLevel = pU->GetLevel();
+                        rec.dwMoney = pU->GetMoney();
+                        rec.dwCp = pU->GetConquerPoints();
+                        rec.dwBank = pU->GetBank();
+                        rec.dwPkPoints = pU->GetPkPoints();
+                        rec.dwMapId = pU->GetMapId();
+                        rec.usX = pU->GetX();
+                        rec.usY = pU->GetY();
+                        CAccountManager::Instance().SaveCharacter(pU->GetAccountId(), rec);
+                        ++saved;
+                    }
+                    if (saved) printf("[AUTOSAVE] %u character(s) saved to cq_user.\n", saved);
+                } catch (...) {}
+            }
+        }
+    }).detach();
     CMonsterManager::Instance().Start();
     std::cout << "[STATUS] World initialized. Listening on port " << port << " - Ctrl+C to stop." << std::endl;
 
