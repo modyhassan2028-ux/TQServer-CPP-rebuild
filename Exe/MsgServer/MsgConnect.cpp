@@ -109,9 +109,12 @@ void CMsgConnect::Process(uint32_t dwSender, void* pContext) {
         pUser->SetBank(rec.dwBank);
         pUser->SetPkPoints(rec.dwPkPoints);
         pUser->SetExperience(rec.dwExperience);
+        pUser->SetStatPoints(rec.dwStatPoints);
+        pUser->SetStrength(rec.dwStrength);
+        pUser->SetVitality(rec.dwVitality);
         pUser->SetLife(1000);
-        // base max life scales with restored level (20 per level above 1)
-        pUser->SetMaxLife(1000 + (rec.dwLevel > 1 ? (rec.dwLevel - 1) * 20 : 0));
+        // base max life scales with restored level (+20/level) and vitality (+5/point)
+        pUser->SetMaxLife(1000 + (rec.dwLevel > 1 ? (rec.dwLevel - 1) * 20 : 0) + rec.dwVitality * 5);
         pUser->SetPos(rec.usX, rec.usY);
         dwSpawnMap = rec.dwMapId;
         printf("[LOGIN] Account %u: character restored (level %u, money %llu, map %u)\n",

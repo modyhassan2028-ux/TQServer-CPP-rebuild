@@ -188,6 +188,22 @@ if (m_message.rfind("/npc", 0) == 0) {
         }
         return;
     }
+    // ---- attributes: /stats, /stat <str|vit> <n> ----
+    if (m_message == "/stats" || m_message == "/stat") {
+        user->SendSysMsg("Str " + std::to_string(user->GetStrength()) +
+                         ", Vit " + std::to_string(user->GetVitality()) +
+                         ", unspent points: " + std::to_string(user->GetStatPoints()) +
+                         " (/stat str|vit <n>)");
+        return;
+    }
+    if (m_message.rfind("/stat ", 0) == 0) {
+        std::istringstream iss(m_message.substr(6));
+        std::string st; uint32_t n = 1;
+        iss >> st >> n;
+        std::string err = user->AllocStat(st, n);
+        if (!err.empty()) user->SendSysMsg(err);
+        return;
+    }
     // ---- ground drops: /pick, /drops ----
     if (m_message == "/pick" || m_message == "/pick up") {
         std::string err = CGroundItemManager::Instance().Pick(user);

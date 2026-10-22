@@ -76,6 +76,17 @@ public:
     uint8_t GetLevel() const { return m_ucLevel; }
     void SetLevel(uint8_t level) { m_ucLevel = level; }
 
+    // attribute points: +3 per level, /stat str|vit allocates
+    // (agi/spi come with the port of the original dodge/mana systems)
+    uint32_t GetStatPoints() const { return m_dwStatPoints; }
+    void SetStatPoints(uint32_t v) { m_dwStatPoints = v; }
+    uint32_t GetStrength() const { return m_dwStrength; }
+    uint32_t GetVitality() const { return m_dwVitality; }
+    void SetStrength(uint32_t v) { m_dwStrength = v; }
+    void SetVitality(uint32_t v) { m_dwVitality = v; }
+    // returns an error message, or "" on success
+    std::string AllocStat(const std::string& stat, uint32_t count);
+
     // experience + level-ups (original v6159 curve, v1 approximation:
     // exp needed for next level = 30 * level^2 + 40 * level)
     uint64_t GetExperience() const { return m_dwExperience; }
@@ -126,6 +137,9 @@ private:
     uint32_t m_dwMaxLife{1000};
     uint32_t m_dwBaseMaxLife{1000};
     uint64_t m_dwExperience{0};
+    uint32_t m_dwStatPoints{0};
+    uint32_t m_dwStrength{0};
+    uint32_t m_dwVitality{0};
     uint32_t m_dwBaseBP{100};
     uint32_t m_dwBattlePower{100};
 

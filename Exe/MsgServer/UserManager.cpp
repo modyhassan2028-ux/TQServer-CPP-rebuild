@@ -24,6 +24,9 @@ bool CUserManager::RemoveUser(uint32_t dwId) {
             CAccountManager::CharacterRecord rec;
             rec.dwLevel = pUser->GetLevel();
             rec.dwExperience = pUser->GetExperience();
+            rec.dwStatPoints = pUser->GetStatPoints();
+            rec.dwStrength = pUser->GetStrength();
+            rec.dwVitality = pUser->GetVitality();
             rec.dwMoney = pUser->GetMoney();
             rec.dwCp = pUser->GetConquerPoints();
             rec.dwBank = pUser->GetBank();

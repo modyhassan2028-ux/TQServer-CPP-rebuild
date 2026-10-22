@@ -62,6 +62,7 @@ uint32_t CUser::AddExperience(uint64_t dwXp) {
     }
     if (ups > 0) {
         m_dwBaseMaxLife += 20 * ups;   // permanent base growth
+        m_dwStatPoints += 3 * ups;     // attribute points to spend
         RecalcEquipmentBonuses();      // re-apply gear on the new base
         m_dwLife = m_dwMaxLife;        // level-up fully heals
         SendSysMsg("LEVEL UP! You are now level " + std::to_string(m_ucLevel) +
@@ -69,4 +70,24 @@ uint32_t CUser::AddExperience(uint64_t dwXp) {
         printf("[LEVEL] %s reached level %u\n", m_name.c_str(), m_ucLevel);
     }
     return ups;
+}
+
+// /stat str N  -> +N attack per point; /stat vit N -> +5 base max life per point
+std::string CUser::AllocStat(const std::string& stat, uint32_t count) {
+    if (count == 0) return "Amount must be positive.";
+    if (m_dwStatPoints < count)
+        return "Only " + std::to_string(m_dwStatPoints) + " stat points left.";
+    if (stat == "str" || stat == "strength") {
+        m_dwStrength += count;
+    } else if (stat == "vit" || stat == "vitality") {
+        m_dwVitality += count;
+        m_dwBaseMaxLife += 5 * count;   // permanent base growth
+        RecalcEquipmentBonuses();
+    } else {
+        return "Unknown stat '" + stat + "'. Use str or vit.";
+    }
+    m_dwStatPoints -= count;
+    SendSysMsg("Allocated " + std::to_string(count) + " point(s) to " + stat +
+               " (" + std::to_string(m_dwStatPoints) + " left).");
+    return "";
 }
