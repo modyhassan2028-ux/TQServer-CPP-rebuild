@@ -73,3 +73,11 @@ CREATE TABLE IF NOT EXISTS cq_generator (
   x1 INT NOT NULL DEFAULT 0,
   y1 INT NOT NULL DEFAULT 0
 );
+
+-- item type library (as loaded by NpcServer: "SELECT * FROM cq_itemtype")
+CREATE TABLE IF NOT EXISTS cq_itemtype (
+  id INT PRIMARY KEY,
+  name VARCHAR(64) NOT NULL,
+  sort INT NOT NULL DEFAULT 0,   -- 0=consumable, 1=weapon, 2=armor
+  price INT NOT NULL DEFAULT 0
+);

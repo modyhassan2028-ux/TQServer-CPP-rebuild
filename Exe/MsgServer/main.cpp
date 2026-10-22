@@ -3,6 +3,7 @@
 #include "MonsterManager.h"
 #include "UserManager.h"
 #include "Guild.h"
+#include "Item.h"
 #include "Account.h"
 #include <cstdlib>
 #include <iostream>
@@ -42,6 +43,10 @@ int main(int argc, char* argv[]) {
         getenv("TQ_DB_NAME") ? getenv("TQ_DB_NAME") : "tqserver");
 
     // background service thread: war settlement every 30s, character autosave every 5 min
+    // cq_itemtype first (DB), data/items.ini as fallback
+    if (!CItemLibrary::Instance().LoadFromDB(CAccountManager::Instance().GetDB()))
+        CItemLibrary::Instance().LoadFromFile("data/items.ini");
+
     std::thread([] {
         int nTicks = 0;
         for (;;) {

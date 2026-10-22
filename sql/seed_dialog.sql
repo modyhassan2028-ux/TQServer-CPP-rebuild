@@ -56,3 +56,8 @@ INSERT INTO cq_generator VALUES (1, 1, 1002, 2, 650, 320, 700, 380),
                                 (2, 2, 1002, 2, 560, 400, 620, 450),
                                 (3, 10, 1000, 1, 500, 300, 500, 300),
                                 (4, 20, 1001, 1, 400, 400, 400, 400);
+
+-- starter-kit item types
+DELETE FROM cq_itemtype;
+INSERT INTO cq_itemtype VALUES (410011, 'Sword', 1, 1000), (900020, 'Armor', 2, 800),
+                                (100020, 'HealingPotion', 0, 50);

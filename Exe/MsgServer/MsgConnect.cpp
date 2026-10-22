@@ -4,6 +4,7 @@
 #include "MsgItem.h"
 #include "User.h"
 #include "UserManager.h"
+#include "Item.h"
 #include "MapManager.h"
 #include "MonsterManager.h"
 #include "MsgMonster.h"
@@ -144,6 +145,7 @@ void CMsgConnect::Process(uint32_t dwSender, void* pContext) {
         item.dwAmount = k.amount;
         item.dwPosition = 255;
         item.strName = k.name;
+        CItemLibrary::Instance().Apply(item); // cq_itemtype drives name/sort
         pUser->AddItem(item);
         CMsgItem msgItem;
         if (msgItem.Create(item, CMsgItem::Action_Buy))
