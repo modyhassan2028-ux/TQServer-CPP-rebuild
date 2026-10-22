@@ -188,6 +188,12 @@ if (m_message.rfind("/npc", 0) == 0) {
         }
         return;
     }
+    // ---- rebirth at the level cap ----
+    if (m_message == "/reborn") {
+        std::string err = user->Reborn();
+        if (!err.empty()) user->SendSysMsg(err);
+        return;
+    }
     // ---- consumables: /eat ----
     if (m_message == "/eat" || m_message == "/eat pill" || m_message == "/use pill") {
         if (!user->ConsumeByType(725013))

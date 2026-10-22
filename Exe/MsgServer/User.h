@@ -76,6 +76,12 @@ public:
     uint8_t GetLevel() const { return m_ucLevel; }
     void SetLevel(uint8_t level) { m_ucLevel = level; }
 
+    // rebirth: at level 130 /reborn restarts at 15 with permanent growth
+    uint32_t GetRebornCount() const { return m_dwRebornCount; }
+    void SetRebornCount(uint32_t v) { m_dwRebornCount = v; }
+    // returns an error message, or "" on success
+    std::string Reborn();
+
     // attribute points: +3 per level, /stat str|vit allocates
     // (agi/spi come with the port of the original dodge/mana systems)
     uint32_t GetStatPoints() const { return m_dwStatPoints; }
@@ -142,6 +148,7 @@ private:
     uint32_t m_dwStatPoints{0};
     uint32_t m_dwStrength{0};
     uint32_t m_dwVitality{0};
+    uint32_t m_dwRebornCount{0};
     uint32_t m_dwBaseBP{100};
     uint32_t m_dwBattlePower{100};
 

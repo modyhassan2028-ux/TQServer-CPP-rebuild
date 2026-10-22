@@ -109,3 +109,21 @@ bool CUser::ConsumeByType(uint32_t dwType) {
     }
     return false;
 }
+
+// rebirth at the level cap: restart at 15, keep allocated str/vit, gain
+// +1000 permanent base life and +45 bonus points per rebirth (v6159 model:
+// reborn characters grow stronger through retained stats + bonus points)
+std::string CUser::Reborn() {
+    if (m_ucLevel < 130) return "Rebirth requires level 130.";
+    ++m_dwRebornCount;
+    m_ucLevel = 15;
+    m_dwExperience = 0;
+    m_dwBaseMaxLife += 1000;              // permanent rebirth growth
+    m_dwStatPoints += 45;                 // reborn bonus points
+    RecalcEquipmentBonuses();
+    m_dwLife = m_dwMaxLife;
+    SendSysMsg("REBORN! You are level 15 again, +1000 max life and +45 stat points (rebirth " +
+               std::to_string(m_dwRebornCount) + ").");
+    printf("[REBORN] %s reborn (count %u)\n", m_name.c_str(), m_dwRebornCount);
+    return "";
+}

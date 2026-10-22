@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS cq_user (       -- character sync lands in the next s
   stat_points INT DEFAULT 0,
   strength INT DEFAULT 0,
   vitality INT DEFAULT 0,
+  reborn_count INT DEFAULT 0,
   recordmap_id INT DEFAULT 1002,
   recordx INT DEFAULT 315,
   recordy INT DEFAULT 275,

@@ -27,6 +27,7 @@ bool CUserManager::RemoveUser(uint32_t dwId) {
             rec.dwStatPoints = pUser->GetStatPoints();
             rec.dwStrength = pUser->GetStrength();
             rec.dwVitality = pUser->GetVitality();
+            rec.dwRebornCount = pUser->GetRebornCount();
             rec.dwMoney = pUser->GetMoney();
             rec.dwCp = pUser->GetConquerPoints();
             rec.dwBank = pUser->GetBank();
