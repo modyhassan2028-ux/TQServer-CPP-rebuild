@@ -820,6 +820,40 @@ bool bAll = (llAll == 1);
                pUser->GetId(), f3, f1, f4);
         return true;
     }
+    case 517: { // ORIGINAL case 0x205: item attr set/compare (with %iter_var_data)
+        std::string strP = pNode->strParam;
+        pUser->ResolveIterVars(strP); // ORIGINAL: vars resolved before the case runs
+        int32_t aPos = 0, aAttr = 0, aVal = 0, aSync = 0;
+        char szOp[64] = {0};
+        int nGot = sscanf(strP.c_str(), "%d %d %63s %d %d", &aPos, &aAttr, szOp, &aVal, &aSync);
+        if (nGot < 4) {
+            // ORIGINAL: LOGERR + DBERR, break -> false
+            printf("[DBERR] cq_action %u type 517 param error\n", pNode->dwId);
+            return false;
+        }
+        ItemInfo* pItem = pUser->FindItemByPosition(aPos); // ORIGINAL FUN_14032b4b0
+        if (!pItem) return false; // ORIGINAL: mgr lookup 0 -> out
+        if (!stricmp(szOp, "set")) {
+            if (aAttr == 19) { // ORIGINAL 0x13: equipment lock status
+                // ORIGINAL: MyLogSave("gmlog/EquipmentLockStatus", ...Change Flag From:%d)
+                printf("[GMLOG] gmlog/EquipmentLockStatus item id:%u owner id:%u lock status:%d org lock status:%d item type:%d action id:%u Change Flag From:%d\n",
+                       pItem->dwId, pUser->GetId(), aVal,
+                       (int)pItem->GetActionAttr(19), pItem->dwType, pNode->dwId,
+                       (int)pItem->GetActionAttr(19));
+            }
+            pItem->SetActionAttr((uint32_t)aAttr, aVal); // ORIGINAL FUN_140104140(item, attr, val, 1)
+            if (aSync != 0) {
+                printf("[USER] %u item attr %d -> %d (client sync, pos %d)\n",
+                       pUser->GetId(), aAttr, aVal, aPos); // ORIGINAL: vtable+0x130 sync
+            }
+            return true;
+        } else if (!stricmp(szOp, "==")) {
+            bool b = pItem->GetActionAttr((uint32_t)aAttr) == aVal;
+            return b;
+        }
+        printf("[DBERR] cq_action %u type 517 unknown op %s\n", pNode->dwId, szOp);
+        return false;
+    }
     case 518: { // ORIGINAL case 0x206: award item copies (FUN_14011cf20)
         // data = item type; param = the same 19-field spec as 501 (all 0 when
         // empty). sscanf field2 (n[1]) = copy count: >0 -> award that many

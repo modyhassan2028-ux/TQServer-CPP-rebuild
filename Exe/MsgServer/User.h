@@ -3,6 +3,8 @@
 #include "PlayerMagic.h"
 #include <cstdio>
 #include <string>
+#include <cstring>
+#include <cctype>
 #include <cstdint>
 #include <utility>
 #include <functional>
@@ -505,6 +507,23 @@ public:
     uint32_t m_dwTransformLookface{0}; // ORIGINAL: transform display look
     uint32_t m_dwTransformMonsterType{0}; // ORIGINAL: cq_monstertype id of the transform
     uint32_t m_dwTransformSecs{0}; // ORIGINAL: transform duration (timer system pending)
+    // ORIGINAL action iteration vars: %iter_var_dataN tokens resolve to these
+    // (populated by the iteration actions - var engine family C)
+    int64_t m_arIterVarData[65]{};
+    void SetIterVarData(uint32_t n, int64_t v) { if (n && n < 65) m_arIterVarData[n] = v; }
+    int64_t GetIterVarData(uint32_t n) const { return (n && n < 65) ? m_arIterVarData[n] : 0; }
+    void ResolveIterVars(std::string& s) const {
+        const char* szTok = "%iter_var_data";
+        size_t p = 0;
+        while ((p = s.find(szTok, p)) != std::string::npos) {
+            size_t q = p + strlen(szTok);
+            uint32_t idx = 0; size_t r = q;
+            while (r < s.size() && isdigit((unsigned char)s[r])) r++;
+            idx = (uint32_t)strtoul(s.substr(q, r - q).c_str(), nullptr, 10);
+            s.replace(p, r - p, std::to_string(GetIterVarData(idx)));
+            p = q;
+        }
+    }
     void SetTransform(int32_t v) { m_nTransform = v; printf("[USER] %u transform -> %d\n", m_dwId, v); }
     uint32_t GetIteratorVar() const { return m_dwIterator; }
     void SetIteratorVar(uint32_t v) { m_dwIterator = v; }

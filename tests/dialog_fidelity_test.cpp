@@ -800,6 +800,28 @@ int main() {
         g_bActionTestMode = false;
         printf("[ok] 513 transform matches case 0x201 (Transform2)\n");
     }
+    // ---- 517: item attr set/compare (case 0x205) ----
+    {
+        auto upR = std::make_shared<CUser>(999020); upR->SetName("Attr517");
+        CUser& r = *upR;
+        ItemInfo it; it.dwType = 421338; it.dwPosition = 3; r.AddItem(it);
+        { auto n = mkMgc(0, 517, "3 14 set 5 1"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 517, "3 14 == 5 1"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 517, "3 14 == 4 1"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        // attr 1 = type binding (proven in the original class-digit checks)
+        { auto n = mkMgc(0, 517, "3 1 == 421338 1"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        // lock status (attr 0x13) special case with gmlog
+        { auto n = mkMgc(0, 517, "3 19 set 1 1"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 517, "3 19 == 1 1"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        // %iter_var_data7 substitution
+        r.SetIterVarData(7, 3); // iter var 7 = position 3
+        { auto n = mkMgc(0, 517, "%iter_var_data7 14 set 2 1"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 517, "%iter_var_data7 14 == 2 1"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        // item not at position -> false; bad param -> false
+        { auto n = mkMgc(0, 517, "9 14 set 1 1"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        { auto n = mkMgc(0, 517, "3"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        printf("[ok] 517 item attr set/compare matches case 0x205\n");
+    }
     // ---- 518: award item copies (case 0x206 -> FUN_14011cf20) ----
     {
         auto upR = std::make_shared<CUser>(999019); upR->SetName("Item518");

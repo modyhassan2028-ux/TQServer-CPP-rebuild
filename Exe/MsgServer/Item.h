@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include <cstdint>
 #include <string>
+#include <map>
+#include <cstdint>
 #include <vector>
 #include <map>
 
@@ -17,6 +19,30 @@ struct ItemInfo {
     uint16_t    usEnchant{0};    // enchant: bonus life added by gems (0..2048)
     uint16_t    usDurability{1000}; // wear: 1000 = pristine, damage halves below 200
     std::string strName;
+    // ORIGINAL action attr engine (FUN_1400fda10 get / FUN_140104140 set):
+    // attr 1 = type (proven: class digit checks read GetAttr(1)), attr 2 = id,
+    // attr 0x13 = equipment lock status (gmlog special case). The full
+    // cq_item column binding ports with the item-attr subsystem; ids without a
+    // typed field keep exact per-id fidelity through this map.
+    std::map<uint32_t, int64_t> mapActionAttr;
+
+    int64_t GetActionAttr(uint32_t dwAttr) const {
+        switch (dwAttr) {
+            case 1: return (int64_t)dwType;   // ORIGINAL attr(1,1) = type
+            case 2: return (int64_t)dwId;     // ORIGINAL attr(2,1) = id
+            default: {
+                auto it = mapActionAttr.find(dwAttr);
+                return it == mapActionAttr.end() ? 0 : it->second;
+            }
+        }
+    }
+    void SetActionAttr(uint32_t dwAttr, int64_t v) {
+        switch (dwAttr) {
+            case 1: dwType = (uint32_t)v; break;
+            case 2: dwId = (uint32_t)v; break;
+            default: mapActionAttr[dwAttr] = v; break;
+        }
+    }
 };
 
 inline uint32_t MakeItemId(uint32_t dwSeq) { return 700000000 + dwSeq; }
