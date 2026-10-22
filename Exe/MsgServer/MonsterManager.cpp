@@ -183,8 +183,9 @@ void CMonsterManager::AILoop() {
             }
             // aggro first: a player within 5 cells gets attacked (2s tick = cooldown)
             Aggro(pM);
-            // 1-in-4 chance per tick to take a roam step (original AI ticks per state machine)
-            if (std::rand() % 4 == 0) Roam(pM);
+            // chase: a player within 7 cells but out of melee range pulls the
+            // monster one step closer every tick (visible via the jump packet)
+            if (!Chase(pM) && std::rand() % 4 == 0) Roam(pM);
         }
     }
 }
@@ -246,4 +247,60 @@ void CMonsterManager::Aggro(std::shared_ptr<CMonster> pM) {
         }
         return; // one target per tick
     }
+}
+
+// visual chase: the nearest player within 7 sight cells (but beyond the
+// 5-cell melee range) pulls the monster one step closer per tick. Returns
+// false when nobody is in sight so roaming can take over. Leash is 15 cells
+// from the spawn point; beyond that the monster gives up and holds ground.
+bool CMonsterManager::Chase(std::shared_ptr<CMonster> pM) {
+    if (!pM || !pM->IsAlive()) return false;
+    auto pMap = CMapManager::Instance().GetMap(pM->GetMapId());
+    if (!pMap) return false;
+    std::shared_ptr<CUser> pTarget;
+    long best = 0;
+    for (auto pUser : CUserManager::Instance().GetAllUsers()) {
+        if (!pUser || pUser->GetMapId() != pM->GetMapId() || pUser->GetLife() == 0) continue;
+        long dx = (long)pUser->GetX() - (long)pM->GetX();
+        long dy = (long)pUser->GetY() - (long)pM->GetY();
+        long d2 = dx * dx + dy * dy;
+        if (d2 > 49) continue;              // sight radius: 7 cells
+        if (d2 <= 25) continue;              // already in melee range: aggro handles it
+        if (!pTarget || d2 < best) { pTarget = pUser; best = d2; }
+    }
+    if (!pTarget) return false;
+    int stepX = pM->GetX(), stepY = pM->GetY();
+    int tx = pTarget->GetX(), ty = pTarget->GetY();
+    if (tx != stepX) stepX += (tx > stepX) ? 1 : -1;
+    if (ty != stepY) stepY += (ty > stepY) ? 1 : -1;
+    if (stepX < 0 || stepY < 0) return false;
+    // leash: never stray more than 15 cells from the spawn point
+    if (stepX < (int)pM->GetSpawnX() - 15 || stepX > (int)pM->GetSpawnX() + 15 ||
+        stepY < (int)pM->GetSpawnY() - 15 || stepY > (int)pM->GetSpawnY() + 15)
+        return true;                        // holding ground is still "in chase"
+    if (!pMap->IsPassable(static_cast<uint16_t>(stepX), static_cast<uint16_t>(stepY))) {
+        // blocked straight ahead: try the two axis-only alternatives
+        if (pMap->IsPassable(static_cast<uint16_t>(pM->GetX() + (tx > (int)pM->GetX() ? 1 : -1)),
+                             pM->GetY()) &&
+            tx != pM->GetX())
+            stepY = pM->GetY();
+        else if (ty != pM->GetY() &&
+                 pMap->IsPassable(pM->GetX(),
+                                 static_cast<uint16_t>(pM->GetY() + (ty > (int)pM->GetY() ? 1 : -1))))
+            stepX = pM->GetX();
+        else return true;                    // wedged: wait for the player to move
+    }
+    pM->SetPos(static_cast<uint16_t>(stepX), static_cast<uint16_t>(stepY));
+    uint8_t dir = 0;
+    int dx = tx - stepX, dy = ty - stepY;
+    if (dx > 0 && dy == 0) dir = 2; else if (dx < 0 && dy == 0) dir = 6;
+    else if (dx == 0 && dy > 0) dir = 4; else if (dx == 0 && dy < 0) dir = 0;
+    else if (dx > 0 && dy > 0) dir = 3; else if (dx < 0 && dy > 0) dir = 5;
+    else if (dx > 0 && dy < 0) dir = 1; else dir = 7;
+    pM->SetDir(dir);
+
+    CMsgMonsterJump jump;
+    if (jump.Create(pM->GetId(), pM->GetX(), pM->GetY(), pM->GetDir()))
+        CMapManager::Instance().Broadcast(pM->GetMapId(), jump.GetBuf(), jump.GetSize());
+    return true;
 }
