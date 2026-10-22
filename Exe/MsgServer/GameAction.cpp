@@ -1104,6 +1104,40 @@ bool bAll = (llAll == 1);
         if (!_stricmp(szKind, "type")) { pNpc->SetTypeByRaw(strtoul(szValue, nullptr, 10)); return true; }
         return false; // ORIGINAL: unmatched kind falls out (break -> false)
     }
+    case 2101: { // ORIGINAL case 0x835: ACTION_TRAP_CREATE
+        // sscanf "%hu %hu %u %u %hu %hu %d %hu %hu" must return 7 or 9
+        // (else DBERR "GameAction::ACTION_TRAP_CREATE, idAction:%u, param:%s."
+        // -> false). The 0x48 spawn struct goes to FUN_1403ab040(mgr,
+        // struct, 0); on success the trap (ptr+0x10) is inserted into the
+        // map-object tree (FUN_1400875f0+0x30 tree vcall+0x28) -> return 1.
+        std::string strP = pNode->strParam; pUser->ResolveActionVars(strP);
+        uint16_t wF1 = 0, wF2 = 0, wX = 0, wY = 0, wF8 = 0, wF9 = 0;
+        uint32_t dwF3 = 0, dwMap = 0; int32_t nF7 = 0;
+        int iN = sscanf(strP.c_str(), "%hu %hu %u %u %hu %hu %d %hu %hu",
+                        &wF1, &wF2, &dwF3, &dwMap, &wX, &wY, &nF7, &wF8, &wF9);
+        if (iN != 7 && iN != 9) {
+            printf("[DBERR] GameAction::ACTION_TRAP_CREATE, idAction:%u, param:%s.\n",
+                   pNode->dwId, strP.c_str());
+            return false;
+        }
+        auto pMap = CMapManager::Instance().GetMap(dwMap);
+        if (!pMap) return false; // ORIGINAL: create fails (no map-object tree)
+        pMap->AddTrap(wF1, wF2, dwF3, dwMap, wX, wY, nF7, wF8, wF9, pUser->GetId());
+        return true;
+    }
+    case 2102: { // ORIGINAL case 0x836: trap removal by the acting user
+        // param_5 = the acting user; null -> LOGERR 0x3304 -> false. Else
+        // vcall+0x298(user, 0x1400, blob) fetches the user's trap list and
+        // FUN_1403a7180(blob) removes them -> return 1. (Blob fetch failing
+        // also falls out -> false.)
+        if (!pUser) {
+            printf("[LOGERR] 0x3304\n"); // ORIGINAL MYASSERT path
+            return false;
+        }
+        auto pMap = CMapManager::Instance().GetMap(pUser->GetMapId());
+        if (pMap) pMap->RemoveTrapsOwnedBy(pUser->GetId());
+        return true;
+    }
     case 2012: { // ORIGINAL case 0x7dc: mass teleport "src_map dst_map x y"
         // sscanf "%u %u %d %d" = (srcMap, dstMap, x, y). Iterates the global map
         // object list (cap 1M); every object whose map (vcall+0x168) == srcMap

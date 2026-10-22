@@ -905,6 +905,31 @@ int main() {
         { auto n = mkMgc(0, 2011, "5002 bogus 1"); assert(!CGameAction::ProcessActionUser(upN, &n)); }
         printf("[ok] 2011 npc property setter matches case 0x7db\n");
     }
+    // ---- 2101/2102: trap create/remove (cases 0x835/0x836) ----
+    {
+        auto upT = std::make_shared<CUser>(999041); upT->SetName("Trapper");
+        CUser& r = *upT;
+        r.SetMapId(1000); r.SetPos(760, 745);
+        // real row: "51 11 0 1000 762 747 0 0 0"
+        { auto n = mkMgc(0, 2101, "51 11 0 1000 762 747 0 0 0");
+          assert(CGameAction::ProcessActionUser(upT, &n));
+          assert(CMapManager::Instance().GetMap(1000)->GetTraps().size() == 1); }
+        // real row pattern: "591 5 0 %user_map_id %user_map_x %user_map_y 0 0 0"
+        { auto n = mkMgc(0, 2101, "591 5 0 1000 760 745 0 0 0");
+          assert(CGameAction::ProcessActionUser(upT, &n));
+          assert(CMapManager::Instance().GetMap(1000)->GetTraps().size() == 2); }
+        // 7-field form
+        { auto n = mkMgc(0, 2101, "51 11 0 1000 100 100 0");
+          assert(CGameAction::ProcessActionUser(upT, &n)); }
+        // bad parse (neither 7 nor 9)
+        { auto n = mkMgc(0, 2101, "51 11 0");
+          assert(!CGameAction::ProcessActionUser(upT, &n)); }
+        // 2102 removes the acting user's traps
+        { auto n = mkMgc(0, 2102, "");
+          assert(CGameAction::ProcessActionUser(upT, &n));
+          assert(CMapManager::Instance().GetMap(1000)->GetTraps().empty()); }
+        printf("[ok] 2101/2102 trap create/remove match cases 0x835/0x836\n");
+    }
     // ---- 2008: count map monsters by name/type (case 0x7d8, pairs with 2006) ----
     {
         auto upA = std::make_shared<CUser>(999028); upA->SetName("Cmp2008");

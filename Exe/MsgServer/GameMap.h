@@ -56,6 +56,44 @@ private:
     // (case 0x7dd) removes ground objects of a type from the map.
     struct GroundItem { uint32_t dwType; uint32_t dwItemId; };
     std::vector<GroundItem> m_groundItems;
+    // cq_action 2101 (case 0x835, ACTION_TRAP_CREATE): trap record built
+    // from the sscanf fields and passed to FUN_1403ab040 (create) and the
+    // map-object tree insert (vcall+0x28). Field order per the original
+    // struct layout: f1/f2 are the leading ushorts, f3/f4 dwords, f5/f6 the
+    // x/y ushorts, f7 int, f8/f9 trailing ushorts.
+    struct CTrap {
+        uint16_t wField1;   // 591/51 in rows (effect kind)
+        uint16_t wField2;   // 5/11 in rows
+        uint32_t dwField3;  // 0 in rows
+        uint32_t dwMapId;   // %user_map_id in rows
+        uint16_t usX, usY;
+        int32_t  nField7;
+        uint16_t wField8, wField9;
+        uint32_t dwOwnerId; // removal path: user 0x1400 blob (FUN_1403a7180)
+        uint32_t dwTrapId;
+        bool bActive;
+    };
+    std::vector<CTrap> m_traps;
+    uint32_t m_dwNextTrapId{1};
+  public:
+    uint32_t AddTrap(uint16_t wF1, uint16_t wF2, uint32_t dwF3, uint32_t dwMapId,
+                     uint16_t usX, uint16_t usY, int32_t nF7, uint16_t wF8, uint16_t wF9,
+                     uint32_t dwOwnerId) {
+        m_traps.push_back({wF1, wF2, dwF3, dwMapId, usX, usY, nF7, wF8, wF9, dwOwnerId,
+                           m_dwNextTrapId++, true});
+        return m_traps.back().dwTrapId;
+    }
+    // cq_action 2102 (case 0x836): remove traps owned by the acting user
+    // via the 0x1400 blob (FUN_1403a7180). Returns traps removed.
+    uint32_t RemoveTrapsOwnedBy(uint32_t dwOwnerId) {
+        uint32_t n = 0;
+        for (auto it = m_traps.begin(); it != m_traps.end(); ) {
+            if (it->dwOwnerId == dwOwnerId) { it = m_traps.erase(it); n++; }
+            else ++it;
+        }
+        return n;
+    }
+    const std::vector<CTrap>& GetTraps() const { return m_traps; }
   public:
     void AddGroundItem(uint32_t dwType, uint32_t dwItemId) { m_groundItems.push_back({dwType, dwItemId}); }
     // returns number removed (ORIGINAL FUN_140145f60 path; its client packet
