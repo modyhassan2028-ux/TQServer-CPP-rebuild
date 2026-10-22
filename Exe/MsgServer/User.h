@@ -83,8 +83,16 @@ public:
     // (102/103) shown to the player with the action id it jumps to
     // (FUN_14039d300, list capped at 20), so the client's MsgTalk answer
     // text maps back to the next action node.
-    void PushDialogOption(const std::string& text, uint32_t dwActionId) {
-        if (m_dialogOptions.size() < 20) m_dialogOptions.push_back({text, dwActionId});
+    // ORIGINAL FUN_14039d300: register the option (list capped at 20,
+    // 0x30-byte slots) and return its 0-based INDEX, or -1 (0xFFFFFFFF)
+    // when the action id is 0 (dead-end option, client shows plain text)
+    // or the list is full ("menu task size overflow" DBERROR log).
+    // The index goes into the MsgDialog header byte at offset 10.
+    uint32_t PushDialogOption(const std::string& text, uint32_t dwActionId) {
+        if (dwActionId == 0) return 0xFFFFFFFF;
+        if (m_dialogOptions.size() >= 20) return 0xFFFFFFFF;
+        m_dialogOptions.push_back({text, dwActionId});
+        return (uint32_t)(m_dialogOptions.size() - 1);
     }
     void ClearDialogOptions() { m_dialogOptions.clear(); }
     const std::vector<std::pair<std::string, uint32_t>>& GetDialogOptions() const { return m_dialogOptions; }

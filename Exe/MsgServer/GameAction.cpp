@@ -71,10 +71,13 @@ bool CGameAction::ProcessActionOS(std::shared_ptr<CUser> pUser, const CDialogEng
         unsigned uAction = 0; int nSize = 0;
         if (sscanf(param.c_str(), "%255s %u %d", szText, &uAction, &nSize) < 2) return false;
         // ORIGINAL FUN_14039d300: register the option id with the user
-        // (list capped at 20 entries, param_1[0x13d]/0x30)
-        pUser->PushDialogOption(szText, uAction);
+        // (list capped at 20 entries, param_1[0x13d]/0x30) and send its
+        // INDEX in the dialog header byte (FUN_1403a6400 param_4 ->
+        // offset 10); -1 -> 0xff = non-clickable line
+        uint32_t uIdx = pUser->PushDialogOption(szText, uAction);
         CMsgDialog dlg;
-        if (!dlg.Create(CMsgDialog::Mode_Option, szText, 0, static_cast<uint16_t>(nSize))) return false;
+        if (!dlg.Create(CMsgDialog::Mode_Option, szText, (uint8_t)uIdx,
+                        static_cast<uint16_t>(nSize))) return false;
         pUser->SendMsg(dlg.GetBuf(), dlg.GetSize());
         return true;
     }
@@ -83,9 +86,10 @@ bool CGameAction::ProcessActionOS(std::shared_ptr<CUser> pUser, const CDialogEng
         char szText[256] = {0};
         if (sscanf(param.c_str(), "%d %u %255s %d", &nLen, &uAction, szText, &nFlag) < 3) return false;
         if (nFlag != 0) nLen += 0x100; // ORIGINAL: if (d) size += 0x100
-        pUser->PushDialogOption(szText, uAction);
+        uint32_t uIdx = pUser->PushDialogOption(szText, uAction); // index -> header byte
         CMsgDialog dlg;
-        if (!dlg.Create(CMsgDialog::Mode_Input, szText, 0, static_cast<uint16_t>(nLen))) return false;
+        if (!dlg.Create(CMsgDialog::Mode_Input, szText, (uint8_t)uIdx,
+                        static_cast<uint16_t>(nLen))) return false;
         pUser->SendMsg(dlg.GetBuf(), dlg.GetSize());
         return true;
     }

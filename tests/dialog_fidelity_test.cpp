@@ -43,7 +43,7 @@ int main() {
     auto up = std::make_shared<CUser>(999001); up->SetName("Tester"); // synthetic owner id
     CUser& u = *up;
 
-    struct Captured { uint16_t type; uint8_t mode; std::string text; };
+    struct Captured { uint16_t type; uint8_t mode; uint8_t optIdx; std::string text; };
     std::vector<Captured> pkts;
     u.SetPacketSink([&](const void* p, uint16_t sz) {
         assert(sz >= sizeof(tq::MsgHead) + sizeof(DialogData));
@@ -53,7 +53,7 @@ int main() {
         // string payload: [u8 count][u8 len][bytes]
         const char* strs = (const char*)p + sizeof(tq::MsgHead) + sizeof(d);
         std::string text((const char*)strs + 2, (unsigned char)strs[1]);
-        pkts.push_back({t, d.byMode, text});
+        pkts.push_back({t, d.byMode, d.byColor, text});
     });
 
     // --- walk the real 1501 chain: text, 3 options, listbox
@@ -65,13 +65,27 @@ int main() {
     assert(pkts[2].mode == CMsgDialog::Mode_Option && pkts[2].text == "Learn~advanced~spells.");
     assert(pkts[3].mode == CMsgDialog::Mode_Option && pkts[3].text == "No~thanks.");
     assert(pkts[4].mode == CMsgDialog::Mode_Listbox); // 10004: "10 10 6"
-    // ORIGINAL FUN_14039d300: every option registered with its action id
+    // ORIGINAL FUN_14039d300: options with action 0 ("No~thanks. 0",
+    // row 3050) are NOT registered (-1) and send 0xff in the header byte
+    // (a non-clickable line); real options send their list index.
     auto& opts = u.GetDialogOptions();
-    assert(opts.size() == 3);
+    assert(opts.size() == 2);
     assert(opts[0].first == "Will~you~teach~me?" && opts[0].second == 1510);
     assert(opts[1].first == "Learn~advanced~spells." && opts[1].second == 3060);
-    assert(opts[2].first == "No~thanks." && opts[2].second == 0);
-    printf("[ok] 1501 chain: 5 original 2032 packets; options registered\n");
+    assert(pkts[1].optIdx == 0 && pkts[2].optIdx == 1);
+    assert(pkts[3].optIdx == 0xFF); // FUN_14039d300 returned -1
+    printf("[ok] 1501 chain: 5 original 2032 packets; option indexes + 0xff dead-end\n");
+
+    // --- cap: 20 options max (0x14 slots), overflow -> 0xFFFFFFFF ---
+    u.ClearDialogOptions();
+    uint32_t uIdx = 0;
+    for (int i = 0; i < 20; i++) uIdx = u.PushDialogOption("opt" + std::to_string(i), 100 + i);
+    assert(uIdx == 19);                                          // last index in the 0x14 slots
+    assert(u.PushDialogOption("overflow", 999) == 0xFFFFFFFF);   // "menu task size overflow"
+    assert(u.GetDialogOptions().size() == 20);
+    assert(u.PushDialogOption("dead-end", 0) == 0xFFFFFFFF);    // action 0 -> never registered
+    assert(u.GetDialogOptions().size() == 20);
+    printf("[ok] FUN_14039d300 option cap 20 + action-0 rejection\n");
 
     // --- ORIGINAL reply flow: the player answers with the option text; the
     u.SetProfession(100); // Taoist, no skills yet
