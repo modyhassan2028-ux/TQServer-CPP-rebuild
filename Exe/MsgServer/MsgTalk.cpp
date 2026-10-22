@@ -409,6 +409,45 @@ if (m_message.rfind("/npc", 0) == 0) {
     }
     // ---- rebirth at the level cap ----
     // ---- /fish + /catch: fish by the water for money/CP ----
+    // ---- item warehouse: /whstore <id> /whlist /whtake <id> ----
+    if (m_message.rfind("/whstore ", 0) == 0) {
+        uint32_t id = strtoul(m_message.substr(9).c_str(), nullptr, 10);
+        ItemInfo* pItem = user->FindItem(id);
+        if (!pItem) { user->SendSysMsg("No such item in your bag."); return; }
+        if (pItem->dwPosition != 255) { user->SendSysMsg("Unequip it first."); return; }
+        if (user->GetWarehouse().size() >= 40) { user->SendSysMsg("Warehouse full (40)."); return; }
+        ItemInfo copy = *pItem;
+        user->RemoveItem(id);
+        user->WarehouseStore(copy);
+        user->SendSysMsg("Stored " + copy.strName + " in the warehouse.");
+        printf("[WAREHOUSE] %s stored %s\n", user->GetName().c_str(), copy.strName.c_str());
+        return;
+    }
+    if (m_message == "/whlist") {
+        auto& whs = user->GetWarehouse();
+        if (whs.empty()) { user->SendSysMsg("Warehouse empty. /whstore <itemid> to store."); return; }
+        std::string out = "Warehouse (" + std::to_string(whs.size()) + "/40):";
+        for (auto& it : whs) {
+            out += "\n  " + std::to_string(it.dwId) + ". " + it.strName;
+            if (it.dwAmount > 1) out += " x" + std::to_string(it.dwAmount);
+            if (out.size() > 380) { out += "\n  ..."; break; }
+        }
+        user->SendSysMsg(out);
+        return;
+    }
+    if (m_message.rfind("/whtake ", 0) == 0) {
+        uint32_t id = strtoul(m_message.substr(8).c_str(), nullptr, 10);
+        ItemInfo* pItem = user->WarehouseFind(id);
+        if (!pItem) { user->SendSysMsg("No such item in the warehouse. /whlist"); return; }
+        if (user->GetInventory().size() >= 40) { user->SendSysMsg("Bag full - free a slot first."); return; }
+        ItemInfo copy = *pItem;
+        user->WarehouseRemove(id);
+        user->AddItem(copy);
+        user->SendSysMsg("Took " + copy.strName + " from the warehouse.");
+        printf("[WAREHOUSE] %s took %s\n", user->GetName().c_str(), copy.strName.c_str());
+        return;
+    }
+
     // ---- /enchant: socket gems into equipped gear for bonus life ----
     if (m_message.rfind("/enchant", 0) == 0) {
         // find an equipped item (first equipped piece)

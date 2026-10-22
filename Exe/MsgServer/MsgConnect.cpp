@@ -170,9 +170,11 @@ void CMsgConnect::Process(uint32_t dwSender, void* pContext) {
                 item.dwType = r.dwType;
                 item.usSort = r.usSort;
                 item.dwAmount = r.dwAmount;
-                item.dwPosition = r.dwPosition;
+                bool bWarehouse = r.dwPosition >= 1000; // stored marker
+                item.dwPosition = bWarehouse ? 255 : r.dwPosition;
                 item.strName = r.strName;
                 item.ucPlus = r.ucPlus;
+                if (bWarehouse) { pUser->WarehouseStore(item); continue; }
                 pUser->AddItem(item);
                 CMsgItem msgItem;
                 if (msgItem.Create(item, CMsgItem::Action_Buy))

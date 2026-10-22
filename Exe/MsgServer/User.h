@@ -160,6 +160,17 @@ public:
             if (m_items[i].dwId == dwItemId) { m_items.erase(m_items.begin() + i); return; }
     }
     std::vector<ItemInfo>& GetInventory() { return m_items; }
+    // warehouse: a second, bank-like bag for long-term storage
+    std::vector<ItemInfo>& GetWarehouse() { return m_warehouse; }
+    void WarehouseStore(ItemInfo& item) { m_warehouse.push_back(item); }
+    ItemInfo* WarehouseFind(uint32_t dwItemId) {
+        for (auto& it : m_warehouse) if (it.dwId == dwItemId) return &it;
+        return nullptr;
+    }
+    void WarehouseRemove(uint32_t dwItemId) {
+        for (size_t i = 0; i < m_warehouse.size(); ++i)
+            if (m_warehouse[i].dwId == dwItemId) { m_warehouse.erase(m_warehouse.begin() + i); return; }
+    }
     uint32_t NextItemSeq() { return ++m_dwItemSeq; }
 
     void BindNet(CNetClient* pNet) { m_pNet = pNet; }
@@ -214,5 +225,6 @@ private:
     bool m_bInvisible{false};
     CNetClient* m_pNet{nullptr};
     std::vector<ItemInfo> m_items;
+    std::vector<ItemInfo> m_warehouse;
     uint32_t m_dwItemSeq{0};
 };

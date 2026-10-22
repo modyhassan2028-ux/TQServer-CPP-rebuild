@@ -90,6 +90,9 @@ int main(int argc, char* argv[]) {
                         std::vector<CAccountManager::ItemRow> rows;
                         for (const auto& it : pU->GetInventory())
                             rows.push_back({ it.dwType, it.usSort, it.dwAmount, it.dwPosition, it.strName, it.ucPlus });
+                        // warehouse items persist as position 1000+
+                        for (const auto& it : pU->GetWarehouse())
+                            rows.push_back({ it.dwType, it.usSort, it.dwAmount, it.dwPosition + 1000, it.strName, it.ucPlus });
                         CAccountManager::Instance().SaveItems(pU->GetAccountId(), rows);
                         ++saved;
                     }
