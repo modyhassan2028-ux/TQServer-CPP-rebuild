@@ -94,7 +94,7 @@ void CNetClient::RecvLoop() {
 void CNetClient::Dispatch(tq::MsgHead head, const uint8_t* pPayload, uint16_t usPayloadLen) {
     (void)usPayloadLen;
     switch (head.type) {
-    case 1001: { // MsgConnect - login handshake
+    case 1052: { // MsgConnect (0x41C) - login handshake
         CMsgConnect login;
         login.Clear();
         login.AppendRaw(reinterpret_cast<const uint8_t*>(&head), sizeof(head));
@@ -112,12 +112,12 @@ void CNetClient::Dispatch(tq::MsgHead head, const uint8_t* pPayload, uint16_t us
             msg.Process(m_dwSessionId);
         } else {
             CMsgTalk reply;
-            if (reply.Create("SYSTEM", "", "Not logged in. Send MsgConnect (1001) first.", CMsgTalk::Channel_Talk))
+            if (reply.Create("SYSTEM", "", "Not logged in. Send MsgConnect (1052) first.", CMsgTalk::Channel_Talk))
                 Send(reply.GetBuf(), reply.GetSize());
         }
         break;
     }
-    case 1010: { // MsgAction - movement / map change
+    case 10010: { // MsgAction (0x271A) - movement / map change
         CMsgAction msg;
         msg.Clear();
         msg.AppendRaw(reinterpret_cast<const uint8_t*>(&head), sizeof(head));

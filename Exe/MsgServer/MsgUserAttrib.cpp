@@ -4,7 +4,7 @@ CMsgUserAttrib::CMsgUserAttrib() = default;
 
 bool CMsgUserAttrib::Create(uint32_t dwId, const std::vector<AttribPair>& attribs) {
     tq::MsgHead head;
-    head.type = 1017; // MsgUserAttrib Packet ID
+    head.type = 10017; // 0x2721 CMsgUserAttrib - dispatcher at decompiled.c:196539 + Create at 112185
     uint32_t dataSize = 4 + 4 + static_cast<uint32_t>(attribs.size() * sizeof(AttribPair));
     head.length = sizeof(tq::MsgHead) + dataSize;
 

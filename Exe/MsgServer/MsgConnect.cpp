@@ -23,7 +23,7 @@ bool CMsgConnect::Create(uint32_t dwId, uint32_t dwData, const std::string& acco
     packer.AddString("TQServer"); // server name
 
     tq::MsgHead head;
-    head.type = 1001; // MsgConnect
+    head.type = 1052; // 0x41C CMsgConnect_A - CWorldKernel::ProcessAccountNetMsg (MsgConnect size 0x1C) + FUN_140083100 Create
     uint32_t dataSize = 4 + 4 + packer.GetSize();
     head.length = static_cast<uint16_t>(sizeof(tq::MsgHead) + dataSize);
 

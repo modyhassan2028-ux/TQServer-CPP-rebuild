@@ -8,7 +8,7 @@ CMsgAction::CMsgAction() = default;
 
 bool CMsgAction::Create(uint32_t dwId, uint32_t dwData, uint16_t usX, uint16_t usY, ActionType action) {
     tq::MsgHead head;
-    head.type = 1010; // MsgAction Packet ID
+    head.type = 10010; // 0x271A CMsgAction - dispatcher switchD_1400eb932_caseD_3fe + Create at MsgServer.exe.decompiled.c:111998
     head.length = sizeof(tq::MsgHead) + sizeof(ActionData);
 
     ActionData data{};

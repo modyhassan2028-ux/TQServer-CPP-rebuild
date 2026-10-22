@@ -94,6 +94,13 @@
 ### منهجية الاختبار الثابتة
 كل نوع جديد: اقرأ الجسم من الـ decompile → طبّق مع صفوف القاعدة → اكتب test block في `dialog_fidelity_test.cpp` بـ asserts على صفوف حقيقية (مُعلَّق عليها ids الجداول المرجعية) → `origdb_test` + `dialog_test` أخضر → commit + push (كود فقط).
 
+## 7. تصحيح مهم: أرقام الباكتات الشبكية (23 أكتوبر)
+
+مراجعة خارجية (Cloud AI) أشارت لتعارض في أرقام الباكتات — تم التحقق من الـ decompile وثبت:
+- **الخطأ:** جلسات قديمة كانت تستخدم 1001 (MsgConnect) و1010 (MsgAction) و1017 (MsgUserAttrib) — أرقام مخترعة متعاربة مع ترقيم cq_action. صُححت إلى: **MsgConnect = 1052 (0x41C)** (CWorldKernel::ProcessAccountNetMsg، حجم MsgConnect_A = 0x1C) و**MsgAction = 10010 (0x271A)** و**MsgUserAttrib = 10017 (0x2721)** (الموزّع عند السطر 196539 + دوال Create عند 111998/112185).
+- الباقي كان صحيحاً وموثقاً من البداية: MsgTalk=1004 (0x3EC)، MsgItem=1009 (0x3F1)، MsgInteract=1022 (0x3FE)، MsgDialog=2032 (0x7F0)، MsgNpcInfo=2030 (0x7EE)، MsgMonsterInfo=20001/20002 (0x4E21/0x4E22).
+- الدرس المعتمد كقاعدة: أي ثابت بروتوكول يوثق بالهكس وسطر الـ decompile المصدر في تعليق بجانبه.
+
 ## 6. بيئة البناء السريعة
 
 ```bash
