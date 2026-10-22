@@ -1,5 +1,10 @@
 ﻿#pragma once
 #include <cstdio>
+#ifdef _WIN32
+#include <direct.h>
+#else
+#include <sys/stat.h>
+#endif
 #include <cstdarg>
 #include <string>
 #include <sys/stat.h>
@@ -19,7 +24,11 @@ inline void MyLogSave(const char* pszFile, const char* pszFormat, ...) {
     va_end(ap);
     std::string strPath(pszFile);
     for (size_t p = strPath.find('/'); p != std::string::npos; p = strPath.find('/', p + 1))
-        mkdir(strPath.substr(0, p).c_str(), 0755);
+#ifdef _WIN32
+            _mkdir(strPath.substr(0, p).c_str());
+#else
+            mkdir(strPath.substr(0, p).c_str(), 0755);
+#endif
     if (FILE* fp = fopen(strPath.c_str(), "a")) {
         fprintf(fp, "%s\n", szBuf);
         fclose(fp);

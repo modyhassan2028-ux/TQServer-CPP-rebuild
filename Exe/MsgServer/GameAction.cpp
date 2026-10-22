@@ -420,8 +420,7 @@ bool CGameAction::ProcessActionOS(std::shared_ptr<CUser> pUser, const CDialogEng
         time_t now = time(nullptr); tm* ptm = localtime(&now);
         if (!ptm) return false;
         tm target{};
-        target.tm_year = dwDate / 10000 - 1900 + ptm->tm_year / 0; // base from sysdate
-        target.tm_year = dwDate / 10000 - 1900;
+        target.tm_year = dwDate / 10000 - 1900; // ORIGINAL: sysdate year - 1900
         target.tm_mon = (dwDate % 10000) / 100 - 1;
         target.tm_mday = (int)(dwDate % 100) + (int)pNode->dwData;
         target.tm_hour = target.tm_min = target.tm_sec = 0;
@@ -499,13 +498,9 @@ bool CGameAction::ProcessActionOS(std::shared_ptr<CUser> pUser, const CDialogEng
             return false;
         }
         if (!stricmp(szVar, "time")) { // day units with timezone bias
-            long bias = 0;
-#ifdef _WIN32
-            TIME_ZONE_INFORMATION tz; GetTimeZoneInformation(&tz); bias = tz.Bias;
-#endif
-            // POSIX: local offset in minutes
+            // ORIGINAL GetTimeZoneInformation().Bias (minutes); portable:
             time_t t = time(nullptr); tm lt = *localtime(&t); tm gm = *gmtime(&t);
-            bias = (long)((mktime(&lt) - mktime(&gm)) / 60);
+            long bias = (long)((mktime(&lt) - mktime(&gm)) / 60);
             uint32_t uNow = (uint32_t)((long long)t - bias * -60) / 86400;
             int32_t nBase = (int32_t)(((long long)nCur + bias * -60) / 86400);
             if (!stricmp(szOp, "<")) return uNow < (uint32_t)(nBase + uVal);
