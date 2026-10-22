@@ -372,6 +372,10 @@ public:
     std::vector<ItemInfo>& GetInventory() { return m_items; }
     // ORIGINAL FUN_14032b4b0: positions 21..29 (warehouse pages) fold to 1..9
     // (pos%10), then position 1..19 indexes the user's position array.
+    ItemInfo* FindItemById(uint32_t dwId) {
+        for (auto& it : m_items) if (it.dwId == dwId) return &it;
+        return nullptr;
+    }
     ItemInfo* FindItemByPosition(int nPos) {
         if (nPos >= 21 && nPos <= 29) nPos %= 10;
         if (nPos < 1 || nPos > 19) return nullptr; // ORIGINAL: logs + 0
@@ -510,6 +514,10 @@ public:
     // ORIGINAL action iteration vars: %iter_var_dataN tokens resolve to these
     // (populated by the iteration actions - var engine family C)
     int64_t m_arIterVarData[65]{};
+    // ORIGINAL quench (refinery) context: the two item ids the quench UI
+    // passes to CGameAction::ProcessActionItemQuench (FUN_14011b910)
+    uint32_t m_dwQuenchItemId{0};
+    uint32_t m_dwQuenchMaterialId{0};
     void SetIterVarData(uint32_t n, int64_t v) { if (n && n < 65) m_arIterVarData[n] = v; }
     int64_t GetIterVarData(uint32_t n) const { return (n && n < 65) ? m_arIterVarData[n] : 0; }
     void ResolveIterVars(std::string& s) const {

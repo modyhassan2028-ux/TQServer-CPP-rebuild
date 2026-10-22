@@ -26,6 +26,8 @@ public:
     // 1001..1121. Returns true on success (chain continues id_next),
     // false on failure (chain continues id_nextfail).
     static bool ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode);
+    static bool ProcessItemQuench(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode,
+                                   uint32_t dwItemId, uint32_t dwMatId); // ORIGINAL FUN_14011b910
 
     // ORIGINAL cq_action 1001 condition "field op value" evaluator
     static bool ProcessDataCondition(std::shared_ptr<CUser> pUser, const std::string& strParam);

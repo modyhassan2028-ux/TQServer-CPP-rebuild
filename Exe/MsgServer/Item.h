@@ -25,6 +25,16 @@ struct ItemInfo {
     // cq_item column binding ports with the item-attr subsystem; ids without a
     // typed field keep exact per-id fidelity through this map.
     std::map<uint32_t, int64_t> mapActionAttr;
+    // ORIGINAL FUN_140100070/140102a10: temp item status from quench
+    // (refinery) actions - gmlog/QuenchItem Add/Erase model
+    struct QuenchStatus {
+        uint32_t dwStatu{0};    // status id (param field5, e.g. 121)
+        uint32_t dwActionId{0};
+        uint32_t dwDuration{0};// param field4 (e.g. 604800 = a week)
+        uint64_t tExpireAt{0};  // 0 = none
+        bool bActive() const { return dwStatu != 0; }
+    };
+    QuenchStatus m_stQuench;
 
     int64_t GetActionAttr(uint32_t dwAttr) const {
         switch (dwAttr) {

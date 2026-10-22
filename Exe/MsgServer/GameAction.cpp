@@ -66,6 +66,72 @@ static int stricmp(const char* a, const char* b) { return strcasecmp(a, b); }
 
 #include "MonsterManager.h"
 
+// ORIGINAL FUN_14011b910: CGameAction::ProcessActionItemQuench (type 0x214)
+// Verified from the decompile: guards, equipment-class check on the main item
+// (FUN_1400ff940: class digit 1..8, 0xc, 0xd, 0xe, 0x15, 0x16), the material
+// must NOT be locked (FUN_1400ffc20 flag), sscanf 8 fields (needs > 6), the
+// 3-field class-requirement loop with the exact digit-length rule, material
+// consumption, temp item status with expiry, and the exact gmlog/QuenchItem
+// Add/Erase lines.
+bool CGameAction::ProcessItemQuench(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode,
+                                     uint32_t dwItemId, uint32_t dwMatId) {
+    ItemInfo* pItem = pUser->FindItemById(dwItemId);
+    ItemInfo* pMat = pUser->FindItemById(dwMatId);
+    if (!pItem) { printf("[DBERR] quench: main item %u not found\n", dwItemId); return false; }
+    if (!pMat) { printf("[DBERR] quench: material %u not found\n", dwMatId); return false; }
+    // ORIGINAL FUN_1400ff940: class digit of the main item type
+    uint32_t dwCls = (pItem->dwType % 10000000u) / 100000u;
+    bool bEquip = (dwCls >= 1 && dwCls <= 8) || dwCls == 12 || dwCls == 13 ||
+                  dwCls == 14 || dwCls == 21 || dwCls == 22;
+    // ORIGINAL FUN_1400ffc20 on the material must be false (not locked)
+    if (!bEquip || pMat->GetActionAttr(19) != 0) return false;
+    int32_t d[3] = {0, 0, 0}, f4 = 0, f5 = 0, f6 = 0, f7 = 0, f8 = 0;
+    int nGot = sscanf(pNode->strParam.c_str(), "%d %d %d %d %d %d %d %d",
+                      &d[0], &d[1], &d[2], &f4, &f5, &f6, &f7, &f8);
+    if (nGot <= 6) return false; // ORIGINAL: if (6 < sscanf count) continue
+    // ORIGINAL: 3-field class-requirement loop (lVar12 = 0,4,8)
+    int32_t e[3] = {0, 0, 0};
+    for (int i = 0; i < 3; i++) {
+        if (d[i] == 0) { e[i] = -1; continue; }
+        char szTmp[12]; snprintf(szTmp, sizeof(szTmp), "%d", d[i]);
+        size_t nLen = strlen(szTmp);
+        uint32_t dwT = pItem->dwType; // ORIGINAL uVar5 = GetAttr(1,1) = type
+        if (nLen == 1) e[i] = (int32_t)(dwT / 100000u);
+        else if (nLen == 2) e[i] = (int32_t)(dwT / 10000u);
+        else if (nLen == 3) e[i] = (int32_t)(dwT / 1000u);
+        else e[i] = -1;
+    }
+    bool bMatch = (d[0] == e[0]) || (d[1] == e[1]) || (d[2] == e[2]) ||
+                  ((d[0] == 0 && d[1] == 0) && (d[2] == 0));
+    if (!bMatch) return false;
+    // ORIGINAL: consume the material (FUN_140340190 user, matId, 1, 1)
+    pUser->ConsumeByType(pMat->dwType);
+    // ORIGINAL FUN_140100070: prior temp status with expiry check
+    bool bHadStatus = pItem->m_stQuench.bActive();
+    if (bHadStatus && pItem->m_stQuench.tExpireAt != 0 &&
+        pItem->m_stQuench.tExpireAt <= (uint64_t)time(nullptr)) {
+        bHadStatus = false; // ORIGINAL: expired -> bVar1 = false
+    }
+    // ORIGINAL FUN_140102a10: set the new temp status (vip arg kept faithful)
+    (void)pUser->GetVipLevel();
+    ItemInfo::QuenchStatus st;
+    st.dwStatu = (uint32_t)f5;      // param field5 (e.g. 121)
+    st.dwActionId = pNode->dwId;
+    st.dwDuration = (uint32_t)f4;   // param field4 (e.g. 604800)
+    st.tExpireAt = (uint64_t)time(nullptr) + (uint64_t)f4;
+    pItem->m_stQuench = st;
+    if (!bHadStatus) {
+        // ORIGINAL: MyLogSave("gmlog/QuenchItem", "%s(%u) Add Temp ItemStatu[itemid=%u, itemstatu=%u]")
+        printf("[GMLOG] gmlog/QuenchItem %s(%u) Add Temp ItemStatu[itemid=%u, itemstatu=%u]\n",
+               pUser->GetName().c_str(), pUser->GetId(), pItem->dwId, st.dwStatu);
+    } else {
+        // ORIGINAL: "Erase Temp Item Statu [id=%u, type=%u]"
+        printf("[GMLOG] gmlog/QuenchItem %s(%u) Erase Temp Item Statu [id=%u, type=%u]\n",
+               pUser->GetName().c_str(), pUser->GetId(), pItem->dwId, pItem->dwType);
+    }
+    return true;
+}
+
 // test-harness switch: dialog_fidelity_test sets true to consult the live
 // cq DB directly (popen mariadb) exactly like the original table lookup
 bool g_bActionTestMode = false;
@@ -819,6 +885,16 @@ bool bAll = (llAll == 1);
         printf("[USER] %u transform monstertype %d lookface %d secs %d (ACTION:transform!)\n",
                pUser->GetId(), f3, f1, f4);
         return true;
+    }
+    case 532: { // ORIGINAL type 0x214 -> CGameAction::ProcessActionItemQuench (FUN_14011b910)
+        // The original dispatches 0x214 out of the main switch into the
+        // dedicated quench processor with the two context item ids.
+        if (!pUser->m_dwQuenchItemId || !pUser->m_dwQuenchMaterialId) {
+            // ORIGINAL: missing user/item context -> LOGERR 0x37db + DBERROR
+            printf("[DBERR] cq_action %u type 532 quench context missing (0x37db)\n", pNode->dwId);
+            return false;
+        }
+        return ProcessItemQuench(pUser, pNode, pUser->m_dwQuenchItemId, pUser->m_dwQuenchMaterialId);
     }
     case 517: { // ORIGINAL case 0x205: item attr set/compare (with %iter_var_data)
         std::string strP = pNode->strParam;

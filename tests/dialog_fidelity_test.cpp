@@ -800,6 +800,29 @@ int main() {
         g_bActionTestMode = false;
         printf("[ok] 513 transform matches case 0x201 (Transform2)\n");
     }
+    // ---- 532: item quench (type 0x214 -> ProcessActionItemQuench) ----
+    {
+        auto upR = std::make_shared<CUser>(999021); upR->SetName("Qnch532");
+        CUser& r = *upR;
+        // main: 5-class equipment (500000-599999 -> cls digit 5), material: gem
+        ItemInfo main; main.dwType = 500123; main.dwPosition = 1; main.dwId = 700000001; r.AddItem(main);
+        ItemInfo mat;  mat.dwType = 700010;  mat.dwPosition = 2; mat.dwId = 700000002; r.AddItem(mat);
+        // requirement "5" (1 digit) matches type/100000 = 5
+        r.m_dwQuenchItemId = 700000001; r.m_dwQuenchMaterialId = 700000002;
+        { auto n = mkMgc(0, 532, "5 0 0 604800 121 0 0"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        // material consumed: only the main item remains of that type
+        { auto n = mkMgc(0, 507, "700010 700010 1"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        // second quench on same item: prior status path (Erase log) + fresh material
+        ItemInfo mat2; mat2.dwType = 700010; mat2.dwPosition = 3; mat2.dwId = 700000003; r.AddItem(mat2);
+        r.m_dwQuenchMaterialId = 700000003;
+        { auto n = mkMgc(0, 532, "5 0 0 604800 122 0 0"); assert(CGameAction::ProcessActionUser(upR, &n)); }
+        // class mismatch -> false
+        { auto n = mkMgc(0, 532, "7 0 0 604800 121 0 0"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        // missing context -> false
+        r.m_dwQuenchItemId = 0;
+        { auto n = mkMgc(0, 532, "5 0 0 604800 121 0 0"); assert(!CGameAction::ProcessActionUser(upR, &n)); }
+        printf("[ok] 532 quench matches ProcessActionItemQuench (0x214)\n");
+    }
     // ---- 517: item attr set/compare (case 0x205) ----
     {
         auto upR = std::make_shared<CUser>(999020); upR->SetName("Attr517");
