@@ -49,6 +49,7 @@ public:
         uint32_t dwPkPoints{0};
         uint32_t dwMapId{1002};
         uint16_t usX{315}, usY{275};
+        uint32_t dwFishCaught{0}, dwOreMined{0};
     };
     // inventory persistence (cq_item), MySQL mode only
     // runtime ids regenerate on load (MakeItemId) - rows store types/amounts

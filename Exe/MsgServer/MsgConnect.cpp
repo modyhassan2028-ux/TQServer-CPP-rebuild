@@ -114,6 +114,8 @@ void CMsgConnect::Process(uint32_t dwSender, void* pContext) {
         pUser->SetVitality(rec.dwVitality);
         pUser->SetRebornCount(rec.dwRebornCount);
         pUser->SetLastRewardDay(rec.strLastRewardDay);
+        pUser->SetFishCaught(rec.dwFishCaught);
+        pUser->SetOreMined(rec.dwOreMined);
         pUser->SetSpouseName(rec.strSpouseName);
         pUser->SetLife(1000);
         // base max life scales with restored level (+20/level) and vitality (+5/point)

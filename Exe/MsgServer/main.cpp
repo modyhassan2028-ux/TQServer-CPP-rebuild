@@ -83,6 +83,8 @@ int main(int argc, char* argv[]) {
                         // PK decay: 1 point per 5 min online (original: slow redemption)
                         if (pU->GetPkPoints() > 0) pU->SetPkPoints(pU->GetPkPoints() - 1);
                         rec.dwPkPoints = pU->GetPkPoints();
+                        rec.dwFishCaught = pU->GetFishCaught();
+                        rec.dwOreMined = pU->GetOreMined();
                         rec.dwMapId = pU->GetMapId();
                         rec.usX = pU->GetX();
                         rec.usY = pU->GetY();

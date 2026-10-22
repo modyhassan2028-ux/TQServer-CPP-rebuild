@@ -97,6 +97,27 @@ public:
         return false;
     }
 
+    // profession counters (ranks raise payouts): fish + mining
+    uint32_t GetFishCaught() const { return m_dwFishCaught; }
+    void AddFishCaught(uint32_t v) { m_dwFishCaught += v; }
+    void SetFishCaught(uint32_t v) { m_dwFishCaught = v; }
+    uint32_t GetOreMined() const { return m_dwOreMined; }
+    void AddOreMined(uint32_t v) { m_dwOreMined += v; }
+    void SetOreMined(uint32_t v) { m_dwOreMined = v; }
+    // rank from a count: 0-24 Novice, 25-99 Adept, 100-299 Expert, 300+ Master
+    static const char* ProfRank(uint32_t count) {
+        if (count >= 300) return "Master";
+        if (count >= 100) return "Expert";
+        if (count >= 25) return "Adept";
+        return "Novice";
+    }
+    static uint32_t ProfBonus(uint32_t count) { // payout multiplier in percent
+        if (count >= 300) return 150;
+        if (count >= 100) return 125;
+        if (count >= 25) return 110;
+        return 100;
+    }
+
     // mining: channel end time (0 = idle)
     uint32_t GetMineUntil() const { return m_dwMineUntil; }
     void SetMineUntil(uint32_t t) { m_dwMineUntil = t; }
@@ -217,6 +238,8 @@ private:
     uint32_t m_dwFishUntil{0};
     uint32_t m_dwMineUntil{0};
     bool m_bRiding{false};
+    uint32_t m_dwFishCaught{0};
+    uint32_t m_dwOreMined{0};
     uint32_t m_dwQuestKills{0};
     bool m_bQuestClaimed{false};
     uint32_t m_dwBaseBP{100};

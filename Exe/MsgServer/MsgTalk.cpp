@@ -412,6 +412,18 @@ if (m_message.rfind("/npc", 0) == 0) {
     }
     // ---- rebirth at the level cap ----
     // ---- /fish + /catch: fish by the water for money/CP ----
+    // ---- /profession: fishing + mining ranks and bonuses ----
+    if (m_message == "/profession") {
+        user->SendSysMsg("Professions:\n"
+                         "  Fishing: " + std::to_string(user->GetFishCaught()) + " catches - " +
+                         CUser::ProfRank(user->GetFishCaught()) + " (+" +
+                         std::to_string(CUser::ProfBonus(user->GetFishCaught()) - 100) + "% pay)\n"
+                         "  Mining: " + std::to_string(user->GetOreMined()) + " digs - " +
+                         CUser::ProfRank(user->GetOreMined()) + " (+" +
+                         std::to_string(CUser::ProfBonus(user->GetOreMined()) - 100) + "% pay)");
+        return;
+    }
+
     // ---- weapon skills v1: /skills, /thunder <id>, /fastblade ----
     if (m_message == "/skills") {
         user->SendSysMsg("Skills: /thunder <monsterid> (level 10+, 20 stamina, 2.5x damage)\n"
@@ -691,21 +703,29 @@ if (m_message.rfind("/npc", 0) == 0) {
         if ((uint32_t)time(nullptr) < until) { user->SendSysMsg("Too early - the rock is still cracking."); return; }
         user->SetMineUntil(0);
         int roll = std::rand() % 100;
+        user->AddOreMined(1); // every resolved dig counts toward rank
+        uint32_t bonus = CUser::ProfBonus(user->GetOreMined());
         if (roll < 35) { // 35%: dust
             user->SendSysMsg("Just dust and pebbles.");
         } else if (roll < 75) { // 40%: iron ore
-            user->AddMoney(200);
-            user->SendSysMsg("You mined iron ore! +200 money.");
-            printf("[MINE] %s iron\n", user->GetName().c_str());
+            uint32_t pay = 200 * bonus / 100;
+            user->AddMoney(pay);
+            user->SendSysMsg("You mined iron ore! +" + std::to_string(pay) +
+                             " money (" + CUser::ProfRank(user->GetOreMined()) + " miner).");
+            printf("[MINE] %s iron +%u\n", user->GetName().c_str(), pay);
         } else if (roll < 95) { // 20%: copper
-            user->AddMoney(600);
-            user->SendSysMsg("You mined a copper vein! +600 money.");
-            printf("[MINE] %s copper\n", user->GetName().c_str());
+            uint32_t pay = 600 * bonus / 100;
+            user->AddMoney(pay);
+            user->SendSysMsg("You mined a copper vein! +" + std::to_string(pay) + " money.");
+            printf("[MINE] %s copper +%u\n", user->GetName().c_str(), pay);
         } else { // 5%: gemstone
-            user->AddMoney(3000);
-            user->AddConquerPoints(3);
-            user->SendSysMsg("A gemstone sparkles in the rubble! +3000 money, +3 CP.");
-            printf("[MINE] %s gem\n", user->GetName().c_str());
+            uint32_t pay = 3000 * bonus / 100;
+            uint32_t cp = 3 * bonus / 100; if (cp < 3) cp = 3;
+            user->AddMoney(pay);
+            user->AddConquerPoints(cp);
+            user->SendSysMsg("A gemstone sparkles in the rubble! +" + std::to_string(pay) +
+                             " money, +" + std::to_string(cp) + " CP.");
+            printf("[MINE] %s gem +%u\n", user->GetName().c_str(), pay);
         }
         return;
     }
@@ -731,17 +751,24 @@ if (m_message.rfind("/npc", 0) == 0) {
         if ((uint32_t)time(nullptr) < until) { user->SendSysMsg("Too early - the fish is still circling."); return; }
         user->SetFishUntil(0);
         int roll = std::rand() % 100;
+        user->AddFishCaught(1); // every resolved cast counts toward rank
+        uint32_t bonus = CUser::ProfBonus(user->GetFishCaught());
         if (roll < 45) { // 45%: nothing
             user->SendSysMsg("Nothing took the bait...");
         } else if (roll < 85) { // 40%: common fish +150 money
-            user->AddMoney(150);
-            user->SendSysMsg("You caught a small fish! +150 money.");
-            printf("[FISH] %s small fish\n", user->GetName().c_str());
+            uint32_t pay = 150 * bonus / 100;
+            user->AddMoney(pay);
+            user->SendSysMsg("You caught a small fish! +" + std::to_string(pay) +
+                             " money (" + CUser::ProfRank(user->GetFishCaught()) + " angler).");
+            printf("[FISH] %s small fish +%u\n", user->GetName().c_str(), pay);
         } else { // 15%: golden fish
-            user->AddMoney(2000);
-            user->AddConquerPoints(2);
-            user->SendSysMsg("A golden fish! +2000 money, +2 CP.");
-            printf("[FISH] %s golden fish\n", user->GetName().c_str());
+            uint32_t pay = 2000 * bonus / 100;
+            uint32_t cp = 2 * bonus / 100; if (cp < 2) cp = 2;
+            user->AddMoney(pay);
+            user->AddConquerPoints(cp);
+            user->SendSysMsg("A golden fish! +" + std::to_string(pay) + " money, +" +
+                             std::to_string(cp) + " CP.");
+            printf("[FISH] %s golden fish +%u\n", user->GetName().c_str(), pay);
         }
         return;
     }
