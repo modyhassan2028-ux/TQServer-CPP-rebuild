@@ -5,6 +5,8 @@
 #include "NetCore.h"
 #include "Npc.h"
 #include "MsgNpcInfo.h"
+#include "Account.h"
+#include "MySQLClient.h"
 
 CUser::CUser(uint32_t dwId) : m_dwId(dwId) {}
 CUser::~CUser() = default;
@@ -247,4 +249,115 @@ uint64_t CUser::GrantDailyBankInterest() {
         printf("[BANK] %s interest +%llu\n", m_name.c_str(), (unsigned long long)interest);
     }
     return interest;
+}
+
+// ===========================================================================
+// ORIGINAL magic record API (CPlayerMagic port)
+// ===========================================================================
+
+// FUN_14048b5f0(user, type): iterate the user's magic map and return the
+// first record whose GetAttrib(rec, 2) == dwType.
+CPlayerMagic* CUser::FindMagic(uint32_t dwType) {
+    auto it = m_oMagics.find(dwType);
+    return it == m_oMagics.end() ? nullptr : &it->second;
+}
+
+// load this character's cq_magic rows (the original record pool for the
+// owner; logged on login, written back on change)
+bool CUser::LoadMagicsFromDB(CMySQLClient* pDB) {
+    if (!pDB) return false;
+    if (!pDB->Query("SELECT id, ownerid, type, level, exp, unlearn, old_level,"
+                    " current_effect_type, available_effect_type, effect_monopoly,"
+                    " effect_exorbitant FROM cq_magic WHERE ownerid=" +
+                    std::to_string(m_dwId))) {
+        printf("[MAGIC] cq_magic load failed: %s\n", pDB->GetError().c_str());
+        return false;
+    }
+    m_oMagics.clear();
+    for (auto& row : pDB->GetRows()) {
+        if (row.size() < 11) continue;
+        CPlayerMagic m;
+        m.m_dwId = (uint32_t)strtoul(row[0].c_str(), nullptr, 10);
+        m.m_dwOwnerid = (uint32_t)strtoul(row[1].c_str(), nullptr, 10);
+        m.m_wType = (uint16_t)strtoul(row[2].c_str(), nullptr, 10);
+        m.m_wLevel = (uint16_t)strtoul(row[3].c_str(), nullptr, 10);
+        m.m_dwExp = (uint32_t)strtoul(row[4].c_str(), nullptr, 10);
+        m.m_ucUnlearn = (uint8_t)strtoul(row[5].c_str(), nullptr, 10);
+        m.m_wOldLevel = (uint16_t)strtoul(row[6].c_str(), nullptr, 10);
+        m.m_ucCurrentEffectType = (uint8_t)strtoul(row[7].c_str(), nullptr, 10);
+        m.m_dwAvailableEffectType = (uint32_t)strtoul(row[8].c_str(), nullptr, 10);
+        m.m_dwEffectMonopoly = (uint32_t)strtoul(row[9].c_str(), nullptr, 10);
+        m.m_dwEffectExorbitant = (uint32_t)strtoul(row[10].c_str(), nullptr, 10);
+        if (m_dwMagicCounter < m.m_dwId) m_dwMagicCounter = m.m_dwId;
+        m_oMagics[m.m_wType] = m;
+    }
+    return true;
+}
+
+// FUN_1404939c0(user, type, level, byTask):
+//  1. the cq_magictype (type, level) stage must exist, else
+//     "CPlayerMagic::LearnMagic(), Can't Find Magic(Type:%d, Level:%d)"
+//  2. already-known type -> re-learn only clears the unlearn flag, then
+//     returns false (the original also returns 0 on this path)
+//  3. new record: owner/type/level set, exp 0, id from the pool counter
+//  4. persist + (original sends a MsgMagic packet here; wire pending)
+bool CUser::LearnMagic(uint32_t dwType, uint32_t dwLevel) {
+    if (!dwType) return false;
+    const CMagicTypeInfo* pType = CMagicTypePool::Instance().Find(dwType, dwLevel);
+    if (!pType) {
+        printf("[MAGIC] CPlayerMagic::LearnMagic(), Can't Find Magic(Type:%u, Level:%u)\n",
+               dwType, dwLevel);
+        return false;
+    }
+    if (CPlayerMagic* pRec = FindMagic(dwType)) {
+        // ORIGINAL: known + unlearn + inactive -> clear the flag, resend
+        if (pRec->IsUnlearn()) {
+            pRec->SetUnlearn(0);
+            pRec->Save(CAccountManager::Instance().GetDB());
+        }
+        return false; // can't learn twice
+    }
+    CPlayerMagic m;
+    m.m_dwOwnerid = m_dwId;
+    m.m_wType = (uint16_t)dwType;
+    m.m_wLevel = (uint16_t)dwLevel;
+    m.m_dwExp = 0;
+    if (!m.Save(CAccountManager::Instance().GetDB())) {
+        printf("[MAGIC] pop cq_magic rec err:owner=%u,type=%u,lev=%u\n",
+               m_dwId, dwType, dwLevel);
+        return false;
+    }
+    m_oMagics[dwType] = m;
+    ++m_dwMagicCounter;
+    return true;
+}
+
+// FUN_14048fd10 UpLevelByTask: level+1 stage must exist in cq_magictype,
+// else "CPlayerMagic::UpLevelByTask(), Can't Find Magic(Type,Level)"
+bool CUser::UpLevelMagic(uint32_t dwType) {
+    CPlayerMagic* pRec = FindMagic(dwType);
+    if (!pRec) return false;
+    uint32_t dwNew = (uint32_t)pRec->GetAttrib(3) + 1;
+    if (!CMagicTypePool::Instance().Find(dwType, dwNew)) {
+        printf("[MAGIC] CPlayerMagic::UpLevelByTask(), Can't Find Magic(Type:%u, Level:%u)\n",
+               dwType, dwNew);
+        return false;
+    }
+    pRec->SetAttrib(3, (int32_t)dwNew);
+    pRec->SetAttrib(4, 0); // exp resets on level-up
+    pRec->Save(CAccountManager::Instance().GetDB());
+    return true;
+}
+
+// FUN_140493f70 DeleteMagic(user, type, mode=0):
+// old_level = max(old_level, level); unlearn = 1 (record kept)
+bool CUser::DeleteMagic(uint32_t dwType) {
+    CPlayerMagic* pRec = FindMagic(dwType);
+    if (!pRec) return false;
+    int32_t nOld = pRec->GetAttrib(6);
+    int32_t nLev = pRec->GetAttrib(3);
+    if (nOld < nLev) pRec->SetAttrib(6, nLev);
+    pRec->SetAttrib(5, 1);
+    pRec->Save(CAccountManager::Instance().GetDB());
+    return true;
 }

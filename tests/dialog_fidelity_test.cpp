@@ -10,6 +10,7 @@
 #include "MsgDialog.h"
 #include "MsgTalk.h"
 #include "User.h"
+#include "PlayerMagic.h"
 #include "MySQLClient.h"
 #include <cassert>
 #include <cstring>
@@ -29,8 +30,10 @@ int main() {
     auto* pDB = acc.GetDB();
     assert(CDialogEngine::Instance().LoadFromDB(pDB) > 190000);
     printf("[ok] cq_action loaded\n");
+    assert(CMagicTypePool::Instance().LoadFromDB(pDB));
+    printf("[ok] cq_magictype loaded (%zu stages)\n", CMagicTypePool::Instance().Count());
 
-    auto up = std::make_shared<CUser>(1); up->SetName("Tester");
+    auto up = std::make_shared<CUser>(999001); up->SetName("Tester"); // synthetic owner id
     CUser& u = *up;
 
     struct Captured { uint16_t type; uint8_t mode; std::string text; };
@@ -92,8 +95,13 @@ int main() {
     printf("[ok] option reply maps back into the 1511 chain (1514 Thunder/Cure)\n");
 
     // A player who ALREADY knows Thunder (1000) must take the id_next branch
-    // of check 1000 (3587220 -> 1516): the page offers only what remains
-    u.LearnMagic(1000, 1);
+    // of check 1000 (3587220 -> 1516): the page offers only what remains.
+    // Seed the record exactly as the original stores it (cq_magic row),
+    // then load through the ported record pool.
+    pDB->Query("DELETE FROM cq_magic WHERE ownerid=999001");
+    pDB->Query("INSERT INTO cq_magic (ownerid, type, level, exp, unlearn, old_level)"
+               " VALUES (999001, 1000, 1, 0, 0, 0)");
+    assert(u.LoadMagicsFromDB(pDB) && u.GetMagicCount() == 1);
     pkts.clear();
     u.ClearDialogOptions();
     CGameAction::ProcessActionChain(up, 1511);
@@ -105,6 +113,26 @@ int main() {
     }
     assert(!bThunderAgain && bCureAgain); // Thunder. no longer offered
     printf("[ok] known-skill branch: Thunder. hidden, Cure. still offered\n");
+
+    // --- ORIGINAL LearnMagic / UpLevel / DeleteMagic semantics (FUN_1404939c0,
+    // FUN_14048fd10, FUN_140493f70) against the live cq_magic/cq_magictype ---
+    pDB->Query("DELETE FROM cq_magic WHERE ownerid=999001");
+    up = std::make_shared<CUser>(999001); // fresh user, no record pool
+    CUser& u2 = *up;
+    assert(u2.LearnMagic(1005, 0));            // Cure stage 0 exists in cq_magictype
+    assert(u2.GetMagicCount() == 1);
+    assert(!u2.LearnMagic(1005, 0));           // can't learn twice
+    assert(!u2.LearnMagic(1000, 9));           // stage (1000,9) does NOT exist
+    assert(u2.UpLevelMagic(1005));             // stage (1005,1) exists -> level 1
+    CPlayerMagic* pM = u2.FindMagic(1005);
+    assert(pM && pM->GetAttrib(3) == 1 && pM->GetAttrib(4) == 0); // level up, exp reset
+    assert(u2.DeleteMagic(1005));              // unlearn=1, old_level saved
+    assert(pM->GetAttrib(5) == 1 && pM->GetAttrib(6) == 1);
+    // persisted row round-trips through the ported loader
+    auto up3 = std::make_shared<CUser>(999001);
+    assert(up3->LoadMagicsFromDB(pDB) && up3->FindMagic(1005) != nullptr);
+    pDB->Query("DELETE FROM cq_magic WHERE ownerid=999001"); // cleanup
+    printf("[ok] LearnMagic/UpLevel/DeleteMagic match FUN_1404939c0 et al.\n");
 
     printf("DIALOG FIDELITY TEST PASSED\n");
     return 0;

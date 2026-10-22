@@ -126,20 +126,19 @@ bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogE
             return false; // ORIGINAL logs InlineLogDBERROR and fails
         }
         if (!_stricmp(szCmd, "check")) {
-            if (n == 2) return pUser->HaveMagic((uint32_t)nType);          // FUN_1402f3830
-            return pUser->HaveMagic((uint32_t)nType) &&
-                   pUser->GetMagicLevel((uint32_t)nType) >= (uint16_t)nLevel; // FUN_1402f3860
+            CPlayerMagic* pRec = pUser->FindMagic((uint32_t)nType); // FUN_1402f3830
+            if (n == 2) return pRec != nullptr;
+            // FUN_14048bbf0: GetAttrib(rec, 3) == level  (EXACT match)
+            return pRec != nullptr && pRec->GetAttrib(3) == nLevel;
         }
-        if (!_stricmp(szCmd, "learn")) {
-            if (n == 2) return pUser->LearnMagic((uint32_t)nType, 0);      // FUN_1402f38e0
-            return pUser->LearnMagic((uint32_t)nType, (uint16_t)nLevel);
+        if (!_stricmp(szCmd, "learn")) {                                   // FUN_1402f38e0
+            if (n == 2) return pUser->LearnMagic((uint32_t)nType, 0);
+            return pUser->LearnMagic((uint32_t)nType, (uint32_t)nLevel);
         }
-        if (!_stricmp(szCmd, "uplevel"))
-            return pUser->UpMagicLevel((uint32_t)nType);                    // FUN_1402f38a0
-        if (!_stricmp(szCmd, "del")) {
-            pUser->DeleteMagic((uint32_t)nType);                            // FUN_1402f3960
-            return true;
-        }
+        if (!_stricmp(szCmd, "uplevel"))                                   // FUN_1402f38a0
+            return pUser->UpLevelMagic((uint32_t)nType);
+        if (!_stricmp(szCmd, "del"))                                       // FUN_1402f3960
+            return pUser->DeleteMagic((uint32_t)nType);
         // addexp / addlevtime need the full CPlayerMagic port (FUN_1402f3040/1402f3080)
         static bool bLoggedExp = false;
         if (!bLoggedExp) {

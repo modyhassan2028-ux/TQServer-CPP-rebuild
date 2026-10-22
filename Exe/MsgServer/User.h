@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Item.h"
+#include "PlayerMagic.h"
 #include <string>
 #include <cstdint>
 #include <utility>
@@ -204,24 +205,24 @@ public:
     uint32_t GetMana() const { return m_dwMana; }
     // metempsychosis = reborn count (cq_user column)
     uint32_t GetMetempsychosis() const { return m_dwRebornCount; }
-    // ORIGINAL magic set (CPlayerMagic port pending; 1020 "check/learn" run here)
-    bool HaveMagic(uint32_t dwType) const { return m_magics.find(dwType) != m_magics.end(); }
-    uint16_t GetMagicLevel(uint32_t dwType) const {
-        auto it = m_magics.find(dwType);
-        return it == m_magics.end() ? 0 : it->second;
-    }
-    bool LearnMagic(uint32_t dwType, uint16_t wLevel) {
-        if (!dwType) return false;
-        m_magics[dwType] = wLevel;
-        return true;
-    }
-    bool UpMagicLevel(uint32_t dwType) {
-        auto it = m_magics.find(dwType);
-        if (it == m_magics.end()) return false;
-        if (it->second < 20) it->second++; // original cap: 20?
-        return true;
-    }
-    void DeleteMagic(uint32_t dwType) { m_magics.erase(dwType); }
+    // ---- ORIGINAL magic record API (CPlayerMagic, ported) ----
+    // FUN_14048b5f0: first record with GetAttrib(rec,2) == dwType
+    CPlayerMagic* FindMagic(uint32_t dwType);
+    // ORIGINAL: cq_magic rows owned by this character, loaded on login
+    bool LoadMagicsFromDB(CMySQLClient* pDB);
+    // FUN_1404939c0 LearnMagic(type, level, byTask): (type, level) must
+    // exist in cq_magictype; already-known magic returns false (a known
+    // but unlearned record just clears its unlearn flag, like original)
+    bool LearnMagic(uint32_t dwType, uint32_t dwLevel);
+    // FUN_14048fd10 UpLevelByTask: needs the cq_magictype (type, level+1)
+    // row to exist, else logs "Can't Find Magic" and fails
+    bool UpLevelMagic(uint32_t dwType);
+    // FUN_140493f70 DeleteMagic(user, type, mode=0): old_level = max(
+    // old_level, level), unlearn = 1 (record kept, like original)
+    bool DeleteMagic(uint32_t dwType);
+    uint32_t GetMagicCount() const { return (uint32_t)m_oMagics.size(); }
+    // attr-0 counter (original CUser+0x88) for newly created records
+    uint32_t m_dwMagicCounter{0};
     // returns an error message, or "" on success
     std::string Reborn();
 
@@ -330,7 +331,7 @@ private:
     std::vector<std::pair<std::string, uint32_t>> m_dialogOptions;
     uint16_t m_wProfession{0};   // cq_user.profession (short @ +0xef4)
     uint32_t m_dwMana{0};
-    std::map<uint32_t, uint16_t> m_magics; // type -> level
+    std::map<uint32_t, CPlayerMagic> m_oMagics; // type -> cq_magic record
     std::function<void(const void*, uint16_t)> m_packetSink;
     uint32_t m_dwAccountId{0};
     uint32_t m_dwEmoney{0};

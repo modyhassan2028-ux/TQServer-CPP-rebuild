@@ -123,6 +123,9 @@ void CMsgConnect::Process(uint32_t dwSender, void* pContext) {
                           rec.dwVitality * 5 + rec.dwRebornCount * 1000);
         pUser->SetPos(rec.usX, rec.usY);
         dwSpawnMap = rec.dwMapId;
+        // ORIGINAL: the character's cq_magic records are loaded on login
+        // (the original record pool per owner)
+        pUser->LoadMagicsFromDB(CAccountManager::Instance().GetDB());
         printf("[LOGIN] Account %u: character restored (level %u, money %llu, map %u)\n",
                dwAccountId, rec.dwLevel, (unsigned long long)rec.dwMoney, rec.dwMapId);
     }

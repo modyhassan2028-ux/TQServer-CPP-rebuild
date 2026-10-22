@@ -9,6 +9,7 @@
 #include "UserManager.h"
 #include "Guild.h"
 #include "Item.h"
+#include "PlayerMagic.h"
 #include "Account.h"
 #include <cstdlib>
 #include <iostream>
@@ -52,6 +53,7 @@ int main(int argc, char* argv[]) {
     if (!CItemLibrary::Instance().LoadFromDB(CAccountManager::Instance().GetDB()))
         CItemLibrary::Instance().LoadFromFile("data/items.ini");
     CItemLibrary::Instance().LoadDropsFromDB(CAccountManager::Instance().GetDB());
+    CMagicTypePool::Instance().LoadFromDB(CAccountManager::Instance().GetDB());
     if (!CItemLibrary::Instance().LoadAdditionsFromDB(CAccountManager::Instance().GetDB()))
         CItemLibrary::Instance().LoadAdditionsFromFile("data/itemadditions.ini");
 
