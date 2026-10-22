@@ -155,6 +155,12 @@ bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogE
         printf("[DIALOG] 1003: FlyMap error, Action[%u]\n", pNode->dwId);
         return false;
     }
+    case 1027: { // ORIGINAL switch case 0x13 -> FUN_140164440:
+        // return (user->vtable+0x48)() != 0 - the mate id (cq_user.mateid).
+        // NOTE: the cq_action param ("self angelwing", 3,379 rows) is NEVER
+        // read by the original server; those rows only chain id_next.
+        return pUser->GetSpouseID() != 0;
+    }
     case 1056: { // ORIGINAL switch case 0x30: task new / delete / isexit
         char szOp[256] = {0}; uint32_t dwTok2 = 0, dwMinutes = 0;
         int nTok = sscanf(pNode->strParam.c_str(), "%s %u %u", szOp, &dwTok2, &dwMinutes);

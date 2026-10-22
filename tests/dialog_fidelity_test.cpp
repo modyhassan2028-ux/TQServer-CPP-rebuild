@@ -373,6 +373,23 @@ int main() {
     pDB->Query("DELETE FROM task_detail WHERE user_id=999002");
     printf("[ok] 1056 task new/delete/isexit match TaskDetail.dll FUN_1418b1a90/e80/3210\n");
 
+// --- 1027 (case 0x13): ORIGINAL FUN_140164440 = mate-id check ---
+    // mirror real row 1211265 ("self angelwing"); the param is dead code
+    auto mk1027 = [](uint32_t id, const char* param) {
+        CDialogEngine::Node n; n.dwType = 1027; n.dwId = id;
+        n.strParam = param; return n; };
+    { auto n = mk1027(1211265, "self angelwing"); assert(!CGameAction::ProcessActionUser(u9, &n)); }
+    // the ORIGINAL cq dump has no married players; give 999002 a cq_user row
+    pDB->Query("INSERT IGNORE INTO cq_user (id, name, account_id, mateid)"
+               " VALUES (999002, 'TestMarry', 999002, 1)");
+    pDB->Query("UPDATE cq_user SET mateid=1 WHERE id=999002");
+    auto u10 = std::make_shared<CUser>(999002); // fresh instance: lazy load
+    { auto n = mk1027(1211265, "self angelwing"); assert( CGameAction::ProcessActionUser(u10, &n)); }
+    u10->SetSpouseID(0); // back to unmarried (in-memory + cq_user)
+    { auto n = mk1027(1211265, "self angelwing"); assert(!CGameAction::ProcessActionUser(u10, &n)); }
+    pDB->Query("DELETE FROM cq_user WHERE id=999002");
+    printf("[ok] 1027 mate-id check matches FUN_140164440 (param ignored)\n");
+
     printf("DIALOG FIDELITY TEST PASSED\n");
     return 0;
 }

@@ -303,6 +303,30 @@ CPlayerMagic* CUser::FindMagic(uint32_t dwType) {
 
 // load this character's cq_magic rows (the original record pool for the
 // owner; logged on login, written back on change)
+
+// ORIGINAL CUser vtable+0x48 (used by FUN_140164440 = CGameAction type 1027
+// and the login spouse notice): the mate id, cq_user.mateid.
+uint32_t CUser::GetSpouseID() {
+    if (!m_bMateLoaded) {
+        m_bMateLoaded = true;
+        CMySQLClient* pDB = CAccountManager::Instance().GetDB();
+        if (pDB && pDB->Query("SELECT mateid FROM cq_user WHERE id=" +
+                              std::to_string(m_dwId)) &&
+            !pDB->GetRows().empty())
+            m_dwMateId = (uint32_t)strtoul(pDB->GetRows()[0][0].c_str(), nullptr, 10);
+    }
+    return m_dwMateId;
+}
+
+void CUser::SetSpouseID(uint32_t dwId) {
+    m_dwMateId = dwId;
+    m_bMateLoaded = true;
+    CMySQLClient* pDB = CAccountManager::Instance().GetDB();
+    if (pDB)
+        pDB->Query("UPDATE cq_user SET mateid=" + std::to_string(dwId) +
+                   " WHERE id=" + std::to_string(m_dwId));
+}
+
 bool CUser::LoadMagicsFromDB(CMySQLClient* pDB) {
     if (!pDB) return false;
     if (!pDB->Query("SELECT id, ownerid, type, level, exp, unlearn, old_level,"

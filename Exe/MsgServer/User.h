@@ -104,6 +104,11 @@ public:
     const std::string& GetSpouseName() const { return m_strSpouse; }
     void SetSpouseName(const std::string& n) { m_strSpouse = n; }
 
+    // ORIGINAL CUser vtable+0x48: the mate ID (cq_user.mateid). Lazily
+    // loaded from cq_user on first use; 0 = unmarried.
+    uint32_t GetSpouseID();
+    void SetSpouseID(uint32_t dwId);
+
     // daily hunt quest: kills counted today, claim flag
     uint32_t GetQuestKills() const { return m_dwQuestKills; }
     void AddQuestKill() { ++m_dwQuestKills; }
@@ -372,6 +377,8 @@ private:
     uint16_t m_usStamina{100};
     std::string m_strLastRewardDay;
     std::string m_strSpouse;
+    uint32_t m_dwMateId{0};     // ORIGINAL cq_user.mateid
+    bool     m_bMateLoaded{false};
     uint32_t m_dwFishUntil{0};
     uint32_t m_dwMineUntil{0};
     bool m_bRiding{false};
