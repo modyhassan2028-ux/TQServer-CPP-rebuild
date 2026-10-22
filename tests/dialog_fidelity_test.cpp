@@ -907,6 +907,35 @@ int main() {
         { auto n = mkMgc(0, 2008, "1002 bogus X == 1"); assert(!CGameAction::ProcessActionUser(upA, &n)); }
         printf("[ok] 2008 map user counts match case 0x7d8\n");
     }
+    // ---- 2012: mass teleport src_map->dst_map (case 0x7dc) ----
+    {
+        auto upX = std::make_shared<CUser>(999031); upX->SetName("MassMove1");
+        auto upY = std::make_shared<CUser>(999032); upY->SetName("MassMove2");
+        CUserManager::Instance().AddUser(upX); CUserManager::Instance().AddUser(upY);
+        auto pSrc = CMapManager::Instance().GetMap(1002); assert(pSrc);
+        auto pDst = CMapManager::Instance().GetMap(1000); assert(pDst);
+        pSrc->AddUser(upX); upX->SetMapId(1002);
+        pSrc->AddUser(upY); upY->SetMapId(1002);
+        { auto n = mkMgc(0, 2012, "1002 1000 300 400");
+          assert(CGameAction::ProcessActionUser(upX, &n));
+          assert(upX->GetMapId() == 1000 && upY->GetMapId() == 1000);
+          assert(upX->GetX() == 300 && upX->GetY() == 400); }
+        { auto n = mkMgc(0, 2012, "bad"); assert(!CGameAction::ProcessActionUser(upX, &n)); }
+        printf("[ok] 2012 mass teleport matches case 0x7dc\n");
+    }
+    // ---- 2013: remove ground objects by type (case 0x7dd) ----
+    {
+        auto upZ = std::make_shared<CUser>(999033); upZ->SetName("GroundClean");
+        auto pMap = CMapManager::Instance().GetMap(1000); assert(pMap);
+        pMap->AddGroundItem(6014760, 11); pMap->AddGroundItem(6014760, 12);
+        pMap->AddGroundItem(601325, 13);
+        { auto n = mkMgc(0, 2013, "1000 6014760 -1");
+          assert(CGameAction::ProcessActionUser(upZ, &n));
+          assert(pMap->RemoveGroundItemsOfType(6014760, 0xffff) == 0); // all gone
+          assert(pMap->RemoveGroundItemsOfType(601325, 1) == 1); } // other type kept
+        { auto n = mkMgc(0, 2013, "1000 601325"); assert(!CGameAction::ProcessActionUser(upZ, &n)); }
+        printf("[ok] 2013 ground cleanup matches case 0x7dd\n");
+    }
     // ---- 306: map attributes (case 0x132) ----
     {
         auto upR = std::make_shared<CUser>(999026); upR->SetName("Map306");

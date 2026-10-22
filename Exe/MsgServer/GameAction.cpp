@@ -1055,6 +1055,51 @@ bool bAll = (llAll == 1);
         }
         return true;
     }
+    case 2012: { // ORIGINAL case 0x7dc: mass teleport "src_map dst_map x y"
+        // sscanf "%u %u %d %d" = (srcMap, dstMap, x, y). Iterates the global map
+        // object list (cap 1M); every object whose map (vcall+0x168) == srcMap
+        // gets FUN_1401c55b0(obj, dstMap, x, y) = fly-map teleport (dstMap==0 or
+        // same map -> in-map move vcall+0x370, else cross-map path). Failures
+        // log "ACTION_EVENT_MAPUSER_CHGMAP, user(%u) failed in fly map(%u)".
+        // Parse != 4 -> DBERR -> false; loop exhaustion -> LOGERR 0x3179 ->
+        // still TRUE.
+        uint32_t dwSrc = 0, dwDst = 0; int32_t nX = 0, nY = 0;
+        if (sscanf(pNode->strParam.c_str(), "%u %u %d %d", &dwSrc, &dwDst, &nX, &nY) != 4) {
+            printf("[DBERR] cq_action %u type 2012 param error\n", pNode->dwId);
+            return false;
+        }
+        auto pSrc = CMapManager::Instance().GetMap(dwSrc);
+        if (pSrc) { // ORIGINAL: empty iterator ends the loop -> return 1
+            auto ids = pSrc->GetUserIds(); // snapshot: users leave the map during
+            for (uint32_t uid : ids) {
+                auto u = CUserManager::Instance().GetUser(uid);
+                if (!u) continue;
+                // ORIGINAL: FUN_1401c55b0 == our FlyMap (ported earlier)
+                if (u->FlyMap(dwDst, (uint32_t)nX, (uint32_t)nY, false) != 0) {
+                    printf("[LOGERR] ACTION_EVENT_MAPUSER_CHGMAP, user(%u) failed in fly map(%u)\n", uid, dwDst);
+                }
+            }
+        }
+        return true;
+    }
+    case 2013: { // ORIGINAL case 0x7dd: remove ground objects by type
+        // sscanf "%u %u %d" = (map, type, count); count == -1 -> 0xffff (all).
+        // Iterates the map object list; objects whose map (vcall+0x168) == map
+        // and matching type get FUN_140145f60(mgr, type, obj, 0) (ground object
+        // removal) with count countdown; ends -> return 1 (even LOGERR 0x315a
+        // -> true). The removal packet of FUN_140145f60 is documented open in
+        // PORTING_LOG; removal from the registry is the verified effect.
+        std::string strP = pNode->strParam; pUser->ResolveActionVars(strP);
+        uint32_t dwMap = 0, dwType = 0; int32_t nCount = 0;
+        if (sscanf(strP.c_str(), "%u %u %d", &dwMap, &dwType, &nCount) != 3) {
+            printf("[DBERR] cq_action %u type 2013 param error\n", pNode->dwId);
+            return false;
+        }
+        if (nCount == -1) nCount = 0xffff; // ORIGINAL: -1 -> 0xffff
+        auto pMap = CMapManager::Instance().GetMap(dwMap);
+        if (pMap) pMap->RemoveGroundItemsOfType(dwType, (uint32_t)nCount);
+        return true;
+    }
     case 303: { // ORIGINAL case 0x12f: SYSTEM/ALLUSERS world broadcast (formatted)
         // ORIGINAL: FUN_14015b240(buf) setup, FUN_14015b300(buf,"SYSTEM",
         // "ALLUSERS", param) - the same broadcast machinery as 125; 0 -> DBERR

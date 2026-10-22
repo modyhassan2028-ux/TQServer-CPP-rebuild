@@ -52,6 +52,22 @@ private:
     uint32_t m_dwId;
     std::string m_name;
     std::unordered_map<uint32_t, std::shared_ptr<CUser>> m_users;
+    // ORIGINAL map-object list also carries ground items; cq_action 2013
+    // (case 0x7dd) removes ground objects of a type from the map.
+    struct GroundItem { uint32_t dwType; uint32_t dwItemId; };
+    std::vector<GroundItem> m_groundItems;
+  public:
+    void AddGroundItem(uint32_t dwType, uint32_t dwItemId) { m_groundItems.push_back({dwType, dwItemId}); }
+    // returns number removed (ORIGINAL FUN_140145f60 path; its client packet
+    // format is documented open in PORTING_LOG)
+    uint32_t RemoveGroundItemsOfType(uint32_t dwType, uint32_t dwMax) {
+        uint32_t n = 0;
+        for (auto it = m_groundItems.begin(); it != m_groundItems.end() && n < dwMax; ) {
+            if (it->dwType == dwType) { it = m_groundItems.erase(it); n++; }
+            else ++it;
+        }
+        return n;
+    }
     CDMap m_dmap;
     bool m_bSafeZone{false};
     uint32_t m_dwSynId{0};
