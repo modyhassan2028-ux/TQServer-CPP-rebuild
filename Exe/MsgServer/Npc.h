@@ -31,6 +31,7 @@ struct NpcOption {
 class CNpc {
 public:
     enum class Type {
+        Dialog,      // original cq_npc: task0 drives a cq_action tree
         Healer,      // restores life
         Warehouse,   // bank storage
         Teleporter   // sends the player to a fixed destination

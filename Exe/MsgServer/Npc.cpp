@@ -9,6 +9,9 @@
 #include "MsgTalk.h"
 
 #include <cstdio>
+#include <sstream>
+#include <cstring>
+#include <cctype>
 
 CNpc::CNpc(uint32_t dwId, const std::string& name, Type type,
            uint32_t dwMapId, uint16_t usX, uint16_t usY)
@@ -16,19 +19,79 @@ CNpc::CNpc(uint32_t dwId, const std::string& name, Type type,
       m_dwMapId(dwMapId), m_usX(usX), m_usY(usY) {}
 
 
-// shows a cq_action node: its text plus the numbered options beneath it
-static void ShowDialogNode(std::shared_ptr<CUser> pUser, uint32_t dwNodeId) {
+// ORIGINAL cq_action condition (type 1001): "field op value"
+// unknown fields pass open (permissive) so dialogs stay reachable.
+static bool EvalCondition(std::shared_ptr<CUser> pUser, const std::string& strParam) {
+    static const char* kUnknown = nullptr;
+    std::string field, op; int64_t value = 0;
+    std::istringstream is(strParam);
+    is >> field >> op >> value;
+    auto ieq = [&](const char* f) {
+        if (field.size() != strlen(f)) return false;
+        for (size_t i = 0; i < field.size(); ++i)
+            if (tolower((unsigned char)field[i]) != tolower((unsigned char)f[i])) return false;
+        return true;
+    };
+    int64_t cur = 0;
+    if (ieq("metempsychosis")) cur = pUser->GetRebornCount();
+    else if (ieq("level")) cur = pUser->GetLevel();
+    else if (ieq("money")) cur = (int64_t)pUser->GetMoney();
+    else if (ieq("pk")) cur = pUser->GetPkPoints();
+    else {
+        if (kUnknown != field.c_str()) { kUnknown = field.c_str(); printf("[DIALOG] condition field '%s' not evaluated (pass).\n", field.c_str()); }
+        return true;
+    }
+    if (op == "<") return cur < value;
+    if (op == "<=") return cur <= value;
+    if (op == ">") return cur > value;
+    if (op == ">=") return cur >= value;
+    if (op == "==" || op == "=") return cur == value;
+    if (op == "!=") return cur != value;
+    return true;
+}
+
+// runs an ORIGINAL cq_action chain: 1001 conditions gate the branch,
+// 101 sends the dialog text ('~' encodes space), consecutive 102s
+// become the numbered menu shown to the player.
+static void RunActionChain(std::shared_ptr<CUser> pUser, uint32_t dwActionId) {
     auto& eng = CDialogEngine::Instance();
-    auto* pNode = eng.GetNode(dwNodeId);
-    if (!pNode) return;
-    pUser->SetDialogNode(dwNodeId);
-    if (!pNode->strText.empty()) pUser->SendSysMsg(pNode->strText);
-    auto opts = eng.GetOptions(dwNodeId);
-    if (!opts.empty()) {
-        std::string menu = "Options:";
-        uint32_t i = 1;
-        for (auto& o : opts) menu += "\n  " + std::to_string(i++) + ". " + o.strText;
-        pUser->SendSysMsg(menu);
+    const CDialogEngine::Node* n = eng.GetNode(dwActionId);
+    uint32_t guard = 0;
+    pUser->SetDialogNode(0);
+    while (n && ++guard < 128) {
+        if (n->dwType == 101) { // dialog text
+            std::string s = n->strParam;
+            for (auto& c : s) if (c == '~') c = ' ';
+            pUser->SendSysMsg(s);
+            n = eng.GetNode(n->dwNext);
+            continue;
+        }
+        if (n->dwType == 1001) { // condition: pick the branch
+            uint32_t next = EvalCondition(pUser, n->strParam) ? n->dwNext : n->dwNextFail;
+            n = eng.GetNode(next);
+            continue;
+        }
+        // 1020/1056/... : unported types continue the walk (id_next) until
+        // they are ported from the decompiled CGameAction interpreter
+        n = eng.GetNode(n->dwNext);
+        if (!n) break;
+        continue;
+    }
+    // the walk ended on a 102 (or after texts): collect the menu like the
+    // original interpreter, from the position the texts led to
+    {
+        auto opts = eng.GetOptions(dwActionId);
+        if (!opts.empty()) {
+            pUser->SetDialogNode(dwActionId); // the menu the player picks from
+            std::string menu = "Options:";
+            uint32_t i = 1;
+            for (auto& o : opts) {
+                std::string t = o.strText;
+                for (auto& c : t) if (c == '~') c = ' ';
+                menu += "\n  " + std::to_string(i++) + ". " + t;
+            }
+            pUser->SendSysMsg(menu);
+        }
     }
 }
 
@@ -39,10 +102,14 @@ void CNpc::Interact(std::shared_ptr<CUser> pUser) {
         return;
     }
     pUser->SetTalkingNpc(GetId()); // digit replies now route to this NPC
-    // cq_action dialog tree (original 6159 system) takes priority when loaded
-    if (m_dwActionId && CDialogEngine::Instance().HasNode(m_dwActionId)) {
-        ShowDialogNode(pUser, m_dwActionId);
-        return;
+    // ORIGINAL flow: cq_npc.task0 -> cq_task -> first cq_action of the tree
+    if (m_dwActionId && CDialogEngine::Instance().IsLoaded()) {
+        uint32_t dwEntry = CDialogEngine::Instance().TaskEntry(m_dwActionId);
+        if (!dwEntry || !CDialogEngine::Instance().HasNode(dwEntry)) dwEntry = m_dwActionId;
+        if (CDialogEngine::Instance().HasNode(dwEntry)) {
+            RunActionChain(pUser, dwEntry);
+            return;
+        }
     }
     if (!m_strDialog.empty()) pUser->SendSysMsg(m_strDialog);
     // numbered menu (original 6159 style: pick by replying with the number)
@@ -82,87 +149,15 @@ void CNpc::Interact(std::shared_ptr<CUser> pUser) {
 
 bool CNpc::ChooseOption(std::shared_ptr<CUser> pUser, uint32_t dwIndex) {
     if (!pUser) return false;
-    // cq_action tree: follow the numbered option the player picked
+    // ORIGINAL chain: run the action the picked option points at
     if (m_dwActionId && CDialogEngine::Instance().IsLoaded()) {
         uint32_t dwCur = pUser->GetDialogNode();
         if (!dwCur || !CDialogEngine::Instance().HasNode(dwCur)) dwCur = m_dwActionId;
         auto opts = CDialogEngine::Instance().GetOptions(dwCur);
         if (dwIndex >= 1 && dwIndex <= opts.size()) {
             auto& o = opts[dwIndex - 1];
-            auto* pOpt = CDialogEngine::Instance().GetNode(o.dwTargetNode);
-            if (!pOpt) return false;
-            switch (pOpt->dwType) {
-            case 2: { // accept task: param = task id
-                uint32_t dwTaskId = (uint32_t)strtoul(pOpt->strParam.c_str(), nullptr, 10);
-                if (pUser->HasActiveTask()) { pUser->SendSysMsg("Finish your current task first!"); return true; }
-                // look the task up in the data library
-                auto& tasks = CNpcManager::Instance().GetTasks();
-                for (const auto& d : tasks) {
-                    if (d.dwId != dwTaskId) continue;
-                    if (pUser->GetLevel() < d.dwMinLevel) {
-                        pUser->SendSysMsg("Come back at level " + std::to_string(d.dwMinLevel) + ".");
-                        return true;
-                    }
-                    pUser->m_task.dwNpcId = GetId();
-                    pUser->m_task.dwMonsterType = d.dwMonsterType;
-                    pUser->m_task.dwNeeded = d.dwCount;
-                    pUser->m_task.dwDone = 0;
-                    pUser->m_task.dwRewardMoney = d.dwMoney;
-                    pUser->m_task.dwRewardCp = d.dwCp;
-                    pUser->SendSysMsg("Task accepted: " + d.strName + "! Kill " +
-                                      std::to_string(d.dwCount) + " monster(s), then return.");
-                    return true;
-                }
-                pUser->SendSysMsg("That task is not available.");
-                return true;
-            }
-            case 3: { // turn-in: reuse the v1 flow by delegating to a matching static option
-                if (pUser->HasActiveTask() && pUser->m_task.dwDone >= pUser->m_task.dwNeeded) {
-                    pUser->AddMoney(pUser->m_task.dwRewardMoney);
-                    pUser->AddConquerPoints(pUser->m_task.dwRewardCp);
-                    pUser->SendSysMsg("Task complete! Reward: " +
-                                      std::to_string(pUser->m_task.dwRewardMoney) + " money, " +
-                                      std::to_string(pUser->m_task.dwRewardCp) + " CP.");
-                    pUser->m_task = {};
-                    return true;
-                }
-                pUser->SendSysMsg(pUser->HasActiveTask()
-                    ? "Not done yet: " + std::to_string(pUser->m_task.dwDone) + "/" +
-                      std::to_string(pUser->m_task.dwNeeded) + " killed."
-                    : "You have no task with me.");
-                return true;
-            }
-            case 5: { // shop: list cq_itemtype wares with prices
-                pUser->SetDialogNode(0);
-                pUser->SendSysMsg(CItemLibrary::Instance().ShopListText());
-                return true;
-            }
-            case 6: { // lua: param = script name (data/lua/<name>.lua)
-                std::string strErr;
-                if (!CLuaVM::Instance().LoadScript(pOpt->strParam, strErr)) {
-                    pUser->SendSysMsg("Script failed: " + strErr);
-                    return true;
-                }
-                pUser->SetDialogNode(0);
-                if (!CLuaVM::Instance().CallUserFunc("on_talk", pUser.get(), strErr))
-                    pUser->SendSysMsg("Script error: " + strErr);
-                return true;
-            }
-            case 4: { // teleport: param = "map,x,y"
-                uint32_t map = 0; int x = 0, y = 0;
-                if (sscanf(pOpt->strParam.c_str(), "%u,%d,%d", &map, &x, &y) == 3 && map) {
-                    pUser->SetDialogNode(0);
-                    pUser->Teleport(map, (uint16_t)x, (uint16_t)y);
-                    return true;
-                }
-                pUser->SendSysMsg("This gate is broken (bad param).");
-                return true;
-            }
-            default: // 0/1: just walk the tree
-                pUser->SetDialogNode(0);
-                ShowDialogNode(pUser, pOpt->dwNext);
-                return true;
-            }
+            RunActionChain(pUser, o.dwTargetNode);
+            return true;
         }
         pUser->SendSysMsg("No such option. Talk to me again.");
         return false;
@@ -281,12 +276,11 @@ CNpcManager& CNpcManager::Instance() {
 }
 
 
-// original 6159 model: every NPC lives in cq_npc
-//  id, name, type, map_id, x, y, lookface, action_id
-// type: 0=generic(dialog-driven), 1=healer, 2=warehouse, 3=teleporter
+// ORIGINAL cq_npc schema (6159): id, name, type, lookface, mapid, cellx, celly, task0
+// task0 -> cq_task -> cq_action chain: the original dialog system.
 uint32_t CNpcManager::SpawnNpcsFromDB(CMySQLClient* pDB) {
     if (!pDB) return 0;
-    if (!pDB->Query("SELECT id, name, type, map_id, x, y, lookface, action_id FROM cq_npc")) {
+    if (!pDB->Query("SELECT id, name, type, lookface, mapid, cellx, celly, task0 FROM cq_npc")) {
         printf("[NPC] cq_npc load failed: %s\n", pDB->GetError().c_str());
         return 0;
     }
@@ -296,19 +290,16 @@ uint32_t CNpcManager::SpawnNpcsFromDB(CMySQLClient* pDB) {
         if (row.size() < 8) continue;
         uint32_t id = (uint32_t)strtoul(row[0].c_str(), nullptr, 10);
         uint32_t type = (uint32_t)strtoul(row[2].c_str(), nullptr, 10);
-        uint32_t mapId = (uint32_t)strtoul(row[3].c_str(), nullptr, 10);
-        uint16_t x = (uint16_t)strtoul(row[4].c_str(), nullptr, 10);
-        uint16_t y = (uint16_t)strtoul(row[5].c_str(), nullptr, 10);
-        uint32_t lookface = (uint32_t)strtoul(row[6].c_str(), nullptr, 10);
-        uint32_t actionId = (uint32_t)strtoul(row[7].c_str(), nullptr, 10);
+        uint32_t lookface = (uint32_t)strtoul(row[3].c_str(), nullptr, 10);
+        uint32_t mapId = (uint32_t)strtoul(row[4].c_str(), nullptr, 10);
+        uint16_t x = (uint16_t)strtoul(row[5].c_str(), nullptr, 10);
+        uint16_t y = (uint16_t)strtoul(row[6].c_str(), nullptr, 10);
+        uint32_t taskId = (uint32_t)strtoul(row[7].c_str(), nullptr, 10);
         if (!id || !mapId) continue;
-        CNpc::Type eType = (type == 1) ? CNpc::Type::Healer
-                        : (type == 2) ? CNpc::Type::Warehouse
-                        : (type == 3) ? CNpc::Type::Teleporter
-                        : CNpc::Type::Healer; // generic NPCs default to Healer shell; dialogs drive behavior
-        auto p = std::make_shared<CNpc>(id, row[1], eType, mapId, x, y);
-        p->m_dwLookface = lookface;
-        p->m_dwActionId = actionId; // cq_action tree root (0 = plain text greeting)
+        (void)type; // original NPC behavior is fully dialog-driven (task0)
+        auto p = std::make_shared<CNpc>(id, row[1], CNpc::Type::Dialog, mapId, x, y);
+        p->m_dwLookface = lookface;  // the ORIGINAL mesh id for this NPC
+        p->m_dwActionId = taskId;    // cq_task id (0 = no dialog tree)
         m_npcs[id] = p;
         ++spawned;
     }

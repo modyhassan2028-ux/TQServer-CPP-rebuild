@@ -57,6 +57,30 @@ include/        shared headers (Network/MsgHead.h, ...)
 Config/         ini files (game port 5816, Blowfish key, ...)
 ```
 
+## Original database fidelity
+
+`sql/original_schema_only.sql` is the ORIGINAL server's schema (267 tables,
+extracted verbatim from the original `cq.sql` Navicat dump that shipped inside
+the original release archive). The loaders were reworked to run against that
+schema directly:
+
+- login validates against the original `accounts` table (plaintext compare,
+  same semantics as the original AccountServer)
+- characters persist through the original `cq_user` columns
+  (money_saved/emoney/pk/metempsychosis/recordmap_id/...)
+- NPCs spawn from the real `cq_npc` (lookface + task0)
+- the dialog engine walks the original `cq_action`/`cq_task` tree
+  (101 text, 102 "option target" menus, 1001 conditions; unported action
+  types currently continue down id_next)
+- monsters spawn from `cq_monstertype`/`cq_generator` with the original
+  bound-rect math
+
+`tests/orig_db_fidelity_test.cpp` runs the loaders against a live MariaDB
+holding the original dump and asserts real original rows flow out (account
+704/"1", 2,122 NPCs, 192,894 actions, option-menu parsing, cq_user
+round-trip). NetCore.cpp gained a POSIX socket path, so the whole server
+also builds and runs natively on Linux for tests.
+
 ## Legal
 
 Conquer Online © TQ Digital. This repo may receive DMCA takedowns; keep that in mind.

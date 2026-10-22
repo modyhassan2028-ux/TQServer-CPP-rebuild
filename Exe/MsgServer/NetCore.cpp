@@ -6,14 +6,33 @@
 #include "MsgItem.h"
 #include "UserManager.h"
 
-#include <winsock2.h>
-#include <ws2tcpip.h>
+#ifdef _WIN32
+  #define WIN32_LEAN_AND_MEAN
+  #include <winsock2.h>
+  #include <ws2tcpip.h>
+  #pragma comment(lib, "ws2_32.lib")
+#else
+  // POSIX: the same listener/accept/recv-send loop, portable sockets
+  #include <sys/socket.h>
+  #include <netinet/in.h>
+  #include <arpa/inet.h>
+  #include <unistd.h>
+  #include <fcntl.h>
+  #include <errno.h>
+  typedef int SOCKET;
+  typedef struct sockaddr_in SOCKADDR_IN;
+  #define INVALID_SOCKET (-1)
+  #define SOCKET_ERROR   (-1)
+  #define SD_BOTH        SHUT_RDWR
+  #define WSAGetLastError() errno
+  #define closesocket(s) ::close(s)
+  #define WSAStartup(v, p) ((p != nullptr) ? 0 : 0)
+  #define WSACleanup() (0)
+#endif
 #include <thread>
 #include <chrono>
 #include <cstdio>
 #include <cstring>
-
-#pragma comment(lib, "ws2_32.lib")
 
 static const uint16_t MAX_PACKET = 8192;
 
@@ -137,11 +156,13 @@ CNetCore& CNetCore::Instance() {
 }
 
 bool CNetCore::Start(uint16_t usPort) {
+#ifdef _WIN32
     WSADATA wsa;
     if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
         printf("[NET] WSAStartup failed.\n");
         return false;
     }
+#endif
 
     SOCKET listenSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (listenSock == INVALID_SOCKET) {
@@ -190,7 +211,8 @@ void CNetCore::AcceptLoop() {
         sockaddr_in clientAddr{};
         int addrLen = sizeof(clientAddr);
         SOCKET clientSock = accept(static_cast<SOCKET>(m_ullListen),
-                                   reinterpret_cast<sockaddr*>(&clientAddr), &addrLen);
+                                   reinterpret_cast<sockaddr*>(&clientAddr),
+                                   reinterpret_cast<socklen_t*>(&addrLen));
         if (clientSock == INVALID_SOCKET) {
             if (!m_bRunning.load()) break;
             std::this_thread::sleep_for(std::chrono::milliseconds(50));

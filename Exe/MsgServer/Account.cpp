@@ -173,18 +173,21 @@ CAccountManager::Result CAccountManager::Validate(const std::string& name, const
     std::string key = name;
     std::transform(key.begin(), key.end(), key.begin(), ::tolower);
 
-    // MySQL mode: cq_account is authoritative; flat files stay untouched
+    // MySQL mode: the ORIGINAL 6159 `accounts` table is authoritative —
+    // the same schema the original AccountServer.exe validates against
+    // (name + plaintext password, banned, enabled, type = GM level).
     if (m_bMySQL && m_pDB) {
         std::lock_guard<std::mutex> dbLock(m_dbMutex);
-        if (m_pDB->Query("SELECT id, password FROM cq_account WHERE name='" +
+        if (m_pDB->Query("SELECT id, password, banned + 0, enabled + 0, type FROM accounts WHERE name='" +
                          m_pDB->Escape(name) + "'") && !m_pDB->GetRows().empty()) {
             auto& row = m_pDB->GetRows()[0];
             uint32_t dwId = (uint32_t)strtoul(row[0].c_str(), nullptr, 10);
-            // stored hash = sha256(salt + password), salt embedded as "salt$hash"
-            std::string stored = row[1];
-            size_t sep = stored.find('$');
-            if (sep == std::string::npos ||
-                Sha256Hex(stored.substr(0, sep) + password) != stored.substr(sep + 1)) {
+            if (row[2] != "0") { // accounts.banned (original: blocks login)
+                printf("[DB] Account '%s' is banned.\n", name.c_str());
+                return Result::Banned;
+            }
+            if (row[3] == "0") return Result::Disabled;
+            if (row[1] != password) { // original: plaintext compare (AccountServer 1051 flow)
                 printf("[DB] Bad password for account '%s'.\n", name.c_str());
                 return Result::WrongPassword;
             }
@@ -192,12 +195,11 @@ CAccountManager::Result CAccountManager::Validate(const std::string& name, const
             return Result::Ok;
         }
         if (!m_bAutoCreate) return Result::NoSuchAccount;
-        // dev mode: register into cq_account
-        std::string salt = RandomSaltHex();
-        std::string hash = Sha256Hex(salt + password);
-        if (!m_pDB->Query("INSERT INTO cq_account (name, password) VALUES ('" +
-                          m_pDB->Escape(name) + "', '" + m_pDB->Escape(salt + "$" + hash) + "')")) {
-            printf("[DB] cq_account insert failed: %s\n", m_pDB->GetError().c_str());
+        // dev mode: register into the ORIGINAL accounts table with the
+        // original defaults (enabled = 1, type = 2 player, point = 100000)
+        if (!m_pDB->Query("INSERT INTO accounts (name, password, enabled, type, point) VALUES ('" +
+                          m_pDB->Escape(name) + "', '" + m_pDB->Escape(password) + "', 1, 2, 100000)")) {
+            printf("[DB] accounts insert failed: %s\n", m_pDB->GetError().c_str());
             return Result::NoSuchAccount;
         }
         std::string idStr = m_pDB->Scalar("SELECT LAST_INSERT_ID()", "10000");
@@ -252,52 +254,72 @@ bool CAccountManager::TryMySQL(const std::string& host, uint16_t port, const std
 bool CAccountManager::LoadCharacter(uint32_t dwAccountId, CharacterRecord& out) {
     if (!m_bMySQL || !m_pDB) return false;
     std::lock_guard<std::mutex> dbLock(m_dbMutex);
-    if (!m_pDB->Query("SELECT level, money, cp, bank, pk_points, recordmap_id, recordx, recordy, experience, "
-                      "stat_points, strength, vitality, reborn_count, last_reward_day, spouse_name, fish_caught, ore_mined "
-                      "FROM cq_user WHERE account_id=" + std::to_string(dwAccountId)) ||
+    // ORIGINAL cq_user columns (6159): exp, money_saved = bank, emoney = CP,
+    // additional_point = stat points, health = vitality, metempsychosis = reborns
+    if (!m_pDB->Query("SELECT level, exp, money, money_saved, emoney, pk, "
+                      "recordmap_id, recordx, recordy, strength, health, additional_point, metempsychosis "
+                      "FROM cq_user WHERE account_id=" + std::to_string(dwAccountId) + " ORDER BY id LIMIT 1") ||
         m_pDB->GetRows().empty())
         return false;
     auto& row = m_pDB->GetRows()[0];
     out.dwLevel    = (uint32_t)strtoul(row[0].c_str(), nullptr, 10);
-    out.dwMoney    = strtoull(row[1].c_str(), nullptr, 10);
-    out.dwCp       = strtoull(row[2].c_str(), nullptr, 10);
+    out.dwExperience = strtoull(row[1].c_str(), nullptr, 10);
+    out.dwMoney    = strtoull(row[2].c_str(), nullptr, 10);
     out.dwBank     = strtoull(row[3].c_str(), nullptr, 10);
-    out.dwPkPoints = (uint32_t)strtoul(row[4].c_str(), nullptr, 10);
-    out.dwMapId    = (uint32_t)strtoul(row[5].c_str(), nullptr, 10);
-    out.usX        = (uint16_t)strtoul(row[6].c_str(), nullptr, 10);
-    out.usY        = (uint16_t)strtoul(row[7].c_str(), nullptr, 10);
-    out.dwExperience = (row.size() > 8) ? strtoull(row[8].c_str(), nullptr, 10) : 0;
-    out.dwStatPoints = (row.size() > 9) ? (uint32_t)strtoul(row[9].c_str(), nullptr, 10) : 0;
-    out.dwStrength   = (row.size() > 10) ? (uint32_t)strtoul(row[10].c_str(), nullptr, 10) : 0;
-    out.dwVitality   = (row.size() > 11) ? (uint32_t)strtoul(row[11].c_str(), nullptr, 10) : 0;
-    out.dwRebornCount = (row.size() > 12) ? (uint32_t)strtoul(row[12].c_str(), nullptr, 10) : 0;
-    out.strLastRewardDay = (row.size() > 13) ? row[13] : "";
-    out.strSpouseName = (row.size() > 14) ? row[14] : "";
-    out.dwFishCaught = (row.size() > 15) ? (uint32_t)strtoul(row[15].c_str(), nullptr, 10) : 0;
-    out.dwOreMined  = (row.size() > 16) ? (uint32_t)strtoul(row[16].c_str(), nullptr, 10) : 0;
+    out.dwCp       = strtoull(row[4].c_str(), nullptr, 10);
+    out.dwPkPoints = (uint32_t)strtoul(row[5].c_str(), nullptr, 10);
+    out.dwMapId    = (uint32_t)strtoul(row[6].c_str(), nullptr, 10);
+    out.usX        = (uint16_t)strtoul(row[7].c_str(), nullptr, 10);
+    out.usY        = (uint16_t)strtoul(row[8].c_str(), nullptr, 10);
+    out.dwStrength   = (uint32_t)strtoul(row[9].c_str(), nullptr, 10);
+    out.dwVitality   = (uint32_t)strtoul(row[10].c_str(), nullptr, 10);
+    out.dwStatPoints = (uint32_t)strtoul(row[11].c_str(), nullptr, 10);
+    out.dwRebornCount = (uint32_t)strtoul(row[12].c_str(), nullptr, 10);
     return true;
 }
 
 void CAccountManager::SaveCharacter(uint32_t dwAccountId, const CharacterRecord& in) {
     if (!m_bMySQL || !m_pDB) return;
-    std::string sql = "INSERT INTO cq_user (account_id, name, level, money, cp, bank, pk_points, "
-                      "recordmap_id, recordx, recordy, experience, stat_points, strength, vitality, reborn_count, fish_caught, ore_mined) VALUES (" +
-        std::to_string(dwAccountId) + ", '" + m_pDB->Escape(std::to_string(dwAccountId) + "_char") + "', " +
-        std::to_string(in.dwLevel) + ", " + std::to_string(in.dwMoney) + ", " +
-        std::to_string(in.dwCp) + ", " + std::to_string(in.dwBank) + ", " +
-        std::to_string(in.dwPkPoints) + ", " + std::to_string(in.dwMapId) + ", " +
-        std::to_string(in.usX) + ", " + std::to_string(in.usY) + ", " +
-        std::to_string(in.dwExperience) + ", " + std::to_string(in.dwStatPoints) + ", " +
-        std::to_string(in.dwStrength) + ", " + std::to_string(in.dwVitality) + ", " +
-        std::to_string(in.dwRebornCount) + ", " +
-        std::to_string(in.dwFishCaught) + ", " + std::to_string(in.dwOreMined) + ") "
-        "ON DUPLICATE KEY UPDATE level=VALUES(level), money=VALUES(money), cp=VALUES(cp), "
-        "bank=VALUES(bank), pk_points=VALUES(pk_points), recordmap_id=VALUES(recordmap_id), "
-        "recordx=VALUES(recordx), recordy=VALUES(recordy), "
-        "experience=VALUES(experience), stat_points=VALUES(stat_points), "
-        "strength=VALUES(strength), vitality=VALUES(vitality), reborn_count=VALUES(reborn_count), "
-        "fish_caught=VALUES(fish_caught), ore_mined=VALUES(ore_mined)";
     std::lock_guard<std::mutex> dbLock(m_dbMutex);
+    // ORIGINAL cq_user columns; the character carries the account name
+    // (single-character servers: cq_user.name = accounts.name)
+    std::string strName;
+    if (m_pDB->Query("SELECT name FROM accounts WHERE id=" + std::to_string(dwAccountId)) &&
+        !m_pDB->GetRows().empty())
+        strName = m_pDB->GetRows()[0][0];
+    if (strName.empty()) strName = "char_" + std::to_string(dwAccountId);
+    const bool bExists =
+        m_pDB->Query("SELECT id FROM cq_user WHERE account_id=" + std::to_string(dwAccountId) + " LIMIT 1") &&
+        !m_pDB->GetRows().empty();
+    std::string sql;
+    if (bExists) {
+        sql = "UPDATE cq_user SET name='" + m_pDB->Escape(strName) + "', level=" + std::to_string(in.dwLevel) +
+              ", exp=" + std::to_string(in.dwExperience) +
+              ", money=" + std::to_string(in.dwMoney) +
+              ", money_saved=" + std::to_string(in.dwBank) +
+              ", emoney=" + std::to_string(in.dwCp) +
+              ", pk=" + std::to_string(in.dwPkPoints) +
+              ", recordmap_id=" + std::to_string(in.dwMapId) +
+              ", recordx=" + std::to_string(in.usX) +
+              ", recordy=" + std::to_string(in.usY) +
+              ", strength=" + std::to_string(in.dwStrength) +
+              ", health=" + std::to_string(in.dwVitality) +
+              ", additional_point=" + std::to_string(in.dwStatPoints) +
+              ", metempsychosis=" + std::to_string(in.dwRebornCount) +
+              ", last_logout=UNIX_TIMESTAMP() WHERE account_id=" + std::to_string(dwAccountId);
+    } else {
+        sql = "INSERT INTO cq_user (account_id, name, account, level, exp, money, money_saved, emoney, pk, "
+              "recordmap_id, recordx, recordy, strength, health, additional_point, metempsychosis, "
+              "first_login, last_login, auto_allot) VALUES (" +
+            std::to_string(dwAccountId) + ", '" + m_pDB->Escape(strName) + "', '" + m_pDB->Escape(strName) + "', " +
+            std::to_string(in.dwLevel) + ", " + std::to_string(in.dwExperience) + ", " +
+            std::to_string(in.dwMoney) + ", " + std::to_string(in.dwBank) + ", " +
+            std::to_string(in.dwCp) + ", " + std::to_string(in.dwPkPoints) + ", " +
+            std::to_string(in.dwMapId) + ", " + std::to_string(in.usX) + ", " + std::to_string(in.usY) + ", " +
+            std::to_string(in.dwStrength) + ", " + std::to_string(in.dwVitality) + ", " +
+            std::to_string(in.dwStatPoints) + ", " + std::to_string(in.dwRebornCount) +
+            ", UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0)";
+    }
     if (!m_pDB->Query(sql))
         printf("[DB] cq_user save failed: %s\n", m_pDB->GetError().c_str());
 }

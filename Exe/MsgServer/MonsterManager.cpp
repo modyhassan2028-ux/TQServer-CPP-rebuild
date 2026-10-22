@@ -22,32 +22,33 @@ CMonsterManager& CMonsterManager::Instance() {
 }
 
 
-// original 6159 model (NpcServer.exe loads the same tables):
-//   cq_monstertype: id, name, level, life
-//   cq_generator:   id, type_id, map_id, count, x0, y0, x1, y1
+// ORIGINAL 6159 model (NpcServer.exe loads the same tables):
+//   cq_monstertype: id, name, level, life, attack_max, attack_min, defence
+//   cq_generator:   npctype, mapid, bound_x, bound_y, bound_cx, bound_cy, maxnpc, rest_secs
 uint32_t CMonsterManager::SpawnFromDB(CMySQLClient* pDB) {
     if (!pDB) return 0;
-    // 1) monster types
+    // 1) monster types (original columns)
     struct TypeDef { std::string name; uint32_t level, life, attack, defense; };
     std::map<uint32_t, TypeDef> types; // id -> def
-    if (!pDB->Query("SELECT id, name, level, life, attack, defense FROM cq_monstertype")) {
+    if (!pDB->Query("SELECT id, name, level, life, attack_max, attack_min, defence FROM cq_monstertype")) {
         printf("[MONSTER] cq_monstertype load failed: %s\n", pDB->GetError().c_str());
         return 0;
     }
     for (auto& row : pDB->GetRows()) {
-        if (row.size() < 4) continue;
+        if (row.size() < 7) continue;
         TypeDef d;
         uint32_t id = (uint32_t)strtoul(row[0].c_str(), nullptr, 10);
         d.name = row[1];
         d.level = (uint32_t)strtoul(row[2].c_str(), nullptr, 10);
         d.life = (uint32_t)strtoul(row[3].c_str(), nullptr, 10);
-        d.attack = (row.size() > 4) ? (uint32_t)strtoul(row[4].c_str(), nullptr, 10) : 10;
-        d.defense = (row.size() > 5) ? (uint32_t)strtoul(row[5].c_str(), nullptr, 10) : 2;
+        d.attack = (uint32_t)strtoul(row[4].c_str(), nullptr, 10); // attack_max
+        d.defense = (uint32_t)strtoul(row[6].c_str(), nullptr, 10); // defence
         types[id] = d;
     }
     if (types.empty()) return 0;
-    // 2) generators (spawners), like NpcServer: mask order
-    if (!pDB->Query("SELECT type_id, map_id, count, x0, y0, x1, y1 FROM cq_generator ORDER BY id")) {
+    // 2) generators: original bound-rect spawn rules
+    if (!pDB->Query("SELECT npctype, mapid, bound_x, bound_y, bound_cx, bound_cy, maxnpc, rest_secs "
+                    "FROM cq_generator ORDER BY id")) {
         printf("[MONSTER] cq_generator load failed: %s\n", pDB->GetError().c_str());
         return 0;
     }
@@ -56,11 +57,11 @@ uint32_t CMonsterManager::SpawnFromDB(CMySQLClient* pDB) {
         if (row.size() < 7) continue;
         uint32_t typeId = (uint32_t)strtoul(row[0].c_str(), nullptr, 10);
         uint32_t mapId  = (uint32_t)strtoul(row[1].c_str(), nullptr, 10);
-        uint32_t count  = (uint32_t)strtoul(row[2].c_str(), nullptr, 10);
-        uint16_t x0 = (uint16_t)strtoul(row[3].c_str(), nullptr, 10);
-        uint16_t y0 = (uint16_t)strtoul(row[4].c_str(), nullptr, 10);
-        uint16_t x1 = (uint16_t)strtoul(row[5].c_str(), nullptr, 10);
-        uint16_t y1 = (uint16_t)strtoul(row[6].c_str(), nullptr, 10);
+        uint32_t count  = (uint32_t)strtoul(row[6].c_str(), nullptr, 10); // maxnpc
+        uint16_t x0 = (uint16_t)strtoul(row[2].c_str(), nullptr, 10);    // bound_x
+        uint16_t y0 = (uint16_t)strtoul(row[3].c_str(), nullptr, 10);    // bound_y
+        uint16_t x1 = (uint16_t)(x0 + strtoul(row[4].c_str(), nullptr, 10)); // + bound_cx
+        uint16_t y1 = (uint16_t)(y0 + strtoul(row[5].c_str(), nullptr, 10)); // + bound_cy
         auto it = types.find(typeId);
         if (it == types.end() || !count) continue;
         auto& def = it->second;
@@ -319,7 +320,7 @@ bool CMonsterManager::Chase(std::shared_ptr<CMonster> pM) {
 uint32_t CMonsterManager::SpawnCrossFromDB(CMySQLClient* pDB) {
     if (!pDB) return 0;
     if (!pDB->Query("SELECT c.map_id, c.count, c.x, c.y, c.respawn_secs, c.cp_reward, "
-                    "t.name, t.level, t.life, t.attack, t.defense "
+                    "t.name, t.level, t.life, t.attack_max, t.defence "
                     "FROM cq_cross_monster c JOIN cq_monstertype t ON t.id = c.type_id")) {
         printf("[CROSS] cq_cross_monster load failed: %s\n", pDB->GetError().c_str());
         return 0;

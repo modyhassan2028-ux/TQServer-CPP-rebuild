@@ -13,13 +13,15 @@ WARN="-Wno-unused-parameter"
 mkdir -p build
 
 echo "[1/6] MsgServer.exe (net core + packet handlers)..."
-$CC $INC $WARN Exe/MsgServer/main.cpp Exe/MsgServer/NetCore.cpp Exe/MsgServer/Account.cpp Exe/MsgServer/Npc.cpp Exe/MsgServer/MsgNpcInfo.cpp Exe/MsgServer/MySQLClient.cpp Exe/MsgServer/Dialog.cpp Core/CQBase/SHA1.cpp Exe/MsgServer/BattleSystem.cpp \
-    Exe/MsgServer/DMap.cpp Exe/MsgServer/GameMap.cpp Exe/MsgServer/Guild.cpp Exe/MsgServer/MapManager.cpp Exe/MsgServer/Monster.cpp Exe/MsgServer/MonsterManager.cpp Exe/MsgServer/MsgMonster.cpp Exe/MsgServer/MsgConnect.cpp \
-    Exe/MsgServer/MsgAction.cpp \
-    Exe/MsgServer/MsgInteract.cpp Exe/MsgServer/MsgItem.cpp Exe/MsgServer/MsgTalk.cpp Exe/MsgServer/MsgUserAttrib.cpp \
-    Exe/MsgServer/User.cpp Exe/MsgServer/UserManager.cpp Exe/MsgServer/CrossServer/CrossMsgAction.cpp \
-    Core/CQBase/Msg.cpp Core/CQBase/StringPacker.cpp Core/CQBase/Timer.cpp \
-    Core/DB/AsyncDBThread.cpp Core/Root/Root.cpp -lws2_32 -o build/MsgServer.exe
+mkdir -p build/luaobj
+for f in vendor/lua/*.c; do
+    $ZIG cc -target x86_64-windows-gnu -O2 -Ivendor/lua -c "$f" -o "build/luaobj/$(basename ${f%.c}).o" || exit 1
+done
+ar rcs build/liblua.a build/luaobj/*.o
+$CC $INC $WARN -Ivendor/lua -IExe/CQCrossServer \
+    Exe/MsgServer/*.cpp Exe/MsgServer/LuaScript/LuaVM.cpp Exe/MsgServer/Activity/ActivityManager.cpp \
+    Exe/MsgServer/CrossServer/*.cpp Core/CQBase/*.cpp Core/DB/*.cpp Core/Root/*.cpp \
+    build/liblua.a -lws2_32 -o build/MsgServer.exe
 
 echo "[2/6] NpcServer.exe..."
 $CC $INC $WARN Exe/NpcServer/main.cpp -o build/NpcServer.exe
