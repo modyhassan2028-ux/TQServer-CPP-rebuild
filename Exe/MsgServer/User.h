@@ -111,6 +111,8 @@ public:
     void AddItem(const ItemInfo& item) { m_items.push_back(item); }
     // eats one charge of a usable stack (by type id); false if not carried
     bool ConsumeByType(uint32_t dwType);
+    // refine the equipped weapon; returns an error message or ""
+    std::string UpgradeEquipped();
     ItemInfo* FindItem(uint32_t dwItemId) {
         for (auto& it : m_items) if (it.dwId == dwItemId) return &it;
         return nullptr;

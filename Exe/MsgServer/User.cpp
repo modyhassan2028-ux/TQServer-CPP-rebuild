@@ -42,9 +42,14 @@ void CUser::RecalcEquipmentBonuses() {
     for (const auto& it : m_items) {
         if (it.dwPosition == 255) continue; // not equipped
         auto* a = CItemLibrary::Instance().LookupAddition(it.dwType);
-        if (!a) continue;
-        bonusLife += a->dwLife;
-        bonusAtk += a->dwAttack;
+        if (a) {
+            bonusLife += a->dwLife;
+            bonusAtk += a->dwAttack;
+        }
+        // refinement applies to ANY equipped item, with or without an addition record:
+        // weapons gain +5 attack per plus, armor +10 life per plus
+        if (it.usSort == 1) bonusAtk += it.ucPlus * 5;
+        else if (it.usSort == 2) bonusLife += it.ucPlus * 10;
     }
     uint32_t newMax = m_dwBaseMaxLife + bonusLife;
     if (m_dwLife > newMax) m_dwLife = newMax;
@@ -125,5 +130,36 @@ std::string CUser::Reborn() {
     SendSysMsg("REBORN! You are level 15 again, +1000 max life and +45 stat points (rebirth " +
                std::to_string(m_dwRebornCount) + ").");
     printf("[REBORN] %s reborn (count %u)\n", m_name.c_str(), m_dwRebornCount);
+    return "";
+}
+
+// /upgrade: refine the equipped weapon to +1..+12 (cq_itemaddition model).
+// Cost = 10k * (next plus); success chance falls ~8% per level (100% at +0 -> 10% at +11).
+// v1 is forgiving: a failure keeps the current plus, only the money burns.
+std::string CUser::UpgradeEquipped() {
+    ItemInfo* pWeapon = nullptr;
+    for (auto& it : m_items)
+        if (it.dwPosition != 255 && it.usSort == 1) { pWeapon = &it; break; }
+    if (!pWeapon) return "Equip a weapon first.";
+    if (pWeapon->ucPlus >= 12) return "Weapon is already at the +12 cap.";
+    uint32_t dwCost = 10000 * (uint32_t)(pWeapon->ucPlus + 1);
+    if (m_dwMoney < dwCost) return "Upgrading to +" + std::to_string(pWeapon->ucPlus + 1) +
+                                       " costs " + std::to_string(dwCost) + " money.";
+    m_dwMoney -= dwCost;
+    int chance = 100 - pWeapon->ucPlus * 8;
+    if (chance < 10) chance = 10;
+    if (std::rand() % 100 < chance) {
+        ++pWeapon->ucPlus;
+        RecalcEquipmentBonuses();
+        SendSysMsg("SUCCESS! " + pWeapon->strName + " refined to +" +
+                   std::to_string(pWeapon->ucPlus) + "!");
+        printf("[REFINE] %s upgraded %s to +%u\n", m_name.c_str(),
+               pWeapon->strName.c_str(), pWeapon->ucPlus);
+    } else {
+        SendSysMsg("The refining failed... your " + pWeapon->strName +
+                   " stays +" + std::to_string(pWeapon->ucPlus) + ".");
+        printf("[REFINE] %s failed refining %s (cost %u)\n", m_name.c_str(),
+               pWeapon->strName.c_str(), dwCost);
+    }
     return "";
 }

@@ -50,7 +50,7 @@ public:
     };
     // inventory persistence (cq_item), MySQL mode only
     // runtime ids regenerate on load (MakeItemId) - rows store types/amounts
-    struct ItemRow { uint32_t dwType; uint16_t usSort; uint32_t dwAmount; uint32_t dwPosition; std::string strName; };
+    struct ItemRow { uint32_t dwType; uint16_t usSort; uint32_t dwAmount; uint32_t dwPosition; std::string strName; uint8_t ucPlus{0}; };
     bool LoadItems(uint32_t dwAccountId, std::vector<ItemRow>& out);
     void SaveItems(uint32_t dwAccountId, const std::vector<ItemRow>& items);
 

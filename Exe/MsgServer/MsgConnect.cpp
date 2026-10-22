@@ -154,6 +154,7 @@ void CMsgConnect::Process(uint32_t dwSender, void* pContext) {
                 item.dwAmount = r.dwAmount;
                 item.dwPosition = r.dwPosition;
                 item.strName = r.strName;
+                item.ucPlus = r.ucPlus;
                 pUser->AddItem(item);
                 CMsgItem msgItem;
                 if (msgItem.Create(item, CMsgItem::Action_Buy))

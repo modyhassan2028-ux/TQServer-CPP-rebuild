@@ -38,7 +38,7 @@ bool CUserManager::RemoveUser(uint32_t dwId) {
             CAccountManager::Instance().SaveCharacter(pUser->GetAccountId(), rec);
             std::vector<CAccountManager::ItemRow> rows;
             for (const auto& it : pUser->GetInventory())
-                rows.push_back({ it.dwType, it.usSort, it.dwAmount, it.dwPosition, it.strName });
+                rows.push_back({ it.dwType, it.usSort, it.dwAmount, it.dwPosition, it.strName, it.ucPlus });
             CAccountManager::Instance().SaveItems(pUser->GetAccountId(), rows);
         }
         m_names.erase(pUser->GetName());

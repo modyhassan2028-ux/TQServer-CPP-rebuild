@@ -12,6 +12,7 @@ struct ItemInfo {
     uint16_t    usSort{0};     // 0=consumable, 1=weapon, 2=armor ... (v1)
     uint32_t    dwAmount{1};
     uint32_t    dwPosition{255}; // inventory slot / equip position
+    uint8_t     ucPlus{0};        // refinement level +0..+12
     std::string strName;
 };
 

@@ -188,6 +188,12 @@ if (m_message.rfind("/npc", 0) == 0) {
         }
         return;
     }
+    // ---- refinement ----
+    if (m_message == "/upgrade" || m_message == "/refine") {
+        std::string err = user->UpgradeEquipped();
+        if (!err.empty()) user->SendSysMsg(err);
+        return;
+    }
     // ---- rebirth at the level cap ----
     if (m_message == "/reborn") {
         std::string err = user->Reborn();
