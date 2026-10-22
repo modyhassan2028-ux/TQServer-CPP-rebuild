@@ -67,6 +67,9 @@ public:
     void Interact(std::shared_ptr<CUser> pUser); // shows the greeting + numbered menu
     // player picked option n (1-based); returns false if out of range
     bool ChooseOption(std::shared_ptr<CUser> pUser, uint32_t dwIndex);
+    // ORIGINAL: player answered a dialog with an option text - jump to
+    // the action node that option was registered with
+    void ReplyWithAction(std::shared_ptr<CUser> pUser, uint32_t dwActionId);
 
 private:
     uint32_t m_dwId;

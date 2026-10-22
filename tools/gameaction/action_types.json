@@ -1,0 +1,387 @@
+[
+ {
+  "type": 1004,
+  "ctor": "0x14015b240",
+  "class": "CMsgTalk"
+ },
+ {
+  "type": 1005,
+  "ctor": "0x14041f890",
+  "class": "CMsgAuctionItem"
+ },
+ {
+  "type": 1006,
+  "ctor": "0x14044df40",
+  "class": "CMsgUserInfo"
+ },
+ {
+  "type": 1007,
+  "ctor": "0x140454ef0",
+  "class": "CMsgPromotionAct"
+ },
+ {
+  "type": 1008,
+  "ctor": "0x140458720",
+  "class": "CMsgItemInfo"
+ },
+ {
+  "type": 1009,
+  "ctor": "0x1400f83e0",
+  "class": "CMsgItem"
+ },
+ {
+  "type": 1012,
+  "ctor": "0x1403edea0",
+  "class": "CMsgTick"
+ },
+ {
+  "type": 1014,
+  "ctor": "0x1403b0410",
+  "class": "CMsgAstProf"
+ },
+ {
+  "type": 1015,
+  "ctor": "0x14037dfb0",
+  "class": "CMsgName"
+ },
+ {
+  "type": 1016,
+  "ctor": "0x140456d30",
+  "class": "CMsgWeather"
+ },
+ {
+  "type": 1021,
+  "ctor": "0x1403f2320",
+  "class": "CMsgEquipLock"
+ },
+ {
+  "type": 1022,
+  "ctor": "0x14035f2f0",
+  "class": "CMsgInteract"
+ },
+ {
+  "type": 1024,
+  "ctor": "0x1404575b0",
+  "class": "CMsgAllot"
+ },
+ {
+  "type": 1025,
+  "ctor": "0x1403b3fd0",
+  "class": "CMsgWeaponSkill"
+ },
+ {
+  "type": 1027,
+  "ctor": "0x140456ad0",
+  "class": "CMsgGemEmbed"
+ },
+ {
+  "type": 1028,
+  "ctor": "0x1404592c0",
+  "class": "CMsgFuse"
+ },
+ {
+  "type": 1032,
+  "ctor": "0x1403f0c40",
+  "class": "CMsgBattleEffect"
+ },
+ {
+  "type": 1033,
+  "ctor": "0x1403a6980",
+  "class": "CMsgData"
+ },
+ {
+  "type": 1035,
+  "ctor": "0x140424690",
+  "class": "CMsgSlotOpt"
+ },
+ {
+  "type": 1036,
+  "ctor": "0x1403b3d40",
+  "class": "CMsgGodExp"
+ },
+ {
+  "type": 1037,
+  "ctor": "0x140455d00",
+  "class": "CMsgPing"
+ },
+ {
+  "type": 1038,
+  "ctor": "0x1404557e0",
+  "class": "CMsgSolidify"
+ },
+ {
+  "type": 1039,
+  "ctor": "0x140457e30",
+  "class": "CMsgNpcPath"
+ },
+ {
+  "type": 1040,
+  "ctor": "0x14036fe70",
+  "class": "CMsgUserQuality"
+ },
+ {
+  "type": 1042,
+  "ctor": "0x1404579b0",
+  "class": "CMsgMonsterTransform"
+ },
+ {
+  "type": 1043,
+  "ctor": "0x140455550",
+  "class": "CMsgTeamDice"
+ },
+ {
+  "type": 1044,
+  "ctor": "0x1403eed30",
+  "class": "CMsgLoadMap"
+ },
+ {
+  "type": 1045,
+  "ctor": "0x14035c460",
+  "class": "CMsgMailOperation"
+ },
+ {
+  "type": 1046,
+  "ctor": "0x14035bec0",
+  "class": "CMsgMailList"
+ },
+ {
+  "type": 1049,
+  "ctor": "0x140452310",
+  "class": "CMsgQuench"
+ },
+ {
+  "type": 1053,
+  "ctor": "0x1403ee140",
+  "class": "CMsgChangeName"
+ },
+ {
+  "type": 1061,
+  "ctor": "0x140459f10",
+  "class": "CMsgShowHandKick"
+ },
+ {
+  "type": 1062,
+  "ctor": "0x140459c90",
+  "class": "CMsgShowHandRaceInteractive"
+ },
+ {
+  "type": 1063,
+  "ctor": "0x1404531c0",
+  "class": "CMsgShowHandEnter"
+ },
+ {
+  "type": 1066,
+  "ctor": "0x14045aff0",
+  "class": "CMsgRebirth"
+ },
+ {
+  "type": 1068,
+  "ctor": "0x1403b58f0",
+  "class": "CMsgWebRegister"
+ },
+ {
+  "type": 1069,
+  "ctor": "0x1403865d0",
+  "class": "CMsgIPad"
+ },
+ {
+  "type": 1070,
+  "ctor": "0x1403b75b0",
+  "class": "CMsgHangUp"
+ },
+ {
+  "type": 1072,
+  "ctor": "0x140453510",
+  "class": "CMsgShowHandTrusteeship"
+ },
+ {
+  "type": 1083,
+  "ctor": "0x140451eb0",
+  "class": "CMsgSuperFlag"
+ },
+ {
+  "type": 1094,
+  "ctor": "0x140420930",
+  "class": "CMsgTransportor"
+ },
+ {
+  "type": 1095,
+  "ctor": "0x140422f50",
+  "class": "CMsgInstance"
+ },
+ {
+  "type": 1096,
+  "ctor": "0x140401810",
+  "class": "CMsgTrainingGongFu"
+ },
+ {
+  "type": 1097,
+  "ctor": "0x1404503d0",
+  "class": "CMsgTotalPowerValueSort"
+ },
+ {
+  "type": 1098,
+  "ctor": "0x140459ad0",
+  "class": "CMsgJiangHuPKSetting"
+ },
+ {
+  "type": 1101,
+  "ctor": "0x1403a5840",
+  "class": "CMsgMapItem"
+ },
+ {
+  "type": 1103,
+  "ctor": "0x140456f30",
+  "class": "CMsgMagicInfo"
+ },
+ {
+  "type": 1104,
+  "ctor": "0x1403eff70",
+  "class": "CMsgFlushExp"
+ },
+ {
+  "type": 1105,
+  "ctor": "0x140386780",
+  "class": "CMsgMagicEffect"
+ },
+ {
+  "type": 1108,
+  "ctor": "0x140387320",
+  "class": "CMsgItemInfoEx"
+ },
+ {
+  "type": 1109,
+  "ctor": "0x140456560",
+  "class": "CMsgNpcInfoEx"
+ },
+ {
+  "type": 1110,
+  "ctor": "0x140456380",
+  "class": "CMsgMapInfo"
+ },
+ {
+  "type": 1111,
+  "ctor": "0x140458b20",
+  "class": "CMsgMessageBoard"
+ },
+ {
+  "type": 1113,
+  "ctor": "0x140455ef0",
+  "class": "CMsgBODice"
+ },
+ {
+  "type": 1124,
+  "ctor": "0x1403b66d0",
+  "class": "CMsgNationality"
+ },
+ {
+  "type": 1126,
+  "ctor": "0x140455a10",
+  "class": "CMsgInviteTrans"
+ },
+ {
+  "type": 1127,
+  "ctor": "0x1403f33e0",
+  "class": "CMsgMentorPlayer"
+ },
+ {
+  "type": 1128,
+  "ctor": "0x14045a870",
+  "class": "CMsgVipUserHandle"
+ },
+ {
+  "type": 1134,
+  "ctor": "0x1403b8560",
+  "class": "CMsgAthleteShop"
+ },
+ {
+  "type": 1136,
+  "ctor": "0x1403778c0",
+  "class": "CMsgAchievement"
+ },
+ {
+  "type": 1144,
+  "ctor": "0x140453760",
+  "class": "CMsgSitDown"
+ },
+ {
+  "type": 1193,
+  "ctor": "0x1403f2a40",
+  "class": "CMsgPkStatistic"
+ },
+ {
+  "type": 1194,
+  "ctor": "0x1404507d0",
+  "class": "CMsgRouletteBet"
+ },
+ {
+  "type": 1198,
+  "ctor": "0x1404500a0",
+  "class": "CMsgRouletteAction"
+ },
+ {
+  "type": 1199,
+  "ctor": "0x1404131e0",
+  "class": "CMsgRoulette1ArgAction"
+ },
+ {
+  "type": 1201,
+  "ctor": "0x1403b6e00",
+  "class": "CMsgIPADPaymentsClient"
+ },
+ {
+  "type": 1202,
+  "ctor": "0x1404518e0",
+  "class": "CMsgIPadInfo"
+ },
+ {
+  "type": 1205,
+  "ctor": "0x1404249a0",
+  "class": "CMsgTaskReward"
+ },
+ {
+  "type": 1206,
+  "ctor": "0x14044f830",
+  "class": "CMsgPetAttack"
+ },
+ {
+  "type": 1214,
+  "ctor": "0x14042bb20",
+  "class": "CMsgActivityTask"
+ },
+ {
+  "type": 1216,
+  "ctor": "0x1404598d0",
+  "class": "CMsgActivityReward"
+ },
+ {
+  "type": 1224,
+  "ctor": "0x140459630",
+  "class": "CMsgProcessGoalTaskOpt"
+ },
+ {
+  "type": 1227,
+  "ctor": "0x1403b6340",
+  "class": "CMsgTrainingVitality"
+ },
+ {
+  "type": 1230,
+  "ctor": "0x140450dc0",
+  "class": "CMsgTrainingVitalityProtect"
+ },
+ {
+  "type": 1234,
+  "ctor": "0x14044e580",
+  "class": "CMsg2ndPwd"
+ },
+ {
+  "type": 1236,
+  "ctor": "0x1403b73e0",
+  "class": "CMsgQueryIPADPayInfoClient"
+ },
+ {
+  "type": 1315,
+  "ctor": "0x14035bb80",
+  "class": "CMsgOperatingAct"
+ }
+]

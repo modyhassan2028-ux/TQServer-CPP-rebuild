@@ -2,6 +2,10 @@
 #include "Item.h"
 #include <string>
 #include <cstdint>
+#include <utility>
+#include <functional>
+#include <vector>
+#include <map>
 
 class CGameMap;
 class CNetClient;
@@ -34,6 +38,10 @@ public:
     void SnapshotBaseStats() { m_dwBaseMaxLife = m_dwMaxLife; m_dwBaseBP = m_dwBattlePower; }
     void RecalcEquipmentBonuses();
     void SetLife(uint32_t dwLife) { m_dwLife = dwLife; }
+    void AddLife(int32_t nDelta) {
+        if (nDelta < 0 && (uint32_t)(-nDelta) > m_dwLife) m_dwLife = 0;
+        else m_dwLife = (uint32_t)(m_dwLife + nDelta);
+    }
 
     uint32_t GetBattlePower() const { return m_dwBattlePower; }
     // cq_itemaddition attack granted by currently equipped gear
@@ -63,6 +71,16 @@ public:
     // last NPC the player talked to; digit replies route to its dialog menu
     void SetTalkingNpc(uint32_t id) { m_dwTalkingNpc = id; }
     uint32_t GetTalkingNpc() const { return m_dwTalkingNpc; }
+
+    // ORIGINAL dialog reply state: the server registers every option
+    // (102/103) shown to the player with the action id it jumps to
+    // (FUN_14039d300, list capped at 20), so the client's MsgTalk answer
+    // text maps back to the next action node.
+    void PushDialogOption(const std::string& text, uint32_t dwActionId) {
+        if (m_dialogOptions.size() < 20) m_dialogOptions.push_back({text, dwActionId});
+    }
+    void ClearDialogOptions() { m_dialogOptions.clear(); }
+    const std::vector<std::pair<std::string, uint32_t>>& GetDialogOptions() const { return m_dialogOptions; }
     // cq_action dialog tree position (0 = no tree open)
     void SetDialogNode(uint32_t id) { m_dwDialogNode = id; }
     uint32_t GetDialogNode() const { return m_dwDialogNode; }
@@ -179,6 +197,31 @@ public:
     // returns false with a reason string on failure
     std::string DoReborn();
     void SetRebornCount(uint32_t v) { m_dwRebornCount = v; }
+    // ORIGINAL condition fields (CGameAction::ProcessActionUser case 1001)
+    void SetProfession(uint16_t v) { m_wProfession = v; }
+    uint16_t GetProfession() const { return m_wProfession; }
+    void SetMana(uint32_t v) { m_dwMana = v; }
+    uint32_t GetMana() const { return m_dwMana; }
+    // metempsychosis = reborn count (cq_user column)
+    uint32_t GetMetempsychosis() const { return m_dwRebornCount; }
+    // ORIGINAL magic set (CPlayerMagic port pending; 1020 "check/learn" run here)
+    bool HaveMagic(uint32_t dwType) const { return m_magics.find(dwType) != m_magics.end(); }
+    uint16_t GetMagicLevel(uint32_t dwType) const {
+        auto it = m_magics.find(dwType);
+        return it == m_magics.end() ? 0 : it->second;
+    }
+    bool LearnMagic(uint32_t dwType, uint16_t wLevel) {
+        if (!dwType) return false;
+        m_magics[dwType] = wLevel;
+        return true;
+    }
+    bool UpMagicLevel(uint32_t dwType) {
+        auto it = m_magics.find(dwType);
+        if (it == m_magics.end()) return false;
+        if (it->second < 20) it->second++; // original cap: 20?
+        return true;
+    }
+    void DeleteMagic(uint32_t dwType) { m_magics.erase(dwType); }
     // returns an error message, or "" on success
     std::string Reborn();
 
@@ -246,6 +289,9 @@ public:
 
     void Teleport(uint32_t dwMapId, uint16_t usX, uint16_t usY);
     void SendMsg(const void* pBuf, uint16_t usSize);
+    // test seam: when set, outgoing packets are captured here instead of
+    // going to the socket (system tests assert on real packet bytes)
+    void SetPacketSink(std::function<void(const void*, uint16_t)> sink) { m_packetSink = std::move(sink); }
     void SendSysMsg(const std::string& message);
 
 private:
@@ -281,6 +327,11 @@ private:
     uint32_t m_dwPkPoints{0};
     uint32_t m_dwTalkingNpc{0};
     uint32_t m_dwDialogNode{0};
+    std::vector<std::pair<std::string, uint32_t>> m_dialogOptions;
+    uint16_t m_wProfession{0};   // cq_user.profession (short @ +0xef4)
+    uint32_t m_dwMana{0};
+    std::map<uint32_t, uint16_t> m_magics; // type -> level
+    std::function<void(const void*, uint16_t)> m_packetSink;
     uint32_t m_dwAccountId{0};
     uint32_t m_dwEmoney{0};
     uint8_t m_ucLevel{1};

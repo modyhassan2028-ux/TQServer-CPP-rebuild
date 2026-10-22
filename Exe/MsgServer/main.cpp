@@ -5,6 +5,7 @@
 #include "Activity/ActivityManager.h"
 #include "LuaScript/LuaVM.h"
 #include "GroundItems.h"
+#include "Core/Root/ModuleHost.h"
 #include "UserManager.h"
 #include "Guild.h"
 #include "Item.h"
@@ -123,12 +124,16 @@ int main(int argc, char* argv[]) {
         CAccountManager::Instance().GetDB());
     cross::CCrossClient::Instance().Start();
     CGroundItemManager::Instance().Start();
+    // load the original game-system module DLLs (Modules/ ABI, ModuleCreate)
+    gs::CModuleHost::Instance().LoadDirectory("modules");
     std::cout << "[STATUS] World initialized. Listening on port " << port << " - Ctrl+C to stop." << std::endl;
 
     while (g_running.load()) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
+        gs::CModuleHost::Instance().TickAll();
     }
 
+    gs::CModuleHost::Instance().ShutdownAll();
     CNetCore::Instance().Stop();
     std::cout << "[STATUS] Server shut down cleanly." << std::endl;
     return 0;

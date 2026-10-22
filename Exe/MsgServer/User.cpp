@@ -33,6 +33,7 @@ void CUser::SendSysMsg(const std::string& message) {
 }
 
 void CUser::SendMsg(const void* pBuf, uint16_t usSize) {
+    if (m_packetSink) { m_packetSink(pBuf, usSize); return; }
     if (m_pNet)
         static_cast<CNetClient*>(m_pNet)->Send(pBuf, usSize);
 }

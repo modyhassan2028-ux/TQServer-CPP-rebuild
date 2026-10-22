@@ -51,8 +51,8 @@ void CMsgConnect::Process(uint32_t dwSender, void* pContext) {
     std::memcpy(&dwData, pData + 4, 4);
 
     tq::CStringPacker packer;
-    packer.SetBuf(const_cast<char*>(pData + 8),
-                   static_cast<uint32_t>(m_buffer.size()) - sizeof(tq::MsgHead) - 8, false);
+    packer.ParseBuf(pData + 8,
+                    static_cast<uint32_t>(m_buffer.size()) - sizeof(tq::MsgHead) - 8);
     char buf[64] = { 0 };
     if (packer.GetStrAmount() >= 2) {
         packer.GetString(0, buf, sizeof(buf) - 1);

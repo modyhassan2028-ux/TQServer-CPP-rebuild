@@ -1,5 +1,6 @@
 ﻿#include "Npc.h"
 #include "Dialog.h"
+#include "GameAction.h"
 #include "LuaScript/LuaVM.h"
 #include "Item.h"
 #include "MySQLClient.h"
@@ -19,80 +20,10 @@ CNpc::CNpc(uint32_t dwId, const std::string& name, Type type,
       m_dwMapId(dwMapId), m_usX(usX), m_usY(usY) {}
 
 
-// ORIGINAL cq_action condition (type 1001): "field op value"
-// unknown fields pass open (permissive) so dialogs stay reachable.
-static bool EvalCondition(std::shared_ptr<CUser> pUser, const std::string& strParam) {
-    static const char* kUnknown = nullptr;
-    std::string field, op; int64_t value = 0;
-    std::istringstream is(strParam);
-    is >> field >> op >> value;
-    auto ieq = [&](const char* f) {
-        if (field.size() != strlen(f)) return false;
-        for (size_t i = 0; i < field.size(); ++i)
-            if (tolower((unsigned char)field[i]) != tolower((unsigned char)f[i])) return false;
-        return true;
-    };
-    int64_t cur = 0;
-    if (ieq("metempsychosis")) cur = pUser->GetRebornCount();
-    else if (ieq("level")) cur = pUser->GetLevel();
-    else if (ieq("money")) cur = (int64_t)pUser->GetMoney();
-    else if (ieq("pk")) cur = pUser->GetPkPoints();
-    else {
-        if (kUnknown != field.c_str()) { kUnknown = field.c_str(); printf("[DIALOG] condition field '%s' not evaluated (pass).\n", field.c_str()); }
-        return true;
-    }
-    if (op == "<") return cur < value;
-    if (op == "<=") return cur <= value;
-    if (op == ">") return cur > value;
-    if (op == ">=") return cur >= value;
-    if (op == "==" || op == "=") return cur == value;
-    if (op == "!=") return cur != value;
-    return true;
-}
-
-// runs an ORIGINAL cq_action chain: 1001 conditions gate the branch,
-// 101 sends the dialog text ('~' encodes space), consecutive 102s
-// become the numbered menu shown to the player.
+// ORIGINAL flow: the chain walker now lives in CGameAction
+// (ported from the decompiled ProcessActionOS/ProcessActionUser).
 static void RunActionChain(std::shared_ptr<CUser> pUser, uint32_t dwActionId) {
-    auto& eng = CDialogEngine::Instance();
-    const CDialogEngine::Node* n = eng.GetNode(dwActionId);
-    uint32_t guard = 0;
-    pUser->SetDialogNode(0);
-    while (n && ++guard < 128) {
-        if (n->dwType == 101) { // dialog text
-            std::string s = n->strParam;
-            for (auto& c : s) if (c == '~') c = ' ';
-            pUser->SendSysMsg(s);
-            n = eng.GetNode(n->dwNext);
-            continue;
-        }
-        if (n->dwType == 1001) { // condition: pick the branch
-            uint32_t next = EvalCondition(pUser, n->strParam) ? n->dwNext : n->dwNextFail;
-            n = eng.GetNode(next);
-            continue;
-        }
-        // 1020/1056/... : unported types continue the walk (id_next) until
-        // they are ported from the decompiled CGameAction interpreter
-        n = eng.GetNode(n->dwNext);
-        if (!n) break;
-        continue;
-    }
-    // the walk ended on a 102 (or after texts): collect the menu like the
-    // original interpreter, from the position the texts led to
-    {
-        auto opts = eng.GetOptions(dwActionId);
-        if (!opts.empty()) {
-            pUser->SetDialogNode(dwActionId); // the menu the player picks from
-            std::string menu = "Options:";
-            uint32_t i = 1;
-            for (auto& o : opts) {
-                std::string t = o.strText;
-                for (auto& c : t) if (c == '~') c = ' ';
-                menu += "\n  " + std::to_string(i++) + ". " + t;
-            }
-            pUser->SendSysMsg(menu);
-        }
-    }
+    CGameAction::ProcessActionChain(pUser, dwActionId);
 }
 
 void CNpc::Interact(std::shared_ptr<CUser> pUser) {
@@ -147,16 +78,19 @@ void CNpc::Interact(std::shared_ptr<CUser> pUser) {
 }
 
 
+void CNpc::ReplyWithAction(std::shared_ptr<CUser> pUser, uint32_t dwActionId) {
+    if (!pUser) return;
+    RunActionChain(pUser, dwActionId);
+}
+
 bool CNpc::ChooseOption(std::shared_ptr<CUser> pUser, uint32_t dwIndex) {
     if (!pUser) return false;
     // ORIGINAL chain: run the action the picked option points at
-    if (m_dwActionId && CDialogEngine::Instance().IsLoaded()) {
-        uint32_t dwCur = pUser->GetDialogNode();
-        if (!dwCur || !CDialogEngine::Instance().HasNode(dwCur)) dwCur = m_dwActionId;
-        auto opts = CDialogEngine::Instance().GetOptions(dwCur);
+    if (CDialogEngine::Instance().IsLoaded()) {
+        // pending options were registered while the 102 rows were walked
+        auto& opts = pUser->GetDialogOptions();
         if (dwIndex >= 1 && dwIndex <= opts.size()) {
-            auto& o = opts[dwIndex - 1];
-            RunActionChain(pUser, o.dwTargetNode);
+            RunActionChain(pUser, opts[dwIndex - 1].second);
             return true;
         }
         pUser->SendSysMsg("No such option. Talk to me again.");

@@ -32,6 +32,21 @@ namespace tq {
     }
 
     void CStringPacker::SetBuf(char* pBuf, uint32_t nSize, bool) {
+        // serialize m_strings into pBuf: [u8 amount][u8 len][bytes]...
+        if (!pBuf || nSize == 0) return;
+        uint32_t offset = 0;
+        uint8_t count = static_cast<uint8_t>(m_strings.size());
+        pBuf[offset++] = static_cast<char>(count);
+        for (const auto& s : m_strings) {
+            uint32_t len = static_cast<uint32_t>(s.length());
+            if (offset + 1 + len > nSize) break;
+            pBuf[offset++] = static_cast<char>(len);
+            std::memcpy(pBuf + offset, s.data(), len);
+            offset += len;
+        }
+    }
+
+    void CStringPacker::ParseBuf(const char* pBuf, uint32_t nSize) {
         m_strings.clear();
         if (!pBuf || nSize == 0) return;
         uint8_t count = static_cast<uint8_t>(*pBuf);

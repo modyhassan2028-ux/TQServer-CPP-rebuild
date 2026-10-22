@@ -1,0 +1,581 @@
+[
+ {
+  "folder": "AntiCheat",
+  "name": "anticheat",
+  "dll": "AntiCheat.dll",
+  "namespace": "anticheat",
+  "ns": "anticheat",
+  "size": 48,
+  "msgs": [
+   1003,
+   10010,
+   1022,
+   2521,
+   1003,
+   10010,
+   1022,
+   2521
+  ],
+  "modes": [],
+  "mode_from_index": false
+ },
+ {
+  "folder": "Arena/Arenic",
+  "name": "arenic",
+  "dll": "Arenic.dll",
+  "namespace": "arenic",
+  "ns": "arenic",
+  "size": 40,
+  "msgs": [
+   2209,
+   2208,
+   2207,
+   2206,
+   2205,
+   2211,
+   1003,
+   1002
+  ],
+  "modes": [
+   4
+  ],
+  "mode_from_index": false
+ },
+ {
+  "folder": "Arena/TeamArenic",
+  "name": "team_arenic",
+  "dll": "TeamArenic.dll",
+  "namespace": "team_arenic",
+  "ns": "team_arenic",
+  "size": 48,
+  "msgs": [
+   2245,
+   2244,
+   2243,
+   2242,
+   2241,
+   2211,
+   2247,
+   1003,
+   1002
+  ],
+  "modes": [
+   34
+  ],
+  "mode_from_index": false
+ },
+ {
+  "folder": "Arena/ClanPKArenic",
+  "name": "clan_pk_arenic",
+  "dll": "ClanPKArenic.dll",
+  "namespace": "clan_pk_arenic",
+  "ns": "clan_pk_arenic",
+  "size": 48,
+  "msgs": [
+   1003,
+   1002,
+   2230,
+   2211,
+   2240,
+   2232,
+   2233
+  ],
+  "modes": [
+   33
+  ],
+  "mode_from_index": false
+ },
+ {
+  "folder": "Arena/ElitePKArenic",
+  "name": "elite_pk_arenic",
+  "dll": "ElitePKArenic.dll",
+  "namespace": "elitepkarenic",
+  "ns": "elitepkarenic",
+  "size": 5240,
+  "msgs": [
+   2223,
+   2219,
+   2211,
+   1002,
+   2239
+  ],
+  "modes": [
+   25
+  ],
+  "mode_from_index": false
+ },
+ {
+  "folder": "Arena/FamilyArenic",
+  "name": "family_arenic",
+  "dll": "FamilyArenic.dll",
+  "namespace": "family_arenic",
+  "ns": "family_arenic",
+  "size": 40,
+  "msgs": [
+   2216,
+   2215,
+   2214,
+   2213,
+   2212,
+   2211,
+   1003,
+   1002
+  ],
+  "modes": [],
+  "mode_from_index": false
+ },
+ {
+  "folder": "Arena/PopPKArenic",
+  "name": "pop_pk_arenic",
+  "dll": "PopPKArenic.dll",
+  "namespace": "pop_pk_arenic",
+  "ns": "pop_pk_arenic",
+  "size": 48,
+  "msgs": [
+   1003,
+   1002,
+   2250,
+   2211,
+   2260,
+   2252,
+   2253
+  ],
+  "modes": [
+   36
+  ],
+  "mode_from_index": false
+ },
+ {
+  "folder": "Arena/CrossFlagWar",
+  "name": "cross_flag_war",
+  "dll": "CrossFlagWar.dll",
+  "namespace": "cross_flag_war",
+  "ns": "cross_flag_war",
+  "size": 4192,
+  "msgs": [
+   2502,
+   2506,
+   2504,
+   2507
+  ],
+  "modes": [],
+  "mode_from_index": false
+ },
+ {
+  "folder": "Arena/FrontierFlagWar",
+  "name": "frontier_flag_war",
+  "dll": "FrontierFlagWar.dll",
+  "namespace": "frontier_flag_war",
+  "ns": "frontier_flag_war",
+  "size": 4200,
+  "msgs": [
+   2502,
+   2506,
+   2504,
+   2507
+  ],
+  "modes": [
+   37
+  ],
+  "mode_from_index": true
+ },
+ {
+  "folder": "Arena/VexillumArenic",
+  "name": "vexillum_arenic",
+  "dll": "VexillumArenic.dll",
+  "namespace": "vexillumarenic",
+  "ns": "vexillumarenic",
+  "size": 2120,
+  "msgs": [
+   2224,
+   1063
+  ],
+  "modes": [
+   28
+  ],
+  "mode_from_index": false
+ },
+ {
+  "folder": "Booth",
+  "name": "booth",
+  "dll": "Booth.dll",
+  "namespace": "booth",
+  "ns": "booth",
+  "size": 48,
+  "msgs": [
+   10010
+  ],
+  "modes": [
+   27
+  ],
+  "mode_from_index": false
+ },
+ {
+  "folder": "Competion",
+  "name": "competion",
+  "dll": "Competion.dll",
+  "namespace": "competion",
+  "ns": "competion",
+  "size": 3168,
+  "msgs": [
+   2068,
+   1003,
+   1002
+  ],
+  "modes": [
+   5
+  ],
+  "mode_from_index": false
+ },
+ {
+  "folder": "CrossStatus",
+  "name": "cross_status",
+  "dll": "CrossStatus.dll",
+  "namespace": "crossstatus",
+  "ns": "crossstatus",
+  "size": 24,
+  "msgs": [],
+  "modes": [
+   1000
+  ],
+  "mode_from_index": false
+ },
+ {
+  "folder": "DetainEquip",
+  "name": "detain_equip",
+  "dll": "DetainEquip.dll",
+  "namespace": "detainequip",
+  "ns": "detainequip",
+  "size": 2144,
+  "msgs": [
+   1009,
+   10010
+  ],
+  "modes": [
+   19
+  ],
+  "mode_from_index": false
+ },
+ {
+  "folder": "FactionMatch",
+  "name": "faction_match",
+  "dll": "FactionMatch.dll",
+  "namespace": "factionmatch",
+  "ns": "factionmatch",
+  "size": 48,
+  "msgs": [
+   2330,
+   2333,
+   1003
+  ],
+  "modes": [
+   24
+  ],
+  "mode_from_index": false
+ },
+ {
+  "folder": "Family",
+  "name": "family",
+  "dll": "Family.dll",
+  "namespace": "family",
+  "ns": "family",
+  "size": 3176,
+  "msgs": [
+   1312,
+   1313,
+   1002,
+   1003
+  ],
+  "modes": [
+   8
+  ],
+  "mode_from_index": false
+ },
+ {
+  "folder": "Flower",
+  "name": "flower",
+  "dll": "Flower.dll",
+  "namespace": "flower",
+  "ns": "flower",
+  "size": 2120,
+  "msgs": [
+   1150,
+   1002,
+   1003
+  ],
+  "modes": [
+   9
+  ],
+  "mode_from_index": false
+ },
+ {
+  "folder": "Guide",
+  "name": "guide",
+  "dll": "Guide.dll",
+  "namespace": "guide",
+  "ns": "guide",
+  "size": 5304,
+  "msgs": [
+   2065,
+   2066,
+   2067,
+   1002,
+   1003
+  ],
+  "modes": [
+   16
+  ],
+  "mode_from_index": false
+ },
+ {
+  "folder": "LeaveWord",
+  "name": "leaveword",
+  "dll": "LeaveWord.dll",
+  "namespace": "leaveword",
+  "ns": "leaveword",
+  "size": 2128,
+  "msgs": [
+   2170,
+   1002,
+   1003
+  ],
+  "modes": [
+   29
+  ],
+  "mode_from_index": false
+ },
+ {
+  "folder": "Lottery",
+  "name": "lottery",
+  "dll": "Lottery.dll",
+  "namespace": "lottery",
+  "ns": "lottery",
+  "size": 2120,
+  "msgs": [
+   1003,
+   1314
+  ],
+  "modes": [
+   10
+  ],
+  "mode_from_index": false
+ },
+ {
+  "folder": "Peerage",
+  "name": "peerage",
+  "dll": "Peerage.dll",
+  "namespace": "peerage",
+  "ns": "peerage",
+  "size": 2136,
+  "msgs": [
+   2064,
+   1002
+  ],
+  "modes": [],
+  "mode_from_index": false
+ },
+ {
+  "folder": "Pigeon",
+  "name": "pigeon",
+  "dll": "Pigeon.dll",
+  "namespace": "pigeon",
+  "ns": "pigeon",
+  "size": 2128,
+  "msgs": [
+   2050,
+   1002
+  ],
+  "modes": [],
+  "mode_from_index": false
+ },
+ {
+  "folder": "Rank",
+  "name": "rank",
+  "dll": "Rank.dll",
+  "namespace": "rank",
+  "ns": "rank",
+  "size": 2104,
+  "msgs": [
+   1151,
+   1002
+  ],
+  "modes": [
+   17
+  ],
+  "mode_from_index": false
+ },
+ {
+  "folder": "Relation",
+  "name": "relation",
+  "dll": "Relation.dll",
+  "namespace": "relation",
+  "ns": "relation",
+  "size": 6272,
+  "msgs": [
+   1002,
+   1003,
+   2046,
+   1019,
+   1041,
+   2033,
+   2047
+  ],
+  "modes": [
+   32
+  ],
+  "mode_from_index": false
+ },
+ {
+  "folder": "Sponsor",
+  "name": "sponsor",
+  "dll": "Sponsor.dll",
+  "namespace": "sponsor",
+  "ns": "sponsor",
+  "size": 2112,
+  "msgs": [
+   1064,
+   1065
+  ],
+  "modes": [
+   26
+  ],
+  "mode_from_index": false
+ },
+ {
+  "folder": "Status",
+  "name": "status",
+  "dll": "Status.dll",
+  "namespace": "status",
+  "ns": "status",
+  "size": 2112,
+  "msgs": [
+   1002,
+   2070
+  ],
+  "modes": [
+   20
+  ],
+  "mode_from_index": false
+ },
+ {
+  "folder": "Storage",
+  "name": "storage",
+  "dll": "Storage.dll",
+  "namespace": "storage",
+  "ns": "storage",
+  "size": 4192,
+  "msgs": [
+   1009,
+   1102,
+   1003,
+   1002
+  ],
+  "modes": [],
+  "mode_from_index": false
+ },
+ {
+  "folder": "TaskDetail",
+  "name": "task_detail",
+  "dll": "TaskDetail.dll",
+  "namespace": "taskdetail",
+  "ns": "taskdetail",
+  "size": 5224,
+  "msgs": [
+   1134,
+   1002,
+   1003,
+   1135,
+   3000
+  ],
+  "modes": [
+   13
+  ],
+  "mode_from_index": false
+ },
+ {
+  "folder": "Team",
+  "name": "team",
+  "dll": "Team.dll",
+  "namespace": "team",
+  "ns": "team",
+  "size": 3152,
+  "msgs": [
+   1002,
+   1003,
+   1023,
+   2045,
+   1023,
+   2045
+  ],
+  "modes": [
+   30
+  ],
+  "mode_from_index": false
+ },
+ {
+  "folder": "Title",
+  "name": "title",
+  "dll": "Title.dll",
+  "namespace": "title",
+  "ns": "title",
+  "size": 3144,
+  "msgs": [
+   1130,
+   1002,
+   1003
+  ],
+  "modes": [
+   14
+  ],
+  "mode_from_index": false
+ },
+ {
+  "folder": "Totem",
+  "name": "totem",
+  "dll": "Totem.dll",
+  "namespace": "totem",
+  "ns": "totem",
+  "size": 3152,
+  "msgs": [
+   2203,
+   2202,
+   2204
+  ],
+  "modes": [
+   21
+  ],
+  "mode_from_index": false
+ },
+ {
+  "folder": "Training",
+  "name": "training",
+  "dll": "Training.dll",
+  "namespace": "training",
+  "ns": "training",
+  "size": 3144,
+  "msgs": [
+   2044,
+   1002,
+   1003
+  ],
+  "modes": [
+   15
+  ],
+  "mode_from_index": false
+ },
+ {
+  "folder": "Wanted",
+  "name": "wanted",
+  "dll": "Wanted.dll",
+  "namespace": "wanted",
+  "ns": "wanted",
+  "size": 1088,
+  "msgs": [
+   1015
+  ],
+  "modes": [
+   31
+  ],
+  "mode_from_index": false
+ }
+]

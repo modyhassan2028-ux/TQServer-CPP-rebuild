@@ -76,7 +76,29 @@ void CMsgTalk::Process(uint32_t dwSender) {
         }
         return;
     }
-    // plain digits route to the open NPC dialog menu (original 6159 interaction)
+    // ORIGINAL 6159 reply: the client answers a 102/103 dialog with the
+    // option text itself; the server matches it against the options it
+    // registered for this player and jumps to that action node.
+    {
+        auto& opts = user->GetDialogOptions();
+        if (!opts.empty() && m_message.find("/") != 0) {
+            auto norm = [](std::string t) {
+                for (auto& c : t) if (c == '~') c = ' ';
+                return t;
+            };
+            std::string msg = norm(m_message);
+            for (auto& o : opts) {
+                if (norm(o.first) == msg) {
+                    uint32_t dwNpc = user->GetTalkingNpc();
+                    if (dwNpc >= CNpcManager::NPC_ID_BASE) {
+                        auto pNpc = CNpcManager::Instance().GetNpc(dwNpc);
+                        if (pNpc) { pNpc->ReplyWithAction(user, o.second); return; }
+                    }
+                }
+            }
+        }
+    }
+    // legacy digit picking of the open dialog menu
     if (!m_message.empty() && m_message.find_first_not_of("0123456789") == std::string::npos) {
         uint32_t dwNpc = user->GetTalkingNpc();
         if (dwNpc >= CNpcManager::NPC_ID_BASE) {
