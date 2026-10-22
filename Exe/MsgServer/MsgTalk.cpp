@@ -409,6 +409,47 @@ if (m_message.rfind("/npc", 0) == 0) {
     }
     // ---- rebirth at the level cap ----
     // ---- /fish + /catch: fish by the water for money/CP ----
+    // ---- /mine + /dig: mine ore veins for money (profession v1) ----
+    if (m_message == "/mine") {
+        static const struct { uint16_t x, y, r; } kVeins[] = { // Twin City ore veins
+            { 380, 220, 10 }, { 660, 380, 10 }, { 180, 420, 10 },
+        };
+        bool bAtVein = false;
+        for (const auto& v : kVeins) {
+            int32_t dx = (int32_t)user->GetX() - v.x;
+            int32_t dy = (int32_t)user->GetY() - v.y;
+            if (dx * dx + dy * dy <= v.r * v.r) { bAtVein = true; break; }
+        }
+        if (!bAtVein) { user->SendSysMsg("Find an ore vein to mine (rocky areas)."); return; }
+        if (user->GetMineUntil() != 0) { user->SendSysMsg("You are already mining."); return; }
+        user->SetMineUntil((uint32_t)time(nullptr) + 6); // 6s swing
+        user->SendSysMsg("You swing your pickaxe... wait 6 seconds, then type /dig.");
+        return;
+    }
+    if (m_message == "/dig") {
+        uint32_t until = user->GetMineUntil();
+        if (until == 0) { user->SendSysMsg("You are not mining. Use /mine first."); return; }
+        if ((uint32_t)time(nullptr) < until) { user->SendSysMsg("Too early - the rock is still cracking."); return; }
+        user->SetMineUntil(0);
+        int roll = std::rand() % 100;
+        if (roll < 35) { // 35%: dust
+            user->SendSysMsg("Just dust and pebbles.");
+        } else if (roll < 75) { // 40%: iron ore
+            user->AddMoney(200);
+            user->SendSysMsg("You mined iron ore! +200 money.");
+            printf("[MINE] %s iron\n", user->GetName().c_str());
+        } else if (roll < 95) { // 20%: copper
+            user->AddMoney(600);
+            user->SendSysMsg("You mined a copper vein! +600 money.");
+            printf("[MINE] %s copper\n", user->GetName().c_str());
+        } else { // 5%: gemstone
+            user->AddMoney(3000);
+            user->AddConquerPoints(3);
+            user->SendSysMsg("A gemstone sparkles in the rubble! +3000 money, +3 CP.");
+            printf("[MINE] %s gem\n", user->GetName().c_str());
+        }
+        return;
+    }
     if (m_message == "/fish") {
         static const struct { uint16_t x, y, r; } kWater[] = { // Twin City water spots
             { 240, 260, 12 }, { 610, 520, 12 }, { 420, 140, 12 },

@@ -80,6 +80,10 @@ public:
     const std::string& GetSpouseName() const { return m_strSpouse; }
     void SetSpouseName(const std::string& n) { m_strSpouse = n; }
 
+    // mining: channel end time (0 = idle)
+    uint32_t GetMineUntil() const { return m_dwMineUntil; }
+    void SetMineUntil(uint32_t t) { m_dwMineUntil = t; }
+
     // fishing: channel end time (0 = idle)
     uint32_t GetFishUntil() const { return m_dwFishUntil; }
     void SetFishUntil(uint32_t t) { m_dwFishUntil = t; }
@@ -181,6 +185,7 @@ private:
     std::string m_strLastRewardDay;
     std::string m_strSpouse;
     uint32_t m_dwFishUntil{0};
+    uint32_t m_dwMineUntil{0};
     uint32_t m_dwBaseBP{100};
     uint32_t m_dwBattlePower{100};
 
