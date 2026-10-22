@@ -19,6 +19,8 @@ public:
 
     // send a packet to every user on a map (optionally skipping one id)
     bool Broadcast(uint32_t dwMapId, const void* pBuf, uint16_t usLen, uint32_t dwExceptId = 0);
+    // world broadcast: every online user on every map
+    bool BroadcastToAll(const void* pBuf, uint16_t usLen);
 
 private:
     CMapManager() = default;

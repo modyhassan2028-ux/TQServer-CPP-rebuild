@@ -76,6 +76,10 @@ public:
     uint8_t GetLevel() const { return m_ucLevel; }
     void SetLevel(uint8_t level) { m_ucLevel = level; }
 
+    // marriage v1: spouse name persisted in cq_user.spouse_name
+    const std::string& GetSpouseName() const { return m_strSpouse; }
+    void SetSpouseName(const std::string& n) { m_strSpouse = n; }
+
     // stamina: 0..100 bar, -15 per jump, regen handled by the world tick
     uint16_t GetStamina() const { return m_usStamina; }
     void SetStamina(uint16_t v) { m_usStamina = v > 100 ? 100 : v; }
@@ -168,6 +172,7 @@ private:
     uint32_t m_dwRebornCount{0};
     uint16_t m_usStamina{100};
     std::string m_strLastRewardDay;
+    std::string m_strSpouse;
     uint32_t m_dwBaseBP{100};
     uint32_t m_dwBattlePower{100};
 

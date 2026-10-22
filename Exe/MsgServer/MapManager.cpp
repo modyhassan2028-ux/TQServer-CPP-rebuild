@@ -73,3 +73,12 @@ void CMapManager::ScanDMaps(const std::string& mapDir) {
     m_bScanned = true;
     printf("[DMAP] Indexed %zu DMap file(s).\n", m_dmapFiles.size());
 }
+
+// world broadcast: deliver the packet to every online user
+bool CMapManager::BroadcastToAll(const void* pBuf, uint16_t usLen) {
+    bool any = false;
+    for (auto& pU : CUserManager::Instance().GetAllUsers()) {
+        if (pU) { pU->SendMsg(pBuf, usLen); any = true; }
+    }
+    return any;
+}

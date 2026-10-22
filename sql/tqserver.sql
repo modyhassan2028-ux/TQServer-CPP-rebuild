@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS cq_user (       -- character sync lands in the next s
   vitality INT DEFAULT 0,
   reborn_count INT DEFAULT 0,
   last_reward_day VARCHAR(10) NOT NULL DEFAULT '',
+  spouse_name VARCHAR(64) NOT NULL DEFAULT '',
   recordmap_id INT DEFAULT 1002,
   recordx INT DEFAULT 315,
   recordy INT DEFAULT 275,

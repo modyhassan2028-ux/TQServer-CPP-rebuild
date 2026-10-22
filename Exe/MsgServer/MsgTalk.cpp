@@ -1,4 +1,6 @@
 ﻿#include "MsgTalk.h"
+#include "Account.h"
+#include "MapManager.h"
 #include "StringPacker.h"
 #include "UserManager.h"
 #include "Guild.h"
@@ -271,6 +273,65 @@ if (m_message.rfind("/npc", 0) == 0) {
         return;
     }
     // ---- team commands ----
+    // ---- marriage v1: /marry <name> propose, /marry accept, /divorce ----
+    if (m_message.rfind("/marry", 0) == 0) {
+        std::string arg = m_message.substr(6);
+        while (!arg.empty() && arg[0] == ' ') arg.erase(0, 1);
+        auto& mates = CUserManager::Instance(); // singleton holder
+        static std::map<uint32_t, uint32_t> s_pendingMarry; // target -> proposer
+        if (arg == "accept") {
+            auto it = s_pendingMarry.find(user->GetId());
+            if (it == s_pendingMarry.end()) { user->SendSysMsg("No marriage proposal pending."); return; }
+            auto proposer = mates.GetUser(it->second);
+            s_pendingMarry.erase(it);
+            if (!proposer) { user->SendSysMsg("The proposer went offline."); return; }
+            if (proposer->GetId() == user->GetId()) { user->SendSysMsg("You cannot marry yourself."); return; }
+            if (!user->GetSpouseName().empty() || !proposer->GetSpouseName().empty()) {
+                user->SendSysMsg("One of you is already married. /divorce first.");
+                return;
+            }
+            user->SetSpouseName(proposer->GetName());
+            proposer->SetSpouseName(user->GetName());
+            if (user->GetAccountId()) CAccountManager::Instance().UpdateSpouse(user->GetAccountId(), user->GetSpouseName());
+            if (proposer->GetAccountId()) CAccountManager::Instance().UpdateSpouse(proposer->GetAccountId(), proposer->GetSpouseName());
+            CMsgTalk wed;
+            if (wed.Create("SYSTEM", "", proposer->GetName() + " and " + user->GetName() +
+                           " are now married! May your blades stay sharp.", CMsgTalk::Channel_Broadcast))
+                CMapManager::Instance().BroadcastToAll(wed.GetBuf(), wed.GetSize());
+            user->SendSysMsg("You married " + proposer->GetName() + "!");
+            proposer->SendSysMsg(user->GetName() + " accepted - you are married!");
+            printf("[MARRY] %s + %s\n", proposer->GetName().c_str(), user->GetName().c_str());
+            return;
+        }
+        if (arg.empty()) { user->SendSysMsg("Usage: /marry <name> (they then type /marry accept)"); return; }
+        auto target = mates.GetUserByName(arg);
+        if (!target) { user->SendSysMsg(arg + " is not online."); return; }
+        if (target->GetId() == user->GetId()) { user->SendSysMsg("You cannot marry yourself."); return; }
+        if (!user->GetSpouseName().empty()) { user->SendSysMsg("You are already married to " + user->GetSpouseName() + "."); return; }
+        if (!target->GetSpouseName().empty()) { user->SendSysMsg(target->GetName() + " is already married."); return; }
+        s_pendingMarry[target->GetId()] = user->GetId();
+        target->SendSysMsg(user->GetName() + " proposes marriage! Type /marry accept to say yes.");
+        user->SendSysMsg("Proposal sent to " + target->GetName() + ".");
+        return;
+    }
+    if (m_message == "/divorce") {
+        if (user->GetSpouseName().empty()) { user->SendSysMsg("You are not married."); return; }
+        std::string ex = user->GetSpouseName();
+        auto target = CUserManager::Instance().GetUserByName(ex);
+        if (target) {
+            target->SetSpouseName("");
+            target->SendSysMsg(user->GetName() + " divorced you.");
+            if (target->GetAccountId()) CAccountManager::Instance().UpdateSpouse(target->GetAccountId(), "");
+        }
+        user->SetSpouseName("");
+        if (user->GetAccountId()) CAccountManager::Instance().UpdateSpouse(user->GetAccountId(), "");
+        CMsgTalk div;
+        if (div.Create("SYSTEM", "", user->GetName() + " and " + ex + " have divorced.", CMsgTalk::Channel_Broadcast))
+            CMapManager::Instance().BroadcastToAll(div.GetBuf(), div.GetSize());
+        printf("[DIVORCE] %s + %s\n", user->GetName().c_str(), ex.c_str());
+        return;
+    }
+
     if (m_message.rfind("/team", 0) == 0) {
         std::string sub = m_message.size() > 6 ? m_message.substr(6) : "";
         if (!sub.empty() && sub[0] == ' ') sub = sub.substr(1);

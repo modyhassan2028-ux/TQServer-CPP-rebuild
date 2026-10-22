@@ -44,6 +44,7 @@ public:
         uint64_t dwExperience{0};
         uint32_t dwStatPoints{0}, dwStrength{0}, dwVitality{0}, dwRebornCount{0};
         std::string strLastRewardDay;
+        std::string strSpouseName;
         uint64_t dwMoney{100000}, dwCp{5000}, dwBank{0};
         uint32_t dwPkPoints{0};
         uint32_t dwMapId{1002};
@@ -53,6 +54,7 @@ public:
     // runtime ids regenerate on load (MakeItemId) - rows store types/amounts
     struct ItemRow { uint32_t dwType; uint16_t usSort; uint32_t dwAmount; uint32_t dwPosition; std::string strName; uint8_t ucPlus{0}; };
     bool SaveRewardDay(uint32_t dwAccountId, const std::string& strDay);
+        bool UpdateSpouse(uint32_t dwAccountId, const std::string& strSpouse);
         bool LoadItems(uint32_t dwAccountId, std::vector<ItemRow>& out);
     void SaveItems(uint32_t dwAccountId, const std::vector<ItemRow>& items);
 
