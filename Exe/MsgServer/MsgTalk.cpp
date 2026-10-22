@@ -9,6 +9,9 @@
 #include "Trade.h"
 #include "Team.h"
 #include "GroundItems.h"
+#include "MsgInteract.h"
+#include "MonsterManager.h"
+#include "BattleSystem.h"
 #include "Npc.h"
 #include "User.h"
 #include "Item.h"
@@ -409,6 +412,55 @@ if (m_message.rfind("/npc", 0) == 0) {
     }
     // ---- rebirth at the level cap ----
     // ---- /fish + /catch: fish by the water for money/CP ----
+    // ---- weapon skills v1: /skills, /thunder <id>, /fastblade ----
+    if (m_message == "/skills") {
+        user->SendSysMsg("Skills: /thunder <monsterid> (level 10+, 20 stamina, 2.5x damage)\n"
+                         "         /fastblade (level 30+, 30 stamina, hits the 3 nearest, 1.5x each)\n"
+                         "         Usable on any monster on your map.");
+        return;
+    }
+    if (m_message.rfind("/thunder ", 0) == 0) {
+        if (user->GetLevel() < 10) { user->SendSysMsg("Thunder requires level 10."); return; }
+        if (!user->SpendStamina(20)) { user->SendSysMsg("Not enough stamina (20)."); return; }
+        uint32_t id = strtoul(m_message.substr(9).c_str(), nullptr, 10);
+        auto pMonster = CMonsterManager::Instance().GetMonsterById(id);
+        if (!pMonster || !pMonster->IsAlive() || pMonster->GetMapId() != user->GetMapId()) {
+            user->SendSysMsg("No such monster here. /skills for usage."); return;
+        }
+        uint32_t base = CBattleSystem::Instance().CalcMonsterDamage(user.get(), pMonster.get());
+        uint32_t dmg = base * 5 / 2; // 2.5x melee
+        CMsgInteract::ResolveMonsterHit(user.get(), id, dmg, 21, user->GetX(), user->GetY());
+        user->SendSysMsg("THUNDER strikes " + pMonster->GetName() + " for " + std::to_string(dmg) + "!");
+        return;
+    }
+    if (m_message == "/fastblade") {
+        if (user->GetLevel() < 30) { user->SendSysMsg("FastBlade requires level 30."); return; }
+        if (!user->SpendStamina(30)) { user->SendSysMsg("Not enough stamina (30)."); return; }
+        // the 3 nearest living monsters on the map, 1.5x melee each
+        auto monsters = CMonsterManager::Instance().GetMapMonsters(user->GetMapId());
+        std::vector<std::pair<uint32_t, uint32_t>> hits; // (dist2, id)
+        for (auto& m : monsters) {
+            if (!m || !m->IsAlive()) continue;
+            uint32_t dx = (uint32_t)abs((int)m->GetX() - (int)user->GetX());
+            uint32_t dy = (uint32_t)abs((int)m->GetY() - (int)user->GetY());
+            hits.push_back({ dx * dx + dy * dy, m->GetId() });
+        }
+        std::sort(hits.begin(), hits.end());
+        uint32_t n = 0;
+        for (auto& h : hits) {
+            if (n >= 3) break;
+            auto pMonster = CMonsterManager::Instance().GetMonsterById(h.second);
+            if (!pMonster || !pMonster->IsAlive()) continue;
+            uint32_t base = CBattleSystem::Instance().CalcMonsterDamage(user.get(), pMonster.get());
+            uint32_t dmg = base * 3 / 2; // 1.5x melee
+            CMsgInteract::ResolveMonsterHit(user.get(), h.second, dmg, 21,
+                                            user->GetX(), user->GetY());
+            ++n;
+        }
+        user->SendSysMsg("FASTBLADE sweeps " + std::to_string(n) + " monster(s)!");
+        return;
+    }
+
     // ---- riding: buy a horse once, then /ride on|off for free jumps ----
     if (m_message == "/buyhorse") {
         const uint64_t kHorsePrice = 100000;

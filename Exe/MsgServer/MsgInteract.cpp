@@ -140,22 +140,39 @@ void CMsgInteract::Process(uint32_t dwSender) {
     }
 
     // v1: any interact aimed at a monster id is resolved as a melee hit
-    auto pMonster = CMonsterManager::Instance().GetMonsterById(m_data.dwTargetId);
+    {
+        auto pMonster = CMonsterManager::Instance().GetMonsterById(m_data.dwTargetId);
+        if (!pMonster) return;
+        ResolveMonsterHit(pAttacker.get(), m_data.dwTargetId,
+                           CBattleSystem::Instance().CalcMonsterDamage(pAttacker.get(), pMonster.get()),
+                           m_data.usAction, m_data.usX, m_data.usY);
+    }
+
+}
+
+// shared monster-hit resolution: damage -> broadcast -> retaliation ->
+// the full kill pipeline (drops, task, xp, team share, quest, loot, pk
+// decay). Weapon skills reuse it with their own damage numbers.
+void CMsgInteract::ResolveMonsterHit(CUser* pAttacker, uint32_t dwTargetId,
+                                     uint32_t dwDamage, uint16_t usAction,
+                                     uint16_t usX, uint16_t usY) {
+    // team share APIs take the shared_ptr handle - recover it by user id
+    auto pAttackerRef = CUserManager::Instance().GetUser(pAttacker->GetId());
+    // v1: any interact aimed at a monster id is resolved as a melee hit
+    auto pMonster = CMonsterManager::Instance().GetMonsterById(dwTargetId);
     if (!pMonster) return;
 
     if (!pMonster->IsAlive()) return;
     if (pMonster->GetMapId() != pAttacker->GetMapId()) return;
 
-    // simple v1 damage: base + level scale + random, replaces the full
-    // BattleSystem formula (crit/dodge/weapon types) which ports later
-    uint32_t dwDamage = CBattleSystem::Instance().CalcMonsterDamage(pAttacker.get(), pMonster.get());
+    // dwDamage comes from the caller: melee roll or a skill's own formula
     uint32_t dwLife = pMonster->GetLife() > dwDamage ? pMonster->GetLife() - dwDamage : 0;
     pMonster->SetLife(dwLife);
 
     // echo the strike to everyone on the map, damage carried in dwData
     CMsgInteract resp;
-    resp.Create(m_data.usAction, m_data.dwTargetId, dwDamage,
-                m_data.usX, m_data.usY, pAttacker->GetId());
+    resp.Create(usAction, dwTargetId, dwDamage,
+                usX, usY, pAttacker->GetId());
     CMapManager::Instance().Broadcast(pAttacker->GetMapId(), resp.GetBuf(), resp.GetSize());
 
     printf("[BATTLE] %s hits %s for %u dmg (life %u/%u)\n",
@@ -164,7 +181,7 @@ void CMsgInteract::Process(uint32_t dwSender) {
 
     // the monster fights back: retaliation damage to the attacker
     if (pMonster->IsAlive()) {
-        uint32_t back = CBattleSystem::Instance().CalcPlayerDamage(pMonster.get(), pAttacker.get());
+        uint32_t back = CBattleSystem::Instance().CalcPlayerDamage(pMonster.get(), pAttacker);
         uint32_t heroLife = pAttacker->GetLife() > back ? pAttacker->GetLife() - back : 0;
         pAttacker->SetLife(heroLife);
         std::vector<AttribPair> attribs = { { CMsgUserAttrib::Attrib_Life, heroLife } };
@@ -207,7 +224,7 @@ void CMsgInteract::Process(uint32_t dwSender) {
         if (pMonster->IsBoss()) dwXp *= 20; // world boss jackpot
         pAttacker->AddExperience(dwXp);
         // teammates on the same map each earn half the kill XP
-        CTeamManager::Instance().ShareKillXp(pAttacker, dwXp);
+        CTeamManager::Instance().ShareKillXp(pAttackerRef, dwXp);
         // daily hunt quest: every monster kill counts
         pAttacker->AddQuestKill();
         if (!pAttacker->IsQuestClaimed() && pAttacker->GetQuestKills() == 10)
@@ -219,7 +236,7 @@ void CMsgInteract::Process(uint32_t dwSender) {
                 CMapManager::Instance().BroadcastToAll(note.GetBuf(), note.GetSize());
         }
         // attacker rewards: base bounty; teams split it among same-map members
-        CTeamManager::Instance().ShareKillReward(pAttacker, 50, 1);
+        CTeamManager::Instance().ShareKillReward(pAttackerRef, 50, 1);
         pAttacker->AddMoney(50);
         pAttacker->AddConquerPoints(1);
         // cq_dropitemrule: roll the monster's loot table (v1: straight to bag)

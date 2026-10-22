@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include "Msg.h"
+
+class CUser;
 #include <cstdint>
 
 // Packet 1022 (0x3FE) - MsgInteract, 40 bytes total.
@@ -30,6 +32,10 @@ public:
                 uint16_t usX, uint16_t usY, uint32_t dwSenderId);
 
     void Process(uint32_t dwSender) override;
+    // shared monster-hit pipeline; skills call it with skill damage
+    static void ResolveMonsterHit(CUser* pAttacker, uint32_t dwTargetId,
+                                 uint32_t dwDamage, uint16_t usAction,
+                                 uint16_t usX, uint16_t usY);
 
     // wire accessors for received packets
     uint16_t GetAction() const;
