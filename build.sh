@@ -27,7 +27,9 @@ echo "[2/7] CQCrossServer.exe (cross hub)..."
 $CC $INC $WARN -IExe/CQCrossServer Exe/CQCrossServer/main.cpp Exe/CQCrossServer/CrossKernel.cpp \
     -lws2_32 -o build/CQCrossServer.exe
 
-echo "[3/7] NpcServer.exe...
+# renumber handled below
+
+echo "[3/7] NpcServer.exe..."
 # renumber handled below
 
 $CC $INC $WARN Exe/NpcServer/main.cpp -o build/NpcServer.exe
