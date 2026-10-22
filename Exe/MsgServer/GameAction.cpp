@@ -181,6 +181,30 @@ bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogE
         }
         return false; // nothing equipped there -> ORIGINAL lookup null -> 0
     }
+    case 1062: { // ORIGINAL var-cluster case 0x35: string var == compare
+        // sscanf "var(%d) %s %s"; op MUST be exactly "=="; FUN_140164570
+        // returns the raw char* of the string slot (empty if never set).
+        int nIdx = 0; char szOp[64] = {0}, szVal[256] = {0};
+        if (sscanf(pNode->strParam.c_str(), "var(%d) %63s %255s", &nIdx, szOp, szVal) != 3) {
+            return false; // ORIGINAL: log "Wrong param number" -> 0
+        }
+        if (strcmp(szOp, "==") != 0) return false; // ORIGINAL: 3-byte compare with "=="
+        const char* psz = pUser->GetActionVarStr(nIdx);
+        // ORIGINAL quirk: acting record type == 0x426 (1062) -> strcmp,
+        // otherwise _stricmp. Kept literally for fidelity.
+        if (pNode->dwType == 1062) return strcmp(psz, szVal) == 0;
+        return _stricmp(psz, szVal) == 0;
+    }
+    case 1063: { // ORIGINAL var-cluster case 0x36 -> FUN_1401645e0: string set
+        // sscanf "var(%d) %s %s" -> unconditional std::string assign,
+        // returns 1; the op word ("set") is ignored; idx>7 logs + no-op.
+        int nIdx = 0; char szOp[64] = {0}, szVal[256] = {0};
+        if (sscanf(pNode->strParam.c_str(), "var(%d) %63s %255s", &nIdx, szOp, szVal) != 3) {
+            return false; // ORIGINAL: log "Wrong param number" -> 0
+        }
+        pUser->SetActionVarStr(nIdx, szVal);
+        return true;
+    }
     case 1027: { // ORIGINAL switch case 0x13 -> FUN_140164440:
         // return (user->vtable+0x48)() != 0 - the mate id (cq_user.mateid).
         // NOTE: the cq_action param ("self angelwing", 3,379 rows) is NEVER
