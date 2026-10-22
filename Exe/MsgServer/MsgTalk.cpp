@@ -1,4 +1,6 @@
 ﻿#include "MsgTalk.h"
+#include <ctime>
+#include <cstdlib>
 #include "Account.h"
 #include "MapManager.h"
 #include "StringPacker.h"
@@ -406,6 +408,43 @@ if (m_message.rfind("/npc", 0) == 0) {
         return;
     }
     // ---- rebirth at the level cap ----
+    // ---- /fish + /catch: fish by the water for money/CP ----
+    if (m_message == "/fish") {
+        static const struct { uint16_t x, y, r; } kWater[] = { // Twin City water spots
+            { 240, 260, 12 }, { 610, 520, 12 }, { 420, 140, 12 },
+        };
+        bool bNearWater = false;
+        for (const auto& w : kWater) {
+            int32_t dx = (int32_t)user->GetX() - w.x;
+            int32_t dy = (int32_t)user->GetY() - w.y;
+            if (dx * dx + dy * dy <= w.r * w.r) { bNearWater = true; break; }
+        }
+        if (!bNearWater) { user->SendSysMsg("You need to stand near water to fish."); return; }
+        if (user->GetFishUntil() != 0) { user->SendSysMsg("You are already fishing."); return; }
+        user->SetFishUntil((uint32_t)time(nullptr) + 8); // 8s cast
+        user->SendSysMsg("You cast your line... wait 8 seconds, then type /catch.");
+        return;
+    }
+    if (m_message == "/catch") {
+        uint32_t until = user->GetFishUntil();
+        if (until == 0) { user->SendSysMsg("You are not fishing. Use /fish first."); return; }
+        if ((uint32_t)time(nullptr) < until) { user->SendSysMsg("Too early - the fish is still circling."); return; }
+        user->SetFishUntil(0);
+        int roll = std::rand() % 100;
+        if (roll < 45) { // 45%: nothing
+            user->SendSysMsg("Nothing took the bait...");
+        } else if (roll < 85) { // 40%: common fish +150 money
+            user->AddMoney(150);
+            user->SendSysMsg("You caught a small fish! +150 money.");
+            printf("[FISH] %s small fish\n", user->GetName().c_str());
+        } else { // 15%: golden fish
+            user->AddMoney(2000);
+            user->AddConquerPoints(2);
+            user->SendSysMsg("A golden fish! +2000 money, +2 CP.");
+            printf("[FISH] %s golden fish\n", user->GetName().c_str());
+        }
+        return;
+    }
     if (m_message == "/reborn") {
         std::string err = user->Reborn();
         if (!err.empty()) user->SendSysMsg(err);

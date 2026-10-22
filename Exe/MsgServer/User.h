@@ -80,6 +80,10 @@ public:
     const std::string& GetSpouseName() const { return m_strSpouse; }
     void SetSpouseName(const std::string& n) { m_strSpouse = n; }
 
+    // fishing: channel end time (0 = idle)
+    uint32_t GetFishUntil() const { return m_dwFishUntil; }
+    void SetFishUntil(uint32_t t) { m_dwFishUntil = t; }
+
     // stamina: 0..100 bar, -15 per jump, regen handled by the world tick
     uint16_t GetStamina() const { return m_usStamina; }
     void SetStamina(uint16_t v) { m_usStamina = v > 100 ? 100 : v; }
@@ -176,6 +180,7 @@ private:
     uint16_t m_usStamina{100};
     std::string m_strLastRewardDay;
     std::string m_strSpouse;
+    uint32_t m_dwFishUntil{0};
     uint32_t m_dwBaseBP{100};
     uint32_t m_dwBattlePower{100};
 
