@@ -44,6 +44,7 @@ public:
     uint64_t GetMoney() const { return m_dwMoney; }
     uint64_t GetBank() const { return m_dwBank; }
     void SetBank(uint64_t v) { m_dwBank = v; }
+    void AddBank(int64_t delta) { if (delta >= 0) m_dwBank += (uint64_t)delta; else m_dwBank = (m_dwBank > (uint64_t)(-delta)) ? m_dwBank - (uint64_t)(-delta) : 0; }
     uint32_t GetPkPoints() const { return m_dwPkPoints; }
     void AddPkPoints(uint32_t v) { m_dwPkPoints += v; }
     void SetPkPoints(uint32_t v) { m_dwPkPoints = v; }

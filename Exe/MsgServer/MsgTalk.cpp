@@ -187,6 +187,35 @@ if (m_message.rfind("/npc", 0) == 0) {
         }
         return;
     }
+    // ---- warehouse: /wh deposit|withdraw|info <amount> ----
+    if (m_message.rfind("/wh ", 0) == 0 || m_message == "/wh") {
+        std::istringstream iss(m_message.size() > 4 ? m_message.substr(4) : "");
+        std::string op; int64_t amount = 0;
+        iss >> op >> amount;
+        if (op == "deposit" && amount > 0) {
+            if (user->GetMoney() < (uint64_t)amount) {
+                user->SendSysMsg("Not enough money to deposit.");
+            } else {
+                user->AddMoney(-amount);
+                user->AddBank(amount);
+                user->SendSysMsg("Deposited " + std::to_string(amount) +
+                                 " money. Warehouse: " + std::to_string(user->GetBank()));
+            }
+        } else if (op == "withdraw" && amount > 0) {
+            if (user->GetBank() < (uint64_t)amount) {
+                user->SendSysMsg("Warehouse holds only " + std::to_string(user->GetBank()) + ".");
+            } else {
+                user->AddBank(-amount);
+                user->AddMoney(amount);
+                user->SendSysMsg("Withdrew " + std::to_string(amount) +
+                                 " money. Warehouse: " + std::to_string(user->GetBank()));
+            }
+        } else {
+            user->SendSysMsg("Warehouse: " + std::to_string(user->GetBank()) +
+                             " money. Usage: /wh deposit|withdraw <amount>");
+        }
+        return;
+    }
     if (m_message.rfind("/bank", 0) == 0) {
         std::string arg = m_message.length() > 5 ? m_message.substr(6) : "";
         std::string sub;
