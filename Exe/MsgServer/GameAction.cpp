@@ -1,6 +1,7 @@
 ﻿#include "GameAction.h"
 #include "MsgDialog.h"
 #include "User.h"
+#include "MapManager.h"
 #include "PlayerMagic.h"
 #include "Log.h"
 #include "Dialog.h"
@@ -120,6 +121,36 @@ bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogE
     switch (pNode->dwType) {
     case 1001: // ORIGINAL switch case 0: user data condition ("field op value")
         return ProcessDataCondition(pUser, pNode->strParam);
+    case 1003: { // ORIGINAL switch case 2: teleport "mapid x y [force]"
+        uint32_t dwMap = 0; int nX = 0, nY = 0, nForce = 0;
+        if (sscanf(pNode->strParam.c_str(), "%u %d %d %d", &dwMap, &nX, &nY, &nForce) < 3) {
+            // ORIGINAL: log_InlineLogDBERROR (gameaction.cpp:0x26ac) -> return 0
+            return false;
+        }
+        // ORIGINAL guard FUN_140119510: map-flag bit 0x40 blocks the teleport
+        // unless the 4th param forces it. Our maps carry no flag dword yet,
+        // so the gate defaults open (see FlyMap TODO).
+        auto pMap = CMapManager::Instance().GetMap(dwMap);
+        if (!pMap) {
+            printf("[DIALOG] 1003: map[%u] is not exist, Action[%u]\n", dwMap, pNode->dwId);
+            return false;
+        }
+        if (!pMap->IsPassable((uint16_t)nX, (uint16_t)nY)) {
+            printf("[DIALOG] 1003: map[%u] pos.x[%d] pos.y[%d] can not stand, Action[%u]\n",
+                   dwMap, nX, nY, pNode->dwId);
+            return false;
+        }
+        // FlyMap codes: 0 success (chain continues), 1 cross-doc transfer
+        // (success + the ORIGINAL halts the chain via param_1[1]=0 - not
+        // reachable in our single-doc build), 2 mount gate, -1 error.
+        int32_t nFly = pUser->FlyMap(dwMap, (uint32_t)nX, (uint32_t)nY, nForce != 0);
+        if (nFly == 0 || nFly == 1) return true;
+        if (nFly == 2) return false;
+        // -1: ORIGINAL re-flies the player to the recorded position, logs
+        // DAT_14070e870 and sends DAT_14070e850, then the action fails.
+        printf("[DIALOG] 1003: FlyMap error, Action[%u]\n", pNode->dwId);
+        return false;
+    }
     case 1010: { // ORIGINAL switch case 9: talk message on a channel
         // vtable+0x150(user, data?data:2000, "%s", param) -> MsgTalk (1004)
         pUser->SendTalkMsg(pNode->strParam, pNode->dwData ? pNode->dwData : 2000);

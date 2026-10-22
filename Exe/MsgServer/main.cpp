@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    CMapManager::Instance().RegisterDefaultMaps();
+    CMapManager::Instance().LoadMapsFromDb(CAccountManager::Instance().GetDB());
     CAccountManager::Instance().Load();
     // MySQL persistence: TQ_DB_HOST/PORT/USER/PASS/NAME override the defaults
     CAccountManager::Instance().TryMySQL(

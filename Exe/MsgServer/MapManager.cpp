@@ -1,5 +1,6 @@
 ﻿#include "MapManager.h"
 #include "User.h"
+#include "MySQLClient.h"
 #include "UserManager.h"
 #include "DMap.h"
 #include <filesystem>
@@ -31,13 +32,24 @@ std::shared_ptr<CGameMap> CMapManager::GetOrCreate(uint32_t dwId, const std::str
     return pMap;
 }
 
-void CMapManager::RegisterDefaultMaps() {
-    // base 6159-family maps (id, name) - full list loads from GameMap config later
-    GetOrCreate(1000, "Desert");
-    GetOrCreate(1001, "Canyon");
-    GetOrCreate(1002, "Twin City");
-    GetOrCreate(1015, "Bird Island");
-    GetOrCreate(1020, "Ape Mountain");
+// ORIGINAL: the map-doc materializes a CGameMap per cq_map row (id, name).
+// Safe zone = Twin City (1002) as before the full flag dword is ported.
+uint32_t CMapManager::LoadMapsFromDb(CMySQLClient* pDB) {
+    if (!pDB) return 0;
+    if (!pDB->Query("SELECT id, name FROM cq_map")) {
+        printf("[MAP] cq_map load failed: %s\n", pDB->GetError().c_str());
+        return 0;
+    }
+    uint32_t n = 0;
+    for (auto& row : pDB->GetRows()) {
+        if (row.size() < 2) continue;
+        uint32_t id = (uint32_t)strtoul(row[0].c_str(), nullptr, 10);
+        if (!id) continue;
+        GetOrCreate(id, row[1]);
+        ++n;
+    }
+    printf("[MAP] cq_map loaded: %u map(s).\n", n);
+    return n;
 }
 
 bool CMapManager::Broadcast(uint32_t dwMapId, const void* pBuf, uint16_t usLen, uint32_t dwExceptId) {

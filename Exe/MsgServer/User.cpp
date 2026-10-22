@@ -3,6 +3,7 @@
 #include "MsgTalk.h"
 #include <iostream>
 #include "NetCore.h"
+#include "MapManager.h"
 #include "Npc.h"
 #include "MsgNpcInfo.h"
 #include "Account.h"
@@ -12,20 +13,50 @@ CUser::CUser(uint32_t dwId) : m_dwId(dwId) {}
 CUser::~CUser() = default;
 
 void CUser::Teleport(uint32_t dwMapId, uint16_t usX, uint16_t usY) {
-    m_dwMapId = dwMapId;
-    m_usX = usX;
-    m_usY = usY;
     std::cout << "[GM System] Teleported User " << m_name << " (ID: " << m_dwId << ") to Map "
               << dwMapId << " (" << usX << ", " << usY << ")\n";
+    FlyMap(dwMapId, usX, usY, true);
     SendSysMsg("Teleported to Map " + std::to_string(dwMapId) + " at (" + std::to_string(usX) + ", " + std::to_string(usY) + ")");
+}
 
-    // announce the NPCs of the destination map (CMsgNpcInfo 2030)
+// ---------------------------------------------------------------------------
+// ORIGINAL FUN_1401c55b0 CUser::FlyMap(this, mapid, x, y, flag)
+int32_t CUser::FlyMap(uint32_t dwMapId, uint32_t usX, uint32_t usY, bool bForce) {
+    (void)bForce; // map-flag bit 0x40 / force param resolved upstream (1003)
+    if (m_dwMapId == 0) {
+        // ORIGINAL: log_InlineLogWARNING(&DAT_14071f828); return -1
+        return -1;
+    }
+    // same-map (or mapid==0): ORIGINAL vtable+0x370 Jump(x, y) -> return 0
+    if (dwMapId == 0 || dwMapId == m_dwMapId) {
+        m_usX = (uint16_t)usX;
+        m_usY = (uint16_t)usY;
+        return 0;
+    }
+    // ORIGINAL FUN_1401a4030 leave-map gate -> FUN_140179040, return -1
+    // (TODO(port): no leave-gates ported yet)
+    auto pMap = CMapManager::Instance().GetMap(dwMapId);
+    if (!pMap) return -1;                                   // map not found -> -1
+    // ORIGINAL cross-doc transfer: map-doc id != current doc ->
+    // FUN_1401995a0 (transfer) -> return 1. Our build is a single map-doc.
+    // ORIGINAL IsStandable re-check (FUN_1402c3cc0):
+    if (!pMap->IsPassable((uint16_t)usX, (uint16_t)usY)) {
+        printf("[MAP] CUser::FlyMap() oldmap%u, map%u(%u, %u), user_id(%u) at user.cpp:0x2789\n",
+               m_dwMapId, dwMapId, usX, usY, m_dwId);
+        return -1;
+    }
+    // ORIGINAL mount gate (return 2 / STR_EQUIP_HORSE): TODO(port)
+    // move: position fields + NPC announce of the destination map (2030)
+    m_dwMapId = dwMapId;
+    m_usX = (uint16_t)usX;
+    m_usY = (uint16_t)usY;
     for (auto& pNpc : CNpcManager::Instance().GetNpcsOnMap(dwMapId)) {
         CMsgNpcInfo info;
         if (info.Create(pNpc->GetId(), pNpc->GetLookface(), pNpc->GetX(), pNpc->GetY(),
                         pNpc->GetDir(), pNpc->GetName()))
             SendMsg(info.GetBuf(), info.GetSize());
     }
+    return 0;                                                // success in-doc
 }
 
 bool CUser::SendTalkMsg(const std::string& strText, uint32_t dwChannel) {

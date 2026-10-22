@@ -121,6 +121,6 @@ private:
     CNpcManager() = default;
     std::map<uint32_t, std::shared_ptr<CNpc>> m_npcs;
     std::vector<TaskDef> m_taskDefs;
-    std::mutex m_mutex;
+    std::recursive_mutex m_mutex; // SpawnDefaults may re-enter via SpawnNpcsFromDB
     bool m_bSpawned{false};
 };

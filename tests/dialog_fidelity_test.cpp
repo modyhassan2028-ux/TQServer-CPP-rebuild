@@ -11,6 +11,7 @@
 #include "MsgTalk.h"
 #include "User.h"
 #include "PlayerMagic.h"
+#include "MapManager.h"
 #include "MySQLClient.h"
 #include <cassert>
 #include <cstring>
@@ -32,6 +33,8 @@ int main() {
     printf("[ok] cq_action loaded\n");
     assert(CMagicTypePool::Instance().LoadFromDB(pDB));
     printf("[ok] cq_magictype loaded (%zu stages)\n", CMagicTypePool::Instance().Count());
+    // maps from the ORIGINAL cq_map table (map-doc materialization)
+    CMapManager::Instance().LoadMapsFromDb(pDB);
 
     auto up = std::make_shared<CUser>(999001); up->SetName("Tester"); // synthetic owner id
     CUser& u = *up;
@@ -201,6 +204,35 @@ int main() {
     fclose(fp); system("rm -f gmlog/fidelity_test");
     assert(nLn == 2 && "two appended lines");
     printf("[ok] 1010 talk channel + 1085 gmlog match case 9/0x4b\n");
+
+    // --- 1003 (case 2): teleport "mapid x y [force]" ---
+    uint32_t dwTargetMap = 1002; // Twin City from cq_map
+    CDialogEngine::Node ndTp; ndTp.dwType = 1003; ndTp.dwId = 9993;
+    ndTp.strParam = std::to_string(dwTargetMap) + " 300 300";
+    auto u6 = std::make_shared<CUser>(999001);
+    u6->SetMapId(1002); u6->SetPos(400, 400);   // already on Twin City
+    // same-map jump: FlyMap 0, position updated, map unchanged
+    assert(CGameAction::ProcessActionUser(u6, &ndTp));
+    assert(u6->GetMapId() == 1002 && u6->GetX() == 300 && u6->GetY() == 300);
+    // different map: cross-map teleport (our maps are all one doc -> 0)
+    u6->SetMapId(1000); u6->SetPos(50, 50);
+    CDialogEngine::Node ndTp2; ndTp2.dwType = 1003; ndTp2.dwId = 9994;
+    ndTp2.strParam = std::to_string(dwTargetMap) + " 320 320";
+    assert(CGameAction::ProcessActionUser(u6, &ndTp2));
+    assert(u6->GetMapId() == 1002 && u6->GetX() == 320 && u6->GetY() == 320);
+    // nonexistent map: original logs "map[%lu] is not exist" and fails
+    CDialogEngine::Node ndTp3; ndTp3.dwType = 1003; ndTp3.dwId = 9995;
+    ndTp3.strParam = "999999999 100 100";
+    assert(!CGameAction::ProcessActionUser(u6, &ndTp3));
+    assert(u6->GetMapId() == 1002 && "failed teleport leaves position");
+    // malformed param (<3 fields): DBERROR path -> false
+    CDialogEngine::Node ndTp4; ndTp4.dwType = 1003; ndTp4.dwId = 9996;
+    ndTp4.strParam = "1002";
+    assert(!CGameAction::ProcessActionUser(u6, &ndTp4));
+    // FlyMap: mapid 0 = same-map jump like the original branch
+    assert(u6->FlyMap(0, 111, 222, false) == 0);
+    assert(u6->GetX() == 111 && u6->GetY() == 222);
+    printf("[ok] 1003 teleport matches FlyMap FUN_1401c55b0 codes\n");
 
     printf("DIALOG FIDELITY TEST PASSED\n");
     return 0;

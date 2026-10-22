@@ -15,7 +15,9 @@ public:
 
     // scan <mapDir> recursively for .DMap files and index them by map id
     void ScanDMaps(const std::string& mapDir = "map");
-    void RegisterDefaultMaps();
+    // ORIGINAL: the map-doc loads every cq_map row; FindMap(id) succeeds
+    // exactly for rows present in the original database.
+    uint32_t LoadMapsFromDb(class CMySQLClient* pDB);
 
     // send a packet to every user on a map (optionally skipping one id)
     bool Broadcast(uint32_t dwMapId, const void* pBuf, uint16_t usLen, uint32_t dwExceptId = 0);

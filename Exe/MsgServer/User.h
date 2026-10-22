@@ -296,6 +296,16 @@ public:
     void SetInvisible(bool inv) { m_bInvisible = inv; }
 
     void Teleport(uint32_t dwMapId, uint16_t usX, uint16_t usY);
+    // ORIGINAL CUser::FlyMap @ 0x1401c55b0 (user.cpp): move the player to a
+    // map/cell. Return codes (consumed by cq_action 1003, gameaction.cpp
+    // case 2): 0 = moved inside this map-doc (action succeeds, chain walks
+    // id_next), 1 = transfer to another map-doc (action succeeds and HALTS
+    // the chain), 2 = mount gate refused (action fails), -1 = error (action
+    // fails; the original then re-flies the player to the recorded pos).
+    // TODO(port): map-flag bit 0x40 gates, transform clear (0x26/0x194),
+    // leave-map check FUN_1401a4030, os-enter gate FUN_14016ced0, mount
+    // gate (STR_EQUIP_HORSE) and the cross-doc transfer FUN_1401995a0.
+    int32_t FlyMap(uint32_t dwMapId, uint32_t usX, uint32_t usY, bool bForce);
     void SendMsg(const void* pBuf, uint16_t usSize);
     // test seam: when set, outgoing packets are captured here instead of
     // going to the socket (system tests assert on real packet bytes)

@@ -218,7 +218,7 @@ uint32_t CNpcManager::SpawnNpcsFromDB(CMySQLClient* pDB) {
         printf("[NPC] cq_npc load failed: %s\n", pDB->GetError().c_str());
         return 0;
     }
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
     uint32_t spawned = 0;
     for (auto& row : pDB->GetRows()) {
         if (row.size() < 8) continue;
@@ -242,7 +242,7 @@ uint32_t CNpcManager::SpawnNpcsFromDB(CMySQLClient* pDB) {
 }
 
 void CNpcManager::SpawnDefaults() {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
     if (m_bSpawned) return;
     m_bSpawned = true;
 
@@ -388,14 +388,14 @@ void CNpcManager::SpawnDefaults() {
 }
 
 std::shared_ptr<CNpc> CNpcManager::GetNpc(uint32_t dwId) {
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
     auto it = m_npcs.find(dwId);
     return it == m_npcs.end() ? nullptr : it->second;
 }
 
 std::vector<std::shared_ptr<CNpc>> CNpcManager::GetNpcsOnMap(uint32_t dwMapId) {
     SpawnDefaults();
-    std::lock_guard<std::mutex> lock(m_mutex);
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
     std::vector<std::shared_ptr<CNpc>> out;
     for (auto& kv : m_npcs)
         if (kv.second->GetMapId() == dwMapId) out.push_back(kv.second);
