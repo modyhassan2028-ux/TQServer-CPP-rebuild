@@ -1,6 +1,8 @@
 ﻿#include "GroundItems.h"
 #include "User.h"
 #include "Item.h"
+#include "Team.h"
+#include "UserManager.h"
 #include <thread>
 #include <chrono>
 #include <cstdio>
@@ -90,7 +92,7 @@ std::string CGroundItemManager::Pick(std::shared_ptr<CUser> pUser) {
         info.dwPosition = 255;
         pUser->AddItem(info);
     }
-    if (d.qwMoney > 0) pUser->AddMoney(d.qwMoney);
+    if (d.qwMoney > 0) TeamShare(pUser, d.qwMoney);
     pUser->SendSysMsg("Picked up " + d.strName + ".");
     return "";
 }
@@ -136,4 +138,31 @@ void CGroundItemManager::OnPlayerDeath(std::shared_ptr<CUser> pVictim) {
     m_drops[d.dwDropId] = d;
     printf("[DROPS] %s dropped %llu money at their corpse.\n",
            pVictim->GetName().c_str(), (unsigned long long)qwLoss);
+}
+
+// team loot: a picked money pile splits equally among the picker's team
+// members on the same map (original model: all online members share drops)
+void CGroundItemManager::TeamShare(std::shared_ptr<CUser> pPicker, uint64_t qwMoney) {
+    auto pTeam = CTeamManager::Instance().GetTeamOf(pPicker->GetId());
+    std::vector<std::shared_ptr<CUser>> sharers;
+    sharers.push_back(pPicker);
+    if (pTeam) {
+        for (uint32_t id : pTeam->GetMembers()) {
+            if (id == pPicker->GetId()) continue;
+            auto m = CUserManager::Instance().GetUser(id);
+            if (m && m->GetMapId() == pPicker->GetMapId()) sharers.push_back(m);
+        }
+    }
+    if (sharers.size() <= 1) {          // solo: full pile to the picker
+        pPicker->AddMoney(qwMoney);
+        return;
+    }
+    uint64_t each = qwMoney / sharers.size();
+    for (auto& m : sharers) {
+        m->AddMoney(each);
+        m->SendSysMsg("Team loot: +" + std::to_string(each) + " money (" +
+                      std::to_string(sharers.size()) + " way split).");
+    }
+    printf("[DROPS] team split %llu -> %zu x %llu\n",
+           (unsigned long long)qwMoney, sharers.size(), (unsigned long long)each);
 }

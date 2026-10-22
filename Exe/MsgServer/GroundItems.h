@@ -35,6 +35,8 @@ public:
     // pick the nearest drop within 3 cells; returns an error message or ""
     std::string Pick(std::shared_ptr<CUser> pUser);
     std::string ListNearby(std::shared_ptr<CUser> pUser);   // /drops
+    // split a picked money pile across same-map team members
+    void TeamShare(std::shared_ptr<CUser> pPicker, uint64_t qwMoney);
     size_t GetDropCount();
 
 private:
