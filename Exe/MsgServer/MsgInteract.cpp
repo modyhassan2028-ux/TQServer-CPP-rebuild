@@ -173,6 +173,8 @@ void CMsgInteract::Process(uint32_t dwSender) {
                                   (pAttacker->m_task.dwDone == pAttacker->m_task.dwNeeded
                                    ? " - return to the TaskMaster!" : ""));
         }
+        // experience scales with monster level (original model: harder mobs = more xp)
+        pAttacker->AddExperience(10 + pMonster->GetLevel() * 15);
         // attacker rewards: base bounty; teams split it among same-map members
         CTeamManager::Instance().ShareKillReward(pAttacker, 50, 1);
         pAttacker->AddMoney(50);

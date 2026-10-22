@@ -41,6 +41,7 @@ public:
     // character persistence (cq_user), MySQL mode only
     struct CharacterRecord {
         uint32_t dwLevel{1};
+        uint64_t dwExperience{0};
         uint64_t dwMoney{100000}, dwCp{5000}, dwBank{0};
         uint32_t dwPkPoints{0};
         uint32_t dwMapId{1002};

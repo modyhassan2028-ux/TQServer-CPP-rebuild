@@ -108,12 +108,18 @@ void CMsgConnect::Process(uint32_t dwSender, void* pContext) {
         pUser->SetConquerPoints((uint32_t)rec.dwCp);
         pUser->SetBank(rec.dwBank);
         pUser->SetPkPoints(rec.dwPkPoints);
+        pUser->SetExperience(rec.dwExperience);
         pUser->SetLife(1000);
+        // base max life scales with restored level (20 per level above 1)
+        pUser->SetMaxLife(1000 + (rec.dwLevel > 1 ? (rec.dwLevel - 1) * 20 : 0));
         pUser->SetPos(rec.usX, rec.usY);
         dwSpawnMap = rec.dwMapId;
         printf("[LOGIN] Account %u: character restored (level %u, money %llu, map %u)\n",
                dwAccountId, rec.dwLevel, (unsigned long long)rec.dwMoney, rec.dwMapId);
     }
+    // level-scaled max life becomes the base BEFORE equipment bonuses apply
+    pUser->SetLife(pUser->GetMaxLife());
+    pUser->SnapshotBaseStats();
     pUser->BindNet(pClient);
     CUserManager::Instance().AddUser(pUser);
     CMapManager::Instance().GetOrCreate(dwSpawnMap, "Twin City")->AddUser(pUser);

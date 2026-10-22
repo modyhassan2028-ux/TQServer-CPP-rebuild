@@ -75,6 +75,14 @@ public:
     uint8_t GetLevel() const { return m_ucLevel; }
     void SetLevel(uint8_t level) { m_ucLevel = level; }
 
+    // experience + level-ups (original v6159 curve, v1 approximation:
+    // exp needed for next level = 30 * level^2 + 40 * level)
+    uint64_t GetExperience() const { return m_dwExperience; }
+    void SetExperience(uint64_t v) { m_dwExperience = v; }
+    static uint64_t ExpForLevel(uint8_t ucLevel) { return 30ull * ucLevel * ucLevel + 40ull * ucLevel; }
+    // grants xp; returns the number of levels gained (stats grow per level)
+    uint32_t AddExperience(uint64_t dwXp);
+
     uint8_t GetReborn() const { return m_ucReborn; }
     void SetReborn(uint8_t reborn) { m_ucReborn = reborn; }
 
@@ -116,6 +124,7 @@ private:
     uint32_t m_dwLife{1000};
     uint32_t m_dwMaxLife{1000};
     uint32_t m_dwBaseMaxLife{1000};
+    uint64_t m_dwExperience{0};
     uint32_t m_dwBaseBP{100};
     uint32_t m_dwBattlePower{100};
 

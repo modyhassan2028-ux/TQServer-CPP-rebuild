@@ -252,7 +252,7 @@ bool CAccountManager::TryMySQL(const std::string& host, uint16_t port, const std
 bool CAccountManager::LoadCharacter(uint32_t dwAccountId, CharacterRecord& out) {
     if (!m_bMySQL || !m_pDB) return false;
     std::lock_guard<std::mutex> dbLock(m_dbMutex);
-    if (!m_pDB->Query("SELECT level, money, cp, bank, pk_points, recordmap_id, recordx, recordy "
+    if (!m_pDB->Query("SELECT level, money, cp, bank, pk_points, recordmap_id, recordx, recordy, experience "
                       "FROM cq_user WHERE account_id=" + std::to_string(dwAccountId)) ||
         m_pDB->GetRows().empty())
         return false;
@@ -265,13 +265,14 @@ bool CAccountManager::LoadCharacter(uint32_t dwAccountId, CharacterRecord& out) 
     out.dwMapId    = (uint32_t)strtoul(row[5].c_str(), nullptr, 10);
     out.usX        = (uint16_t)strtoul(row[6].c_str(), nullptr, 10);
     out.usY        = (uint16_t)strtoul(row[7].c_str(), nullptr, 10);
+    out.dwExperience = (row.size() > 8) ? strtoull(row[8].c_str(), nullptr, 10) : 0;
     return true;
 }
 
 void CAccountManager::SaveCharacter(uint32_t dwAccountId, const CharacterRecord& in) {
     if (!m_bMySQL || !m_pDB) return;
     std::string sql = "INSERT INTO cq_user (account_id, name, level, money, cp, bank, pk_points, "
-                      "recordmap_id, recordx, recordy) VALUES (" +
+                      "recordmap_id, recordx, recordy, experience) VALUES (" +
         std::to_string(dwAccountId) + ", '" + m_pDB->Escape(std::to_string(dwAccountId) + "_char") + "', " +
         std::to_string(in.dwLevel) + ", " + std::to_string(in.dwMoney) + ", " +
         std::to_string(in.dwCp) + ", " + std::to_string(in.dwBank) + ", " +

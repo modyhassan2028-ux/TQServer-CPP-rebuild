@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS cq_user (       -- character sync lands in the next s
   cp BIGINT DEFAULT 0,
   bank BIGINT DEFAULT 0,
   pk_points INT DEFAULT 0,
+  experience BIGINT DEFAULT 0,
   recordmap_id INT DEFAULT 1002,
   recordx INT DEFAULT 315,
   recordy INT DEFAULT 275,

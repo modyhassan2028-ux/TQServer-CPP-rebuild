@@ -51,3 +51,22 @@ void CUser::RecalcEquipmentBonuses() {
     m_dwMaxLife = newMax;
     m_dwBattlePower = m_dwBaseBP + bonusAtk;
 }
+
+// grant xp with level-ups: each level grants +20 base max life and full heal
+uint32_t CUser::AddExperience(uint64_t dwXp) {
+    m_dwExperience += dwXp;
+    uint32_t ups = 0;
+    while (m_ucLevel < 130 && m_dwExperience >= ExpForLevel(m_ucLevel)) {
+        ++m_ucLevel;
+        ++ups;
+    }
+    if (ups > 0) {
+        m_dwBaseMaxLife += 20 * ups;   // permanent base growth
+        RecalcEquipmentBonuses();      // re-apply gear on the new base
+        m_dwLife = m_dwMaxLife;        // level-up fully heals
+        SendSysMsg("LEVEL UP! You are now level " + std::to_string(m_ucLevel) +
+                   " (+" + std::to_string(20 * ups) + " max life).");
+        printf("[LEVEL] %s reached level %u\n", m_name.c_str(), m_ucLevel);
+    }
+    return ups;
+}
