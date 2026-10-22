@@ -5,6 +5,7 @@
 #include "Account.h"
 #include "MonsterManager.h"
 #include "CrossServer/CrossClient.h"
+#include "PKBounty.h"
 #include "Npc.h"
 #include "Guild.h"
 #include "MsgItem.h"
@@ -106,6 +107,28 @@ void CMsgInteract::Process(uint32_t dwSender) {
             } else {
             // justice kill: slaying a red-name earns no PK points
             bJustice = pTarget->IsRedName();
+            if (bJustice) {
+                // PK bounty: the outlaw's head has a price - claim it
+                uint32_t dwBountyMoney = pk::BountyMoney(pTarget->GetLevel(),
+                                                         pTarget->GetPkPoints());
+                uint32_t dwBountyCp = pk::BountyCp(pTarget->GetPkPoints());
+                pAttacker->AddMoney(dwBountyMoney);
+                pAttacker->AddConquerPoints((int32_t)dwBountyCp);
+                pTarget->SetPkPoints(pk::PkAfterBountyDeath(pTarget->GetPkPoints()));
+                std::string strMsg = pAttacker->GetName() + " claimed the bounty on " +
+                                     pTarget->GetName() + " (+" +
+                                     std::to_string(dwBountyMoney) + " silver, +" +
+                                     std::to_string(dwBountyCp) + " CP)";
+                CMsgTalk note;
+                if (note.Create("SYSTEM", "", strMsg, CMsgTalk::Channel_Broadcast))
+                    CMapManager::Instance().BroadcastToAll(note.GetBuf(), note.GetSize());
+                // the whole realm hears about big bounties via the hub
+                if (dwBountyCp >= 20)
+                    cross::CCrossClient::Instance().SendTalk("SYSTEM", strMsg);
+                printf("[BOUNTY] %s claimed %u silver +%u CP on %s\n",
+                       pAttacker->GetName().c_str(), dwBountyMoney, dwBountyCp,
+                       pTarget->GetName().c_str());
+            }
             // killer gains PK points; the victim respawns in Twin City
             if (!bJustice) pAttacker->AddPkPoints(10);
             // the victim drops 10% of carried money at the corpse

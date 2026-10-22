@@ -26,6 +26,9 @@ public:
     bool IsMember(uint32_t dwUserId) const;
 
     // guild war (v1)
+    uint32_t GetWeeklyWins() const { return m_dwWeeklyWins; }
+    void AddWeeklyWin() { ++m_dwWeeklyWins; }
+    void ResetWeeklyWins() { m_dwWeeklyWins = 0; }
     uint32_t GetWarScore() const { return m_dwWarScore; }
     void AddWarScore(uint32_t v) { m_dwWarScore += v; }
     void ResetWarScore() { m_dwWarScore = 0; }
@@ -51,6 +54,7 @@ private:
     std::vector<uint32_t> m_members;
     uint32_t m_dwWarScore{0};
     uint64_t m_dwFund{0};
+    uint32_t m_dwWeeklyWins{0};
 };
 
 class CGuildManager {
@@ -70,6 +74,9 @@ public:
 
     // guild war: leader declares, defender auto-accepts, 30 min, kill scoring
     bool DeclareWar(std::shared_ptr<CUser> pLeader, const std::string& strTargetGuild);
+    // weekly guild war champion: crowns the top war winner of the week
+    void WeeklyChampionPayout();
+    std::string WeeklyStandingsText(); // /gwtop
     void OnWarKill(uint32_t dwKillerGuildId, uint32_t dwVictimGuildId);
     bool IsAtWar(uint32_t dwGuildId) const;
     // settles expired wars, announces the winner and pays the reward

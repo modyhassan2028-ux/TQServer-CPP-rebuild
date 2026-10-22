@@ -3,6 +3,9 @@
 #include "User.h"
 #include "UserManager.h"
 #include "MsgTalk.h"
+#include "MapManager.h"
+#include "PKBounty.h"
+#include <algorithm>
 #include <chrono>
 #include <thread>
 #include "User.h"
@@ -215,6 +218,7 @@ void CGuildManager::TickWars() {
                     auto pLoser  = (!draw && sa > sb) ? gB : gA;
                     if (!draw) {
                         pWinner->AddFund(500000); // war chest for the winner
+                        pWinner->AddWeeklyWin(); // weekly champion race
                         results.push_back({pWinner->GetId(), pLoser->GetId(),
                                            std::max(sa, sb)});
                     } else {
@@ -251,4 +255,54 @@ void CGuildManager::TickWars() {
             tell(pL, "[GUILD WAR] Defeat against '" + pW->GetName() + "'. Regroup!");
         }
     }
+}
+
+// ---------------- weekly guild war champion ----------------
+
+void CGuildManager::WeeklyChampionPayout() {
+    std::vector<pk::WeeklyEntry> entries;
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        for (auto& kv : m_byName)
+            entries.push_back({kv.second->GetName(), kv.second->GetWeeklyWins()});
+    }
+    std::string strChampion = pk::PickWeeklyChampion(entries);
+    if (strChampion.empty()) return; // no guild earned the crown this week
+    std::shared_ptr<CGuild> pChamp;
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        auto it = m_byName.find(strChampion);
+        if (it == m_byName.end()) return;
+        pChamp = it->second;
+        pChamp->AddFund(pk::ChampionFundBonus());
+        for (auto& kv : m_byName) kv.second->ResetWeeklyWins();
+    }
+    std::string strMsg = "[GUILD WAR] Weekly champion: '" + strChampion +
+                         "'! +" + std::to_string(pk::ChampionFundBonus()) +
+                         " silver to the guild fund.";
+    CMsgTalk note;
+    if (note.Create("SYSTEM", "", strMsg, CMsgTalk::Channel_Broadcast))
+        CMapManager::Instance().BroadcastToAll(note.GetBuf(), note.GetSize());
+    printf("[GUILD] weekly champion: %s\n", strChampion.c_str());
+}
+
+std::string CGuildManager::WeeklyStandingsText() {
+    std::vector<pk::WeeklyEntry> entries;
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        for (auto& kv : m_byName)
+            entries.push_back({kv.second->GetName(), kv.second->GetWeeklyWins()});
+    }
+    std::sort(entries.begin(), entries.end(),
+              [](const pk::WeeklyEntry& a, const pk::WeeklyEntry& b) {
+                  return a.dwWins > b.dwWins;
+              });
+    std::string out = "Weekly guild war standings:";
+    uint32_t dwRank = 1;
+    for (auto& e : entries) {
+        out += "\n  " + std::to_string(dwRank++) + ". " + e.strName + " - " +
+               std::to_string(e.dwWins) + " win(s)";
+        if (dwRank > 5) break;
+    }
+    return out;
 }

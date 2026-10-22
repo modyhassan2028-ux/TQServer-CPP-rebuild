@@ -53,10 +53,15 @@ int main(int argc, char* argv[]) {
         CItemLibrary::Instance().LoadAdditionsFromFile("data/itemadditions.ini");
 
     std::thread([] {
-        int nTicks = 0, nBossTicks = 0;
+        int nTicks = 0, nBossTicks = 0, nChampTicks = 0;
         for (;;) {
             std::this_thread::sleep_for(std::chrono::seconds(30));
             try { CGuildManager::Instance().TickWars(); } catch (...) {}
+            // weekly guild war champion payout: 168 x 30s = 1 week cadence
+            if (++nChampTicks >= 168) {
+                nChampTicks = 0;
+                try { CGuildManager::Instance().WeeklyChampionPayout(); } catch (...) {}
+            }
             if (++nBossTicks >= 120) { // 120 x 30s = 1 hour
                 nBossTicks = 0;
                 try { CMonsterManager::Instance().SpawnBoss(); } catch (...) {}

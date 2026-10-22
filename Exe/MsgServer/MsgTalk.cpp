@@ -425,6 +425,12 @@ if (m_message.rfind("/npc", 0) == 0) {
         return;
     }
 
+    // ---- weekly guild war standings: /gwtop ----
+    if (m_message == "/gwtop") {
+        user->SendSysMsg(CGuildManager::Instance().WeeklyStandingsText());
+        return;
+    }
+
     // ---- cross-server hub link: /cross <text>, /crosswho ----
     if (m_message.rfind("/cross ", 0) == 0) {
         std::string text = m_message.substr(7);
