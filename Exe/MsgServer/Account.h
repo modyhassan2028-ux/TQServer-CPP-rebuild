@@ -56,6 +56,10 @@ public:
     bool SaveRewardDay(uint32_t dwAccountId, const std::string& strDay);
         bool UpdateSpouse(uint32_t dwAccountId, const std::string& strSpouse);
 
+        // top-N ranking by column (level|money|pk_points), with names
+        struct TopRow { std::string strName; uint64_t qwValue; };
+        std::vector<TopRow> GetTopPlayers(const std::string& strColumn, uint32_t n = 10);
+
         // ---- offline mail ----
         struct MailRow { uint32_t dwId; std::string strFrom; std::string strBody; };
         bool SendMail(const std::string& strTo, const std::string& strFrom, const std::string& strBody);

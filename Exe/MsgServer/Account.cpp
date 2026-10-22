@@ -383,3 +383,20 @@ void CAccountManager::MarkMailRead(const std::string& strTo) {
     std::lock_guard<std::mutex> dbLock(m_dbMutex);
     m_pDB->Query("UPDATE cq_mail SET is_read=1 WHERE to_name='" + m_pDB->Escape(strTo) + "'");
 }
+
+// top-N ranking: whitelist the column, ORDER BY DESC, LIMIT n
+std::vector<CAccountManager::TopRow> CAccountManager::GetTopPlayers(const std::string& strColumn, uint32_t n) {
+    std::vector<TopRow> out;
+    if (!m_bMySQL || !m_pDB) return out;
+    if (strColumn != "level" && strColumn != "money" && strColumn != "pk_points")
+        return out; // SQL-injection guard: whitelist only
+    std::lock_guard<std::mutex> dbLock(m_dbMutex);
+    if (!m_pDB->Query("SELECT name, " + strColumn + " FROM cq_user ORDER BY " +
+                      strColumn + " DESC LIMIT " + std::to_string(n)))
+        return out;
+    for (auto& row : m_pDB->GetRows()) {
+        if (row.size() < 2) continue;
+        out.push_back({ row[0], strtoull(row[1].c_str(), nullptr, 10) });
+    }
+    return out;
+}

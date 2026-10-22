@@ -1,4 +1,5 @@
 ﻿#include "MsgAction.h"
+#include <cmath>
 #include "MsgUserAttrib.h"
 #include "UserManager.h"
 #include "MapManager.h"
@@ -38,6 +39,15 @@ void CMsgAction::Process(uint32_t dwSender) {
     case Action_Jump: { // 137: jump - validate target tile, then move
         auto pMap = CMapManager::Instance().GetMap(user->GetMapId());
         if (!pMap || !pMap->IsPassable(pData->usX, pData->usY)) return;
+        // speed-hack gate: a jump covers at most 24 cells
+        int32_t nDx = (int32_t)pData->usX - (int32_t)user->GetX();
+        int32_t nDy = (int32_t)pData->usY - (int32_t)user->GetY();
+        if (nDx * nDx + nDy * nDy > 24 * 24) {
+            user->SendSysMsg("You cannot jump that far.");
+            printf("[ANTICHEAT] %s rejected a %d-cell jump\n",
+                   user->GetName().c_str(), (int)sqrt((double)(nDx * nDx + nDy * nDy)));
+            return;
+        }
         // fatigue gate: each jump costs 15 stamina (classic CO)
         if (!user->SpendStamina(15)) {
             user->SendSysMsg("You are too tired to jump. Rest a moment.");

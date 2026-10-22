@@ -273,6 +273,25 @@ if (m_message.rfind("/npc", 0) == 0) {
         return;
     }
     // ---- team commands ----
+    // ---- /top level|money|pk: DB rankings ----
+    if (m_message.rfind("/top", 0) == 0) {
+        std::string col = m_message.size() > 5 ? m_message.substr(5) : "level";
+        while (!col.empty() && col.back() == ' ') col.pop_back();
+        if (col.empty()) col = "level";
+        std::string display = col == "pk_points" ? "PK points" : col;
+        auto rows = CAccountManager::Instance().GetTopPlayers(col);
+        if (rows.empty()) { user->SendSysMsg("No ranking data."); return; }
+        std::string out = "Top " + std::to_string(rows.size()) + " (" + display + "):";
+        int rank = 1;
+        for (auto& r : rows) {
+            out += "\n  " + std::to_string(rank++) + ". " + r.strName + " - " +
+                   std::to_string(r.qwValue);
+            if (out.size() > 380) { out += "\n  ..."; break; }
+        }
+        user->SendSysMsg(out);
+        return;
+    }
+
     // ---- offline mail: /mail send <name> <text> (delivered at login) ----
     if (m_message.rfind("/mail ", 0) == 0) {
         std::string arg = m_message.substr(6);
