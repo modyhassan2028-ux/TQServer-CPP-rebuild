@@ -10,6 +10,8 @@
 #include "Dialog.h"
 #include "MsgAction.h"
 #include "MsgTalk.h"
+#include "MsgData.h"
+#include "GroupSystem.h"
 #include "MapManager.h"
 #include "Item.h"
 #include "Npc.h"
@@ -58,6 +60,10 @@ namespace {
 //   -> two ints (start/count) into CreateListbox (FUN_1403a6510).
 // ORIGINAL case 0x69 (type 105) - link:    sscanf(param, "%s")
 // ---------------------------------------------------------------------------
+#ifndef _WIN32
+static int stricmp(const char* a, const char* b) { return strcasecmp(a, b); }
+#endif
+
 bool CGameAction::ProcessActionOS(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode) {
     if (!pUser || !pNode) return false;
     const std::string& param = pNode->strParam;
@@ -263,6 +269,270 @@ bool CGameAction::ProcessActionOS(std::shared_ptr<CUser> pUser, const CDialogEng
                         CMsgAction::Action_UpdateStatus)) return false;
         pUser->SendMsg(act.GetBuf(), act.GetSize());
         return true;
+    }
+    case 110: { // ORIGINAL case 0x6e: log-only, breaks -> false
+        printf("[ACTION] type 110 (log) id=%u data=%u param=%s\n",
+               pNode->dwId, pNode->dwData, pNode->strParam.c_str());
+        return false;
+    }
+    case 111: { // ORIGINAL case 0x6f: input dialog (mode 5)
+        // sscanf "%u %u" -> (a,b); the tail after the 2nd space is the
+        // text; option registered via FUN_14039d470(user, a, b) -> index
+        uint32_t a = 0, b = 0;
+        if (sscanf(param.c_str(), "%u %u", &a, &b) < 2) {
+            printf("[DBERR] cq_action %u type 111 wrong param number\n", pNode->dwId);
+            return false;
+        }
+        const char* sp1 = strchr(param.c_str(), ' ');
+        const char* sp2 = sp1 ? strchr(sp1 + 1, ' ') : nullptr;
+        if (!sp2 || sp2[1] == '\0') { // ORIGINAL: no 2nd space / empty text
+            printf("[LOGERR] cq_action %u type 111 bad text\n", pNode->dwId);
+            return false;
+        }
+        uint32_t uIdx = pUser->PushDialogOption("", a); // registers like FUN_14039d470
+        CMsgDialog dlg;
+        if (!dlg.Create(5, sp2 + 1, (uint8_t)uIdx, 0)) return false;
+        pUser->SendMsg(dlg.GetBuf(), dlg.GetSize());
+        return true;
+    }
+    case 112: { // ORIGINAL case 0x70: news/patch dialog (mode 112)
+        // FUN_1403a6400(buf, 0x70, param-text, row->data): text + data byte
+        CMsgDialog dlg;
+        if (!dlg.Create(112, param.c_str(), (uint8_t)pNode->dwData, 0)) return false;
+        pUser->SendMsg(dlg.GetBuf(), dlg.GetSize());
+        return true;
+    }
+    case 113: { // ORIGINAL case 0x71: reset user UI state (FUN_140142d80:
+        // FUN_140142c90(user+0x9d0) + FUN_140036640(user+0xa00))
+        pUser->ClearDialogOptions();
+        pUser->SetTalkingNpc(0);
+        return true;
+    }
+    case 114: { // ORIGINAL case 0x72: mode-113 dialog with "%s" token,
+        // index 0xffffffff; NOTE: the original BREAKS after the send,
+        // which returns false (chain takes id_nextfail)
+        char szToken[256] = {0};
+        if (sscanf(param.c_str(), "%255s", szToken) == 1) {
+            CMsgDialog dlg;
+            if (!dlg.Create(113, szToken, 0xFF, 0)) return false;
+            pUser->SendMsg(dlg.GetBuf(), dlg.GetSize());
+        } else {
+            printf("[DBERR] cq_action %u type 114 wrong param number\n", pNode->dwId);
+        }
+        return false; // original break -> false
+    }
+    case 128: { // ORIGINAL case 0x80: CMsgData (1033) local-time packet
+        // data == 0 -> send to the player; data == 1 -> broadcast to the
+        // world (same broadcast path as 125); otherwise break -> false
+        time_t now = time(nullptr);
+        tm* ptm = localtime(&now);
+        if (!ptm) return false;
+        CMsgData dat;
+        if (!dat.Create((uint32_t)ptm->tm_year, (uint32_t)ptm->tm_mon,
+                         (uint32_t)ptm->tm_sec, (uint32_t)ptm->tm_min,
+                         (uint32_t)ptm->tm_hour, (uint32_t)ptm->tm_mday,
+                         (uint32_t)ptm->tm_yday)) return false;
+        if (pNode->dwData == 0) {
+            pUser->SendMsg(dat.GetBuf(), dat.GetSize());
+            return true;
+        }
+        if (pNode->dwData == 1) {
+            CMapManager::Instance().BroadcastToAll(dat.GetBuf(), dat.GetSize());
+            return true;
+        }
+        return false;
+    }
+    case 129: { // ORIGINAL case 0x81: relation add/remove
+        auto& sys = CGroupSystem::Instance();
+        if (pNode->dwData == 1) { // remove: "%u" id; exists && !flag -> remove
+            uint32_t dwId = 0;
+            if (sscanf(param.c_str(), "%u", &dwId) < 1) {
+                printf("[DBERR] cq_action %u type 129 wrong param number\n", pNode->dwId);
+                return false;
+            }
+            auto* pRel = sys.FindRelation(dwId);
+            if (!pRel) return false;
+            if (!pRel->bFlag) { sys.RemoveRelation(dwId); return true; }
+            return false;
+        }
+        { // add: "%u %s %s %d ..." (id + 6x(name,name2,int)); exists -> false
+            uint32_t dwId = 0; char s1[256] = {0}, s2[256] = {0}; int32_t n0 = 0;
+            if (sscanf(param.c_str(), "%u %255s %255s %d", &dwId, s1, s2, &n0) < 1) {
+                printf("[DBERR] cq_action %u type 129 wrong param number\n", pNode->dwId);
+                return false;
+            }
+            if (sys.FindRelation(dwId)) return false;
+            CGroupSystem::CRelationEntry e;
+            e.dwId = dwId; e.strName = s1; e.strName2 = s2; e.bFlag = (n0 != 0);
+            sys.AddRelation(e);
+            return true;
+        }
+    }
+    case 130: { // ORIGINAL case 0x82: relation stat update
+        // sscanf "%u %dx16 %u %u %u %d"; >20 fields -> find relation by id
+        // and copy the 16 stat slots; field17==0 -> 600
+        auto& sys = CGroupSystem::Instance();
+        uint32_t dwId = 0; int32_t vals[16] = {0};
+        uint32_t u17 = 0, u18 = 0, u19 = 0; int32_t d20 = 0;
+        int n = sscanf(param.c_str(), "%u %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %u %u %u %d",
+                       &dwId, &vals[0], &vals[1], &vals[2], &vals[3], &vals[4], &vals[5],
+                       &vals[6], &vals[7], &vals[8], &vals[9], &vals[10], &vals[11], &vals[12],
+                       &vals[13], &vals[14], &vals[15], &u17, &u18, &u19, &d20);
+        if (n <= 20) {
+            printf("[DBERR] cq_action %u type 130 wrong param number (%d)\n", pNode->dwId, n);
+            return false;
+        }
+        if (u17 == 0) u17 = 600; // ORIGINAL: field17 0 -> 600
+        auto* pRel = sys.FindRelation(dwId);
+        if (!pRel) return false;
+        for (int i = 0; i < 16; i++) pRel->nStats[i] = vals[i];
+        return true;
+    }
+    case 132: { // ORIGINAL case 0x84: date threshold compare (0 DB rows)
+        // sscanf "%s %s %d": unit(year|month|day), op(==|<|>), offset
+        char szUnit[256] = {0}, szOp[256] = {0}; int32_t nVal = 0;
+        if (sscanf(param.c_str(), "%255s %255s %d", szUnit, szOp, &nVal) != 3 ||
+            (!stricmp(szUnit, "year") && !stricmp(szUnit, "month") && !stricmp(szUnit, "day"))) {
+            printf("[DBERR] cq_action %u type 132 wrong param number\n", pNode->dwId);
+            return false;
+        }
+        uint32_t dwDate = CGroupSystem::Instance().GetSysDate();
+        tm target{}; time_t now = time(nullptr); tm* ptm = localtime(&now);
+        target.tm_hour = target.tm_min = target.tm_sec = target.tm_isdst = 0;
+        target.tm_mday = ptm->tm_mday; target.tm_mon = ptm->tm_mon;
+        target.tm_year = ptm->tm_year;
+        if (!stricmp(szUnit, "year")) target.tm_year += nVal;
+        else if (!stricmp(szUnit, "month")) target.tm_mon += nVal;
+        else target.tm_mday += nVal;
+        time_t tTarget = mktime(&target);
+        tm todayTm{}; todayTm.tm_mday = ptm->tm_mday; todayTm.tm_mon = ptm->tm_mon;
+        todayTm.tm_year = ptm->tm_year; todayTm.tm_isdst = -1;
+        time_t tToday = mktime(&todayTm);
+        int32_t nDays = (int32_t)((long long)tToday - (long long)tTarget) / 86400;
+        if (!stricmp(szOp, "==")) return nDays == 0;
+        if (!stricmp(szOp, "<")) return nDays < 0;
+        if (!stricmp(szOp, ">")) return 0 < nDays;
+        return false;
+    }
+    case 133: { // ORIGINAL case 0x85: days-between date -> FUN_1400e2440 (0 rows)
+        // target = (sysdate year, mon, day + row->data); result in days
+        uint32_t dwDate = CGroupSystem::Instance().GetSysDate();
+        time_t now = time(nullptr); tm* ptm = localtime(&now);
+        if (!ptm) return false;
+        tm target{};
+        target.tm_year = dwDate / 10000 - 1900 + ptm->tm_year / 0; // base from sysdate
+        target.tm_year = dwDate / 10000 - 1900;
+        target.tm_mon = (dwDate % 10000) / 100 - 1;
+        target.tm_mday = (int)(dwDate % 100) + (int)pNode->dwData;
+        target.tm_hour = target.tm_min = target.tm_sec = 0;
+        tm todayTm{}; todayTm.tm_mday = ptm->tm_mday; todayTm.tm_mon = ptm->tm_mon;
+        todayTm.tm_year = ptm->tm_year; todayTm.tm_isdst = -1;
+        time_t tTarget = mktime(&target), tToday = mktime(&todayTm);
+        if (tTarget == (time_t)-1) return false;
+        CGroupSystem::Instance().SetDaysSince(
+            (int32_t)((long long)tTarget - (long long)tToday) / 86400);
+        return true;
+    }
+    case 136: { // ORIGINAL case 0x88: param == server name (group+0x408)
+        size_t len = param.size();
+        if (len < 1 || len > 16) return false;
+        return stricmp(param.c_str(), CGroupSystem::Instance().GetServerName()) == 0;
+    }
+    case 137: { // ORIGINAL case 0x89: CMsgAction 431 with row->data (0 rows)
+        CMsgAction act;
+        if (!act.Create(pUser->GetId(), 0, 0, 0, 0, pNode->dwData,
+                        (CMsgAction::ActionType)431)) return false;
+        pUser->SendMsg(act.GetBuf(), act.GetSize());
+        return true;
+    }
+    case 138: { // ORIGINAL case 0x8a: group vcall +0x70(param, 0, data)
+        // dynasys-by-string op; subsystem not identified yet (0 rows)
+        printf("[ACTION] type 138 unported group-string op id=%u param=%s\n",
+               pNode->dwId, param.c_str());
+        return true;
+    }
+    case 144: { // ORIGINAL case 0x90: dynasys flag check
+        char szOp[256] = {0};
+        if (sscanf(param.c_str(), "%255s", szOp) < 1) {
+            printf("[DBERR] cq_action %u type 144 wrong param number\n", pNode->dwId);
+            return false;
+        }
+        if (stricmp(szOp, "==") == 0) // only op the original handles
+            return CGroupSystem::Instance().IsFlagSet(pNode->dwData);
+        return false; // original: break -> false
+    }
+    case 150: { // ORIGINAL case 0x96: ACTION_DYNA_SYS_DATA (132 rows)
+        // sscanf "%d %s %s %s" -> (idx, varname, op, value)
+        int32_t nIdx = 0; char szVar[256] = {0}, szOp[256] = {0}, szVal[256] = {0};
+        int n = sscanf(param.c_str(), "%d %255s %255s %255s", &nIdx, szVar, szOp, szVal);
+        if (n < 2) {
+            printf("[DBERR] cq_action %u type 150 wrong param number\n", pNode->dwId);
+            return false;
+        }
+        auto& sys = CGroupSystem::Instance();
+        uint32_t dwData = pNode->dwData;
+        uint32_t uVal = strtoul(szVal, nullptr, 10);
+        int32_t nCur = sys.GetData(dwData, nIdx);
+        if (!stricmp(szVar, "data")) {
+            if (!stricmp(szOp, "<")) return nCur < (int32_t)uVal;
+            if (!stricmp(szOp, "<=")) return nCur <= (int32_t)uVal;
+            if (!stricmp(szOp, ">")) return (int32_t)uVal < nCur;
+            if (!stricmp(szOp, ">=")) return (int32_t)uVal <= nCur;
+            if (!stricmp(szOp, "==")) return nCur == (int32_t)uVal;
+            if (!stricmp(szOp, "+=")) { sys.SetData(dwData, nIdx, nCur + (int32_t)uVal); return true; }
+            if (!stricmp(szOp, "set")) { sys.SetData(dwData, nIdx, (int32_t)uVal); return true; }
+            if (!stricmp(szOp, "resetall")) {
+                for (int i = 0; i < 6; i++) sys.SetData(dwData, i, 0);
+                return true;
+            }
+            printf("[LOGERR] ERROR ACTION_DYNA_SYS_DATA opt\n");
+            return false;
+        }
+        if (!stricmp(szVar, "datastr")) {
+            if (!stricmp(szOp, "==")) return stricmp(sys.GetDataStr(dwData, nIdx), szVal) == 0;
+            if (!stricmp(szOp, "set")) { sys.SetDataStr(dwData, nIdx, szVal); return true; }
+            if (!stricmp(szOp, "resetall")) {
+                for (int i = 0; i < 6; i++) sys.SetDataStr(dwData, i, "");
+                return true;
+            }
+            printf("[LOGERR] ERROR ACTION_DYNA_SYS_DATA opt\n");
+            return false;
+        }
+        if (!stricmp(szVar, "time")) { // day units with timezone bias
+            long bias = 0;
+#ifdef _WIN32
+            TIME_ZONE_INFORMATION tz; GetTimeZoneInformation(&tz); bias = tz.Bias;
+#endif
+            // POSIX: local offset in minutes
+            time_t t = time(nullptr); tm lt = *localtime(&t); tm gm = *gmtime(&t);
+            bias = (long)((mktime(&lt) - mktime(&gm)) / 60);
+            uint32_t uNow = (uint32_t)((long long)t - bias * -60) / 86400;
+            int32_t nBase = (int32_t)(((long long)nCur + bias * -60) / 86400);
+            if (!stricmp(szOp, "<")) return uNow < (uint32_t)(nBase + uVal);
+            if (!stricmp(szOp, "<=")) return uNow <= (uint32_t)(nBase + uVal);
+            if (!stricmp(szOp, ">")) return (uint32_t)(nBase + uVal) < uNow;
+            if (!stricmp(szOp, ">=")) return (uint32_t)(nBase + uVal) <= uNow;
+            if (!stricmp(szOp, "==")) return uNow == (uint32_t)(nBase + uVal);
+            printf("[LOGERR] ERROR ACTION_DYNA_SYS_DAY opt\n");
+            return false;
+        }
+        if (!stricmp(szVar, "day")) {
+            if (!stricmp(szOp, "<")) return nCur < (int32_t)uVal;
+            if (!stricmp(szOp, "<=")) return nCur <= (int32_t)uVal;
+            if (!stricmp(szOp, ">")) return (int32_t)uVal < nCur;
+            if (!stricmp(szOp, ">=")) return (int32_t)uVal <= nCur;
+            if (!stricmp(szOp, "==")) return nCur == (int32_t)uVal;
+            if (!stricmp(szOp, "+=")) { sys.SetData(dwData, nIdx, nCur + (int32_t)uVal); return true; }
+            if (!stricmp(szOp, "set")) { sys.SetData(dwData, nIdx, (int32_t)uVal); return true; }
+            if (!stricmp(szOp, "resetall")) {
+                for (int i = 0; i < 6; i++) sys.SetData(dwData, i, 0);
+                return true;
+            }
+            printf("[LOGERR] ERROR ACTION_DYNA_SYS_DAY opt\n");
+            return false;
+        }
+        printf("[LOGERR] ERROR ACTION_DYNA_SYS_DATA attr\n");
+        return false;
     }
     default: {
         // remaining OS types (106..132) not ported yet: log once per

@@ -14,6 +14,7 @@
 #include "UserManager.h"
 #include "MsgTalk.h"
 #include "MsgAction.h"
+#include "GroupSystem.h"
 #include "PlayerMagic.h"
 #include "MapManager.h"
 #include "Item.h"
@@ -683,6 +684,108 @@ int main() {
         { auto n = mkMgc(0, 125, "%user_name found an Earth CP Pearl!");
           assert(CGameAction::ProcessActionOS(upO, &n)); }
         printf("[ok] 120/124/125/126/131 OS-side cases match 0x78/0x7c/0x7d/0x7e/0x83\n");
+
+    // ---- OS-side cases 110-150 (remaining switch tail) ----
+    {
+        auto upR = std::make_shared<CUser>(999013); upR->SetName("RestCases");
+        CUser& r = *upR;
+        std::vector<std::pair<uint16_t, std::vector<uint8_t>>> pk;
+        r.SetPacketSink([&](const void* p, uint16_t sz) {
+            pk.push_back({GetPktType(p), std::vector<uint8_t>((const uint8_t*)p, (const uint8_t*)p + sz)});
+        });
+        // 110: log-only -> false
+        { auto n = mkMgc(0, 110, "1"); assert(!CGameAction::ProcessActionOS(upR, &n)); }
+        // 111: mode-5 input dialog with the tail text (0 DB rows)
+        { auto n = mkMgc(0, 111, "7 9 Enter~your~name"); assert(CGameAction::ProcessActionOS(upR, &n)); }
+        assert(!pk.empty() && pk.back().first == 2032);
+        assert(pk.back().second[sizeof(tq::MsgHead)+11] == 5); // uiMode byte = 5
+        { auto n = mkMgc(0, 111, "7 9"); assert(!CGameAction::ProcessActionOS(upR, &n)); } // no 2nd space
+        // 112: mode-112 news dialog with the row->data byte
+        { auto n = mkMgc(0, 112, "Patch 5312 notes..."); n.dwData = 1;
+          assert(CGameAction::ProcessActionOS(upR, &n)); }
+        assert(pk.back().second[sizeof(tq::MsgHead)+11] == 112);
+        assert(pk.back().second[sizeof(tq::MsgHead)+10] == 1); // data byte
+        // 113: resets dialog state -> true
+        { auto n = mkMgc(0, 113, ""); assert(CGameAction::ProcessActionOS(upR, &n)); }
+        assert(r.GetDialogOptions().empty() && r.GetTalkingNpc() == 0);
+        // 114: sends mode-113 then returns FALSE (original break)
+        { auto n = mkMgc(0, 114, "Hello"); assert(!CGameAction::ProcessActionOS(upR, &n)); }
+        assert(pk.back().second[sizeof(tq::MsgHead)+11] == 113);
+        assert(pk.back().second[sizeof(tq::MsgHead)+10] == 0xFF);
+        // 128: data==0 -> CMsgData 1033 to the player
+        { auto n = mkMgc(0, 128, ""); n.dwData = 0; assert(CGameAction::ProcessActionOS(upR, &n)); }
+        assert(pk.back().first == 1033 && pk.back().second.size() == sizeof(tq::MsgHead) + 36);
+        { auto n = mkMgc(0, 128, ""); n.dwData = 5; assert(!CGameAction::ProcessActionOS(upR, &n)); }
+        // 129: relation add then duplicate add fails; data=1 removes
+        auto& sys = CGroupSystem::Instance();
+        { auto n = mkMgc(0, 129, "555 Alice Wonder 1"); assert(CGameAction::ProcessActionOS(upR, &n)); }
+        { auto n = mkMgc(0, 129, "555 Alice Wonder 1"); assert(!CGameAction::ProcessActionOS(upR, &n)); }
+        assert(sys.FindRelation(555) && sys.FindRelation(555)->strName == "Alice");
+        // remove branch on a non-existing relation -> false
+        { auto n = mkMgc(0, 129, "999 Nobody"); n.dwData = 1;
+          assert(!CGameAction::ProcessActionOS(upR, &n)); }
+        // entry 555 was added with the int 1 -> bFlag true -> remove blocked
+        { auto n = mkMgc(0, 129, "555 Alice Wonder 1"); n.dwData = 1;
+          assert(!CGameAction::ProcessActionOS(upR, &n)); }
+        assert(sys.FindRelation(555) != nullptr);
+        // add 554 with int 0 -> bFlag false -> removable
+        { auto n = mkMgc(0, 129, "554 Dave Helper 0");
+          assert(CGameAction::ProcessActionOS(upR, &n)); }
+        { auto n = mkMgc(0, 129, "554"); n.dwData = 1;
+          assert(CGameAction::ProcessActionOS(upR, &n)); }
+        assert(sys.FindRelation(554) == nullptr);
+        // 130: stat update on an existing relation (21 fields)
+        CGroupSystem::CRelationEntry ent777; ent777.dwId = 777; ent777.strName = "Carol";
+        ent777.strName2 = "C"; ent777.bFlag = true;
+        assert(sys.AddRelation(ent777));
+        { auto n = mkMgc(0, 130, "777 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 0 0 0 0");
+          assert(CGameAction::ProcessActionOS(upR, &n)); }
+        assert(sys.FindRelation(777)->nStats[0] == 1 && sys.FindRelation(777)->nStats[15] == 16);
+        { auto n = mkMgc(0, 130, "777 1 2"); assert(!CGameAction::ProcessActionOS(upR, &n)); } // <21 fields
+        { auto n = mkMgc(0, 130, "888 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 0 0 0 0");
+          assert(!CGameAction::ProcessActionOS(upR, &n)); } // unknown id
+        // 136: server-name compare, 1..16 chars
+        sys.SetServerName("GoldenGulf");
+        { auto n = mkMgc(0, 136, "goldengulf"); assert(CGameAction::ProcessActionOS(upR, &n)); }
+        { auto n = mkMgc(0, 136, "other"); assert(!CGameAction::ProcessActionOS(upR, &n)); }
+        { auto n = mkMgc(0, 136, ""); assert(!CGameAction::ProcessActionOS(upR, &n)); }
+        // 137: action 431 packet with the data value
+        { auto n = mkMgc(0, 137, ""); n.dwData = 42; assert(CGameAction::ProcessActionOS(upR, &n)); }
+        assert(pk.back().first == 10010 &&
+               *(uint32_t*)(pk.back().second.data()+sizeof(tq::MsgHead)+0x10) == 431 &&
+               *(uint32_t*)(pk.back().second.data()+sizeof(tq::MsgHead)+8) == 42);
+        // 144: flag check (== is the only op)
+        sys.SetFlag(3, true);
+        { auto n = mkMgc(0, 144, "=="); n.dwData = 3; assert(CGameAction::ProcessActionOS(upR, &n)); }
+        { auto n = mkMgc(0, 144, "=="); n.dwData = 4; assert(!CGameAction::ProcessActionOS(upR, &n)); }
+        { auto n = mkMgc(0, 144, "<");  n.dwData = 3; assert(!CGameAction::ProcessActionOS(upR, &n)); }
+        // 150: dyna sys data ops on data-id 7777
+        { auto n = mkMgc(0, 150, "0 data set 25"); n.dwData = 7777;
+          assert(CGameAction::ProcessActionOS(upR, &n)); }
+        assert(sys.GetData(7777, 0) == 25);
+        { auto n = mkMgc(0, 150, "0 data == 25"); n.dwData = 7777;
+          assert(CGameAction::ProcessActionOS(upR, &n)); }
+        { auto n = mkMgc(0, 150, "0 data += 5"); n.dwData = 7777;
+          assert(CGameAction::ProcessActionOS(upR, &n)); }
+        assert(sys.GetData(7777, 0) == 30);
+        { auto n = mkMgc(0, 150, "0 data > 29"); n.dwData = 7777;
+          assert(CGameAction::ProcessActionOS(upR, &n)); }
+        { auto n = mkMgc(0, 150, "0 data < 29"); n.dwData = 7777;
+          assert(!CGameAction::ProcessActionOS(upR, &n)); }
+        { auto n = mkMgc(0, 150, "0 datastr set Gold"); n.dwData = 7777;
+          assert(CGameAction::ProcessActionOS(upR, &n)); }
+        { auto n = mkMgc(0, 150, "0 datastr == gold"); n.dwData = 7777;
+          assert(CGameAction::ProcessActionOS(upR, &n)); }
+        { auto n = mkMgc(0, 150, "0 datastr == Silver"); n.dwData = 7777;
+          assert(!CGameAction::ProcessActionOS(upR, &n)); }
+        { auto n = mkMgc(0, 150, "0 data resetall"); n.dwData = 7777;
+          assert(CGameAction::ProcessActionOS(upR, &n)); }
+        assert(sys.GetData(7777, 0) == 0);
+        { auto n = mkMgc(0, 150, "0 nodata == 1"); n.dwData = 7777;
+          assert(!CGameAction::ProcessActionOS(upR, &n)); } // bad attr
+        printf("[ok] 110/111/112/113/114/128/129/130/136/137/144/150 match the original switch\n");
+    }
+
     }
 
 
