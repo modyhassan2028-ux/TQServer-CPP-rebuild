@@ -91,3 +91,21 @@ std::string CUser::AllocStat(const std::string& stat, uint32_t count) {
                " (" + std::to_string(m_dwStatPoints) + " left).");
     return "";
 }
+
+// consume one charge of a usable stack; healing pills restore 200 hp
+bool CUser::ConsumeByType(uint32_t dwType) {
+    for (auto& it : m_items) {
+        if (it.dwType != dwType || it.dwAmount == 0) continue;
+        if (--it.dwAmount == 0) RemoveItem(it.dwId);
+        if (dwType == 725013) {          // HealingPill
+            uint32_t life = m_dwLife + 200;
+            if (life > m_dwMaxLife) life = m_dwMaxLife;
+            m_dwLife = life;
+            SendSysMsg("You eat a healing pill (+200 life, now " + std::to_string(life) + ").");
+        } else {
+            SendSysMsg("You use the item.");
+        }
+        return true;
+    }
+    return false;
+}

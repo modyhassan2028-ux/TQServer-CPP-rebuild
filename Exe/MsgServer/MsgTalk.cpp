@@ -188,6 +188,12 @@ if (m_message.rfind("/npc", 0) == 0) {
         }
         return;
     }
+    // ---- consumables: /eat ----
+    if (m_message == "/eat" || m_message == "/eat pill" || m_message == "/use pill") {
+        if (!user->ConsumeByType(725013))
+            user->SendSysMsg("No healing pills. Monsters drop them!");
+        return;
+    }
     // ---- attributes: /stats, /stat <str|vit> <n> ----
     if (m_message == "/stats" || m_message == "/stat") {
         user->SendSysMsg("Str " + std::to_string(user->GetStrength()) +

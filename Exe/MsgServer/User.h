@@ -103,6 +103,8 @@ public:
 
     // ---- inventory (v1) ----
     void AddItem(const ItemInfo& item) { m_items.push_back(item); }
+    // eats one charge of a usable stack (by type id); false if not carried
+    bool ConsumeByType(uint32_t dwType);
     ItemInfo* FindItem(uint32_t dwItemId) {
         for (auto& it : m_items) if (it.dwId == dwItemId) return &it;
         return nullptr;
