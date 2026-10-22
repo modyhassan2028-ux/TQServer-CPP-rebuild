@@ -464,6 +464,46 @@ int main() {
     pDB->Query("DELETE FROM cq_magic WHERE ownerid=999003");
     printf("[ok] 1020/1021 magic + weaponskill ops match cases 0xe/0xf\n");
 
+    // --- 1001 (case 0): ACTION_USER_ATTR - 47-field chain, real row patterns ---
+    { auto n = mkMgc(0, 1001, "level == 132");  assert(!CGameAction::ProcessActionUser(u11, &n)); } // real row 5025700
+    { auto n = mkMgc(0, 1001, "level < 99");    assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1001, "money += 400"); assert( CGameAction::ProcessActionUser(u11, &n)); }  // real row 6074065
+    assert(u11->GetMoney() == 400);
+    { auto n = mkMgc(0, 1001, "money < 9780000000"); assert( CGameAction::ProcessActionUser(u11, &n)); } // real row 9461800
+    { auto n = mkMgc(0, 1001, "vip > 3"); assert(!CGameAction::ProcessActionUser(u11, &n)); }  // real row 9232063
+    { auto n = mkMgc(0, 1001, "profession == 50"); assert(!CGameAction::ProcessActionUser(u11, &n)); } // real 3520903
+    u11->SetProfession(50);
+    { auto n = mkMgc(0, 1001, "profession == 50"); assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1001, "iterator = 5");  assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1001, "iterator <= 8");  assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1001, "iterator += 2");  assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1001, "iterator == 7");  assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1001, "transform = 0");  assert( CGameAction::ProcessActionUser(u11, &n)); }  // real pattern
+    { auto n = mkMgc(0, 1001, "transform == 0");  assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1001, "e_money_mono == 0"); assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1001, "e_money_mono += 10"); assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1001, "e_money_mono == 10"); assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1001, "force += 10");    assert( CGameAction::ProcessActionUser(u11, &n)); } // displaced handler
+    { auto n = mkMgc(0, 1001, "force == 10");    assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1001, "strength == 10"); assert(!CGameAction::ProcessActionUser(u11, &n)); } // NO handler (quirk)
+    { auto n = mkMgc(0, 1001, "storage_money += 500"); assert( CGameAction::ProcessActionUser(u11, &n)); }
+    assert(u11->GetBankMoney() == 500);
+    { auto n = mkMgc(0, 1001, "rankshow == 60"); assert(!CGameAction::ProcessActionUser(u11, &n)); } // unknown field (quirk)
+    { auto n = mkMgc(0, 1001, "viplevel += 2");  assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1001, "vip == 2");       assert( CGameAction::ProcessActionUser(u11, &n)); } // same underlying value
+    { auto n = mkMgc(0, 1001, "speed += 10");    assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1001, "soul -= 3");      assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1001, "lookface set 1003"); assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1001, "look == 3");       assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1001, "face == 0");      assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1001, "sex == 1");       assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1001, "pkprotocol set 1"); assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1001, "pkprotocol == 1");  assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1001, "metempsychosis == 0"); assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1001, "crime == 0");     assert( CGameAction::ProcessActionUser(u11, &n)); }
+    { auto n = mkMgc(0, 1001, "life");           assert(!CGameAction::ProcessActionUser(u11, &n)); } // 1 token -> 0
+    printf("[ok] 1001 ACTION_USER_ATTR 47-field chain matches the original case-0 body\n");
+
 // --- 1027 (case 0x13): ORIGINAL FUN_140164440 = mate-id check ---
     // mirror real row 1211265 ("self angelwing"); the param is dead code
     auto mk1027 = [](uint32_t id, const char* param) {

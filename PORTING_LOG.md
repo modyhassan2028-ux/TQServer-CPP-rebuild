@@ -66,10 +66,16 @@
 
 ## 5. واقفين فين + التالي
 
-### أولاً: إكمال 1001 (الهدف التالي، 10,775 صف)
-يوجد بورت جزئي (`ProcessDataCondition`) يدعم 10 حقول فقط (life/mana/money/e_money/level/exp/pk/strength/profession/metempsychosis).
-**الحصيلة الحقيقية من القاعدة أكبر بكتير:** profession (3,220), level (2,261), money (1,233), exp (1,093), **vip (917)**, e_money (882), metempsychosis, **e_money_mono (196)**, pk, life, **mentor (74), rank (52), iterator, transform, speed, force, cultivation, xp, mana, health, virtue, e_money_trial, look, soul, strengthvalue, ep, rankshow, business, storage_money** — بالإضافة لعمليات `=`, `+=`, `-=` (وأيضاً `ep +=`, `storage_money +=`).
-**المطلوب:** قراءة جسم الـ 1001 من الـ decompile (جسم "field op value" — سياقه switch على اسم الحقل) وبورت قائمة الحقول كاملة + عمليات الجمع/الطرح/التعيين، ثم اختبارات على صفوف حقيقية (مثل 5025700 `level == 132`, 6074065 `money += 400`, 9232063 `vip > 3`).
+### أولاً: ✅ 1001 اكتمل (10,775 صف — أكبر نوع مبورت)
+`ProcessDataCondition` استُبدل بالبورت الكامل: سلسلة الـ 47 حقل بترتيب الـ _stricmp الأصلي (life → culture_value)، بنفس العمليات لكل حقل (==, <, <=, >, >=, =, set, +=, -= حسب الحقل). تفاصيل مهمة محفوظة:
+- force: معالجه موجود لكن Ghidra أزاحه لنهاية الجسم (attrib 15 / ushort user+0xED8) — بُورت بعملياته (+=, ==, <, -=).
+- strength: **لا يوجد له معالج إطلاقاً** → يسقط للنهاية → 0 (غريرة محفوظة).
+- rankshow وغيره من الحقول غير المعروفة → لوق ACTION_USER_ATTR (0x2567) + 0.
+- vip وviplevel نفس القيمة الأساسية (FUN_1401649c0).
+- money += محدود بـ [0, cap) — بوابة الـ event-tax (mgr4 + FUN_140175470) مهملة وموثقة.
+- look/face/sex مشتقة حسابياً من lookface (%1000، /10000%1000، /1000%10).
+- القيمة عبر _strtoi64 → "nocontribute"/"%iter_var_data3" تُفسَّر 0 (مطابق للأصل).
+- 38 assert على صفوف حقيقية في dialog_fidelity_test.
 
 ### بعدها — الأنواع الكبيرة المتبقية (حسب عدد الصفوف)
 | النوع | الصفوف | المعنى (من عينات القاعدة) |

@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "Item.h"
 #include "PlayerMagic.h"
+#include <cstdio>
 #include <string>
 #include <cstdint>
 #include <utility>
@@ -440,6 +441,65 @@ private:
     std::vector<std::pair<std::string, uint32_t>> m_dialogOptions;
     uint16_t m_wProfession{0};   // cq_user.profession (short @ +0xef4)
     uint32_t m_dwMana{0};
+public:
+    // ---- ORIGINAL ACTION_USER_ATTR (cq_action type 1001) fields ----
+    // In-memory mirrors of the cq_user attribute set read/written by the
+    // original case-0 field chain (gameaction.cpp 242240-244770). Setters
+    // print the original client-sync notices; persistence rides on the
+    // record layer (CPlayerMagic-style Save paths) where applicable.
+    uint32_t m_dwLookface{0};      // cq_user.lookface (look/face/sex derive)
+    uint32_t m_dwMentor{0};        // mentor system id
+    int32_t  m_nTransform{0};     // user+0x798 transform state
+    uint32_t m_dwEmoneyTrial{0};  // trial CP wallet (sync type 0x34)
+    uint32_t m_dwEmoneyMono{0};   // cq_user.emoney_mono
+    uint16_t m_wForce{0};         // attrib 15, ushort user+0xED8
+    uint16_t m_wSpeed{0};         // cq_user.Speed, attrib 16, +0xEDC
+    uint16_t m_wHealth{0};        // cq_user.health, attrib 14, +0xEDE
+    uint16_t m_wSoul{0};          // cq_user.soul, attrib 13, +0xEE0
+    uint32_t m_dwRank{0};         // rank manager value
+    uint32_t m_dwIterator{0};     // user+0xA78 (iter_var_data)
+    uint32_t m_dwCrime{0};        // crime state
+    int32_t  m_nVirtue{0};        // cq_user.virtue, attrib 23
+    uint32_t m_dwGamecard{0};     // FUN_140330ef0
+    uint32_t m_dwGamecard2{0};    // FUN_140330f80
+    uint32_t m_dwXp{0};           // xp bar
+    int32_t  m_nEp{0};            // energy points
+    uint16_t m_wFirstProf{0};     // cq_user.first_prof
+    uint16_t m_wOldProf{0};       // cq_user.old_prof
+    uint32_t m_dwMount{0};        // FUN_140160ba0
+    uint32_t m_dwRidingPoint{0}; // cq_user.ridepet_point
+    uint32_t m_dwCultivation{0};  // cq_user.cultivation
+    uint32_t m_dwPkProtocol{0};  // cq_user.pkprotocol
+    uint32_t m_dwStrengthValue{0};// cq_user.strength_value
+    uint32_t m_dwCultureValue{0}; // cq_user.culture_value
+    uint32_t m_dwClientVer{0};    // FUN_140165160
+    uint32_t m_dwPeerage{0};      // nobility peerage
+    uint8_t  m_ucBusiness{0};     // cq_user.business
+    uint32_t m_dwVipValue{0};     // cq_user.vip_value
+    uint16_t m_wBattleLev{0};    // FUN_14018eb30
+
+    uint32_t GetLookface() const { return m_dwLookface; }
+    void SetLookface(uint32_t v) { m_dwLookface = v; printf("[USER] %u lookface -> %u (client sync)\n", m_dwId, v); }
+    int32_t  GetTransform() const { return m_nTransform; }
+    void SetTransform(int32_t v) { m_nTransform = v; printf("[USER] %u transform -> %d\n", m_dwId, v); }
+    uint32_t GetIteratorVar() const { return m_dwIterator; }
+    void SetIteratorVar(uint32_t v) { m_dwIterator = v; }
+    int32_t  GetVirtue() const { return m_nVirtue; }
+    uint32_t GetEmoneyMono() const { return m_dwEmoneyMono; }
+    uint32_t GetRidingPoint() const { return m_dwRidingPoint; }
+    uint32_t GetCultivation() const { return m_dwCultivation; }
+    uint32_t GetStrengthValue() const { return m_dwStrengthValue; }
+    uint32_t GetCultureValue() const { return m_dwCultureValue; }
+    uint32_t GetBankMoney() const { return m_dwBank; }
+    uint16_t GetForce() const { return m_wForce; }
+    uint16_t GetUserSpeed() const { return m_wSpeed; }
+    uint16_t GetUserHealth() const { return m_wHealth; }
+    uint16_t GetUserSoul() const { return m_wSoul; }
+    uint32_t GetVipValue() const { return m_dwVipValue; }
+    uint32_t GetXp() const { return m_dwXp; }
+    void SetXp(uint32_t v) { m_dwXp = v; printf("[USER] %u xp -> %u (client sync)\n", m_dwId, v); }
+
+private:
     std::map<uint32_t, CPlayerMagic> m_oMagics; // type -> cq_magic record
     std::map<uint32_t, WeaponSkillRec> m_oWeaponSkills; // cq_weapon_skill rows
     bool m_bWSkillsLoaded{false};

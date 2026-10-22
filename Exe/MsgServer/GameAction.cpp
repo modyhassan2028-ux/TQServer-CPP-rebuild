@@ -430,55 +430,368 @@ bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogE
 // CUser does not carry yet log once and FAIL (original returns 0 via
 // LAB_14013a784 after InlineLogDBERROR). ops: += == < <= > >= =
 bool CGameAction::ProcessDataCondition(std::shared_ptr<CUser> pUser, const std::string& strParam) {
+    // ORIGINAL gameaction.cpp case 0 (ACTION_USER_ATTR, lines 242240-244770).
+    // sscanf "%s %s %s %s"; <3 tokens -> InlineLogDBERROR (gameaction.cpp:0x215a) -> 0.
+    // Value via _strtoi64 (non-numeric tokens like "%iter_var_data3"/"nocontribute"
+    // parse to 0 - faithful). Field chain in the exact original _stricmp order.
+    // NOTE (decompile artifact): the "force" handler appears DISPLACED to
+    // 244700+ (attrib 15 / ushort user+0xED8, ops += == < -=) in the broken
+    // switch; "strength" has NO handler anywhere -> falls through -> 0.
+    // The money/e_money/virtue "+=" paths carry an event-tax gate
+    // ((mgr4 vtable+0x48) != 0 && FUN_140175470 != 0 -> value scaled by
+    // FUN_140164ee0/100) - omitted here (event subsystem not ported); the
+    // plain path and the [0, cap) bound are ported.
+    static constexpr int64_t kMoneyMax = 2000000000; // mapgroup config *(cfg+400)
     char szField[64] = {0}, szOp[16] = {0}, szVal[64] = {0}, szExtra[64] = {0};
-    int n = sscanf(strParam.c_str(), "%63s %15s %63s %63s", szField, szOp, szVal, szExtra);
-    if (n < 3) {
-        printf("[DIALOG] 1001 malformed param '%s'\n", strParam.c_str());
-        return false; // ORIGINAL: log + return 0
-    }
-    int64_t llValue = _strtoi64(szVal, nullptr, 10);
-
-    struct Field { const char* name; int64_t cur; bool bKnown; };
-    auto f = [&](const char* name) -> Field {
-        if (!_stricmp(szField, name)) return {name, 0, true};
-        return {nullptr, 0, false};
-    };
-    int64_t cur = 0;
-    bool bKnown = true;
-    if (!_stricmp(szField, "life"))             cur = pUser->GetLife();
-    else if (!_stricmp(szField, "mana"))        cur = pUser->GetMana();
-    else if (!_stricmp(szField, "money"))       cur = (int64_t)pUser->GetMoney();
-    else if (!_stricmp(szField, "e_money"))     cur = pUser->GetConquerPoints();
-    else if (!_stricmp(szField, "level"))       cur = pUser->GetLevel();
-    else if (!_stricmp(szField, "exp"))         cur = (int64_t)pUser->GetExperience();
-    else if (!_stricmp(szField, "pk"))          cur = pUser->GetPkPoints();
-    else if (!_stricmp(szField, "strength"))    cur = pUser->GetStrength();
-    else if (!_stricmp(szField, "profession")) cur = pUser->GetProfession();
-    else if (!_stricmp(szField, "metempsychosis")) cur = pUser->GetMetempsychosis();
-    else bKnown = false;
-    if (!bKnown) {
-        static const char* kLast = nullptr;
-        if (kLast != szField) { kLast = szField; printf("[DIALOG] 1001 unknown data '%s' -> fail\n", szField); }
+    int nTok = sscanf(strParam.c_str(), "%63s %15s %63s %63s", szField, szOp, szVal, szExtra);
+    if (nTok < 3) {
+        printf("[ACTION] 1001 wrong param number '%s' (gameaction.cpp:0x215a)\n", strParam.c_str());
         return false;
     }
+    int64_t v = _strtoi64(szVal, nullptr, 10);
+    const char* F = szField, *O = szOp;
+    auto ie = [](const char* a, const char* b) { return _stricmp(a, b) == 0; };
 
-    if (!_stricmp(szOp, "==") || !_stricmp(szOp, "=")) return cur == llValue;
-    if (!_stricmp(szOp, "<"))  return cur <  llValue;
-    if (!_stricmp(szOp, "<=")) return cur <= llValue;
-    if (!_stricmp(szOp, ">"))  return cur >  llValue;
-    if (!_stricmp(szOp, ">=")) return cur >= llValue;
-    if (!_stricmp(szOp, "+=")) {
-        // ORIGINAL applies the delta to the field (AddAttrib path)
-        if (!_stricmp(szField, "life"))       pUser->AddLife((int32_t)llValue);
-        else if (!_stricmp(szField, "mana"))  pUser->SetMana((uint32_t)(cur + llValue));
-        else if (!_stricmp(szField, "money")) pUser->AddMoney(llValue);
-        else if (!_stricmp(szField, "e_money")) pUser->AddConquerPoints((int32_t)llValue);
-        else if (!_stricmp(szField, "exp"))   pUser->SetExperience((uint64_t)(cur + llValue));
-        else if (!_stricmp(szField, "strength")) pUser->SetStrength((uint32_t)(cur + llValue));
-        else return false;
-        return true;
+    if (ie(F, "life")) {
+        if (ie(O, "+=")) { // alive gate (fightunit vtable+0x220), AddAttrib(0,v,1)
+            if (pUser->GetLife() > 0) { pUser->SetLife(pUser->GetLife() + (int32_t)v);
+                printf("[USER] %u life -> %u (client sync)\n", pUser->GetId(), pUser->GetLife());
+                return true; }
+            printf("[ACTION] user %u has died in action (1001 life +=).\n", pUser->GetId());
+            return false;
+        }
+        if (ie(O, "==")) return pUser->GetLife() == v;
+        if (ie(O, "<"))  return pUser->GetLife() < v;
+        return false;
     }
-    printf("[DIALOG] 1001 unknown op '%s' -> fail\n", szOp);
+    if (ie(F, "mana")) {
+        if (ie(O, "+=")) { pUser->SetMana(pUser->GetMana() + (uint32_t)v); return true; }
+        if (ie(O, "==")) return pUser->GetMana() == (uint64_t)v;
+        if (ie(O, "<"))  return pUser->GetMana() < (uint64_t)v;
+        return false;
+    }
+    if (ie(F, "mentor")) { // FUN_140163420 get / FUN_140163430 set
+        if (ie(O, "+=")) { pUser->m_dwMentor += (uint32_t)v;
+            printf("[USER] %u mentor -> %u (client sync)\n", pUser->GetId(), pUser->m_dwMentor);
+            return true; }
+        if (ie(O, "==")) return pUser->m_dwMentor == (uint64_t)v;
+        if (ie(O, "<"))  return pUser->m_dwMentor < v;
+        if (ie(O, "<=")) return pUser->m_dwMentor <= (uint64_t)v;
+        if (ie(O, ">=")) return pUser->m_dwMentor >= (uint64_t)v;
+        return false;
+    }
+    if (ie(F, "lookface")) { // fightunit vtable+0x30
+        if (ie(O, "==")) return pUser->GetLookface() == (uint64_t)v;
+        if (ie(O, "<"))  return pUser->GetLookface() < (uint64_t)v;
+        if (ie(O, "set")) { pUser->SetLookface((uint32_t)v); return true; } // SetAttrib(11,v,2)
+        return false;
+    }
+    if (ie(F, "look")) { // lookface % 1000
+        uint32_t dw = pUser->GetLookface() % 1000;
+        if (ie(O, "==")) return dw == (uint64_t)v;
+        if (ie(O, "<"))  return dw < (uint64_t)v;
+        if (ie(O, "set")) { pUser->SetLookface((uint32_t)((int64_t)v + (pUser->GetLookface()/1000 - (uint32_t)v/1000)*1000)); return true; }
+        return false;
+    }
+    if (ie(F, "face")) { // (lookface/10000) % 1000
+        uint32_t dw = (pUser->GetLookface() / 10000) % 1000;
+        if (ie(O, "==")) return dw == (uint64_t)v;
+        if (ie(O, "<"))  return dw < (uint64_t)v;
+        if (ie(O, "set")) { pUser->SetLookface(((uint32_t)v % 1000) * 10000 + pUser->GetLookface() % 10000); return true; }
+        return false;
+    }
+    if (ie(F, "sex")) { // (lookface/1000) % 10
+        uint32_t dw = (pUser->GetLookface() / 1000) % 10;
+        if (ie(O, "==")) return dw == (uint64_t)v;
+        if (ie(O, "<"))  return dw < (uint64_t)v;
+        if (ie(O, "set")) { // FUN_1401a6670: set the sex digit of lookface
+            uint32_t cur = pUser->GetLookface();
+            pUser->SetLookface((cur / 10000) * 10000 + ((uint32_t)v % 10) * 1000 + cur % 1000);
+            return true;
+        }
+        return false;
+    }
+    if (ie(F, "transform")) { // user+0x798; "=" (242628) also resets when 0
+        if (ie(O, "="))  { pUser->SetTransform((int32_t)v);
+            if (v == 0) printf("[USER] %u transform cleared (FUN_140173130/30)\n", pUser->GetId());
+            return true; }
+        if (ie(O, "==")) return pUser->GetTransform() == v;
+        if (ie(O, "<"))  return pUser->GetTransform() < v;
+        return false;
+    }
+    if (ie(F, "money")) { // user vtable+0x60; AddAttrib(4,v,1), bound [0,cap)
+        if (ie(O, "+=")) {
+            int64_t cur = (int64_t)pUser->GetMoney();
+            if (cur + v < kMoneyMax && cur + v >= 0) {
+                pUser->AddMoney(v);
+                printf("[USER] %u money -> %lld (client sync)\n", pUser->GetId(), (long long)(cur + v));
+                return true;
+            }
+            return false;
+        }
+        if (ie(O, "==")) return pUser->GetMoney() == (uint64_t)v;
+        if (ie(O, "<"))  return pUser->GetMoney() < (uint64_t)v;
+        return false;
+    }
+    if (ie(F, "e_money_trial")) { // AddAttrib(29,v,1) + sync type 0x34
+        if (ie(O, "+=")) { pUser->m_dwEmoneyTrial += (uint32_t)v;
+            printf("[USER] %u e_money_trial -> %u (sync 0x34)\n", pUser->GetId(), pUser->m_dwEmoneyTrial);
+            return true; }
+        return false;
+    }
+    if (ie(F, "e_money")) { // user+0xfa4; AddAttrib(29,v,1) + sync type 1
+        if (ie(O, "+=")) { pUser->AddConquerPoints((int32_t)v);
+            printf("[USER] %u e_money -> %u (sync 1)\n", pUser->GetId(), pUser->GetConquerPoints());
+            return true; }
+        if (ie(O, "==")) return pUser->GetConquerPoints() == (uint64_t)v;
+        if (ie(O, "<"))  return pUser->GetConquerPoints() < (uint64_t)v;
+        return false;
+    }
+    if (ie(F, "e_money_mono")) { // FUN_140371860 on the record object
+        if (ie(O, "+=")) { pUser->m_dwEmoneyMono += (uint32_t)v;
+            printf("[USER] %u e_money_mono -> %u (client sync)\n", pUser->GetId(), pUser->m_dwEmoneyMono);
+            return true; }
+        if (ie(O, "==")) return pUser->GetEmoneyMono() == (uint64_t)v;
+        if (ie(O, "<"))  return pUser->GetEmoneyMono() < (uint64_t)v;
+        return false;
+    }
+    if (ie(F, "exp")) { // FUN_140178c90 gate + FUN_1401a7e10 AddExp + sync
+        if (ie(O, "+=")) { pUser->SetExperience(pUser->GetExperience() + (uint64_t)v);
+            printf("[USER] %u exp -> %llu (client sync)\n", pUser->GetId(), (unsigned long long)pUser->GetExperience());
+            return true; }
+        if (ie(O, "==")) return pUser->GetExperience() == (uint64_t)v;
+        if (ie(O, "<"))  return pUser->GetExperience() < (uint64_t)v;
+        return false;
+    }
+    if (ie(F, "pk")) { // ushort user+0xEF4; += FUN_1401a9c40
+        if (ie(O, "+=")) { pUser->SetPkPoints(pUser->GetPkPoints() + (int32_t)v); return true; }
+        if (ie(O, "==")) return pUser->GetPkPoints() == v;
+        if (ie(O, "<"))  return pUser->GetPkPoints() < v;
+        return false;
+    }
+    if (ie(F, "profession")) {
+        if (ie(O, "==")) return pUser->GetProfession() == v;
+        if (ie(O, ">=")) return pUser->GetProfession() >= v;
+        if (ie(O, "<=")) return pUser->GetProfession() <= v;
+        if (ie(O, "set")) { pUser->SetProfession((uint16_t)v);
+            printf("[USER] %u profession -> %u (client sync)\n", pUser->GetId(), pUser->GetProfession());
+            return true; }
+        return false;
+    }
+    if (ie(F, "level")) { // ==/< fightunit vtable+0x70; += full level-up ceremony
+        if (ie(O, "+=")) {
+            pUser->SetLevel(pUser->GetLevel() + (uint32_t)v);
+            pUser->SetExperience(0); // ORIGINAL SetAttrib(5,0,1): exp resets
+            printf("[USER] %u level -> %u (level-up ceremony: syncs + attrib refresh)\n",
+                   pUser->GetId(), pUser->GetLevel());
+            return true;
+        }
+        if (ie(O, "==")) return pUser->GetLevel() == v;
+        if (ie(O, "<"))  return pUser->GetLevel() < v;
+        return false;
+    }
+    if (ie(F, "force")) { // DISPLACED handler (attrib 15, ushort user+0xED8)
+        if (ie(O, "+=")) { pUser->m_wForce = (uint16_t)(pUser->m_wForce + v); return true; }
+        if (ie(O, "==")) return pUser->m_wForce == (uint64_t)v;
+        if (ie(O, "<"))  return pUser->m_wForce < (uint64_t)v;
+        if (ie(O, "-=")) { pUser->m_wForce = (uint16_t)(pUser->m_wForce - v); return true; }
+        return false;
+    }
+    if (ie(F, "strength")) return false; // ORIGINAL: no handler -> fall through -> 0
+    if (ie(F, "speed")) { // attrib 16, ushort user+0xEDC
+        if (ie(O, "+=")) { pUser->m_wSpeed = (uint16_t)(pUser->m_wSpeed + v); return true; }
+        if (ie(O, "==")) return pUser->m_wSpeed == (uint64_t)v;
+        if (ie(O, "<"))  return pUser->m_wSpeed < (uint64_t)v;
+        if (ie(O, "-=")) { pUser->m_wSpeed = (uint16_t)(pUser->m_wSpeed - v); return true; }
+        return false;
+    }
+    if (ie(F, "health")) { // attrib 14, ushort user+0xEDE
+        if (ie(O, "+=")) { pUser->m_wHealth = (uint16_t)(pUser->m_wHealth + v); return true; }
+        if (ie(O, "==")) return pUser->m_wHealth == (uint64_t)v;
+        if (ie(O, "<"))  return pUser->m_wHealth < (uint64_t)v;
+        if (ie(O, "-=")) { pUser->m_wHealth = (uint16_t)(pUser->m_wHealth - v); return true; }
+        return false;
+    }
+    if (ie(F, "soul")) { // attrib 13, ushort user+0xEE0
+        if (ie(O, "+=")) { pUser->m_wSoul = (uint16_t)(pUser->m_wSoul + v); return true; }
+        if (ie(O, "==")) return pUser->m_wSoul == (uint64_t)v;
+        if (ie(O, "<"))  return pUser->m_wSoul < (uint64_t)v;
+        if (ie(O, "-=")) { pUser->m_wSoul = (uint16_t)(pUser->m_wSoul - v); return true; }
+        return false;
+    }
+    if (ie(F, "rank")) { // rank manager (fightunit vtable+0x170 + mapgroup vtable+0xf8)
+        if (ie(O, "==")) return pUser->m_dwRank == (uint64_t)v;
+        if (ie(O, "<"))  return pUser->m_dwRank < (uint64_t)v;
+        return false;
+    }
+    if (ie(F, "iterator")) { // uint user+0xA78
+        if (ie(O, "="))  { pUser->SetIteratorVar((uint32_t)v); return true; }
+        if (ie(O, "<=")) return pUser->GetIteratorVar() <= (uint64_t)v;
+        if (ie(O, "+=")) { pUser->SetIteratorVar(pUser->GetIteratorVar() + (uint32_t)v); return true; }
+        if (ie(O, "==")) return pUser->GetIteratorVar() == (uint64_t)v;
+        return false;
+    }
+    if (ie(F, "crime")) { // fightunit vtable+0x2d8 state query
+        if (ie(O, "==")) return v != 0 ? pUser->m_dwCrime != 0 : pUser->m_dwCrime == 0;
+        if (ie(O, "set")) { pUser->m_dwCrime = (v != 0) ? 1u : 0u;
+            printf("[USER] %u crime state -> %u (client sync)\n", pUser->GetId(), pUser->m_dwCrime);
+            return true; }
+        return false;
+    }
+    if (ie(F, "virtue")) { // attrib 23, member user+0xF28; += event-tax (omitted)
+        if (ie(O, "+=")) { pUser->m_nVirtue += (int32_t)v;
+            printf("[USER] %u virtue -> %d (client sync)\n", pUser->GetId(), pUser->m_nVirtue);
+            return true; }
+        if (ie(O, "==")) return pUser->GetVirtue() == v;
+        if (ie(O, "<"))  return pUser->GetVirtue() < v;
+        return false;
+    }
+    if (ie(F, "gamecard")) { // FUN_140330ef0
+        if (ie(O, "==")) return pUser->m_dwGamecard == (uint64_t)v;
+        if (ie(O, ">=")) return pUser->m_dwGamecard >= (uint64_t)v;
+        if (ie(O, "<=")) return pUser->m_dwGamecard <= (uint64_t)v;
+        return false;
+    }
+    if (ie(F, "gamecard2")) { // FUN_140330f80
+        if (ie(O, "==")) return pUser->m_dwGamecard2 == (uint64_t)v;
+        if (ie(O, ">=")) return pUser->m_dwGamecard2 >= (uint64_t)v;
+        if (ie(O, "<=")) return pUser->m_dwGamecard2 <= (uint64_t)v;
+        return false;
+    }
+    if (ie(F, "xp")) { // += FUN_140183d90, set FUN_1401a9e70, get FUN_140161fb0
+        if (ie(O, "+=")) { pUser->SetXp(pUser->GetXp() + (uint32_t)v); return true; }
+        if (ie(O, "set")) { pUser->SetXp((uint32_t)v); return true; }
+        if (ie(O, "<"))  return pUser->GetXp() < (uint64_t)v;
+        if (ie(O, "==")) return pUser->GetXp() == (uint64_t)v;
+        return false;
+    }
+    if (ie(F, "ep")) { // += AddAttrib, set SetAttrib(8,v), ushort compare
+        if (ie(O, "+=")) { pUser->m_nEp += (int32_t)v; return true; }
+        if (ie(O, "set")) { pUser->m_nEp = (int32_t)v; return true; }
+        if (ie(O, "<"))  return pUser->m_nEp < v;
+        if (ie(O, "==")) return pUser->m_nEp == v;
+        return false;
+    }
+    if (ie(F, "addpoint")) { // += AddAttrib(10), set SetAttrib(10,v,1), get FUN_140160eb0
+        if (ie(O, "+=")) { pUser->SetStatPoints(pUser->GetStatPoints() + (uint32_t)v); return true; }
+        if (ie(O, "set")) { pUser->SetStatPoints((uint32_t)v); return true; }
+        if (ie(O, "<"))  return pUser->GetStatPoints() < (uint64_t)v;
+        if (ie(O, "==")) return pUser->GetStatPoints() == (uint64_t)v;
+        return false;
+    }
+    if (ie(F, "metempsychosis")) { // user vtable+0x108
+        if (ie(O, "==")) return pUser->GetMetempsychosis() == v;
+        if (ie(O, "<"))  return pUser->GetMetempsychosis() < v;
+        return false;
+    }
+    if (ie(F, "client_ver")) { // FUN_140165160
+        if (ie(O, "==")) return pUser->m_dwClientVer == (uint64_t)v;
+        if (ie(O, "<"))  return pUser->m_dwClientVer < (uint64_t)v;
+        return false;
+    }
+    if (ie(F, "peerage")) {
+        if (ie(O, "==")) return pUser->m_dwPeerage == (uint64_t)v;
+        return false;
+    }
+    if (ie(F, "business")) { // FUN_140165180 get; set = reset cluster
+        if (ie(O, "==")) return pUser->m_ucBusiness == (uint64_t)v;
+        if (ie(O, "<"))  return pUser->m_ucBusiness < (uint64_t)v;
+        if (ie(O, "set")) { pUser->m_ucBusiness = (uint8_t)v;
+            printf("[USER] %u business -> %u (client sync)\n", pUser->GetId(), pUser->m_ucBusiness);
+            return true; }
+        return false;
+    }
+    if (ie(F, "vip")) { // FUN_1401649c0 (same value as viplevel)
+        if (ie(O, "==")) return pUser->GetVipLevel() == v;
+        if (ie(O, "<"))  return pUser->GetVipLevel() < v;
+        if (ie(O, ">"))  return pUser->GetVipLevel() > v;
+        return false;
+    }
+    if (ie(F, "vipvalue")) { // += FUN_140175810, set FUN_140175990
+        if (ie(O, "+=")) { pUser->m_dwVipValue += (uint32_t)v; return true; }
+        if (ie(O, "set")) { pUser->m_dwVipValue = (uint32_t)v; return true; }
+        if (ie(O, "<"))  return pUser->GetVipValue() < (uint64_t)v;
+        if (ie(O, "==")) return pUser->GetVipValue() == (uint64_t)v;
+        return false;
+    }
+    if (ie(F, "storage_money")) { // += FUN_140171280; get user vtable+0x68 (bank)
+        if (ie(O, "+=")) { pUser->SetBank(pUser->GetBankMoney() + (uint32_t)v); return true; }
+        if (ie(O, "==")) return pUser->GetBankMoney() == (uint64_t)v;
+        if (ie(O, "<"))  return pUser->GetBankMoney() < (uint64_t)v;
+        return false;
+    }
+    if (ie(F, "battlelev")) { // FUN_14018eb30
+        if (ie(O, ">=")) return pUser->m_wBattleLev >= (uint64_t)v;
+        if (ie(O, "<=")) return pUser->m_wBattleLev <= (uint64_t)v;
+        return false;
+    }
+    if (ie(F, "first_prof")) { // FUN_140165570
+        if (ie(O, "<"))  return pUser->m_wFirstProf < (uint64_t)v;
+        if (ie(O, "==")) return pUser->m_wFirstProf == (uint64_t)v;
+        if (ie(O, ">"))  return pUser->m_wFirstProf > (uint64_t)v;
+        return false;
+    }
+    if (ie(F, "old_prof")) { // FUN_140165580
+        if (ie(O, "<"))  return pUser->m_wOldProf < (uint64_t)v;
+        if (ie(O, "==")) return pUser->m_wOldProf == (uint64_t)v;
+        if (ie(O, ">"))  return pUser->m_wOldProf > (uint64_t)v;
+        return false;
+    }
+    if (ie(F, "addmount")) { // FUN_140160ba0
+        if (ie(O, "+=")) { pUser->m_dwMount += (uint32_t)v;
+            printf("[USER] %u mount point -> %u (client sync)\n", pUser->GetId(), pUser->m_dwMount);
+            return true; }
+        return false;
+    }
+    if (ie(F, "ridingpoint")) { // get user vtable+0x70; += FUN_140162b60
+        if (ie(O, ">"))  return pUser->GetRidingPoint() > (uint64_t)v;
+        if (ie(O, ">=")) return pUser->GetRidingPoint() >= (uint64_t)v;
+        if (ie(O, "==")) return pUser->GetRidingPoint() == (uint64_t)v;
+        if (ie(O, "+=")) { pUser->m_dwRidingPoint += (uint32_t)v;
+            printf("[USER] %u ridingpoint -> %u (client sync)\n", pUser->GetId(), pUser->m_dwRidingPoint);
+            return true; }
+        return false;
+    }
+    if (ie(F, "cultivation")) { // += FUN_1401669f0, get FUN_1401669e0
+        if (ie(O, "+=")) { pUser->m_dwCultivation += (uint32_t)v;
+            printf("[USER] %u cultivation -> %u (client sync)\n", pUser->GetId(), pUser->m_dwCultivation);
+            return true; }
+        if (ie(O, "==")) return pUser->GetCultivation() == (uint64_t)v;
+        if (ie(O, "<"))  return pUser->GetCultivation() < (uint64_t)v;
+        return false;
+    }
+    if (ie(F, "pkprotocol")) { // FUN_140373e40 get / FUN_140373dd0 set
+        if (ie(O, "==")) return pUser->m_dwPkProtocol == (uint64_t)v;
+        if (ie(O, "set")) { pUser->m_dwPkProtocol = (uint32_t)v; return true; }
+        return false;
+    }
+    if (ie(F, "viplevel")) { // FUN_1401649c0 get / FUN_1401649d0 set (same value as vip)
+        if (ie(O, "+=")) { pUser->SetVipLevel(pUser->GetVipLevel() + (uint32_t)v); return true; }
+        if (ie(O, "==")) return pUser->GetVipLevel() == v;
+        if (ie(O, "<"))  return pUser->GetVipLevel() < v;
+        return false;
+    }
+    if (ie(F, "strengthvalue")) { // += FUN_140166c40, get FUN_140166bf0
+        if (ie(O, "+=")) { pUser->m_dwStrengthValue += (uint32_t)v;
+            printf("[USER] %u strength_value -> %u (client sync)\n", pUser->GetId(), pUser->m_dwStrengthValue);
+            return true; }
+        if (ie(O, "==")) return pUser->GetStrengthValue() == (uint64_t)v;
+        if (ie(O, "<=")) return pUser->GetStrengthValue() <= (uint64_t)v;
+        return false;
+    }
+    if (ie(F, "culture_value")) { // += FUN_140166ac0, get FUN_140166ab0
+        if (ie(O, "+=")) { pUser->m_dwCultureValue += (uint32_t)v;
+            printf("[USER] %u culture_value -> %u (client sync)\n", pUser->GetId(), pUser->m_dwCultureValue);
+            return true; }
+        if (ie(O, "==")) return pUser->GetCultureValue() == (uint64_t)v;
+        if (ie(O, "<"))  return pUser->GetCultureValue() < (uint64_t)v;
+        if (ie(O, ">"))  return pUser->GetCultureValue() > (uint64_t)v;
+        return false;
+    }
+    // ORIGINAL unknown-field path: InlineLogDBERROR "ACTION_USER_ATTR
+    // ActionID:%u, %s %s %s %s" (gameaction.cpp:0x2567) -> 0
+    printf("[ACTION] 1001 ACTION_USER_ATTR unknown data '%s %s %s' (gameaction.cpp:0x2567)\n",
+           szField, szOp, szVal);
     return false;
 }
 
