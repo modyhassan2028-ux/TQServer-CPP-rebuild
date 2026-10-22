@@ -178,3 +178,19 @@ CREATE TABLE IF NOT EXISTS cq_cross_monster (
   cp_reward INT NOT NULL DEFAULT 25,  -- CP bounty for the killer
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- scheduled server activities (original event model): the activity manager
+-- checks this schedule every 30s and drives xp multipliers, boss rushes,
+-- drop boosts and peace hours
+CREATE TABLE IF NOT EXISTS cq_activity (
+  id INT NOT NULL AUTO_INCREMENT,
+  name VARCHAR(32) NOT NULL,
+  type INT NOT NULL,              -- 1=double xp, 2=boss rush, 3=lucky drops, 4=peace (no pk points)
+  days VARCHAR(16) NOT NULL DEFAULT 'daily',  -- 'daily' | 'weekend' | 'weekday'
+  start_hour INT NOT NULL,
+  end_hour INT NOT NULL,
+  param1 INT NOT NULL DEFAULT 1,  -- xp/drop multiplier or boss count
+  message VARCHAR(128) NOT NULL DEFAULT '',
+  enabled INT NOT NULL DEFAULT 1,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

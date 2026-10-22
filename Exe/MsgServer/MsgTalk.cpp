@@ -17,6 +17,7 @@
 #include "User.h"
 #include "Item.h"
 #include "ItemUpgrade.h"
+#include "Activity/ActivityManager.h"
 #include "MsgItem.h"
 #include "MySQLClient.h"
 #include <sstream>
@@ -423,6 +424,12 @@ if (m_message.rfind("/npc", 0) == 0) {
                          "  Mining: " + std::to_string(user->GetOreMined()) + " digs - " +
                          CUser::ProfRank(user->GetOreMined()) + " (+" +
                          std::to_string(CUser::ProfBonus(user->GetOreMined()) - 100) + "% pay)");
+        return;
+    }
+
+    // ---- live event schedule: /events ----
+    if (m_message == "/events") {
+        user->SendSysMsg(CActivityManager::Instance().StatusText());
         return;
     }
 

@@ -2,6 +2,7 @@
 #include "CrossServer/CrossClient.h"
 #include "MapManager.h"
 #include "MonsterManager.h"
+#include "Activity/ActivityManager.h"
 #include "GroundItems.h"
 #include "UserManager.h"
 #include "Guild.h"
@@ -57,6 +58,7 @@ int main(int argc, char* argv[]) {
         for (;;) {
             std::this_thread::sleep_for(std::chrono::seconds(30));
             try { CGuildManager::Instance().TickWars(); } catch (...) {}
+            try { CActivityManager::Instance().Tick(); } catch (...) {}
             // weekly guild war champion payout: 168 x 30s = 1 week cadence
             if (++nChampTicks >= 168) {
                 nChampTicks = 0;
@@ -111,6 +113,8 @@ int main(int argc, char* argv[]) {
     }).detach();
     CMonsterManager::Instance().Start();
     // cross-server hub link (data/cross.ini, ENABLED=0 keeps it off)
+    // scheduled activities from cq_activity (double xp, boss rush, ...)
+    CActivityManager::Instance().Load(CAccountManager::Instance().GetDB());
     // cross-realm beasts from cq_cross_monster (announced hub-wide on kill)
     CMonsterManager::Instance().SpawnCrossFromDB(
         CAccountManager::Instance().GetDB());

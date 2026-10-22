@@ -6,6 +6,8 @@
 #include "MonsterManager.h"
 #include "CrossServer/CrossClient.h"
 #include "PKBounty.h"
+#include "Activity/ActivityManager.h"
+#include "Activity/ActivityWindow.h"
 #include "Npc.h"
 #include "Guild.h"
 #include "MsgItem.h"
@@ -130,7 +132,9 @@ void CMsgInteract::Process(uint32_t dwSender) {
                        pTarget->GetName().c_str());
             }
             // killer gains PK points; the victim respawns in Twin City
-            if (!bJustice) pAttacker->AddPkPoints(10);
+            // peace hours activity: no pk points gained
+            if (!bJustice && !CActivityManager::Instance().IsActive(activity::TypePeace))
+                pAttacker->AddPkPoints(10);
             // the victim drops 10% of carried money at the corpse
             CGroundItemManager::Instance().OnPlayerDeath(pTarget);
             } // end non-arena death
@@ -246,6 +250,8 @@ void CMsgInteract::ResolveMonsterHit(CUser* pAttacker, uint32_t dwTargetId,
         // experience scales with monster level (original model: harder mobs = more xp)
         uint32_t dwXp = 10 + pMonster->GetLevel() * 15;
         if (pMonster->IsBoss()) dwXp *= 20; // world boss jackpot
+        // scheduled activity: double xp hour multiplies all kill xp
+        dwXp *= CActivityManager::Instance().Multiplier(activity::TypeDoubleXp, 1);
         pAttacker->AddExperience(dwXp);
         // teammates on the same map each earn half the kill XP
         CTeamManager::Instance().ShareKillXp(pAttackerRef, dwXp);
@@ -281,8 +287,12 @@ void CMsgInteract::ResolveMonsterHit(CUser* pAttacker, uint32_t dwTargetId,
         // cq_dropitemrule: roll the monster's loot table (v1: straight to bag)
         auto* pRules = CItemLibrary::Instance().GetDropRules(pMonster->GetTypeId());
         if (pRules) {
+            uint32_t dwDropMul = CActivityManager::Instance().Multiplier(activity::TypeLuckyDrops, 1);
             for (const auto& r : *pRules) {
-                if ((uint32_t)(rand() % 100) >= r.dwChance) continue;
+                // lucky time activity: chance is multiplied, capped at 100
+                uint32_t dwChance = r.dwChance * dwDropMul;
+                if (dwChance > 100) dwChance = 100;
+                if ((uint32_t)(rand() % 100) >= dwChance) continue;
                 auto* pDef = CItemLibrary::Instance().Lookup(r.dwItemType);
                 if (!pDef) continue;
                 // stack with an existing consumable stack
