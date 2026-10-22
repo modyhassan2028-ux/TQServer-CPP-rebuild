@@ -192,9 +192,16 @@ void CMsgInteract::Process(uint32_t dwSender) {
         }
         // experience scales with monster level (original model: harder mobs = more xp)
         uint32_t dwXp = 10 + pMonster->GetLevel() * 15;
+        if (pMonster->IsBoss()) dwXp *= 20; // world boss jackpot
         pAttacker->AddExperience(dwXp);
         // teammates on the same map each earn half the kill XP
         CTeamManager::Instance().ShareKillXp(pAttacker, dwXp);
+        if (pMonster->IsBoss()) {
+            CMsgTalk note;
+            if (note.Create("SYSTEM", "", pAttacker->GetName() + std::string(" has slain the TerraDragon!"),
+                            CMsgTalk::Channel_Broadcast))
+                CMapManager::Instance().BroadcastToAll(note.GetBuf(), note.GetSize());
+        }
         // attacker rewards: base bounty; teams split it among same-map members
         CTeamManager::Instance().ShareKillReward(pAttacker, 50, 1);
         pAttacker->AddMoney(50);

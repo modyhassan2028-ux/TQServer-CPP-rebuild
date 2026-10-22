@@ -52,10 +52,14 @@ int main(int argc, char* argv[]) {
         CItemLibrary::Instance().LoadAdditionsFromFile("data/itemadditions.ini");
 
     std::thread([] {
-        int nTicks = 0;
+        int nTicks = 0, nBossTicks = 0;
         for (;;) {
             std::this_thread::sleep_for(std::chrono::seconds(30));
             try { CGuildManager::Instance().TickWars(); } catch (...) {}
+            if (++nBossTicks >= 120) { // 120 x 30s = 1 hour
+                nBossTicks = 0;
+                try { CMonsterManager::Instance().SpawnBoss(); } catch (...) {}
+            }
             try {
                 // stamina regen: everyone online regains 120 per 30s tick
                 // (4/sec) - the jump cost in MsgAction drains it

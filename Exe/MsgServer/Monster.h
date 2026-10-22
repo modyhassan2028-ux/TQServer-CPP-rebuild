@@ -38,6 +38,8 @@ public:
     void SetDefense(uint32_t v) { m_dwDefense = v; }
 
     uint32_t GetLevel() const { return m_dwLevel; }
+    bool IsBoss() const { return m_bBoss; }
+    void SetBoss(bool b) { m_bBoss = b; }
     void SetLevel(uint32_t dwLevel) { m_dwLevel = dwLevel; }
 
 private:
@@ -52,6 +54,7 @@ private:
     uint8_t  m_ucDir{0};
     uint32_t m_dwLife{100};
     uint32_t m_dwMaxLife{100};
+    bool m_bBoss{false};
     uint32_t m_dwLevel{1};
     uint32_t m_dwAttack{10};
     uint32_t m_dwDefense{2};

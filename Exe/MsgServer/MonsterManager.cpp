@@ -4,9 +4,11 @@
 #include "MySQLClient.h"
 #include "Account.h"
 #include "MapManager.h"
+#include "MsgTalk.h"
 #include "GameMap.h"
 #include "MsgMonster.h"
 #include "MapManager.h"
+#include "MsgTalk.h"
 #include "UserManager.h"
 
 #include <thread>
@@ -304,4 +306,29 @@ bool CMonsterManager::Chase(std::shared_ptr<CMonster> pM) {
     if (jump.Create(pM->GetId(), pM->GetX(), pM->GetY(), pM->GetDir()))
         CMapManager::Instance().Broadcast(pM->GetMapId(), jump.GetBuf(), jump.GetSize());
     return true;
+}
+
+// spawn the hourly world boss in Twin City with a world announcement.
+// boss = 20x the XP of a normal kill and flags a guaranteed drop bonus.
+void CMonsterManager::SpawnBoss() {
+    auto pMap = CMapManager::Instance().GetMap(1002);
+    uint16_t x = 550, y = 480;
+    if (pMap && pMap->HasRealCollision()) {
+        uint32_t rx = 0, ry = 0;
+        if (pMap->RandomWalkableCell(rx, ry)) { x = (uint16_t)rx; y = (uint16_t)ry; }
+    }
+    auto p = std::make_shared<CMonster>(m_dwNextId++, 999, "TerraDragon");
+    p->SetMapId(1002);
+    p->SetSpawn(x, y);
+    p->SetLevel(50);
+    p->SetLife(50000);
+    p->SetMaxLife(50000);
+    p->SetBoss(true);
+    m_byMap[1002].push_back(p);
+    // world announcement
+    CMsgTalk note;
+    if (note.Create("SYSTEM", "", "The TerraDragon has appeared in Twin City! Great rewards await...",
+                    CMsgTalk::Channel_Broadcast))
+        CMapManager::Instance().BroadcastToAll(note.GetBuf(), note.GetSize());
+    printf("[BOSS] TerraDragon spawned at 1002 (%u,%u)\n", x, y);
 }

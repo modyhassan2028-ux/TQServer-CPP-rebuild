@@ -29,6 +29,10 @@ public:
     bool Chase(std::shared_ptr<CMonster> pMonster);
     void OnMonsterKilled(std::shared_ptr<CMonster> pMonster); // schedules delayed respawn
 
+public:
+    // hourly world boss: big XP + guaranteed drops (classic MMORPG event)
+    void SpawnBoss();
+
 private:
     CMonsterManager() = default;
     void SpawnDefaults();
