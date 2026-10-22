@@ -132,6 +132,67 @@ if (m_message.rfind("/npc", 0) == 0) {
         return;
     }
 
+    // ---- CP (conquer points) shop: premium currency from monster kills ----
+    if (m_message.rfind("/cpshop", 0) == 0) {
+        std::string out = "CP Shop (conquer points):";
+        for (const auto& kv : CItemLibrary::Instance().GetAllTypes()) {
+            const auto& d = kv.second;
+            if (d.dwPrice / 1000 < 1) continue;   // only premium-priced goods
+            out += "\n  " + std::to_string(d.dwType) + ". " + d.strName +
+                   " - " + std::to_string(d.dwPrice / 1000) + " CP (you have " +
+                   std::to_string(user->GetConquerPoints()) + ")";
+            if (out.size() > 380) { out += "\n  ..."; break; }
+        }
+        user->SendSysMsg(out);
+        return;
+    }
+    if (m_message.rfind("/cpbuy ", 0) == 0) {
+        std::istringstream iss(m_message.substr(7));
+        uint32_t dwType = 0, dwCount = 1;
+        iss >> dwType >> dwCount;
+        if (dwCount == 0) dwCount = 1;
+        auto* pDef = CItemLibrary::Instance().Lookup(dwType);
+        if (!pDef) { user->SendSysMsg("No such item type. /cpshop to list."); return; }
+        uint32_t cpEach = pDef->dwPrice / 1000;
+        if (cpEach < 1) cpEach = 1;
+        uint64_t total = (uint64_t)cpEach * dwCount;
+        if (user->GetConquerPoints() < total) {
+            user->SendSysMsg("Not enough CP: need " + std::to_string(total) +
+                             ", you have " + std::to_string(user->GetConquerPoints()) + ".");
+            return;
+        }
+        user->SetConquerPoints(user->GetConquerPoints() - (uint32_t)total);
+        uint32_t dwGiven = 0;
+        if (pDef->usSort == 0) { // consumables stack first
+            for (auto& it : user->GetInventory()) {
+                if (it.dwType == dwType && it.dwAmount < 1000) {
+                    uint32_t room = 1000 - it.dwAmount;
+                    uint32_t add = (room < dwCount) ? room : dwCount;
+                    it.dwAmount += add; dwCount -= add; dwGiven += add;
+                    break;
+                }
+            }
+        }
+        while (dwCount > 0) {
+            uint32_t amt = (dwCount > 1000) ? 1000 : dwCount;
+            ItemInfo item;
+            item.dwId = MakeItemId(user->NextItemSeq());
+            item.dwType = dwType;
+            item.usSort = pDef->usSort;
+            item.dwAmount = pDef->usSort == 0 ? amt : 1;
+            item.strName = pDef->strName;
+            item.dwPosition = 255;
+            user->GetInventory().push_back(item);
+            dwGiven += item.dwAmount;
+            if (pDef->usSort == 0) dwCount -= amt; else dwCount = 0;
+        }
+        user->SendSysMsg("Bought " + std::to_string(dwGiven) + " x " + pDef->strName +
+                         " for " + std::to_string(total) + " CP.");
+        printf("[CPSHOP] %s bought %u x %s for %llu CP\n", user->GetName().c_str(),
+               dwGiven, pDef->strName.c_str(), (unsigned long long)total);
+        return;
+    }
+
     // ---- shop commands (prices from cq_itemtype / data/items.ini) ----
     if (m_message.rfind("/shop", 0) == 0) {
         user->SendSysMsg(CItemLibrary::Instance().ShopListText());

@@ -49,6 +49,7 @@ public:
     const ItemTypeDef* Lookup(uint32_t dwType) const;
     // numbered shop listing with prices ("1. Sword - 1000 money" per line)
     std::string ShopListText() const;
+    const std::map<uint32_t, ItemTypeDef>& GetAllTypes() const { return m_types; }
     size_t Size() const { return m_types.size(); }
     // applies name+sort from the library (keeps item fields when type unknown)
     void Apply(ItemInfo& item) const;
