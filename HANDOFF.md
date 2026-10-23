@@ -109,8 +109,24 @@ chk_sum بمعادلة FUN_1400fe140 كاملة + LAST_INSERT_ID)،
   IsDynaNpc. حقول السجل أضيفت لـ CNpc (m_bDyna يضبط من 2007 spawn)،
   وسياق الحوار صار يتعبأ من NPC التفاعل في MsgInteract. اختبار
   npc_record_201_test PASSED مع القاعدتين القديمتين.
-- آخر 3 commits: 3523/3524 battle domains (هذا)، clan 218/219/3501/3510
-  (e7b65d0)، 205/207/208 npc ops (5db1686).
+- **منظومة 35xx كاملة (3521 آخرها):** 3521 = توزيع دخل معركة العيلة —
+  فُكّ مخزن الدخل العالمي (0x140975e00، مفتاح (domain,syn,type)):
+  FUN_140151580 قراءة / 151380 إنشاء+تصفير / 1511e0 مسح / 1515b0 تراكم؛
+  FUN_14018eb30 = field4 من سجل المستخدم+0x1100؛ FUN_14008a6c0 = دقائق
+  من [mapgroup+0x3b8] (نُمذجت SetKernelMinutes). البورت الحرفي: بوابات
+  domain/vcall+0x40 early-true/holder(field19)/جمع أونلاين نفس السين +
+  نافذة 15 دقيقة ثلاثية المسارات + SUCCESS (استهلاك الدخل → خزنة
+  +0x190 → إعلان STR_FAMILY_BATTLE_SUCCESS_ADD_INCOME → +0x1a8 →
+  رسالة DEFEND_SUCCESS) وDEFEND (مسح دخل المتحدى → خزنته → إعلان
+  FAIL_ADD_INCOME → تبديل التحدي +0x1b8 → رسالة CHALLENGE_SUCCESS) +
+  حلقة الالتقاط المتأخرة بأقصى قيمة معركة. CFamilyBattleManager كسب
+  مخزن الدخل وقيم المعركة وKernelMinutes؛ CGuildManager كسب
+  AddTreasuryOfSyn/SetChallengeDomainOfSyn/AnnounceOfSyn. اختبار
+  family_income_3521_test PASSED (9 حالات) — القواعد الثمانية كلها
+  خضرا. نمذجة موثقة: +0x1a8 = علامة "تم التوزيع" (الكاتب الوحيد
+  المرئي لعلم vcall+0x40).
+- آخر 3 commits: 3521 income (b0fd4a8)، 3523/3524 battle domains
+  (e631dfc)، clan 218/219/3501/3510 (e7b65d0).
 - **3523/3524 اكتملت (فحوص نطاق معركة العيلة):** النوعين يحسّنان
   (rec8 vcall+0x1c0 = نطاق الحيازة / +0x1b0 = نطاق التحدي لكل عيلة)
   مقابل عمود data (مجموعة 10026-10035 في القاعدة)، مع بوابة سجل
@@ -123,26 +139,10 @@ chk_sum بمعادلة FUN_1400fe140 كاملة + LAST_INSERT_ID)،
   CGuild كسب m_dwHoldDomain/m_dwChallengeDomain + مدير m_byId
   (GetSynById). اختبار family_battle_352x_test PASSED.
 - **PORT-PENDING المتبقي (بالترتيب):**
-  1) **3521 — توزيع دخل معركة العيلة (الوحدة العميقة التالية،
-     فُكّت بالكامل ولم تُبورت):** handler عند 0x140140d00 (FUN_140140380
-     idx20). المسار: pUser(0x3585) → سجل المجال عبر mgr vcall+0x88(data)
-     (null→false) → علم vcall+0x40 المحقق يعمل true فوريًا → بوابة
-     "سين المستخدم == field19" (حيازة السجل) وإلا false → جمع
-     المستخدمين الأونلاين من نفس السين (mapgroup) → بوابة نافذة
-     الوقت 15 دقيقة (دقائق localtime الحالية مقابل FUN_14008a6c0 =
-     دقائق نواة الوقت) → منطق النتيجة: userSyn==field1 (r15=1،
-     SUCCESS_ADD_INCOME) أو حيازة المجال && vcall+0x1b0==0 (r15=2،
-     مسار DEFEND/FAIL) → الدخل من FUN_140151580(mgr,domain,syn,4)
-     (قراءة field4، والمتغيرات 0x140151380/0x1401511e0/FUN_1401512e0
-     تحتاج فكًا قبل البورت!) → vcall+0x190(synid,amount) إضافة
-     للخزنة + vcall+0x148(synid,text) إعلان بنصوص
-     STR_FAMILY_BATTLE_SUCCESS_ADD_INCOME / FAIL_ADD_INCOME (0x1407103d8/
-     0x140710388) + vcall+0x1a8(domain) علامة + رسالة للمستخدم
-     (0x7db/0xffffff بنص DEFEND_SUCCESS 0x1407103b0). صفوف حقيقية:
-     5022872..5023521 (data=10026..10035).
-  2) 223/224 أثاث البيت (parser مخصص + mgr vcall+0xa8).
-  3) 207 نوع 10 (stall) و46 (pole) لما تُبورت النظامان الفرعيان.
-  4) إدخال الحوار من العميل (MsgDialog::Process stub يغذي ctx.strInput).
+**استُبدل — 3521 اكتمل (انظر فقرة "35xx كاملة" تحت).**22872..5023521 (data=10026..10035).
+  1) 223/224 أثاث البيت (parser مخصص + mgr vcall+0xa8).
+  2) 207 نوع 10 (stall) و46 (pole) لما تُبورت النظامان الفرعيان.
+  3) إدخال الحوار من العميل (MsgDialog::Process stub يغذي ctx.strInput).
   عائلات النطاقات الأخرى
   غير الشائعة تسقط لسلوك محفوظ (return محدد لكل عائلة)، وفرع
   sysdata/taskdata في المُحلِّل — صفر استخدام في القاعدة الحقيقية.
