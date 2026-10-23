@@ -362,6 +362,17 @@ int main() {
       assert(!CGameAction::ProcessActionUser(uLv, &n)); }
     printf("[ok] 1086 levexp var matches case 0x4c (FUN_140382f00 + cq_levexp)\n");
 
+    // --- 1026 (case 0x14): face-code/10000 == 1 gate (FUN_1401bf470) ---
+    auto uF = std::make_shared<CUser>(999006);
+    auto mk1026 = [](uint32_t id) {
+        CDialogEngine::Node n; n.dwType = 1026; n.dwId = id; return n; };
+    uF->SetLookface(10003);    // 10003/10000 = 1 -> success branch
+    { auto n = mk1026(410002); assert(CGameAction::ProcessActionUser(uF, &n)); }
+    uF->SetLookface(1051003);  // 1051003/10000 = 105 -> fail branch
+    { auto n = mk1026(302957); assert(!CGameAction::ProcessActionUser(uF, &n)); }
+    printf("[ok] 1026 face-code gate matches case 0x14 (FUN_1401bf470 /10000)\n");
+
+
 
 
 

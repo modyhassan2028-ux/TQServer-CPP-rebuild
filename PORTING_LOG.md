@@ -825,3 +825,21 @@ CUser vtable+0x50 — يلزم تفريغ الـ vtable)، 1023 (0x11 cq_bonus)�
 السلوك بعد (فشل تحديد الـ vtable من الباينري: MSVC EH tables تشوّه
 المسح؛ يلزم استخراج vtable CUser عبر مسار آخر أو غيدرا سكربت)،
 1023/1024/1028/1029 وأصناف نطاق FUN_140141c80 المتبقية عند ظهور صفوف.
+
+## وحدة 2026-10-23 (4) — النوع 1026 (case 0x14، 555 صف): تم الحل أخيرًا
+
+- **كسر الـ vtable:** الملف بلا جدول relocations (دليل .reloc = 0)، فالـ
+  vtables مخزنة كـ VA كاملة (8 بايت). مسح .rdata بحثًا عن سلاسل مؤشرات
+  كود ≥ 40 خانة → 44 جدولًا. جدول CUser الحقيقي عند file 0x71d348
+  (49 خانة): +0x8 = GetId(+0xe80)، +0xa0 = GetExp(+0xed0 qword)،
+  +0x108 = GetMetempsychosis(+0xf00 byte) — التلاتة مطابقة لدلالات
+  معروفة من سويتش cq_action.
+- **FUN_1401bf470 (slot 0x50):** `[this+0xeac] / 10000` بقسمة سحرية
+  (mul 0xd1b71759/shr 13 ثم mul 0x10624dd3/shr 6) — objdump-verified.
+- **دليل +0xeac = كود الوجه:** معالج محل الوجه يقرأ `+0xeac/10000` ثم
+  `%1000 == face_id` (STR_FACE_ALREADY_NO_TO_BUY)؛ الـ CUserData module
+  يحمّله من الحقل 0xd. **غير محسوم:** عمود القاعدة الدقيق المغذي
+  للحقل 0xd (v6159 cq_user فيها lookface فقط) — ربطناه بـ lookface
+  في بورتنا مع تعليق ORIGINAL يوثّق الاحتمال.
+- **case 0x14:** `uVar41 = (vcall+0x50 == 1)` — أي `lookface/10000 == 1`.
+- **الاختبار:** lookface 10003 → نجاح؛ 1051003 → فشل. PASSED.

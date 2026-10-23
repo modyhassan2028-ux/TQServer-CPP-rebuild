@@ -1702,6 +1702,17 @@ bool bAll = (llAll == 1);
             return pUser->AwardWeaponSkillTime(nId, (int)uArg2);
         return false; // uplevel/del/unknown -> ORIGINAL falls through -> 0
     }
+    case 1026: { // ORIGINAL switch case 0x14 (remap 1026->0x14): vcall+0x50 == 1
+        // ORIGINAL FUN_1401bf470 (CUser vtable slot 0x50; the real vtable was
+        // located in the binary at file 0x71d348 — slot 0x8 = GetId(+0xe80),
+        // slot 0xa0 = GetExp(+0xed0), slot 0x108 = GetMetempsychosis(+0xf00)
+        // all matching our established semantics). Slot 0x50 returns
+        // [this+0xeac] / 10000 (magic division 0xd1b71759 / 0x10624dd3,
+        // objdump-verified). +0xeac is the face/look code — the face-shop
+        // handler reads +0xeac/10000 %1000 as the face id (STR_FACE_ALREADY_
+        // NO_TO_BUY). Our port maps it to cq_user.lookface.
+        return pUser->GetLookface() / 10000 == 1;
+    }
     case 1025: // ORIGINAL switch case 0x13 (remap 1025->0x13): same FUN_140164440
     case 1027: { // ORIGINAL switch case 0x13 -> FUN_140164440:
         // return (user->vtable+0x48)() != 0 - the mate id (cq_user.mateid).
