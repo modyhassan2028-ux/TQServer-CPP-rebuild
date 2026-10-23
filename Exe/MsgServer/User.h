@@ -99,8 +99,15 @@ public:
         m_dialogOptions.push_back({text, dwActionId});
         return (uint32_t)(m_dialogOptions.size() - 1);
     }
-    void ClearDialogOptions() { m_dialogOptions.clear(); }
+    void ClearDialogOptions() { m_dialogOptions.clear(); m_dwInputAction = 0; }
     const std::vector<std::pair<std::string, uint32_t>>& GetDialogOptions() const { return m_dialogOptions; }
+    // ORIGINAL 6159 input flow: a 103 (input) dialog registers the
+    // action the typed answer continues at; the client reply text
+    // arrives as MsgTalk(1004) to the NPC, the engine stores it as the
+    // dialog ctx strInput and jumps there (FUN_14013f4c0-family input
+    // branch). Modeled as one pending input action at a time.
+    void SetPendingInput(uint32_t dwAction) { m_dwInputAction = dwAction; }
+    uint32_t GetPendingInput() const { return m_dwInputAction; }
     // cq_action dialog tree position (0 = no tree open)
     void SetDialogNode(uint32_t id) { m_dwDialogNode = id; }
     uint32_t GetDialogNode() const { return m_dwDialogNode; }
@@ -503,6 +510,7 @@ private:
     uint32_t m_dwTalkingNpc{0};
     uint32_t m_dwDialogNode{0};
     std::vector<std::pair<std::string, uint32_t>> m_dialogOptions;
+    uint32_t m_dwInputAction{0}; // pending 103 input continuation
     uint16_t m_wProfession{0};   // cq_user.profession (short @ +0xef4)
     uint32_t m_dwMana{0};
 public:

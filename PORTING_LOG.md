@@ -1034,3 +1034,23 @@ CUser vtable+0x50 — يلزم تفريغ الـ vtable)، 1023 (0x11 cq_bonus)�
   تحديث مركز NPC (الأصل يكتب fields 8/9 ثم ينقل، والنتيجة واحدة).
 - اختبار home_furniture_223_224_test: 9 حالات PASSED + القواعد
   الثمانية القديمة كلها خضرا (9 قواعد إجمالًا).
+
+## وحدة 207 stall/pole + إدخال حوار 6159 (2026-10-23)
+- فُكّت مسارات 207 المتبقية: النوع 10 → FUN_140087ed0 مدير الستول
+  (singleton كسول على root record mgr: vcall+0x20(0x16) يخزن عند
+  0x140975c50، CHECKF 0x3ef) ثم vcall+0x328(npcId)؛ النوع 46 → البوابة
+  FUN_14008b330 = بايت [mapgroup+0x77c]، true → فئة 0x25
+  (vcall+0x20(0x25) ثم vcall+0x78(npcId))، false → فئة 0x1c
+  (vcall+0x20(0x1c) ثم vcall+0x40(npcId))، سجل null → false.
+- StallPole.h/cpp: CStallManager (سجل معرفات + RemoveStall→bool)،
+  CPoleManager (بوابة pole-mode + سجلان منفصلان للفئتين + RemovePole
+  يوزع حسب البوابة). النظم المُنشِئة (stall open/pole systems) لم
+  تُبورت بعد — تسجل هنا عند بورتها.
+- إدخال الحوار: 103 يسجل فعل الاستمرار (User::SetPendingInput)، رد
+  MsgTalk(1004) من العميل يخزن النص في ctx.strInput ويقفز للفعل ثم
+  يُستهلك؛ ClearDialogOptions يمسح البندنق. (فرع الإدخال بعد فرع
+  مطابقة الخيارات؛ الخيارات أولوية لو تطابق النص حرفيًا — قرار
+  نمذجة موثق).
+- اختبارا stall_pole_207_test و dialog_input_flow_test PASSED (صف
+  حقيقي 5021750 نوع 218 كهدف الإدخال) + القواعد التسع القديمة كلها
+  خضرا (11 قاعدة إجمالًا).

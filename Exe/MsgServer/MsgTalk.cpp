@@ -153,6 +153,24 @@ void CMsgTalk::Process(uint32_t dwSender) {
             }
         }
     }
+    // ORIGINAL 6159 input branch: a 103 (input) dialog is open - the
+    // typed text is stored as the dialog ctx strInput and the chain
+    // continues at the action the 103 row registered
+    {
+        uint32_t dwInputAction = user->GetPendingInput();
+        if (dwInputAction) {
+            uint32_t dwNpc = user->GetTalkingNpc();
+            if (dwNpc >= CNpcManager::NPC_ID_BASE) {
+                auto pNpc = CNpcManager::Instance().GetNpc(dwNpc);
+                if (pNpc) {
+                    user->m_stDialogCtx.strInput = m_message;
+                    user->SetPendingInput(0); // consumed
+                    pNpc->ReplyWithAction(user, dwInputAction);
+                    return;
+                }
+            }
+        }
+    }
     // legacy digit picking of the open dialog menu
     if (!m_message.empty() && m_message.find_first_not_of("0123456789") == std::string::npos) {
         uint32_t dwNpc = user->GetTalkingNpc();

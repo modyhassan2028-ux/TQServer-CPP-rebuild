@@ -125,8 +125,8 @@ chk_sum بمعادلة FUN_1400fe140 كاملة + LAST_INSERT_ID)،
   family_income_3521_test PASSED (9 حالات) — القواعد الثمانية كلها
   خضرا. نمذجة موثقة: +0x1a8 = علامة "تم التوزيع" (الكاتب الوحيد
   المرئي لعلم vcall+0x40).
-- آخر 3 commits: 223/224 home furniture (هذا)، 3521 income (b0fd4a8)،
-  3523/3524 battle domains (e631dfc).
+- آخر 3 commits: 207 stall/pole + input flow (هذا)، 223/224 home
+  furniture (e3c2393)، 3521 income (b0fd4a8).
 - **3523/3524 اكتملت (فحوص نطاق معركة العيلة):** النوعين يحسّنان
   (rec8 vcall+0x1c0 = نطاق الحيازة / +0x1b0 = نطاق التحدي لكل عيلة)
   مقابل عمود data (مجموعة 10026-10035 في القاعدة)، مع بوابة سجل
@@ -158,9 +158,24 @@ chk_sum بمعادلة FUN_1400fe140 كاملة + LAST_INSERT_ID)،
     CNpcManager::GetNpcsOnMapOfType (vcall+0xc8). اختبار
     home_furniture_223_224_test PASSED (9 حالات). **القواعد التسعة
     كلها خضرا.**
-- **PORT-PENDING المتبقي (بالترتيب):**
-  1) 207 نوع 10 (stall) و46 (pole) لما تُبورت النظامان الفرعيان.
-  2) إدخال الحوار من العميل (MsgDialog::Process stub يغذي ctx.strInput).
+- **آخر نقطتين في الخطة اكتملتا — PORT-PENDING القديم انتهى:**
+  - **207 نوع 10/46** (فك 0x14013c7ef..0x14013c8b4): النوع 10 → مدير
+    الستول FUN_140087ed0 (singleton كسول: root mgr [0x1406d8df0] →
+    vcall+0x20(0x16) مخزن عند 0x140975c50، CHECKF 0x3ef لو null) ثم
+    vcall+0x328(npcId)؛ النوع 46 → نفس الـ root mgr، بوابة
+    FUN_14008b330 ([mapgroup+0x77c]): true → فئة 0x25 عبر
+    vcall+0x78(npcId)، false → فئة 0x1c عبر vcall+0x40(npcId).
+    نمذجة: StallPole.h/cpp — CStallManager (سجل معرفات الستول) و
+    CPoleManager (بوابة pole-mode + سجلان: فئة 0x25/0x1c)، النقل
+    إزالة بالمعرف → bool. النظم المُنشِئة للستول/الأعمدة (أنظمة
+    أخرى) لما تُبورت تسجل هنا.
+  - **إدخال الحوار 6159**: حوار 103 (input) يسجل الآن فعل الاستمرار
+    في User::SetPendingInput (مع خيار البوش القديم)، ورد العميل
+    المكتوب يصل MsgTalk(1004) إلى الـ NPC المتحدث: فرع الإدخال في
+    MsgTalk::Process يخزن النص في ctx.strInput ويقفز للفعل، ثم
+    يُستهلك. ClearDialogOptions يمسح البندنق. اختبار
+    dialog_input_flow_test PASSED (صف حقيقي 5021750 نوع 218).
+  - **القواعد الـ 11 كلها خضرا.**
   عائلات النطاقات الأخرى
   غير الشائعة تسقط لسلوك محفوظ (return محدد لكل عائلة)، وفرع
   sysdata/taskdata في المُحلِّل — صفر استخدام في القاعدة الحقيقية.

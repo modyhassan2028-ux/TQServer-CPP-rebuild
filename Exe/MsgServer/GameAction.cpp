@@ -12,6 +12,7 @@
 #include "UserManager.h"
 #include "MonsterManager.h"
 #include "Npc.h"
+#include "StallPole.h"
 #include "NameStrCheck.h"
 #include "MsgTalk.h"
 #include "MsgData.h"
@@ -182,6 +183,7 @@ bool CGameAction::ProcessActionOS(std::shared_ptr<CUser> pUser, const CDialogEng
         if (sscanf(param.c_str(), "%d %u %255s %d", &nLen, &uAction, szText, &nFlag) < 3) return false;
         if (nFlag != 0) nLen += 0x100; // ORIGINAL: if (d) size += 0x100
         uint32_t uIdx = pUser->PushDialogOption(szText, uAction); // index -> header byte
+        pUser->SetPendingInput(uAction); // typed answer continues here
         CMsgDialog dlg;
         if (!dlg.Create(CMsgDialog::Mode_Input, szText, (uint8_t)uIdx,
                         static_cast<uint16_t>(nLen))) return false;
@@ -1022,13 +1024,9 @@ bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogE
         return CNpcManager::Instance().RemoveNpc(pRec->GetId()); // FUN_1402bf900
     }
     case 207: { // ORIGINAL case 0xcf subcase (FUN_14013c75a): npc-type op
-        // pRole (0xbf3) then QueryObj(OBJ_NPC) -> dialog npc (0xbf6).
-        // npc record field 4 = type dispatch:
-        //  type 10 -> stall subsystem vcall+0x328(mgr, npcId) (PORT-
-        //    PENDING: stall registry)
-        //  type 46 -> FUN_14008b330(mapgroup) gate -> mgr record 0x25 vs
-        //    0x1c, vcall+0x78(rec, npcId) (PORT-PENDING: pole/home mgr)
-        //  other types -> false (0x14013c8b9)
+        // pRole (0xbf3) then the npc's 0x1040 typed sub-record
+        // (0xbf6); record field 4 = type dispatch (see the branch
+        // comments below for 10/46)
         if (pUser->m_stDialogCtx.dwId == 0) {
             tq::MyLogSave("gmlog/all", "CHECKF in %s, %d", "pRole", 3063); // 0xbf3
             return false;
@@ -1039,12 +1037,17 @@ bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogE
                 "pRole->QueryObj(OBJ_NPC, IPP_OF(pNpc))", 3066); // 0xbf6
             return false;
         }
-        if (pRec->m_dwNpcType == 10 || pRec->m_dwNpcType == 46) {
-            printf("[ACTION %u] type 207: npc(%u) type %u op pending "
-                   "(stall/pole subsystem)\n", pNode->dwId, pRec->GetId(),
-                   pRec->m_dwNpcType);
-            return false; // PORT-PENDING: subsystem not yet ported
-        }
+        // record field 4 (npc type) dispatch, objdump-verified at
+        // 0x14013c7ef: type 10 -> stall mgr FUN_140087ed0 (root record
+        // class 0x16, lazy singleton, CHECKF 0x3ef) vcall+0x328(npcId)
+        // -> bool; type 46 -> root mgr [0x1406d8df0], gate
+        // FUN_14008b330([mapgroup+0x77c]): true -> class 0x25 record
+        // vcall+0x78(npcId), false -> class 0x1c record
+        // vcall+0x40(npcId); null record -> false (0x14013c8b9)
+        if (pRec->m_dwNpcType == 10)
+            return CStallManager::Instance().RemoveStall(pRec->GetId());
+        if (pRec->m_dwNpcType == 46)
+            return CPoleManager::Instance().RemovePole(pRec->GetId());
         return false; // ORIGINAL 0x14013c8b9
     }
     case 208: { // ORIGINAL case 0xd0 subcase (FUN_14013c8c0): clone npc
