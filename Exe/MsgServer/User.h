@@ -543,6 +543,17 @@ public:
     uint16_t m_wBattleLev{0};    // FUN_14018eb30
 
     uint32_t GetLookface() const { return m_dwLookface; }
+    // ORIGINAL user+0xf24: 32-bit action flag array (case 0x16 = type 1028);
+    // FUN_14039a210 chk / FUN_14039a150 add / FUN_14039a1b0 clr (bit <= 31
+    // else LOGERR + no-op; add/clr go through the FUN_1403724f0(user+0xe78)
+    // sync wrapper).
+    uint32_t m_dwActionFlags{0};
+    bool IsActionFlag(int n) const { return n >= 0 && n <= 31 && ((m_dwActionFlags >> n) & 1) != 0; }
+    void SetActionFlag(int n, bool b) {
+        if (n < 0 || n > 31) return; // ORIGINAL: LOGERR + no-op
+        if (b) m_dwActionFlags |= (1u << n); else m_dwActionFlags &= ~(1u << n);
+    }
+
     void SetLookface(uint32_t v) { m_dwLookface = v; printf("[USER] %u lookface -> %u (client sync)\n", m_dwId, v); }
     int32_t  GetTransform() const { return m_nTransform; }
     uint32_t m_dwTransformLookface{0}; // ORIGINAL: transform display look

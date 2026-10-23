@@ -372,6 +372,19 @@ int main() {
     { auto n = mk1026(302957); assert(!CGameAction::ProcessActionUser(uF, &n)); }
     printf("[ok] 1026 face-code gate matches case 0x14 (FUN_1401bf470 /10000)\n");
 
+    // --- 1028 (case 0x16): user flag chk/add/clr (+0xf24 bit array) ---
+    auto uG = std::make_shared<CUser>(999007);
+    auto mk1028 = [](const char* param) {
+        CDialogEngine::Node n; n.dwType = 1028; n.dwId = 7551064; n.strParam = param; return n; };
+    { auto n = mk1028("add 5"); assert(CGameAction::ProcessActionUser(uG, &n)); }
+    { auto n = mk1028("chk 5"); assert(CGameAction::ProcessActionUser(uG, &n)); }
+    { auto n = mk1028("chk 6"); assert(!CGameAction::ProcessActionUser(uG, &n)); }
+    { auto n = mk1028("clr 5"); assert(CGameAction::ProcessActionUser(uG, &n)); }
+    { auto n = mk1028("chk 5"); assert(!CGameAction::ProcessActionUser(uG, &n)); }
+    { auto n = mk1028("chk"); assert(!CGameAction::ProcessActionUser(uG, &n)); } // sscanf < 2
+    printf("[ok] 1028 user-flag chk/add/clr matches case 0x16 (+0xf24)\n");
+
+
 
 
 

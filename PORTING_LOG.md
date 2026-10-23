@@ -843,3 +843,16 @@ CUser vtable+0x50 — يلزم تفريغ الـ vtable)، 1023 (0x11 cq_bonus)�
   في بورتنا مع تعليق ORIGINAL يوثّق الاحتمال.
 - **case 0x14:** `uVar41 = (vcall+0x50 == 1)` — أي `lookface/10000 == 1`.
 - **الاختبار:** lookface 10003 → نجاح؛ 1051003 → فشل. PASSED.
+
+## وحدة 2026-10-23 (5) — النوع 1028 (case 0x16): أعلام المستخدم + HANDOFF.md
+
+- **case 0x16:** sscanf "%s %d" ثم chk→FUN_14039a210 (اختبار بت)،
+  add→FUN_14039a150 (ضبط بت)، clr→FUN_14039a1b0 (مسح بت). المصفوفة: uint32
+  عند user+0xf24، بت <= 31 وإلا LOGERR + no-op. add/clr عبر الغلاف
+  FUN_1403724f0(user+0xe78, mask) (مسار sync عندنا مبسط مع تعليق ORIGINAL).
+  كلمة غير معروفة → log_InlineLogDBERROR → نتيجة 0.
+- **CUser:** أضفنا m_dwActionFlags مع IsActionFlag/SetActionFlag (بت 0-31).
+- **الاختبار:** add/chk/chk6/clr/chk/sscanf ناقص — PASSED كله.
+- **أنشأنا TQServer/HANDOFF.md**: نقطة تسليم للأجنت التالي (الوضع، التالي
+  بالترتيب: 1023 cq_bonus ثم 1024 Family.dll ثم 1029 wave packet، التقنيات
+  المثبتة، أوامر البناء).

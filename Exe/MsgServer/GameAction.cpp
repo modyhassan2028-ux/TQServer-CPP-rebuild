@@ -1713,6 +1713,19 @@ bool bAll = (llAll == 1);
         // NO_TO_BUY). Our port maps it to cq_user.lookface.
         return pUser->GetLookface() / 10000 == 1;
     }
+    case 1028: { // ORIGINAL switch case 0x16 (remap 1028->0x16): user flag chk/add/clr
+        // ORIGINAL: sscanf "%s %d" == 2; keyword chk -> FUN_14039a210 (test
+        // bit, returns it), add -> FUN_14039a150 (set bit, return 1), clr ->
+        // FUN_14039a1b0 (clear bit, return 1). Bit index <= 31 else LOGERR
+        // + no-op. Unknown keyword -> log_InlineLogDBERROR, result 0.
+        char szKey[256] = {0}; int nIdx = 0;
+        if (sscanf(pNode->strParam.c_str(), "%s %d", szKey, &nIdx) != 2) return false;
+        if (_stricmp(szKey, "chk") == 0) return pUser->IsActionFlag(nIdx);
+        if (_stricmp(szKey, "add") == 0) { pUser->SetActionFlag(nIdx, true); return true; }
+        if (_stricmp(szKey, "clr") == 0) { pUser->SetActionFlag(nIdx, false); return true; }
+        printf("[DBERR] 1028 unknown flag key: %s\n", szKey); // ORIGINAL log_InlineLogDBERROR
+        return false;
+    }
     case 1025: // ORIGINAL switch case 0x13 (remap 1025->0x13): same FUN_140164440
     case 1027: { // ORIGINAL switch case 0x13 -> FUN_140164440:
         // return (user->vtable+0x48)() != 0 - the mate id (cq_user.mateid).
