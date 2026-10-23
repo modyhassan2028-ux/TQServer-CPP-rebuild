@@ -670,6 +670,72 @@ namespace {
     }
 }
 
+// ---------------- ORIGINAL FUN_140163c90 (rebirth rule lookup) ----------------
+// Iterates the global rebirth manager (cq_rebirth rows): field 1 = need_prof
+// must equal the user's profession (+0xeee), field 2 = new_prof must equal the
+// requested prof, field 5 = metepsychosis must equal the requested stage, and
+// field 3 = need_level must be <= the user's level. Rebirth-count gate:
+// (vcall+0x108(user) < stage || 2 < rebirthCount) - i.e. first rebirth
+// requires reborn==0. Returns the matching row or NULL.
+struct SRebirthRule { uint32_t dwNeedProf, dwNewProf, dwNeedLevel, dwNewLevel, dwMete; };
+static const SRebirthRule* FindRebirthRule(CUser* pUser, uint32_t dwProf, uint32_t dwStage) {
+    static std::vector<SRebirthRule> s_vecRules;
+    static bool s_bLoaded = false;
+    if (!s_bLoaded) {
+        s_bLoaded = true;
+        auto* pDB = CAccountManager::Instance().GetDB();
+        if (pDB && pDB->Query("SELECT need_prof, new_prof, need_level, new_level, "
+                              "metepsychosis FROM cq_rebirth")) {
+            for (auto& r : pDB->GetRows())
+                s_vecRules.push_back({(uint32_t)strtoul(r[0].c_str(), nullptr, 10),
+                                      (uint32_t)strtoul(r[1].c_str(), nullptr, 10),
+                                      (uint32_t)strtoul(r[2].c_str(), nullptr, 10),
+                                      (uint32_t)strtoul(r[3].c_str(), nullptr, 10),
+                                      (uint32_t)strtoul(r[4].c_str(), nullptr, 10)});
+        }
+        printf("[DB] cq_rebirth rules loaded: %zu\n", s_vecRules.size());
+    }
+    uint32_t dwCurProf = pUser->GetProfession();
+    uint32_t dwReborn = pUser->GetMetempsychosis();
+    uint32_t dwLevel = pUser->GetLevel();
+    for (auto& r : s_vecRules)
+        if (r.dwNeedProf == dwCurProf && r.dwNewProf == dwProf && r.dwMete == dwStage &&
+            (dwReborn < dwStage || 2 < dwReborn) && r.dwNeedLevel <= dwLevel)
+            return &r;
+    return nullptr;
+}
+
+// ---------------- ORIGINAL FUN_1401c3180 (rebirth execution, core path) ----------------
+// Full original chain: FUN_140161610 x2 + FUN_140354ed0 (magic/transform
+// teardown - not modeled yet), weapon-skill resets 0x266/0x268/0x26c (club/
+// blade/sword skill wipe on class-family change - no weapon-skill system
+// yet), FUN_140163e10 (old-class skill wipe 1..19 except 10/11/19),
+// FUN_1401b9d70/FUN_1401abab0 (class change: profession -> new_prof, level
+// store reset + new_level, metempsychosis -> stage, stage stat-point award),
+// mete-level store +0x1cf (level*100000 + exp-scaled remainder), packet 2
+// rebirth notify + broadcast FUN_140087ed0 vcall+0x4e0, final info packet.
+// Ported external behavior: prof/level/reborn/lookface/exp; the remaining
+// hooks are tracked open in PORTING_LOG.md.
+static bool DoRebirth(std::shared_ptr<CUser> pUser, const SRebirthRule* pRule,
+                      uint32_t dwStage, uint32_t dwLook) {
+    if (!pRule) { // ORIGINAL: rule==NULL -> InlineLogERROR 0x4641 -> 0
+        printf("[LOGERR] DoRebirth: null rebirth rule (user.cpp:0x4641)\n");
+        return false;
+    }
+    // ORIGINAL FUN_14008ac00 gate ("pure" rebirth flag from the user-data
+    // manager): when set, the class family (prof/10) must not change.
+    // The flag source is not modeled yet -> always false here.
+    // ORIGINAL: bPure && (new_prof%1000)/10 != cur_prof/10 -> return 0
+    // ORIGINAL core: FUN_1401715d0(user, new_prof) + level reset + FUN_1401a6420
+    // (attr 7 = profession, attr 0x16 = metempsychosis, 0x33/0x32 = level)
+    pUser->SetProfession((uint16_t)pRule->dwNewProf);
+    pUser->SetLevel((uint8_t)pRule->dwNewLevel);   // cq_rebirth.new_level (15)
+    pUser->SetRebornCount(dwStage);               // metempsychosis = stage
+    pUser->SetExperience(0);                      // FUN_140371e90 level-store reset
+    if (dwLook != 0) pUser->SetLookface(dwLook);  // ORIGINAL param 2 (look)
+    return true;
+}
+
 bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode) {
     if (!pUser || !pNode) return false;
     switch (pNode->dwType) {
@@ -1737,6 +1803,29 @@ bool bAll = (llAll == 1);
         // tq::MyLogSave("gmlog/action", param); return 1;
         tq::MyLogSave("gmlog/action", pNode->strParam.c_str());
         return true;
+    }
+    case 1040: { // ORIGINAL switch case 0x22 (remap 1040->0x22): rebirth
+        std::string strP = pNode->strParam; pUser->ResolveActionVars(strP);
+        int32_t nProf = 0, nLook = 0, nStage = 1;
+        if (sscanf(strP.c_str(), "%d %d %d", &nProf, &nLook, &nStage) < 2) {
+            // ORIGINAL: iVar14 < 2 -> InlineLogDBERROR (gameaction.cpp:0x2947) -> 0
+            printf("[DBERR] cq_action %u type 1040 param '%s' (gameaction.cpp:0x2947)\n",
+                   pNode->dwId, pNode->strParam.c_str());
+            return false;
+        }
+        const SRebirthRule* pRule = FindRebirthRule(pUser.get(), (uint32_t)nProf,
+                                                    (uint32_t)nStage);
+        if (pRule && DoRebirth(pUser, pRule, (uint32_t)nStage, (uint32_t)nLook)) {
+            // ORIGINAL tq::MyLogSave("gmlog/rebirth",
+            //   "User[%s][%d], prof[%d], level[%d] rebirth to prof[%d], look[%d]")
+            tq::MyLogSave("gmlog/rebirth",
+                          "User[%s][%d], prof[%d], level[%d] rebirth to prof[%d], look[%d]",
+                          pUser->GetName().c_str(), pUser->GetId(),
+                          (uint32_t)pRule->dwNeedProf, (uint32_t)pRule->dwNeedLevel,
+                          pRule->dwNewProf, (uint32_t)nLook);
+            return true;
+        }
+        return false;
     }
     case 1080: { // ORIGINAL switch case 0x46: timestamp(%u, %u) op value
         uint32_t dwA = 0, dwB = 0, dwVal = 0; char szOp[256] = {0};

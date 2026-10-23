@@ -776,3 +776,28 @@ FUN_14013d790 وما حولها، ~3,400 صف).
 تنفيذ)، 1086 (0x4c عبر mapgroups FUN_140382f00)، 1026 (0x14 بوابة
 CUser vtable+0x50 — يلزم تفريغ الـ vtable)، 1023 (0x11 cq_bonus)،
 1024 (0x12 Family)، 1028 (0x15 couple effects)، 1029 (0x17).
+
+## وحدة 2026-10-23 (2) — النوع 1040 Rebirth (case 0x22، 668 صف)
+
+- **البنية المؤكدة:** cq_rebirth (251 صف): need_prof/new_prof/need_level/new_level/
+  metepsychosis — الحقول 1..5 في سجلات المدير الأصلي (vcall+0x10) تطابق
+  الأعمدة بالترتيب: 1=need_prof (مطابقة مهنة المستخدم +0xeee)، 2=new_prof
+  (المهنة المطلوبة)، 3=need_level <= مستوى المستخدم، 5=metepsychosis (المرحلة).
+- **FUN_140163c90 (بوابة القاعدة):** بورت حرفي كامل — دوران على الصفوف،
+  شرط عدد الولادات: (metempsychosis < stage || 2 < metempsychosis)
+  (vcall+0x108 = GetMetempsychosis).
+- **case 0x22:** sscanf "%d %d %d" (new_prof, look, [stage=1]) — < 2 →
+  DBERR (gameaction.cpp 0x2947). النجاح → MyLogSave("gmlog/rebirth",
+  "User[%s][%d], prof[%d], level[%d] rebirth to prof[%d], look[%d]").
+- **FUN_1401c3180 (التنفيذ):** السلوك الخارجي المنفذ: prof → new_prof،
+  level → new_level (15)، metempsychosis → stage، exp → 0 (FUN_140371e90)،
+  lookface → param2. **مفتوح (موثق بالكود):** بوابة FUN_14008ac00
+  (راية pure rebirth من مدير بيانات المستخدم — غير مُنمذج، دائمًا false
+  حاليًا)، تفريغ مهارات الكلاس القديم FUN_140163e10 (1..19 عدا 10/11/19)،
+  إعادة تعيين مهارات السلاح 0x266/0x268/0x26c عند تغيير العائلة، نقاط
+  الحوافز FUN_140006f10/f20 (قيم مدير الإعدادات)، مخزن mete-level
+  +0x1cf (level*100000 + exp-scaled)، باكِت الإشعار 2 + البث العام
+  FUN_140087ed0 vcall+0x4e0، وباكِت المعلومات الختامي.
+- **الاختبار:** مستوى 120/مهنة 15/ولادات 0 → صف 101 (15→21): prof=21،
+  level=15، mete=1، look=2003 ✓ + رفض ولادة ثانية بنفس المهنة + رفض
+  مستوى أقل + param مشوه — كله على صفوف القاعدة الحقيقية.

@@ -311,6 +311,32 @@ int main() {
       assert(!CGameAction::ProcessActionUser(uTs, &n)); }
     printf("[ok] 1080/1081 match cases 0x46/0x47 (FUN_1403863f0/4e0)\n");
 
+    // --- 1040 (case 0x22): rebirth via cq_rebirth rows ---
+    auto uRb = std::make_shared<CUser>(999004);
+    uRb->SetProfession(15);       // Trojan (cq_rebirth need_prof=15 rows 100..104)
+    uRb->SetLevel(120);           // need_level 120 (row 101: 15 -> 21)
+    uRb->SetRebornCount(0);       // first rebirth: gate (reborn < 1)
+    auto mk1040 = [](uint32_t id, const char* param) {
+        CDialogEngine::Node n; n.dwType = 1040; n.dwId = id; n.strParam = param; return n; };
+    // real param form "new_prof look" (row 101: 15->21, new_level 15, mete 1)
+    { auto n = mk1040(9300, "21 2003");
+      assert(CGameAction::ProcessActionUser(uRb, &n));
+      assert(uRb->GetProfession() == 21);
+      assert(uRb->GetLevel() == 15);
+      assert(uRb->GetMetempsychosis() == 1);
+      assert(uRb->GetLookface() == 2003); }
+    // second rebirth: row 1101 (15->21) no longer matches (prof is 21 now)
+    { auto n = mk1040(9301, "21 2003");
+      assert(!CGameAction::ProcessActionUser(uRb, &n)); }
+    // level gate: level 15 < need_level 110/120 -> no rule -> false
+    { auto n = mk1040(9302, "11 2003");
+      assert(!CGameAction::ProcessActionUser(uRb, &n)); }
+    // malformed param (<2 fields) -> DBERR path -> false
+    { auto n = mk1040(9303, "21");
+      assert(!CGameAction::ProcessActionUser(uRb, &n)); }
+    printf("[ok] 1040 rebirth matches case 0x22 (FUN_140163c90/1c3180 + cq_rebirth)\n");
+
+
 
     // --- 1073/1074 (cases 0x3f/0x40): stc(type, data) checks and set/add ---
     auto u7 = std::make_shared<CUser>(999001);
