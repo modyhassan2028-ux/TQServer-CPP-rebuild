@@ -336,6 +336,33 @@ int main() {
       assert(!CGameAction::ProcessActionUser(uRb, &n)); }
     printf("[ok] 1040 rebirth matches case 0x22 (FUN_140163c90/1c3180 + cq_rebirth)\n");
 
+    // --- 1086 (case 0x4c): levexp action var (FUN_140382f00 + FUN_140164520) ---
+    auto uLv = std::make_shared<CUser>(999005);
+    uLv->SetLevel(1);
+    uLv->SetExperience(0);
+    auto mk1086 = [](uint32_t id, const char* param) {
+        CDialogEngine::Node n; n.dwType = 1086; n.dwId = id; n.strParam = param; return n; };
+    // partial: value 1 < up_lev_time(level1)=2 -> acc = int(120 * 1/2) = 60; delta 60
+    { auto n = mk1086(9515041, "1 5");
+      assert(CGameAction::ProcessActionUser(uLv, &n));
+      assert(uLv->GetActionVar(5) == 60); }
+    // walk: value 5: L1 (ult 2) -> +120; L2 (ult 2) -> +180; L3 (ult 1) target 1:
+    // 1 >= 1 -> +240, target 0; L4 target 0 < 2 -> int(360*0/2)=0. acc=540
+    { auto n = mk1086(300028, "5 3");
+      assert(CGameAction::ProcessActionUser(uLv, &n));
+      assert(uLv->GetActionVar(3) == 540); }
+    // with current exp: exp 60 -> expReq 120, ult 2: target = 1 + int(2*(60/120)) = 2
+    // L1: 2>=2 -> target 0, acc 120; L2: 0 < 2 -> +int(180*0/2)=0 -> acc 120
+    // acc(120) vs curExp(60): max -> 120-60 = 60
+    { auto n = mk1086(7551062, "1 0");
+      assert(CGameAction::ProcessActionUser(uLv, &n));
+      assert(uLv->GetActionVar(0) == 60); }
+    // malformed: sscanf < 2 -> false
+    { auto n = mk1086(7551063, "2400");
+      assert(!CGameAction::ProcessActionUser(uLv, &n)); }
+    printf("[ok] 1086 levexp var matches case 0x4c (FUN_140382f00 + cq_levexp)\n");
+
+
 
 
     // --- 1073/1074 (cases 0x3f/0x40): stc(type, data) checks and set/add ---

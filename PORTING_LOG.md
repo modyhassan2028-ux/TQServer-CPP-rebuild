@@ -801,3 +801,27 @@ CUser vtable+0x50 — يلزم تفريغ الـ vtable)، 1023 (0x11 cq_bonus)�
 - **الاختبار:** مستوى 120/مهنة 15/ولادات 0 → صف 101 (15→21): prof=21،
   level=15، mete=1، look=2003 ✓ + رفض ولادة ثانية بنفس المهنة + رفض
   مستوى أقل + param مشوه — كله على صفوف القاعدة الحقيقية.
+
+## وحدة 2026-10-23 (3) — النوع 1086 (case 0x4c، 640 صف) + CLevUpExp
+
+- **البنية:** المدير DAT_140975be0 = CLevUpExp محمّل من
+  "SELECT * FROM cq_levexp" (سجل CGameData: الحقل 0 = level، 1 = exp عبر
+  vcall+0x58 (int64)، 2 = up_lev_time، 5 = type؛ المفتاح (level, type)).
+- **FUN_140382f00:** تفكيك Ghidra كان **مفقودًا منه زيادة المستوى** (inc %esi)
+  — تم التحقق من الباينري مباشرة بـ objdump والصيغة النهائية المؤكدة:
+  target = value + int(ult * (exp / max(expReq,1)))، ثم مسار مستويات من
+  مستوى المستخدم حتى 130 (DAT_14094da38): طالما target >= up_lev_time →
+  target -= up_lev_time، acc += exp(level)، level++؛ عند أول مستوى
+  target < up_lev_time → acc += int(exp * target / max(ult,1)) وبريك؛
+  لا سجل → خروج. النهاية: acc = max(acc, curExp) ثم الناتج acc - curExp.
+- **case 0x4c:** sscanf "%u %u" == 2 (قيمة، فهرس) وإلا فشل →
+  FUN_140164520 (user+0x2f0 + idx*8، idx <= 7 وإلا LOGERR وتجاهل) =
+  SetActionVar الحالية عندنا؛ النجاح دائمًا 1.
+- **الاختبار:** مستوى 1/exp=0 على صفوف القاعدة الحقيقية: قيمة 1 → 60
+  (جزئي 120×1/2)، قيمة 5 → 540 (مسار L1+L2+L3)، exp=60 → 60 (فرق
+  max)، مشوه → false. **DIALOG FIDELITY TEST PASSED**.
+
+**مفتوح:** 1026 (case 0x14): vcall+0x50 على CUser == 1 — لم يُحدد
+السلوك بعد (فشل تحديد الـ vtable من الباينري: MSVC EH tables تشوّه
+المسح؛ يلزم استخراج vtable CUser عبر مسار آخر أو غيدرا سكربت)،
+1023/1024/1028/1029 وأصناف نطاق FUN_140141c80 المتبقية عند ظهور صفوف.

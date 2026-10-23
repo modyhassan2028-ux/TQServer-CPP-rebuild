@@ -736,6 +736,68 @@ static bool DoRebirth(std::shared_ptr<CUser> pUser, const SRebirthRule* pRule,
     return true;
 }
 
+// ---------------- ORIGINAL CLevUpExp (cq_levexp) + FUN_140382f00 ----------------
+// Manager loaded via "SELECT * FROM cq_levexp" (CLevUpExp, DAT_140975be0);
+// record key = (field0 = level, field5 = type), field1 = exp (int64 via the
+// field-object vcall+0x58), field2 = up_lev_time. Max walk level: the global
+// DAT_14094da38 = 130.
+struct SLevExpRow { uint32_t dwLevel; int64_t nExp; int32_t nUpLevTime; uint32_t dwType; };
+static const SLevExpRow* GetLevExp(uint32_t dwType, uint32_t dwLevel) {
+    static std::vector<SLevExpRow> s_vec;
+    static bool s_bLoaded = false;
+    if (!s_bLoaded) {
+        s_bLoaded = true;
+        auto* pDB = CAccountManager::Instance().GetDB();
+        if (pDB && pDB->Query("SELECT level, exp, up_lev_time, type FROM cq_levexp"))
+            for (auto& r : pDB->GetRows())
+                s_vec.push_back({(uint32_t)strtoul(r[0].c_str(), nullptr, 10),
+                                  strtoll(r[1].c_str(), nullptr, 10),
+                                  (int32_t)strtol(r[2].c_str(), nullptr, 10),
+                                  (uint32_t)strtoul(r[3].c_str(), nullptr, 10)});
+        printf("[DB] cq_levexp rows loaded: %zu\n", s_vec.size());
+    }
+    for (auto& r : s_vec)
+        if (r.dwType == dwType && r.dwLevel == dwLevel) return &r;
+    return nullptr;
+}
+
+// ORIGINAL FUN_140382f00: exp-delta for a level-progress "value" relative to
+// the user's current exp. Verified against the binary (Ghidra had dropped the
+// level increment): walk levels from the user's level adding full exp rows
+// while target >= up_lev_time (target -= up_lev_time, acc += exp), and add
+// the fractional part (exp * target / max(up_lev_time,1)) at the first level
+// whose up_lev_time exceeds the remaining target. Finish:
+// acc = max(acc, curExp); return acc - curExp. No level record -> 0.
+static int64_t CalcLevExpVar(CUser* pUser, uint32_t dwValue) {
+    const uint32_t kMaxWalkLevel = 130;   // ORIGINAL DAT_14094da38
+    uint32_t dwLevel = pUser->GetLevel();
+    const SLevExpRow* pRec = GetLevExp(0, dwLevel);
+    if (!pRec) return 0;
+    int64_t nCurExp = (int64_t)pUser->GetExperience();     // vcall+0xa0
+    int64_t nExpReq = pRec->nExp < 1 ? 1 : pRec->nExp;      // ORIGINAL clamp <1 -> 1
+    // ORIGINAL: target = value + (int)((float)up_lev_time * ((float)exp / (float)expReq))
+    uint32_t dwTarget = dwValue + (int32_t)((float)pRec->nUpLevTime *
+                          ((float)nCurExp / (float)nExpReq));
+    int64_t nAcc = 0;
+    if (dwLevel < kMaxWalkLevel) {
+        for (;;) {
+            const SLevExpRow* pL = GetLevExp(0, dwLevel);
+            if (!pL) break;                                 // ORIGINAL: no record -> finish
+            if (dwTarget < (uint32_t)pL->nUpLevTime) {
+                int32_t nDenom = pL->nUpLevTime < 1 ? 1 : pL->nUpLevTime;
+                nAcc += (int64_t)((float)pL->nExp * ((float)dwTarget / (float)nDenom));
+                break;
+            }
+            dwTarget -= (uint32_t)pL->nUpLevTime;
+            nAcc += pL->nExp;                               // ORIGINAL: acc += exp(level)
+            dwLevel++;                                      // ORIGINAL: inc %esi
+            if (dwLevel >= kMaxWalkLevel) break;
+        }
+    }
+    if (nAcc < nCurExp) nAcc = nCurExp;                     // ORIGINAL cmovl
+    return nAcc - nCurExp;
+}
+
 bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode) {
     if (!pUser || !pNode) return false;
     switch (pNode->dwType) {
@@ -1803,6 +1865,16 @@ bool bAll = (llAll == 1);
         // tq::MyLogSave("gmlog/action", param); return 1;
         tq::MyLogSave("gmlog/action", pNode->strParam.c_str());
         return true;
+    }
+    case 1086: { // ORIGINAL switch case 0x4c (remap 1086->0x4c): levexp action var
+        uint32_t dwValue = 0, dwIdx = 0;
+        if (sscanf(pNode->strParam.c_str(), "%u %u", &dwValue, &dwIdx) == 2) {
+            // ORIGINAL: FUN_140382f00(user, value) then FUN_140164520(user, idx,
+            // result) -> user+0x2f0 + idx*8 (int64 action var, idx <= 7)
+            pUser->SetActionVar((int)dwIdx, CalcLevExpVar(pUser.get(), dwValue));
+            return true;
+        }
+        return false; // ORIGINAL: sscanf != 2 -> LAB_14013a784
     }
     case 1040: { // ORIGINAL switch case 0x22 (remap 1040->0x22): rebirth
         std::string strP = pNode->strParam; pUser->ResolveActionVars(strP);
