@@ -1238,6 +1238,139 @@ bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogE
         uint32_t dwChal = mgr.GetChallengeDomainOfSyn(dwSyn);
         return dwChal != 0 && dwChal == pNode->dwData;
     }
+    case 3521: { // ORIGINAL FUN_140140380 subcase idx20 (0x140140d00):
+        // family-battle income distribution (10 real rows, data = domain
+        // id 10026..10035). Flow decoded at 0x140140d00..0x1401419ff:
+        //  pUser (0x3585 CHECKF) -> false
+        //  domain record = mgr vcall+0x88(data); null -> CHECKF 0x3598 false
+        //  record vcall+0x40() true (income already distributed) -> true
+        //  localtime(time(0)) null ('pLocal' CHECKF) -> false
+        //  holder = record field 19 (vcall+0x10(0x13)); user's syn id
+        //  (rec8 vcall+0x128) must equal it, else false
+        //  collect the online users of the holder syn (mapgroup walk,
+        //  vcall+0x220 gate); the walk also feeds the late-path pick
+        //  window: cur = tm_hour*60+tm_min vs kernel = FUN_14008a6c0
+        //  ([mapgroup+0x3b8] snapshot):
+        //   cur < kernel            -> false (0x1401419d7)
+        //   cur in [kernel,kernel+15) -> in-window outcome at 0x1401412b3
+        //   cur >= kernel+15       -> late path 0x140141379
+        //  in-window outcome (r14d = user syn, from 0x14014118f):
+        //   userSyn == record field 1 (challenger, FUN_1400872b0(rec,1))
+        //     -> SUCCESS r15=1; else hold (vcall+0x1c0) must equal this
+        //     domain else false; challenge (vcall+0x1b0) == 0 -> DEFEND
+        //     r15=2 (r14d = user syn); != 0 -> SUCCESS with field 1's syn
+        //  late path: challenger online among collected -> SUCCESS
+        //   (field 1 syn); else the 0x1401414a0 loop: among collected
+        //   users whose syn HOLDS this domain and does NOT challenge,
+        //   keep the one with the max FUN_14018eb30 value (user battle
+        //   record field 4) -> DEFEND with that syn; nothing found ->
+        //   false (r14 == 0 at 0x1401415ec)
+        //  SUCCESS (r15==1, 0x140141610): income = FUN_140151580(domain,
+        //   syn, 4) (record field 4); FUN_140151380 resets it;
+        //   vcall+0x190(syn, income) adds the clan treasury;
+        //   STR_FAMILY_BATTLE_SUCCESS_ADD_INCOME -> vcall+0x148(syn,text)
+        //   announcement; vcall+0x1a8(domain) marks distributed;
+        //   STR_FAMILY_BATTLE_DEFEND_SUCCESS message (0x7db/0xffffff) to
+        //   the acting user; true.
+        //  DEFEND (r15==2, 0x1401417a9): challenger = record field 1;
+        //   income = FUN_140151580(domain,challenger,4);
+        //   FUN_1401511e0 ERASES it; vcall+0x190(challenger, income);
+        //   STR_FAMILY_BATTLE_FAIL_ADD_INCOME announcement;
+        //   vcall+0x1a8(domain); vcall+0x1b8(userSyn, domain) sets the
+        //   acting clan's challenge; vcall+0x1b8(challenger, 0) clears
+        //   the challenger's; STR_FAMILY_BATTLE_CHALLENGE_SUCCESS
+        //   message to the acting user; true.
+        auto& synMgr = CGuildManager::Instance();
+        auto& fb = CFamilyBattleManager::Instance();
+        uint32_t dwDomain = pNode->dwData;                 // record field 4
+        auto* pRec = fb.Find(dwDomain);                   // mgr vcall+0x88
+        if (!pRec) return false;                          // CHECKF 0x3598
+        if (pRec->bProcessed) return true;                // vcall+0x40
+        time_t tClock = time(nullptr);
+        struct tm* pTm = localtime(&tClock);
+        if (!pTm) return false;                           // 'pLocal' CHECKF
+        uint32_t dwUserSyn = synMgr.GetSynIdOfUser(pUser->GetId());
+        uint32_t dwHolder = pRec->dwHolderSyn;            // field 19
+        if (dwUserSyn != dwHolder) return false;
+        // collect online users of the holder syn (mapgroup walk)
+        std::vector<CUser*> vecOnline;
+        for (auto& spU : CUserManager::Instance().GetAllUsers()) {
+            if (!spU) continue;
+            if (synMgr.GetSynIdOfUser(spU->GetId()) == dwHolder)
+                vecOnline.push_back(spU.get());
+        }
+        int64_t llCur = pTm->tm_hour * 60 + pTm->tm_min;
+        int64_t llKernel = fb.KernelMinutes();            // FUN_14008a6c0
+        uint32_t dwChallenger = pRec->dwChallengerSyn;    // FUN_1400872b0 idx 1
+        uint32_t dwOutcomeSyn = 0;                        // r14d
+        int eOutcome = 0;                                 // r15d
+        if (llCur < llKernel) return false;               // -> 0x1401419d7
+        if (llCur < llKernel + 15) {
+            // in-window path (0x140141176): r14d = user syn (must be
+            // nonzero), member walk, then the outcome check at 2b3
+            if (dwUserSyn == 0) return false;
+            if (dwUserSyn == dwChallenger) {
+                dwOutcomeSyn = dwChallenger; eOutcome = 1; // SUCCESS
+            } else {
+                uint32_t dwHold = synMgr.GetHoldDomainOfSyn(dwUserSyn);
+                if (dwHold == 0 || dwHold != dwDomain) return false;
+                if (synMgr.GetChallengeDomainOfSyn(dwUserSyn) == 0) {
+                    dwOutcomeSyn = dwUserSyn; eOutcome = 2; // DEFEND
+                } else {
+                    dwOutcomeSyn = dwChallenger; eOutcome = 1; // SUCCESS
+                }
+            }
+        } else {
+            // late path (0x140141379): challenger online -> SUCCESS
+            bool bChallengerOnline = false;
+            for (CUser* pU : vecOnline)
+                if (synMgr.GetSynIdOfUser(pU->GetId()) == dwChallenger)
+                    { bChallengerOnline = true; break; }
+            if (bChallengerOnline) {
+                dwOutcomeSyn = dwChallenger; eOutcome = 1;
+            } else {
+                // 0x1401414a0: max battle value among holders that do
+                // not challenge (FUN_14018eb30 = user record field 4)
+                int32_t nMax = -1;
+                for (CUser* pU : vecOnline) {
+                    uint32_t dwS = synMgr.GetSynIdOfUser(pU->GetId());
+                    if (dwS == 0) continue;
+                    uint32_t dwH = synMgr.GetHoldDomainOfSyn(dwS);
+                    if (dwH == 0 || dwH != dwDomain) continue;
+                    if (synMgr.GetChallengeDomainOfSyn(dwS) != 0) continue;
+                    int32_t v = fb.GetUserBattleValue(pU->GetId());
+                    if (v > nMax) { nMax = v; dwOutcomeSyn = dwS; eOutcome = 2; }
+                }
+            }
+        }
+        if (dwOutcomeSyn == 0 || eOutcome == 0) return false; // 0x1401415ec
+        char szText[1024];
+        if (eOutcome == 1) { // SUCCESS (0x140141610)
+            int64_t llIncome = fb.ReadIncome(dwDomain, dwOutcomeSyn, 4);
+            fb.ResetIncome(dwDomain, dwOutcomeSyn, 4);
+            synMgr.AddTreasuryOfSyn(dwOutcomeSyn, llIncome); // vcall+0x190
+            snprintf(szText, sizeof(szText),
+                     "STR_FAMILY_BATTLE_SUCCESS_ADD_INCOME %lld",
+                     (long long)llIncome);
+            synMgr.AnnounceOfSyn(dwOutcomeSyn, szText);      // vcall+0x148
+            fb.MarkDomainProcessed(dwDomain);               // vcall+0x1a8
+            pUser->SendSysMsg("STR_FAMILY_BATTLE_DEFEND_SUCCESS"); // 0x7db
+            return true;
+        }
+        // DEFEND (0x1401417a9)
+        int64_t llIncome = fb.ReadIncome(dwDomain, dwChallenger, 4);
+        fb.EraseIncome(dwDomain, dwChallenger, 4);          // FUN_1401511e0
+        synMgr.AddTreasuryOfSyn(dwChallenger, llIncome);     // vcall+0x190
+        snprintf(szText, sizeof(szText),
+                 "STR_FAMILY_BATTLE_FAIL_ADD_INCOME %lld",
+                 (long long)llIncome);
+        synMgr.AnnounceOfSyn(dwChallenger, szText);          // vcall+0x148
+        fb.MarkDomainProcessed(dwDomain);                    // vcall+0x1a8
+        synMgr.SetChallengeDomainOfSyn(dwUserSyn, dwDomain);  // vcall+0x1b8
+        synMgr.SetChallengeDomainOfSyn(dwChallenger, 0);      // vcall+0x1b8
+        pUser->SendSysMsg("STR_FAMILY_BATTLE_CHALLENGE_SUCCESS");
+        return true;
+    }
     case 501: { // ORIGINAL case 0x1f5 (FUN_140123590): award item
         // Type = cq_action.data (node vtable GetData(4)). Param = the
         // 19-field CItemInfo spec; the 2nd conversion (local_734 in the

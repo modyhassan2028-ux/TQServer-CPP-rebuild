@@ -33,3 +33,49 @@ void CFamilyBattleManager::SeedFromDB(CMySQLClient* pDB) {
         if (id && !Find(id)) Create(id);
     }
 }
+
+// ================= income record store (FUN_1401512e0 family) ============
+#include <ctime>
+
+static uint64_t IncomeKey(uint32_t d, uint32_t s, uint32_t t) {
+    return ((uint64_t)d << 40) | ((uint64_t)s << 20) | (uint64_t)t;
+}
+
+CFamilyBattleManager::SIncomeRec* CFamilyBattleManager::FindIncome(
+        uint32_t d, uint32_t s, uint32_t t) {
+    auto it = m_income.find(IncomeKey(d, s, t));
+    return it == m_income.end() ? nullptr : &it->second;
+}
+
+int64_t CFamilyBattleManager::ReadIncome(uint32_t d, uint32_t s, uint32_t t) {
+    // ORIGINAL FUN_140151580: lookup then FUN_1403ac920(rec, 4) -> int64;
+    // missing record reads as 0
+    auto* p = FindIncome(d, s, t);
+    return p ? p->qwAmount : 0;
+}
+
+void CFamilyBattleManager::ResetIncome(uint32_t d, uint32_t s, uint32_t t) {
+    // ORIGINAL FUN_140151380: create-or-reset the record with
+    // {1:domain, 2:syn, 3:type, 4:0} and store it
+    auto& r = m_income[IncomeKey(d, s, t)];
+    r.dwDomain = d; r.dwSyn = s; r.dwType = t; r.qwAmount = 0;
+}
+
+void CFamilyBattleManager::EraseIncome(uint32_t d, uint32_t s, uint32_t t) {
+    // ORIGINAL FUN_1401511e0: release + hash erase
+    m_income.erase(IncomeKey(d, s, t));
+}
+
+void CFamilyBattleManager::AccumIncome(uint32_t d, uint32_t s, uint32_t t,
+                                       int64_t n) {
+    // ORIGINAL FUN_1401515b0: record found -> field4 += amount
+    auto* p = FindIncome(d, s, t);
+    if (p) p->qwAmount += n;
+}
+
+int32_t CFamilyBattleManager::KernelMinutes() {
+    if (m_nKernelMinutes >= 0) return m_nKernelMinutes;
+    time_t t = time(nullptr);
+    struct tm* pTm = localtime(&t);
+    return pTm ? pTm->tm_hour * 60 + pTm->tm_min : 0;
+}

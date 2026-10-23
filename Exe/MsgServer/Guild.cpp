@@ -347,6 +347,12 @@ bool CGuildManager::SetTreasuryOf(uint32_t dwUserId, int64_t n) {
     return true;
 }
 
+std::shared_ptr<CGuild> CGuildManager::GetSynByIdShared(uint32_t dwSynId) {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    auto it = m_byId.find(dwSynId);
+    return it == m_byId.end() ? nullptr : it->second;
+}
+
 CGuild* CGuildManager::GetSynById(uint32_t dwSynId) {
     std::lock_guard<std::mutex> lock(m_mutex);
     auto it = m_byId.find(dwSynId);
@@ -361,6 +367,37 @@ uint32_t CGuildManager::GetHoldDomainOfSyn(uint32_t dwSynId) {
 uint32_t CGuildManager::GetChallengeDomainOfSyn(uint32_t dwSynId) {
     auto* pG = GetSynById(dwSynId);
     return pG ? pG->GetChallengeDomain() : 0;
+}
+
+void CGuildManager::SetChallengeDomainOfSyn(uint32_t dwSynId, uint32_t dwDomain) {
+    auto* pG = GetSynById(dwSynId);
+    if (pG) pG->SetChallengeDomain(dwDomain);
+}
+
+bool CGuildManager::AddTreasuryOfSyn(uint32_t dwSynId, int64_t n) {
+    auto* pG = GetSynById(dwSynId);
+    if (!pG) return false;
+    pG->AddTreasury(n);
+    return true;
+}
+
+void CGuildManager::AnnounceOfSyn(uint32_t dwSynId, const std::string& text) {
+    // ORIGINAL rec8 vcall+0x148(synId, text): the clan announcement the
+    // 3521 income paths write (STR_FAMILY_BATTLE_*_ADD_INCOME). Set the
+    // guild announcement and push it to every online member.
+    auto* pG = GetSynById(dwSynId);
+    if (!pG) return;
+    pG->SetAnnouncement(text);
+    auto sp = GetSynByIdShared(dwSynId);
+    if (!sp) return;
+    for (uint32_t uid : sp->GetMembers()) {
+        auto pU = CUserManager::Instance().GetUser(uid);
+        if (!pU) continue;
+        auto* pMsg = sp->BuildChat(nullptr, text);
+        if (!pMsg) continue;
+        pU->SendMsg(pMsg->GetBuf(), pMsg->GetSize());
+        delete pMsg;
+    }
 }
 
 uint32_t CGuildManager::LoadFromDB(CMySQLClient* pDB) {

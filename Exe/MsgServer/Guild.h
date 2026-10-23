@@ -124,7 +124,13 @@ public:
     // family-battle domain queries BY SYN ID (rec8 vcall+0x1c0 / +0x1b0)
     uint32_t GetHoldDomainOfSyn(uint32_t dwSynId);
     uint32_t GetChallengeDomainOfSyn(uint32_t dwSynId);
+    void SetChallengeDomainOfSyn(uint32_t dwSynId, uint32_t dwDomain); // +0x1b8
     CGuild* GetSynById(uint32_t dwSynId);
+    std::shared_ptr<CGuild> GetSynByIdShared(uint32_t dwSynId);
+    // treasury add BY SYN ID (rec8 vcall+0x190)
+    bool AddTreasuryOfSyn(uint32_t dwSynId, int64_t n);
+    // clan announcement (rec8 vcall+0x148): set + broadcast to members
+    void AnnounceOfSyn(uint32_t dwSynId, const std::string& text);
     bool AddTreasuryOf(uint32_t dwUserId, int64_t n);  // vcall+0x190
     bool SetTreasuryOf(uint32_t dwUserId, int64_t n);  // vcall+0x1a0
 
