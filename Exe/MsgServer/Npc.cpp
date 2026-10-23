@@ -227,6 +227,19 @@ std::shared_ptr<CNpc> CNpcManager::SpawnDynamic(uint32_t dwId, const std::string
     return p;
 }
 
+bool CNpcManager::RemoveNpc(uint32_t dwId) {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    return m_npcs.erase(dwId) != 0;
+}
+
+std::vector<std::shared_ptr<CNpc>> CNpcManager::GetAllNpcs() {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    std::vector<std::shared_ptr<CNpc>> v;
+    v.reserve(m_npcs.size());
+    for (auto& kv : m_npcs) v.push_back(kv.second);
+    return v;
+}
+
 uint32_t CNpcManager::SpawnNpcsFromDB(CMySQLClient* pDB) {
     if (!pDB) return 0;
     if (!pDB->Query("SELECT id, name, type, lookface, mapid, cellx, celly, task0 FROM cq_npc")) {

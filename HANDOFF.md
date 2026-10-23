@@ -69,6 +69,21 @@ chk_sum بمعادلة FUN_1400fe140 كاملة + LAST_INSERT_ID)،
   تمر الآن عبر الـ master walker الحرفي — بوابات id-0/عمق-11/[PM]/OS-user،
   قاعدة الصف 320 (توقف السلسلة حرفيًا)، حد 33 خطوة، بروفايل per-type،
   وتفعيل 1023 منح حقيقي. كلا الاختبارين PASSED (dialog + orig_db).
+- **أنواع 205/207/208 (FUN_14013b950 subcases) اكتملت:**
+  205 = حذف NPC (data=0 → NPC الحوار مع مسح ctx + بوابة [+0xb4]،
+  data!=0 → purge كل NPC من النوع ده، مسح فاشل يوقف بـ false، مشي
+  فاضي يرجّع true)، 207 = تفريع حسب نوع NPC الحوار (نوع 10 stall /
+  46 pole — العمليتين pending للنظامين الفرعيين، غيره false)،
+  208 = استنساخ NPC الحوار إلى (id,map,x,y) من فورمات "%u %u %d %d"
+  مع دايناميك + بث الظهور، ويرجع false دايمًا زي الأصل. CNpcManager
+  كسب RemoveNpc/GetAllNpcs. اختبار npc_ops_205_207_208_test PASSED
+  مع القواعد الثلاثة القديمة (35 صفًا حقيقيًا مغطى).
+- **فُكّت ودُوّنت لكنها pending:** 218 إنشاء Clan + 219 حل Clan
+  (سلاسل 502174x/502274x؛ تحتاج وحدة syndicate حقيقية: singleton
+  0x1406d8df0 + سجل 8 + vcalls 0xf0/0x100/0x128، والاسم من dialog
+  103 عبر ctx.strInput مع تحقق STR_INVALID_FAMILY_NAME)، و223/224
+  أثاث البيت (parser مخصص + mgr vcall+0xa8). جداول cq_syndicate
+  موجودة (3 صفوف).
 - **نوع 201 (FUN_14013ba1e) اكتمل:** عمليات سجل الـ DynaNpc بالكامل —
   ownerid/ownertype/lookface (=/==)، datastr (=/==، عمود 15)،
   data0-3 (=,+=,==,<,<=,>,>=)، "accept" تعيد قراءة إدخال اللاعب
@@ -77,8 +92,8 @@ chk_sum بمعادلة FUN_1400fe140 كاملة + LAST_INSERT_ID)،
   IsDynaNpc. حقول السجل أضيفت لـ CNpc (m_bDyna يضبط من 2007 spawn)،
   وسياق الحوار صار يتعبأ من NPC التفاعل في MsgInteract. اختبار
   npc_record_201_test PASSED مع القاعدتين القديمتين.
-- آخر 3 commits: 201 dyna record (هذا)، محرك 145f60+بوابات (1deb328)،
-  1024 طلاق (a0650b3).
+- آخر 3 commits: 205/207/208 npc ops (هذا)، 201 dyna record (62657e6)،
+  محرك 145f60+بوابات (1deb328).
 - **PORT-PENDING المتبقي:** عائلة 202-224 المتبقية من FUN_14013b950
   (فك 205/207/208/218/219/223/224 — كلها أنظمة بيت/home، ~35 صفًا)،
   وإدخال الحوار من العميل (MsgDialog::Process stub يغذي ctx.strInput).

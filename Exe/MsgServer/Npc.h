@@ -159,6 +159,16 @@ public:
                                        uint32_t dwMapId, uint16_t usX, uint16_t usY,
                                        uint32_t dwTask0);
     void AddNpcForTest(std::shared_ptr<CNpc> p) { m_npcs[p->GetId()] = p; } // tests
+
+    // cq_action 205 (case 0xcd): dynamic NPC deletion. ORIGINAL
+    // FUN_1402bf900 erases the role from the group object tree (dyna
+    // flags +0x68/+0x69 pick the record-save path); the client-erase
+    // packet stays documented open, registry removal is the verified
+    // effect (same stance as 2013).
+    bool RemoveNpc(uint32_t dwId);
+    // ORIGINAL 205 data!=0 path walks the whole group role tree; the
+    // snapshot lets the action iterate without holding the registry.
+    std::vector<std::shared_ptr<CNpc>> GetAllNpcs();
     std::vector<TaskDef> m_taskDefs;
     std::recursive_mutex m_mutex; // SpawnDefaults may re-enter via SpawnNpcsFromDB
     bool m_bSpawned{false};

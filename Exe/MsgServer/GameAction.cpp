@@ -983,6 +983,113 @@ bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogE
         }
         return false; // unknown field -> ORIGINAL 0x14013c272
     }
+    case 205: { // ORIGINAL case 0xcd subcase (FUN_14013c564): delete NPC
+        // data col (node field 4) = target; 0 -> the dialog npc via
+        // pRole->QueryObj(OBJ_NPC) (0xbd3 CHECKF log on absence, 0xbcd
+        // 'pAction && pRole').
+        uint32_t uTarget = pNode->dwData;
+        std::shared_ptr<CNpc> pRec;
+        if (uTarget != 0) {
+            // ORIGINAL: walk the whole group role tree; roles whose data
+            // field 4 (npc TYPE) == data value and role+0xb4 == 0 get
+            // FUN_1402bf900 (erase). A failed erase stops with false; an
+            // exhausted walk returns true. (+0xb4 never set in rebuild.)
+            bool bAll = true;
+            for (auto p : CNpcManager::Instance().GetAllNpcs()) {
+                if (!p || p->m_dwNpcType != uTarget) continue;
+                if (!CNpcManager::Instance().RemoveNpc(p->GetId())) {
+                    bAll = false;
+                    break;
+                }
+            }
+            return bAll;
+        }
+        if (pUser->m_stDialogCtx.dwId == 0) {
+            tq::MyLogSave("gmlog/all", "CHECKF in %s, %d",
+                "pRole->QueryObj(OBJ_NPC, IPP_OF(pNpc))", 3027); // 0xbd3
+            return false;
+        }
+        pRec = CNpcManager::Instance().GetNpc(pUser->m_stDialogCtx.dwId);
+        if (!pRec) {
+            tq::MyLogSave("gmlog/all", "CHECKF in %s, %d",
+                "pRole->QueryObj(OBJ_NPC, IPP_OF(pNpc))", 3027); // 0xbd3
+            return false;
+        }
+        // ORIGINAL gate: role+0xb4 != 0 -> false (never set in rebuild)
+        pUser->m_stDialogCtx.dwId = 0; // ORIGINAL: [pUser+0x10] = 0 first
+        return CNpcManager::Instance().RemoveNpc(pRec->GetId()); // FUN_1402bf900
+    }
+    case 207: { // ORIGINAL case 0xcf subcase (FUN_14013c75a): npc-type op
+        // pRole (0xbf3) then QueryObj(OBJ_NPC) -> dialog npc (0xbf6).
+        // npc record field 4 = type dispatch:
+        //  type 10 -> stall subsystem vcall+0x328(mgr, npcId) (PORT-
+        //    PENDING: stall registry)
+        //  type 46 -> FUN_14008b330(mapgroup) gate -> mgr record 0x25 vs
+        //    0x1c, vcall+0x78(rec, npcId) (PORT-PENDING: pole/home mgr)
+        //  other types -> false (0x14013c8b9)
+        if (pUser->m_stDialogCtx.dwId == 0) {
+            tq::MyLogSave("gmlog/all", "CHECKF in %s, %d", "pRole", 3063); // 0xbf3
+            return false;
+        }
+        auto pRec = CNpcManager::Instance().GetNpc(pUser->m_stDialogCtx.dwId);
+        if (!pRec) {
+            tq::MyLogSave("gmlog/all", "CHECKF in %s, %d",
+                "pRole->QueryObj(OBJ_NPC, IPP_OF(pNpc))", 3066); // 0xbf6
+            return false;
+        }
+        if (pRec->m_dwNpcType == 10 || pRec->m_dwNpcType == 46) {
+            printf("[ACTION %u] type 207: npc(%u) type %u op pending "
+                   "(stall/pole subsystem)\n", pNode->dwId, pRec->GetId(),
+                   pRec->m_dwNpcType);
+            return false; // PORT-PENDING: subsystem not yet ported
+        }
+        return false; // ORIGINAL 0x14013c8b9
+    }
+    case 208: { // ORIGINAL case 0xd0 subcase (FUN_14013c8c0): clone npc
+        // sscanf "%u %u %d %d" (4 tokens) = (npcId, map, x, y); < 4 ->
+        // 0xc25 'wrong param count' log + false. QueryObj(OBJ_NPC) ->
+        // dialog npc (0xc2a) is the template; pUser (0xc2c) required.
+        // MYASSERT logs when template ownerid != 0 (0xc2d) and CONTINUES.
+        // ORIGINAL FUN_1400872b0(rec,1) reads ownerid, then mapgroup
+        // vcall+0x100(group, dialogNpcId, edi, npcId, map, x, y) creates
+        // the clone -> ALWAYS returns false.
+        std::string strP = pNode->strParam; pUser->ResolveActionVars(strP);
+        unsigned uNpcId = 0, uMap = 0; int nX = 0, nY = 0;
+        if (sscanf(strP.c_str(), "%u %u %d %d", &uNpcId, &uMap, &nX, &nY) < 4) {
+            tq::MyLogSave("gmlog/all",
+                "table:cq_action/cq_newaction, ACTION %u: wrong param count at %s, %d",
+                pNode->dwId, "gameaction.cpp", 3114); // 0xc25
+            return false;
+        }
+        if (pUser->m_stDialogCtx.dwId == 0) {
+            tq::MyLogSave("gmlog/all", "CHECKF in %s, %d",
+                "pRole->QueryObj(OBJ_NPC, IPP_OF(pNpc))", 3125); // 0xc2a
+            return false;
+        }
+        auto pTmpl = CNpcManager::Instance().GetNpc(pUser->m_stDialogCtx.dwId);
+        if (!pTmpl) {
+            tq::MyLogSave("gmlog/all", "CHECKF in %s, %d",
+                "pRole->QueryObj(OBJ_NPC, IPP_OF(pNpc))", 3125); // 0xc2a
+            return false;
+        }
+        if (pTmpl->m_dwOwnerid != 0)
+            printf("[ACTION %u] type 208: MYASSERT "
+                   "pNpc->GetInt(NPCDATA_OWNERID) == 0\n", pNode->dwId);
+        auto pClone = CNpcManager::Instance().SpawnDynamic(uNpcId,
+            pTmpl->GetName(), pTmpl->m_dwLookface, pTmpl->m_dwNpcType,
+            uMap, (uint16_t)nX, (uint16_t)nY, pTmpl->m_dwActionId);
+        if (pClone) {
+            pClone->m_bDyna = true;   // ORIGINAL: dyna registry record
+            pClone->m_dwOwnerid = pTmpl->m_dwOwnerid;
+            CMsgNpcInfo spawn;
+            if (spawn.Create(pClone->GetId(), pClone->m_dwLookface,
+                             pClone->GetX(), pClone->GetY(), pClone->GetDir(),
+                             pClone->GetName()))
+                CMapManager::Instance().Broadcast(uMap,
+                    spawn.GetBuf(), spawn.GetSize());
+        }
+        return false; // ORIGINAL: xor al,al at 0x14013ca5c
+    }
     case 501: { // ORIGINAL case 0x1f5 (FUN_140123590): award item
         // Type = cq_action.data (node vtable GetData(4)). Param = the
         // 19-field CItemInfo spec; the 2nd conversion (local_734 in the
@@ -2942,7 +3049,13 @@ static bool ProcessActionDispatch(std::shared_ptr<CUser> pUser,
                                   const CDialogEngine::Node* pNode, uint32_t dwType) {
     if (dwType >= 101 && dwType <= 198) // -0x65 <= 0x61: FUN_140142db0
         return CGameAction::ProcessActionOS(pUser, pNode);
-    if (dwType >= 201 && dwType <= 262) // -0xc9 <= 0x61: FUN_14013b950 (201 ported; 202+ pending)
+    // FUN_14013b950 family (201-224, jump table 0x14013d728): 201/205/207/208
+    // ported. Remaining decoded-but-pending: 218 create-clan, 219 disband-
+    // clan (both need the syndicate subsystem, singleton mgr + syn record
+    // 8 + vcall+0xf0/0x100/0x128), 223 home furniture placement (custom
+    // int parser, >=4 numbers, map object spawn), 224 home count check
+    // ("%u %d %d" + mgr vcall+0xa8). 206/209/220/223-adjacent handlers
+    // exist in the original but have zero cq_action rows.
         return CGameAction::ProcessActionUser(pUser, pNode);
     if (dwType >= 301 && dwType <= 362) // -0x12d <= 0x61: FUN_14013d790 (family B port)
         return CGameAction::ProcessActionUser(pUser, pNode);
