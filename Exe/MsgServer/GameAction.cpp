@@ -20,6 +20,8 @@
 #include "Item.h"
 #include "Npc.h"
 #include "Npc.h" // CNpcManager lives here
+#include "MsgUserAttrib.h"
+#include "MsgNpcInfo.h"
 
 #include <cstdio>
 #include <cstring>
@@ -128,7 +130,7 @@ bool CGameAction::ProcessItemQuench(std::shared_ptr<CUser> pUser, const CDialogE
     st.tExpireAt = (uint64_t)time(nullptr) + (uint64_t)f4;
     pItem->m_stQuench = st;
     if (!bHadStatus) {
-        // ORIGINAL: MyLogSave("gmlog/QuenchItem", "%s(%u) Add Temp ItemStatu[itemid=%u, itemstatu=%u]")
+        // ORIGINAL: tq::MyLogSave("gmlog/QuenchItem", "%s(%u) Add Temp ItemStatu[itemid=%u, itemstatu=%u]")
         printf("[GMLOG] gmlog/QuenchItem %s(%u) Add Temp ItemStatu[itemid=%u, itemstatu=%u]\n",
                pUser->GetName().c_str(), pUser->GetId(), pItem->dwId, st.dwStatu);
     } else {
@@ -819,6 +821,168 @@ bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogE
     if (!pUser || !pNode) return false;
     switch (pNode->dwType) {
 
+    case 201: { // ORIGINAL case 0xc9 subcase (FUN_14013ba1e): dyna-npc record op
+        // sscanf "%s %s %s %u %d" (>= 3 tokens): field, op, operand,
+        // npcId (default 0 = the dialog npc), flag (default 0).
+        char szField[256]={0}, szOp[256]={0}, szOperand[256]={0};
+        unsigned uNpcId = 0; int nFlag = 0;
+        if (sscanf(pNode->strParam.c_str(), "%255s %255s %255s %u %d",
+                   szField, szOp, szOperand, &uNpcId, &nFlag) < 3) {
+            printf("[ACTION %u] type 201: bad param count (0xa9c)\n", pNode->dwId);
+            return false;
+        }
+        // target record: npcId != 0 -> that npc; else the dialog npc
+        std::shared_ptr<CNpc> pRec;
+        if (uNpcId != 0) {
+            pRec = CNpcManager::Instance().GetNpc(uNpcId);
+        } else {
+            if (pUser->m_stDialogCtx.dwId == 0) {
+                tq::MyLogSave("gmlog/all", "CHECKF in %s, %d", "gameaction.cpp", 2742);
+                return false; // ORIGINAL CHECKF 0xab6: no dialog npc
+            }
+            pRec = CNpcManager::Instance().GetNpc(pUser->m_stDialogCtx.dwId);
+        }
+        if (!pRec) {
+            printf("[ACTION %u] type 201: Can't find npc_id[%u] in action[%u]\n",
+                   pNode->dwId, uNpcId, pNode->dwId);
+            return false;
+        }
+        if (!pRec->m_bDyna) { // ORIGINAL: record byte +0x68 must be set
+            printf("[ACTION %u] type 201: NPC(%u) is not DynaNpc in action[%u]\n",
+                   pNode->dwId, pRec->GetId(), pNode->dwId);
+            return false;
+        }
+        long lVal = strtol(szOperand, nullptr, 10);
+        const std::string& rsOp = szOp; // operand text kept for datastr "=="
+        auto SetF1 = [&](uint32_t uIdx, int32_t nVal) { // FUN_1400922d0
+            switch (uIdx) {
+                case 1: pRec->m_dwOwnerid = (uint32_t)nVal; break;
+                case 2: pRec->m_dwOwnertype = (uint32_t)nVal; break;
+                case 3: pRec->m_dwLookface = (uint32_t)nVal; break;
+                case 24: pRec->m_nLife = nVal; break;
+                case 25: pRec->m_nMaxLife = nVal; break;
+            }
+        };
+        auto GetF1 = [&](uint32_t uIdx) -> int32_t { // FUN_1400872b0
+            switch (uIdx) {
+                case 1: return (int32_t)pRec->m_dwOwnerid;
+                case 2: return (int32_t)pRec->m_dwOwnertype;
+                case 3: return (int32_t)pRec->m_dwLookface;
+                case 24: return pRec->m_nLife;
+                case 25: return pRec->m_nMaxLife;
+            }
+            return 0;
+        };
+        auto SetData = [&](uint32_t uN, int32_t nVal, int nUpd) { // FUN_1400e3310
+            if (uN < 4) pRec->m_dwDynData[uN] = (uint32_t)nVal;
+            (void)nUpd;
+        };
+        auto GetData = [&](uint32_t uN) -> int32_t { // FUN_140087300
+            return uN < 4 ? (int32_t)pRec->m_dwDynData[uN] : 0;
+        };
+        // ---- ownerid (field 1) ----
+        if (strcmp(szField, "ownerid") == 0) {
+            if (rsOp == "=")  { SetF1(1, (int32_t)lVal); return true; }
+            if (rsOp == "==") return GetF1(1) == (int32_t)lVal;
+            return false;
+        }
+        // ---- ownertype (field 2) ----
+        if (strcmp(szField, "ownertype") == 0) {
+            if (rsOp == "=")  { SetF1(2, (int32_t)lVal); return true; }
+            if (rsOp == "==") return GetF1(2) == (int32_t)lVal;
+            return false;
+        }
+        // ---- lookface (field 3; ORIGINAL set = FUN_1402bd090(rec, val, 1)) ----
+        if (strcmp(szField, "lookface") == 0) {
+            if (rsOp == "=") {
+                SetF1(3, (int32_t)lVal);
+                CMsgNpcInfo upd;
+                if (upd.Create(pRec->GetId(), pRec->m_dwLookface, pRec->GetX(),
+                               pRec->GetY(), pRec->GetDir(), pRec->GetName()))
+                    CMapManager::Instance().Broadcast(pRec->GetMapId(),
+                        upd.GetBuf(), upd.GetSize());
+                return true;
+            }
+            if (rsOp == "==") return GetF1(3) == (int32_t)lVal;
+            return false;
+        }
+        // ---- datastr (field 22, string) ----
+        if (strcmp(szField, "datastr") == 0) {
+            if (rsOp == "=") {
+                // ORIGINAL: m_pData && IsDynaNpc -> vcall+0x68(22, operand);
+                // otherwise a CHECK log - BOTH return true
+                if (!pRec->m_bDyna)
+                    tq::MyLogSave("gmlog/all", "CHECK in %s, %d",
+                              "m_pData && IsDynaNpc()", 329);
+                pRec->m_strDatastr.assign(szOperand, strnlen(szOperand, 15));
+                return true;
+            }
+            if (rsOp == "==") // ORIGINAL FUN_140117cc0(rec, 22) strcmp operand
+                return strncmp(pRec->m_strDatastr.c_str(), szOperand, 15) == 0;
+            return false;
+        }
+        // ---- data0..data3 ----
+        if (strncmp(szField, "data", 4) == 0) {
+            int nDigit = (int)(uint8_t)szField[4] - '0';
+            if (nDigit < 0 || nDigit > 3) return false; // ORIGINAL: ja 0xc07f
+            long lUse = lVal;
+            if (strcmp(szOperand, "accept") == 0) // re-parse from player input
+                lUse = strtol(pUser->m_stDialogCtx.strInput.c_str(), nullptr, 10);
+            if (rsOp == "=") {
+                if (uNpcId == 0x334 && nDigit == 0) {
+                    // guild-treasurer (820) special: gmlog/npc_820 audit
+                    char szBuf[128];
+                    snprintf(szBuf, sizeof(szBuf),
+                             "action(type = 201) \xd7\xdc\xcc\xb3\xb2\xc6\xd5\xfe\xb9\xd9(820) "
+                             "oldData0(%d) newData(%d) Update(%d)",
+                             GetData(0), (int)lUse, nFlag);
+                    tq::MyLogSave("gmlog/npc_820", "%s", szBuf);
+                }
+                SetData((uint32_t)nDigit, (int32_t)lUse, nFlag == 1 ? 1 : 0);
+                return true;
+            }
+            if (rsOp == "+=") {
+                SetData((uint32_t)nDigit, GetData((uint32_t)nDigit) + (int32_t)lUse, 0);
+                return true;
+            }
+            int32_t nCur = GetData((uint32_t)nDigit);
+            if (rsOp == "==") return nCur == (int32_t)lUse;
+            if (rsOp == "<")  return nCur <  (int32_t)lUse;
+            if (rsOp == "<=") return nCur <= (int32_t)lUse;
+            if (rsOp == ">")  return nCur >  (int32_t)lUse;
+            if (rsOp == ">=") return nCur >= (int32_t)lUse;
+            return false;
+        }
+        // ---- life (field 24; "=" only, broadcast attrib mode 0) ----
+        if (strcmp(szField, "life") == 0) {
+            if (rsOp != "=") return false;
+            SetF1(24, (int32_t)lVal);
+            CMsgUserAttrib msg;
+            if (msg.Create(pRec->GetId(), {{CMsgUserAttrib::Attrib_Life,
+                                             (uint64_t)(int32_t)lVal}}))
+                CMapManager::Instance().Broadcast(pRec->GetMapId(),
+                    msg.GetBuf(), msg.GetSize());
+            else
+                tq::MyLogSave("gmlog/all", "IF_OK in %s, %d",
+                          "msg.Create(pNpc->GetID(), _USERATTRIB_LIFE, nData)", 2885);
+            return true;
+        }
+        // ---- maxlife (field 25; "=" only, attrib mode 1) ----
+        if (strcmp(szField, "maxlife") == 0) {
+            if (rsOp != "=") return false;
+            SetF1(25, (int32_t)lVal);
+            CMsgUserAttrib msg;
+            if (msg.Create(pRec->GetId(), {{CMsgUserAttrib::Attrib_MaxLife,
+                                             (uint64_t)(int32_t)lVal}}))
+                CMapManager::Instance().Broadcast(pRec->GetMapId(),
+                    msg.GetBuf(), msg.GetSize());
+            else
+                tq::MyLogSave("gmlog/all", "IF_OK in %s, %d",
+                          "msg.Create(pNpc->GetID(), _USERATTRIB_MAXLIFE, nData)", 2885);
+            return true;
+        }
+        return false; // unknown field -> ORIGINAL 0x14013c272
+    }
     case 501: { // ORIGINAL case 0x1f5 (FUN_140123590): award item
         // Type = cq_action.data (node vtable GetData(4)). Param = the
         // 19-field CItemInfo spec; the 2nd conversion (local_734 in the
@@ -1290,6 +1454,10 @@ bool bAll = (llAll == 1);
         // record-side extras (the szDynTable columns the registry keeps)
         pNpc->m_nSpawnFlags = f3;   // col 0x1c source (bit 1)
         pNpc->m_usLife = (uint16_t)f11; // col 0x19
+        // ORIGINAL: the spawned record is a DynaNpc (byte +0x68) whose
+        // field 25 (maxlife) carries spawn col 0x19 life
+        pNpc->m_bDyna = true;
+        pNpc->m_nMaxLife = (int32_t)(uint16_t)f11;
         pNpc->m_strDatastr.assign(szDatastr, strnlen(szDatastr, 15)); // col 0x16
         (void)f2; (void)f10; (void)f12; // parsed into non-record slots
         (void)f14; (void)f15; (void)f16; (void)f17; (void)f18; (void)f19;
@@ -1492,7 +1660,7 @@ bool bAll = (llAll == 1);
         if (!pItem) return false; // ORIGINAL: mgr lookup 0 -> out
         if (!stricmp(szOp, "set")) {
             if (aAttr == 19) { // ORIGINAL 0x13: equipment lock status
-                // ORIGINAL: MyLogSave("gmlog/EquipmentLockStatus", ...Change Flag From:%d)
+                // ORIGINAL: tq::MyLogSave("gmlog/EquipmentLockStatus", ...Change Flag From:%d)
                 printf("[GMLOG] gmlog/EquipmentLockStatus item id:%u owner id:%u lock status:%d org lock status:%d item type:%d action id:%u Change Flag From:%d\n",
                        pItem->dwId, pUser->GetId(), aVal,
                        (int)pItem->GetActionAttr(19), pItem->dwType, pNode->dwId,
@@ -1748,7 +1916,7 @@ bool bAll = (llAll == 1);
         // 0x28 (40 slots) -> send STR_BAG_FULL, return 0. Otherwise:
         // "SELECT * FROM cq_bonus WHERE id_account = %u AND flag = 0 LIMIT 1".
         // On a row: bonusValue = record field(0) = cq_bonus.action;
-        // FUN_140145f60 grants it; MyLogSave("gmlog/bonus",
+        // FUN_140145f60 grants it; tq::MyLogSave("gmlog/bonus",
         // "###Bonus: AccountID(%u), Player(%u) take bonus(%u).");
         // field(3) = flag set to 1; field(5) = time set to TimeStampGet();
         // return 1. No row -> return 0.
@@ -1771,7 +1939,7 @@ bool bAll = (llAll == 1);
         // ORIGINAL 140172953+: FUN_140145f60(mapgroup action, bonusActionId,
         // user, 0) grants the bonus action chain
         CGameAction::ProcessAction(pUser, dwBonus);
-        // ORIGINAL: MyLogSave("gmlog/bonus", "###Bonus: AccountID(%u),
+        // ORIGINAL: tq::MyLogSave("gmlog/bonus", "###Bonus: AccountID(%u),
         // Player(%u) take bonus(%u).") - account id, GetId(user), action
         printf("[GMLOG] gmlog/bonus ###Bonus: AccountID(%u), Player(%u) take bonus(%u).\n",
                pUser->GetAccountId(), pUser->GetId(), dwBonus);
@@ -2774,7 +2942,7 @@ static bool ProcessActionDispatch(std::shared_ptr<CUser> pUser,
                                   const CDialogEngine::Node* pNode, uint32_t dwType) {
     if (dwType >= 101 && dwType <= 198) // -0x65 <= 0x61: FUN_140142db0
         return CGameAction::ProcessActionOS(pUser, pNode);
-    if (dwType >= 201 && dwType <= 262) // -0xc9 <= 0x61: FUN_14013b950 (PORT-PENDING family)
+    if (dwType >= 201 && dwType <= 262) // -0xc9 <= 0x61: FUN_14013b950 (201 ported; 202+ pending)
         return CGameAction::ProcessActionUser(pUser, pNode);
     if (dwType >= 301 && dwType <= 362) // -0x12d <= 0x61: FUN_14013d790 (family B port)
         return CGameAction::ProcessActionUser(pUser, pNode);

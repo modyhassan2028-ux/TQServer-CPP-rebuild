@@ -59,6 +59,19 @@ public:
     // (f7), col8 x (f8), col9 y (f9), col10 task0 (f13), col0x19 life
     // (f11), col0x1c flags (f3 bit 1), col0x16 datastr (f25, char(15)).
     // f2 is parsed but lands outside the spawn struct (dead).
+    // ---- dynamic record fields (cq_action 201, ORIGINAL FUN_14013ba1e) ----
+    // The original DynaNpc record exposes these through the generic
+    // SetField/GetField helpers (FUN_1400922d0 / FUN_1400872b0). Index map,
+    // objdump-verified: 1 ownerid, 2 ownertype, 3 lookface, 22 datastr
+    // (string), 24 life, 25 maxlife; data0..data3 go through the data
+    // helpers (FUN_140087300 get / FUN_1400e3310 set).
+    uint32_t m_dwOwnerid{0};    // field 1
+    uint32_t m_dwOwnertype{0};  // field 2
+    uint32_t m_dwDynData[4]{};  // data0..data3
+    int32_t  m_nLife{0};        // field 24 (runtime; not spawn col life)
+    int32_t  m_nMaxLife{0};     // field 25 (= 2007 spawn col 0x19 life)
+    bool     m_bDyna{false};    // ORIGINAL record byte +0x68 IsDynaNpc
+
     uint32_t m_dwNpcType{0};    // f5 (col 2)
     int32_t  m_nSpawnFlags{0};  // f3 (bit 1 -> col 0x1c)
     uint16_t m_usLife{0};       // f11 (col 0x19)

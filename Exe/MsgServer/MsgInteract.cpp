@@ -68,7 +68,20 @@ void CMsgInteract::Process(uint32_t dwSender) {
     if (m_data.dwTargetId >= CNpcManager::NPC_ID_BASE) {
         CNpcManager::Instance().SpawnDefaults();
         auto pNpc = CNpcManager::Instance().GetNpc(m_data.dwTargetId);
-        if (pNpc) pNpc->Interact(pAttacker);
+        if (pNpc) {
+            // ORIGINAL: the dialog record fields the %... resolver reads
+            // (%id/%name/%datastr/%npc_life/%npc_ownerid/%npc_x/%npc_y)
+            // come from the npc the player interacts with; the same
+            // record is the target of cq_action 201 ops with npcId==0
+            auto& ctx = pAttacker->m_stDialogCtx;
+            ctx.dwId = pNpc->GetId();
+            ctx.strName = pNpc->GetName();
+            ctx.strDatastr = pNpc->m_strDatastr;
+            ctx.dwNpcLife = (uint32_t)pNpc->m_nLife;     // field 24
+            ctx.dwNpcOwnerId = pNpc->m_dwOwnerid;         // field 1
+            ctx.wX = pNpc->GetX(); ctx.wY = pNpc->GetY();
+            pNpc->Interact(pAttacker);
+        }
         else pAttacker->SendSysMsg("There is no such NPC. /npc list");
         return;
     }

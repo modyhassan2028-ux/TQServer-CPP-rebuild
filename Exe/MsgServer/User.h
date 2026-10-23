@@ -579,6 +579,11 @@ public:
         uint32_t dwId{0}, dwData{0}, dwNpcLife{0}, dwNpcOwnerId{0};
         uint16_t wX{0}, wY{0};
         std::string strDatastr, strName;
+        // ORIGINAL walker arg7 (FUN_140145f60 stack 0x1168): the string the
+        // player typed into an input dialog, re-parsed by the "accept"
+        // operand of cq_action type 201 data ops. Wired once client dialog
+        // replies land here (MsgDialog::Process stub).
+        std::string strInput;
     } m_stDialogCtx;
     uint32_t GetHomeMapId() const { return m_dwHomeMapId; }
     void SetHomeMapId(uint32_t m) { m_dwHomeMapId = m; }
