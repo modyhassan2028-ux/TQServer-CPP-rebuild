@@ -1807,6 +1807,58 @@ bool bAll = (llAll == 1);
         pUser->SendSysMsg("NOMATE_NAME");
         return true;
     }
+    case 1029: { // ORIGINAL switch case 0x17 (remap 1029->0x17): play wave
+        // ORIGINAL: sscanf "%s %s %hu %hu %u"; <= 1 token -> Wrong param log
+        // (LAB_14013a784) + fail. Token 1:
+        //  - "play": FUN_14037dfb0 (CMsgName ctor) + FUN_14037e0a0(msg, 0x14,
+        //    media, data) = MsgName(1015): [uint32 timestamp = TimeGet][uint32
+        //    data][byte action = 0x14 NAMEACT_PLAYER_WAVE][CStringPacker:
+        //    media + "%u" of the %u token], size = packerSize + 0xb; then
+        //    send to SELF (user vcall+0x350).
+        //  - "broacast" (sic - original typo): same packet, sent to the
+        //    whole map (user vcall+0x348, bFlag=1).
+        //  - other token: no packet, still return 1.
+        char szCmd[256] = {0}, szMedia[256] = {0};
+        uint16_t usA = 0, usB = 0; uint32_t dwVal = 0;
+        int nScan = sscanf(pNode->strParam.c_str(), "%s %s %hu %hu %u",
+                           szCmd, szMedia, &usA, &usB, &dwVal);
+        if (nScan <= 1) {
+            printf("[DBERR] 1029 Wrong param number (%d): %s\n", nScan, pNode->strParam.c_str());
+            return false; // ORIGINAL: LAB_14013a784
+        }
+        if (_stricmp(szCmd, "play") == 0 || _stricmp(szCmd, "broacast") == 0) {
+            char szVal[0x100]; snprintf(szVal, 0xff, "%u", dwVal);
+            std::string strMedia = szMedia, strVal = szVal;
+            // ORIGINAL FUN_14037e0a0: tq::CStringPacker AddString(media),
+            // then FUN_14037e280 AddString("%u" of the uint token)
+            size_t nPacker = (strMedia.size() + 2) + (strVal.size() + 2);
+            size_t nSize = 11 + nPacker; // ORIGINAL: *(msg+0xc) = packer + 0xb
+            std::string pkt;
+            pkt.reserve(8 + nSize);
+            uint16_t usType = 0x3f7; // 1015 = MsgName
+            pkt.append((char*)&usType, 2);
+            pkt.append((char*)&nSize, 2);
+            uint32_t dwNow = (uint32_t)time(nullptr); // tq::TimeGet
+            pkt.append((char*)&dwNow, 4);
+            pkt.append((char*)&dwVal, 4);
+            uint8_t byAct = 0x14; // NAMEACT_PLAYER_WAVE
+            pkt.append((char*)&byAct, 1);
+            uint16_t usLen = (uint16_t)strMedia.size(); // packed strings
+            pkt.append((char*)&usLen, 2); pkt.append(strMedia);
+            usLen = (uint16_t)strVal.size();
+            pkt.append((char*)&usLen, 2); pkt.append(strVal);
+            if (_stricmp(szCmd, "broacast") == 0) {
+                // ORIGINAL: vcall+0x348(user, msg, 1) - broadcast to the map
+                // (single map group: same map id == the whole map group)
+                for (auto& p : CUserManager::Instance().GetAllUsers())
+                    if (p->GetMapId() == pUser->GetMapId())
+                        p->SendMsg(pkt.data(), (uint16_t)pkt.size());
+            } else {
+                pUser->SendMsg(pkt.data(), (uint16_t)pkt.size()); // vcall+0x350
+            }
+        }
+        return true;
+    }
     case 1025: // ORIGINAL switch case 0x13 (remap 1025->0x13): same FUN_140164440
     case 1027: { // ORIGINAL switch case 0x13 -> FUN_140164440:
         // return (user->vtable+0x48)() != 0 - the mate id (cq_user.mateid).

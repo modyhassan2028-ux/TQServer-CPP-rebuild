@@ -411,6 +411,27 @@ int main() {
     system("mariadb -u root cq -e \"DELETE FROM cq_item WHERE owner_id=888001 AND type=1086978\" >/dev/null 2>&1");
     printf("[ok] 1024 divorce matches case 0x12 (FUN_140173e20)\n");
 
+    // --- 1029 (case 0x17): play/broacast wave (MsgName 1015, action 0x14) ---
+    auto uJ = std::make_shared<CUser>(999010);
+    auto mk1029 = [](const char* param) {
+        CDialogEngine::Node n; n.dwType = 1029; n.dwId = 5000032; n.strParam = param; return n; };
+    std::string strGotWave;
+    uJ->SetPacketSink([&](const void* p, uint16_t n) {
+        if (n >= 8 && *(uint16_t*)p == 1015) strGotWave.assign((const char*)p, n); });
+    { auto n = mk1029("play coolmedia.wav 1 2 7"); assert(CGameAction::ProcessActionUser(uJ, &n)); }
+    assert(!strGotWave.empty());
+    assert((uint8_t)strGotWave[12] == 0x14);            // action byte NAMEACT_PLAYER_WAVE
+    assert(*(uint16_t*)&strGotWave[13] == 13);          // media string length
+    assert(strGotWave.substr(15, 13) == "coolmedia.wav");
+    assert(strGotWave.size() == 4 + 4 + 4 + 1 + (13 + 2) + (1 + 2)); // hdr+ts+data+act+media+"7"
+    { auto n = mk1029("broacast bgm.mid 0 0 3"); assert(CGameAction::ProcessActionUser(uJ, &n)); }
+    { auto n = mk1029("xyz whatever"); assert(CGameAction::ProcessActionUser(uJ, &n)); } // unknown cmd, 2 tokens -> 1
+    { auto n = mk1029("xyz"); assert(!CGameAction::ProcessActionUser(uJ, &n)); } // single token -> LAB_14013a784 -> 0
+    { auto n = mk1029("play"); assert(!CGameAction::ProcessActionUser(uJ, &n)); } // sscanf <= 1 -> 0
+    uJ->SetPacketSink(nullptr);
+    printf("[ok] 1029 play/broacast wave matches case 0x17 (MsgName 1015 / 0x14)\n");
+
+
 
 
 
