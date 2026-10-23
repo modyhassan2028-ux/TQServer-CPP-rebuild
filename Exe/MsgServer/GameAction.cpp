@@ -798,6 +798,18 @@ static int64_t CalcLevExpVar(CUser* pUser, uint32_t dwValue) {
     return nAcc - nCurExp;
 }
 
+// ORIGINAL FUN_1400fe140 (item chk_sum): p3 + p6*3 + (p4+1+p5)*0x2537 +
+// p7*2 + p8+p9+p10+p11 ^ p1 ^ 0xb00cf ^ p2 (C precedence: + before ^,
+// XOR left-assoc). 11 params; only the first 4 are set at the divorce
+// call site (0x14017408c) - params 5..11 are the clobbered edi register
+// in the ORIGINAL (undefined behavior); we pass 0 (deterministic port).
+static uint32_t ChkSum11(uint32_t p1, uint32_t p2, uint32_t p3, uint32_t p4,
+                         uint32_t p5, uint32_t p6, uint32_t p7, uint32_t p8,
+                         uint32_t p9, uint32_t p10, uint32_t p11) {
+    return (p3 + p6 * 3 + (p4 + 1 + p5) * 0x2537 + p7 * 2 +
+            p8 + p9 + p10 + p11) ^ p1 ^ 0xb00cfU ^ p2;
+}
+
 bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode) {
     if (!pUser || !pNode) return false;
     switch (pNode->dwType) {
@@ -1785,9 +1797,17 @@ bool bAll = (llAll == 1);
                      "amount=1,amount_limit=1,position=%d, accumulate_num = 1",
                      0x109a02, dwMate, dwMate, 0);
             pDB->Query(szSql);
-            // PORT-PENDING: FUN_1400fe140 (chk_sum formula) not ported;
-            // the original then runs
-            // "UPDATE cq_item SET chk_sum=%u WHERE id=%u LIMIT 1".
+            // ORIGINAL FUN_1400fe140(last_insert_id, mateid, 0x109a02, 0,
+            // edi, edi, edi, edi, edi, edi, edi) then
+            // "UPDATE cq_item SET chk_sum=%u WHERE id=%u LIMIT 1"
+            uint32_t dwNewId = (uint32_t)strtoul(
+                pDB->Scalar("SELECT LAST_INSERT_ID()").c_str(), nullptr, 10);
+            uint32_t dwChk = ChkSum11(dwNewId, dwMate, 0x109a02, 0,
+                                     0, 0, 0, 0, 0, 0, 0);
+            snprintf(szSql, 0x3ff,
+                     "UPDATE cq_item SET chk_sum=%u WHERE id=%u LIMIT 1",
+                     dwChk, dwNewId);
+            pDB->Query(szSql);
         }
         pUser->SendSysMsg("STR_DIVORCE");
         if (!pMate) {

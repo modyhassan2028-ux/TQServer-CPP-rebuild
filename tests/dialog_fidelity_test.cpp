@@ -408,7 +408,16 @@ int main() {
     { auto n = mk1024(5000009); assert(CGameAction::ProcessActionUser(uI, &n)); }
     assert(uI->GetSpouseID() == 0); // self cleared
     { auto n = mk1024(5000009); assert(!CGameAction::ProcessActionUser(uI, &n)); } // already divorced -> 0
-    system("mariadb -u root cq -e \"DELETE FROM cq_item WHERE owner_id=888001 AND type=1086978\" >/dev/null 2>&1");
+        { // chk_sum persisted per FUN_1400fe140: (0x109a02+0x2537) ^ id ^ 0xb00cf ^ mateid
+        auto* pDB = CAccountManager::Instance().GetDB();
+        assert(pDB && pDB->Query("SELECT id, chk_sum + 0 FROM cq_item WHERE owner_id=888001 AND type=1088002"));
+        assert(!pDB->GetRows().empty());
+        uint32_t dwId = (uint32_t)strtoul(pDB->GetRows()[0][0].c_str(), nullptr, 10);
+        uint32_t dwChk = (uint32_t)strtoul(pDB->GetRows()[0][1].c_str(), nullptr, 10);
+        uint32_t dwExp = (0x109a02U + 0x2537U) ^ dwId ^ 0xb00cfU ^ 888001U;
+        assert(dwChk == dwExp);
+    }
+system("mariadb -u root cq -e \"DELETE FROM cq_item WHERE owner_id=888001 AND type=1088002\" >/dev/null 2>&1");
     printf("[ok] 1024 divorce matches case 0x12 (FUN_140173e20)\n");
 
     // --- 1029 (case 0x17): play/broacast wave (MsgName 1015, action 0x14) ---
