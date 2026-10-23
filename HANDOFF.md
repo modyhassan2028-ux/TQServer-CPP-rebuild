@@ -33,7 +33,8 @@
    PORT-PENDING** — وحدة عميقة: اقرأها كاملة من MsgServer.exe.decompiled.c،
    تتبّع FUN_140146a10/FUN_1401184a0/FUN_14013b950... وبوّرتها 1:1، ثم فعّل
    المطالبة في 1023 (flag=1 + time + المنح + سطر gmlog/bonus).
-2. **1024 (case 0x12)** = FUN_140173e20: يعتمد على Family.dll
+2. ~~1024 (case 0x12)~~ — **تم بورته حرفيًا** (وحدة 7): طلاق — غرض 0x109a02 للرفيق + مسح mateid للطرفين. **PORT-PENDING:** صيغة chk_sum في FUN_1400fe140 (لاحق 1023).
+
    (CurrentInstanceGet vcall+0x20(8)) — وحدد أولًا الدلالة؛ ممكن يتعمل
    تعويضًا عبر منطق الجيلد عندنا مع توثيق.
 3. **1029 (case 0x17)** = "play" wave للعميل: sscanf

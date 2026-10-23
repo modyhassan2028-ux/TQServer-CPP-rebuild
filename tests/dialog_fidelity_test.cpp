@@ -398,6 +398,20 @@ int main() {
     system("mariadb -u root cq -e \"DELETE FROM cq_bonus WHERE id_account=9990001\" >/dev/null 2>&1");
     printf("[ok] 1023 bonus claim wrapper matches case 0x11 (FUN_140172910)\n");
 
+    // --- 1024 (case 0x12): divorce (FUN_140173e20) ---
+    auto uI = std::make_shared<CUser>(999009);
+    auto mk1024 = [](uint32_t id) {
+        CDialogEngine::Node n; n.dwType = 1024; n.dwId = id; return n; };
+    { auto n = mk1024(5000009); assert(!CGameAction::ProcessActionUser(uI, &n)); } // no mate -> 0
+    system("mariadb -u root cq -e \"UPDATE cq_user SET mateid=999009 WHERE id=999009 LIMIT 1\" >/dev/null 2>&1");
+    uI->SetSpouseID(888001); // married, mate offline
+    { auto n = mk1024(5000009); assert(CGameAction::ProcessActionUser(uI, &n)); }
+    assert(uI->GetSpouseID() == 0); // self cleared
+    { auto n = mk1024(5000009); assert(!CGameAction::ProcessActionUser(uI, &n)); } // already divorced -> 0
+    system("mariadb -u root cq -e \"DELETE FROM cq_item WHERE owner_id=888001 AND type=1086978\" >/dev/null 2>&1");
+    printf("[ok] 1024 divorce matches case 0x12 (FUN_140173e20)\n");
+
+
 
 
 

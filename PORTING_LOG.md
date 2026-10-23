@@ -875,3 +875,20 @@ CUser vtable+0x50 — يلزم تفريغ الـ vtable)، 1023 (0x11 cq_bonus)�
   حقيقي مُدرج في cq_bonus → 0 مع بقاء flag=0 (عدم المطالبة موثق) ثم نُظف
   صف الاختبار. PASSED.
 - جدول cq_bonus عندنا فارغ (0 صفوف) — المسار الحقيقي الغالب هو "لا صف → 0".
+
+## وحدة 2026-10-23 (7) — النوع 1024 (case 0x12): الطلاق (DIVORCE)
+
+- **FUN_140173e20 = Divorce.** الحارس: vcall+0x48 (mateid) == 0 → 0.
+- **objdump حسم الوسائط المطوية في Ghidra:** الـ INSERT عند
+  0x140173fe9: type=**0x109a02 ثابت** (غرض الطلاق)، owner_id=player_id=
+  mateid، position=0. (لاحظ: صيغة va2off للـ .rdata خاطئة بمقدار 0xA00 —
+  استخدم جدول الـ sections: .rdata VA 0x1406d8000 ↔ file 0x6d6600.)
+- المسار: Family.dll (module 8) غير محمّل عندنا → نفس مسار اللوج الأصلي
+  "Family.dll not load." ثم البحث عن الزوج/الزوجة (slot 0x98)، INSERT
+  الغرض للرفيق، STR_DIVORCE للعميل، مسح mateid في DB للطرف غير المتصل،
+  إشعار الطرف المتصل (FUN_140164300 = مسح + إشعار NOMATE_NAME)،
+  MyLogSave gmlog/marriage "%u[%s] divorced %u[%s]"، مسح الرفيق عند self → 1.
+- **PORT-PENDING:** صيغة chk_sum (FUN_1400fe140 + UPDATE cq_item SET
+  chk_sum) لم تُبورت بعد — موثقة داخل الكود.
+- **الاختبار:** بدون زواج → 0؛ متزوج برفيق غير متصل → 1 مع مسح الرفيق
+  وإدراج غرض 1086978؛ إعادة → 0 (مطلق فعلًا). PASSED.

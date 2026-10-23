@@ -1755,6 +1755,58 @@ bool bAll = (llAll == 1);
                dwBonus, pUser->GetAccountId());
         return false; // documented partial: grant engine pending
     }
+    case 1024: { // ORIGINAL switch case 0x12 (remap 1024->0x12): divorce (FUN_140173e20)
+        // ORIGINAL FUN_140173e20 (objdump-verified 0x140173e20..0x1401742e0):
+        // gate: CUser vcall+0x48 (mate id, cq_user.mateid) == 0 -> return 0.
+        // Family.dll (module 8) notify slot 0x178; module absent in our port,
+        // the original logs "Family.dll not load." and continues (same path).
+        // FUN_140087ed0 module notify slot 0x68 (module absent likewise).
+        // Then: mate lookup (user container slot 0x98), and a FIXED item is
+        // created for the mate: "INSERT cq_item SET type=%u,owner_id=%u,
+        // player_id=%u,amount=1,amount_limit=1,position=%d, accumulate_num=1"
+        // with type=0x109a02, owner_id=player_id=mate id, position=0
+        // (regs at 0x140173fe9: r9=0x109a02, [rsp+0x20]=eax,
+        // [rsp+0x28]=ebx, [rsp+0x30]=rdi=0), followed by the chk_sum update
+        // below. STR_DIVORCE sent to the client. Mate not loaded:
+        // "UPDATE cq_user SET mateid=%u WHERE id=%u LIMIT 1" clears the
+        // mate's row; mate loaded: FUN_140164300(mate,0,NOMATE_NAME,1)
+        // clears + notifies the mate. tq::MyLogSave("gmlog/marriage",
+        // "%u[%s] divorced %u[%s]"). Finally FUN_140164300(self,0,
+        // NOMATE_NAME,1) clears self; return 1.
+        uint32_t dwMate = pUser->GetSpouseID();
+        if (dwMate == 0) return false; // ORIGINAL: no mate -> 0
+        printf("[ACTION] Family.dll not load. (case 0x12 module 8)\n");
+        auto pMate = CUserManager::Instance().GetUser(dwMate); // slot 0x98
+        auto* pDB = CAccountManager::Instance().GetDB();
+        if (pDB) {
+            char szSql[0x400];
+            snprintf(szSql, 0x3ff,
+                     "INSERT cq_item SET type=%u,owner_id=%u,player_id=%u,"
+                     "amount=1,amount_limit=1,position=%d, accumulate_num = 1",
+                     0x109a02, dwMate, dwMate, 0);
+            pDB->Query(szSql);
+            // PORT-PENDING: FUN_1400fe140 (chk_sum formula) not ported;
+            // the original then runs
+            // "UPDATE cq_item SET chk_sum=%u WHERE id=%u LIMIT 1".
+        }
+        pUser->SendSysMsg("STR_DIVORCE");
+        if (!pMate) {
+            if (pDB) { // ORIGINAL: clear the offline mate's DB row
+                char szSql[0x400];
+                snprintf(szSql, 0x3ff, "UPDATE cq_user SET mateid = %u WHERE id=%u LIMIT 1",
+                         0, dwMate);
+                pDB->Query(szSql);
+            }
+        } else {
+            pMate->SetSpouseID(0); // ORIGINAL FUN_140164300(mate,0,NOMATE_NAME,1)
+            pMate->SendSysMsg("NOMATE_NAME");
+        }
+        tq::MyLogSave("gmlog/marriage", "%u[%s] divorced %u[%s]",
+                  pUser->GetId(), pUser->GetName().c_str(), dwMate, "NOMATE_NAME");
+        pUser->SetSpouseID(0); // ORIGINAL FUN_140164300(self,0,NOMATE_NAME,1)
+        pUser->SendSysMsg("NOMATE_NAME");
+        return true;
+    }
     case 1025: // ORIGINAL switch case 0x13 (remap 1025->0x13): same FUN_140164440
     case 1027: { // ORIGINAL switch case 0x13 -> FUN_140164440:
         // return (user->vtable+0x48)() != 0 - the mate id (cq_user.mateid).
