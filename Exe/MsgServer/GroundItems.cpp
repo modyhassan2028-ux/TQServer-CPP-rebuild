@@ -166,3 +166,48 @@ void CGroundItemManager::TeamShare(std::shared_ptr<CUser> pPicker, uint64_t qwMo
     printf("[DROPS] team split %llu -> %zu x %llu\n",
            (unsigned long long)qwMoney, sharers.size(), (unsigned long long)each);
 }
+
+uint32_t CGroundItemManager::AddMoneyDrop(uint32_t dwMapId, uint16_t usX,
+                                          uint16_t usY, uint64_t qwMoney,
+                                          uint32_t dwOwnerId)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    GroundDrop d;
+    d.dwDropId = NextId();
+    d.dwMapId = dwMapId;
+    d.usX = usX;
+    d.usY = usY;
+    d.qwMoney = qwMoney;
+    d.strName = "Money " + std::to_string(qwMoney);
+    m_drops[d.dwDropId] = d;
+    printf("[DROPS] money %llu (owner %u) fell on map %u (%u,%u).\n",
+           (unsigned long long)qwMoney, dwOwnerId, dwMapId, usX, usY);
+    return d.dwDropId;
+}
+
+uint32_t CGroundItemManager::AddItemDrop(uint32_t dwMapId, uint16_t usX,
+                                        uint16_t usY, uint32_t dwItemType,
+                                        uint32_t dwOwnerId)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    GroundDrop d;
+    d.dwDropId = NextId();
+    d.dwMapId = dwMapId;
+    d.usX = usX;
+    d.usY = usY;
+    d.dwItemType = dwItemType;
+    d.dwAmount = 1;
+    const ItemTypeDef* pDef = CItemLibrary::Instance().Lookup(dwItemType);
+    d.strName = pDef ? pDef->strName : ("ItemType " + std::to_string(dwItemType));
+    m_drops[d.dwDropId] = d;
+    printf("[DROPS] item %s (type %u, owner %u) fell on map %u (%u,%u).\n",
+           d.strName.c_str(), dwItemType, dwOwnerId, dwMapId, usX, usY);
+    return d.dwDropId;
+}
+
+const GroundDrop* CGroundItemManager::FindDrop(uint32_t dwDropId)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    auto it = m_drops.find(dwDropId);
+    return it == m_drops.end() ? nullptr : &it->second;
+}

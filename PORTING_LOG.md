@@ -1054,3 +1054,49 @@ CUser vtable+0x50 — يلزم تفريغ الـ vtable)، 1023 (0x11 cq_bonus)�
 - اختبارا stall_pole_207_test و dialog_input_flow_test PASSED (صف
   حقيقي 5021750 نوع 218 كهدف الإدخال) + القواعد التسع القديمة كلها
   خضرا (11 قاعدة إجمالًا).
+
+## وحدة 801/802 — عائلة FUN_140127070 (dropitem/dropmoney/أكوام) (2026-10-23)
+- فُكّ النافذة كاملة (801..862): الأصل يعالج 801 و802 فقط؛ أي نوع
+  آخر داخل النافذة يسجّل "table:cq_action/cq_newaction, <خطأ: نوع
+  Action غير صحيح>" ويرجع FALSE (سلوك حرفي، ليس pass-through).
+  الديسباتشر يوجه الآن النافذة كلها إلى ProcessActionFamily8xx.
+- 801: sscanf "%s" على param (CHECKF 0x62a) → stricmp مع dropitem:
+  إعادة parse "%s %u" (CHECKF 0x641) + تحقق مزدوج حرفي ثم
+  FUN_14038a790؛ مع dropmoney: parse "%s %u %u"، n==2 → bound=100،
+  n==3 → bound %= 100 (بالموقّع)، وإلا فشل؛ roll = bound +
+  tq::RandGet(100-bound)؛ final = money*roll/100؛ final==0 → false؛
+  ثم FUN_14038a560.
+- FUN_14038a560 الحرفية: money==0 → true؛ level<80 && money<=10 →
+  true صامت؛ LuckyTime (قوة 1 → [بيانات+0x20]، 2 → 1): money =
+  [mon+0x2c]*lucky/100؛ علم [mon+0x10f8]: >>3 ([mon+0x100]<=3) وإلا
+  >>2؛ 0 → true؛ بوابة خلية الدروب (FUN_1402d1110 نمذجت IsPassable)
+  وإلا سجل CMonster::DropMoney؛ دروب مالي عبر CGroundItemManager.
+- FUN_14038a790: نوع 0 → true؛ بوابة الخلية؛ فشل cq_itemtype → سجل
+  "can not found itemtype" + false؛ دروب عنصر.
+- tq::RandGet (CQBase.dll 0x140b82fb0): r1 + r2*0x8000 ثم %n، n<=0
+  → 0 — بورت حرفي في Msg.h مع قناع 15-bit لكل سحبة (rand على
+  glibc 31-bit فيفيض على التركيب الأصلي 30-bit).
+- 802: "%d %d %I64d" (CHECKF 0x669)؛ بوابات min>max&&max!=0 /
+  سالب (0x66f)؛ لكل وحش من نوع المصدر على خريطة المصدر في نطاق
+  [min,max] (0=مفتوح) كومة مال FUN_1401669f0 (انتشار ±2) بحد 0x12
+  لكل تشغيل.
+- CMonster::m_dwSourceMonsterId على CUser = استعلام "0x1002"؛ فشله
+  يفشل المعالج كله (حرفي).
+- اختبار action_801_802_test: صفوف حقيقية (51 "dropmoney 49 100" —
+  roll حتمي بالمطابقة المزدوجة للسحبة، 2-token → كومة 49 بالضبط،
+  skip الصامت level<80&&<=10، dropitem 120005=LightNecklace، فشل
+  نوع غير موجود، 9171710 "0 0 20" → 3 أكوام، نطاق "10 10 30" →
+  وحش واحد، معادلات LuckyTime/>>3/>>2 الحرفية) — ALL PASSED.
+
+## فحص نزاهة قاعدة cq_action (2026-10-23)
+- تحقق بالأرقام (وليس منقولًا): cq_action فعلية 192,895 صفًا،
+  cq_action_total 349,914 صفًا — cq_action مجموعة جزئية صارمة
+  منها (157,019 صفًا في total غير موجود في cq_action).
+- داخل cq_action الفعلية: 893 وصلة id_next مكسورة + 719
+  id_nextfail (605 هدفًا فريدًا)، منها 517 موجود حرفيًا في
+  cq_action_total؛ و9,442 مدخل cq_task بلا صف action، منها 8,524
+  قابل للاستعادة من total.
+- الاستعادة = نسخ صفوف من cq_action_total (بيانات، ليست تخمينًا)؛
+  الأنواع المطلوبة handlersها تُبورت من الديكومبايل كما نعمل
+  دائمًا. أُدرجت "استكمال الناقص من total" في المراحل القادمة
+  في HANDOFF — دون كسر الترتيب الجاري.

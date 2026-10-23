@@ -4,7 +4,23 @@
 #include <cstring>
 #include <cstdint>
 
+#include <cstdlib>
+
 namespace tq {
+    // ORIGINAL CQBase.dll tq::RandGet(int) (decompiled 0x140b82fb0):
+    // two rand() calls combined (r1 + r2*0x8000), mod n; n <= 0 -> 0.
+    // The 801/802 family relies on the 0 case (no division by zero).
+    // MSVC rand() is 15-bit; this host's is 31-bit, so both draws are
+    // masked to 15 bits to keep the original 30-bit combine exact and
+    // the modulo non-negative.
+    inline int RandGet(int n) {
+        if (n <= 0)
+            return 0;
+        int r1 = rand() & 0x7fff;
+        int r2 = rand() & 0x7fff;
+        return (r1 + r2 * 0x8000) % n;
+    }
+
     class __declspec(dllexport) CMsg {
     public:
         CMsg();

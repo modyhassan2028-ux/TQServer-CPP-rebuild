@@ -593,6 +593,11 @@ public:
         // replies land here (MsgDialog::Process stub).
         std::string strInput;
     } m_stDialogCtx;
+    // ORIGINAL family 801/802 (FUN_140127070) queries its "0x1002" object -
+    // the monster record the action runs from (monster AI chains). The
+    // query failing fails the whole handler; modeled as the source
+    // monster id resolved through CMonsterManager.
+    uint32_t m_dwSourceMonsterId{0};
     uint32_t GetHomeMapId() const { return m_dwHomeMapId; }
     void SetHomeMapId(uint32_t m) { m_dwHomeMapId = m; }
     // ORIGINAL: action vars resolve centrally before the case runs

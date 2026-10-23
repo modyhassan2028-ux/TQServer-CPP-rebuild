@@ -50,6 +50,12 @@ public:
     void SetDefense(uint32_t v) { m_dwDefense = v; }
 
     uint32_t GetLevel() const { return m_dwLevel; }
+    // FUN_14038a560 — literal 801 dropmoney gate + equations + floor drop
+    bool ActionDropMoney(uint32_t dwMoney, uint32_t dwOwnerId);
+    // FUN_14038a790 — literal 801 dropitem floor drop
+    bool ActionDropItem(uint32_t dwItemType, uint32_t dwOwnerId);
+    // FUN_1401669f0 — 802 fixed-amount money pile near the monster
+    bool SpawnMoneyPile(uint64_t qwAmount, uint8_t cFlag);
     bool IsBoss() const { return m_bBoss; }
     void SetBoss(bool b) { m_bBoss = b; }
     void SetLevel(uint32_t dwLevel) { m_dwLevel = dwLevel; }
@@ -72,6 +78,19 @@ private:
     uint32_t m_dwMaxLife{100};
     bool m_bBoss{false};
     uint32_t m_dwLevel{1};
+    // ORIGINAL monster fields read by the 801 drop helpers
+    // (FUN_14038a560/FUN_14038a790):
+    //  [mon+0x2c]   money base used by the LuckyTime calc
+    //  [mon+0x1230] LuckyTime status id -> record power (+0x2a0):
+    //               power 1 -> data[+0x20], power 2 -> 1, else 0
+    //  [mon+0x10f8] drop-bonus flag (!=0 -> money >>= 3 or >> 2)
+    //  [mon+0x100]  bonus depth (<=3 -> >>3, else >>2)
+public:
+    uint32_t m_dwDropMoneyBase{0};      // [mon+0x2c]
+    uint32_t m_dwLuckyTime{0};          // resolved LuckyTime multiplier
+    bool m_bDropBonus{false};           // [mon+0x10f8]
+    uint32_t m_dwDropBonusLevel{4};     // [mon+0x100]
+private:
     uint32_t m_dwAttack{10};
     uint32_t m_dwDefense{2};
 };

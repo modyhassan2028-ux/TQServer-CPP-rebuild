@@ -821,10 +821,141 @@ static uint32_t ChkSum11(uint32_t p1, uint32_t p2, uint32_t p3, uint32_t p4,
             p8 + p9 + p10 + p11) ^ p1 ^ 0xb00cfU ^ p2;
 }
 
+bool CGameAction::ProcessActionFamily8xx(std::shared_ptr<CUser> pUser,
+                                         const CDialogEngine::Node* pNode)
+{
+    // ORIGINAL FUN_140127070: pNode null -> CHECKF 0x611; then only the
+    // exact types 801/802 are handled - every other type in the window
+    // logs "table:cq_action/cq_newaction, <GBK: wrong action type>"
+    // and returns FALSE.
+    if (!pNode)
+        return false;
+    if (pNode->dwType == 801 || pNode->dwType == 802)
+        return CGameAction::ProcessActionUser(pUser, pNode);
+    printf("[ACTION %u] table:cq_action/cq_newaction, wrong Action Type %u\n",
+           pNode->dwId, pNode->dwType);
+    return false;
+}
+
 bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode) {
     if (!pUser || !pNode) return false;
     switch (pNode->dwType) {
 
+    // ------------------------------------------------------------------
+    // ORIGINAL FUN_140127070 - the 801..862 family. The original handles
+    // exactly 801 and 802; every other type in the window logs
+    // "table:cq_action/cq_newaction, <GBK: wrong action type>" and
+    // returns FALSE. Entry gates: pNode null -> CHECKF 0x611;
+    // the 0x1002 object query (the action's source monster) failing
+    // fails the whole handler.
+    // ------------------------------------------------------------------
+    case 801: {
+        auto pMon = pUser->m_dwSourceMonsterId
+            ? CMonsterManager::Instance().GetMonsterById(pUser->m_dwSourceMonsterId)
+            : nullptr;
+        if (!pMon) { // ORIGINAL: 0x1002 query fail -> log + false
+            printf("[ACTION %u] type 801: source monster query failed\n",
+                   pNode->dwId);
+            return false;
+        }
+        // ownerId: ORIGINAL rdi (6th arg) vcall+0x8 GetId - the talking
+        // npc when present; modeled as the dialog npc, else the user
+        uint32_t dwOwnerId = pUser->m_stDialogCtx.dwId ? pUser->m_stDialogCtx.dwId
+                                                       : pUser->GetId();
+        char szOp[256] = {0};
+        // sscanf(param, "%s", op) must yield 1 token (CHECKF 0x62a)
+        if (sscanf(pNode->strParam.c_str(), "%255s", szOp) != 1) {
+            printf("[ACTION %u] type 801: bad param count (0x62a)\n", pNode->dwId);
+            return false;
+        }
+        if (!_stricmp(szOp, "dropitem")) {
+            char szOp2[256] = {0}; unsigned uItemType = 0;
+            if (sscanf(pNode->strParam.c_str(), "%255s %u", szOp2, &uItemType) != 2) {
+                // CHECKF 0x641 "wrong param count"
+                printf("[ACTION %u] type 801: bad dropitem param count (0x641)\n",
+                       pNode->dwId);
+                return false;
+            }
+            if (_stricmp(szOp2, "dropitem")) // ORIGINAL double-check -> silent false
+                return false;
+            return pMon->ActionDropItem(uItemType, dwOwnerId); // FUN_14038a790
+        }
+        if (!_stricmp(szOp, "dropmoney")) {
+            char szOp2[256] = {0}; unsigned uMoney = 0, uBound = 0;
+            int n = sscanf(pNode->strParam.c_str(), "%255s %u %u",
+                           szOp2, &uMoney, &uBound);
+            if (n == 2) {
+                uBound = 100;                    // ORIGINAL default 0x64
+            } else if (n == 3) {
+                uBound = (unsigned)((int)uBound % 100); // signed mod 100
+            } else {
+                printf("[ACTION %u] type 801: bad dropmoney param count (0x64f)\n",
+                       pNode->dwId);
+                return false;
+            }
+            // ORIGINAL: roll = bound + tq::RandGet(100 - bound)
+            // ([0x1406d82c0] = CQBase tq::RandGet: n<=0 -> 0, so the
+            // default bound 100 rolls exactly 100);
+            // final = money * roll / 100 (0x51eb851f magic division);
+            // final == 0 -> return false
+            uint32_t dwRoll = uBound + (uint32_t)tq::RandGet(100 - uBound);
+            uint32_t dwFinal = uMoney * dwRoll / 100;
+            if (dwFinal == 0)
+                return false;
+            return pMon->ActionDropMoney(dwFinal, dwOwnerId); // FUN_14038a560
+        }
+        return false; // neither keyword -> ORIGINAL falls to the tail false
+    }
+    case 802: {
+        auto pMon = pUser->m_dwSourceMonsterId
+            ? CMonsterManager::Instance().GetMonsterById(pUser->m_dwSourceMonsterId)
+            : nullptr;
+        if (!pMon) {
+            printf("[ACTION %u] type 802: source monster query failed\n",
+                   pNode->dwId);
+            return false;
+        }
+        // sscanf "%d %d %I64d" (CHECKF 0x669 on a short parse)
+        int nMinLev = 0, nMaxLev = 0; long long llAmount = 0;
+        if (sscanf(pNode->strParam.c_str(), "%d %d %lld",
+                   &nMinLev, &nMaxLev, &llAmount) != 3) {
+            printf("[ACTION %u] type 802: bad param count (0x669)\n", pNode->dwId);
+            return false;
+        }
+        // ORIGINAL gates: min > max with max != 0, or either negative
+        if ((uint32_t)nMinLev > (uint32_t)nMaxLev && nMaxLev != 0) {
+            printf("[ACTION %u] type 802: bad level range (0x66f)\n", pNode->dwId);
+            return false;
+        }
+        if (nMinLev < 0 || nMaxLev < 0) {
+            printf("[ACTION %u] type 802: negative level (0x66f)\n", pNode->dwId);
+            return false;
+        }
+        // every monster of the source type on the source map, level range
+        // [min,max] (0 = unbounded side), a money pile next to each
+        uint32_t nSpawned = 0;
+        for (auto& spM : CMonsterManager::Instance().GetMapMonsters(pMon->GetMapId())) {
+            if (!spM || spM->GetTypeId() != pMon->GetTypeId())
+                continue;
+            uint32_t dwLv = spM->GetLevel();
+            bool bPass;
+            if (nMinLev == 0)
+                bPass = (nMaxLev == 0) || ((int)dwLv <= nMaxLev);
+            else if (nMaxLev == 0)
+                bPass = ((int)dwLv >= nMinLev);
+            else
+                bPass = ((int)dwLv >= nMinLev && (int)dwLv <= nMaxLev);
+            if (!bPass)
+                continue;
+            // ORIGINAL per-monster spawn count (vcall+0x150) <= 0x12;
+            // modeled as a cap of 18 piles per action run
+            if (nSpawned >= 0x12)
+                continue;
+            ++nSpawned;
+            spM->SpawnMoneyPile((uint64_t)llAmount, 0); // FUN_1401669f0
+        }
+        return true;
+    }
     case 201: { // ORIGINAL case 0xc9 subcase (FUN_14013ba1e): dyna-npc record op
         // sscanf "%s %s %s %u %d" (>= 3 tokens): field, op, operand,
         // npcId (default 0 = the dialog npc), flag (default 0).
@@ -3460,8 +3591,8 @@ static bool ProcessActionDispatch(std::shared_ptr<CUser> pUser,
         return CGameAction::ProcessActionUser(pUser, pNode);
     if (dwType >= 701 && dwType <= 762) // -0x2bd <= 0x61: FUN_140128290 (PORT-PENDING family)
         return CGameAction::ProcessActionUser(pUser, pNode);
-    if (dwType >= 801 && dwType <= 862) // -0x321 <= 0x61: FUN_140127070 (PORT-PENDING family)
-        return CGameAction::ProcessActionUser(pUser, pNode);
+    if (dwType >= 801 && dwType <= 862) // -0x321 <= 0x61: FUN_140127070
+        return CGameAction::ProcessActionFamily8xx(pUser, pNode);
     if (dwType >= 1001 && dwType <= 1384) // -0x3e9 <= 0x3e5: FUN_14012a6e0 (user types)
         return CGameAction::ProcessActionUser(pUser, pNode);
     if (dwType >= 2001 && dwType <= 2062) // -0x7d1 <= 0x61: FUN_140146a10 (family C)

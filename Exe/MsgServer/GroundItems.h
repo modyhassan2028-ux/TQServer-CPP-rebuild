@@ -38,6 +38,15 @@ public:
     std::string ListNearby(std::shared_ptr<CUser> pUser);   // /drops
     // split a picked money pile across same-map team members
     void TeamShare(std::shared_ptr<CUser> pPicker, uint64_t qwMoney);
+    // explicit floor-drop entry points used by cq_action 801/802
+    // (CMonster::ActionDropMoney / ActionDropItem / SpawnMoneyPile -
+    // literal ports of the original drop helpers)
+    uint32_t AddMoneyDrop(uint32_t dwMapId, uint16_t usX, uint16_t usY,
+                          uint64_t qwMoney, uint32_t dwOwnerId);
+    uint32_t AddItemDrop(uint32_t dwMapId, uint16_t usX, uint16_t usY,
+                         uint32_t dwItemType, uint32_t dwOwnerId);
+    const GroundDrop* FindDrop(uint32_t dwDropId);   // test introspection
+    const std::map<uint32_t, GroundDrop>& AllDrops() const { return m_drops; }
     size_t GetDropCount();
 
 private:

@@ -35,6 +35,10 @@ public:
     // 1001..1121. Returns true on success (chain continues id_next),
     // false on failure (chain continues id_nextfail).
     static bool ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode);
+    // ORIGINAL FUN_140127070: the 801..862 window (dropitem/dropmoney +
+    // per-monster money piles). Anything but 801/802 in the window is
+    // "wrong action type" -> FALSE.
+    static bool ProcessActionFamily8xx(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode);
     static bool ProcessItemQuench(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode,
                                    uint32_t dwItemId, uint32_t dwMatId); // ORIGINAL FUN_14011b910
 
