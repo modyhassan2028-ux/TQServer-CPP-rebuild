@@ -155,6 +155,24 @@ public:
         return m_astrActionVars[nIdx].c_str();
     }
 
+    // ORIGINAL 1080/1081 timestamp vars (FUN_1403863f0 get / FUN_1403864e0
+    // set): the original keeps two std::map<(id_a,id_b),data-module*> trees on
+    // CUser (keys a<3 at +0xb0 via FUN_140385a30/5b80, keys a>=3 at +0x40 via
+    // FUN_140384640); each stored value is read/written through the module's
+    // GetProcess(5) -> vtable+0x40 Get / vtable+0xb8 Set as a single uint32.
+    // FUN_140167b70 gates both: GetId > 0xee69a15e && CUser+0x12fc != 0 makes
+    // GetTimeStamp return 0 and SetTimeStamp a no-op ("system" user).
+    // Not found -> 0 (original returns 0 after the failed tree walk).
+    uint32_t GetTimeStamp(uint32_t dwA, uint32_t dwB) const {
+        if (m_dwId > 0xee69a15eU && m_nFlag12fc != 0) return 0; // FUN_140167b70
+        auto it = m_mapTimeStamps.find({dwA, dwB});
+        return it == m_mapTimeStamps.end() ? 0 : it->second;
+    }
+    void SetTimeStamp(uint32_t dwA, uint32_t dwB, uint32_t dwVal) {
+        if (m_dwId > 0xee69a15eU && m_nFlag12fc != 0) return; // FUN_140167b70
+        m_mapTimeStamps[{dwA, dwB}] = dwVal;
+    }
+
     // ORIGINAL CUser vtable+0x48: the mate ID (cq_user.mateid). Lazily
     // loaded from cq_user on first use; 0 = unmarried.
     uint32_t GetSpouseID();
@@ -463,6 +481,8 @@ private:
     std::string m_strLastRewardDay;
     std::string m_strSpouse;
     uint32_t m_dwMateId{0};     // ORIGINAL cq_user.mateid
+    int m_nFlag12fc{0};          // ORIGINAL CUser+0x12fc gate used by FUN_140167b70
+    std::map<std::pair<uint32_t, uint32_t>, uint32_t> m_mapTimeStamps; // ORIGINAL: two maps a<3/+0xb0, a>=3/+0x40
     int64_t     m_anActionVars[8]{};   // ORIGINAL CUser+0x2f0
     std::string m_astrActionVars[8];  // ORIGINAL CUser+0x1b0
     bool     m_bMateLoaded{false};

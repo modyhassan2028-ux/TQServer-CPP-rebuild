@@ -1574,6 +1574,7 @@ bool bAll = (llAll == 1);
             return pUser->AwardWeaponSkillTime(nId, (int)uArg2);
         return false; // uplevel/del/unknown -> ORIGINAL falls through -> 0
     }
+    case 1025: // ORIGINAL switch case 0x13 (remap 1025->0x13): same FUN_140164440
     case 1027: { // ORIGINAL switch case 0x13 -> FUN_140164440:
         // return (user->vtable+0x48)() != 0 - the mate id (cq_user.mateid).
         // NOTE: the cq_action param ("self angelwing", 3,379 rows) is NEVER
@@ -1731,6 +1732,63 @@ bool bAll = (llAll == 1);
             printf("[DIALOG] 1020 unknown command '%s' (gameaction.cpp:0x27f1)\n", szCmd);
         }
         return true;
+    }
+    case 1022: { // ORIGINAL switch case 0x10 (remap 1022->0x10): gmlog/action append
+        // tq::MyLogSave("gmlog/action", param); return 1;
+        tq::MyLogSave("gmlog/action", pNode->strParam.c_str());
+        return true;
+    }
+    case 1080: { // ORIGINAL switch case 0x46: timestamp(%u, %u) op value
+        uint32_t dwA = 0, dwB = 0, dwVal = 0; char szOp[256] = {0};
+        int n = sscanf(pNode->strParam.c_str(), "timestamp(%u, %u) %255s %d",
+                       &dwA, &dwB, szOp, &dwVal);
+        if (n == 4) { // ORIGINAL requires exactly 4 (else InlineLogDBERROR, fail)
+            if (!_stricmp(szOp, "+=")) { // ORIGINAL: set(get() + val)
+                pUser->SetTimeStamp(dwA, dwB, pUser->GetTimeStamp(dwA, dwB) + dwVal);
+                return true;
+            }
+            uint32_t dwNow = (uint32_t)time(nullptr);
+            if (!_stricmp(szOp, "set")) { // val==0 -> store the current time
+                pUser->SetTimeStamp(dwA, dwB, dwVal == 0 ? dwNow : dwVal);
+                return true;
+            }
+            uint32_t dwStored = pUser->GetTimeStamp(dwA, dwB); // FUN_1403863f0
+            if (!_stricmp(szOp, ">=")) return (dwVal == 0 ? dwNow : dwVal) <= dwStored;
+            if (!_stricmp(szOp, ">"))  return (dwVal == 0 ? dwNow : dwVal) <  dwStored;
+            if (!_stricmp(szOp, "==")) return dwStored == (dwVal == 0 ? dwNow : dwVal);
+        }
+        printf("[DIALOG] 1080 malformed '%s' (gameaction.cpp:0x1d73)\n", pNode->strParam.c_str());
+        return false;
+    }
+    case 1081: { // ORIGINAL switch case 0x47: interval(%u, %u, %u) op value
+        uint32_t dwA = 0, dwB = 0, dwDaily = 0, dwVal = 0; char szOp[256] = {0};
+        int n = sscanf(pNode->strParam.c_str(), "interval(%u, %u, %u) %255s %d",
+                       &dwA, &dwB, &dwDaily, szOp, &dwVal);
+        if (n == 5) { // ORIGINAL requires exactly 5 (else InlineLogDBERROR, fail)
+            uint32_t dwStored = pUser->GetTimeStamp(dwA, dwB); // FUN_1403863f0
+            if (dwStored == 0) return false; // ORIGINAL: value==0 -> return 0
+            uint32_t dwNow = (uint32_t)time(nullptr);
+            // ORIGINAL GetTimeZoneInformation: local = t + Bias*-60 (== t +
+            // tm_gmtoff), day = local / 86400 (0x15180)
+            long nGmtoff = 0;
+            { time_t t = (time_t)dwNow; struct tm tmL; localtime_r(&t, &tmL); nGmtoff = tmL.tm_gmtoff; }
+            uint32_t dwStoredDay = (uint32_t)(((int64_t)dwStored + nGmtoff) / 86400);
+            uint32_t dwNowDay = (uint32_t)(((int64_t)dwNow + nGmtoff) / 86400);
+            if (!_stricmp(szOp, ">=")) {
+                if (dwDaily) return (uint32_t)((int64_t)dwStoredDay + dwVal) <= dwNowDay;
+                return dwStored + dwVal <= dwNow;
+            }
+            if (!_stricmp(szOp, ">")) {
+                if (dwDaily) return (uint32_t)((int64_t)dwStoredDay + dwVal) < dwNowDay;
+                return dwStored + dwVal < dwNow;
+            }
+            if (!_stricmp(szOp, "==")) {
+                if (dwDaily) return dwNowDay == dwStoredDay + dwVal;
+                return dwNow == dwStored + dwVal;
+            }
+        }
+        printf("[DIALOG] 1081 malformed '%s' (gameaction.cpp:0x1daf)\n", pNode->strParam.c_str());
+        return false;
     }
     default:
         return true; // pass-open until the case body is ported

@@ -262,6 +262,56 @@ int main() {
     assert(u6->GetX() == 111 && u6->GetY() == 222);
     printf("[ok] 1003 teleport matches FlyMap FUN_1401c55b0 codes\n");
 
+    // --- 1022/1025 (cases 0x10/0x13): gmlog append + mate gate alias ---
+    auto uTs = std::make_shared<CUser>(999003);
+    { // 1022: real row 5044048 param; MyLogSave consumes it, always true
+        CDialogEngine::Node n; n.dwType = 1022; n.dwId = 5044048;
+        n.strParam = "Welcome~to~Conquer~Online.~";
+        assert(CGameAction::ProcessActionUser(uTs, &n));
+    }
+    { // 1025/1027 share FUN_140164440: unmarried -> false branch
+        CDialogEngine::Node n; n.dwType = 1025; n.dwId = 410001; n.strParam = "";
+        assert(!CGameAction::ProcessActionUser(uTs, &n));
+        uTs->SetSpouseID(700100); // cq_user.mateid != 0 path
+        assert(CGameAction::ProcessActionUser(uTs, &n));
+    }
+    printf("[ok] 1022/1025 match cases 0x10/0x13 (MyLogSave + FUN_140164440)\n");
+
+    // --- 1080/1081 (cases 0x46/0x47): timestamp/interval storage ---
+    auto mkTS = [](uint32_t id, uint32_t type, const char* param) {
+        CDialogEngine::Node n; n.dwType = type; n.dwId = id; n.strParam = param; return n; };
+    // real row 5045002 param: fixed value set
+    { auto n = mkTS(5045002, 1080, "timestamp(19,0) set 325240280");
+      assert(CGameAction::ProcessActionUser(uTs, &n));
+      assert(uTs->GetTimeStamp(19,0) == 325240280); }
+    // real row 5045513 param: set 0 -> stores current time
+    { auto n = mkTS(5045513, 1080, "timestamp(19,0) set 0");
+      assert(CGameAction::ProcessActionUser(uTs, &n));
+      assert(uTs->GetTimeStamp(19,0) == (uint32_t)time(nullptr)); }
+    // += accumulates like the original: set(get()+val); unset key -> 0+3600
+    { auto n = mkTS(9201, 1080, "timestamp(13,7) += 3600");
+      assert(CGameAction::ProcessActionUser(uTs, &n));
+      assert(uTs->GetTimeStamp(13,7) == 3600); }
+    // ">": (val==0 -> now) < stored; stored was just set to now -> false
+    { auto n = mkTS(9202, 1080, "timestamp(19,0) > 0");
+      assert(!CGameAction::ProcessActionUser(uTs, &n)); }
+    // malformed (<4 fields) -> DBERROR path -> false
+    { auto n = mkTS(9203, 1080, "timestamp(19,0)");
+      assert(!CGameAction::ProcessActionUser(uTs, &n)); }
+    // interval: unset key -> false (original returns 0 for value==0)
+    { auto n = mkTS(300019, 1081, "interval(47,33,1) >= 1");
+      assert(!CGameAction::ProcessActionUser(uTs, &n)); }
+    // set then interval same-second check: interval(a,b,0) == 0 is true now
+    { auto n = mkTS(9204, 1080, "timestamp(47,33) set 0");
+      assert(CGameAction::ProcessActionUser(uTs, &n));
+      auto n2 = mkTS(9205, 1081, "interval(47,33,0) == 0");
+      assert(CGameAction::ProcessActionUser(uTs, &n2)); }
+    // interval >= 1 in day mode: nowDay >= storedDay+1 is false (same day)
+    { auto n = mkTS(300019, 1081, "interval(47,33,1) >= 1");
+      assert(!CGameAction::ProcessActionUser(uTs, &n)); }
+    printf("[ok] 1080/1081 match cases 0x46/0x47 (FUN_1403863f0/4e0)\n");
+
+
     // --- 1073/1074 (cases 0x3f/0x40): stc(type, data) checks and set/add ---
     auto u7 = std::make_shared<CUser>(999001);
     u7->SetMoney(500);

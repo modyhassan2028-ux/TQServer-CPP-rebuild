@@ -739,3 +739,40 @@ FUN_14013d790 وما حولها، ~3,400 صف).
   التحميل FUN_14019d5e0، سياق %map_owner_id في الـ resolver، والأنواع
   2206..2262 المتبقية من نطاق FUN_140141c80 (لا صفوف DB تستخدمها —
   يتم فحصها عند ظهور صفوف).
+
+## وحدة 2026-10-23 — أنواع 1022/1025/1080/1081 (remap bytes 0x10/0x13/0x46/0x47)
+
+من جدول الـ remap المستخرج من Ghidra (`tools/gameaction/switch_remap.json`،
+جدول بايتات عند 0x14013aa9c، 188 نوع صالح):
+
+- **1022 (0x10، 746 صف):** `tq::MyLogSave("gmlog/action", param)` → true.
+  الصف يكتب نص الإنجاز في سجل GM (صفوف حقيقية 60063/93093/5044048 —
+  نصوص أبطال البطولات بـ %user_name).
+- **1025 (0x13، صفوف فردية):** نفس FUN_140164440 بتاع 1027 حرفيًا
+  (فحص mateid — لا label منفصل في الأصل، نفس الـ case body).
+- **1080 (0x46، 780 صف):** sscanf `"timestamp(%u, %u) %s %d"` (== 4 وإلا
+  DBERR → false). "+=" → set(get()+val)؛ "set" → val==0 يخزن الوقت الحالي؛
+  ">="/"==": val==0 → now ثم مقارنة مع المخزن؛ ">" → (val or now) < المخزن.
+  التخزين عبر Get/SetTimeStamp (FUN_1403863f0/1403864e0).
+- **1081 (0x47، 487 صف):** sscanf `"interval(%u, %u, %u) %s %d"` (== 5).
+  المخزن == 0 → false. GetTimeZoneInformation: المحلي = t + Bias*-60
+  (= tm_gmtoff)، اليوم = محلي/86400 (0x15180). مع اليوم (c!=0):
+  (storedDay+val) </<=/== nowDay؛ بدونه: (stored+val) </<=/== now.
+  صفوف حقيقية: 5045002 "timestamp(19,0) set 325240280"، 300019
+  "interval(47,33,1) >= 1"، 400810 "interval(2,1,1) >= 1" (مفتاح a<3 —
+  الفرع الثاني للشجرة الأصلية +0xb0).
+- **بنية 1080/1081 (FUN_1403863f0/4e0):** الأصل يحفظ std::map<(a,b),
+  module*>: مفاتيح a<3 في شجرة CUser+0xb0 (FUN_140385a30/5b80)، وa>=3 في
+  شجرة +0x40 (FUN_140384640)؛ القيمة تُقرأ/تكتب عبر GetProcess(5) →
+  vtable+0x40 Get / +0xb8 Set كـ uint32 واحد. غير موجود → 0. بوابة
+  FUN_140167b70: GetId > 0xee69a15e && CUser+0x12fc != 0 ("مستخدم نظام")
+  → Get=0 وSet=لا-شيء. البورت: std::map<pair<uint32,uint32>,uint32>
+  واحدة على CUser بنفس السلوك الخارجي + تعليقات موثقة للسلسلة الأصلية.
+- **الاختبار:** امتداد `tests/dialog_fidelity_test.cpp` — صفوف 1022/1025
+  الحقيقية + سلسلة set/+=/))/malformed لـ 1080 وunset/same-second/day-mode
+  لـ 1081 — كله أخضر (`DIALOG FIDELITY TEST PASSED`).
+
+**مفتوح:** 1040 (0x22 Rebirth، 668 صف — FUN_140163c90 فحص + FUN_1401c3180
+تنفيذ)، 1086 (0x4c عبر mapgroups FUN_140382f00)، 1026 (0x14 بوابة
+CUser vtable+0x50 — يلزم تفريغ الـ vtable)، 1023 (0x11 cq_bonus)،
+1024 (0x12 Family)، 1028 (0x15 couple effects)، 1029 (0x17).
