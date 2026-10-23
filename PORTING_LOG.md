@@ -856,3 +856,22 @@ CUser vtable+0x50 — يلزم تفريغ الـ vtable)، 1023 (0x11 cq_bonus)�
 - **أنشأنا TQServer/HANDOFF.md**: نقطة تسليم للأجنت التالي (الوضع، التالي
   بالترتيب: 1023 cq_bonus ثم 1024 Family.dll ثم 1029 wave packet، التقنيات
   المثبتة، أوامر البناء).
+
+## وحدة 2026-10-23 (6) — النوع 1023 (case 0x11): غلاف استلام الـ bonus
+
+- **FUN_140172910 (TakeBonus):** حارس — حجم حاوية أشياء المستخدم >= 0x28
+  (40 خانة) → إرسال STR_BAG_FULL → 0. وإلا:
+  `SELECT * FROM cq_bonus WHERE id_account=%u AND flag=0 LIMIT 1`.
+  عند صف: bonusValue = الحقل(0) = عمود action، ثم FUN_140145f60 يمنح،
+  MyLogSave "gmlog/bonus ###Bonus: AccountID(%u), Player(%u) take
+  bonus(%u)"، الحقل(3)=flag → 1، الحقل(5)=time → TimeStampGet() → 1.
+  لا صف → 0. (ترتيب أعمدة cq_bonus: 0=action, 1=id, 2=id_account,
+  3=flag, 4=ref_id, 5=time — الدليل: field(3)=flag وfield(5)=time ✓)
+- **PORT-PENDING: FUN_140145f60** — محرك المنح الكامل (15KB pseudocode،
+  ~40 استدعاء داخلي: FUN_140146a10, FUN_1401184a0, FUN_14013b950...).
+  رُفض بورت سطحي له: وهو غير مبورت لا نطالب بالصف (flag يظل 0) حتى لا
+  يُأكل الـ bonus دون منح فعلي. **مُدرَج كوحدة عميقة مستقبلية في HANDOFF.**
+- **الاختبار:** بدون صف → 0؛ حارس الشنطة الممتلئة (40 غرضًا) → 0؛ صف
+  حقيقي مُدرج في cq_bonus → 0 مع بقاء flag=0 (عدم المطالبة موثق) ثم نُظف
+  صف الاختبار. PASSED.
+- جدول cq_bonus عندنا فارغ (0 صفوف) — المسار الحقيقي الغالب هو "لا صف → 0".

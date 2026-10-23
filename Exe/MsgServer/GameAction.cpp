@@ -1726,6 +1726,35 @@ bool bAll = (llAll == 1);
         printf("[DBERR] 1028 unknown flag key: %s\n", szKey); // ORIGINAL log_InlineLogDBERROR
         return false;
     }
+    case 1023: { // ORIGINAL switch case 0x11 (remap 1023->0x11): claim account bonus
+        // ORIGINAL FUN_140172910 (TakeBonus): if user item container size >=
+        // 0x28 (40 slots) -> send STR_BAG_FULL, return 0. Otherwise:
+        // "SELECT * FROM cq_bonus WHERE id_account = %u AND flag = 0 LIMIT 1".
+        // On a row: bonusValue = record field(0) = cq_bonus.action;
+        // FUN_140145f60 grants it; MyLogSave("gmlog/bonus",
+        // "###Bonus: AccountID(%u), Player(%u) take bonus(%u).");
+        // field(3) = flag set to 1; field(5) = time set to TimeStampGet();
+        // return 1. No row -> return 0.
+        // PORT-PENDING: FUN_140145f60 (grant engine, 15KB, ~40 sub-calls) is
+        // not yet ported; while pending we do NOT claim the row (flag stays
+        // 0) so the bonus is never eaten without being granted.
+        if (pUser->GetInventory().size() >= 0x28) { // ORIGINAL: STR_BAG_FULL
+            pUser->SendSysMsg("STR_BAG_FULL");
+            return false;
+        }
+        auto* pDB = CAccountManager::Instance().GetDB();
+        if (!pDB) return false;
+        if (!pDB->Query("SELECT action FROM cq_bonus WHERE id_account = " +
+                        std::to_string(pUser->GetAccountId()) +
+                        " AND flag = 0 LIMIT 1") ||
+            pDB->GetRows().empty()) {
+            return false; // ORIGINAL: no record -> return 0
+        }
+        uint32_t dwBonus = (uint32_t)strtoul(pDB->GetRows()[0][0].c_str(), nullptr, 10);
+        printf("[PORT-PENDING] 1023 bonus %u for account %u: FUN_140145f60 grant engine not ported - row left unclaimed\n",
+               dwBonus, pUser->GetAccountId());
+        return false; // documented partial: grant engine pending
+    }
     case 1025: // ORIGINAL switch case 0x13 (remap 1025->0x13): same FUN_140164440
     case 1027: { // ORIGINAL switch case 0x13 -> FUN_140164440:
         // return (user->vtable+0x48)() != 0 - the mate id (cq_user.mateid).

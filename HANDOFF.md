@@ -28,10 +28,11 @@
 **1086** (0x4c levexp var، objdump-verified)، **1028** (0x16 flag chk/add/clr)،
 وأصناف 503-520 القديمة.
 **التالية بالترتيب:**
-1. **1023 (case 0x11)** = FUN_140172910: مزاعم bonus — يحرس
-   `(bonus_list_end-bonus_list_beg)>>2 < 0x28` ثم
-   `SELECT * FROM cq_bonus WHERE id_account=%u AND flag=0 LIMIT 1` (الجدول
-   موجود في DB). اقرأ باقي الدالة وعملها حرفيًا.
+1. ~~1023 (case 0x11)~~ — **تم الغلاف حرفيًا** (وحدة 6 في PORTING_LOG) لكن
+   المحرك الداخلي **FUN_140145f60 (منح الـ bonus، 15KB + ~40 دالة داخلية)
+   PORT-PENDING** — وحدة عميقة: اقرأها كاملة من MsgServer.exe.decompiled.c،
+   تتبّع FUN_140146a10/FUN_1401184a0/FUN_14013b950... وبوّرتها 1:1، ثم فعّل
+   المطالبة في 1023 (flag=1 + time + المنح + سطر gmlog/bonus).
 2. **1024 (case 0x12)** = FUN_140173e20: يعتمد على Family.dll
    (CurrentInstanceGet vcall+0x20(8)) — وحدد أولًا الدلالة؛ ممكن يتعمل
    تعويضًا عبر منطق الجيلد عندنا مع توثيق.

@@ -384,6 +384,21 @@ int main() {
     { auto n = mk1028("chk"); assert(!CGameAction::ProcessActionUser(uG, &n)); } // sscanf < 2
     printf("[ok] 1028 user-flag chk/add/clr matches case 0x16 (+0xf24)\n");
 
+    // --- 1023 (case 0x11): account bonus claim wrapper (FUN_140172910) ---
+    auto uH = std::make_shared<CUser>(999008);
+    uH->SetAccountId(9990001);
+    auto mk1023 = [](uint32_t id) {
+        CDialogEngine::Node n; n.dwType = 1023; n.dwId = id; return n; };
+    { auto n = mk1023(5000010); assert(!CGameAction::ProcessActionUser(uH, &n)); } // no row -> 0
+    for (int i = 0; i < 0x28; ++i) { ItemInfo it{}; it.dwType = 1; uH->GetInventory().push_back(it); }
+    { auto n = mk1023(5000010); assert(!CGameAction::ProcessActionUser(uH, &n)); } // bag full guard
+    uH->GetInventory().clear();
+    system("mariadb -u root cq -e \"INSERT INTO cq_bonus (action,id_account,flag) VALUES (55,9990001,0)\" >/dev/null 2>&1");
+    { auto n = mk1023(5000010); assert(!CGameAction::ProcessActionUser(uH, &n)); } // pending grant: unclaimed
+    system("mariadb -u root cq -e \"DELETE FROM cq_bonus WHERE id_account=9990001\" >/dev/null 2>&1");
+    printf("[ok] 1023 bonus claim wrapper matches case 0x11 (FUN_140172910)\n");
+
+
 
 
 
