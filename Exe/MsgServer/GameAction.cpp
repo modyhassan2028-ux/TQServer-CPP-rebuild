@@ -1,4 +1,4 @@
-﻿#include "GameAction.h"
+#include "GameAction.h"
 #include "UserTask.h"
 #include "MsgDialog.h"
 #include "User.h"
@@ -69,6 +69,7 @@ static int stricmp(const char* a, const char* b) { return strcasecmp(a, b); }
 #endif
 
 #include "MonsterManager.h"
+#include "DetainEquip.h"
 
 // ORIGINAL FUN_14011b910: CGameAction::ProcessActionItemQuench (type 0x214)
 // Verified from the decompile: guards, equipment-class check on the main item
@@ -988,6 +989,27 @@ bool bAll = (llAll == 1);
         }
         return false; // ORIGINAL: unmatched attr/op -> break -> false
     }
+    case 2002: { // ORIGINAL case 0x7d2: delmonsternow
+        // ORIGINAL: the data column (GetData(4) -> vcall+0x48) is the record
+        // filter; the param column is FETCHED AND DISCARDED (the 5 real rows
+        // carry "4021 type 2" - dead text). tq::SysLogSave("delmonsternow",
+        // "ActionID[%u] at %s, %d"). Iterates the map object tree; every
+        // monster record (vcall+0x298 blob 0x1002) whose record+0x164 == data
+        // with a live monster ((record+0x10) vcall+0x78 != 0) and record+0x154
+        // == 0 gets FUN_14038e270(record,1) (detach+delete). Always returns 1.
+        uint32_t dwFilter = pNode->dwData; // GetData(4)
+        (void)pNode->strParam;             // ORIGINAL: fetched, discarded
+        printf("[SYSLOG] delmonsternow, ActionID[%u] at %s, %d\n",
+               pNode->dwId, __FILE__, __LINE__);
+        auto& mgr = CMonsterManager::Instance();
+        // record+0x164 == data: the record's mapgroup field (single
+        // mapgroup 0 here, matching every data=0 row).
+        for (auto& p : mgr.GetAllMonsters()) {
+            if (p->GetMapGroup() == dwFilter && p->IsAlive())
+                mgr.RemoveMonster(p); // FUN_14038e270(record,1)
+        }
+        return true;
+    }
     case 2003: { // ORIGINAL case 0x7d3: signed compare "a op b" (op: == < <=)
         // sscanf "%d %s %d"; vars resolve first (rows like "%id == 7831").
         std::string strP = pNode->strParam; pUser->ResolveActionVars(strP);
@@ -1082,6 +1104,87 @@ bool bAll = (llAll == 1);
         auto pM = CMonsterManager::Instance().SpawnDynamic(dwMap, (uint16_t)nX, (uint16_t)nY,
                                                            dwType, dwGen, strName);
         return pM != nullptr;
+    }
+    case 2007: { // ORIGINAL case 0x7d7: dynamic NPC creation (25 fields)
+        // sscanf "%s %d %d %d %d %u %u %d %d %d %u %u %d %d %d %d %d %d %d
+        // %d %d %d %d %d %s"; < 9 parsed -> DBERR 0x324a + false. The 0x6c
+        // spawn struct (param_3[]) feeds CNpc::Create (FUN_1402c2390):
+        // f1 name (Create's string arg), f2 dead, f3 flags (bit 1 ->
+        // szDynTable col 0x1c = 0), f4 lookface (col 5), f5 type (col 2),
+        // f6 id (col 1), f7 map (col 7 + the map lookup), f8 x (col 8),
+        // f9 y (col 9), f10 col 0x18, f11 life (col 0x19), f12 col 0x17,
+        // f13 task0 (col 10), f14..f17 task1..4, f18..f21 task5..7/data0,
+        // f22..f24 data1..3, f25 datastr (memmove 0xf bytes to col 0x16).
+        std::string strP = pNode->strParam; pUser->ResolveActionVars(strP);
+        char szName[256] = {0}, szDatastr[256] = {0};
+        int32_t f2=0,f3=0,f4=0,f5=0,f6=0,f7=0,f8=0,f9=0,f10=0,f11=0,f12=0,
+                f13=0,f14=0,f15=0,f16=0,f17=0,f18=0,f19=0,f20=0,f21=0,
+                f22=0,f23=0,f24=0;
+        int iN = sscanf(strP.c_str(),
+            "%255s %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d"
+            " %d %d %d %d %255s",
+            szName, &f2, &f3, &f4, &f5, &f6, &f7, &f8, &f9, &f10, &f11,
+            &f12, &f13, &f14, &f15, &f16, &f17, &f18, &f19, &f20, &f21,
+            &f22, &f23, &f24, szDatastr);
+        if (iN < 9) {
+            printf("[DBERR] cq_action %u type 2007 param (0x324a)\n", pNode->dwId);
+            return false;
+        }
+        auto pMap = CMapManager::Instance().GetMap((uint32_t)f7);
+        if (!pMap) { // ORIGINAL: "CNpc::Create(), Create Npc(Type:%u, Name:%s)
+            // can't find map(%u)" LOGERR + DBERR 0x3255 + release -> false
+            printf("[LOGERR] CNpc::Create(), Create Npc(Type:%u, Name:%s)"
+                   " can't find map(%u)\n", (uint32_t)f5, szName, (uint32_t)f7);
+            printf("[DBERR] cq_action %u type 2007 create failed (0x3255)\n", pNode->dwId);
+            return false;
+        }
+        auto pNpc = CNpcManager::Instance().SpawnDynamic(
+            (uint32_t)f6, szName, (uint32_t)f4, (uint32_t)f5,
+            (uint32_t)f7, (uint16_t)f8, (uint16_t)f9, (uint32_t)f13);
+        if (!pNpc) return false;
+        // record-side extras (the szDynTable columns the registry keeps)
+        pNpc->m_nSpawnFlags = f3;   // col 0x1c source (bit 1)
+        pNpc->m_usLife = (uint16_t)f11; // col 0x19
+        pNpc->m_strDatastr.assign(szDatastr, strnlen(szDatastr, 15)); // col 0x16
+        (void)f2; (void)f10; (void)f12; // parsed into non-record slots
+        (void)f14; (void)f15; (void)f16; (void)f17; (void)f18; (void)f19;
+        (void)f20; (void)f21; (void)f22; (void)f23; (void)f24; // task/data cols
+        // ORIGINAL: success inserts CNpc+0x10 into the map object tree
+        // (LAB_140147b36) -> return 1
+        return true;
+    }
+    case 2009: { // ORIGINAL case 0x7d9: delete the matching monster record
+        // sscanf "%u %u %d %s" = (map, type, gate, name); parsed > 1
+        // required, else the DBERR path (fetch param, discard, DBERR,
+        // false). Scans the map object tree: a monster record (blob
+        // 0x1002) matches when the monster's map (vcall+0x160 ->
+        // map->GetId) == map, the record type (blob vcall+0x50) == type,
+        // and gate == 0 (gate != 0 compares FUN_1401178a0(record) = the
+        // record+0x80 blob vcall+0x10(0xb) - no real row sets it; modelled
+        // as never equal). A non-empty name must strcmp-equal the
+        // monster's name (vcall+0x18). Match + record+0x154 == 0 ->
+        // FUN_14038e270(record,1); the scan CONTINUES over all records.
+        // Returns 1 iff anything was deleted.
+        std::string strP = pNode->strParam; pUser->ResolveActionVars(strP);
+        uint32_t dwMap = 0, dwType = 0; int32_t nGate = 0;
+        char szName[256] = {0};
+        int iN = sscanf(strP.c_str(), "%u %u %d %255s", &dwMap, &dwType, &nGate, szName);
+        if (iN <= 1) {
+            printf("[DBERR] cq_action %u type 2009 param\n", pNode->dwId);
+            return false;
+        }
+        std::string strName = szName;
+        bool bDeleted = false; // uVar5
+        auto& mgr = CMonsterManager::Instance();
+        for (auto& p : mgr.GetAllMonsters()) {
+            if (p->GetMapId() != dwMap || p->GetTypeId() != dwType) continue;
+            if (nGate != 0) continue; // documented: open blob, no rows use it
+            if (!strName.empty() && strcmp(p->GetName().c_str(), strName.c_str()) != 0)
+                continue; // ORIGINAL: raw strcmp loop (case-sensitive)
+            if (p->IsAlive() && mgr.RemoveMonster(p))
+                bDeleted = true; // LAB_140147fda -> continue scanning
+        }
+        return bDeleted;
     }
     case 2011: { // ORIGINAL case 0x7db: set NPC property by id
         // sscanf "%u %s %s" = (npcId, kind, value); kinds: id | name | type.
@@ -1183,6 +1286,12 @@ bool bAll = (llAll == 1);
         if (pMap) pMap->RemoveGroundItemsOfType(dwType, (uint32_t)nCount);
         return true;
     }
+    case 2201: case 2202: case 2203: case 2204: case 2205:
+        // ORIGINAL dispatch: types [2201..2263) (main switch
+        // `iVar8 - 0x899 < 0x62`) route to
+        // CGameAction::ProcessActionPkBonus (FUN_140141c80)
+        return ProcessActionPkBonus(pUser, pNode);
+
     case 303: { // ORIGINAL case 0x12f: SYSTEM/ALLUSERS world broadcast (formatted)
         // ORIGINAL: FUN_14015b240(buf) setup, FUN_14015b300(buf,"SYSTEM",
         // "ALLUSERS", param) - the same broadcast machinery as 125; 0 -> DBERR
@@ -1632,6 +1741,163 @@ bool bAll = (llAll == 1);
 // Supported fields mirror the decompiled stricmp chain; fields the rebuilt
 // CUser does not carry yet log once and FAIL (original returns 0 via
 // LAB_14013a784 after InlineLogDBERROR). ops: += == < <= > >= =
+// ORIGINAL CGameAction::ProcessActionPkBonus (FUN_140141c80).
+// "table:cq_action/cq_newaction, CGameAction::ProcessActionPkBonus() at
+// %s, %d" on a null action; the param_4-null path logs
+// "ProcessActionPkBonus() ActionID=%u ActionType=%u at %s, %d".
+bool CGameAction::ProcessActionPkBonus(std::shared_ptr<CUser> pUser,
+                                       const CDialogEngine::Node* pNode) {
+    if (!pNode) {
+        printf("[DBERR] table:cq_action/cq_newaction,"
+               " CGameAction::ProcessActionPkBonus() at %s, %d\n", __FILE__, __LINE__);
+        return false;
+    }
+    if (!pUser) {
+        printf("[DBERR] table:cq_action/cq_newaction, ProcessActionPkBonus()"
+               " ActionID=%u ActionType=%u at %s, %d\n",
+               pNode->dwId, pNode->dwType, __FILE__, __LINE__);
+        return false;
+    }
+    auto* pDB = CAccountManager::Instance().GetDB();
+    auto& ctx = pUser->m_stPkBonusCtx;
+    switch (pNode->dwType) {
+    case 2201: { // ORIGINAL case 0x899: target/hunter bonus condition
+        // sscanf "%s %s %s" = (kind, op, value). SQL is built per the
+        // literals and the count is evaluated by the DB scalar call
+        // (InstanceGet vcall+0 - the same ExecuteScalar as case 127);
+        // result != 0 -> true.
+        std::string strP = pNode->strParam; pUser->ResolveActionVars(strP);
+        char szKind[256] = {0}, szOp[256] = {0}, szVal[256] = {0};
+        if (sscanf(strP.c_str(), "%255s %255s %255s", szKind, szOp, szVal) < 3) {
+            printf("[DBERR] cq_action %u type 2201 param\n", pNode->dwId);
+            return false;
+        }
+        uint32_t dwVal = strtoul(szVal, nullptr, 10);
+        char sql[0x400] = {0};
+        if (!strcmp(szKind, "target_bonus")) {
+            if (!strcmp(szOp, "=="))
+                snprintf(sql, sizeof(sql),
+                         "SELECT count(*) FROM cq_pk_bonus WHERE target=%u AND bonus=%u",
+                         pUser->GetId(), dwVal);
+            else if (!strcmp(szOp, ">"))
+                snprintf(sql, sizeof(sql),
+                         "SELECT count(*) FROM cq_pk_bonus WHERE target=%u AND bonus>%u",
+                         pUser->GetId(), dwVal);
+        } else if (!strcmp(szKind, "hunter_bonus")) {
+            if (!strcmp(szOp, "=="))
+                snprintf(sql, sizeof(sql),
+                         "SELECT count(*) FROM cq_pk_bonus WHERE hunter=%u AND bonus=%u",
+                         pUser->GetId(), dwVal);
+            else if (!strcmp(szOp, ">"))
+                snprintf(sql, sizeof(sql),
+                         "SELECT count(*) FROM cq_pk_bonus WHERE hunter=%u AND bonus>%u",
+                         pUser->GetId(), dwVal);
+        } else {
+            return false; // ORIGINAL: unknown kind -> no SQL -> result 0
+        }
+        if (!sql[0]) return false; // ORIGINAL: unknown op -> empty buffer -> 0
+        return pDB ? strtoull(pDB->Scalar(sql, "0").c_str(), nullptr, 10) != 0 : false;
+    }
+    case 2202: { // ORIGINAL case 0x89a: assign a record to the hunter
+        // sscanf "%d %d" -> Set("b_type", first), Set("bonus", second)
+        // (real row 5002144: "2 500000" = b_type 2, bonus 500000);
+        // != 2 -> DBERR + false.
+        std::string strP = pNode->strParam; pUser->ResolveActionVars(strP);
+        int32_t nBType = 0, nBonus = 0;
+        if (sscanf(strP.c_str(), "%d %d", &nBType, &nBonus) != 2) {
+            printf("[DBERR] cq_action %u type 2202 param\n", pNode->dwId);
+            return false;
+        }
+        // FUN_140168a60(user): the target-side vector (CUser+0x13b8).
+        // Empty -> return false.
+        if (pUser->m_vecPkTarget.empty()) return false;
+        auto rec = pUser->m_vecPkTarget.back(); // the LAST record
+        rec.nBonus = nBonus; // record "bonus"
+        rec.nBType = nBType; // record "b_type"
+        // ctx: +0x20 target name = the acting user; +0x30 hunter name from
+        // the record; +0x40 the record's bonus
+        snprintf(ctx.szTargetName, sizeof(ctx.szTargetName), "%s", pUser->GetName().c_str());
+        snprintf(ctx.szHunterName, sizeof(ctx.szHunterName), "%s", rec.szHunterName);
+        ctx.dwBonus = (uint32_t)rec.nBonus;
+        pUser->m_vecPkTarget.pop_back(); // ORIGINAL: popped from the vector
+        // look the hunter up (FUN_140087650 vcall+0x98 in the mapgroup)
+        auto pHunter = CUserManager::Instance().GetUser(rec.dwHunter);
+        if (pHunter) {
+            snprintf(ctx.szHunterName, sizeof(ctx.szHunterName), "%s",
+                     pHunter->GetName().c_str());
+            pHunter->m_vecPkHunter.push_back(rec); // FUN_140019370 push
+            // ORIGINAL: STR_PK_HUNTER_BONUS system notice to the hunter -
+            // rides the string-table notice packet (documented open)
+            printf("[NOTICE] STR_PK_HUNTER_BONUS -> %s\n", pHunter->GetName().c_str());
+        } // ORIGINAL: hunter missing -> release; both paths return true
+        return true;
+    }
+    case 2203: { // ORIGINAL case 0x89b: cleanup zero-bonus rows
+        // "DELETE FROM cq_pk_bonus WHERE target=%d AND bonus=0" via the
+        // ExecuteNonQuery vcall (DB vtable+0x30), then FUN_14019d5e0(user)
+        // (reload hook - open) -> always true.
+        char sql[0x400];
+        snprintf(sql, sizeof(sql), "DELETE FROM cq_pk_bonus WHERE target=%u AND bonus=0",
+                 pUser->GetId());
+        if (pDB) pDB->Query(sql);
+        // FUN_14019d5e0(param_4): the pk-bonus reload hook (open)
+        return true;
+    }
+    case 2204: { // ORIGINAL case 0x89c: the hunter claims the bonus
+        // FUN_140168a70(user): the hunter-side vector (CUser+0x13e8).
+        // Empty -> false. The LAST record: b_type 2 -> money
+        // (vtable+0x180(user, bonus, 1)); b_type 1 -> CP (AddAttrib 0x1d
+        // = 29 + FUN_1401742b0 sync). The record is POPPED in every path
+        // (paid -> true, unpaid/unknown b_type -> release + false).
+        if (pUser->m_vecPkHunter.empty()) return false;
+        auto rec = pUser->m_vecPkHunter.back();
+        int32_t nBType = rec.nBType;
+        snprintf(ctx.szHunterName, sizeof(ctx.szHunterName), "%s", pUser->GetName().c_str());
+        snprintf(ctx.szTargetName, sizeof(ctx.szTargetName), "%s", rec.szTargetName);
+        auto pTarget = CUserManager::Instance().GetUser(rec.dwTarget);
+        if (pTarget) // ORIGINAL: live name overwrite
+            snprintf(ctx.szTargetName, sizeof(ctx.szTargetName), "%s",
+                     pTarget->GetName().c_str());
+        ctx.dwBonus = (uint32_t)rec.nBonus;
+        ctx.nRemain = (int32_t)pUser->m_vecPkHunter.size() - 1; // +0x44
+        bool bPaid = false;
+        static constexpr int64_t kMoneyMax = 2000000000; // mapgroup config
+        if (nBType == 2) { // money: vtable+0x180(user, bonus, 1)
+            int64_t cur = (int64_t)pUser->GetMoney();
+            if (cur + rec.nBonus >= 0 && cur + rec.nBonus < kMoneyMax) {
+                pUser->AddMoney(rec.nBonus);
+                bPaid = true;
+            }
+        } else if (nBType == 1) { // CP: AddAttrib(0x1d, bonus, 1)
+            int64_t cur = (int64_t)pUser->GetConquerPoints();
+            if (cur + rec.nBonus >= 0 && cur + rec.nBonus < 0xFFFFFFFFLL) {
+                pUser->AddConquerPoints(rec.nBonus);
+                // ORIGINAL FUN_1401742b0(user, 0xb, 0, uid): attrib sync packet
+                bPaid = true;
+            }
+        }
+        pUser->m_vecPkHunter.pop_back(); // ORIGINAL: popped in EVERY path
+        return bPaid;
+    }
+    case 2205: { // ORIGINAL case 0x89d: DetainEquip target/hunter checks
+        // GetProcess(0x13) -> the DetainEquip module processor
+        // (SetProcess mode 19); vtable+0x18 = IsTarget(uid),
+        // vtable+0x10 = IsHunter(uid). Module missing -> false.
+        const std::string& strP = pNode->strParam; // ORIGINAL: raw compare
+        if (!_stricmp(strP.c_str(), "target"))
+            return CDetainEquipManager::Instance().IsTarget(pUser->GetId(), pDB);
+        if (!_stricmp(strP.c_str(), "hunter"))
+            return CDetainEquipManager::Instance().IsHunter(pUser->GetId(), pDB);
+        return false;
+    }
+    default:
+        // ORIGINAL: "ProcessActionPkBonus" ActionID/ActionType DBERR tail
+        printf("[DBERR] cq_action %u type %u not a pk-bonus type\n",
+               pNode->dwId, pNode->dwType);
+        return false;
+    }
+}
+
 bool CGameAction::ProcessDataCondition(std::shared_ptr<CUser> pUser, const std::string& strParam) {
     // ORIGINAL gameaction.cpp case 0 (ACTION_USER_ATTR, lines 242240-244770).
     // sscanf "%s %s %s %s"; <3 tokens -> InlineLogDBERROR (gameaction.cpp:0x215a) -> 0.

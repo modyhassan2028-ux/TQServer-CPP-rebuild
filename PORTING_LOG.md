@@ -666,3 +666,76 @@ FUN_14013d790 وما حولها، ~3,400 صف).
   تحديد FUN_14015b100/FUN_14015b1f0 (مديري كل نوع) قبل التنفيذ.
 - **عائلة C المتبقية: 2009 (77) + 2002 (5) + 2007 (54) + 2201/2205 (4)
   + 2011 تمت = ~140 صف. 2007 = استدعاء NPC ديناميكي (25 حقلاً).**
+
+## 29. عائلة C — الجزء 7: 2002/2007/2009 + عائلة PkBonus كاملة (23 أكتوبر)
+
+**الوحدة:** الحالات الأخيرة لعائلة C (2002/2007/2009) + اكتشاف وتنفيذ
+معالج مكافآت الـ PK (FUN_140141c80) بأنواعه 2201-2205. 45 قسماً [ok]
+في dialog_fidelity_test، كلها على صفوف DB حقيقية.
+
+- **تصحيح مهم للقسم 28:** ما وُصّف كـ "مسار كلام" لـ 2201/2205 هو
+  في الحقيقي سويتش **msgtalk.cpp** (الحالات 0x899/0x89d هناك تخص
+  TalkStrCheck لقنوات الكلام). المسار الفعلي داخل ProcessActionUser:
+  `iVar8 - 0x899 < 0x62` (الأنواع [2201..2263)) → **FUN_140141c80 =
+  CGameAction::ProcessActionPkBonus** (بام: param_1 = كائن سياق
+  +0x20/+0x30/+0x40/+0x44، param_2 = صف cq_action، param_3 = param،
+  param_4 = المستخدم).
+- **2201 (0x899):** sscanf "%s %s %s" (نوع/عملية/قيمة)؛ SQL حرفي:
+  `SELECT count(*) FROM cq_pk_bonus WHERE target/hunter=%u AND bonus=%u`
+  (==) أو `bonus>%u` (>)؛ النتيجة عبر ExecuteScalar (نفس استدعاء
+  InstanceGet+vcall+0 للحالة 127) `!= 0` → النتيجة. نوع/عملية غير
+  معروفة → المخزن فاضي → false.
+- **2202 (0x89a):** sscanf "%d %d" → Set("b_type", الأول) + Set("bonus",
+  الثاني) — الصف الحقيقي 5002144 "2 500000". المتجه الهدف (CUser+0x13b8،
+  FUN_140168a60)؛ فارغ → false. آخر سجل: السياق (+0x20 اسم الهدف =
+  الفاعل، +0x30 اسم الصياد من السجل) ثم pop؛ البحث عن الصياد
+  (FUN_140087650 vcall+0x98): موجود → نسخة للسياق + دفع في متجه الصياد
+  (FUN_140168a70/140019370) + إشعار STR_PK_HUNTER_BONUS (vcall+0x358)؛
+  مفقود → تحرير؛ كلا المسارين true.
+- **2203 (0x89b):** حرفي `DELETE FROM cq_pk_bonus WHERE target=%d AND
+  bonus=0` عبر ExecuteNonQuery (vcall+0x30) + FUN_14019d5e0 (خطاف
+  إعادة تحميل — مفتوح) → دائماً true.
+- **2204 (0x89c):** متجه الصياد (CUser+0x13e8)؛ فارغ → false. آخر سجل:
+  b_type==2 → vcall+0x180(user, bonus, 1) نقود؛ b_type==1 → AddAttrib(29)
+  CP + FUN_1401742b0 مزامنة. **السجل يُستخرج (pop) في كل المسارات**
+  (نجح → true، فشل/b_type مجهول → تحرير + false).
+- **2205 (0x89d):** GetProcess(0x13) → **موديول DetainEquip**
+  (SetProcess mode 19 — موثق أصلاً في Modules/DetainEquip)؛ vcall+0x18 =
+  IsTarget(uid)، vcall+0x10 = IsHunter(uid)؛ الموديول مفقود → false.
+  الجداول المرجعية: cq_pk_item(item, target, target_name, hunter,
+  hunter_name, manhunt_time, bonus) — حرفياً من DetainEquip.dll. النقل
+  المؤقت: CDetainEquipManager (Exe/MsgServer/DetainEquip.h) يقرأ
+  cq_pk_item مباشرة حتى منفذة الموديول الكاملة (نفس نمط TaskDetail→
+  CUserTaskManager). السلاسل الحقيقية: 5005215/5005235 (DetainEquip NPC).
+- **2002 (0x7d2، 5 صفوف "4021 type 2"):** param يُجلب ويُهمل حرفياً؛
+  SysLogSave("delmonsternow", "ActionID[%u] at %s, %d")؛ عمود data هو
+  الفلتر (record+0x164 = mapgroup)؛ كل سجل وحش حي (record+0x154==0
+  ومطابق) → FUN_14038e270(record,1) فصل وحذف؛ دائماً true. الصفوف
+  الحقيقية 5017680-84 (data=0 = امسح الكل).
+- **2007 (0x7d7، 54 صف):** sscanf 25 حقلاً؛ < 9 → DBERR 0x324a. بنية
+  الاستدعاء 0x6C: f1 اسم (معامل Create)، f2 ميت، f3 أعلام (بت 1 →
+  عمود 0x1c)، f4 lookface (عمود 5)، f5 نوع (عمود 2)، f6 معرف (عمود 1)،
+  f7 خريطة (عمود 7)، f8/f9 إحداثيات (أعمدة 8/9)، f11 حياة (عمود
+  0x19)، f13 task0 (عمود 10)، f25 datastr (memmove 0xf → عمود 0x16).
+  FUN_1402c2390 (CNpc::Create)؛ خريطة مفقودة → "can't find map(%u)"
+  LOGERR + DBERR 0x3255 → false؛ نجاح → إدراج CNpc+0x10 في شجرة
+  كائنات الخريطة → true. صفوف حقيقية: 410072 (ItemBox بـ %user_id)،
+  402771/402995 (بوابات 1038 بـ %map_owner_id — سياق مالك الخريطة
+  غير منفذ بعد في الـ resolver المركزي).
+- **2009 (0x7d9، 77 صف):** sscanf "%u %u %d %s" (خريطة/نوع/بوابة/اسم)؛
+  <= 1 → مسار DBERR. مسح الشجرة: مطابقة الخريطة (vcall+0x160 →
+  GetId) + النوع (blob vcall+0x50) + البوابة (gate != 0 → مقارنة
+  blob مفتوحة، لا صف يستخدمها) + الاسم strcmp خام (حلقة بايت-بايت،
+  حساسة لحالة الأحرف) + record+0x154==0 → FUN_14038e270(record,1)
+  **مع استمرار المسح** (لا break)؛ true فقط إذا حُذف شيء. صف حقيقي:
+  120121 "1038 3120 0 GuildBeast" + 4092240 "1011 2494 0" (اسم فارغ =
+  مطابقة بالنوع فقط).
+- **إصلاح بنية تحتية (client الواير خاص بنا):** CMySQLClient كان
+  يرسل scramble 20 بايت حتى مع كلمة مرور فارغة → ER_ACCESS_DENIED
+  1698. قاعدة البروتوكول: مرور فارغ → استجابة مصادقة فارغة (ونفس
+  الشيء في رد AuthSwitchRequest).
+- **مفتوح:** باكِت اختفاء الوحش (FUN_14038e270 vcall+0x60(6,0))،
+  إشعار STR_PK_HUNTER_BONUS كباكِت نظام (string table)، خطاف إعادة
+  التحميل FUN_14019d5e0، سياق %map_owner_id في الـ resolver، والأنواع
+  2206..2262 المتبقية من نطاق FUN_140141c80 (لا صفوف DB تستخدمها —
+  يتم فحصها عند ظهور صفوف).

@@ -1,4 +1,4 @@
-﻿#include "MySQLClient.h"
+#include "MySQLClient.h"
 
 #include <cstring>
 #include <cstdio>
@@ -118,8 +118,12 @@ bool CMySQLClient::ReadHandshake(std::string& saltOut) {
 
 bool CMySQLClient::SendAuth(const std::string& user, const std::string& password,
                              const std::string& database, const std::string& salt) {
+    // wire protocol: an empty password authenticates with an EMPTY auth
+    // response - a 20-byte scramble of "" is rejected by the server
+    // (ER_ACCESS_DENIED 1698). Same for the AuthSwitchRequest reply.
     uint8_t h4[20];
-    NativeScramble(password, salt, h4);
+    const bool bEmptyPass = password.empty();
+    if (!bEmptyPass) NativeScramble(password, salt, h4);
 
     std::vector<uint8_t> body;
     auto put32 = [&](uint32_t v) { for (int i = 0; i < 4; ++i) body.push_back((v >> (8 * i)) & 0xff); };
@@ -131,7 +135,8 @@ bool CMySQLClient::SendAuth(const std::string& user, const std::string& password
     for (int i = 0; i < 23; ++i) body.push_back(0);
     body.insert(body.end(), user.begin(), user.end());
     body.push_back(0);
-    body.push_back(20); body.insert(body.end(), h4, h4 + 20);
+    if (bEmptyPass) body.push_back(0); // empty auth response
+    else { body.push_back(20); body.insert(body.end(), h4, h4 + 20); }
     // CLIENT_PLUGIN_AUTH: name the auth plugin we used
     static const char kPlugin[] = "mysql_native_password";
     body.insert(body.end(), kPlugin, kPlugin + sizeof(kPlugin));
@@ -169,8 +174,12 @@ bool CMySQLClient::HandleAuthResult() {
                 return false;
             }
             uint8_t h4[20];
-            NativeScramble(m_strAuthPass, salt, h4);
-            if (!SendPacket(seq + 1, h4, 20)) { m_strError = "send switch reply failed"; return false; }
+            if (m_strAuthPass.empty()) {
+                if (!SendPacket(seq + 1, h4, 0)) { m_strError = "send switch reply failed"; return false; }
+            } else {
+                NativeScramble(m_strAuthPass, salt, h4);
+                if (!SendPacket(seq + 1, h4, 20)) { m_strError = "send switch reply failed"; return false; }
+            }
             continue; // read the final result
         }
         m_strError = "unexpected auth packet";

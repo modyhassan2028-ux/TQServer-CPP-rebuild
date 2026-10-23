@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <map>
 #include <memory>
 #include <mutex>
@@ -53,6 +53,16 @@ public:
     uint32_t GetLookface() const { return m_dwLookface; }
     uint16_t GetDir() const { return m_usDir; }
 
+    // cq_action 2007 (case 0x7d7) dynamic spawn record. ORIGINAL
+    // FUN_1402c2390 writes the szDynTable record: col1 id (f6), col2 type
+    // (f5), col3 name (f1, the Create arg), col5 lookface (f4), col7 map
+    // (f7), col8 x (f8), col9 y (f9), col10 task0 (f13), col0x19 life
+    // (f11), col0x1c flags (f3 bit 1), col0x16 datastr (f25, char(15)).
+    // f2 is parsed but lands outside the spawn struct (dead).
+    uint32_t m_dwNpcType{0};    // f5 (col 2)
+    int32_t  m_nSpawnFlags{0};  // f3 (bit 1 -> col 0x1c)
+    uint16_t m_usLife{0};       // f11 (col 0x19)
+    std::string m_strDatastr;   // f25 (col 0x16)
     uint32_t m_dwLookface{0}; // client c3 mesh id (placeholder values until matched to the client ini)
     uint16_t m_usDir{2};
 
@@ -125,6 +135,16 @@ private:
     CNpcManager() = default;
     std::map<uint32_t, std::shared_ptr<CNpc>> m_npcs;
 public:
+    // cq_action 2007 (case 0x7d7): dynamic NPC creation. ORIGINAL:
+    // FUN_1402c0d80 (CNpc ctor) -> FUN_1402c2390(mgr, mapgroup, struct, 0,
+    // name) fills the szDynTable record and inserts CNpc+0x10 into the map
+    // object tree (LAB_140147b36) -> return 1. Missing map is logged by
+    // the caller ("CNpc::Create(), Create Npc(Type:%u, Name:%s) can't find
+    // map(%u)" + DBERR 0x3255).
+    std::shared_ptr<CNpc> SpawnDynamic(uint32_t dwId, const std::string& strName,
+                                       uint32_t dwLookface, uint32_t dwType,
+                                       uint32_t dwMapId, uint16_t usX, uint16_t usY,
+                                       uint32_t dwTask0);
     void AddNpcForTest(std::shared_ptr<CNpc> p) { m_npcs[p->GetId()] = p; } // tests
     std::vector<TaskDef> m_taskDefs;
     std::recursive_mutex m_mutex; // SpawnDefaults may re-enter via SpawnNpcsFromDB

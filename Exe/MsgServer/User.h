@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Item.h"
 #include "PlayerMagic.h"
 #include <cstdio>
@@ -110,6 +110,23 @@ public:
     uint32_t GetConquerPoints() const { return m_dwEmoney; }
     void SetConquerPoints(uint32_t cps) { m_dwEmoney = cps; }
     void AddConquerPoints(int32_t amount) { m_dwEmoney = (amount < 0 && (uint32_t)(-amount) > m_dwEmoney) ? 0 : m_dwEmoney + amount; }
+    // ORIGINAL ProcessActionPkBonus records (cq_pk_item rows): CUser+0x13b8
+    // (FUN_140168a60) = records where this user is the TARGET; CUser+0x13e8
+    // (FUN_140168a70) = pending claims where this user is the HUNTER.
+    // Populated by the DetainEquip module flow (module port pending).
+    struct SPkBonusRecord {
+        uint32_t dwItem = 0, dwTarget = 0, dwHunter = 0;
+        char szTargetName[16] = {0}, szHunterName[16] = {0};
+        int32_t nBonus = 0, nBType = 0;
+    };
+    std::vector<SPkBonusRecord> m_vecPkTarget;  // +0x13b8
+    std::vector<SPkBonusRecord> m_vecPkHunter;  // +0x13e8
+    // the ProcessActionPkBonus context object (param_1): +0x20 target name,
+    // +0x30 hunter name, +0x40 bonus, +0x44 remaining count
+    struct SPkBonusCtx {
+        char szTargetName[16] = {0}, szHunterName[16] = {0};
+        uint32_t dwBonus = 0; int32_t nRemain = 0;
+    } m_stPkBonusCtx;
 
     uint8_t GetLevel() const { return m_ucLevel; }
     void SetLevel(uint8_t level) { m_ucLevel = level; }

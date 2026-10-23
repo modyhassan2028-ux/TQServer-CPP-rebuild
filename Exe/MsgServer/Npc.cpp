@@ -1,4 +1,4 @@
-﻿#include "Npc.h"
+#include "Npc.h"
 #include "Dialog.h"
 #include "GameAction.h"
 #include "LuaScript/LuaVM.h"
@@ -212,6 +212,21 @@ CNpcManager& CNpcManager::Instance() {
 
 // ORIGINAL cq_npc schema (6159): id, name, type, lookface, mapid, cellx, celly, task0
 // task0 -> cq_task -> cq_action chain: the original dialog system.
+std::shared_ptr<CNpc> CNpcManager::SpawnDynamic(uint32_t dwId, const std::string& strName,
+                                                  uint32_t dwLookface, uint32_t dwType,
+                                                  uint32_t dwMapId, uint16_t usX, uint16_t usY,
+                                                  uint32_t dwTask0) {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    // ORIGINAL: the record object is heap-created (FUN_1402c0d80, CNpc
+    // 0xd0 bytes) and keyed by its own id in the dynamic table.
+    auto p = std::make_shared<CNpc>(dwId, strName, CNpc::Type::Dialog, dwMapId, usX, usY);
+    p->m_dwLookface = dwLookface;  // col 5
+    p->m_dwNpcType = dwType;       // col 2
+    p->m_dwActionId = dwTask0;     // col 10 (task0 dialog entry)
+    m_npcs[dwId] = p;
+    return p;
+}
+
 uint32_t CNpcManager::SpawnNpcsFromDB(CMySQLClient* pDB) {
     if (!pDB) return 0;
     if (!pDB->Query("SELECT id, name, type, lookface, mapid, cellx, celly, task0 FROM cq_npc")) {

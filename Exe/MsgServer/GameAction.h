@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Dialog.h"
 #include <memory>
 #include <cstdint>
@@ -31,4 +31,11 @@ public:
 
     // ORIGINAL cq_action 1001 condition "field op value" evaluator
     static bool ProcessDataCondition(std::shared_ptr<CUser> pUser, const std::string& strParam);
+    // ORIGINAL CGameAction::ProcessActionPkBonus (FUN_140141c80): dispatch
+    // range [2201..2263) (main switch `iVar8 - 0x899 < 0x62`). Pk-bonus
+    // bounty system (cq_pk_bonus / cq_pk_item): 2201 target/hunter bonus
+    // conditions, 2202 assign a record to the hunter, 2203 cleanup, 2204
+    // claim the bonus, 2205 DetainEquip target/hunter checks.
+    static bool ProcessActionPkBonus(std::shared_ptr<CUser> pUser,
+                                     const CDialogEngine::Node* pNode);
 };

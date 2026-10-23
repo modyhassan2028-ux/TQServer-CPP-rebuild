@@ -1,4 +1,4 @@
-﻿// ORIGINAL dialog fidelity: CGameAction walks the real cq_action chain and
+// ORIGINAL dialog fidelity: CGameAction walks the real cq_action chain and
 // emits the ORIGINAL CMsgDialog packets (id 2032) the 6159 client renders.
 // Chain 1501 in the original dump (Taoist teacher):
 //   1501(101 text) -> 1502(102 opt ->1510) -> 1503(102 opt ->3060)
@@ -17,6 +17,7 @@
 #include "GroupSystem.h"
 #include "PlayerMagic.h"
 #include "MapManager.h"
+#include "MonsterManager.h"
 #include "Item.h"
 #include "UserTask.h"
 #include "MySQLClient.h"
@@ -1162,6 +1163,142 @@ int main() {
     pDB->Query("DELETE FROM cq_user WHERE id=999002");
     printf("[ok] 1027 mate-id check matches FUN_140164440 (param ignored)\n");
 
+
+    // ---- 2009/2002: delete monster records (cases 0x7d9/0x7d2) ----
+    {
+        auto upD = std::make_shared<CUser>(999045); upD->SetName("DelMon");
+        // spawn the GuildBeast (real 2009 row 120121: "1038 3120 0 GuildBeast")
+        { auto n = mkMgc(0, 2006, "0 0 1038 50 60 3120 4194 0 GuildBeast");
+          assert(CGameAction::ProcessActionUser(upD, &n)); }
+        // name mismatch (ORIGINAL: raw strcmp loop) -> no delete -> false
+        { auto n = mkMgc(120121, 2009, "1038 3120 0 NotTheBeast");
+          assert(!CGameAction::ProcessActionUser(upD, &n)); }
+        // the real row deletes it; iteration would continue over all records
+        { auto n = mkMgc(120121, 2009, "1038 3120 0 GuildBeast");
+          assert(CGameAction::ProcessActionUser(upD, &n));
+          assert(CMonsterManager::Instance().GetMapMonsters(1038).empty()); }
+        // no match left -> false (uVar5 stays 0)
+        { auto n = mkMgc(120121, 2009, "1038 3120 0 GuildBeast");
+          assert(!CGameAction::ProcessActionUser(upD, &n)); }
+        // empty name matches by map+type (real row 4092240: "1011 2494 0")
+        { auto n = mkMgc(0, 2006, "0 0 1011 50 60 2494 4195 0");
+          assert(CGameAction::ProcessActionUser(upD, &n)); }
+        { auto n = mkMgc(4092240, 2009, "1011 2494 0");
+          assert(CGameAction::ProcessActionUser(upD, &n)); }
+        // parse failure (<= 1 field) -> the DBERR path
+        { auto n = mkMgc(0, 2009, "1011");
+          assert(!CGameAction::ProcessActionUser(upD, &n)); }
+        // 2002 (real rows 5017680-84: param "4021 type 2" is dead text,
+        // data 0): delmonsternow wipes every live record, always returns 1
+        { auto n = mkMgc(0, 2006, "0 0 1038 70 80 3120 4196 0 LeftGate");
+          assert(CGameAction::ProcessActionUser(upD, &n)); }
+        { auto n = mkMgc(0, 2006, "0 0 1011 70 80 2494 4197 0 RightGate");
+          assert(CGameAction::ProcessActionUser(upD, &n)); }
+        { auto n = mkMgc(5017680, 2002, "4021 type 2"); n.dwData = 0;
+          assert(CGameAction::ProcessActionUser(upD, &n));
+          assert(CMonsterManager::Instance().GetAllMonsters().empty()); }
+        printf("[ok] 2009/2002 monster record deletion match cases 0x7d9/0x7d2\n");
+    }
+    // ---- 2007: dynamic NPC creation (case 0x7d7) ----
+    {
+        auto upN7 = std::make_shared<CUser>(999046); upN7->SetName("SpawnNpc");
+        upN7->SetMapId(1000);
+        upN7->SetHomeMapId(1000);
+        // real row 410072: ItemBox keyed by %user_id on the home map
+        { auto n = mkMgc(410072, 2007,
+            "ItemBox 4 33 8200 1 %user_id %user_home_id 21 39 0 0 0 8003010 0 0 0 0 0 0");
+          assert(CGameAction::ProcessActionUser(upN7, &n)); }
+        auto pBox = CNpcManager::Instance().GetNpc(999046);
+        assert(pBox && pBox->GetName() == "ItemBox" && pBox->GetMapId() == 1000);
+        assert(pBox->GetX() == 21 && pBox->GetY() == 39);
+        assert(pBox->m_dwActionId == 8003010); // task0 -> szDynTable col 10
+        assert(pBox->m_dwLookface == 8200);    // f4 -> col 5
+        assert(pBox->m_dwNpcType == 1);         // f5 -> col 2
+        // real row 402771 with %map_owner_id substituted by a literal id
+        // (our central resolver has no map-owner context yet - field f6 is
+        // the spawn record id); f13 task0 = 5030101, f11 life = 24
+        { auto n = mkMgc(402771, 2007,
+            "Close~left~gate 26 21 241 2 999047 1038 163 210 20000000 24 5030100"
+            " 5030101 0 0 0 0 0 0 0 0 0 0 0");
+          assert(CGameAction::ProcessActionUser(upN7, &n)); }
+        auto pGate = CNpcManager::Instance().GetNpc(999047);
+        assert(pGate && pGate->GetName() == "Close~left~gate" && pGate->GetMapId() == 1038);
+        assert(pGate->m_dwActionId == 5030101); // task0 (col 10)
+        assert(pGate->m_usLife == 24);          // f11 (col 0x19)
+        assert(pGate->m_nSpawnFlags == 21);     // f3
+        // < 9 fields -> DBERR 0x324a
+        { auto n = mkMgc(0, 2007, "ItemBox 4 33 8200 1");
+          assert(!CGameAction::ProcessActionUser(upN7, &n)); }
+        // missing map -> "can't find map" LOGERR + DBERR 0x3255
+        { auto n = mkMgc(0, 2007, "ItemBox 4 33 8200 1 999048 999999 21 39 0 0 0 8003010");
+          assert(!CGameAction::ProcessActionUser(upN7, &n)); }
+        printf("[ok] 2007 dynamic NPC creation matches case 0x7d7\n");
+    }
+    // ---- 2201-2205: ProcessActionPkBonus (FUN_140141c80) ----
+    {
+        auto upT1 = std::make_shared<CUser>(999050); upT1->SetName("PkbT");
+        auto upH1 = std::make_shared<CUser>(999051); upH1->SetName("PkbH");
+        CUserManager::Instance().AddUser(upH1);
+        pDB->Query("DELETE FROM cq_pk_bonus WHERE target=999050 OR hunter=999051");
+        pDB->Query("DELETE FROM cq_pk_item WHERE target=999050 OR hunter=999051");
+        // 2201 (real rows 5002143/5002310) - original SQL literals
+        { auto n = mkMgc(5002143, 2201, "target_bonus == 0");
+          assert(!CGameAction::ProcessActionUser(upT1, &n)); } // empty table
+        pDB->Query("INSERT INTO cq_pk_bonus (target, Target_name, hunter, Hunter_name,"
+                   " B_type, Bonus) VALUES (999050, 'PkbT', 999051, 'PkbH', 2, 0)");
+        { auto n = mkMgc(5002143, 2201, "target_bonus == 0");
+          assert(CGameAction::ProcessActionUser(upT1, &n)); }
+        pDB->Query("INSERT INTO cq_pk_bonus (target, hunter, B_type, Bonus)"
+                   " VALUES (999050, 999051, 2, 500)");
+        { auto n = mkMgc(5002310, 2201, "hunter_bonus > 0");
+          assert(CGameAction::ProcessActionUser(upH1, &n)); }
+        { auto n = mkMgc(5002310, 2201, "hunter_bonus > 900");
+          assert(!CGameAction::ProcessActionUser(upH1, &n)); }
+        { auto n = mkMgc(5002310, 2201, "target_bonus > 900");
+          assert(!CGameAction::ProcessActionUser(upH1, &n)); }
+        // 2205 (real rows 5005215/5005235): DetainEquip vtable slots
+        { auto n = mkMgc(5005215, 2205, "target");
+          assert(!CGameAction::ProcessActionUser(upT1, &n)); } // empty
+        pDB->Query("INSERT INTO cq_pk_item (item, target, target_name, hunter,"
+                   " hunter_name, manhunt_time, bonus)"
+                   " VALUES (10, 999050, 'PkbT', 999051, 'PkbH', 0, 0)");
+        { auto n = mkMgc(5005215, 2205, "target");
+          assert(CGameAction::ProcessActionUser(upT1, &n)); }
+        { auto n = mkMgc(5005235, 2205, "hunter");
+          assert(CGameAction::ProcessActionUser(upH1, &n)); }
+        // 2202 (real row 5002144: "2 500000"): pop the target record, push
+        // it to the hunter's pending vector, notify the hunter
+        CUser::SPkBonusRecord rec{};
+        rec.dwItem = 10; rec.dwTarget = 999050; rec.dwHunter = 999051;
+        snprintf(rec.szTargetName, sizeof(rec.szTargetName), "PkbT");
+        snprintf(rec.szHunterName, sizeof(rec.szHunterName), "PkbH");
+        upT1->m_vecPkTarget.push_back(rec);
+        { auto n = mkMgc(5002144, 2202, "2 500000");
+          assert(CGameAction::ProcessActionUser(upT1, &n)); }
+        assert(upT1->m_vecPkTarget.empty());
+        assert(upH1->m_vecPkHunter.size() == 1);
+        assert(upH1->m_vecPkHunter[0].nBonus == 500000);
+        assert(upH1->m_vecPkHunter[0].nBType == 2);
+        { auto n = mkMgc(5002144, 2202, "2 500000"); // empty -> false
+          assert(!CGameAction::ProcessActionUser(upT1, &n)); }
+        // 2204 (real row 5002320): b_type 2 pays money; record popped either way
+        uint64_t qwBefore = upH1->GetMoney();
+        { auto n = mkMgc(5002320, 2204, "");
+          assert(CGameAction::ProcessActionUser(upH1, &n)); }
+        assert(upH1->GetMoney() == qwBefore + 500000);
+        assert(upH1->m_vecPkHunter.empty());
+        { auto n = mkMgc(5002320, 2204, ""); // empty -> false
+          assert(!CGameAction::ProcessActionUser(upH1, &n)); }
+        // 2203 (real row 5002080): DELETE ... AND bonus=0 -> always true
+        { auto n = mkMgc(5002080, 2203, "");
+          assert(CGameAction::ProcessActionUser(upT1, &n)); }
+        assert(atoi(pDB->Scalar("SELECT count(*) FROM cq_pk_bonus WHERE"
+                                " target=999050 AND bonus=0", "0").c_str()) == 0);
+        pDB->Query("DELETE FROM cq_pk_bonus WHERE target=999050 OR hunter=999051");
+        pDB->Query("DELETE FROM cq_pk_item WHERE target=999050 OR hunter=999051");
+        CUserManager::Instance().RemoveUser(999051);
+        printf("[ok] 2201-2205 pk-bonus family matches FUN_140141c80\n");
+    }
     printf("DIALOG FIDELITY TEST PASSED\n");
     return 0;
 }

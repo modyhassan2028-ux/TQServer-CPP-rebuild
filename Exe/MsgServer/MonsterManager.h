@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Monster.h"
 #include <map>
 #include <vector>
@@ -32,6 +32,14 @@ public:
                                             uint32_t dwTypeId, uint32_t dwGenId,
                                             const std::string& strName);
     std::shared_ptr<CMonster> FindMonsterByName(const std::string& strName);
+    // whole-registry scans (cq_action 2002/2009 iterate the map object tree)
+    std::vector<std::shared_ptr<CMonster>> GetAllMonsters();
+    // ORIGINAL FUN_14038e270(record,1): guards record+0x154 == 0 (live),
+    // then detaches the monster from its map + the registry. The
+    // (record+0x10 monster) vcall+0x60(6,0) disappear packet ports with
+    // the monster-packet subsystem (documented open in PORTING_LOG).
+    bool RemoveMonster(std::shared_ptr<CMonster> p);
+
     // nearby player -> attack (v1 proximity, no visual chase); called by the AI tick
     void Aggro(std::shared_ptr<CMonster> pMonster);
     // step a live monster one cell toward the nearest player in sight

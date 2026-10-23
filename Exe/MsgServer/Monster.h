@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <string>
 #include <cstdint>
 #include <memory>
@@ -21,6 +21,11 @@ public:
     void SetPos(uint16_t usX, uint16_t usY) { m_usX = usX; m_usY = usY; }
     void SetSpawn(uint16_t usX, uint16_t usY) { m_usSpawnX = usX; m_usSpawnY = usY; SetPos(usX, usY); }
 
+    // cq_action 2002 (case 0x7d2): the record+0x164 filter field. Modelled
+    // as the record's mapgroup id: our single mapgroup is 0, matching every
+    // data=0 row (delmonsternow wipes the dynamic monster records).
+    uint32_t GetMapGroup() const { return m_dwMapGroup; }
+    void SetMapGroup(uint32_t g) { m_dwMapGroup = g; }
     uint32_t GetGenId() const { return m_dwGenId; } // dynamic spawn gen (2006)
     void SetGenId(uint32_t g) { m_dwGenId = g; }
     uint8_t GetDir() const { return m_ucDir; }
@@ -53,6 +58,7 @@ private:
     uint32_t m_dwId;
     uint32_t m_dwTypeId;
     uint32_t m_dwGenId{0};
+    uint32_t m_dwMapGroup{0}; // record+0x164 (2002 filter)
     std::string m_name;
     uint32_t m_dwMapId{1002};
     uint16_t m_usX{0};

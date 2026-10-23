@@ -1,4 +1,4 @@
-﻿#include "MonsterManager.h"
+#include "MonsterManager.h"
 #include "MsgUserAttrib.h"
 #include "BattleSystem.h"
 #include "MySQLClient.h"
@@ -175,6 +175,32 @@ std::shared_ptr<CMonster> CMonsterManager::SpawnDynamic(uint32_t dwMapId, uint16
     p->SetGenId(dwGenId);
     m_byMap[dwMapId].push_back(p);
     return p;
+}
+
+std::vector<std::shared_ptr<CMonster>> CMonsterManager::GetAllMonsters() {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    std::vector<std::shared_ptr<CMonster>> out;
+    for (auto& kv : m_byMap)
+        for (auto& p : kv.second)
+            out.push_back(p);
+    return out;
+}
+
+bool CMonsterManager::RemoveMonster(std::shared_ptr<CMonster> p) {
+    // ORIGINAL FUN_14038e270(record,1): the +0x154 == 0 guard (not already
+    // dying/removed), then the detach; the disappear broadcast (mode 6/10)
+    // rides the monster-packet subsystem.
+    if (!p || !p->IsAlive()) return false;
+    std::lock_guard<std::mutex> lock(m_mutex);
+    p->SetLife(0);
+    auto it = m_byMap.find(p->GetMapId());
+    if (it != m_byMap.end()) {
+        auto& v = it->second;
+        for (auto i = v.begin(); i != v.end(); ++i)
+            if (i->get() == p.get()) { v.erase(i); break; }
+        if (v.empty()) m_byMap.erase(it);
+    }
+    return true;
 }
 
 std::shared_ptr<CMonster> CMonsterManager::FindMonsterByName(const std::string& strName) {
