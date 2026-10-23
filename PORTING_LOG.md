@@ -965,3 +965,22 @@ CUser vtable+0x50 — يلزم تفريغ الـ vtable)، 1023 (0x11 cq_bonus)�
   601-862/3001-3962/8001-9384...) تُسقِط لسلوك محفوظ عبر
   ProcessActionUser، وفرع sysdata/taskdata في المُحلِّل. لا يوجد من
   ذلك أي استخدام في cq_action الحقيقية.
+
+## وحدة 3523/3524 — فحوص نطاق معركة العيلة (2026-10-23)
+- 3523 (FUN_140140380 idx22 @ 0x140141a5c) و3524 (idx23 @ 0x140141b1b):
+  كلاهما: pUser (CHECKF 0x3676/0x3694) → سين المستخدم (rec8 vcall+0x128،
+  صفر→false) → سجل مجال المعركة mgr vcall+0x88(data) (null→false) →
+  النتيجة: vcall+0x1c0(synId) [3523] أو vcall+0x1b0(synId) [3524] != 0
+  && == data. الفرق الوحيد بين النوعين: مقبض السجل (حيازة/تحدي).
+- عمود data في الصفوف الحقيقية = معرفات نطاقات 10026-10035 (سلاسل
+  9055102/9055103 → 5022872...).
+- CFamilyBattleManager جديد بمقابض حرفية: field19 حيازة، field1 متحدٍ
+  (FUN_1400872b0(rec,idx) = قراءة field idx من m_pData)، field4 دخل،
+  vcall+0x40 علم مُعالجة. Seeding من DISTINCT data في cq_action (نظام
+  الجدولة الأصلي غير مبورت بعد - موثق في FamilyBattle.h).
+- CGuild: m_dwHoldDomain/m_dwChallengeDomain (vcall+0x1c0/+0x1b0)؛
+  CGuildManager: m_byId + GetSynById + GetHold/ChallengeDomainOfSyn.
+- اختبارات: family_battle_352x_test PASSED (سين بدون عيلة، حيازة،
+  تحدي، سجل مجال غير موجود) + القواعد الست القديمة كلها خضرا.
+- 3521 فُكّ بالكامل ووُثّق في HANDOFF كوحدة تالية (يحتاج فك
+  FUN_1401512e0/151380/1511e0 قبل البورت - لا تخمين).

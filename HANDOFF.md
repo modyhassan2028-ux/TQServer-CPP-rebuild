@@ -109,12 +109,37 @@ chk_sum بمعادلة FUN_1400fe140 كاملة + LAST_INSERT_ID)،
   IsDynaNpc. حقول السجل أضيفت لـ CNpc (m_bDyna يضبط من 2007 spawn)،
   وسياق الحوار صار يتعبأ من NPC التفاعل في MsgInteract. اختبار
   npc_record_201_test PASSED مع القاعدتين القديمتين.
-- آخر 3 commits: clan 218/219/3501/3510 (هذا)، 205/207/208 npc ops
-  (5db1686)، 201 dyna record (62657e6).
+- آخر 3 commits: 3523/3524 battle domains (هذا)، clan 218/219/3501/3510
+  (e7b65d0)، 205/207/208 npc ops (5db1686).
+- **3523/3524 اكتملت (فحوص نطاق معركة العيلة):** النوعين يحسّنان
+  (rec8 vcall+0x1c0 = نطاق الحيازة / +0x1b0 = نطاق التحدي لكل عيلة)
+  مقابل عمود data (مجموعة 10026-10035 في القاعدة)، مع بوابة سجل
+  المجال vcall+0x88 (سجل غير موجود → false). CFamilyBattleManager جديد
+  (Exe/MsgServer/FamilyBattle.h/cpp): سجلات نطاقات معركة العيلة بمقابض
+  حرفية (field19=حيازة السين، field1=المتحدي vcall
+  FUN_1400872b0(rec,idx)، field4=مبلغ الدخل، vcall+0x40=علم "تم
+  التوزيع")، seeding من قيم data المميزة في cq_action لأن نظام جدولة
+  المعركة نفسه لم يُبورت بعد. SeedFromDB موصولة في main.cpp.
+  CGuild كسب m_dwHoldDomain/m_dwChallengeDomain + مدير m_byId
+  (GetSynById). اختبار family_battle_352x_test PASSED.
 - **PORT-PENDING المتبقي (بالترتيب):**
-  1) 3521/3523/3524 — عمليات أعضاء الكلان في سلاسل الإدارة
-     (0x140141a5c/0x140141a5c؟/0x140141b1b؛ 30 صفًا حقيقيًا) —
-     بنفس واجهة CGuildManager الجاهزة الآن.
+  1) **3521 — توزيع دخل معركة العيلة (الوحدة العميقة التالية،
+     فُكّت بالكامل ولم تُبورت):** handler عند 0x140140d00 (FUN_140140380
+     idx20). المسار: pUser(0x3585) → سجل المجال عبر mgr vcall+0x88(data)
+     (null→false) → علم vcall+0x40 المحقق يعمل true فوريًا → بوابة
+     "سين المستخدم == field19" (حيازة السجل) وإلا false → جمع
+     المستخدمين الأونلاين من نفس السين (mapgroup) → بوابة نافذة
+     الوقت 15 دقيقة (دقائق localtime الحالية مقابل FUN_14008a6c0 =
+     دقائق نواة الوقت) → منطق النتيجة: userSyn==field1 (r15=1،
+     SUCCESS_ADD_INCOME) أو حيازة المجال && vcall+0x1b0==0 (r15=2،
+     مسار DEFEND/FAIL) → الدخل من FUN_140151580(mgr,domain,syn,4)
+     (قراءة field4، والمتغيرات 0x140151380/0x1401511e0/FUN_1401512e0
+     تحتاج فكًا قبل البورت!) → vcall+0x190(synid,amount) إضافة
+     للخزنة + vcall+0x148(synid,text) إعلان بنصوص
+     STR_FAMILY_BATTLE_SUCCESS_ADD_INCOME / FAIL_ADD_INCOME (0x1407103d8/
+     0x140710388) + vcall+0x1a8(domain) علامة + رسالة للمستخدم
+     (0x7db/0xffffff بنص DEFEND_SUCCESS 0x1407103b0). صفوف حقيقية:
+     5022872..5023521 (data=10026..10035).
   2) 223/224 أثاث البيت (parser مخصص + mgr vcall+0xa8).
   3) 207 نوع 10 (stall) و46 (pole) لما تُبورت النظامان الفرعيان.
   4) إدخال الحوار من العميل (MsgDialog::Process stub يغذي ctx.strInput).

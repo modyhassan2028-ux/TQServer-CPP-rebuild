@@ -17,6 +17,7 @@
 #include "MsgData.h"
 #include "GroupSystem.h"
 #include "Guild.h"
+#include "FamilyBattle.h"
 #include "MapManager.h"
 #include "Item.h"
 #include "Npc.h"
@@ -1214,6 +1215,28 @@ bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogE
         if (!strcmp(szOp, "-=")) { pSyn->duty -= nVal; return true; }
         if (!strcmp(szOp, "="))  { pSyn->duty = nVal; return true; }
         return false;
+    }
+    case 3523: { // ORIGINAL FUN_140140380 subcase idx22 (0x140141a5c):
+        // "clan holds battle domain <data>". pUser (0x3676 CHECKF);
+        // user syn id required (rec8 vcall+0x128); domain record for the
+        // action data must exist (mgr vcall+0x88). True iff the clan's
+        // HELD domain (rec8 vcall+0x1c0) is nonzero and equals data.
+        auto& mgr = CGuildManager::Instance();
+        uint32_t dwSyn = mgr.GetSynIdOfUser(pUser->GetId());
+        if (dwSyn == 0) return false;
+        if (!CFamilyBattleManager::Instance().Find(pNode->dwData)) return false;
+        uint32_t dwHold = mgr.GetHoldDomainOfSyn(dwSyn);
+        return dwHold != 0 && dwHold == pNode->dwData;
+    }
+    case 3524: { // ORIGINAL FUN_140140380 subcase idx23 (0x140141b1b):
+        // "clan challenges battle domain <data>". Same shape as 3523 but
+        // against the CHALLENGE domain (rec8 vcall+0x1b0).
+        auto& mgr = CGuildManager::Instance();
+        uint32_t dwSyn = mgr.GetSynIdOfUser(pUser->GetId());
+        if (dwSyn == 0) return false;
+        if (!CFamilyBattleManager::Instance().Find(pNode->dwData)) return false;
+        uint32_t dwChal = mgr.GetChallengeDomainOfSyn(dwSyn);
+        return dwChal != 0 && dwChal == pNode->dwData;
     }
     case 501: { // ORIGINAL case 0x1f5 (FUN_140123590): award item
         // Type = cq_action.data (node vtable GetData(4)). Param = the

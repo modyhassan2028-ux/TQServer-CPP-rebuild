@@ -75,10 +75,18 @@ public:
     int64_t GetTreasury() const { return m_qwTreasury; } // cq_syndicate.money
     void SetTreasury(int64_t v) { m_qwTreasury = v; }
     void AddTreasury(int64_t v) { m_qwTreasury += v; }
+    // family-battle domain state (mgr vcall+0x1c0 hold / +0x1b0 challenge;
+    // ORIGINAL per-syn queries against the record-8 API, see 3523/3524)
+    uint32_t GetHoldDomain() const { return m_dwHoldDomain; }
+    void SetHoldDomain(uint32_t v) { m_dwHoldDomain = v; }
+    uint32_t GetChallengeDomain() const { return m_dwChallengeDomain; }
+    void SetChallengeDomain(uint32_t v) { m_dwChallengeDomain = v; }
 
 private:
     std::map<uint32_t, SMemberSyn> m_synRec;
     int64_t m_qwTreasury{0};
+    uint32_t m_dwHoldDomain{0};
+    uint32_t m_dwChallengeDomain{0};
 };
 
 class CGuildManager {
@@ -113,6 +121,10 @@ public:
     CGuild* GetSynOf(uint32_t dwUserId);               // resolve + member rec
     CGuild::SMemberSyn* GetSynRecOf(uint32_t dwUserId);
     int64_t GetTreasuryOf(uint32_t dwUserId);          // vcall+0x198
+    // family-battle domain queries BY SYN ID (rec8 vcall+0x1c0 / +0x1b0)
+    uint32_t GetHoldDomainOfSyn(uint32_t dwSynId);
+    uint32_t GetChallengeDomainOfSyn(uint32_t dwSynId);
+    CGuild* GetSynById(uint32_t dwSynId);
     bool AddTreasuryOf(uint32_t dwUserId, int64_t n);  // vcall+0x190
     bool SetTreasuryOf(uint32_t dwUserId, int64_t n);  // vcall+0x1a0
 
@@ -131,6 +143,7 @@ public:
 private:
     CGuildManager() = default;
     std::map<std::string, std::shared_ptr<CGuild>> m_byName;
+    std::map<uint32_t, std::shared_ptr<CGuild>> m_byId;
     std::map<uint32_t, std::shared_ptr<CGuild>> m_byMember;
     std::mutex m_mutex;
     uint32_t m_dwNextId{ 900000 };

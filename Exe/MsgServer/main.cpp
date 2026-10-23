@@ -9,6 +9,7 @@
 #include "UserManager.h"
 #include "Guild.h"
 #include "Item.h"
+#include "FamilyBattle.h"
 #include "PlayerMagic.h"
 #include "Account.h"
 #include "ResStrings.h"
@@ -59,6 +60,8 @@ int main(int argc, char* argv[]) {
     CMagicTypePool::Instance().LoadFromDB(CAccountManager::Instance().GetDB());
     if (!CItemLibrary::Instance().LoadAdditionsFromDB(CAccountManager::Instance().GetDB()))
         CItemLibrary::Instance().LoadAdditionsFromFile("data/itemadditions.ini");
+    // family-battle domain records for cq_action 3521/3523/3524 (10026..)
+    CFamilyBattleManager::Instance().SeedFromDB(CAccountManager::Instance().GetDB());
 
     std::thread([] {
         int nTicks = 0, nBossTicks = 0, nChampTicks = 0;

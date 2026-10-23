@@ -347,6 +347,22 @@ bool CGuildManager::SetTreasuryOf(uint32_t dwUserId, int64_t n) {
     return true;
 }
 
+CGuild* CGuildManager::GetSynById(uint32_t dwSynId) {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    auto it = m_byId.find(dwSynId);
+    return it == m_byId.end() ? nullptr : it->second.get();
+}
+
+uint32_t CGuildManager::GetHoldDomainOfSyn(uint32_t dwSynId) {
+    auto* pG = GetSynById(dwSynId);
+    return pG ? pG->GetHoldDomain() : 0;
+}
+
+uint32_t CGuildManager::GetChallengeDomainOfSyn(uint32_t dwSynId) {
+    auto* pG = GetSynById(dwSynId);
+    return pG ? pG->GetChallengeDomain() : 0;
+}
+
 uint32_t CGuildManager::LoadFromDB(CMySQLClient* pDB) {
     if (!pDB) return 0;
     std::lock_guard<std::mutex> lock(m_mutex);
@@ -362,6 +378,7 @@ uint32_t CGuildManager::LoadFromDB(CMySQLClient* pDB) {
             auto g = std::make_shared<CGuild>(id, row[1], leader);
             g->SetTreasury((int64_t)strtoll(row[3].c_str(), nullptr, 10));
             m_byName[row[1]] = g;
+            m_byId[id] = g;
             m_byMember[leader] = g;
             ++count;
         }
@@ -422,6 +439,7 @@ bool CGuildManager::CreateForAction(uint32_t dwUserId, const std::string& name) 
     auto& rec = g->GetSynRecForLoad(dwUserId);
     rec.duty = 100; // leader; ORIGINAL creates with duty 100, rank byte 0
     m_byName[name] = g;
+    m_byId[id] = g;
     m_byMember[dwUserId] = g;
     if (pDB)
         pDB->Query("INSERT INTO cq_synattr (id, syn_id, rank) VALUES (" +
@@ -446,5 +464,6 @@ bool CGuildManager::DisbandForAction(uint32_t dwUserId) {
     }
     for (uint32_t uid : g->GetMembers()) m_byMember.erase(uid);
     m_byName.erase(g->GetName());
+    m_byId.erase(g->GetId());
     return true;
 }
