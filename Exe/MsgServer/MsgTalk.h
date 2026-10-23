@@ -32,7 +32,8 @@ public:
     CMsgTalk();
     // sender id defaults to 0 (SYSTEM); usStyle = TQ style constant
     bool Create(const std::string& sender, const std::string& recipient,
-                const std::string& message, ChannelType channel, uint32_t dwId = 0);
+                const std::string& message, ChannelType channel, uint32_t dwId = 0,
+                uint16_t usColor = 0xFFFF, uint8_t byP11 = 0);
     // ORIGINAL cq_action type 125 (case 0x7d): broadcast via
     // FUN_14015b300(buf, "SYSTEM", "ALLUSERS", text): id=0, color=0xffff,
     // style=0xff, p9=p10=0, p11=1 (best-evidence stack values)

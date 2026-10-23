@@ -26,6 +26,7 @@
 #include <cstdio>
 #include <memory>
 #include <vector>
+#include <sstream>
 
 // tq::MsgHead is {u16 length; u16 type;} on the wire
 static uint16_t GetPktType(const void* p) {
@@ -393,10 +394,105 @@ int main() {
     for (int i = 0; i < 0x28; ++i) { ItemInfo it{}; it.dwType = 1; uH->GetInventory().push_back(it); }
     { auto n = mk1023(5000010); assert(!CGameAction::ProcessActionUser(uH, &n)); } // bag full guard
     uH->GetInventory().clear();
-    system("mariadb -u root cq -e \"INSERT INTO cq_bonus (action,id_account,flag) VALUES (55,9990001,0)\" >/dev/null 2>&1");
-    { auto n = mk1023(5000010); assert(!CGameAction::ProcessActionUser(uH, &n)); } // pending grant: unclaimed
+    // claim path, real bonus row: action 7407712 (type 501, id_next 0)
+    // awards item 1200001 (data column) exactly once (param field 2 = 0). The
+    // ORIGINAL FUN_140172910 grants via FUN_140145f60, writes the gmlog
+    // line, sets flag=1 + time=TimeStampGet and returns 1 regardless
+    // of the grant result.
+    system("mariadb -u root cq -e \"DELETE FROM cq_bonus WHERE id_account=9990001; INSERT INTO cq_bonus (action,id_account,flag) VALUES (7407712,9990001,0)\" >/dev/null 2>&1");
+    uH->GetInventory().clear();
+    { auto n = mk1023(5000010); assert(CGameAction::ProcessActionUser(uH, &n)); } // claimed -> 1
+    { uint32_t nCnt = 0;                                   // grant ran through the engine
+      for (auto& it : uH->GetInventory()) if (it.dwType == 1200001) nCnt++;
+      assert(nCnt == 1); }
+    assert(pDB->Query("SELECT flag, time FROM cq_bonus WHERE id_account=9990001") &&
+           pDB->GetRows().size() == 1 &&
+           pDB->GetRows()[0][0] == "1" &&                   // flag = 1 (claimed)
+           strtoul(pDB->GetRows()[0][1].c_str(), nullptr, 10) > 0); // time stamped
+    { auto n = mk1023(5000010); assert(!CGameAction::ProcessActionUser(uH, &n)); } // flag=1: no row -> 0
     system("mariadb -u root cq -e \"DELETE FROM cq_bonus WHERE id_account=9990001\" >/dev/null 2>&1");
     printf("[ok] 1023 bonus claim wrapper matches case 0x11 (FUN_140172910)\n");
+
+    // --- FUN_140145f60 engine gates: id 0, 320 stop rule, 33-body cap,
+    // [PM] trace, depth guard (11), %token% resolver ---
+    assert(!CGameAction::ProcessAction(up, 0)); // 140145fc0: id == 0 -> 0
+    // synthetic rows (id range 909xxx, removed at the end of the block)
+    system("mariadb -u root cq -e \"DELETE FROM cq_action WHERE id BETWEEN 909001 AND 909499;"
+           "INSERT INTO cq_action (id,id_next,id_nextfail,type,data,param) VALUES"
+           " (909001,909002,0,101,0,'Gate test line 1'),"
+           " (909002,909004,320,1001,0,'money < 0'),"
+           " (909004,0,0,101,0,'Never reached'),"
+           " (909300,0,0,1023,0,'')\" >/dev/null 2>&1");
+    // the REAL row id 320 (type 121 task, id_next 321): reaching it stops the
+    // chain regardless of id_next - the ORIGINAL id-320 terminal rule
+    {   // 40-row chain: the ORIGINAL 0x20 tail check fires after 33 bodies
+        std::ostringstream oss;
+        oss << "INSERT INTO cq_action (id,id_next,id_nextfail,type,data,param) VALUES";
+        for (uint32_t id = 909100; id <= 909139; ++id) {
+            if (id > 909100) oss << ",";
+            oss << " (" << id << "," << (id == 909139 ? 0u : id + 1) << ",0,101,0,'loop row')";
+        }
+        system(("mariadb -u root cq -e \"" + oss.str() + "\" >/dev/null 2>&1").c_str());
+    }
+    assert(CDialogEngine::Instance().LoadFromDB(pDB) > 190000); // reload synthetic rows
+
+    auto uGate = std::make_shared<CUser>(999010); uGate->SetName("Gate");
+    std::vector<std::string> vGateTexts; uint32_t nGateTalk = 0;
+    uGate->SetPacketSink([&](const void* p, uint16_t sz) {
+        uint16_t t = GetPktType(p);
+        if (t == 1004) { nGateTalk++; return; }        // CMsgTalk trace packets
+        assert(t == CMsgDialog::MSGDIALOG_ID);
+        DialogData d; std::memcpy(&d, (const char*)p + sizeof(tq::MsgHead), sizeof(d));
+        const char* strs = (const char*)p + sizeof(tq::MsgHead) + sizeof(d);
+        vGateTexts.push_back(std::string((const char*)strs + 2, (unsigned char)strs[1]));
+    });
+    // chain: 909001 text -> 909002 money<0 false -> the REAL row 320
+    // (type 121 task dialog) - executes once and STOPS regardless of its
+    // id_next 321 (the ORIGINAL id-320 terminal rule at 140146908)
+    (void)CGameAction::ProcessAction(uGate, 909001); // 320 = chance row: random
+    assert(vGateTexts.size() == 1 && vGateTexts[0] == "Gate test line 1"
+           && nGateTalk == 0); // row 320: type 121 chance check, no packets
+
+    // 33-body cap: rows 909100..909132 emit, the 0x20 tail check logs
+    // "too many game action" after the 33rd body and returns true
+    assert(CGameAction::ProcessAction(uGate, 909100));
+    assert(vGateTexts.size() == 1 + 33);
+
+    // [PM] trace gate (FUN_1401bf750 strstr "[PM]"): one CMsgTalk per body
+    auto uPM = std::make_shared<CUser>(999011); uPM->SetName("[PM]Gate");
+    uint32_t nPMTrace = 0;
+    uPM->SetPacketSink([&](const void*, uint16_t) { nPMTrace++; });
+    (void)CGameAction::ProcessAction(uPM, 909001); // 320 chance: random
+    assert(nPMTrace == 4); // 3 trace talks + 1 dialog text packet
+
+    // depth guard (max 11 levels): bonus action 909300 is a type-1023 row,
+    // so TakeBonus grants through ProcessAction(909300) -> 1023 -> TakeBonus
+    // ... 11 deep, the guard returns 0, every level still claims -> true
+    system("mariadb -u root cq -e \"DELETE FROM cq_bonus WHERE id_account=9990099;"
+           "INSERT INTO cq_bonus (action,id_account,flag) VALUES (909300,9990099,0)\" >/dev/null 2>&1");
+    auto uDep = std::make_shared<CUser>(999012); uDep->SetAccountId(9990099);
+    assert(CGameAction::ProcessAction(uDep, 909300));
+    assert(pDB->Query("SELECT flag FROM cq_bonus WHERE id_account=9990099")
+           && pDB->GetRows().size() == 1 && pDB->GetRows()[0][0] == "1");
+    system("mariadb -u root cq -e \"DELETE FROM cq_bonus WHERE id_account=9990099;"
+           "DELETE FROM cq_action WHERE id BETWEEN 909001 AND 909499\" >/dev/null 2>&1");
+
+    // %token% resolver (FUN_14011efb0): tokens, widths, %% escape quirk
+    up->SetLevel(37);
+    up->SetName("Tester"); // re-established: the 1501 block rebuilt `up` nameless
+    char szTok[256];
+    CGameAction::ReplacePercentStr(up, szTok, "lv=%user_lev%", sizeof szTok);
+    assert(std::string(szTok) == "lv=37");
+    CGameAction::ReplacePercentStr(up, szTok, "%12user_lev%|", sizeof szTok);
+    assert(std::string(szTok) == "37          |"); // width 12, space-padded
+    CGameAction::ReplacePercentStr(up, szTok, "%%", sizeof szTok);
+    assert(std::string(szTok) == "%");
+    CGameAction::ReplacePercentStr(up, szTok, "%foo%", sizeof szTok);
+    assert(std::string(szTok) == "foo"); // unmatched: % eaten, text verbatim
+    CGameAction::ReplacePercentStr(up, szTok, "user=%user_name% id=%user_id%", sizeof szTok);
+    assert(std::string(szTok) == "user=Tester id=999001");
+    printf("[ok] FUN_140145f60 gates: id 0/320 rule/33-cap, [PM] trace, "
+           "depth 11, token resolver match the master walker\n");
 
     // --- 1024 (case 0x12): divorce (FUN_140173e20) ---
     auto uI = std::make_shared<CUser>(999009);

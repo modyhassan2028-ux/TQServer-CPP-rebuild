@@ -28,7 +28,7 @@
 
 CMsgTalk::CMsgTalk() = default;
 
-bool CMsgTalk::Create(const std::string& sender, const std::string& recipient, const std::string& message, ChannelType channel, uint32_t dwId) {
+bool CMsgTalk::Create(const std::string& sender, const std::string& recipient, const std::string& message, ChannelType channel, uint32_t dwId, uint16_t usColor, uint8_t byP11) {
     m_sender = sender;
     m_recipient = recipient;
     m_message = message;
@@ -45,12 +45,12 @@ bool CMsgTalk::Create(const std::string& sender, const std::string& recipient, c
 
     TalkData data{};
     data.dwId = dwId;          // ORIGINAL +4
-    data.usColor = 0xFFFF;     // ORIGINAL +8
+    data.usColor = usColor;    // ORIGINAL +8 (0xffff00 stack arg truncates to 0xff00)
     data.usStyle = static_cast<uint16_t>(channel); // ORIGINAL +10: TQ style const
     data.dwSysTime = static_cast<uint32_t>(time(nullptr)); // ORIGINAL +12
     data.dwP9 = 0;             // ORIGINAL +20
     data.dwP10 = 0;            // ORIGINAL +24
-    data.byP11 = 0;            // ORIGINAL +28
+    data.byP11 = byP11;        // ORIGINAL +28
 
     m_buffer.resize(head.length);
     std::memcpy(m_buffer.data(), &head, sizeof(head));

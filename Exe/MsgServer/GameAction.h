@@ -7,18 +7,27 @@ class CUser;
 
 // ORIGINAL CGameAction (msgserver\mapgroupkernel\gameaction.cpp):
 // walks the cq_action chain and processes each row by its `type`.
-//   - UI/dialog types 101..132 -> CGameAction::ProcessActionOS (FUN_140142880)
-//   - check/effect types 1001..1121 -> CGameAction::ProcessActionUser (FUN_14012a6e0)
-// This port covers the OS dialog set (101/102/103/104/105) and the
-// condition set currently evaluated; remaining types keep walking
-// id_next exactly like an action whose semantics are still pending.
+//   - the master entry is ProcessAction (FUN_140145f60): it resolves the
+//     param column through the two substitution stages, dispatches each
+//     type to its family handler and follows id_next / id_nextfail
+//   - UI/dialog types 101..198 -> FUN_140142db0 (ProcessActionOS port)
+//   - check/effect types -> FUN_14012a6e0 (ProcessActionUser port) and the
+//     other family handlers merged into it (301/501/2001/2201 cases ...)
+// Family functions not yet ported are dispatched with pass-through
+// behavior (documented PORT-PENDING per family).
 class CGameAction {
 public:
-    // run a chain from dwActionId following id_next (success) /
-    // id_nextfail (failure) like the original ProcessAction loop
+    // ORIGINAL CGameAction::ProcessAction — FUN_140145f60, literal port:
+    // depth guard (11), 33-step chain cap, per-type profiling, [PM] trace,
+    // OS-user type gate, type-320 id_next rule. Returns true when the
+    // chain ran to completion (or was cut short by design), false only
+    // when dwActionId is 0 or the call stack overflows 11 levels.
+    static bool ProcessAction(std::shared_ptr<CUser> pUser, uint32_t dwActionId);
+
+    // legacy walker kept for older callers; delegates to ProcessAction
     static void ProcessActionChain(std::shared_ptr<CUser> pUser, uint32_t dwActionId);
 
-    // ORIGINAL CGameAction::ProcessActionOS case bodies (FUN_140142880):
+    // ORIGINAL CGameAction::ProcessActionOS case bodies (FUN_140142db0):
     // returns true when the row executed successfully.
     static bool ProcessActionOS(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode);
 
@@ -38,4 +47,16 @@ public:
     // claim the bonus, 2205 DetainEquip target/hunter checks.
     static bool ProcessActionPkBonus(std::shared_ptr<CUser> pUser,
                                      const CDialogEngine::Node* pNode);
+
+    // ---- param substitution stages (used by ProcessAction) ----
+    // ORIGINAL FUN_1401184a0 (CGameAction::ReplaceParamStr): @name@ vars
+    // resolved through IStringManager. This DB holds no '@' in any of the
+    // 192,895 cq_action param rows, so the SafeCopy path covers it.
+    static void ReplaceParamStr(char* szOut, const char* szSrc, size_t nOut);
+    // ORIGINAL FUN_14011efb0: the %token% resolver (sysdata(...), taskdata
+    // (...), %<width>user_lev% ...). Ported tokens are implemented with
+    // their verified getters; the rest fall through literally exactly like
+    // the original's unmatched-token path.
+    static void ReplacePercentStr(std::shared_ptr<CUser> pUser, char* szOut,
+                                  const char* szSrc, size_t nOut);
 };

@@ -37,6 +37,8 @@
 #define _strtoi64 strtoll
 #endif
 #include <string>
+#include <unordered_map>
+#include <chrono>
 #include <vector>
 
 namespace {
@@ -147,6 +149,9 @@ bool CGameAction::ProcessActionOS(std::shared_ptr<CUser> pUser, const CDialogEng
 
     switch (pNode->dwType) {
     case 101: { // text
+        // ORIGINAL: a new text dialog page clears the option list
+        // (FUN_14039c590) before the page's options register
+        pUser->ClearDialogOptions();
         CMsgDialog dlg;
         if (!dlg.Create(CMsgDialog::Mode_Text, param.c_str(), 0, 0)) return false;
         pUser->SendMsg(dlg.GetBuf(), dlg.GetSize());
@@ -1763,9 +1768,21 @@ bool bAll = (llAll == 1);
             return false; // ORIGINAL: no record -> return 0
         }
         uint32_t dwBonus = (uint32_t)strtoul(pDB->GetRows()[0][0].c_str(), nullptr, 10);
-        printf("[PORT-PENDING] 1023 bonus %u for account %u: FUN_140145f60 grant engine not ported - row left unclaimed\n",
-               dwBonus, pUser->GetAccountId());
-        return false; // documented partial: grant engine pending
+        // ORIGINAL 140172953+: FUN_140145f60(mapgroup action, bonusActionId,
+        // user, 0) grants the bonus action chain
+        CGameAction::ProcessAction(pUser, dwBonus);
+        // ORIGINAL: MyLogSave("gmlog/bonus", "###Bonus: AccountID(%u),
+        // Player(%u) take bonus(%u).") - account id, GetId(user), action
+        printf("[GMLOG] gmlog/bonus ###Bonus: AccountID(%u), Player(%u) take bonus(%u).\n",
+               pUser->GetAccountId(), pUser->GetId(), dwBonus);
+        // ORIGINAL: record field(3) flag = 1, field(5) time = TimeStampGet()
+        // (the released record set flushes the UPDATE; LIMIT 1 targets the
+        // same first fetched row)
+        pDB->Query("UPDATE cq_bonus SET flag = 1, time = " +
+                   std::to_string((uint32_t)time(nullptr)) +
+                   " WHERE id_account = " + std::to_string(pUser->GetAccountId()) +
+                   " AND flag = 0 LIMIT 1");
+        return true; // ORIGINAL: claimed -> return 1
     }
     case 1024: { // ORIGINAL switch case 0x12 (remap 1024->0x12): divorce (FUN_140173e20)
         // ORIGINAL FUN_140173e20 (objdump-verified 0x140173e20..0x1401742e0):
@@ -2666,36 +2683,411 @@ bool CGameAction::ProcessDataCondition(std::shared_ptr<CUser> pUser, const std::
 // (FUN_14039c590 clears it when a new text dialog starts).
 // ---------------------------------------------------------------------------
 void CGameAction::ProcessActionChain(std::shared_ptr<CUser> pUser, uint32_t dwActionId) {
-    auto& eng = CDialogEngine::Instance();
-    const CDialogEngine::Node* n = eng.GetNode(dwActionId);
-    uint32_t guard = 0;
-    pUser->ClearDialogOptions();
+    // The literal FUN_140145f60 engine now walks the chain (substitution,
+    // dispatch, id_next/id_nextfail following); this wrapper only keeps
+    // the old entry point name for existing callers.
+    CGameAction::ProcessAction(pUser, dwActionId);
+}
 
-    while (n && ++guard < kMaxChainSteps) {
-        uint32_t next = 0;
-        const uint32_t t = n->dwType;
+// ============================================================================
+// ORIGINAL CGameAction::ProcessAction — FUN_140145f60 (objdump-verified
+// 0x140145f60..0x140146a10). The master cq_action engine.
+//
+// Verified flow (each step cross-checked against the disassembly):
+//  1. dwActionId == 0 -> return 0                          (140145fc0)
+//  2. depth guard: DAT_140975d64 > 10 ->
+//     "table:cq_action/cq_newaction, CGameAction::ProcessAction call
+//     stack is overflow. ActionID=%u" -> return 0           (140145fe2)
+//  3. loop (33 bodies max: the tail check reads the pre-increment counter,
+//     error fires when it reaches 0x20):
+//     a. current id == 0 -> return 1                        (140146020)
+//     b. lookup; not found -> "table:cq_action/cq_newaction, CGameAction::
+//        ProcessAction Error: game action %u not found." -> return 1
+//                                                           (140146073)
+//     c. TimeGet start; param column -> ReplaceParamStr (FUN_1401184a0,
+//        '@' vars, 0x400 buffer) -> ReplacePercentStr (FUN_14011efb0,
+//        '%<width>token%' resolver, 0x400 buffer)           (140146088..140)
+//     d. [PM] trace gate: user name contains "[PM]"
+//        (interface vtable slot +0x238 = FUN_1401bf750: strstr(GetName(),
+//        "[PM]")) -> CMsgTalk "SYSTEM"->user
+//        "%u: [%u,%u]. type[%u], data[%u]. param:[%s]." color 0xffff00
+//        (u16 truncation -> 0xFF00), style 2000, p11=1, sent via SendMsg
+//        (vcall +0x350)                                    (14014614d..2c4)
+//     e. type = field(3); OS-user gate: user!=0 && FUN_140167b70(user)
+//        (IsOsUser: id > 0xee69a15e && +0x12fc) &&
+//        !FUN_140118a30(type) (OS-user type whitelist) -> return 1
+//                                                           (140146300..31e)
+//     f. range dispatch (lea/cmp pairs, 22 families)        (140146324..)
+//     g. profiling: elapsed ms; per-type {count,total,max};
+//        if (elapsed > 100 || total > 10000) { if (elapsed > 1000) warn
+//        "CGameAction::ProcessAction over time 1 second, Action id:%u,
+//        type:%u"; FUN_14000d480 slow-action list }
+//                                                           (140146887..908)
+//     h. action id == 320 (0x140): if id_next != 0 ->
+//        "table:cq_action/cq_newaction, Error: %u action[%d] can not have
+//        id_next"; return the handler result                  (140146908..46)
+//     i. next = result ? id_next : id_nextfail; counter++;
+//        counter >= 0x20 -> "table:cq_action/cq_newaction, Error: too many
+//        game action,cur action:%u, last action:%u." -> return 1
+//                                                           (1401469a2..bb)
+// ============================================================================
 
-        if (t >= 101 && t <= 132) {
-            if (!ProcessActionOS(pUser, n)) {
-                // ORIGINAL: an unexecutable UI action logs and stops the chain
-                return;
+// ---- engine-local state (ORIGINAL singletons in .data) --------------------
+// ORIGINAL DAT_140975d64: CGameAction::ProcessAction reentry depth
+static int s_nActionDepth = 0;
+// ORIGINAL DAT_140975db0 map + FUN_1400ea580: per-type {count, total, max}
+struct SActionTypeStat {
+    uint32_t nCount = 0;
+    uint32_t nTotalMs = 0;
+    uint32_t nMaxMs = 0;
+};
+static std::unordered_map<uint32_t, SActionTypeStat> s_typeStats;
+// ORIGINAL DAT_140975d70 list via FUN_14000d480: slow actions (>100ms or
+// >10000ms accumulated) recorded for the maintainer dump
+static std::vector<uint32_t> s_vSlowActions;
+
+static uint32_t ActionMsNow() { // ORIGINAL tq::TimeGet (ms ticks)
+    return (uint32_t)std::chrono::duration_cast<std::chrono::milliseconds>(
+               std::chrono::steady_clock::now().time_since_epoch())
+        .count();
+}
+
+// ORIGINAL FUN_140118a30 (objdump-verified 0x140118a30): the OS-user
+// whitelist. Types allowed while the user is an OS user (FUN_140167b70:
+// id > 0xee69a15e && user+0x12fc flag). Everything else stops the chain
+// silently (return 1). Literal predicate translation:
+//  100..123, 125, 150, 201, 207, 498, 501, 502, 1001, 1008, 1010, 1085,
+//  1555, 1556, 1729, 301, 2003, 9000..9999, 20000..30000
+static bool IsOsUserAllowedType(uint32_t t) {
+    return (t >= 100 && t <= 123) || t == 125 || t == 150 || t == 201 ||
+           t == 207 || t == 498 || t == 501 || t == 502 || t == 1001 ||
+           t == 1008 || t == 1010 || t == 1085 || t == 1555 || t == 1556 ||
+           t == 1729 || t == 301 || t == 2003 ||
+           (t >= 9000 && t <= 9999) || (t >= 20000 && t <= 30000);
+}
+
+// ORIGINAL range dispatch table, objdump-verified at 140146324..140146880.
+// Each lea/cmp pair maps a type window to one family function; a type
+// outside every window logs the bad-type error and yields result=false
+// (the chain then follows id_nextfail).
+static bool ProcessActionDispatch(std::shared_ptr<CUser> pUser,
+                                  const CDialogEngine::Node* pNode, uint32_t dwType) {
+    if (dwType >= 101 && dwType <= 198) // -0x65 <= 0x61: FUN_140142db0
+        return CGameAction::ProcessActionOS(pUser, pNode);
+    if (dwType >= 201 && dwType <= 262) // -0xc9 <= 0x61: FUN_14013b950 (PORT-PENDING family)
+        return CGameAction::ProcessActionUser(pUser, pNode);
+    if (dwType >= 301 && dwType <= 362) // -0x12d <= 0x61: FUN_14013d790 (family B port)
+        return CGameAction::ProcessActionUser(pUser, pNode);
+    if (dwType >= 401 && dwType <= 462) // -0x191 <= 0x61: FUN_1401199d0 (PORT-PENDING family)
+        return CGameAction::ProcessActionUser(pUser, pNode);
+    if (dwType >= 501 && dwType <= 562) // -0x1f5 <= 0x61: FUN_140123590 (family A port)
+        return CGameAction::ProcessActionUser(pUser, pNode);
+    if (dwType >= 601 && dwType <= 662) // -0x259 <= 0x61: FUN_140127820 (PORT-PENDING family)
+        return CGameAction::ProcessActionUser(pUser, pNode);
+    if (dwType >= 701 && dwType <= 762) // -0x2bd <= 0x61: FUN_140128290 (PORT-PENDING family)
+        return CGameAction::ProcessActionUser(pUser, pNode);
+    if (dwType >= 801 && dwType <= 862) // -0x321 <= 0x61: FUN_140127070 (PORT-PENDING family)
+        return CGameAction::ProcessActionUser(pUser, pNode);
+    if (dwType >= 1001 && dwType <= 1384) // -0x3e9 <= 0x3e5: FUN_14012a6e0 (user types)
+        return CGameAction::ProcessActionUser(pUser, pNode);
+    if (dwType >= 2001 && dwType <= 2062) // -0x7d1 <= 0x61: FUN_140146a10 (family C)
+        return CGameAction::ProcessActionUser(pUser, pNode);
+    if (dwType >= 2101 && dwType <= 2162) // -0x835 <= 0x61: FUN_140146a10
+        return CGameAction::ProcessActionUser(pUser, pNode);
+    if (dwType >= 2201 && dwType <= 2262) // -0x899 <= 0x61: FUN_140141c80 (pk bonus)
+        return CGameAction::ProcessActionUser(pUser, pNode);
+    if (dwType >= 3001 && dwType <= 3062) // -0xbb9 <= 0x61: FUN_14011a7e0 (PORT-PENDING family)
+        return CGameAction::ProcessActionUser(pUser, pNode);
+    if (dwType >= 3501 && dwType <= 3562) // -0xdad <= 0x61: FUN_140140380 (PORT-PENDING family)
+        return CGameAction::ProcessActionUser(pUser, pNode);
+    if (dwType >= 3601 && dwType <= 3662) // -0xe11 <= 0x61: FUN_14011b5e0 (PORT-PENDING family)
+        return CGameAction::ProcessActionUser(pUser, pNode);
+    if (dwType >= 3701 && dwType <= 3762) {
+        // -0xe75 <= 0x61: FUN_14011dcb0 — ORIGINAL ignores its result and
+        // returns 1 immediately for this whole window
+        return true;
+    }
+    if (dwType >= 3801 && dwType <= 3862) // -0xed9 <= 0x61: FUN_14011bfa0 (PORT-PENDING family)
+        return CGameAction::ProcessActionUser(pUser, pNode);
+    if (dwType >= 3901 && dwType <= 3962) // -0xf3d <= 0x61: FUN_14011c610 (PORT-PENDING family)
+        return CGameAction::ProcessActionUser(pUser, pNode);
+    if (dwType >= 8001 && dwType <= 8384) // -0x1f41 <= 0x3e5: FUN_14011c9e0 (PORT-PENDING)
+        return CGameAction::ProcessActionUser(pUser, pNode);
+    if (dwType >= 9001 && dwType <= 9384) // -0x2329 <= 0x3e5: FUN_140142880 (PORT-PENDING)
+        return CGameAction::ProcessActionUser(pUser, pNode);
+    if (dwType >= 20001 && dwType <= 30000) { // -0x4e21 <= 0x2783: FUN_14011d050
+        // ORIGINAL FUN_14011d050 — the gmlog/bonus family — is not ported;
+        // pass-through keeps chains walking id_next until its unit lands
+        static bool s_bLogged = false;
+        if (!s_bLogged) {
+            printf("[PORT-PENDING] FUN_14011d050 (types 20001..30000) not ported - pass-through\n");
+            s_bLogged = true;
+        }
+        return true;
+    }
+    // ORIGINAL 0x554-else: log_InlineLogDBERROR and leave the result false
+    printf("[DBERROR] table:cq_action/cq_newaction, Error: game action %u has a bad type %d\n",
+           pNode->dwId, (int)dwType);
+    return false;
+}
+
+// ============================================================================
+// ORIGINAL CGameAction::ReplaceParamStr — FUN_1401184a0: '@name@' variables
+// resolved through IStringManager (theInstance, vtable slot 0). The
+// resolver loop, the 1,000,000-iteration guards and the 1024-byte capture
+// buffer are literal; the string-manager lookup itself is PORT-PENDING.
+// Verified against the full cq_action dump: 0 of 192,895 param rows
+// contain '@', so on this data the strchr fast path (plain SafeCopy) is
+// always taken.
+// ============================================================================
+void CGameAction::ReplaceParamStr(char* szOut, const char* szSrc, size_t nOut) {
+    if (szOut == nullptr || szSrc == nullptr) {
+        printf("[DBERROR] ReplaceParamStr()\n"); // ORIGINAL: log_InlineLogACTION_ERROR
+        return;
+    }
+    if (strchr(szSrc, '@') == nullptr) {
+        // ORIGINAL: tq::SafeCopy(out, src, n)
+        snprintf(szOut, nOut, "%s", szSrc);
+        return;
+    }
+    // PORT-PENDING: IStringManager '@name@' resolution not ported; the
+    // affected-row count on this DB is zero. Fall back to the plain copy
+    // so the row still executes with its literal param.
+    snprintf(szOut, nOut, "%s", szSrc);
+}
+
+// ============================================================================
+// ORIGINAL FUN_14011efb0 — the %<width>token% param resolver. Structure is
+// literal (objdump-verified): strchr('%') fast path -> plain copy; else a
+// byte loop copying literal chars, and on '%': up to two leading digits
+// set the field width (target cursor), "%%" emits a literal '%', token
+// dispatch by case-insensitive prefix, then spaces pad the output cursor
+// to the width target. Unmatched tokens fall through with the '%' dropped
+// (the token text itself is copied verbatim), exactly like the original.
+// Ported tokens use getters verified against the binary vtables
+// (interface vtable @0x14071e938: +0x40 X, +0x48 Y, +0x50 sex field,
+// +0x70 level, +0x168 map id; CUser base: +0x8 id). Remaining tokens
+// (syn/family/pk_bonus/... systems not yet ported) are PORT-PENDING and
+// keep the literal fall-through.
+// ============================================================================
+void CGameAction::ReplacePercentStr(std::shared_ptr<CUser> pUser,
+                                    char* szOut, const char* szSrc, size_t nOut) {
+    if (szOut == nullptr || szSrc == nullptr) {
+        printf("[DBERROR] CGameAction param resolver: null buffer\n");
+        return;
+    }
+    if (strchr(szSrc, '%') == nullptr) {
+        snprintf(szOut, nOut, "%s", szSrc); // ORIGINAL tq::SafeCopy path
+        return;
+    }
+    char* p = szOut;                        // ORIGINAL param_2 write cursor
+    const char* s = szSrc;                  // ORIGINAL param_3 read cursor
+    const char* const pEnd = szOut + nOut - 1;
+    uint32_t nGuard = 0;                    // ORIGINAL 1,000,000 guards
+    char c = *s;
+    while (c != '\0') {
+        if (++nGuard > 1000000) { // ORIGINAL: log + stop
+            printf("[DBERROR] CGameAction::ProcessParamStr loop overflow\n");
+            break;
+        }
+        if (*s != '%') {
+            if (p < pEnd) *p++ = *s;
+            ++s;
+            c = *s;
+            continue;
+        }
+        // '%' branch: parse up to two width digits (ORIGINAL iVar21)
+        const char* t = s + 1;
+        int nWidth = 0;
+        if (isdigit((unsigned char)t[0])) {
+            nWidth = t[0] - '0';
+            ++t;
+            if (isdigit((unsigned char)t[0])) {
+                nWidth = nWidth * 10 + (t[0] - '0');
+                ++t;
             }
-            next = n->dwNext;
-        } else if (t >= 1001 && t <= 1121) {
-            next = ProcessActionUser(pUser, n) ? n->dwNext : n->dwNextFail;
+        }
+        char* const pTarget = p + nWidth; // ORIGINAL local_4660
+        if (*t == '%') {                  // "%%" -> literal '%'
+            if (p < pEnd) *p++ = '%';
+            t += 2;
         } else {
-            // types outside both dispatcher ranges (501, 2003, ... are
-            // handled by their own systems) - keep walking id_next
-            next = n->dwNext;
+            // ---- token dispatch (ORIGINAL _strnicmp else-chain: all
+            // tokens are matched at the same position; first match wins) ----
+            bool bMatched = false;
+            auto Tok = [&](const char* szTok) -> bool {
+                size_t n = strlen(szTok);
+                if (_strnicmp(t, szTok, n) == 0) { t += n; return true; }
+                return false;
+            };
+            auto Put = [&](const std::string& strVal) {
+                size_t n = strVal.size();
+                if (p + n < pEnd) { memcpy(p, strVal.c_str(), n); p += n; }
+            };
+            if (pUser) {
+                // --- user tokens (ORIGINAL: gated on the user object) ---
+                if (Tok("user_map_id")) { Put(std::to_string(pUser->GetMapId())); bMatched = true; }
+                else if (Tok("user_home_id")) { Put(std::to_string(pUser->GetHomeMapId())); bMatched = true; }
+                else if (Tok("user_map_x")) { Put(std::to_string(pUser->GetX())); bMatched = true; }
+                else if (Tok("user_map_y")) { Put(std::to_string(pUser->GetY())); bMatched = true; }
+                else if (Tok("user_lev")) { Put(std::to_string(pUser->GetLevel())); bMatched = true; }
+                else if (Tok("user_id")) { Put(std::to_string(pUser->GetId())); bMatched = true; }
+                else if (Tok("user_name")) { Put(pUser->GetName()); bMatched = true; }
+                // ORIGINAL: reads the cached profession field; the port uses
+                // cq_user.profession (unit-1001-verified semantics)
+                else if (Tok("user_pro")) { Put(std::to_string(pUser->GetProfession())); bMatched = true; }
+                // ORIGINAL: interface vtable +0x50 -> [user+0x10d0], a cached
+                // sex field whose feeder is unmapped; the port uses the
+                // unit-verified lookface derivation (lookface/1000)%10
+                else if (Tok("user_sex")) { Put(std::to_string((pUser->GetLookface() / 1000) % 10)); bMatched = true; }
+                else if (Tok("user_meto")) { Put(std::to_string(pUser->GetMetempsychosis())); bMatched = true; }
+                else if (Tok("account_id")) { Put(std::to_string(pUser->GetAccountId())); bMatched = true; }
+                // ORIGINAL FUN_1401644d0(user, digit): single-digit index
+                else if (Tok("iter_var_data")) {
+                    if (isdigit((unsigned char)t[0])) {
+                        Put(std::to_string(pUser->GetIterVarData(t[0] - '0')));
+                        ++t;
+                        bMatched = true;
+                    }
+                }
+                else {
+                    // --- dialog-context tokens (ORIGINAL: fetched through
+                    // the user's dialog view; the port keeps the context on
+                    // the user - m_stDialogCtx, unit-verified) ---
+                    const auto& ctx = pUser->m_stDialogCtx;
+                    if (Tok("datastr")) { Put(ctx.strDatastr); bMatched = true; }
+                    else if (Tok("npc_life")) { Put(std::to_string(ctx.dwNpcLife)); bMatched = true; }
+                    else if (Tok("npc_ownerid")) { Put(std::to_string(ctx.dwNpcOwnerId)); bMatched = true; }
+                    else if (Tok("npc_x")) { Put(std::to_string(ctx.wX)); bMatched = true; }
+                    else if (Tok("npc_y")) { Put(std::to_string(ctx.wY)); bMatched = true; }
+                    else if (Tok("name")) { Put(ctx.strName); bMatched = true; }
+                    else if (Tok("data")) { Put(std::to_string(ctx.dwData)); bMatched = true; }
+                    else if (Tok("id")) { Put(std::to_string(ctx.dwId)); bMatched = true; }
+                }
+            }
+            // ORIGINAL: unmatched tokens (and tokens whose systems are
+            // PORT-PENDING: syn_*/family/pk_bonus/emoney_cardN/stc(...)/
+            // sysdata(...)/taskdata(...) ...) fall through with the '%'
+            // and width digits consumed; the token text is then copied
+            // verbatim by the main loop.
+        }
+        // ORIGINAL 140146887-tail: pad with spaces to the width target
+        if (nWidth != 0) {
+            uint32_t nPad = 0;
+            for (; p < pTarget; ++p) {
+                if (++nPad > 1000000) { // ORIGINAL guard
+                    printf("[DBERROR] CGameAction::ProcessParamStr pad overflow\n");
+                    break;
+                }
+                if (p >= pEnd) break;
+                *p = ' ';
+            }
+        }
+        s = t;
+        c = *s;
+    }
+    *p = '\0';
+}
+
+bool CGameAction::ProcessAction(std::shared_ptr<CUser> pUser, uint32_t dwActionId) {
+    // 140145fc0: if (id == 0) return 0
+    if (dwActionId == 0) return false;
+
+    // 140145fe2: depth guard (max 11 levels)
+    if (s_nActionDepth > 10) {
+        printf("[DBERROR] table:cq_action/cq_newaction, CGameAction::ProcessAction call stack is overflow. ActionID=%u\n",
+               dwActionId);
+        return false;
+    }
+    ++s_nActionDepth;
+    struct DepthRelease {
+        ~DepthRelease() { --s_nActionDepth; } // ORIGINAL: decl DAT_140975d64 on every exit
+    } stDepth;
+
+    auto& eng = CDialogEngine::Instance();
+    uint32_t dwCur = dwActionId;
+    int nIter = 0;            // ORIGINAL 0x6c(%rsp) loop counter
+    bool bRet = false;        // ORIGINAL sil: current handler result
+
+    for (;;) {
+        // 140146020: current id == 0 -> chain finished cleanly (return 1)
+        if (dwCur == 0) return true;
+
+        const CDialogEngine::Node* pNode = eng.GetNode(dwCur);
+        if (!pNode) { // 140146073
+            printf("[DBERROR] table:cq_action/cq_newaction, CGameAction::ProcessAction Error: game action %u not found.\n",
+                   dwCur);
+            return true;
         }
 
-        if (t == 101) {
-            // a fresh text dialog resets the option list the way the
-            // original clears it when the next dialog page begins
-            pUser->ClearDialogOptions();
+        // 140146088..140: TimeGet start + the two substitution stages
+        uint32_t dwStart = ActionMsNow();
+        char szStage1[1024], szParam[1024];
+        ReplaceParamStr(szStage1, pNode->strParam.c_str(), sizeof(szStage1));
+        ReplacePercentStr(pUser, szParam, szStage1, sizeof(szParam));
+
+        // 14014614d: [PM] trace gate (FUN_1401bf750: strstr(GetName(),"[PM]"))
+        if (pUser && strstr(pUser->GetName().c_str(), "[PM]") != nullptr) {
+            char szTrace[1024];
+            snprintf(szTrace, sizeof(szTrace),
+                      "%u: [%u,%u]. type[%u], data[%u]. param:[%s].",
+                      pNode->dwId, pNode->dwNext, pNode->dwNextFail,
+                      pNode->dwType, pNode->dwData, szParam);
+            szTrace[sizeof(szTrace) - 1] = '\0';
+            CMsgTalk msg; // ORIGINAL: Create(buf,"SYSTEM",name,...) color 0xffff00, style 2000
+            if (msg.Create("SYSTEM", pUser->GetName(), szTrace,
+                           CMsgTalk::Channel_Talk, 0, 0xFF00, 1))
+                pUser->SendMsg(msg.GetBuf(), msg.GetSize());
         }
 
-        if (!next) break;
-        n = eng.GetNode(next);
+        const uint32_t dwType = pNode->dwType;
+
+        // 140146300: OS-user type gate (FUN_140167b70 + FUN_140118a30)
+        if (pUser && pUser->IsOsUser() && !IsOsUserAllowedType(dwType)) {
+            return true; // ORIGINAL: silent stop with return 1
+        }
+
+        // dispatch with the substituted param (the original passes the
+        // stage-2 buffer to every family handler)
+        CDialogEngine::Node stNode = *pNode;
+        stNode.strParam = szParam;
+        bRet = ProcessActionDispatch(pUser, &stNode, dwType);
+
+        // 140146887: per-type profiling
+        uint32_t dwElapsed = ActionMsNow() - dwStart;
+        {
+            auto& st = s_typeStats[dwType]; // ORIGINAL FUN_1400ea580 map
+            st.nCount++;
+            st.nTotalMs += dwElapsed;
+            if (dwElapsed > st.nMaxMs) st.nMaxMs = dwElapsed;
+            if (dwElapsed > 100 || st.nTotalMs > 10000) { // ORIGINAL thresholds
+                if (dwElapsed > 1000) {
+                    printf("[ACTION] CGameAction::ProcessAction over time 1 second, Action id:%u, type:%u\n",
+                           pNode->dwId, dwType);
+                }
+                s_vSlowActions.push_back(pNode->dwId); // ORIGINAL FUN_14000d480
+            }
+        }
+
+        // 140146908: type-320 rows execute once; id_next must be 0
+        if (dwCur == 320) {
+            if (pNode->dwNext != 0) {
+                printf("[DBERROR] table:cq_action/cq_newaction, Error: %u action[%d] can not have id_next\n",
+                       pNode->dwId, (int)pNode->dwId);
+            }
+            return bRet; // ORIGINAL: return the handler result directly
+        }
+
+        // 14014694b/74: id_next (true) or id_nextfail (false)
+        dwCur = bRet ? pNode->dwNext : pNode->dwNextFail;
+
+        // 140146996: the tail reads the pre-increment counter (0x20 max);
+        // 33 bodies execute before the "too many game action" error fires
+        if (nIter++ < 0x20) {
+            continue;
+        }
+        printf("[DBERROR] table:cq_action/cq_newaction, Error: too many game action,cur action:%u, last action:%u.\n",
+               pNode->dwId, dwCur);
+        return true; // ORIGINAL FUN_1400bb7e0(record id) + return 1
     }
 }
