@@ -50,6 +50,11 @@ public:
     uint32_t GetMapId() const { return m_dwMapId; }
     uint16_t GetX() const { return m_usX; }
     uint16_t GetY() const { return m_usY; }
+    // cq_action 223 (FUN_14013cf17): record fields 8/9 rewritten then
+    // FUN_1402bf7a0(rec, map, x, y) performs the map-side move
+    void MoveTo(uint32_t dwMapId, uint16_t usX, uint16_t usY) {
+        m_dwMapId = dwMapId; m_usX = usX; m_usY = usY;
+    }
     uint32_t GetLookface() const { return m_dwLookface; }
     uint16_t GetDir() const { return m_usDir; }
 
@@ -129,6 +134,11 @@ public:
 
     std::shared_ptr<CNpc> GetNpc(uint32_t dwId);
     std::vector<std::shared_ptr<CNpc>> GetNpcsOnMap(uint32_t dwMapId);
+    // ORIGINAL mgr vcall+0xc8(map, type, &vec): the NPC ids of the given
+    // raw type on the map (used by cq_action 223); the map order follows
+    // the manager's id map like the original hash walk
+    std::vector<std::shared_ptr<CNpc>> GetNpcsOnMapOfType(uint32_t dwMapId,
+                                                         uint32_t dwType);
 
     // warehouse (bank) operations, shared by /bank chat commands and the NPC
     bool BankDeposit(std::shared_ptr<CUser> pUser, uint32_t dwAmount);

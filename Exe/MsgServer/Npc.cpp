@@ -430,6 +430,21 @@ std::vector<std::shared_ptr<CNpc>> CNpcManager::GetNpcsOnMap(uint32_t dwMapId) {
     return out;
 }
 
+std::vector<std::shared_ptr<CNpc>> CNpcManager::GetNpcsOnMapOfType(
+        uint32_t dwMapId, uint32_t dwType) {
+    // ORIGINAL mgr vcall+0xc8(map, type, &vec): the ids of the map's NPCs
+    // matching the raw type; an empty vec makes 223 log the
+    // "no matching-type NPC" error
+    SpawnDefaults();
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
+    std::vector<std::shared_ptr<CNpc>> out;
+    for (auto& kv : m_npcs)
+        if (kv.second->GetMapId() == dwMapId &&
+            (uint32_t)kv.second->GetType() == dwType)
+            out.push_back(kv.second);
+    return out;
+}
+
 bool CNpcManager::BankDeposit(std::shared_ptr<CUser> pUser, uint32_t dwAmount) {
     if (!pUser || dwAmount == 0) return false;
     if (pUser->GetMoney() < dwAmount) { pUser->SendSysMsg("Not enough money."); return false; }

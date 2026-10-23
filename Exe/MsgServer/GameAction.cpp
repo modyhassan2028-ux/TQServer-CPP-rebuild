@@ -1216,6 +1216,115 @@ bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogE
         if (!strcmp(szOp, "="))  { pSyn->duty = nVal; return true; }
         return false;
     }
+    case 223: { // ORIGINAL FUN_14013b950 jump-table idx22 (0x14013cf17):
+        // home furniture NPC placement. The engine substitutes %vars in
+        // the param first ("%user_home_id 4 55 50 55 47"); the custom
+        // parser then reads whitespace-separated integers into a
+        // 64-slot array (only digits accumulate; a token without digits
+        // counts but stays 0): arr[0] map id, arr[1] npc type, then x,y
+        // pairs, one pair per NPC. >= 4 numbers required (else log line
+        // 0xcca -> false). Gates: arr[0] != 0 and arr[1] > 0 (else log
+        // 0x14070f870 -> false). The map's NPCs of that type must exist
+        // (mgr vcall+0xc8, else "no matching-type NPC" log -> false)
+        // and the map record must be loaded (FUN_1400876b0 vcall+0x10,
+        // else "map not loaded" -> false). Per NPC i with pair j
+        // (consumed together; ends when either runs out):
+        // FUN_1402c3cc0 point check, invalid -> "Invalid Point" log,
+        // pair still consumed; valid -> record fields 8/9 = x/y,
+        // FUN_1402bf7a0 moves the NPC, gmlog/ActionNpcChangePos
+        // "npc change position:NpcID:%u, OwnerID:%u, NpcName: %s,
+        // OldPosX:%d, OldPosY:%d, NewPosX:%d, NewPosY:%d". ALWAYS true.
+        std::string strP = pNode->strParam;
+        pUser->ResolveActionVars(strP); // %user_home_id et al
+        int an[64] = {0};               // [rsp+0x500] slots
+        int nNums = 0;                   // r14d: token count
+        int nSlot = 0;                   // rbx: accumulating slot
+        size_t i = 0;
+        const char* s = strP.c_str();
+        if (s && *s) {
+            for (int nIter = 0; s[i] && nIter < 10000; nIter++) {
+                if (nSlot > 64) { // ORIGINAL 0xcb0: too many numbers
+                    printf("[ACTION %u] type 223: number overflow (>64)\n",
+                           pNode->dwId);
+                    return false;
+                }
+                if (isdigit((unsigned char)s[i]))
+                    an[nSlot] = an[nSlot] * 10 + (s[i] - '0');
+                i++;
+                if (s[i] == ' ') {
+                    i++; nNums++; nSlot++;
+                    if (s[i] == ' ' || !isdigit((unsigned char)s[i])) break;
+                } else if (s[i] == '\0') {
+                    break;
+                }
+            }
+        }
+        nNums++;                        // ORIGINAL 0x14013d018
+        if (nNums < 4) {                // 0xcca log
+            printf("[ACTION %u] type 223: need >= 4 numbers, got %d\n",
+                   pNode->dwId, nNums);
+            return false;
+        }
+        if (an[0] == 0 || an[1] <= 0) {  // 0x14013d5c1: 0xcd2 log
+            printf("[ACTION %u] type 223: invalid map %d / type %d\n",
+                   pNode->dwId, an[0], an[1]);
+            return false;
+        }
+        auto vec = CNpcManager::Instance().GetNpcsOnMapOfType(an[0], an[1]);
+        if (vec.empty()) {              // 0x14070f9f0 GBK log
+            printf("[ACTION %u] type 223: map(%d) has no NPC of type(%d)\n",
+                   pNode->dwId, an[0], an[1]);
+            return false;
+        }
+        auto pMap = CMapManager::Instance().GetMap(an[0]);
+        if (!pMap) {                    // 0x14070f9b8: map not loaded
+            printf("[ACTION %u] type 223: map(%d) not loaded\n",
+                   pNode->dwId, an[0]);
+            return false;
+        }
+        int nPair = 2;                  // r13d
+        for (auto& spNpc : vec) {
+            if (nPair > nNums - 2) break; // pairs exhausted -> true
+            int nX = an[nPair], nY = an[nPair + 1];
+            if (!pMap->IsPassable((uint16_t)nX, (uint16_t)nY)) {
+                // 0x14013d502: Invalid Point log, pair consumed
+                printf("[ACTION %u] type 223: Invalid Point(map = %d, "
+                       "x = %d, y = %d)\n", pNode->dwId, an[0], nX, nY);
+                nPair += 2;
+                continue;
+            }
+            if (!spNpc) continue;
+            int nOldX = spNpc->GetX(), nOldY = spNpc->GetY();
+            spNpc->MoveTo((uint32_t)an[0], (uint16_t)nX, (uint16_t)nY);
+            tq::MyLogSave("gmlog/ActionNpcChangePos",
+                "npc change position:NpcID:%u, OwnerID:%u, NpcName: %s, "
+                "OldPosX:%d, OldPosY:%d, NewPosX:%d, NewPosY:%d",
+                spNpc->GetId(), spNpc->m_dwOwnerid,
+                spNpc->GetName().c_str(), nOldX, nOldY, nX, nY);
+            nPair += 2;
+        }
+        return true;                    // ORIGINAL 0x14013d5ba
+    }
+    case 224: { // ORIGINAL FUN_14013b950 jump-table idx23 (0x14013d604):
+        // home furniture count check. sscanf(param, "%u %d %d") needs >=
+        // 2 values (else log line 0xd17 -> false): v1 = map id,
+        // v2 = npc type, v3 (optional, default 0) = required count.
+        // result = mgr vcall+0xa8(map, type) (NPC count of the type on
+        // the map) compared: v3 == 0 -> count >= 1; else count >= v3.
+        std::string strC = pNode->strParam;
+        pUser->ResolveActionVars(strC); // %user_home_id et al
+        unsigned uMap = 0; int nType = 0, nNeed = 0;
+        if (sscanf(strC.c_str(), "%u %d %d", &uMap, &nType, &nNeed) < 2) {
+            printf("[ACTION %u] type 224: sscanf needs >= 2 values "
+                   "(0xd17)\n", pNode->dwId);
+            return false;
+        }
+        auto vec = CNpcManager::Instance().GetNpcsOnMapOfType(uMap,
+                                                              (uint32_t)nType);
+        uint32_t dwCount = (uint32_t)vec.size();
+        int nReq = (nNeed == 0) ? 1 : nNeed;
+        return dwCount >= (uint32_t)nReq;
+    }
     case 3523: { // ORIGINAL FUN_140140380 subcase idx22 (0x140141a5c):
         // "clan holds battle domain <data>". pUser (0x3676 CHECKF);
         // user syn id required (rec8 vcall+0x128); domain record for the

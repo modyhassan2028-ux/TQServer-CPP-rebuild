@@ -1012,3 +1012,25 @@ CUser vtable+0x50 — يلزم تفريغ الـ vtable)، 1023 (0x11 cq_bonus)�
   فاعل غير حائز، DEFEND داخلي، early-true لعلم +0x40، SUCCESS داخلي
   مع استهلاك الدخل، cur<kernel، SUCCESS متأخر، التقاط DEFEND متأخر،
   فاعل بلا سين) + القواعد السبع القديمة كلها خضرا.
+
+## وحدة 223/224 — أثاث بيت اللاعب، إتمام عائلة 201-224 (2026-10-23)
+- jump table 0x14013d728 دwords نسبية: idx22=0x14013cf17 (223)،
+  idx23=0x14013d604 (224)، والقيمة المتكررة 0x14013d6b9 = stub
+  الأنواع غير المعالجة.
+- 223: parser حرفي (مصفوفة 64 عند [rsp+0x500]، الأرقام فقط
+  accumulate، العدّ عند المسافة، حد 64 رقمًا بلوغ 0xcb0، شرط >= 4
+  أعداد بلوغ 0xcca، بوابات [0]!=0/[1]>0 بلوغ 0xcd2) → vcall+0xc8
+  (جمع NPC النوع على الخريطة، الفارغ = لوغ GBK 0x14070f9f0) → سجل
+  الخريطة (0x14070f9b8) → حلقة مزدوجة NPC/زوج: FUN_1402c3cc0 فحص
+  نقطة (لوغ Invalid Point 0x14070f8d0 والزوج يُستهلك) → كتابة
+  fields 8/9 → FUN_1402bf7a0 نقل → لوغ gmlog/ActionNpcChangePos
+  (0x14070f950: NpcID/OwnerID(field1)/NpcName(field3-str)/OldXY/NewXY)
+  → return true دائمًا (0x14013d5ba).
+- 224: sscanf "%u %d %d" على param المعوّض (شرط >= 2 وإلا 0xd17) →
+  vcall+0xa8(map,type) عد → النتيجة count >= (v3? v3:1)
+  (0x14013d6aa/d6b2).
+- النمذجة: تعويض المتغيرات (ResolveActionVars) قبل الparse كما
+  يفعل محرك الحوار الأصلي؛ FUN_1402c3cc0 = IsPassable؛ النقل =
+  تحديث مركز NPC (الأصل يكتب fields 8/9 ثم ينقل، والنتيجة واحدة).
+- اختبار home_furniture_223_224_test: 9 حالات PASSED + القواعد
+  الثمانية القديمة كلها خضرا (9 قواعد إجمالًا).

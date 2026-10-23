@@ -125,8 +125,8 @@ chk_sum بمعادلة FUN_1400fe140 كاملة + LAST_INSERT_ID)،
   family_income_3521_test PASSED (9 حالات) — القواعد الثمانية كلها
   خضرا. نمذجة موثقة: +0x1a8 = علامة "تم التوزيع" (الكاتب الوحيد
   المرئي لعلم vcall+0x40).
-- آخر 3 commits: 3521 income (b0fd4a8)، 3523/3524 battle domains
-  (e631dfc)، clan 218/219/3501/3510 (e7b65d0).
+- آخر 3 commits: 223/224 home furniture (هذا)، 3521 income (b0fd4a8)،
+  3523/3524 battle domains (e631dfc).
 - **3523/3524 اكتملت (فحوص نطاق معركة العيلة):** النوعين يحسّنان
   (rec8 vcall+0x1c0 = نطاق الحيازة / +0x1b0 = نطاق التحدي لكل عيلة)
   مقابل عمود data (مجموعة 10026-10035 في القاعدة)، مع بوابة سجل
@@ -138,11 +138,29 @@ chk_sum بمعادلة FUN_1400fe140 كاملة + LAST_INSERT_ID)،
   المعركة نفسه لم يُبورت بعد. SeedFromDB موصولة في main.cpp.
   CGuild كسب m_dwHoldDomain/m_dwChallengeDomain + مدير m_byId
   (GetSynById). اختبار family_battle_352x_test PASSED.
+- **منظومة FUN_14013b950 (201-224) كاملة — 223/224 آخرها:**
+  - **223** (jump idx22 @ 0x14013cf17): نقل أثاث بيت اللاعب — بعد
+    تعويض %vars، parser حرفي لأعداد مفصولة بمسافات في مصفوفة 64
+    (الأرقام فقط تتراكم، التوكن غير الرقمي يُحتسب بقيمة 0)، شرط >= 4
+    أعداد (سطر 0xcca)، بوابات map!=0/type>0 (سطر 0xcd2)، npcMgr
+    vcall+0xc8(map,type) لازم غير فارغ (لوغ GBK "لا يوجد NPC
+    بالنوع")، سجل الخريطة FUN_1400876b0 vcall+0x10 ("الخريطة غير
+    محملة")، لكل NPC زوج (x,y) واحد يُستهلك معه: فحص
+    FUN_1402c3cc0 (Invalid Point لوغ ويُستهلك الزوج)، كتابة fields
+    8/9 (x/y)، نقل FUN_1402bf7a0، لوغ حرفي
+    gmlog/ActionNpcChangePos بنص NpcID/OwnerID/NpcName/Old/New.
+    دائمًا true.
+  - **224** (jump idx23 @ 0x14013d604): فحص عد الأثاث — sscanf
+    "%u %d %d" (شرط >= 2 قيم وإلا لوغ 0xd17)، النتيجة =
+    vcall+0xa8(map,type) (عدد NPC النوع على الخريطة) >= (v3!=0?
+    v3:1).
+  - CNpc::MoveTo(map,x,y) (كتابة fields 8/9 + النقل)؛
+    CNpcManager::GetNpcsOnMapOfType (vcall+0xc8). اختبار
+    home_furniture_223_224_test PASSED (9 حالات). **القواعد التسعة
+    كلها خضرا.**
 - **PORT-PENDING المتبقي (بالترتيب):**
-**استُبدل — 3521 اكتمل (انظر فقرة "35xx كاملة" تحت).**22872..5023521 (data=10026..10035).
-  1) 223/224 أثاث البيت (parser مخصص + mgr vcall+0xa8).
-  2) 207 نوع 10 (stall) و46 (pole) لما تُبورت النظامان الفرعيان.
-  3) إدخال الحوار من العميل (MsgDialog::Process stub يغذي ctx.strInput).
+  1) 207 نوع 10 (stall) و46 (pole) لما تُبورت النظامان الفرعيان.
+  2) إدخال الحوار من العميل (MsgDialog::Process stub يغذي ctx.strInput).
   عائلات النطاقات الأخرى
   غير الشائعة تسقط لسلوك محفوظ (return محدد لكل عائلة)، وفرع
   sysdata/taskdata في المُحلِّل — صفر استخدام في القاعدة الحقيقية.
