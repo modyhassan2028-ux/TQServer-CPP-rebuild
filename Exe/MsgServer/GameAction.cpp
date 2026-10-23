@@ -16,6 +16,7 @@
 #include "MsgTalk.h"
 #include "MsgData.h"
 #include "GroupSystem.h"
+#include "Guild.h"
 #include "MapManager.h"
 #include "Item.h"
 #include "Npc.h"
@@ -1089,6 +1090,130 @@ bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogE
                     spawn.GetBuf(), spawn.GetSize());
         }
         return false; // ORIGINAL: xor al,al at 0x14013ca5c
+    }
+    case 218: { // ORIGINAL case 0xda subcase (FUN_14013ca63): create clan
+        // pUser (0xc35) required. The typed clan name (dialog 103 input,
+        // family arg8) goes through the string-registry charset check
+        // FUN_1400fb570; rejected -> localized STR_INVALID_FAMILY_NAME
+        // message + false. Accepted -> syn mgr record 8
+        // vcall+0xf0(rec, userid, name) creates the clan (duplicate name
+        // or existing membership -> false; the DB chain shows the "name
+        // has been taken" text on the fail branch).
+        const std::string& rsName = pUser->m_stDialogCtx.strInput;
+        if (!tq::NameStrCheck(rsName.c_str(), false)) {
+            pUser->SendSysMsg("STR_INVALID_FAMILY_NAME");
+            return false;
+        }
+        return CGuildManager::Instance().CreateForAction(pUser->GetId(), rsName);
+    }
+    case 219: { // ORIGINAL case 0xdb subcase (FUN_14013cb21): disband clan
+        // pUser (0xc48); mgr rec 8 vcall+0x128(rec, userid) -> syn id
+        // (0 -> false); then vcall+0x100(rec, userid) = disband
+        // (leader-only) -> its bool.
+        if (CGuildManager::Instance().GetSynIdOfUser(pUser->GetId()) == 0)
+            return false;
+        return CGuildManager::Instance().DisbandForAction(pUser->GetId());
+    }
+    case 3501: { // ORIGINAL FUN_140140380 subcase idx0 (0x1401404a6):
+        // syndicate member-record op. pUser (0x34ed CHECKF); the member's
+        // syn id (mgr vcall+0x128) must be nonzero. sscanf "%s %s %I64d %u"
+        // needs >= 3 tokens (else "Wrong param number" 0x140710280).
+        // Fields on the member record:
+        //   rank (byte, vcall+0x160/+0x168):  > ==  test; += result must
+        //     stay <= 4 ("Wrong param" 0x140710420 -> false); -= needs
+        //     rank >= value; = rejects value > 4
+        //   star_tower (byte, +0x150/+0x158): > == += -= =, plain byte math
+        //   money (int64 clan treasury, +0x198 get / +0x190 add /
+        //     +0x1a0 set): > == += -= =
+        if (CGuildManager::Instance().GetSynIdOfUser(pUser->GetId()) == 0)
+            return false;
+        auto* pSyn = CGuildManager::Instance().GetSynRecOf(pUser->GetId());
+        if (!pSyn) return false;
+        std::string strP = pNode->strParam; pUser->ResolveActionVars(strP);
+        char szField[256] = {0}, szOp[256] = {0};
+        long long llVal = 0; unsigned uExtra = 0;
+        if (sscanf(strP.c_str(), "%255s %255s %lld %u",
+                   szField, szOp, &llVal, &uExtra) < 3) {
+            tq::MyLogSave("gmlog/all",
+                "table:cq_action/cq_newaction, ACTION (id=%u,type=3501): "
+                "Wrong param number", pNode->dwId);
+            return false;
+        }
+        if (stricmp(szField, "rank") == 0) {
+            int64_t nRank = pSyn->rank;
+            if (!strcmp(szOp, ">"))  return nRank > llVal;
+            if (!strcmp(szOp, "==")) return nRank == llVal;
+            if (!strcmp(szOp, "+=")) {
+                if (nRank + llVal > 4) { // ORIGINAL clamp -> "Wrong param"
+                    tq::MyLogSave("gmlog/all",
+                        "table:cq_action/cq_newaction, ACTION (id=%u,type=3501): "
+                        "Wrong param", pNode->dwId);
+                    return false;
+                }
+                pSyn->rank = (uint8_t)(nRank + llVal);
+                return true;
+            }
+            if (!strcmp(szOp, "-=")) {
+                if (nRank < llVal) { // ORIGINAL: jns gate -> "Wrong param"
+                    tq::MyLogSave("gmlog/all",
+                        "table:cq_action/cq_newaction, ACTION (id=%u,type=3501): "
+                        "Wrong param", pNode->dwId);
+                    return false;
+                }
+                pSyn->rank = (uint8_t)(nRank - llVal);
+                return true;
+            }
+            if (!strcmp(szOp, "=")) {
+                if ((unsigned long long)llVal > 4) { // ORIGINAL: ja 4 -> reject
+                    tq::MyLogSave("gmlog/all",
+                        "table:cq_action/cq_newaction, ACTION (id=%u,type=3501): "
+                        "Wrong param", pNode->dwId);
+                    return false;
+                }
+                pSyn->rank = (uint8_t)llVal;
+                return true;
+            }
+            return false;
+        }
+        if (stricmp(szField, "star_tower") == 0) {
+            if (!strcmp(szOp, ">"))  return (int64_t)pSyn->starTower > llVal;
+            if (!strcmp(szOp, "==")) return (int64_t)pSyn->starTower == llVal;
+            if (!strcmp(szOp, "+=")) { pSyn->starTower = (uint8_t)(pSyn->starTower + llVal); return true; }
+            if (!strcmp(szOp, "-=")) { pSyn->starTower = (uint8_t)(pSyn->starTower - llVal); return true; }
+            if (!strcmp(szOp, "="))  { pSyn->starTower = (uint8_t)llVal; return true; }
+            return false;
+        }
+        if (stricmp(szField, "money") == 0) {
+            auto& mgr = CGuildManager::Instance();
+            uint32_t uid = pUser->GetId();
+            if (!strcmp(szOp, ">"))  return mgr.GetTreasuryOf(uid) > llVal;
+            if (!strcmp(szOp, "==")) return mgr.GetTreasuryOf(uid) == llVal;
+            if (!strcmp(szOp, "+=")) return mgr.AddTreasuryOf(uid, llVal);
+            if (!strcmp(szOp, "-=")) return mgr.AddTreasuryOf(uid, -llVal);
+            if (!strcmp(szOp, "="))  return mgr.SetTreasuryOf(uid, llVal);
+            return false;
+        }
+        return false; // ORIGINAL: unmatched field falls out
+    }
+    case 3510: { // ORIGINAL FUN_140140380 subcase idx9 (0x140140afd):
+        // duty-rank op. pUser (0x3559 CHECKF); syn id required.
+        // sscanf "%s %s %d" (>= 3). Field "rank" against the DUTY rank
+        // (mgr vcall+0x118 get / +0x120 set; leader = 100):
+        // == / >= / += / -= (and = via the same setter).
+        auto* pSyn = CGuildManager::Instance().GetSynRecOf(pUser->GetId());
+        if (!pSyn) return false;
+        std::string strP = pNode->strParam; pUser->ResolveActionVars(strP);
+        char szField[256] = {0}, szOp[256] = {0}; int nVal = 0;
+        if (sscanf(strP.c_str(), "%255s %255s %d",
+                   szField, szOp, &nVal) < 3)
+            return false;
+        if (stricmp(szField, "rank") != 0) return false; // only "rank"
+        if (!strcmp(szOp, "==")) return pSyn->duty == nVal;
+        if (!strcmp(szOp, ">=")) return pSyn->duty >= nVal;
+        if (!strcmp(szOp, "+=")) { pSyn->duty += nVal; return true; }
+        if (!strcmp(szOp, "-=")) { pSyn->duty -= nVal; return true; }
+        if (!strcmp(szOp, "="))  { pSyn->duty = nVal; return true; }
+        return false;
     }
     case 501: { // ORIGINAL case 0x1f5 (FUN_140123590): award item
         // Type = cq_action.data (node vtable GetData(4)). Param = the

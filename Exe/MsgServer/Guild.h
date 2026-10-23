@@ -55,6 +55,30 @@ private:
     uint32_t m_dwWarScore{0};
     uint64_t m_dwFund{0};
     uint32_t m_dwWeeklyWins{0};
+
+public:
+    // ---- syndicate record facade for cq_action 3501/3510/218/219 ----
+    // ORIGINAL FUN_140140380 operates on the syn manager's record-8 API:
+    // per-member byte rank (vcall+0x160 get / +0x168 set), star_tower
+    // (+0x150/+0x158), duty rank (+0x118/+0x120, 100 = leader), and the
+    // clan treasury money (64-bit: +0x198 get, +0x190 add, +0x1a0 set).
+    struct SMemberSyn {
+        uint8_t rank{0};      // 3501 "rank" (0..4)
+        uint8_t starTower{0}; // 3501 "star_tower"
+        int32_t duty{0};      // 3510 "rank" (100 = leader)
+    };
+    SMemberSyn* GetSynRec(uint32_t dwUserId) {
+        auto it = m_synRec.find(dwUserId);
+        return it == m_synRec.end() ? nullptr : &it->second;
+    }
+    SMemberSyn& GetSynRecForLoad(uint32_t dwUserId) { return m_synRec[dwUserId]; }
+    int64_t GetTreasury() const { return m_qwTreasury; } // cq_syndicate.money
+    void SetTreasury(int64_t v) { m_qwTreasury = v; }
+    void AddTreasury(int64_t v) { m_qwTreasury += v; }
+
+private:
+    std::map<uint32_t, SMemberSyn> m_synRec;
+    int64_t m_qwTreasury{0};
 };
 
 class CGuildManager {
@@ -81,6 +105,28 @@ public:
     bool IsAtWar(uint32_t dwGuildId) const;
     // settles expired wars, announces the winner and pays the reward
     void TickWars();
+
+    // ---- syndicate record facade for cq_action 3501/3510/218/219 ----
+    // ORIGINAL: the singleton syn manager (0x1406d8df0) exposes record 8;
+    // every cq_action 35xx call resolves the member through it.
+    uint32_t GetSynIdOfUser(uint32_t dwUserId);        // vcall+0x128
+    CGuild* GetSynOf(uint32_t dwUserId);               // resolve + member rec
+    CGuild::SMemberSyn* GetSynRecOf(uint32_t dwUserId);
+    int64_t GetTreasuryOf(uint32_t dwUserId);          // vcall+0x198
+    bool AddTreasuryOf(uint32_t dwUserId, int64_t n);  // vcall+0x190
+    bool SetTreasuryOf(uint32_t dwUserId, int64_t n);  // vcall+0x1a0
+
+    // cq_action 218 (0x14013ca63): create clan from the typed dialog name.
+    // Duplicate name / already member -> false (chain shows "taken" text).
+    bool CreateForAction(uint32_t dwUserId, const std::string& name);
+    // cq_action 219 (0x14013cb21): disband, leader-only, del_flag=1.
+    bool DisbandForAction(uint32_t dwUserId);
+
+    // cq_syndicate (del_flag=0) + cq_synattr load; returns guild count
+    uint32_t LoadFromDB(class CMySQLClient* pDB);
+    // registers an existing member in the manager-side index (used by
+    // LoadFromDB and membership flows); creates the default member rec
+    void AttachMember(uint32_t dwUserId, uint32_t dwSynId);
 
 private:
     CGuildManager() = default;

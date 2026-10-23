@@ -306,3 +306,145 @@ std::string CGuildManager::WeeklyStandingsText() {
     }
     return out;
 }
+
+// ================= syndicate record facade (cq_action 3501/3510/218/219) ==
+#include "MySQLClient.h"
+#include "Account.h"
+
+uint32_t CGuildManager::GetSynIdOfUser(uint32_t dwUserId) {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    auto it = m_byMember.find(dwUserId);
+    return it == m_byMember.end() ? 0 : it->second->GetId();
+}
+
+CGuild* CGuildManager::GetSynOf(uint32_t dwUserId) {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    auto it = m_byMember.find(dwUserId);
+    return it == m_byMember.end() ? nullptr : it->second.get();
+}
+
+CGuild::SMemberSyn* CGuildManager::GetSynRecOf(uint32_t dwUserId) {
+    auto* pG = GetSynOf(dwUserId);
+    return pG ? pG->GetSynRec(dwUserId) : nullptr;
+}
+
+int64_t CGuildManager::GetTreasuryOf(uint32_t dwUserId) {
+    auto* pG = GetSynOf(dwUserId);
+    return pG ? pG->GetTreasury() : 0;
+}
+
+bool CGuildManager::AddTreasuryOf(uint32_t dwUserId, int64_t n) {
+    auto* pG = GetSynOf(dwUserId);
+    if (!pG) return false;
+    pG->AddTreasury(n);
+    return true;
+}
+
+bool CGuildManager::SetTreasuryOf(uint32_t dwUserId, int64_t n) {
+    auto* pG = GetSynOf(dwUserId);
+    if (!pG) return false;
+    pG->SetTreasury(n);
+    return true;
+}
+
+uint32_t CGuildManager::LoadFromDB(CMySQLClient* pDB) {
+    if (!pDB) return 0;
+    std::lock_guard<std::mutex> lock(m_mutex);
+    uint32_t count = 0;
+    // ORIGINAL model: clans live in cq_syndicate (del_flag=1 = disbanded)
+    if (pDB->Query("SELECT id, name, leader_id, money, del_flag FROM "
+                   "cq_syndicate WHERE del_flag = 0")) {
+        for (auto& row : pDB->GetRows()) {
+            if (row.size() < 5) continue;
+            uint32_t id = (uint32_t)strtoul(row[0].c_str(), nullptr, 10);
+            uint32_t leader = (uint32_t)strtoul(row[2].c_str(), nullptr, 10);
+            if (!id || m_byName.count(row[1])) continue;
+            auto g = std::make_shared<CGuild>(id, row[1], leader);
+            g->SetTreasury((int64_t)strtoll(row[3].c_str(), nullptr, 10));
+            m_byName[row[1]] = g;
+            m_byMember[leader] = g;
+            ++count;
+        }
+    }
+    // membership: cq_synattr.id = user id, rank 1000 = leader (duty 100)
+    if (pDB->Query("SELECT id, syn_id, rank FROM cq_synattr")) {
+        for (auto& row : pDB->GetRows()) {
+            if (row.size() < 3) continue;
+            uint32_t uid = (uint32_t)strtoul(row[0].c_str(), nullptr, 10);
+            uint32_t synId = (uint32_t)strtoul(row[1].c_str(), nullptr, 10);
+            int32_t nRank = atoi(row[2].c_str());
+            if (!uid || !synId) continue;
+            std::shared_ptr<CGuild> g;
+            for (auto& kv : m_byName)
+                if (kv.second->GetId() == synId) { g = kv.second; break; }
+            if (!g) continue;
+            auto& rec = g->GetSynRecForLoad(uid);
+            rec.duty = nRank / 10; // 1000 -> 100 leader, like ORIGINAL
+            m_byMember[uid] = g;
+        }
+    }
+    return count;
+}
+
+void CGuildManager::AttachMember(uint32_t dwUserId, uint32_t dwSynId) {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    for (auto& kv : m_byName) {
+        if (kv.second->GetId() != dwSynId) continue;
+        kv.second->AddMember(dwUserId);
+        kv.second->GetSynRecForLoad(dwUserId); // default rec
+        m_byMember[dwUserId] = kv.second;
+        return;
+    }
+}
+
+bool CGuildManager::CreateForAction(uint32_t dwUserId, const std::string& name) {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (name.empty() || m_byName.count(name) || m_byMember.count(dwUserId))
+        return false;
+    auto* pDB = CAccountManager::Instance().GetDB();
+    uint32_t id = 0;
+    if (pDB) {
+        std::string sql = "INSERT INTO cq_syndicate (name, announce, "
+            "leader_title, member_title, leader_id, money, emoney, "
+            "fealty_syn, del_flag) VALUES ('" + pDB->Escape(name) +
+            "', '', 'guildleader', 0, " + std::to_string(dwUserId) +
+            ", 0, 0, 0, 0)";
+        if (!pDB->Query(sql)) return false;
+        if (!pDB->Query("SELECT LAST_INSERT_ID()")) return false;
+        auto& rows = pDB->GetRows();
+        if (rows.empty() || rows[0].empty()) return false;
+        id = (uint32_t)strtoul(rows[0][0].c_str(), nullptr, 10);
+    } else {
+        id = m_dwNextId++;
+    }
+    if (!id) return false;
+    auto g = std::make_shared<CGuild>(id, name, dwUserId);
+    auto& rec = g->GetSynRecForLoad(dwUserId);
+    rec.duty = 100; // leader; ORIGINAL creates with duty 100, rank byte 0
+    m_byName[name] = g;
+    m_byMember[dwUserId] = g;
+    if (pDB)
+        pDB->Query("INSERT INTO cq_synattr (id, syn_id, rank) VALUES (" +
+                   std::to_string(dwUserId) + ", " + std::to_string(id) +
+                   ", 1000) ON DUPLICATE KEY UPDATE syn_id=" +
+                   std::to_string(id) + ", rank=1000");
+    return true;
+}
+
+bool CGuildManager::DisbandForAction(uint32_t dwUserId) {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    auto it = m_byMember.find(dwUserId);
+    if (it == m_byMember.end()) return false;
+    auto g = it->second;
+    if (g->GetLeaderId() != dwUserId) return false; // leader-only (219)
+    auto* pDB = CAccountManager::Instance().GetDB();
+    if (pDB) {
+        pDB->Query("UPDATE cq_syndicate SET del_flag=1 WHERE id=" +
+                   std::to_string(g->GetId()));
+        pDB->Query("DELETE FROM cq_synattr WHERE syn_id=" +
+                   std::to_string(g->GetId()));
+    }
+    for (uint32_t uid : g->GetMembers()) m_byMember.erase(uid);
+    m_byName.erase(g->GetName());
+    return true;
+}

@@ -9,6 +9,9 @@
 - **لا final builds ولا zig ولا binaries ولا release uploads** — push كود فقط.
 - حدّث PORTING_LOG.md بعد كل وحدة، وحدّث هذا الملف في نهاية كل جلسة.
 - الشغل مستمر ذاتيًا بدون طلب إذن (قاعدة المالك). الاختبارات ضد صفوف DB حقيقية.
+- **بعد كل وحدة/ميلستون: حدّث هذا الملف فورًا + git commit + git push
+  على طول (طلب المالك 2026-10-23) — عشان حالة الشغل تكون محفوظة في
+  المستودع لو الكريدت خلص في نص الشغل. مفيش commit من غير push أبدًا.
 
 ## البيئة
 - المستودع: github.com/modyhassan2028-ux/TQServer-CPP-rebuild (branch main، push مباشر).
@@ -78,12 +81,26 @@ chk_sum بمعادلة FUN_1400fe140 كاملة + LAST_INSERT_ID)،
   مع دايناميك + بث الظهور، ويرجع false دايمًا زي الأصل. CNpcManager
   كسب RemoveNpc/GetAllNpcs. اختبار npc_ops_205_207_208_test PASSED
   مع القواعد الثلاثة القديمة (35 صفًا حقيقيًا مغطى).
-- **فُكّت ودُوّنت لكنها pending:** 218 إنشاء Clan + 219 حل Clan
-  (سلاسل 502174x/502274x؛ تحتاج وحدة syndicate حقيقية: singleton
-  0x1406d8df0 + سجل 8 + vcalls 0xf0/0x100/0x128، والاسم من dialog
-  103 عبر ctx.strInput مع تحقق STR_INVALID_FAMILY_NAME)، و223/224
-  أثاث البيت (parser مخصص + mgr vcall+0xa8). جداول cq_syndicate
-  موجودة (3 صفوف).
+- **218/219/3501/3510 اكتملت (منظومة الـ Clan كاملة):**
+  218 = إنشاء Clan من الاسم المكتوب في dialog 103 (ctx.strInput عبر
+  tq::NameStrCheck الأصلية؛ اسم رافض → رسالة STR_INVALID_FAMILY_NAME
+  + false؛ صالح → INSERT cq_syndicate + cq_synattr rank=1000 مع
+  LAST_INSERT_ID، مكرر/عضو موجود → false)،
+  219 = حل Clan (syn id للازم، leader-only، del_flag=1 في
+  cq_syndicate + حذف cq_synattr + مسح كل الأعضاء من الفهرس)،
+  3501 = عمليات سجل العضو (FUN_140140380 idx0): rank byte بعمليات
+  > == += -= = مع الأبواب الحرفية (+= يجب ≤4، -= يحتاج rank>=قيمة،
+  = يرفض >4، كل رفض بسجل "Wrong param" 0x140710420)، وstar_tower
+  byte بعمليات عادية، وmoney int64 لخزنة الكلان (vcall+0x198/190/1a0)،
+  3510 = عمليات الـ duty rank (idx9، field "rank" فقط: == >= += -= =،
+  القائد duty=100). واجهة الـ syn كاملة على CGuildManager:
+  GetSynIdOfUser (+0x128)، GetSynRecOf (rank/star/duty)، خزنة
+  Get/Add/SetTreasuryOf، CreateForAction (vcall+0xf0)،
+  DisbandForAction (vcall+0x100)، LoadFromDB (cq_syndicate +
+  cq_synattr، duty = rank/10)، AttachMember. اختبار
+  clan_218_219_35xx_test PASSED (26 assert) مع القواعد الأربع
+  القديمة كلها خضرا، وختام DB round-trip حقيقي (إنشاء/حل مع فحص
+  الصفوف في MariaDB).
 - **نوع 201 (FUN_14013ba1e) اكتمل:** عمليات سجل الـ DynaNpc بالكامل —
   ownerid/ownertype/lookface (=/==)، datastr (=/==، عمود 15)،
   data0-3 (=,+=,==,<,<=,>,>=)، "accept" تعيد قراءة إدخال اللاعب
@@ -92,11 +109,15 @@ chk_sum بمعادلة FUN_1400fe140 كاملة + LAST_INSERT_ID)،
   IsDynaNpc. حقول السجل أضيفت لـ CNpc (m_bDyna يضبط من 2007 spawn)،
   وسياق الحوار صار يتعبأ من NPC التفاعل في MsgInteract. اختبار
   npc_record_201_test PASSED مع القاعدتين القديمتين.
-- آخر 3 commits: 205/207/208 npc ops (هذا)، 201 dyna record (62657e6)،
-  محرك 145f60+بوابات (1deb328).
-- **PORT-PENDING المتبقي:** عائلة 202-224 المتبقية من FUN_14013b950
-  (فك 205/207/208/218/219/223/224 — كلها أنظمة بيت/home، ~35 صفًا)،
-  وإدخال الحوار من العميل (MsgDialog::Process stub يغذي ctx.strInput).
+- آخر 3 commits: clan 218/219/3501/3510 (هذا)، 205/207/208 npc ops
+  (5db1686)، 201 dyna record (62657e6).
+- **PORT-PENDING المتبقي (بالترتيب):**
+  1) 3521/3523/3524 — عمليات أعضاء الكلان في سلاسل الإدارة
+     (0x140141a5c/0x140141a5c؟/0x140141b1b؛ 30 صفًا حقيقيًا) —
+     بنفس واجهة CGuildManager الجاهزة الآن.
+  2) 223/224 أثاث البيت (parser مخصص + mgr vcall+0xa8).
+  3) 207 نوع 10 (stall) و46 (pole) لما تُبورت النظامان الفرعيان.
+  4) إدخال الحوار من العميل (MsgDialog::Process stub يغذي ctx.strInput).
   عائلات النطاقات الأخرى
   غير الشائعة تسقط لسلوك محفوظ (return محدد لكل عائلة)، وفرع
   sysdata/taskdata في المُحلِّل — صفر استخدام في القاعدة الحقيقية.
