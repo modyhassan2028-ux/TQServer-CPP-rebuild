@@ -25,6 +25,7 @@
 #pragma once
 #include <cstdint>
 #include <algorithm>
+#include <vector>
 #include "User.h"
 #include "Msg.h"
 #include "PlayerMagic.h"
@@ -83,6 +84,9 @@ struct DamageCtx {
     bool    bGateMapFinal = false;  // FUN_140186200 final gate -> reject
     bool    bMapGate398 = false;    // target vtable+0x398 map rejection
     bool    bProbeHit = false;      // FUN_1403e9290 status probe hit
+    // ---- fan-loop broadcast gate stubs (FUN_140499830) ----
+    bool    bFanLevelUp = false;    // local_558 level-up flag
+    bool    bFanLevelProb = false; // local_55c + RandGet(100) < 10 gate
 };
 
 // ---- component 1: FUN_1403e98e0 (weapon roll, physical) ----
@@ -547,5 +551,93 @@ inline int32_t LaunchOnTarget(CUser* pCaster, CUser* pTarget,
         pOut->dwPost = dwPost;
     }
     return dwDamage;
+}
+
+// ===========================================================================
+// FUN_140499830: the fan loop - CPlayerMagic post-launch target processing.
+// ORIGINAL: void Fan(caster, targets[], damages[], posts[], effectSlots[])
+// (std::vector arrays with 0x18/0x20 iterators, bounds-checked). 839 lines:
+// per-target apply/XP/kill accounting, the level-up broadcast gate, and the
+// magic-exp award tail. Battle-module and packet calls are documented stubs.
+// ===========================================================================
+enum FanExpMode {
+    FAN_EXP_MODE_1 = 0,      // types 0x3052/0x305c/0x3066 -> (caster, 1)
+    FAN_EXP_MODE_0_XP,       // type 0x3070            -> (caster, 0, xp)
+    FAN_EXP_MODE_1_XP,       // type 0x2ed6 / sort 0x49 -> (caster, 1, xp)
+    FAN_EXP_MODE_XP_XP       // else                   -> (caster, xp, xp)
+};
+struct FanResult {
+    uint32_t dwKills = 0;    // local_560: sort {5,8,0x39,0x3c} kill counter
+    uint32_t dwTotalXp = 0;  // local_540: accumulated monster XP share
+    FanExpMode eExpMode = FAN_EXP_MODE_XP_XP;
+    bool bBroadcast = false; // the level-up/rare-gate broadcast fired
+};
+
+// FUN_1404913c0: magic exp award - documented stub (magic exp system)
+inline void AwardMagicExp(CUser*, uint32_t, uint32_t) {}
+
+// FUN_140185f80: XP share calculation - documented stub (returns 0)
+inline uint32_t CalcXpShare(CUser*, CUser*, uint32_t, uint8_t) { return 0; }
+
+inline FanResult FanProcess(CUser* pCaster,
+                            const std::vector<CUser*>& vecTargets,
+                            const std::vector<LaunchOut>& vecOuts,
+                            const CMagicTypeInfo* pType, const DamageCtx& c)
+{
+    FanResult r;
+    if (!pType) { // ORIGINAL: caster+0x90 null -> log_InlineLogERROR
+        printf("[MAGIC] FanProcess: no magic record\n");
+        return r;
+    }
+    const uint32_t dwSort = (uint32_t)pType->Field(2);
+    const bool bKillSort = dwSort == 5 || dwSort == 8 || dwSort == 0x39
+                           || dwSort == 0x3c;
+    // broadcast gate flags (level-up probes local_558/55c - stubs via ctx)
+    bool bLevelUp = c.bFanLevelUp;       // local_558
+    bool bLevelProb = c.bFanLevelProb;   // local_55c (RandGet(100) < 10)
+    for (size_t i = 0; i < vecTargets.size() && i < vecOuts.size(); ++i) {
+        CUser* pTgt = vecTargets[i];
+        const LaunchOut& out = vecOuts[i];
+        // ORIGINAL skips probe-blocked entries (-2 in the damage array)
+        if (out.dwDamage == -2) continue;
+        if (!pTgt) continue;
+        // post[i] = target->vtable+0x3b8(map, post[i], type) - apply stub
+        uint32_t dwPost = out.dwPost; // (passthrough until battle kernel)
+        // damage = min(GetLife, damage[i] + post[i])
+        int32_t dmg = out.dwDamage + (int32_t)dwPost;
+        int32_t life = (int32_t)pTgt->GetLife();
+        if (dmg > life) dmg = life;      // local_530 = min(...)
+        if (dmg < 1) continue;            // < 1 -> no kill/XP accounting
+        // ---- monster XP accounting (0x240 IsMonster) ----
+        if (pTgt->IsMonster() && c.bTargetMonster) {
+            uint32_t share = CalcXpShare(pCaster, pTgt, (uint32_t)dmg, 0);
+            // first share: FUN_140185f80(...,0) then MulDiv(x,10000,first)
+            r.dwTotalXp += share;
+        }
+        // ---- kill counting: sort {5,8,0x39,0x3c} -> kills++ ----
+        if (bKillSort) r.dwKills++;
+    }
+    // ---- broadcast gate: levelUp || (levelProb && RandGet(100) < 10) ----
+    if (bLevelUp || (bLevelProb && tq::RandGet(100) < 10)) {
+        r.bBroadcast = true;
+        // ORIGINAL: FUN_1404f67b0(buf) build MsgMagicEffect, FUN_1404f6860,
+        // map vtable+0x350 broadcast, FUN_1404f6800 destroy - packet stub
+    }
+    // ---- magic exp award tail (type from the caster's record, literal) ----
+    uint32_t dwType = (uint32_t)pType->dwType; // record GetAttrib(2)
+    if (dwType == 0x3052 || dwType == 0x305c || dwType == 0x3066) {
+        AwardMagicExp(pCaster, 1, 0);
+        r.eExpMode = FAN_EXP_MODE_1;
+    } else if (dwType == 0x3070) {
+        AwardMagicExp(pCaster, 0, r.dwTotalXp);
+        r.eExpMode = FAN_EXP_MODE_0_XP;
+    } else if (dwType == 0x2ed6 || dwSort == 0x49) {
+        AwardMagicExp(pCaster, 1, r.dwTotalXp);
+        r.eExpMode = FAN_EXP_MODE_1_XP;
+    } else {
+        AwardMagicExp(pCaster, r.dwTotalXp, r.dwTotalXp);
+        r.eExpMode = FAN_EXP_MODE_XP_XP;
+    }
+    return r;
 }
 } // namespace tq

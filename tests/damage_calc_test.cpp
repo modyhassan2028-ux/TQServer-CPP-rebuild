@@ -220,6 +220,59 @@ int main() {
     // L8b: sort 50 bypasses the map gate
     assert(tq::LaunchOnTarget(att.get(), tgt.get(), rec, &tSort50, 0, cm, &o) == 0);
 
+    // ---- FanProcess (FUN_140499830) literal tests ----
+    auto tFan = mkType(11500, 5, 1, 100, 0); // sort 5 = kill-counting sort
+    auto tFan3070 = mkType(12400, 14, 0, 500, 0);
+    auto tFan2ed6 = mkType(11990, 14, 1, 100, 0); // 0x2ed6 = 11990
+    auto tFan3052 = mkType(12370, 14, 1, 100, 0);
+
+    // F1: two live targets (damage 120 each, life 1000): 2 kills (sort 5),
+    //     exp mode XP_XP (default type), no broadcast with neutral ctx
+    std::vector<CUser*> tgs{tgt.get()};
+    auto tgt2 = mk(71013); tgt2->SetKernelSlots(0,0,0,40); tgt2->SetPos(105,106);
+    tgs.push_back(tgt2.get());
+    std::vector<tq::LaunchOut> outs(2);
+    outs[0].dwDamage = 120; outs[1].dwDamage = 120;
+    auto fr = tq::FanProcess(att.get(), tgs, outs, &tFan, c);
+    assert(fr.dwKills == 2 && !fr.bBroadcast);
+    assert(fr.eExpMode == tq::FAN_EXP_MODE_XP_XP);
+
+    // F2: probe-blocked entry (-2) skipped; dead-ish target (life 0) -> dmg 0
+    //     -> skipped: only 1 kill
+    outs[0].dwDamage = -2;
+    tgt2->SetLife(0);
+    fr = tq::FanProcess(att.get(), tgs, outs, &tFan, c);
+    assert(fr.dwKills == 0);
+    tgt2->SetLife(1000); outs[0].dwDamage = 120;
+
+    // F3: damage capped by life: life 50, damage 120 -> dmg = 50 (still >= 1)
+    tgt->SetLife(50);
+    fr = tq::FanProcess(att.get(), tgs, outs, &tFan, c);
+    assert(fr.dwKills == 2);
+    tgt->SetLife(1000);
+
+    // F4: non-kill sort (14) -> no kills counted
+    fr = tq::FanProcess(att.get(), tgs, outs, &tPois, c);
+    assert(fr.dwKills == 0);
+
+    // F5: broadcast gate: level-up flag fires
+    tq::DamageCtx cf = c; cf.bFanLevelUp = true;
+    fr = tq::FanProcess(att.get(), tgs, outs, &tFan, cf);
+    assert(fr.bBroadcast);
+
+    // F6: exp tail dispatch: 0x3070 -> (0, xp); 0x2ed6 -> (1, xp);
+    //     0x3052 -> (1, 0)
+    fr = tq::FanProcess(att.get(), tgs, outs, &tFan3070, c);
+    assert(fr.eExpMode == tq::FAN_EXP_MODE_0_XP);
+    fr = tq::FanProcess(att.get(), tgs, outs, &tFan2ed6, c);
+    assert(fr.eExpMode == tq::FAN_EXP_MODE_1_XP);
+    fr = tq::FanProcess(att.get(), tgs, outs, &tFan3052, c);
+    assert(fr.eExpMode == tq::FAN_EXP_MODE_1);
+
+    // F7: null type -> log + empty result
+    fr = tq::FanProcess(att.get(), tgs, outs, nullptr, c);
+    assert(fr.dwKills == 0 && !fr.bBroadcast);
+
     printf("DAMAGE CALC TEST PASSED\n");
     return 0;
 }

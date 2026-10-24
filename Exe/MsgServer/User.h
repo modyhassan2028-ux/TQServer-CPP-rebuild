@@ -64,6 +64,9 @@ public:
     bool IsDie() const { return m_dwLife == 0; } // ORIGINAL vtable+0x290
     bool IsBoss() const { return false; } // ORIGINAL vtable+0x288 (monsters only)
     bool m_bAttackable{true}; // ORIGINAL vtable+0x220 probe target
+    bool m_bMonster{false};  // ORIGINAL vtable+0x240 (monster kernels)
+    bool IsMonster() const { return m_bMonster; }
+    void SetMonster(bool b) { m_bMonster = b; }
     bool IsAttackable() const { return m_bAttackable; }
     void SetAttackable(bool b) { m_bAttackable = b; }
     uint32_t GetLife() const { return m_dwLife; }
