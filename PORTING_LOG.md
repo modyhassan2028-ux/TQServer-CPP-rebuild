@@ -3428,3 +3428,60 @@ FUN_140022f40 (تفاصيل كتابة الحقل)، FUN_1400232b0 (مسار
    **الرجريشن 11/11 خضرا** (world/manager/generator/
    wander/steplist/aitick/transform/msgainfo/create + ops
    205/207/208 + record 201 ضد القاعدة الحية).
+
+## جلسة 2026-10-24 20:15 — NpcServer الوحدة 11: التجميعة الحقيقية (main.cpp)
+1. **تشيل الـ stub المخمّن:** main.cpp القديم (كود
+   مختلق بيطبع أسطر متخيلة) اتشال. الجديد:
+   Exe/NpcServer/NpcAssembly.{h,cpp} (CNpcServerApp) +
+   main.cpp حقيقي + tests/npc_assembly_test.
+2. **ترتيب الإقلاع حرفياً** من عائلة CSocketKernel::
+   Create (ديكمبايل ~1640-1737): "libevent method: %s"
+   (seam: event_get_method → "epoll")؛ CNpcWorld::Create
+   (operator_new(0x838) + ctor FUN_140001210؛ socket
+   FUN_140001ba0 وعند فشله اللوج الحرفي "CNpcWorld::
+   Create, cannot create NpcServer client socket.")؛
+   worker thread FUN_1400024f0 + "thread %u created
+   libevent worker thread %u"؛ CThreadBase::CreateThread
+   "NPC Server KernelThread" → جسم الحلقة = KernelTick
+   بمعدل 1Hz (في الأصل تايمر libevent).
+3. **مسار الحالة:** KernelTick → OnTimer (FUN_14001d390):
+   state 0 (مفتاح 0x3ade68b1، "NpcServer Tqdig"/
+   "skl8934##VJICW ") → seam الرد FUN_14001c5f0 →
+   OnConnectOK (FUN_14001c700) → state 2 مع "Login OK.
+   generator monster after 10 secs" → 10 ثواني →
+   "Generator begin." → عيلة التيك.
+4. **عيلة التيك:** المبورت منها FUN_14002b380 فقط
+   (ProcessGenerators: مشي المولدات بالبودجت + مشي
+   NPC كل 3 تيكات مع حارسات skip = FUN_140028820/
+   140057cf0)؛ الباقي (FUN_14003c520، FUN_140037f80،
+   FUN_14001d230، FUN_1400489b0) seams موثقة TBD.
+5. **مسار المولد:** AddGenerator بيوصل GenConfig
+   GetInt بجدول المؤشرات الأصلي (1 type، 0xf cap،
+   0x12 random-mode bit، 4/5/6/7/8 geometry، 0x11
+   cluster flag=0)؛ cadence التجميعة = محاولة واحدة
+   لكل تيك تحت السقف (**TBD**: أصل الـ cadence في
+   FUN_140060xxx غير مبورت). **تأكيد حرفي من
+   الديكمبايل:** FUN_14003ca10 في مسار المولد بتتندى
+   بالخانة +0x54 (الـ **type** وليس الـ map id) —
+   خريطة كائنات الـ assembly متسقة مع كده.
+6. **الإنشاء:** FUN_140061040 (CreateNpc: mode/geo/
+   rand X/born) → FUN_14005d9c0 (new CNpc 0x158 عبر
+   LiveNpc) → FUN_14005e2e0 (CNpc::Create بكل
+   الـ seams موصولة لكائنات kernel في الذاكرة) →
+   معرف FUN_14002b270 (SpawnNewNpcID، من 0x61a81) →
+   تسجيل في m_mapNpcSet.
+7. **التيك لكل NPC:** +0xe0 (FUN_14005ada0) → hold
+   window → !ready (بوابات +0xa0 مغلقة) → dispatch
+   (vcall+0x20) → FUN_140087d50 wander → عند الوصول
+   m_fnArrive = FUN_140086430 بنقل السلسلة المقبولة
+   إلى الـ steplist (+0x68) مع refcounts.
+8. **مسار الرسالة:** HandleAiNpcInfo → CMsgAiNpcInfo::
+   CreateFromBuffer (بوابة التاج word@0x18=1) →
+   Process → find/new/Create/register/notify98 —
+   المرسل بجدول مولدات التجميعة (rec+0x08=1).
+9. Glue موثق واحد: SpawnNewNpcID_External (passthrough
+   عام على CNpcTransform لأن البورت عايش private هناك
+   لحد ما يملكه CNpcManager).
+10. **الرجريشن 12/12 خضرا** (10 وحدات + التجميعة +
+   ops 205/207/208 + record 201 ضد القاعدة الحية) +
+   smoke لـ main الحقيقي (boot → "Login OK...").

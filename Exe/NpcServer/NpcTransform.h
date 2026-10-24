@@ -87,6 +87,12 @@ public:
     // error-log sink (verbatim strings recorded in order)
     std::vector<std::string> m_vecLogs;
 
+    // ASSEMBLY GLUE (not an ORIGINAL symbol): the port of
+    // FUN_14002b270 lives private here until the manager
+    // unit owns it; NpcAssembly calls it through this
+    // passthrough so the id-space walk has ONE source.
+    uint32_t SpawnNewNpcID_External() { return SpawnNewNpcID(); }
+
 private:
     // ===== ORIGINAL FUN_14002b270 (CNpcManager::SpawnNewNpcID) =====
     uint32_t SpawnNewNpcID();

@@ -1,7 +1,34 @@
 
 # ⚠️ دليل الوكيل التالي — ابدأ من هنا (آخر تحديث 2026-10-24 18:15)
 
-## 0) حالة NpcServer لحظياً (جلسة 24/10 — محدث 19:30)
+## 0) حالة NpcServer لحظياً (جلسة 24/10 — محدث 20:15)
+- **جديد:** الوحدة 11: **التجميعة الحقيقية** — الـ stub
+  المخمّن في main.cpp اتشال واستبدل. ملفات جديدة:
+  Exe/NpcServer/NpcAssembly.{h,cpp} (CNpcServerApp) +
+  main.cpp حقيقي + tests/npc_assembly_test —
+  **NPC_ASSEMBLY_OK**. الترتيب حرفياً من عائلة
+  CSocketKernel::Create (FUN_140002xxx): "libevent
+  method: %s" → CNpcWorld::Create (FUN_140001210 ctor
+  + FUN_140001ba0 socket + اللوج الحرفي "CNpcWorld::
+  Create, cannot create NpcServer client socket." عند
+  الفشل) → "thread %u created libevent worker thread
+  %u" → "NPC Server KernelThread" (KernelTick = 1Hz
+  OnTimer). المسار الكامل شغال: state 0 (مفتاح
+  0x3ade68b1) → OnConnectOK (FUN_14001c700) → 10s
+  "Generator begin." → FUN_14002b380 (مولدات ببودجت
+  + مشي AI كل 3 تيكات مع حارسات skip) → FUN_140061040
+  (المولد، بجدول GetInt الأصلي: 1 type/0xf cap/0x12
+  random-mode/4-8 geometry/0x11 cluster) → FUN_14005d9c0
+  + FUN_14005e2e0 (إنشاء CNpc) بمعرفات FUN_14002b270 →
+  تيك AI (+0xe0) → dispatch → FUN_140087d50 wander →
+  FUN_140086430 steplist عند الوصول → إحصائيات كل 30s.
+  مسار الرسالة شغال كامل: CMsgAiNpcInfo (9) →
+  CNpc::Create (10) → تسجيل في المدير. ملاحظتان
+  حرفيتان مهمتان: (1) FUN_14003ca10 في مسار المولد
+  بيبحث بالخانة +0x54 (الـ **type** مش الـ map id) —
+  اتأكدنا من الديكمبايل. (2) SpawnNewNpcID عامه عام
+  private على CNpcTransform؛ التجميعة بتناديه عبر
+  SpawnNewNpcID_External (glue موثق).
 - **جديد:** الوحدة 10: **CNpc::Create (FUN_14005e2e0،
   1565 بايت)** حرفياً في Exe/NpcServer/NpcCreate.{h,cpp}
   — كائن CNpcObject كامل 0x158 بأوفستات بايتية
