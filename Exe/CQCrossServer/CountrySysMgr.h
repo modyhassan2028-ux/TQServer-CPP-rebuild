@@ -216,6 +216,26 @@ public:
     //     the full brick, re-encode the header, re-append
     //  4. the final brick broadcasts with FUN_140018870(mgr,
     //     brick, 0) - every country server, no exclusion.
+    // ---- ProcessServerConnectOK (ORIGINAL FUN_14001ade0) ----
+    // When a game server finishes registering, the hub queues the
+    // full league/plunder state to its COUNTRY (FUN_14000a0b0 ->
+    // the country broadcast in the rebuild):
+    //  (a) mode-1 brick: header = the server's current league
+    //      (FUN_1400240f0(1, idleague, country_date)) + entries
+    //      (idleague, amount) of ITS OWN leagues
+    //  (b) LeagueRank action 0: a 0x2c entry per league
+    //      (idleague, idserver, amount, league_name, leader_name
+    //      - FUN_1400230a0 field pulls 2/1/3 + strings 5/6)
+    //  (c) LeagueInfo action 2: entries for every league of
+    //      EVERY OTHER server (skip node[3] == dwIdServer)
+    //  (d) PlunderWarInfo: mode-3 announce (id 0), then a
+    //      mode-0 message per today-war with its 10 target
+    //      columns (fields 3..12 via the vcall loop)
+    //  (e) LeagueList action 0: league ids from
+    //      lower_bound(dwIdServer) to the end, chunked
+    // Country -1 (FUN_14000d620) -> NOTHING at all.
+    void ProcessServerConnectOK(uint32_t dwIdServer);
+
     // Returns the ready wire packets (one per chunk).
     std::vector<std::vector<uint8_t>> BuildBrickNotify(
             uint16_t usMode, uint32_t dwIdServer,
@@ -278,6 +298,12 @@ public:
         uint32_t dwTargets[10] = {0}; // cols 3..12
         uint8_t byCount = 0;     // number of valid targets
     };
+
+    // test seam: inject a today-war (the FUN_14001ade0 +0xe0 map)
+    void InsertWarForTest(uint32_t dwKey,
+                          const PlunderWarRecord& rec) {
+        m_mapPlunderWarToday[dwKey] = rec;
+    }
 
     // ---- sinks wired by the kernel after Init ----
     // FUN_140018870: broadcast a built packet to every online server

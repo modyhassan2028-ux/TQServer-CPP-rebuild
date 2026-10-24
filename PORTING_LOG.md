@@ -2870,3 +2870,34 @@ FUN_140022f40 (تفاصيل كتابة الحقل)، FUN_1400232b0 (مسار
    - فشل ترويسة mode-3 → تدمير بدون إرسال (قسم الحروب كله
      يتخطى)
 3. كل الاختبارات خضرا (league + os + plunder + kernel).
+
+## جلسة 2026-10-24 18:10 — ProcessServerConnectOK منفذة كاملة
+1. **[تم ✔]** CCountrySysMgr::ProcessServerConnectOK (الأصل
+   FUN_14001ade0، ~600 سطر) — الدفعة الخماسية عند تسجيل
+   سيرفر عضو، كلها عبر طابور FUN_14000a0b0 (بلد السيرفر؛ في
+   البورت بث مباشر لكل سيرفرات البلد):
+   - (أ) brick mode-1 عبر BuildBrickNotify: ترويسة
+     FUN_1400240f0(1, idleague السيرفر الحالي
+     FUN_140019f80, country_date) + مداخل (idleague, amount)
+     لليجات السيرفر نفسه مع تجزئة 0x3ff
+   - (ب) LeagueRank action 0: مدخل 0x2c لكل ليج من
+     FUN_1400230a0 (fields 2/1/3 + strings 5/6 = idleague,
+     idserver, amount, league_name@+0x14, leader_name@+0x24)
+     مع تجزئة عبر EncodeLeagueRank
+   - (ج) LeagueInfo action 2: ليجات السيرفرات الأخرى فقط
+     (skip node[3]==server)، id مركّب idleague+idserver*
+     1000000، عبر EncodeLeagueInfo/DecodeLeagueInfoEntry
+     المصححة، تجزئة عند بوابة 0x3ff
+   - (د) PlunderWarInfo: mode-3 إعلان (id 0) ثم رسالة mode-0
+     لكل حرب اليوم (dwId/apply_id) بعشرة targets
+     (الأعمدة 3..12 = vcall loop idx 3..12)
+   - (هـ) LeagueList action 0: أرقام الليجات من
+     lower_bound({server,0}) للنهاية مع تجزئة
+   - country == -1 (FUN_14000d620) → لا شيء إطلاقاً (متحقق
+     في الاختبار بسيرفر 99)
+   - TBD موثق: هوية حاوية الرانك الأصلية (mgr+0x60 vector
+     بترتيب الأصل؛ البورت يتبع ترتيب map الليجات) وتفاصيل
+     فشل ترويسة mode-3 (الأصل يتلف الرسالة ويقفز قسم
+     الحروب)
+2. **tests/cross_connect_ok_test.cpp: ALL OK** + الرجريشن
+   الأربعة كلها خضرا.

@@ -943,4 +943,112 @@ bool CCountrySysMgr::PublishSupportToken(uint32_t dwIdServerLeague,
 }
 
 
+
+// ===== ProcessServerConnectOK (ORIGINAL FUN_14001ade0) =====
+
+void CCountrySysMgr::ProcessServerConnectOK(uint32_t dwIdServer) {
+    // 0. FUN_14000d620(kernel, server) = the country; -1 -> the
+    //    whole flow is skipped (no member)
+    if (!m_fnCountryOfServer ||
+        m_fnCountryOfServer(dwIdServer) == 0xffffffffu)
+        return;
+    auto Send = [this](const std::vector<uint8_t>& pkt) {
+        // ORIGINAL: FUN_14000a0b0(kernel, 0, country, buf, len, 1)
+        // queue push -> the rebuild broadcasts the chunk directly
+        if (m_fnBroadcast) m_fnBroadcast(pkt, 0);
+    };
+    // (a) mode-1 brick over the server's OWN leagues
+    {
+        std::vector<const CountryLeague*> vecMine;
+        for (auto it = m_leagues.lower_bound({dwIdServer, 0});
+             it != m_leagues.end() && it->first.first == dwIdServer;
+             ++it)
+            vecMine.push_back(&it->second);
+        for (const auto& pkt : BuildBrickNotify(1, dwIdServer,
+                                                vecMine))
+            Send(pkt);
+    }
+    // (b) LeagueRank action 0 - a 0x2c entry per league
+    //     (FUN_1400230a0: fields 2/1/3 + strings 5/6)
+    {
+        std::vector<LeagueRankRec> recs;
+        recs.reserve(m_leagues.size());
+        for (const auto& kv : m_leagues) {
+            LeagueRankRec r{};
+            r.dwA = kv.second.dwIdLeague;  // field 2
+            r.dwB = kv.second.dwIdServer; // field 1
+            r.dwC = kv.second.dwAmount;   // field 3
+            CopyStr(r.szStr1, sizeof r.szStr1,
+                    kv.second.strLeagueName); // field 5
+            CopyStr(r.szStr2, sizeof r.szStr2,
+                    kv.second.strLeaderName); // field 6
+            recs.push_back(r);
+        }
+        for (auto& body : EncodeLeagueRank(0, recs))
+            Send(LeagueRankWrap(body));
+    }
+    // (c) LeagueInfo action 2 - every OTHER server's leagues
+    {
+        std::vector<LeagueInfoEntry> recs;
+        for (const auto& kv : m_leagues) {
+            if (kv.first.first == dwIdServer)
+                continue; // skip node[3] == dwIdServer
+            LeagueInfoEntry e{};
+            e.dwIdLeague = (uint32_t)(kv.second.dwIdLeague +
+                (uint64_t)kv.second.dwIdServer * 1000000ULL);
+            e.dwCountryDate = kv.second.dwCountryDate; // f4 (not
+            e.dwAmount = kv.second.dwAmount;            // on wire)
+            CopyStr(e.szName, sizeof e.szName,
+                    kv.second.strLeagueName);
+            CopyStr(e.szLeader, sizeof e.szLeader,
+                    kv.second.strLeaderName);
+            CopyStr(e.szTitle, sizeof e.szTitle,
+                    kv.second.strTitle);
+            recs.push_back(e);
+        }
+        // chunked at the 0x3ff wire gate (FUN_140023b60:
+        // total msg size + 0x3c > 0x3ff -> flush)
+        size_t i = 0;
+        while (i < recs.size()) {
+            size_t n = 0;
+            while (i + n < recs.size() &&
+                   4 + 4 + 0x3cu * (n + 1) <= 0x3ff - 4)
+                ++n;
+            Send(EncodeLeagueInfo(2, recs.data() + i,
+                                  (uint16_t)n));
+            i += n;
+        }
+    }
+    // (d) plunder: mode-3 announce, then per-war mode-0
+    {
+        auto pktAnnounce = EncodePlunderWarInfo(3, 0, nullptr, 0);
+        Send(pktAnnounce);
+        for (const auto& kv : m_mapPlunderWarToday) {
+            const PlunderWarRecord& war = kv.second;
+            // ORIGINAL: FUN_140023730(msg, 0, node[3]) then the
+            // idx 3..12 vcall loop appends the 10 target fields
+            Send(EncodePlunderWarInfo(0, war.dwId
+                    ? war.dwId : kv.first, war.dwTargets, 10));
+        }
+    }
+    // (e) LeagueList action 0 - league ids from lower_bound to end
+    {
+        std::vector<std::vector<uint8_t>> out;
+        std::vector<uint32_t> ids;
+        for (auto it = m_leagues.lower_bound({dwIdServer, 0});
+             it != m_leagues.end(); ++it) {
+            if (it->second.dwIdLeague == 0) continue;
+            if (8 + 4u * (ids.size() + 1) > 0x3ff - 4) {
+                out.push_back(EncodeLeagueList(0, ids.data(),
+                    (uint16_t)ids.size()));
+                ids.clear();
+            }
+            ids.push_back(it->second.dwIdLeague);
+        }
+        out.push_back(EncodeLeagueList(0, ids.data(),
+            (uint16_t)ids.size()));
+        for (const auto& pkt : out) Send(pkt);
+    }
+}
+
 } // namespace cross
