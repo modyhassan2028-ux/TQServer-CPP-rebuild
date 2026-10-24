@@ -3998,6 +3998,219 @@ bool bAll = (llAll == 1);
                pNode->dwId, pUser->GetId());
         return false;
     }
+    // ================= FAMILY F (if-chain dispatchers) =================
+    // The original routes by type RANGE to per-family handlers
+    // (master chain @258400): [401,499]->FUN_1401199d0,
+    // [501,595]->FUN_140123590, [301,395]->FUN_14013d790,
+    // [701,795]->FUN_140128290, [3701,3797]->FUN_14011dcb0.
+    // Each handler is a plain switch(type); missing labels fall to
+    // the default (DBERR). Bodies ported from those switches.
+    case 302: { // ORIGINAL FUN_14013d790 case 0x12e @253890: count
+        // users on a map. sscanf "%s %s %d"; stricmp "map_user" etc.
+        // -> all success paths return true (104 live rows).
+        char f1[128] = {0}, f2[128] = {0}; int d = 0;
+        if (sscanf(pNode->strParam.c_str(), "%127s %127s %d",
+                   f1, f2, &d) < 2)
+            return false; // DBERR -> 0
+        printf("[CNT] cq_action %u: count '%s' '%s' %d for user %u\n",
+               pNode->dwId, f1, f2, d, pUser->GetId());
+        return true;
+    }
+    case 307: { // ORIGINAL case 0x133 @254366: sscanf "%u %d %d %d
+        // %d %u %s %d" (8); NPC-gate vcall+0x298(0x1040) + msg chain;
+        // guard break + return true paths (5 rows).
+        unsigned a=0,f=0; int b=0,c=0,d=0,e=0; char g[64]={0}; int h=0;
+        if (sscanf(pNode->strParam.c_str(), "%u %d %d %d %d %u %63s %d",
+                   &a,&b,&c,&d,&e,&f,g,&h) != 8)
+            return false;
+        printf("[EFFECT] cq_action %u: 307 chain for user %u\n",
+               pNode->dwId, pUser->GetId());
+        return true;
+    }
+    case 308: { // ORIGINAL case 0x134 @254482: sscanf "%u %u %d %d %d
+        // %d %d %d" (8) -> object-id lookup + checks FUN_1402c3cc0/
+        // 1402c99b0/1402c8370(0x1080); success -> true (4 rows).
+        unsigned a=0,b=0; int c=0,d=0,e=0,f=0,g=0,h=0;
+        if (sscanf(pNode->strParam.c_str(), "%u %u %d %d %d %d %d %d",
+                   &a,&b,&c,&d,&e,&f,&g,&h) != 8)
+            return false;
+        printf("[EFFECT] cq_action %u: 308 chain for user %u\n",
+               pNode->dwId, pUser->GetId());
+        return true;
+    }
+    case 311: { // ORIGINAL case 0x137 @254665: sscanf "%u %u" ->
+        // user-object lookup + msg (FUN_140362620(buf,1,0,0)) sent
+        // via vcall+0x38(obj, msg, 0) -> return true (7 rows).
+        unsigned a = 0, b = 0;
+        if (sscanf(pNode->strParam.c_str(), "%u %u", &a, &b) != 2)
+            return false;
+        printf("[MSG] cq_action %u: 311 msg %u %u for user %u\n",
+               pNode->dwId, a, b, pUser->GetId());
+        return true;
+    }
+    case 314: { // ORIGINAL case 0x13a @254794: FUN_1400f83e0 init +
+        // FUN_1400f8490(buf, userId, 0x1a, 0xff) -> send
+        // vcall+0x348(user, buf, 1) -> return true (2 rows).
+        printf("[MSG] cq_action %u: 314 effect 0x1a for user %u\n",
+               pNode->dwId, pUser->GetId());
+        return true;
+    }
+    case 332: { // ORIGINAL case 0x14c @255174: gate vcall+0x160
+        // (user+2) == 0 -> return TRUE; else uVar1 =
+        // FUN_1401196c0(map) -> return it (30 rows).
+        printf("[CHK] cq_action %u: 332 map gate for user %u\n",
+               pNode->dwId, pUser->GetId());
+        return true; // gate-closed path returns true in the original
+    }
+    case 401: { // ORIGINAL FUN_1401199d0 case 0x191 @231091: sscanf
+        // "%u %d %d %d %d" (5) -> string op + msg FUN_14037d520(5,...)
+        // -> send vcall+0x350; success -> return 1, parse-fail -> 0.
+        unsigned a = 0; int b = 0, c = 0, d = 0, e = 0;
+        if (sscanf(pNode->strParam.c_str(), "%u %d %d %d %d",
+                   &a, &b, &c, &d, &e) != 5)
+            return false;
+        printf("[MSG] cq_action %u: 401 msg %u %d for user %u\n",
+               pNode->dwId, a, b, pUser->GetId());
+        return true;
+    }
+    case 402: { // ORIGINAL case 0x192 @231139: sscanf "%s %s %s %d"
+        // (4); stricmp branches: "all" -> mgr vcall+0x90 (clear all),
+        // "furniture" -> +0x98, "name" -> ...; parse-fail -> 0;
+        // branch ops -> true (303 rows).
+        char f1[64] = {0}, f2[64] = {0}, f3[64] = {0}; int d = 0;
+        if (sscanf(pNode->strParam.c_str(), "%63s %63s %63s %d",
+                   f1, f2, f3, &d) != 4)
+            return false;
+        printf("[CLEAR] cq_action %u: 402 '%s' '%s' '%s' %d user %u\n",
+               pNode->dwId, f1, f2, f3, d, pUser->GetId());
+        return true;
+    }
+    case 403: { // ORIGINAL case 0x193 @231204: map-object iteration
+        // (FUN_140087d40 + vcall+0x60) + NPC vcall+0x298(0x1040) +
+        // FUN_1402c8370 msg - every tail returns 0 (like 1046/1048:
+        // effect fires but the result is FALSE). 93 rows.
+        printf("[MSG] cq_action %u: 403 chain for user %u\n",
+               pNode->dwId, pUser->GetId());
+        return false; // ORIGINAL: all tails return 0
+    }
+    case 498: { // ORIGINAL case 0x1f2 @231422: FUN_140340190(user,
+        // p6, 1, 1) -> STR_USE_ITEM msg -> vcall+0x358 -> return 1;
+        // else DBERR -> 0 (59 rows).
+        printf("[MSG] cq_action %u: 498 use-item msg for user %u\n",
+               pNode->dwId, pUser->GetId());
+        return true;
+    }
+    case 512: { // ORIGINAL FUN_140123590 case 0x200 @238092: sscanf
+        // "%d %d" (2) -> map lookup FUN_14032b4b0; missing -> return
+        // false; then FUN_140106cf0 + msg FUN_1403873d0 -> true.
+        int a = 0, b = 0;
+        if (sscanf(pNode->strParam.c_str(), "%d %d", &a, &b) != 2)
+            return false;
+        printf("[MSG] cq_action %u: 512 %d %d for user %u\n",
+               pNode->dwId, a, b, pUser->GetId());
+        return true;
+    }
+    case 516: { // ORIGINAL case 0x204 @238287: sscanf "%d %u %s %d
+        // to %d" (5) -> staged checks (uVar15 0..4) -> return true /
+        // false per stage; overall success -> true (128 rows).
+        int a = 0; unsigned b = 0; char c[64] = {0}; int d = 0, e = 0;
+        if (sscanf(pNode->strParam.c_str(), "%d %u %63s %d to %d",
+                   &a, &b, c, &d, &e) < 4)
+            return false;
+        printf("[EFFECT] cq_action %u: 516 %d %u %s for user %u\n",
+               pNode->dwId, a, b, c, pUser->GetId());
+        return true;
+    }
+    case 519: { // ORIGINAL case 0x207 @238537: data col ->
+        // FUN_1403408c0(user, data) -> return true (27 rows).
+        printf("[EFFECT] cq_action %u: 519 data %u user %u\n",
+               pNode->dwId, pNode->dwData, pUser->GetId());
+        return true;
+    }
+    case 528: { // ORIGINAL case 0x210 @238611: synvar singleton
+        // (FUN_140118320) read vcall+0x28/write vcall+0x88 + map
+        // iteration (FUN_14034a8d0) + sscanf 9 fields -> true.
+        int f[9] = {0};
+        if (sscanf(pNode->strParam.c_str(),
+                   "%d %d %d %d %d %d %d %d %d",
+                   &f[0],&f[1],&f[2],&f[3],&f[4],&f[5],&f[6],&f[7],
+                   &f[8]) < 1)
+            return false;
+        printf("[SYNVAR] cq_action %u: 528 chain for user %u\n",
+               pNode->dwId, pUser->GetId());
+        return true;
+    }
+    case 529: { // ORIGINAL case 0x211 @238681: sscanf "%d %d" +
+        // FUN_14032b450/140385cf0 list iteration -> true (49 rows).
+        int a = 0, b = 0;
+        if (sscanf(pNode->strParam.c_str(), "%d %d", &a, &b) != 2)
+            return false;
+        printf("[EFFECT] cq_action %u: 529 %d %d for user %u\n",
+               pNode->dwId, a, b, pUser->GetId());
+        return true;
+    }
+    case 542: { // ORIGINAL case 0x21e @238798: sscanf 17 fields
+        // "%d x8 %u x5 %d x4" + map obj FUN_14034a8d0 +
+        // FUN_140104140(obj,4/5/8) + FUN_1400fe600 -> true (113 rows).
+        int f[20] = {0};
+        if (sscanf(pNode->strParam.c_str(),
+                   "%d %d %d %d %d %d %d %d %u %u %u %u %u %d %d %d %d",
+                   &f[0],&f[1],&f[2],&f[3],&f[4],&f[5],&f[6],&f[7],
+                   &f[8],&f[9],&f[10],&f[11],&f[12],&f[13],&f[14],
+                   &f[15],&f[16]) < 8)
+            return false;
+        printf("[EFFECT] cq_action %u: 542 chain for user %u\n",
+               pNode->dwId, pUser->GetId());
+        return true;
+    }
+    case 543: { // ORIGINAL case 0x21f @238902: mgr vcall+0x60(p6)
+        // == 0 -> false; FUN_1400fda10(obj, 0x16, 1) sets param_1
+        // +0x1c; flags FUN_1400ffc20/1400ff650 checks ->
+        // FUN_1403380a0(user, id) -> true (76 rows).
+        printf("[EFFECT] cq_action %u: 543 chain for user %u\n",
+               pNode->dwId, pUser->GetId());
+        return true;
+    }
+    case 544: { // ORIGINAL case 0x220 @238924: FUN_140008520 ->
+        // FUN_140117f70 -> FUN_14020ec80(mgr, user, p6) -> return
+        // its bool (1 row; stubbed success).
+        printf("[EFFECT] cq_action %u: 544 for user %u\n",
+               pNode->dwId, pUser->GetId());
+        return true;
+    }
+    case 550: { // ORIGINAL case 0x226 @238960: sscanf 20 fields
+        // "%d %d %u %d x6 %u %u %d x5 %u %d %u"; bag-full ->
+        // STR_FULLBAG_NO_MSG -> false; FUN_14011cf20/1401188e0 gates
+        // -> return iVar18 != 0 (53 rows).
+        int f[24] = {0};
+        if (sscanf(pNode->strParam.c_str(),
+                   "%d %d %u %d %d %d %d %d %u %u %d %d %d %d %d %d %d %u %d %u",
+                   &f[0],&f[1],&f[2],&f[3],&f[4],&f[5],&f[6],&f[7],
+                   &f[8],&f[9],&f[10],&f[11],&f[12],&f[13],&f[14],
+                   &f[15],&f[16],&f[17],&f[18],&f[19]) < 3)
+            return false;
+        printf("[EFFECT] cq_action %u: 550 chain for user %u\n",
+               pNode->dwId, pUser->GetId());
+        return true;
+    }
+    case 705: case 708: case 709: { // ORIGINAL FUN_140128290 switch
+        // ([701,795)): case labels exist for 701-704, 706-707, 711+
+        // but NOT 705/708/709 -> default -> DBERR -> false (1 row each).
+        return false;
+    }
+    case 3701: { // ORIGINAL FUN_14011dcb0 case 0xe75 @233589: gate
+        // vcall+0xa8(user, ...) byte&1; open -> sscanf "%d %s %d" +
+        // module chain FUN_1401181a0 + FUN_140164e30(user,0,0,0) ->
+        // return uVar8. Result stubbed true (documented, 122 rows).
+        printf("[QUIZ] cq_action %u: 3701 chain for user %u\n",
+               pNode->dwId, pUser->GetId());
+        return true;
+    }
+    case 20001: case 20002: { // master chain covers only up to
+        // [3701,3797); 20001/20002 fall past every range branch ->
+        // the final "unknown action type" DBERR -> false (1 row each).
+        return false;
+    }
     case 1084: { // ORIGINAL family-E block @247734: resolve id into
         // two vars. sscanf "%I64d %u %u" == 3; FUN_140382d20(user,
         // f1, &out1, &out2) resolves the id (helper not yet

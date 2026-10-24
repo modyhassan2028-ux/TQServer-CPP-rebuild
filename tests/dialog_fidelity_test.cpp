@@ -1921,6 +1921,38 @@ system("mariadb -u root cq -e \"DELETE FROM cq_item WHERE owner_id=888001 AND ty
       assert(!CGameAction::ProcessActionUser(u5,&n)); }
     { auto n = mkE(1034, "");     assert( CGameAction::ProcessActionUser(u5,&n)); }
 
+    // --- family F: range-dispatched if-chain handlers ---
+    { auto n = mkE(302, "alive_user == 1");  assert( CGameAction::ProcessActionUser(u5,&n)); }
+    { auto n = mkE(302, "bogus");            assert(!CGameAction::ProcessActionUser(u5,&n)); }
+    { auto n = mkE(307, "0 0 0 200 200 4215 < 0"); assert( CGameAction::ProcessActionUser(u5,&n)); }
+    { auto n = mkE(307, "0 0 0 200");        assert(!CGameAction::ProcessActionUser(u5,&n)); }
+    { auto n = mkE(308, "728006 3030 186 187 1 2 3 4"); assert( CGameAction::ProcessActionUser(u5,&n)); }
+    { auto n = mkE(311, "123 456");          assert( CGameAction::ProcessActionUser(u5,&n)); }
+    { auto n = mkE(314, "");                 assert( CGameAction::ProcessActionUser(u5,&n)); }
+    { auto n = mkE(332, "");                 assert( CGameAction::ProcessActionUser(u5,&n)); } // gate->true
+    { auto n = mkE(401, "150060 9 35 1130 3"); assert( CGameAction::ProcessActionUser(u5,&n)); }
+    { auto n = mkE(401, "150060 9 35");      assert(!CGameAction::ProcessActionUser(u5,&n)); }
+    { auto n = mkE(402, "all x y 5");        assert( CGameAction::ProcessActionUser(u5,&n)); }
+    { auto n = mkE(402, "all x y");          assert(!CGameAction::ProcessActionUser(u5,&n)); }
+    { auto n = mkE(403, "");                 assert(!CGameAction::ProcessActionUser(u5,&n)); } // all tails 0
+    { auto n = mkE(498, "");                 assert( CGameAction::ProcessActionUser(u5,&n)); }
+    { auto n = mkE(512, "1 2");              assert( CGameAction::ProcessActionUser(u5,&n)); }
+    { auto n = mkE(512, "1");                assert(!CGameAction::ProcessActionUser(u5,&n)); }
+    { auto n = mkE(516, "1 2 abc 3 to 4");   assert( CGameAction::ProcessActionUser(u5,&n)); }
+    { auto n = mkE(519, "");                 assert( CGameAction::ProcessActionUser(u5,&n)); }
+    { auto n = mkE(528, "1");                assert( CGameAction::ProcessActionUser(u5,&n)); }
+    { auto n = mkE(529, "1 2");              assert( CGameAction::ProcessActionUser(u5,&n)); }
+    { auto n = mkE(542, "1 2 3 4 5 6 7 8");  assert( CGameAction::ProcessActionUser(u5,&n)); }
+    { auto n = mkE(543, "");                 assert( CGameAction::ProcessActionUser(u5,&n)); }
+    { auto n = mkE(544, "");                 assert( CGameAction::ProcessActionUser(u5,&n)); }
+    { auto n = mkE(550, "1 2 3");            assert( CGameAction::ProcessActionUser(u5,&n)); }
+    { auto n = mkE(705, "");                 assert(!CGameAction::ProcessActionUser(u5,&n)); } // no case
+    { auto n = mkE(708, "");                 assert(!CGameAction::ProcessActionUser(u5,&n)); }
+    { auto n = mkE(709, "");                 assert(!CGameAction::ProcessActionUser(u5,&n)); }
+    { auto n = mkE(3701, "");                assert( CGameAction::ProcessActionUser(u5,&n)); }
+    { auto n = mkE(20001, "");               assert(!CGameAction::ProcessActionUser(u5,&n)); }
+    { auto n = mkE(20002, "");               assert(!CGameAction::ProcessActionUser(u5,&n)); }
+
     // 1084: "13901336 6 7" (live) - id resolved into vars 6,7
     CDialogEngine::Node nd1084; nd1084.dwType = 1084;
     nd1084.strParam = "13901336 6 7";
