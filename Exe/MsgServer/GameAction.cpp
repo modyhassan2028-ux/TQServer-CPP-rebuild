@@ -3428,6 +3428,42 @@ bool bAll = (llAll == 1);
         // "amount"/other shapes: 0 live rows; sscanf tail documented
         return false;
     }
+    case 1651: { // ORIGINAL family-E block @251130: NPC name/data
+        // check. Head: sscanf(param_7,"%u") -> npcId (param_7 = the
+        // dialog npc id; != 1 -> DBERR 0x2df4 -> 0); CNpcManager
+        // lookup (FUN_1400875f0 + vtable+0x20) -> null -> 0. Node
+        // data column picks the branch:
+        // data==1: sscanf(param,"%s") name; npc blob 0x1040 ->
+        // blob+0x10 vcall+0x18 = npc NAME; strncmp(name, npcName,
+        // 0x40) == 0 -> true; mismatch -> user+0x12d = 1 +
+        // FUN_140165a30 -> false.
+        // data==2: sscanf(param,"%u") v; npc blob 0x1002 vcall+0x50
+        // == v -> true else false.
+        uint32_t dwNpcId = pUser->m_stDialogCtx.dwId; // param_7
+        if (!dwNpcId) return false; // ORIGINAL: lookup null -> 0
+        auto pNpc = CNpcManager::Instance().GetNpc(dwNpcId);
+        if (!pNpc) return false;
+        if (pNode->dwData == 1) { // 66 rows: named NPCs
+            char szName[256]={0};
+            if (sscanf(pNode->strParam.c_str(), "%255s", szName) < 1)
+                return false; // DBERR 0x2e08 -> 0
+            if (strncmp(szName, pUser->m_stDialogCtx.strName.c_str(),
+                        0x40) == 0)
+                return true;
+            printf("[NPCCHK] cq_action %u npc %u name mismatch (%s != %s)\n",
+                   pNode->dwId, dwNpcId, szName,
+                   pUser->m_stDialogCtx.strName.c_str());
+            // ORIGINAL also sets user+0x12d flag + FUN_140165a30
+            return false;
+        }
+        if (pNode->dwData == 2) { // "0017" style: numeric npc data
+            uint32_t v = 0;
+            if (sscanf(pNode->strParam.c_str(), "%u", &v) != 1)
+                return false;
+            return pUser->m_stDialogCtx.dwData == v; // blob 0x1002
+        }
+        return false;
+    }
     case 1003: { // ORIGINAL switch case 2: teleport "mapid x y [force]"
         uint32_t dwMap = 0; int nX = 0, nY = 0, nForce = 0;
         if (sscanf(pNode->strParam.c_str(), "%u %d %d %d", &dwMap, &nX, &nY, &nForce) < 3) {

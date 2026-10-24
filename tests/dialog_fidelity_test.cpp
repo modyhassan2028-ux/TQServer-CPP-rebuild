@@ -1733,6 +1733,26 @@ system("mariadb -u root cq -e \"DELETE FROM cq_item WHERE owner_id=888001 AND ty
     ndE2.strParam = "other"; // no match -> tail -> false
     assert(!CGameAction::ProcessActionUser(u5, &ndE2));
 
+    // --- family E batch 3: 1651 (live rows) ---
+    // dialog npc context: id + name + data
+    auto npcA = std::make_shared<CNpc>(1015, "Armorer", CNpc::Type::Dialog, 1000, 70, 80);
+    CNpcManager::Instance().RegisterNpc(npcA);
+    u5->m_stDialogCtx.dwId = 1015;
+    u5->m_stDialogCtx.strName = "Armorer";  // live pattern
+    u5->m_stDialogCtx.dwData = 17;          // data=2 "0017" rows
+    CDialogEngine::Node nd1651; nd1651.dwType = 1651;
+    nd1651.dwData = 1; nd1651.strParam = "Armorer";
+    assert(CGameAction::ProcessActionUser(u5, &nd1651));
+    nd1651.strParam = "Pharmacist"; // mismatch -> false
+    assert(!CGameAction::ProcessActionUser(u5, &nd1651));
+    nd1651.dwData = 2; nd1651.strParam = "0017"; // %u -> 17 == data
+    assert(CGameAction::ProcessActionUser(u5, &nd1651));
+    nd1651.strParam = "0021"; // 21 != 17 -> false
+    assert(!CGameAction::ProcessActionUser(u5, &nd1651));
+    u5->m_stDialogCtx.dwId = 0; // no dialog npc -> 0
+    assert(!CGameAction::ProcessActionUser(u5, &nd1651));
+    u5->m_stDialogCtx.dwId = 1015;
+
     printf("DIALOG FIDELITY TEST PASSED\n");
     return 0;
 }
