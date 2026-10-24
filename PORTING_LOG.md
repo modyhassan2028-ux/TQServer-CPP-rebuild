@@ -3090,3 +3090,32 @@ FUN_140022f40 (تفاصيل كتابة الحقل)، FUN_1400232b0 (مسار
    world_kernel: حلقة الوحوش والمولّد، (ج) رسائل AI-NPC
    (CMsgAiNpcInfo)، (د) ربط DLLs الجانبية (Arenic/Booth/
    Analyst/AntiCheat).
+
+## جلسة 2026-10-24 21:20 — NpcServer الوحدة 1: CNpcWorld::OnTimer
+1. **[مستخرجة ومنفذة ✔]** الاكتشاف المعماري: مسار السورس
+   الأصلي من سلاسل MYASSERT: `f:\version\cqserver-78.0.11-
+   1204\npcserver\npckernel\npcworld.cpp` — الوحدة =
+   **CNpcWorld** (عالم الـ NPC + المولّد).
+2. **FUN_14001d390 = CNpcWorld::OnTimer** (آلة الحالة
+   الكاملة @+8):
+   - **حالة 0:** state=1 + حاوية FUN_140048d20 + فحص
+     المفتاح FUN_140048da0(**0x3ade68b1**, "NpcServer
+     Tqdig", "skl8934##VJICW ") → نجاح: FUN_14001c5f0
+     (بدء الاتصال بالـ MsgServer)
+   - **حالة 1:** بوابة FUN_14001c2c0 (كل 5 ثوان: خلية
+     last@+4) → "Login game server . . ."
+   - **حالة 2:** عامل 10 ثوانٍ بعد اللوجن (تُقارن
+     بالثواني: TimeGet/1000) → "Generator begin." ثم دورة
+     العالم (FUN_14003c520/140037f80/14002b380 بمحلل
+     CTickAnalyst 0x51) + إحصاءات كل +0x20 ثانية بمشيّة
+     المدير +0x30 (تصنيف vcall+0x30 vs +0x48: أقل=active،
+     مساوٍ=full، أكبر=over، تجميع +0x20)
+   - **حالة 3:** إعادة تشغيل — نفس حالة 0 بمفتاح
+     **0x3ade68b2** (اختلاف رقم واحد!)
+   - **default:** MYASSERT(0x13c, "CNpcWorld::OnTimer")
+3. **FUN_14001c700 = OnConnectOK:** state=2، ثانية اللوجن
+   @+0x1c، "Login OK. generator monster after %d secs"
+   (المتغيّر غير ظاهر في الديكمبايل — TBD).
+4. Exe/NpcServer/NpcWorld.{h,cpp} + tests/npc_world_test —
+   **NPC_WORLD_OK** (كل الحالات + البوابات الزمنية +
+   تصنيف الإحصاءات + MYASSERT). الرجريشن 7/7 كلها خضرا.
