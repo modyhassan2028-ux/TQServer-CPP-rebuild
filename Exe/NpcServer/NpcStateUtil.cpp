@@ -518,6 +518,95 @@ uint32_t CNpcStuckHandler(CNpcStateData& rN) {
     return uRet & 0xff;
 }
 
+uint32_t CNpcPkDay57c50(CNpcStateData& rN) {
+    // ORIGINAL FUN_140057c50
+    int d = rN.m_fnRowGetInt(0xd);
+    // ORIGINAL: the unsigned hash product
+    uint32_t r = (uint32_t)((uint32_t)(d % 10000000)
+        * 0x14f8b589u);
+    if ((d % 10000000) / 100000 == 5) {
+        // ORIGINAL: -((d % 100000) >> 31)
+        // = -(sign bit) = 0 for positive d
+        r = (uint32_t)-(int)(
+            (uint32_t)(d % 100000) >> 0x1f);
+        if (((d % 100000) / 1000) * 1000 == 0)
+            return 1;
+    }
+    return r & 0xffffff00u;   // FALSE path
+}
+
+uint32_t CNpcWorldPkGate59710(CNpcStateData& rN) {
+    // ORIGINAL FUN_140059710
+    uint32_t r = CNpcPkDay57c50(rN);
+    uint32_t v = r;           // uVar3 = CONCAT44
+    if ((char)r == '\0') {
+        v = (uint32_t)rN.m_fnRowGetInt(0x24);
+        if ((int)v != 0) {
+            // ORIGINAL: the VERBATIM re-read
+            v = (uint32_t)rN.m_fnRowGetInt(0x24);
+            if ((int)v != 0x3fc)
+                return v & 0xffffffffffffff00ull;
+        }
+        // ORIGINAL: CONCAT71(v >> 8, 1)
+        return 1;
+    }
+    return v & 0xffffffffffffff00ull;
+}
+
+uint32_t CNpcKeepPkTarget59dc0(CNpcStateData& rN) {
+    // ORIGINAL FUN_140059dc0
+    int nId = (int)rN.m_nTargetId;      // +0x84
+    if (nId == 0) {
+        rN.m_nTargetId = 0;
+        // ORIGINAL: in_RAX (uninitialized
+        // register) masked -> false
+        return 0;
+    }
+    CNpcTargetSeam* pT = rN.m_fnFindTarget(nId);
+    if (pT == nullptr) {
+        rN.m_nTargetId = 0;
+        return 0;
+    }
+    if (!pT->m_bValid50) {   // vt+0x50 alive
+        rN.m_nTargetId = 0;
+        return 0;
+    }
+    if (pT->m_bVt78) {       // target vt+0x78
+        if (!rN.m_fnSubVt78()) {   // MY vt+0x78
+            uint32_t r =
+                CNpcWorldPkGate59710(rN);
+            if ((char)r != '\0') {
+                // LAB_140059f28: FALSE but
+                // the target is NOT cleared
+                // (the VERBATIM quirk)
+                return r &
+                    0xffffffffffffff00ull;
+            }
+        }
+        // fall through to the dist check
+    }
+    // ORIGINAL: sight = row GetInt(0x10)
+    int nSight = rN.m_fnRowGetInt(0x10);
+    // ORIGINAL: my GetInt(t vt+0x48) then
+    // if (sight <= v) v = sight
+    int nV = rN.m_fnSubGetInt(pT->m_nField48);
+    if (nSight <= nV) nV = nSight;
+    int d = rN.m_fnSubDist(pT->m_nX, pT->m_nY);
+    // ORIGINAL: the two paths converge on
+    // LAB_140059eda (the drop-check)
+    if (nSight < d) goto drop_check;
+    if (pT->m_bVt68) goto drop_check;  // vt+0x68
+    return 1;          // LAB_140059ef3
+drop_check:
+    if (d <= nV) {
+        // ORIGINAL: my GetInt(0) > 1 keeps
+        if (1 < rN.m_fnSubGetInt(0))
+            return 1;   // LAB_140059ef3
+    }
+    rN.m_nTargetId = 0;    // +0x84 = 0
+    return 0;              // masked false
+}
+
 void CNpcWalkMsg(CNpcStateData& rN,
                  int nX, int nY,
                  uint32_t uDir) {

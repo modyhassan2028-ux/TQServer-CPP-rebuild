@@ -307,6 +307,53 @@ bool CNpcFreeGate(CNpcStateData& rN);
 uint32_t CNpcStuckHandler(CNpcStateData& rN);
 
 // ============================================================
+// ===== THE PK FAMILY (unit 31) ====================
+// ============================================================
+// FUN_140057c50 - the "free PK day" check:
+//   d = row GetInt(0xd);
+//   r = (uint)(d % 10000000) * 0x14f8b589;
+//   if ((d % 10000000) / 100000 == 5) {
+//     r = -((d % 100000) >> 31);   // 0
+//     if (((d % 100000) / 1000) * 1000 == 0)
+//       return 1;
+//   }
+//   return r & 0xffffff00;   // FALSE path
+uint32_t CNpcPkDay57c50(CNpcStateData& rN);
+
+// FUN_140059710 - the world PK gate:
+//   r = 57c50(npc);
+//   if ((char)r == 0) {          // NOT a PK day
+//     v = row GetInt(0x24);
+//     if (v != 0) {
+//       v = row GetInt(0x24);    // VERBATIM re-read
+//       if (v != 0x3fc) return v & ~0xff;  // false
+//     }
+//     return 1;
+//   }
+//   return r & ~0xff;            // PK day -> false
+uint32_t CNpcWorldPkGate59710(CNpcStateData& rN);
+
+// FUN_140059dc0 - keep the current PK target:
+//   id = +0x84; if (!id) { false }
+//   t = find(id); if (!t || !t vt+0x50) {
+//     +0x84 = 0; false; }
+//   if (t vt+0x78 && !my vt+0x78 &&
+//       59710(npc)) return false
+//     // QUIRK: the 9710 path does NOT
+//     // clear +0x84 (verbatim)
+//   sight = row GetInt(0x10);
+//   v = min(my GetInt(t vt+0x48), sight);
+//   d = my dist(t x, t y);
+//   drop-check (LAB_140059eda):
+//     if (d <= v && 1 < my GetInt(0))
+//       return 1;
+//     +0x84 = 0; return false;
+//   if (sight < d) goto drop-check;
+//   if (t vt+0x68) goto drop-check;
+//   return 1;
+uint32_t CNpcKeepPkTarget59dc0(CNpcStateData& rN);
+
+// ============================================================
 // ===== ORIGINAL FUN_1400597f0 (the walk msg) ======
 // ============================================================
 // map = +0x98; if (!map) { log; return; }

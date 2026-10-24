@@ -20,6 +20,8 @@ struct CNpcTargetSeam {
     int m_nY = 0;             // vtable+0x40
     int m_nMapId = 0;         // vtable+0x30
     int m_nField48 = 0;       // vtable+0x48 (sight)
+    bool m_bVt78 = false;     // vtable+0x78 (59dc0)
+    bool m_bVt68 = false;     // vtable+0x68 (59dc0)
 };
 
 struct CNpcStateData {
@@ -240,6 +242,13 @@ struct CNpcStateData {
         // yShort, dirShort, 0x89, x, y, 0)
         // - the msg fill (SHORT-truncated
         // args verbatim)
+    // ===== the PK family (unit 31) =====
+    std::function<bool()> m_fnSubVt78;
+        // MY sub vtable+0x78 flag (59dc0)
+    std::function<int(int)> m_fnSubGetInt;
+        // MY sub vtable+0x10(key) - the
+        // GetInt(level) lookup and the
+        // GetInt(0) > 1 attacker count
     // ===== 580e0 (unit 29) =====
     bool m_bHasPathfinder = false;
         // map(+0x98)->+0x10 != 0 - NOTE the
