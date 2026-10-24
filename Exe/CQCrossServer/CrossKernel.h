@@ -10,6 +10,8 @@
 #include <string>
 #include <vector>
 #include "CrossProtocol.h"
+#include <memory>
+#include "CountrySysMgr.h"
 
 namespace cross {
 
@@ -43,6 +45,19 @@ public:
     void OnHeartbeat(uint64_t ullFromSocket, const HeartbeatData& beat, uint64_t ullNowMs);
     void OnWhoReq(uint64_t ullFromSocket);                          // SendMsgToOtherServer
 
+    // ---- country system (m_pCountrySysMgr) ----
+    // case 0 of the crossmsg switch: pack league name, leader title
+    // and the country date and reply to the requesting socket
+    void OnCountryStatusReq(uint64_t ullSocket, const CountryStatusReq& req);
+    // case 5: broadcast a system talk to every connected server
+    void OnCountryBroadcast(const char* szText);
+    // the hub owns the manager (Init'ed from cq_league_info)
+    class CCountrySysMgr* CountrySys() { return m_pCountrySys.get(); }
+    // test seam (production wiring is the hub shell after Init)
+    void SetCountrySysForTest(std::shared_ptr<CCountrySysMgr> p) {
+        m_pCountrySys = std::move(p);
+    }
+
     size_t ServerCount();
     uint64_t LastBeat(uint32_t dwServerId);
 
@@ -54,6 +69,7 @@ private:
     std::map<uint32_t, CrossServerInfo> m_mapServers;  // by server id
     SendFn m_fnSend;
     LogFn m_fnLog;
+    std::shared_ptr<class CCountrySysMgr> m_pCountrySys;
 };
 
 } // namespace cross

@@ -143,4 +143,41 @@ size_t CCrossServerKernel::ServerCount() {
     return m_mapServers.size();
 }
 
+// ---------------------------------------------------------------------------
+// COUNTRY system handlers (crossmsgserveraction.cpp cases 0 and 5)
+// ---------------------------------------------------------------------------
+void CCrossServerKernel::OnCountryStatusReq(
+        uint64_t ullSocket, const CountryStatusReq& req) {
+    // ORIGINAL case 0 (~29462): three m_pCountrySysMgr calls -
+    // FUN_14001a6a0 (league name), FUN_14001a6d0 (leader title),
+    // FUN_14001bc50 (country date, also written back to msg+8) -
+    // each guarded by the "m_pCountrySysMgr" ASSERT, then two
+    // CStringPacker::AddString calls carry the strings back.
+    CountryStatusResp resp{};
+    if (m_pCountrySys) {
+        const std::string& name =
+            m_pCountrySys->LeagueName(req.dwIdServer, req.dwIdLeague);
+        const std::string& title =
+            m_pCountrySys->LeaderTitle(req.dwIdServer, req.dwIdLeague);
+        std::snprintf(resp.szLeagueName, sizeof(resp.szLeagueName),
+                      "%s", name.c_str());
+        std::snprintf(resp.szLeaderTitle, sizeof(resp.szLeaderTitle),
+                      "%s", title.c_str());
+        resp.dwCountryDate =
+            m_pCountrySys->CountryDate(req.dwIdServer, req.dwIdLeague);
+    }
+    auto pkt = Encode(MsgType_CountryStatusResp, resp);
+    if (m_fnSend) m_fnSend(ullSocket, pkt);
+}
+
+void CCrossServerKernel::OnCountryBroadcast(const char* szText) {
+    // ORIGINAL case 5 (~29605): FUN_14000a0b0-style broadcast of a
+    // system talk (msg type 0x961) to every server socket.
+    if (!szText) return;
+    TalkData talk{};
+    talk.dwServerId = 0;
+    std::snprintf(talk.szText, sizeof(talk.szText), "%s", szText);
+    BroadcastAll(Encode(MsgType_CountryBroadcast, talk));
+}
+
 } // namespace cross

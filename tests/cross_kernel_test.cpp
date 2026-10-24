@@ -1,5 +1,8 @@
 #include "CrossKernel.h"
 #include "CrossProtocol.h"
+#include "CountrySysMgr.h"
+#include "MySQLClient.h"
+#include <cstring>
 #include <cassert>
 #include <cstdio>
 #include <cstring>
@@ -7,6 +10,13 @@
 using namespace cross;
 
 struct Delivery { uint64_t sock; uint16_t type; std::vector<uint8_t> payload; };
+
+// test seam: hand the kernel a country manager (production path is
+// the hub shell wiring after CCountrySysMgr::Init)
+static void AttachCountrySys(CCrossServerKernel& kern,
+                             std::shared_ptr<CCountrySysMgr> mgr) {
+    kern.SetCountrySysForTest(mgr);
+}
 
 int main() {
     // fake hub: socket ids 100 / 200, captures every send
@@ -107,6 +117,67 @@ int main() {
     // re-feed after drain is clean (no duplication of old bytes)
     assert(dec.Feed(p1.data(), (uint32_t)p1.size(), type, payload) && type == MsgType_Hello);
     assert(!dec.Drain(type, payload));
+
+    // ---- COUNTRY system (crossmsg cases 0 and 5) ----
+    {
+        auto mgr = std::make_shared<CCountrySysMgr>();
+        CountryLeague lg;
+        lg.dwIdServer = 7; lg.dwIdLeague = 42;
+        lg.dwCountryDate = 15;
+        lg.strLeagueName = "GoldenAegis";
+        lg.strTitle = "Champion";
+        mgr->InsertLeagueForTest(lg);
+        auto sink = [&](uint64_t sock, const std::vector<uint8_t>& pkt) {
+            tq::MsgHead h; std::memcpy(&h, pkt.data(), sizeof(h));
+            sent.push_back({ sock, h.type, pkt });
+        };
+        CCrossServerKernel kern(sink, [](const std::string& s) {});
+        CountryStatusReq req{7, 42};
+        kern.OnCountryStatusReq(300, req); // kernel WITHOUT country mgr -> empty resp
+        assert(!sent.empty());
+        assert(sent.back().type == MsgType_CountryStatusResp);
+        CountryStatusResp resp{};
+        std::memcpy(&resp, sent.back().payload.data() + sizeof(tq::MsgHead),
+                    sizeof(resp));
+        assert(resp.szLeagueName[0] == '\0'); // mgr absent -> empty strings
+        // now via a kernel built with the mgr attached through the
+        // test seam below
+        struct Wiring { std::shared_ptr<CCountrySysMgr> p; } ;
+        CCrossServerKernel kern2(sink, [](const std::string& s) {});
+        AttachCountrySys(kern2, mgr); // test helper below main
+        kern2.OnCountryStatusReq(300, req);
+        assert(sent.back().type == MsgType_CountryStatusResp);
+        std::memcpy(&resp, sent.back().payload.data() + sizeof(tq::MsgHead),
+                    sizeof(resp));
+        assert(std::string(resp.szLeagueName) == "GoldenAegis");
+        assert(std::string(resp.szLeaderTitle) == "Champion");
+        assert(resp.dwCountryDate == 15);
+        // unknown league -> empty strings + 0 date, no crash
+        CountryStatusReq bad{999, 1};
+        kern2.OnCountryStatusReq(300, bad);
+        std::memcpy(&resp, sent.back().payload.data() + sizeof(tq::MsgHead),
+                    sizeof(resp));
+        assert(resp.szLeagueName[0] == '\0' && resp.dwCountryDate == 0);
+        // case 5 broadcast reaches every registered server
+        HelloData hello1{100, "Alpha"}, hello2{200, "Beta"};
+        kern2.OnHello(111, hello1);
+        kern2.OnHello(222, hello2);
+        sent.clear();
+        kern2.OnCountryBroadcast("Country war begins!");
+        assert(sent.size() == 2);
+        for (auto& d : sent) assert(d.type == MsgType_CountryBroadcast);
+        // --- CCountrySysMgr::Init against the live cq DB ---
+        {
+            CMySQLClient db;
+            bool bOk = db.Connect("127.0.0.1", 3306, "root", "", "cq");
+            CCountrySysMgr live;
+            // original table currently has 0 rows: Init must still
+            // succeed (LoadLeagueInfo on an empty table = no error)
+            assert(bOk && live.Init(&db, 10, 4));
+            assert(live.LeagueCount() == 0);
+            assert(live.TotalCountryDate() == 0);
+        }
+    }
 
     printf("CROSS_KERNEL_OK: hello/register, talk relay skip-origin, roster+who, "
            "silent-drop 90s with ServerDown, disconnect announce, split-packet drain\n");

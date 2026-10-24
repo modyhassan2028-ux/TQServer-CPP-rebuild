@@ -23,6 +23,37 @@ enum : uint16_t {
     MsgType_WhoResp   = 9006, // hub -> server: every server's roster in one packet
     MsgType_ServerUp  = 9007, // hub -> all: a server connected
     MsgType_ServerDown= 9008, // hub -> all: a server went away
+
+    // ---- COUNTRY system (crossmsgserveraction.cpp switch, the
+    // hub-side handlers keyed on MsgHead.type offset +0x430) ----
+    // case 0 (~29462): country status query. Reads m_pCountrySysMgr
+    //   name (FUN_14001a6a0), leader/title (FUN_14001a6d0) and the
+    //   country_date (FUN_14001bc50) for (idserver, idleague), packs
+    //   them with CStringPacker::AddString x2 and writes the
+    //   country_date back at msg+8.
+    // case 1 (~29507): country war state + score update (FUN_14000d620
+    //   country lookup, FUN_1400218f0 score write, reply packed via
+    //   FUN_1400246a0 and sent with FUN_14000a0b0) - TBD wire format.
+    // case 2 (~29579): FUN_14001ee50(countryMgr, .., idserver) - the
+    //   plunder-war join flow - TBD.
+    // case 4 (~29589): FUN_14001a240(countryMgr, ..) + direct reply.
+    // case 5 (~29605): FUN_14000a310(kernel, buf, 0, 0xffffff, 0x961)
+    //   - cross-server broadcast of a system talk (type 0x961).
+    // case 6 (~29609): FUN_14001d790(countryMgr, .., idserver) - TBD.
+    MsgType_CountryStatusReq  = 9009, // server -> hub: case 0 query
+    MsgType_CountryStatusResp = 9010, // hub -> server: name/title/date
+    MsgType_CountryBroadcast  = 9011, // hub -> all: case 5 system talk
+};
+
+// case 0 query/response payloads (see CCountrySysMgr accessors)
+struct CountryStatusReq {
+    uint32_t dwIdServer;   // msg+8 in the original layout
+    uint32_t dwIdLeague;   // msg+0x10
+};
+struct CountryStatusResp {
+    char szLeagueName[64];  // AddString #1 ("" when league unknown)
+    char szLeaderTitle[64]; // AddString #2
+    uint32_t dwCountryDate; // written back to the request msg+8
 };
 
 constexpr uint32_t MAX_ROSTER = 64;

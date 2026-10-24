@@ -1,6 +1,6 @@
 # PORTING_LOG — سجل مشروع TQServer (v6159) طبق الأصل
 
-## 🕐 الحالة اللحظية — آخر تحديث: السبت 24 أكتوبر 2026، 22:50 بتوقيت القاهرة
+## 🕐 الحالة اللحظية — آخر تحديث: السبت 24 أكتوبر 2026، 22:55 بتوقيت القاهرة
 
 **لو أنت Agent جديد وبتكمل من هنا: ابدأ من القسم ده، وبعده قسم "واقفين فين + التالي" رقم 5.**
 
@@ -2442,3 +2442,46 @@ CQCrossServer، البيلد النهائي بـ zig.
 
 **اللي بعده:** CQCrossServer (المسار الأوسع المتبقي)،
 ثم مراجعة إجرائية شاملة + البيلد النهائي بـ zig.
+
+
+## جلسة 2026-10-24 22:55 — CQCrossServer: نظام الكونتري (CCountrySysMgr)
+**المرجع:** CQCrossServer.exe.decompiled.c — crossmsgserveraction.cpp
+switch على msg+0x430 (حالات 0/1/2/4/5/6 فقط).
+
+**CCountrySysMgr::Init** (السطر ~27030) — الترتيب الحرفي:
+1. LoadLeagueInfo (FUN_140020cf0) → رسالة الفشل الأصلية
+2. LoadPlunderTimeConfig (FUN_1400165d0) — config، محكوم success
+3. LoadPlunderWarInfo (FUN_140019bc0) — محكوم success
+
+**LoadLeagueInfo** (FUN_1400212d0، ~26540) منفذ حرفياً:
+- SELECT * FROM cq_league_info؛ الأعمدة id=1/idserver=2/idleague=3
+- صف غير صالح (idserver 0 أو 0xffffffff أو idleague 0) → تخطي
+- مفتاح مزدوج (idserver, idleague) → سجل "server %u league
+  %u is exist" الأصلي + تخطي
+- country_date > 0 → حساب الإجمالي (local_1b8) + خريطة التواريخ
+- توزيع الطاقة الاحتياطية (capacity*serverCount مقابل
+  الإجمالي، deficit % serverCount) — الحساب حرفي، حلقة
+  التوزيع بالترتيب TBD (سطور 26700-26760)
+
+**خريطة الحالات** (السطر الدقيق في الديكمبايل):
+- case 0 (@29462): استعلام حالة — FUN_14001a6a0 اسم الليج +
+  FUN_14001a6d0 لقب القائد + FUN_14001bc50 country_date
+  (يكتبها تاني في msg+8) + AddString×2 → **منفذ** ك
+  MsgType_CountryStatusReq/Resp (9009/9010)
+- case 1 (@29507): حرب الكونتري + تحديث النقاط (FUN_14000d620،
+  FUN_1400218f0، رد عبر FUN_1400246a0/FUN_14000a0b0) — TBD
+- case 2 (@29579): FUN_14001ee50 (1743 بايت!) — انضمام حرب
+  السلب — TBD
+- case 4 (@29589): FUN_14001a240 + رد مباشر — TBD
+- case 5 (@29605): FUN_14000a310 بث system talk (نوع 0x961)
+  → **منفذ** ك MsgType_CountryBroadcast (9011)
+- case 6 (@29609): FUN_14001d790 (1677 بايت) — TBD
+
+**الاختبارات:** cross_kernel_test اتوسع — استجابة الحالة
+(بمدير وبدونه، ليج معروف/مجهول)، البث لكل السيرفرات، و
+Init ضد القاعدة الحية (cq_league_info حالياً 0 صفوف → نجاح
+بدون أخطاء). كل السويتات خضراء (cross_kernel + cross_e2e +
+dialog + damage roll + damage calc).
+
+**اللي بعده:** cases 1/2/4/6 (الوبر-وار heavy: FUN_14001ee50
+وFUN_14001d790)، ثم مراجعة شاملة والبيلد النهائي.
