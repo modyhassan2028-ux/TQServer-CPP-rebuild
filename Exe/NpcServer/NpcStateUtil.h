@@ -354,6 +354,134 @@ uint32_t CNpcWorldPkGate59710(CNpcStateData& rN);
 uint32_t CNpcKeepPkTarget59dc0(CNpcStateData& rN);
 
 // ============================================================
+// ===== ORIGINAL FUN_14005ab20 @ 14005ab20 ================
+// ===== (unit 32) the candidate PK-mask check =============
+// ============================================================
+// undefined8 FUN_14005ab20(longlong param_1)
+//   [param_1 = the pass-1 candidate item; the record is
+//    its +0x10 sub-object]
+//   plVar1 = param_1 + 0x10;
+//   p = (*plVar1)->vt+0x20(plVar1, out58);   // call 1
+//   if ((*p >> 0xe & 1) == 0) {
+//     p = (*plVar1)->vt+0x20(plVar1, out40); // call 2
+//     if ((*p >> 0xf & 1) == 0) {
+//       p = (*plVar1)->vt+0x20(plVar1, out28); // call 3
+//       if ((*p & 1) == 0) {
+//         return CONCAT71(p >> 8, 1);        // TRUE
+//       }
+//     }
+//   }
+//   return p & 0xffffffffffffff00;   // masked FALSE
+// VERBATIM: the accessor is called THREE TIMES in a
+// row (the original re-fetches the flag word before
+// EACH bit probe - bits 0xe / 0xf / 0x0, the
+// 0xC001 mask); any SET bit fails the candidate.
+struct CNpcPkMaskData {
+    std::function<uint32_t()> m_fnFlagWord;
+        // the candidate +0x10 sub-object
+        // vtable+0x20 flag-record accessor
+        // (called THREE times VERBATIM)
+};
+uint32_t CNpcPkMask5ab20(CNpcPkMaskData& rD);
+
+// ============================================================
+// ===== ORIGINAL FUN_14005b760 @ 14005b760 ================
+// ===== (unit 34) set the pursuit state ===================
+// ============================================================
+// bool FUN_14005b760(longlong *param_1, int param_2)
+//   if (+0x98 == 0) { log(DAT_1400be0b0); return false; }
+//   +0x2c = 0;
+//   +0x3c = (param_2 == 0);      // the bool write
+//   t = FUN_140038010(FUN_14001c210(), +0x84);
+//   if (t && t->vt+0x50()) {      // alive
+//     sight = row GetInt(0x10);   // via +0xa0 +0x10
+//     d = my vt+8(t->vt+0x38(), t->vt+0x40());
+//     if (d <= sight) {
+//       ok = FUN_1400580e0(npc,
+//               t->vt+0x38(), t->vt+0x40(), param_2);
+//       if (!ok) return false;
+//       if ((int)+0x2c < 1) goto RET_2C;
+//       dir8 = (int8)+0x40;      // signed-mod-8 idiom
+//       u48 = my vt+0x48();
+//       walk = FUN_14004bff0(map,
+//           my vt+0x38(), my vt+0x40(), dir8,
+//           u48, 0);              // NOTE mode 0
+//       if (!walk) {
+//         FUN_140058260(npc, dir8);   // discarded
+//         if (+0x2c == 0) {
+//           FUN_14005b2d0(npc); return false; }
+//         return true;
+//       }
+//       if (+0x3c) {
+//         dMe = t->vt+8(my x, my y);
+//         dPt = t->vt+8(+0x90, +0x94);
+//         if (dMe <= dPt) goto DROP_2C;   // NO +0x84 clear
+//       }
+//       if (+0x3c) goto RET_2C;
+//       dMe = t->vt+8(my x, my y);
+//       dPt = t->vt+8(+0x90, +0x94);
+//       if (dMe < dPt) goto RET_2C;
+//       goto DROP_2C;
+//     }
+//     // d > sight falls here too (VERBATIM)
+//   }
+//   +0x84 = 0;                    // clear the target
+// DROP_2C: +0x2c = 0; return false;
+// RET_2C: return (int)+0x2c != 0;
+// VERBATIM QUIRKS:
+//  - the NOT-found/dead/out-of-sight paths clear +0x84,
+//    but the +0x3c dMe <= dPt path drops WITHOUT the
+//    clear (two DIFFERENT fall-outs)
+//  - the +0x3c chain re-runs the SAME two target
+//    vt+8 probes a THIRD time (three near-identical
+//    blocks - kept verbatim)
+//  - FUN_140058260's return is DISCARDED
+bool CNpcPursuit5b760(CNpcStateData& rN, int nParam2);
+
+// ============================================================
+// ===== ORIGINAL FUN_1400586b0 @ 1400586b0 ================
+// ===== (unit 33) the NPC shout broadcast ================
+// ============================================================
+// ulonglong FUN_1400586b0(longlong *npc, char *text,
+//                         char *channel)
+//   if (text == 0) {
+//     log_InlineLogERROR(&DAT_1400be0b0);
+//     return in_RAX & 0xffffffffffffff00;
+//   }
+//   pcVar8 = "ALLUSERS";
+//   if (channel != 0) pcVar8 = channel;
+//   FUN_140064d20(msg);           // CMsgTalk ctor
+//   name = (*(npc+0xa0))->+0x10->vt+0x18();
+//   ok = FUN_140064de0(msg, name, pcVar8, text,
+//          (char*)0, 0xffffff, 0x7d1, 0, 0, 1);
+//   if (!ok) { FUN_140064da0(msg);
+//     return dtor & 0xffffffffffffff00; }
+//   id = npc->vt+0x8();
+//   sent = FUN_14001c5f0(FUN_14001c200(), id, msg);
+//   FUN_140064da0(msg);            // dtor
+//   return CONCAT71(dtor >> 8, (char)sent);
+// (the shout of bc80's STR_GUARD_CALL_s /
+//  STR_PPKER_CALL_s - 0x7d1 = 2001 the talk type)
+struct CNpcShoutData {
+    std::function<void()> m_fnLogError;
+        // log_InlineLogERROR(&DAT_1400be0b0)
+    std::function<const char*()> m_fnGetName;
+        // *(npc+0xa0) row sub-object
+        // vtable+0x18 -> the NPC NAME
+    std::function<uint32_t()> m_fnNpcId8;
+        // npc vtable+0x8 (the sender id)
+    std::function<bool(const char*, const char*,
+        const char*)> m_fnCompose;
+        // FUN_140064de0(msg, name, channel,
+        //   text, 0, 0xffffff, 0x7d1, 0, 0, 1)
+    std::function<bool(uint32_t)> m_fnSend;
+        // FUN_14001c5f0(FUN_14001c200(),
+        //   id, msg) - the broadcast send
+};
+uint32_t CNpcShout586b0(CNpcShoutData& rD,
+    const char* szText, const char* szChannel);
+
+// ============================================================
 // ===== ORIGINAL FUN_1400597f0 (the walk msg) ======
 // ============================================================
 // map = +0x98; if (!map) { log; return; }

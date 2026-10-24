@@ -78,4 +78,46 @@ bool CNpcWalkCheck(CNpcCellCheckData& rD,
     int nX, int nY, int nDir,
     uint32_t uType, int nMode);
 
+// ============================================================
+// ===== THE MAP GATES (unit 32) ============================
+// ===== ORIGINAL FUN_140049310 / FUN_14004ab40 ==============
+// ============================================================
+// Both gates operate on the map's +0x10 sub-object
+// (the same mapdata receiver the cell-check family
+// uses: vtable+0x28 = width, vtable+0x20 = height,
+// vtable+0x18(x, y) = the cell value, 0 = free).
+struct CNpcMapGateData {
+    std::function<int()> m_fnWidth28;
+        // mapdata vtable+0x28 (width)
+    std::function<int()> m_fnHeight20;
+        // mapdata vtable+0x20 (height)
+    std::function<int(int, int)> m_fnCell18;
+        // mapdata vtable+0x18(x, y) -
+        // nonzero means the cell is TAKEN
+};
+
+// FUN_140049310(map, x, y) - the position gate:
+//   if (-1 < x): w = vt+0x28(); if (x < w):
+//   if (-1 < y): h = vt+0x20(); if (y < h):
+//       return vt+0x18(x, y) == 0;
+//   return false;
+// (the ORIGINAL body the whole engine calls - the
+//  NpcTransform::PosValid port now DELEGATES here)
+bool CNpcPosValid49310(CNpcMapGateData& rD,
+    int nX, int nY);
+
+// FUN_14004ab40(map, x, y) - the in-bounds gate
+// (the type 1-2 ring-cell gate in 4bff0):
+//   if (-1 < x): w = vt+0x28(); if (x < w):
+//   if (-1 < y): h = vt+0x20(); if (y < h):
+//       return CONCAT71(h >> 8, 1);   // literal 1
+//   return in_RAX & 0xffffffffffffff00;
+// VERBATIM: NO cell check at all - pure bounds.
+// VERBATIM: in_RAX carries the LAST width/height
+// call result into the masked FALSE return; on
+// the x < 0 path in_RAX is UNINITIALIZED (modeled
+// as 0, the 59dc0 convention).
+uint32_t CNpcInBounds4ab40(CNpcMapGateData& rD,
+    int nX, int nY);
+
 } // namespace npc

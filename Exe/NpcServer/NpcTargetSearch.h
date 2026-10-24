@@ -131,4 +131,24 @@ struct CNpcTargetSearchData {
 uint32_t CNpcTargetSearch(
     CNpcTargetSearchData& rD);
 
+// ============================================================
+// ===== (unit 32) BIND the real PK-family bodies ==========
+// ===== onto this search's seams ==========================
+// ============================================================
+// Wires m_fn59dc0 / m_fn59710 / m_fn57c50 /
+// m_fn5b760 / m_fn5ab20 to the unit-31/32/34
+// real bodies (CNpcKeepPkTarget59dc0 /
+// CNpcWorldPkGate59710 / CNpcPkDay57c50 /
+// CNpcPursuit5b760(npc, 0) / CNpcPkMask5ab20).
+// The candidate's flag word for 5ab20 comes from
+// THIS data's m_fnItemSubFlags (the same
+// +0x10 sub-object vtable+0x20 accessor).
+// NOTE: m_fnShout stays a seam - the
+// theInstance()->get("STR_..._s") string-table
+// lookup is not ported yet (the big integration).
+struct CNpcStateData;   // NpcState.h
+void CNpcBindPkFamily(
+    CNpcTargetSearchData& rD,
+    CNpcStateData& rN);
+
 } // namespace npc

@@ -1,4 +1,5 @@
 #include "NpcTargetSearch.h"
+#include "NpcStateUtil.h"
 
 namespace npc {
 
@@ -267,6 +268,48 @@ uint32_t CNpcTargetSearch(
     // ORIGINAL: FUN_14005b760(npc, 0)
     rD.m_fn5b760();
     return rD.m_nTargetId != 0 ? 1u : 0u;
+}
+
+
+// ============================================================
+// ===== (unit 32) the PK-family seam binder ===============
+// ============================================================
+void CNpcBindPkFamily(
+    CNpcTargetSearchData& rD,
+    CNpcStateData& rN) {
+    // FUN_140059dc0(npc) - keep the PK target
+    rD.m_fn59dc0 = [&rN]() -> bool {
+        return (CNpcKeepPkTarget59dc0(rN)
+                & 0xffu) != 0;
+    };
+    // FUN_140059710(npc) - the world PK gate
+    rD.m_fn59710 = [&rN]() -> bool {
+        return (CNpcWorldPkGate59710(rN)
+                & 0xffu) != 0;
+    };
+    // FUN_140057c50(npc) - the free-PK day
+    rD.m_fn57c50 = [&rN]() -> bool {
+        return (CNpcPkDay57c50(rN)
+                & 0xffu) != 0;
+    };
+    // FUN_14005b760(npc, 0) - bc80's call
+    rD.m_fn5b760 = [&rN]() {
+        CNpcPursuit5b760(rN, 0);
+    };
+    // FUN_14005ab20(item) - the candidate
+    // PK mask; the flag word is read through
+    // THIS data's m_fnItemSubFlags (the same
+    // +0x10 sub-object vtable+0x20 accessor
+    // the original's three calls use)
+    rD.m_fn5ab20 =
+        [&rD](uint64_t uItem) -> bool {
+            CNpcPkMaskData m;
+            m.m_fnFlagWord = [&rD, uItem]() {
+                return rD.m_fnItemSubFlags(uItem);
+            };
+            return (CNpcPkMask5ab20(m)
+                    & 0xffu) != 0;
+        };
 }
 
 } // namespace npc

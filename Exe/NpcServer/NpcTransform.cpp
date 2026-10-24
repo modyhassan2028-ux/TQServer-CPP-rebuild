@@ -1,4 +1,5 @@
 #include "NpcTransform.h"
+#include "NpcCellCheck.h"
 
 namespace npc {
 
@@ -44,18 +45,18 @@ uint32_t CNpcTransform::SpawnNewNpcID() {
 //       return vcall+0x18(subobj, x, y) == 0;
 //   return false;
 bool CNpcTransform::PosValid(int nX, int nY) {
-    if (0 <= nX) {
-        int nW = m_fnMapWidth();
-        if (nX < nW) {
-            if (0 <= nY) {
-                int nH = m_fnMapHeight();
-                if (nY < nH) {
-                    return m_fnMapCell(nX, nY) == 0;
-                }
-            }
-        }
-    }
-    return false;
+    // unit 32: DELEGATES to the canonical real body
+    // (CNpcPosValid49310) so the WHOLE engine has ONE
+    // verbatim port of FUN_140049310 - the three seams
+    // below are this transform's OWN bindings of the
+    // same mapdata vtable slots (+0x28/+0x20/+0x18)
+    CNpcMapGateData gate;
+    gate.m_fnWidth28 = [this]{ return m_fnMapWidth(); };
+    gate.m_fnHeight20 = [this]{ return m_fnMapHeight(); };
+    gate.m_fnCell18 =
+        [this](int x, int y) {
+            return m_fnMapCell(x, y); };
+    return CNpcPosValid49310(gate, nX, nY);
 }
 
 // ===== ORIGINAL FUN_14005a660 (CNpc::CheckTransform) =====

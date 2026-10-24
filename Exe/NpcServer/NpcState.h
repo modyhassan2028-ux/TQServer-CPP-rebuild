@@ -245,6 +245,20 @@ struct CNpcStateData {
     // ===== the PK family (unit 31) =====
     std::function<bool()> m_fnSubVt78;
         // MY sub vtable+0x78 flag (59dc0)
+    // ===== pursuit 5b760 (unit 34) =====
+    uint32_t m_nField90 = 0;
+        // +0x90 (the (int)param_1[0x12]
+        // low dword of the pair probed
+        // against the target vt+8)
+    uint32_t m_nField94 = 0;
+        // +0x94 (the second dword of
+        // the same pair)
+    std::function<int(CNpcTargetSeam*, int, int)>
+        m_fnTgtDist8;
+        // the TARGET vtable+8 (x, y) ->
+        // value - b760 probes it with my
+        // (x, y) AND with the +0x90/+0x94
+        // pair (both VERBATIM twice)
     std::function<int(int)> m_fnSubGetInt;
         // MY sub vtable+0x10(key) - the
         // GetInt(level) lookup and the

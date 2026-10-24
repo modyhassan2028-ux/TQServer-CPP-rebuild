@@ -133,4 +133,87 @@ bool CNpcWalkCheck(CNpcCellCheckData& rD,
     return true;   // LAB_14004c17d
 }
 
+
+// ============================================================
+// ===== THE MAP GATES (unit 32) ============================
+// ===== ORIGINAL FUN_140049310 @ 140049310 ================
+// ============================================================
+// bool FUN_140049310(longlong param_1, int x, int y)
+//   [param_1 = the map object; receiver of the three
+//    vtable calls = *(param_1 + 0x10) mapdata]
+//   if (-1 < x) {
+//     iVar1 = vcall+0x28();          // width
+//     if ((x < iVar1) && (-1 < y)) {
+//       iVar1 = vcall+0x20();        // height
+//       if (y < iVar1) {
+//         iVar1 = vcall+0x18(sub, x, y);  // cell
+//         return iVar1 == 0;
+//       }
+//     }
+//   }
+//   return false;
+// ============================================================
+bool CNpcPosValid49310(CNpcMapGateData& rD,
+    int nX, int nY) {
+    if (-1 < nX) {
+        int nW = rD.m_fnWidth28();
+            // ORIGINAL: vcall+0x28()
+        if ((nX < nW) && (-1 < nY)) {
+            int nH = rD.m_fnHeight20();
+                // ORIGINAL: vcall+0x20()
+            if (nY < nH) {
+                int nCell = rD.m_fnCell18(nX, nY);
+                    // ORIGINAL: vcall+0x18(x, y)
+                return nCell == 0;
+            }
+        }
+    }
+    return false;
+}
+
+// ============================================================
+// ===== ORIGINAL FUN_14004ab40 @ 14004ab40 ================
+// ============================================================
+// undefined8 FUN_14004ab40(longlong param_1, int x, int y)
+//   if (-1 < x) {
+//     in_RAX = vcall+0x28();         // width
+//     if ((x < (int)in_RAX) && (-1 < y)) {
+//       in_RAX = vcall+0x20();       // height
+//       if (y < (int)in_RAX) {
+//         return CONCAT71(in_RAX >> 8, 1);  // TRUE
+//       }
+//     }
+//   }
+//   return in_RAX & 0xffffffffffffff00;  // FALSE
+// VERBATIM QUIRKS:
+//  - NO vt+0x18 cell probe AT ALL (pure bounds -
+//    unlike 49310 this gate says NOTHING about the
+//    cell being taken)
+//  - the FALSE path returns the register in_RAX
+//    (the LAST width/height result, or garbage
+//    when x < 0 made no call) with the low byte
+//    CLEARED = the standard masked-false idiom
+// ============================================================
+uint32_t CNpcInBounds4ab40(CNpcMapGateData& rD,
+    int nX, int nY) {
+    uint32_t uRax = 0;
+        // ORIGINAL: in_RAX - uninitialized on
+        // the x < 0 path (the 59dc0 convention:
+        // modeled as 0)
+    if (-1 < nX) {
+        uRax = (uint32_t)rD.m_fnWidth28();
+            // ORIGINAL: vcall+0x28()
+        if ((nX < (int)uRax) && (-1 < nY)) {
+            uRax = (uint32_t)rD.m_fnHeight20();
+                // ORIGINAL: vcall+0x20()
+            if (nY < (int)uRax) {
+                // ORIGINAL: CONCAT71(in_RAX>>8, 1)
+                return 1;
+            }
+        }
+    }
+    // ORIGINAL: in_RAX & 0xffffffffffffff00
+    return uRax & 0xffffff00u;
+}
+
 } // namespace npc

@@ -693,4 +693,192 @@ bool CNpcMoveTo(CNpcStateData& rN,
     return 0 < (int)uCount;
 }
 
+
+// ============================================================
+// ===== ORIGINAL FUN_14005ab20 @ 14005ab20 ================
+// ===== (unit 32) the candidate PK-mask check =============
+// ============================================================
+uint32_t CNpcPkMask5ab20(CNpcPkMaskData& rD) {
+    // ORIGINAL call 1: out58 - bit 0xe
+    const uint32_t* p =
+        nullptr;   // the puVar2 register
+    uint32_t w = rD.m_fnFlagWord();
+    p = &w;
+    if (((*p >> 0xe) & 1) == 0) {
+        // ORIGINAL call 2: out40 - bit 0xf
+        w = rD.m_fnFlagWord();
+        p = &w;
+        if (((*p >> 0xf) & 1) == 0) {
+            // ORIGINAL call 3: out28 - bit 0x0
+            w = rD.m_fnFlagWord();
+            p = &w;
+            if ((*p & 1) == 0) {
+                // ORIGINAL: CONCAT71(p >> 8, 1)
+                return 1;
+            }
+        }
+    }
+    // ORIGINAL: p & 0xffffffffffffff00
+    // (the low byte CLEARED = the masked FALSE)
+    return *p & 0xffffff00u;
+}
+
+// ============================================================
+// ===== ORIGINAL FUN_14005b760 @ 14005b760 ================
+// ===== (unit 34) set the pursuit state ===================
+// ============================================================
+bool CNpcPursuit5b760(CNpcStateData& rN, int nParam2) {
+    // ORIGINAL: param_1[0x13] = +0x98 the map
+    if (!rN.m_bHasMap) {
+        rN.m_fnLogError();   // DAT_1400be0b0
+        return false;
+    }
+    // ORIGINAL: +0x2c = 0 then
+    // +0x3c = (param_2 == 0) as a bool byte
+    rN.m_dwField2C = 0;
+    rN.m_nField3C = (nParam2 == 0) ? 1u : 0u;
+    // ORIGINAL: FUN_14001c210() +
+    // FUN_140038010(_, +0x84)
+    CNpcTargetSeam* pT =
+        rN.m_fnFindTarget(rN.m_nTargetId);
+    bool bAlive = (pT != nullptr)
+        && pT->m_bValid50;   // t vt+0x50
+    if (bAlive) {
+        // ORIGINAL: sight = row GetInt(0x10)
+        int nSight = rN.m_fnRowGetInt(0x10);
+        // ORIGINAL: d = my vt+8(
+        //   t vt+0x38 (tX), t vt+0x40 (tY))
+        int d = rN.m_fnSubDist(pT->m_nX, pT->m_nY);
+        if (d <= nSight) {
+            // ORIGINAL: FUN_1400580e0(npc,
+            //   tX, tY, param_2)
+            if (!rN.m_fn580e0(pT->m_nX,
+                               pT->m_nY, nParam2))
+                return false;
+            // ORIGINAL: if ((int)+0x2c < 1)
+            //   goto LAB_14005b998
+            if ((int)rN.m_dwField2C < 1)
+                goto ret_2c;
+            // ORIGINAL: the signed-mod-8 idiom
+            // on (int)(char)param_1[8] = +0x40
+            int nDir8 =
+                (int)(int8_t)(rN.m_nField40 & 0xffu);
+            int nAdj = (nDir8 >> 0x1f) & 7;
+            int nDirN = (nAdj + nDir8 & 7) - nAdj;
+            // ORIGINAL: u48 = my vt+0x48()
+            uint32_t u48 = rN.m_fnSubVt48NoArgs();
+            // ORIGINAL: FUN_14004bff0(map,
+            //   my vt+0x38 (x), my vt+0x40 (y),
+            //   dir, u48, 0) - NOTE mode 0
+            //   (NOT c960's 0x1a)
+            int nMyX = rN.m_fnSubGetX38();
+            int nMyY = rN.m_fnSubGetY40();
+            bool bWalk = rN.m_fnMapWalkable(
+                nMyX, nMyY, nDirN, u48);
+            if (!bWalk) {
+                // ORIGINAL: FUN_140058260(npc,
+                //   dir) - return DISCARDED
+                rN.m_fnAttack260(nDirN);
+                // ORIGINAL: if (+0x2c == 0) {
+                //   FUN_14005b2d0; return false }
+                if ((int)rN.m_dwField2C == 0) {
+                    rN.m_fnB2d0();
+                    return false;
+                }
+                return true;
+            }
+            // ORIGINAL: the VERBATIM +0x3c
+            // chain - THREE near-identical
+            // blocks; EACH block RE-READS my
+            // vt+0x38/0x40 (no caching in the
+            // original) and RE-PROBES the
+            // target vt+8 twice
+            if (rN.m_nField3C != 0) {
+                int nMe = rN.m_fnTgtDist8(
+                    pT, rN.m_fnSubGetX38(),
+                    rN.m_fnSubGetY40());
+                int nPt = rN.m_fnTgtDist8(
+                    pT, (int)rN.m_nField90,
+                    (int)rN.m_nField94);
+                if (nMe <= nPt)
+                    goto drop_2c_noClear;
+            }
+            if (rN.m_nField3C != 0)
+                goto ret_2c;
+            {
+                int nMe = rN.m_fnTgtDist8(
+                    pT, rN.m_fnSubGetX38(),
+                    rN.m_fnSubGetY40());
+                int nPt = rN.m_fnTgtDist8(
+                    pT, (int)rN.m_nField90,
+                    (int)rN.m_nField94);
+                if (nMe < nPt)
+                    goto ret_2c;
+            }
+            goto drop_2c_noClear;
+        }
+        // d > sight falls out of the block to
+        // the shared +0x84 clear (VERBATIM)
+    }
+    // ORIGINAL: +0x84 = 0 (the target clear -
+    // reached by NOT-found / dead / out-of-sight)
+    rN.m_nTargetId = 0;
+drop_2c_noClear:
+    // ORIGINAL LAB_14005b9a8: +0x2c = 0
+    // (NO +0x84 clear on this fall-in path)
+    rN.m_dwField2C = 0;
+    return false;
+ret_2c:
+    // ORIGINAL LAB_14005b998:
+    // return (int)+0x2c != 0
+    return (int)rN.m_dwField2C != 0;
+}
+
+// ============================================================
+// ===== ORIGINAL FUN_1400586b0 @ 1400586b0 ================
+// ===== (unit 33) the NPC shout broadcast ================
+// ============================================================
+uint32_t CNpcShout586b0(CNpcShoutData& rD,
+    const char* szText, const char* szChannel) {
+    // ORIGINAL: if (param_2 == 0)
+    if (szText == nullptr) {
+        rD.m_fnLogError();   // DAT_1400be0b0
+        // ORIGINAL: extraout_RAX &
+        //   0xffffffffffffff00 (masked false)
+        return 0;
+    }
+    // ORIGINAL: pcVar8 = "ALLUSERS";
+    //   if (param_3 != 0) pcVar8 = param_3;
+    const char* szChan = "ALLUSERS";
+    if (szChannel != nullptr) szChan = szChannel;
+    // ORIGINAL: FUN_140064d20(msg) - the
+    // CMsgTalk ctor on the stack buffer
+    // ORIGINAL: name = (*(npc+0xa0))->+0x10
+    //   ->vt+0x18()
+    const char* szName = rD.m_fnGetName();
+    // ORIGINAL: FUN_140064de0(msg, name,
+    //   pcVar8, text, 0, 0xffffff, 0x7d1,
+    //   0, 0, 1) - the 0x7d1 = 2001 talk
+    //   type and the 0xffffff color literal
+    bool bOk = rD.m_fnCompose(szName, szChan,
+                              szText);
+    if (!bOk) {
+        // ORIGINAL: FUN_140064da0(msg) dtor
+        // then the masked FALSE return
+        return 0;
+    }
+    // ORIGINAL: id = npc->vt+0x8()
+    uint32_t uId = rD.m_fnNpcId8();
+    // ORIGINAL: FUN_14001c5f0(
+    //   FUN_14001c200(), id, msg) - the send
+    bool bSent = rD.m_fnSend(uId);
+    // ORIGINAL: FUN_140064da0(msg) dtor then
+    // CONCAT71(dtor >> 8, (char)sent) - the
+    // LOW BYTE is the send result, the high
+    // bytes are the DTOR register (garbage in
+    // the original; modeled 0 - the 59dc0
+    // convention)
+    return bSent ? 1u : 0u;
+}
+
 } // namespace npc
