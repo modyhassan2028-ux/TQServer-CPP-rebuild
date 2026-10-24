@@ -191,6 +191,23 @@ void CNpcMapBinder::BindTargetSearchFinale(
         };
 }
 
+void CNpcMapBinder::BindTypeRecords(
+        TqGameDataMgr& rG, TqLookupMgr& rL,
+        CNpcTypeTable& rTbl) {
+    // the ORIGINAL: mgr+0x8 map vt+0x40(id) ->
+    // the monster-type record (the cq_monstertype
+    // rows); FUN_140038010 then CALLS the
+    // record's vt+0xe8 -> the shared proxy
+    rG.m_fnMapVt40 = [&rTbl](int nId) -> void* {
+        return rTbl.FindVt40((uint32_t)nId);
+    };
+    rL.m_fnRecordVtE8 =
+        [](void* pRec) -> void* {
+            return static_cast<CNpcTypeRecord*>(
+                pRec)->ProxyVtE8();
+        };
+}
+
 void CNpcMapBinder::BindLookupContainer(
         TqLookupMgr& rL) {
     // the ORIGINAL: FUN_14001c210()->+0x8

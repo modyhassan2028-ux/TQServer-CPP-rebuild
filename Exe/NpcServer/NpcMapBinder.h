@@ -23,6 +23,7 @@
 #include "NpcStrTable.h"
 #include "NpcStateUtil.h"
 #include "NpcManager.h"
+#include "NpcTypeRecord.h"
 #include "TqKernel.h"
 
 namespace npc {
@@ -109,6 +110,14 @@ public:
     void BindTargetSearchFinale(
         CNpcTargetSearchData& rT,
         CNpcShoutData& rShout);
+    // bind the REAL type records (unit 42):
+    // the game-data mgr's vt+0x40(id) -> the
+    // cq_monstertype table, and the lookup's
+    // record vt+0xe8 vcall -> the record's
+    // ProxyVtE8 (the shared proxy object)
+    void BindTypeRecords(TqGameDataMgr& rG,
+                        TqLookupMgr& rL,
+                        CNpcTypeTable& rTbl);
     // bind the kernel lookup container leg
     // (FUN_140038010's vt+0x30(id)) to the REAL
     // manager by-id map (the +0x10 offset stays

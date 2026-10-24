@@ -4225,3 +4225,38 @@ NPC_PKFAMILY_OK (12 حالة)، الرجريشن 29/29 خضرا.
   الـ lambda الملتقطة — اتصحح بإعادة الربط
   (سلوك الالتقاط الحرفي).
 - **الرجريشن 39/39 أخضر + سموك main.**
+
+## جلسة 2026-10-25 10:10 — NpcServer الوحدة
+42: سجلات الأنواع الحقيقية
+
+### الوحدة 42 (NpcTypeRecord)
+- **المرجع الحقيقي:** FUN_140056ff0 بيعمل
+  "SELECT * FROM %s WHERE %s=%lu LIMIT 1"
+  بسلسلة s_cq_monstertype، وFUN_140032750
+  بيعمل التحميل الكامل "SELECT * FROM
+  cq_monstertype".
+- **البيانات الحقيقية:** جدول cq_monstertype
+  في قاعدة v6159 (823 صف) بيتحمّل فعليًا في
+  الاختبار (mariadb كنقل للبيئة — طبقة الـ DB
+  الأصلية موثقة كفرق بيئي).
+- **CNpcTypeRecord:** أعمدة القتال اللي
+  السيرفر بيستهلكها (id/name/type/lookface/
+  life/mana/atk/def/dodge/ranges/speeds/
+  ai_type...) + **ProxyVtE8()** نموذج نداء
+  vt+0xe8 بتاع FUN_140038010 (بيرجع الـ
+  proxy المشترك).
+- **الربط:** BindTypeRecords في الـ binder:
+  vt+0x40(id) → جدول cq_monstertype الحقيقي،
+  وvt+0xe8 → ProxyVtE8 بتاع السجل.
+- **TBD موثق:** بوابة الـ players [1,300000)
+  في 38110 بتمنع ids السجلات الصغيرة، فمساحة
+  مفاتيح خريطة الـ mgr في الأصل لسه مفتوحة —
+  الاختبار بيسجّل سجل حقيقي تحت id قابل
+  للوصول (500000) وبيمرّ السلسلة كاملة.
+- **اختبار npc_typerecord:** 823 صف، الصف
+  الحقيقي id 1 Pheasant (life 33, lookface
+  104, atk 3/2, dodge 36)، الصف id 2
+  Turtledove، الـ miss، والرجل الكاملة
+  reachable id → vt+0x40 → سجل حقيقي →
+  vt+0xe8 → الـ proxy.
+- **الرجريشن 40/40 أخضر + سموك main.**
