@@ -133,6 +133,8 @@ public:
     void SpawnDefaults();
 
     std::shared_ptr<CNpc> GetNpc(uint32_t dwId);
+    // runtime registration (dynamic NPC records, cq_action 2007/201)
+    void RegisterNpc(std::shared_ptr<CNpc> p) { m_npcs[p->GetId()] = p; }
     std::vector<std::shared_ptr<CNpc>> GetNpcsOnMap(uint32_t dwMapId);
     // ORIGINAL mgr vcall+0xc8(map, type, &vec): the NPC ids of the given
     // raw type on the map (used by cq_action 223); the map order follows

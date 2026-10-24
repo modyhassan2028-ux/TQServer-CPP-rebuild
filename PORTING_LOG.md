@@ -1926,3 +1926,29 @@ true برضه). 48 قسماً أخضر + السويتان التانية.
 
 **عائلة C كاملة ✔ (كل الـ 18 نوع في القاعدة منفذة)**
 التالي بالترتيب: **عائلة D (نوع 201، 974 صف)** وبعدها E (1xxx).
+
+
+## جلسة 2026-10-24 (عاشرة، تكملة 7) — عائلة D (201): تدقيق كامل ضد الأصل + %syn_id
+قرأت جسم الحالة الأصلية بالكامل (FUN_14013b950 case 0xc9، 252569-253060):
+- sscanf "%s %s %s %u %d" (حقل/عملية/قيمة/npcId/فلاج) ≥ 3؛ npcId=0 →
+  NPC الحوار الحالي (بلوب 0x1040)، وإلا بحث CNpcManager
+- مفقود → DBERR حرفي "Can't find npc_id[%u]"؛ مش DynaNpc → DBERR
+  "is not DynaNpc"
+- الحقول: ownerid(1) ownertype(2) lookface(5) datastr(0x16) data0-3
+  life(0x18) maxlife(0x19)؛ عمليات dataN: = += == < <= > >=،
+  و"accept" = قيمة إدخال اللاعب (param_7)
+- npc 820 (0x334) + data0 set → قراءة data0 + MyLogSave
+  "gmlog/npc_820"؛ life/maxlife set → باكت MsgLife (فروعه 0/1)
+
+**النتيجة:** الحالة كانت منفذة أصلاً (subcase FUN_14013ba1e) وتغطي
+كل ده — حذفت نسختي المكررة بعد قراءة الأصل. **الجديد الحقيقي:**
+- حل %vars في case 201 (كان ناقص): 39 صف حي "ownerid == %syn_id"
+  — أضفت %syn_id للريزولفر (m_dwSynId على CUser)
+- RegisterNpc عام على CNpcManager (تسجيل ديناميكي للفحوصات)
+- 16 اختبار حي على كل الأنماط (data1==2 ×322، data3+=1 ×126،
+  ownerid=%syn_id ×39، lookface=287 ×14، data0=accept ×195 مع
+  strInput=42، datastr==1 ×106، life=10000 ×8، npcId صريح مفقود،
+  NPC مش ديناميكي → false)
+
+**عائلة D مكتملة ✔** (النوع الوحيد فيها، 974 صف). كل السويتات
+خضرا بعد rebuild كامل. التالي: عائلة E (شروط 1xxx، ~3,900 صف).

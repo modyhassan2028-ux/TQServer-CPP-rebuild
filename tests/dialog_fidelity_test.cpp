@@ -1598,6 +1598,59 @@ system("mariadb -u root cq -e \"DELETE FROM cq_item WHERE owner_id=888001 AND ty
     ndMod5b.strParam = "1 2";
     assert(CGameAction::ProcessActionUser(u5, &ndMod5b));
 
+    // --- family D: 201 dynamic NPC fields (case 0xc9, live patterns) ---
+    auto dyn = std::make_shared<CNpc>(4001, "Dyn", CNpc::Type::Dialog, 1000, 50, 60);
+    dyn->m_bDyna = true;
+    CNpcManager::Instance().RegisterNpc(dyn);
+    u5->m_stDialogCtx.dwId = 4001; // npcId==0 -> the dialog npc
+    u5->SetSynId(777);
+    CDialogEngine::Node nd201; nd201.dwType = 201;
+
+    // data1 == 2 (322 rows) -> false when 0
+    nd201.strParam = "data1 == 2";
+    assert(!CGameAction::ProcessActionUser(u5, &nd201));
+    // data3 += 1 (126 rows) -> set path, then == passes
+    nd201.strParam = "data3 += 1";
+    assert(CGameAction::ProcessActionUser(u5, &nd201));
+    nd201.strParam = "data3 == 1";
+    assert(CGameAction::ProcessActionUser(u5, &nd201));
+    // ownerid = / == %syn_id (39 rows): resolver fills 777
+    nd201.strParam = "ownerid = %syn_id";
+    assert(CGameAction::ProcessActionUser(u5, &nd201));
+    nd201.strParam = "ownerid == %syn_id";
+    assert(CGameAction::ProcessActionUser(u5, &nd201));
+    // lookface = 287 (14 rows) then ==
+    nd201.strParam = "lookface = 287";
+    assert(CGameAction::ProcessActionUser(u5, &nd201));
+    nd201.strParam = "lookface == 287";
+    assert(CGameAction::ProcessActionUser(u5, &nd201));
+    // data0 = accept (195 rows): value from the dialog input (param_7)
+    u5->m_stDialogCtx.strInput = "42";
+    nd201.strParam = "data0 = accept";
+    assert(CGameAction::ProcessActionUser(u5, &nd201));
+    nd201.strParam = "data0 == 42";
+    assert(CGameAction::ProcessActionUser(u5, &nd201));
+    // explicit npcId not found -> DBERR false
+    nd201.strParam = "data2 = 0 100078 1";
+    assert(!CGameAction::ProcessActionUser(u5, &nd201));
+    // datastr = / == 
+    nd201.strParam = "datastr = 1";
+    assert(CGameAction::ProcessActionUser(u5, &nd201));
+    nd201.strParam = "datastr == 1"; // 106 rows
+    assert(CGameAction::ProcessActionUser(u5, &nd201));
+    // life = 10000 (8 rows) + maxlife
+    nd201.strParam = "life = 10000";
+    assert(CGameAction::ProcessActionUser(u5, &nd201));
+    nd201.strParam = "maxlife = 10000";
+    assert(CGameAction::ProcessActionUser(u5, &nd201));
+    // not a DynaNpc -> false
+    auto plain = std::make_shared<CNpc>(4002, "Plain", CNpc::Type::Dialog, 1000, 51, 61);
+    CNpcManager::Instance().RegisterNpc(plain);
+    u5->m_stDialogCtx.dwId = 4002;
+    nd201.strParam = "data1 == 2";
+    assert(!CGameAction::ProcessActionUser(u5, &nd201));
+    u5->m_stDialogCtx.dwId = 4001;
+
     printf("DIALOG FIDELITY TEST PASSED\n");
     return 0;
 }

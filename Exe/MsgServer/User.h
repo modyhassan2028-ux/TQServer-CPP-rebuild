@@ -764,6 +764,10 @@ public:
     uint32_t GetHomeMapId() const { return m_dwHomeMapId; }
     void SetHomeMapId(uint32_t m) { m_dwHomeMapId = m; }
     // ORIGINAL: action vars resolve centrally before the case runs
+    uint32_t m_dwSynId{0};       // ORIGINAL %syn_id (syndicate/guild id)
+    uint32_t GetSynId() const { return m_dwSynId; }
+    void  SetSynId(uint32_t v) { m_dwSynId = v; }
+
     void ResolveActionVars(std::string& s) const {
         ResolveIterVars(s);
         // %user_map_id -> current map; %user_home_id -> house map
@@ -788,6 +792,7 @@ public:
         sub("%npc_ownerid", std::to_string(m_stDialogCtx.dwNpcOwnerId));
         sub("%npc_x", std::to_string(m_stDialogCtx.wX));
         sub("%npc_y", std::to_string(m_stDialogCtx.wY));
+        sub("%syn_id", std::to_string(m_dwSynId));
     }
     void ResolveIterVars(std::string& s) const {
         const char* szTok = "%iter_var_data";

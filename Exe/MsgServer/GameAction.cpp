@@ -1762,9 +1762,12 @@ bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogE
     case 201: { // ORIGINAL case 0xc9 subcase (FUN_14013ba1e): dyna-npc record op
         // sscanf "%s %s %s %u %d" (>= 3 tokens): field, op, operand,
         // npcId (default 0 = the dialog npc), flag (default 0).
+        // %vars resolved first (%syn_id in 39 live rows)
+        std::string strParam201 = pNode->strParam;
+        pUser->ResolveActionVars(strParam201);
         char szField[256]={0}, szOp[256]={0}, szOperand[256]={0};
         unsigned uNpcId = 0; int nFlag = 0;
-        if (sscanf(pNode->strParam.c_str(), "%255s %255s %255s %u %d",
+        if (sscanf(strParam201.c_str(), "%255s %255s %255s %u %d",
                    szField, szOp, szOperand, &uNpcId, &nFlag) < 3) {
             printf("[ACTION %u] type 201: bad param count (0xa9c)\n", pNode->dwId);
             return false;
