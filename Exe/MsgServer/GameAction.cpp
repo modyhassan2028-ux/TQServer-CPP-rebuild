@@ -19,6 +19,7 @@
 #include "MsgData.h"
 #include "GroupSystem.h"
 #include "Guild.h"
+#include "Wanted.h"
 #include "FamilyBattle.h"
 #include "MapManager.h"
 #include "Item.h"
@@ -1251,6 +1252,200 @@ bool CGameAction::ProcessActionSyn(std::shared_ptr<CUser> pUser, const CDialogEn
         // the decompile) - DBERR bad type + false, literal.
         printf("[DBERR] table:cq_action/cq_newaction, ProcessActionSyn() ActionID=%u, ActionType=%u bad type\n",
                pNode->dwId, pNode->dwType);
+        return false;
+    }
+}
+
+// ============================================================================
+// ORIGINAL CGameAction::ProcessActionWanted - FUN_14011a7e0. The 3001..3012
+// bounty-office family (switch on type-0xbb9, cases 0..7, 9, 10, 0xb).
+//
+// Live chains (bounty office NPC 17000-17112, police board 17600-17663,
+// teleport wanted-gate 200000+):
+//  - 3001 (case 0): iter slot (role+0xa68) += 1, mgr+0x60(slot) - next
+//    offer in the list; %iter_wanted formats the "Offer Target Reward"
+//    line. Live rows 17043/17045/... (5 walk steps then fail-over).
+//  - 3002 (case 1): typed target name, non-empty, mgr+0x120(user, name)
+//    - the draft target. Live row 17020 ("My enemy is:").
+//  - 3003 (case 2): typed amount > 9999999 -> STR_MAX_BONUTY (the
+//    original's literal typo, kept) + false; else mgr+0x130(user,
+//    amount) -> true. Live row 17030 ("I offer...").
+//  - 3004 (case 3): mgr+0x128(user) < 100000 -> STR_MIN_BONUTY;
+//    vcall+0x178 (user, amount, 1) charge fails -> STR_NOT_ENOUGH_MONEY;
+//    mgr+0x118(user, &rec) draft fetch fails -> CHECKF 0x347f + false;
+//    else mgr+0x70(&rec, userName, amount) publish -> true.
+//    Live row 17031 ("I have taken your offer").
+//  - 3005 (case 4): typed offer id; mgr+0x58 invalid -> STR_INVALID_WANTED;
+//    charge 1000 fails -> STR_NOT_ENOUGH_MONEY(1000); else mgr+0x100
+//    accept, SYSTEM broadcast STR_WANTED_ORDER, and the ONLINE target
+//    gets STR_WANTED_INFO. Live row 17060 (accept #, fee 1000, "you can
+//    take only the last").
+//  - 3006 (case 5): typed offer id; invalid -> STR_INVALID_WANTED; else
+//    charge 2x the offer's bounty (mgr+0x88) -> fail STR_NOT_ENOUGH_
+//    MONEY(2x); success -> mgr+0x50 cancel + STR_CANCEL_WANTED. Live
+//    row 17080 ("canceled for double the reward").
+//  - 3007 (case 6): typed offer id; valid -> mgr+0xf0(user, id) select
+//    for reward-add -> true. Live row 17100 ("add reward: offer #").
+//  - 3008 (case 7): typed add-amount; mgr+0xe8(user) selected offer ->
+//    mgr+0x58 invalid -> STR_INVALID_WANTED; amount < 10000 ->
+//    STR_LOWEST_SUPERADD_BONUTY; current (mgr+0x88) + add > 9999999 ->
+//    STR_MAX_BONUTY (correct spelling here!) + false; charge fails ->
+//    STR_NOT_ENOUGH_MONEY; success -> mgr+0x90 new total + mgr+0xa0
+//    refresh + STR_SUPERADD_BONUTY. Live row 17110.
+//  - 3009: NO CASE in the ORIGINAL switch (case 8 absent) -> false.
+//  - 3010 (case 9): iter slot += 1, mgr+0x38(slot) - police board walk;
+//    %iter_police_wanted formats "Board Wanted-Target Guild Level
+//    PK-points". Live rows 17613..17621.
+//  - 3011 (case 10): typed board id; mgr+0x38 invalid -> STR_INVALID_
+//    WANTED; else look the OFFERER up by name (mgr+0xe0 + user-name
+//    registry) - OFFLINE offerer -> fall-out -> FALSE (live 17660 ->
+//    17661 "wrong board number"); online -> mgr+0x110 police-accept +
+//    STR_POLICE_WANTED_ORDER bounty message -> true.
+//  - 3012 (case 0xb): mgr+0x30(user) - is the user's name the target of
+//    an active offer -> true. Live rows 200000+ ("You are the wanted
+//    criminal" teleport gate, id_nextfail charges a 100 silver fine).
+// ============================================================================
+bool CGameAction::ProcessActionWanted(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode) {
+    if (!pUser || !pNode) return false; // node: CHECKF 0x338f / user: DBERR path
+    auto& mgr = CWantedManager::Instance();
+    const char* szInput = pUser->m_stDialogCtx.strInput.c_str(); // param_7
+    // ORIGINAL local helper: vcall+0x178 (user, amount, 1) = charge money;
+    // false when the user cannot afford it
+    auto SpendMoney = [](CUser* pu, uint32_t dw) -> bool {
+        if ((uint64_t)pu->GetMoney() < dw) return false;
+        pu->AddMoney(-(int64_t)dw);
+        return true;
+    };
+
+    switch (pNode->dwType) {
+    case 3001: { // 0: offer-list walk
+        pUser->SetIterSynState(pUser->GetIterSynState() + 1); // slot += 1
+        return mgr.WalkOfferIndex(pUser->GetIterSynState());
+    }
+    case 3002: { // 1: draft target from the typed name
+        if (!szInput[0]) return false; // strlen gate
+        return mgr.SetTargetBy(pUser->GetId(), szInput);
+    }
+    case 3003: { // 2: draft amount from the typed number
+        uint32_t dwAmt = strtoul(szInput, nullptr, 10);
+        if (dwAmt > 9999999) {
+            pUser->SendSysMsg("STR_MAX_BONUTY"); // ORIGINAL literal typo
+            return false;
+        }
+        mgr.SetAmountBy(pUser->GetId(), dwAmt);
+        return true;
+    }
+    case 3004: { // 3: publish - min 100k, charge, then list the offer
+        if (mgr.GetAmountBy(pUser->GetId()) < 100000) {
+            pUser->SendSysMsg("STR_MIN_BONUTY");
+            return false;
+        }
+        if (!SpendMoney(pUser.get(), mgr.GetAmountBy(pUser->GetId()))) {
+            pUser->SendSysMsg("STR_NOT_ENOUGH_MONEY");
+            return false;
+        }
+        SWantedRec rec;
+        if (!mgr.GetDraftBy(pUser->GetId(), rec)) {
+            printf("[CHECKF] 0x347f ProcessActionWanted: no draft\n");
+            return false;
+        }
+        bool bOk = mgr.PublishDraft(rec, pUser->GetName(), rec.dwAmount);
+        printf("[WANTED] %s published offer #%u: target %s, %u silvers\n",
+               pUser->GetName().c_str(), rec.dwId, rec.strTarget.c_str(), rec.dwAmount);
+        return bOk;
+    }
+    case 3005: { // 4: hunter accepts the offer (fee 1000)
+        uint32_t dwId = strtoul(szInput, nullptr, 10);
+        if (!dwId || !mgr.IsValidId(dwId)) {
+            pUser->SendSysMsg("STR_INVALID_WANTED");
+            return false;
+        }
+        if (!SpendMoney(pUser.get(), 1000)) {
+            pUser->SendSysMsg("STR_NOT_ENOUGH_MONEY");
+            return false;
+        }
+        mgr.AcceptWanted(pUser->GetId(), dwId);
+        printf("[WANTED] SYSTEM: %s accepted offer #%u (%s, %u silvers)\n",
+               pUser->GetName().c_str(), dwId, mgr.GetTargetNameOf(dwId).c_str(),
+               mgr.GetBountyOf(dwId));
+        // ORIGINAL: the ONLINE target gets STR_WANTED_INFO
+        auto target = CUserManager::Instance().GetUserByName(mgr.GetTargetNameOf(dwId));
+        if (target) target->SendSysMsg("STR_WANTED_INFO");
+        return true;
+    }
+    case 3006: { // 5: owner cancels for double the reward
+        uint32_t dwId = strtoul(szInput, nullptr, 10);
+        if (!dwId || !mgr.IsValidId(dwId)) {
+            pUser->SendSysMsg("STR_INVALID_WANTED");
+            return false;
+        }
+        uint32_t dwFee = mgr.GetAmountOf(dwId) * 2;
+        if (!SpendMoney(pUser.get(), dwFee)) {
+            pUser->SendSysMsg("STR_NOT_ENOUGH_MONEY");
+            return false;
+        }
+        mgr.CancelWanted(dwId);
+        pUser->SendSysMsg("STR_CANCEL_WANTED");
+        return true;
+    }
+    case 3007: { // 6: owner selects the offer to add reward to
+        uint32_t dwId = strtoul(szInput, nullptr, 10);
+        if (!dwId || !mgr.IsValidId(dwId)) {
+            pUser->SendSysMsg("STR_INVALID_WANTED");
+            return false;
+        }
+        mgr.SelectOwnOffer(pUser->GetId(), dwId);
+        return true;
+    }
+    case 3008: { // 7: add reward to the selected offer (min 10000)
+        uint32_t dwSel = mgr.GetSelectedOwnOffer(pUser->GetId());
+        if (!mgr.IsValidId(dwSel)) {
+            pUser->SendSysMsg("STR_INVALID_WANTED");
+            return false;
+        }
+        uint32_t dwAdd = strtoul(szInput, nullptr, 10);
+        if (dwAdd < 10000) {
+            pUser->SendSysMsg("STR_LOWEST_SUPERADD_BONUTY");
+            return false;
+        }
+        if ((uint64_t)mgr.GetAmountOf(dwSel) + dwAdd > 9999999) {
+            pUser->SendSysMsg("STR_MAX_BONUTY"); // correct spelling here
+            return false;
+        }
+        if (!SpendMoney(pUser.get(), dwAdd)) {
+            pUser->SendSysMsg("STR_NOT_ENOUGH_MONEY");
+            return false;
+        }
+        uint32_t dwTotal = mgr.GetAmountOf(dwSel) + dwAdd;
+        mgr.SetOwnOfferAmount(pUser->GetId(), dwTotal);
+        mgr.RefreshOwnOffer(pUser->GetId());
+        pUser->SendSysMsg("STR_SUPERADD_BONUTY");
+        return true;
+    }
+    case 3010: { // 9: police-board walk
+        pUser->SetIterSynState(pUser->GetIterSynState() + 1); // slot += 1
+        return mgr.WalkPoliceIndex(pUser->GetIterSynState());
+    }
+    case 3011: { // 10: police hunter accepts a board offer
+        uint32_t dwId = strtoul(szInput, nullptr, 10);
+        if (!szInput[0] || !mgr.IsValidId(dwId)) {
+            pUser->SendSysMsg("STR_INVALID_WANTED");
+            return false;
+        }
+        std::string strOwner = mgr.GetOwnerNameOf(dwId);
+        auto offerer = CUserManager::Instance().GetUserByName(strOwner);
+        if (!offerer) return false; // OFFLINE -> fall-out -> FALSE
+        mgr.PoliceAccept(pUser->GetId(), strOwner);
+        printf("[WANTED] %s police-accepted offer #%u from %s (%u silvers)\n",
+               pUser->GetName().c_str(), dwId, strOwner.c_str(), mgr.GetBountyOf(dwId));
+        offerer->SendSysMsg("STR_POLICE_WANTED_ORDER");
+        return true;
+    }
+    case 3012: // 0xb: is the user a wanted target?
+        return mgr.IsUserWanted(pUser->GetId());
+    default:
+        // 3009 (case 8 absent from the ORIGINAL switch) and everything
+        // else in range -> fall-out -> false, literal
         return false;
     }
 }
@@ -4027,8 +4222,8 @@ static bool ProcessActionDispatch(std::shared_ptr<CUser> pUser,
         return CGameAction::ProcessActionUser(pUser, pNode);
     if (dwType >= 2201 && dwType <= 2298) // -0x899 <= 0x61: FUN_140141c80 (pk bonus)
         return CGameAction::ProcessActionUser(pUser, pNode);
-    if (dwType >= 3001 && dwType <= 3098) // -0xbb9 <= 0x61: FUN_14011a7e0 (PORT-PENDING family)
-        return CGameAction::ProcessActionUser(pUser, pNode);
+    if (dwType >= 3001 && dwType <= 3098) // -0xbb9 <= 0x61: FUN_14011a7e0
+        return CGameAction::ProcessActionWanted(pUser, pNode);
     if (dwType >= 3501 && dwType <= 3598) // -0xdad <= 0x61: FUN_140140380 (PORT-PENDING family)
         return CGameAction::ProcessActionUser(pUser, pNode);
     if (dwType >= 3601 && dwType <= 3698) // -0xe11 <= 0x61: FUN_14011b5e0 (PORT-PENDING family)
@@ -4211,6 +4406,15 @@ void CGameAction::ReplacePercentStr(std::shared_ptr<CUser> pUser,
                     }
                     else if (Tok("iter_member_name")) {
                         Put(CGuildManager::Instance().GetIterMemberName(pUser->GetIterSynState()));
+                        bMatched = true;
+                    }
+                    // 3001/3010 wanted-list walks: the same dialog slot
+                    else if (Tok("iter_wanted")) {
+                        Put(CWantedManager::Instance().FormatOfferLine(pUser->GetIterSynState()));
+                        bMatched = true;
+                    }
+                    else if (Tok("iter_police_wanted")) {
+                        Put(CWantedManager::Instance().FormatPoliceLine(pUser->GetIterSynState()));
                         bMatched = true;
                     }
                 }

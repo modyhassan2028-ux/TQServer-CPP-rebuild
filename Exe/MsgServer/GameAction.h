@@ -38,6 +38,9 @@ public:
     // ORIGINAL CGameAction::ProcessActionSyn (FUN_140128290): the 701..732
     // guild/syndicate family, routed from the dispatcher for 701-798
     static bool ProcessActionSyn(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode);
+    // ORIGINAL CGameAction::ProcessActionWanted (FUN_14011a7e0): the
+    // 3001..3012 bounty-office family, routed for 3001-3098
+    static bool ProcessActionWanted(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode);
     // ORIGINAL FUN_140127070: the 801..898 window (dropitem/dropmoney +
     // per-monster money piles). Anything but 801/802 in the window is
     // "wrong action type" -> FALSE.
