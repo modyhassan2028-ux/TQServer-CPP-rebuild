@@ -1,4 +1,4 @@
-# HANDOFF — نقطة تسليم للأجنت التالي (آخر تحديث: 2026-10-24، نهاية جلسة العائلات الأخيرة 3907/8007/8011/9001 — السويتش الوظيفي مكتمل 100% من الصفوف الحية)
+# HANDOFF — نقطة تسليم للأجنت التالي (آخر تحديث: 2026-10-24 متأخراً — نظام الكونتري + حرب السلب في CQCrossServer مكتملان، السويتش الوظيفي للـ cq_action مكتمل 100% من الصفوف الحية)
 
 > هذا الملف هو نقطة البداية لأي أجنت يكمل الشغل. اقرأ PORTING_LOG.md للمنهجية
 > والتاريخ الكامل، وهذا الملف لمعرفة "أنا فين دلوقتي بالظبط".
@@ -31,6 +31,28 @@
   `(ls Exe/MsgServer/*.cpp | grep -v main.cpp; echo tests/stub_cross_client.cpp; ls Exe/MsgServer/Activity/ActivityManager.cpp Exe/MsgServer/LuaScript/LuaVM.cpp Core/CQBase/*.cpp Core/DB/*.cpp Core/Root/*.cpp) | xargs -P $(nproc) -I{} sh -c 'f="{}"; g++ -std=c++17 -O0 "-D__declspec(x)=" -I. -Iinclude -ICore/CQBase -ICore/DB -ICore/Root -IExe/MsgServer -IExe/NpcServer -IExe/CQCrossServer -Ivendor/lua -Wno-unused-parameter -c "$f" -o /tmp/objs2/$(echo $f | tr "/" "_")'`
   (غيّر امتداد .cpp إلى .o في الاسم). الربط النهائي بـ g++ مش zig.
 - ملاحظات مالية: لو الرسائل/الدفعات فشلت: انتظر تجديد الـ credits الشهرية.
+
+## وين وصلنا — CQCrossServer (نظام الكونتري + حرب السلب) ✔ مكتمل (2026-10-24)
+- **CCountrySysMgr:** Init الثلاثي (LoadLeagueInfo + التوزيع
+  الحرفي للطاقة الاحتياطية + LoadPlunderTimeConfig + LoadPlunderWarInfo)،
+  الحالات 0/1/2/4/5/6 كلها منفذة حرفياً (Status/Score/Choose/
+  UpdateDate/Broadcast/ProduceFirst) — شوف جلسات 22:55→23:10 في PORTING_LOG.
+- **حرب السلب (Plunder War):** آلة الحالات OnTimer
+  (FUN_14001a400: 0→1→2→3 ببوابات HHMM)، SignUpPlunderWar
+  (FUN_140019e20 بسبع بوابات ولوجات حرفية)، PublishSupportToken
+  (FUN_14001d560 على idServerLeague)، بث FUN_140018870
+  (خريطة server→country فقط)، الجدولة والاستثناء في الكيرنل (40041).
+- **تصحيح TimeGet الحرفي (CQBase.dll @140b82df0):** TimeGet(1)=ثواني
+  يونكس، TimeGet(3)=غرابة سنة-1900 محفوظة، TimeGet(4)=HHMMSS.
+- **مهم للتشغيل:** الديمبو الأصلي cq.sql **مفيهوش صف type=149883**
+  في cq_config (أوقات الحرب: data1=1900 signup end، data2=2000
+  بداية، data3=2100 نهاية) — بدونه LoadPlunderTimeConfig بيفشل
+  Init. يُضاف يدوياً على أي داتابيز هدف.
+- **اختبار شامل:** tests/cross_plunder_war_test.cpp (8 أقسام،
+  خضراء) + cross_kernel_test + cross_socket_e2e كلها خضراء.
+- **build.sh:** خطوة CQCrossServer بتربط main+CrossKernel+
+  CountrySysMgr+MySQLClient+SHA1؛ البيلد الكروس بـ zig لسه
+  محتاج بيئة فيها zig (مش متاحة في الساندبوكس الحالي).
 
 ## وين وصلنا بالظبط — سويتش cq_action (FUN_14012a6e0، 175 case)
 مربوطة حرفيًا ومختبرة كلها: 1010/1011/1013-1021 القديمة، 1022 (0x10 gmlog)،
