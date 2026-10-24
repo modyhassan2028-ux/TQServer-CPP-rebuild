@@ -191,6 +191,20 @@ void CNpcMapBinder::BindTargetSearchFinale(
         };
 }
 
+void CNpcMapBinder::BindAd20(CNpcStateData& rS) {
+    // the ORIGINAL: FUN_14004ad20(map +0x98,
+    // role) inside FUN_14005d2f0's gate block;
+    // the role is the sub's vt+0xe8 object
+    TqCellGrid* pGr = m_pMap ?
+        m_pMap->m_pCells : nullptr;
+    rS.m_fnAd20 = [pGr](void* pRole) -> bool {
+        if (!pGr || !pRole)
+            return false;
+        return IsRolePresent4ad20(*pGr,
+            static_cast<TqRoleIface*>(pRole));
+    };
+}
+
 void CNpcMapBinder::BindTypeRecords(
         TqGameDataMgr& rG, TqLookupMgr& rL,
         CNpcTypeTable& rTbl) {

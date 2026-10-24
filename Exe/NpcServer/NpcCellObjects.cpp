@@ -90,4 +90,77 @@ TqObjContainer* TqCellGrid::UserCont678a0(
     return pCell ? pCell->m_pUsers : nullptr;
 }
 
+// ===== FUN_14004ad20: the role-presence scan
+// (gamemap.cpp; the ORIGINAL get passes its own
+// literal assert context gamemap.cpp 0x129 -
+// the THIRD file/line pair after npc.cpp
+// 0x68f/0x6b2) =====
+bool IsRolePresent4ad20(TqCellGrid& rGrid,
+                        TqRoleIface* pRole) {
+    // ORIGINAL VERBATIM:
+    //   if (role == 0) return 0;
+    //   cell = FUN_14004aba0(map,
+    //          role->vt+0x38(), role->vt+0x40());
+    //   cont = FUN_1400678b0(cell);   // +0x10
+    //   n = cont->vt+0x10();
+    //   i = 0;
+    //   while (i < n) {
+    //     item = cont->vt+0x18(i,
+    //       "f:\version\cqserver-78.0.11-1204"
+    //       "\npcserver\npckernel\gamemap.cpp",
+    //       0x129);
+    //     if (item) {
+    //       iface = item + 0x10;
+    //       if (iface->vt+0x38() ==
+    //               role->vt+0x38()
+    //        && iface->vt+0x40() ==
+    //               role->vt+0x40())
+    //         return 1;
+    //     }
+    //     ++i;
+    //     n = cont->vt+0x10();   // re-read LIVE
+    //   }
+    //   return 0;
+    if (pRole == nullptr)
+        return false;
+    int nX = pRole->m_fnX38();
+    int nY = pRole->m_fnY40();
+    TqCell* pCell = rGrid.Cell4ac70(
+        nX / 0x12, nY / 0x12);
+    if (pCell == nullptr) {
+        // the ORIGINAL's 4aba0 has NO null path
+        // (raw vector math); the port's
+        // checked Cell4ac70 aborts + 0 -
+        // documented deviation
+        return false;
+    }
+    TqObjContainer* pCont =
+        TqCellGrid::NpcCont678b0(pCell);
+    if (pCont == nullptr)
+        return false;
+    uint32_t uCount = pCont->CountVt10();
+    for (uint32_t i = 0; i < uCount; ++i) {
+        uint64_t h = pCont->GetVt18(i,
+            "f:\\version\\cqserver-78.0.11-1204"
+            "\\npcserver\\npckernel\\gamemap.cpp",
+            0x129);
+        if (h != 0) {
+            TqItemIface* pIf =
+                rGrid.m_fnItemToIface ?
+                rGrid.m_fnItemToIface(h) : nullptr;
+            if (pIf && pIf->m_fnX38
+                && pIf->m_fnY40
+                && pIf->m_fnX38() ==
+                    pRole->m_fnX38()
+                && pIf->m_fnY40() ==
+                    pRole->m_fnY40()) {
+                return true;
+            }
+        }
+        uCount = pCont->CountVt10();
+            // the ORIGINAL re-reads the count
+    }
+    return false;
+}
+
 } // namespace npc

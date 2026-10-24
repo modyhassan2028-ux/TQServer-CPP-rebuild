@@ -60,6 +60,30 @@ public:
     void Remove(uint64_t uItem);
 };
 
+class TqCellGrid;
+
+// the +0x10 embedded interface of a live cell
+// item (vt+0x38 = X, vt+0x40 = Y - the same
+// getters FUN_140038010's proxies provide)
+struct TqItemIface {
+    std::function<int()> m_fnX38;
+    std::function<int()> m_fnY40;
+};
+// the role whose presence FUN_14004ad20 scans
+// (the role's own vt+0x38/vt+0x40 getters)
+struct TqRoleIface {
+    std::function<int()> m_fnX38;
+    std::function<int()> m_fnY40;
+};
+
+// FUN_14004ad20(map, role): the role-presence
+// scan (gamemap.cpp) - is a live object with
+// the role's EXACT (X, Y) in the cell's NPC
+// container? (the literal gamemap.cpp 0x129
+// assert context of the ORIGINAL get call)
+bool IsRolePresent4ad20(TqCellGrid& rGrid,
+                        TqRoleIface* pRole);
+
 // the cell (ORIGINAL 0x18 bytes): +0x08 the
 // user container, +0x10 the NPC container
 struct TqCell {
@@ -77,6 +101,14 @@ class TqCellGrid {
 public:
     std::vector<TqCellRow> m_vRows;  // +0x30
     std::function<void()> m_fnInvalidParam;
+    // the item+0x10 interface resolution (the
+    // container handles are the live-object
+    // pointers; the ORIGINAL adds 0x10 and
+    // derefs the vptr - modeled as a seam so
+    // the binder can point it at the REAL
+    // NpcObj::m_pIface10)
+    std::function<TqItemIface*(uint64_t)>
+        m_fnItemToIface;
 
     // FUN_140049490(map): the base bound:
     //   vt28(mapdata) = width; (width-1)/0x12+1

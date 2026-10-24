@@ -110,6 +110,11 @@ public:
     void BindTargetSearchFinale(
         CNpcTargetSearchData& rT,
         CNpcShoutData& rShout);
+    // bind the state's m_fnAd20 (unit 43):
+    // FUN_14004ad20(map, role) - the REAL
+    // role-presence scan body over the grid
+    // (the ORIGINAL passes the same map +0x98)
+    void BindAd20(CNpcStateData& rS);
     // bind the REAL type records (unit 42):
     // the game-data mgr's vt+0x40(id) -> the
     // cq_monstertype table, and the lookup's
