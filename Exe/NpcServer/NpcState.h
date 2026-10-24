@@ -82,6 +82,42 @@ struct CNpcStateData {
     std::function<bool()> m_fnSub60;    // sub vtable+0x60
     std::function<void(int&, int&)> m_fnSubGetPos;
         // sub vtable+0x38 (x) / +0x40 (y)
+    // ===== state-1 seams =====
+    uint32_t m_nField44 = 0;      // +0x44 (param_1[0x11])
+    uint32_t m_nField3D = 0;      // +0x3d byte
+    std::function<int()> m_fnNpcVt8;
+        // npc vtable+8 (identity/idx getter)
+    std::function<bool(uint32_t, int, int)> m_fnCreatureInit;
+        // FUN_140062460(obj, id18, y, x, 0x59, 0)
+        // after the FUN_1400623e0 ctor - true ok
+    std::function<void(int)> m_fnCreatureSend;
+        // FUN_14001c200 + FUN_14001c5f0(mgr, id, obj)
+    std::function<void()> m_fnCreatureDestroy;
+        // FUN_140062430 dtor
+    std::function<void()> m_fnCreatureCtor;
+        // FUN_1400623e0
+    std::function<bool()> m_fnDF70;    // FUN_14005df70
+    std::function<bool(int, int)> m_fnGenArea68;
+        // gen vtable+0x68(gen, x, y)
+    std::function<uint32_t(int)> m_fnSubGetWord20;
+        // sub vtable+0x20(sub, buf) - two calls,
+        // bit 5 of the first / bit 3 of the second
+    std::function<void()> m_fnRowVt8;  // row vtable+8
+    std::function<void()> m_fnLogWarn;
+        // literal: "npc: [%d][%d], target id: [%d]"
+    std::function<uint32_t(uint32_t)> m_fnRandGet;
+        // tq::RandGet(max)
+    std::function<bool()> m_fn57d30;   // FUN_140057d30
+    std::function<bool(int, int, int)> m_fn580e0;
+        // FUN_1400580e0(npc, x, y, 0)
+    std::function<bool(uint32_t)> m_fn58500;
+        // FUN_140058500(npc, dir) - 8-dir wander
+    std::function<int()> m_fnGenVt60;   // gen vtable+0x60
+    std::function<int()> m_fnGenVt50;   // gen vtable+0x50
+    std::function<int()> m_fnGenVt38;   // gen vtable+0x38
+    std::function<int()> m_fnGenVt58;   // gen vtable+0x58
+    // gen vtable+0x28 -> (x, y) pair reuses
+    // m_fnGenGetSpawn above
 };
 
 // ============================================================
@@ -165,6 +201,96 @@ bool CNpcState6(CNpcStateData& rN);
 // +0x18 = 8; +0x2c = 0;
 // return 1;
 bool CNpcState7(CNpcStateData& rN);
+
+// ============================================================
+// ===== ORIGINAL FUN_14005e900 (state 1) =====
+// ============================================================
+// flags = row(0x15);
+// if (flags bit 8) {              // the summoner bit
+//   FUN_1400623e0(obj);           // creature ctor
+//   if (!FUN_140062460(obj, id18,
+//          y(+0x40), x(+0x38), 0x59, 0))
+//     log(&DAT_1400be0b0);
+//   else FUN_14001c200+
+//        FUN_14001c5f0(mgr, id, obj);
+//   FUN_140062430(obj);           // dtor
+// }
+// if (FUN_14005df70(npc)) return 1;
+// flags = row(0x15);
+// if (!bit3 && !bit4 && !bit0xb) {
+//   if (+0x2c > 0) { FUN_14005c960(npc,0);
+//                    return 1; }
+//   if (bit7 && !gen->vt+0x68(gen,x,y))
+//       goto LAB_14005eb1c;
+//   if (!FUN_140002700(&+0xa8)) return 1;
+// }
+// LAB_14005eb1c:
+//   +0x44 = 0; +0x3d = 0;
+//   w1 = sub->vt+0x20(); w2 = sub->vt+0x20();
+//   if (!(w1 bit5) && !(w2 bit3) &&
+//       FUN_14005bc80(npc)) {
+//     target = find(+0x84);
+//     if (!target) {
+//       log(&DAT_1400be0b0); row->vt+8();
+//       npc->vt+8(npc);
+//       logWARN("npc: [%d][%d], target id: [%d]");
+//     } else {
+//       d1 = sub->vt+8(sub,tX,tY);
+//       d2 = sub->vt+0x10(sub,t->+0x48);
+//       if (d1 <= d2) { FUN_140059c90(npc);
+//         +0x2c = 0; state = 8; return 1; }
+//       if (FUN_14005ad00(npc)) {
+//         if (+0x2c) { state = 7; return 1; }
+//         if (FUN_140057d30(npc) &&
+//             0x4f < tq::RandGet(100)) {
+//           +0x2c = 0; state = 6; return 1;
+//         }
+//         return 1;
+//       }
+//     }
+//   }
+//   // ===== movement section =====
+//   flags = row(0x15);
+//   if (bit3 || bit4 || bit0xb) {
+//     if (+0x2c > 0) { FUN_14005c960(npc,0);
+//                      return 1; }
+//     if (!FUN_140002700(&+0xa8)) return 1;
+//   }
+//   if (!FUN_14005ad00(npc)) return 1;
+//   if (gen->vt+0x68(gen,x,y)) {     // IN gen area
+//     flags = row(0x15);
+//     if (!bit3 && !bit4 && !bit0xb) {
+//       if (tq::RandGet(5) == 0 &&
+//           FUN_140058500(npc, tq::RandGet(8)))
+//         FUN_14005c960(npc,0);
+//     } else {
+//       if ((tq::RandGet(5)==0 &&
+//            1 < gen->vt+0x60()) ||
+//           1 < gen->vt+0x38()) {
+//         nx = gen->vt+0x50() +
+//              tq::RandGet(gen->vt+0x60());
+//         ny = gen->vt+0x58() +
+//              tq::RandGet(gen->vt+0x38());
+//         if (FUN_1400580e0(npc,nx,ny,0))
+//           FUN_14005c960(npc,0);
+//       }
+//     }
+//   } else {                        // OUT of area
+//     flags = row(0x15);
+//     if (!bit3 && !bit4 && !bit7 &&
+//         tq::RandGet(5) != 0) return 1;
+//     gen->vt+0x28(gen,&res);       // spawn res
+//     if (FUN_1400580e0(npc,resLo,resHi,0))
+//       FUN_14005c960(npc,0);
+//     else {
+//       flags = row(0x15);
+//       if (bit3 || bit4 || bit5)
+//         FUN_140059f40(npc,resLo,resHi,id18);
+//       // else: return
+//     }
+//   }
+// return 1;
+bool CNpcState1(CNpcStateData& rN);
 
 // ============================================================
 // ===== ORIGINAL FUN_14005d330 (state 8) =====

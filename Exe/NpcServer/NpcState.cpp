@@ -187,6 +187,178 @@ bool CNpcState7(CNpcStateData& rN) {
     return true;
 }
 
+bool CNpcState1(CNpcStateData& rN) {
+    // ===== the summoner section (flags bit 8) =====
+    uint32_t uFlags = rN.m_fnRowGetFlag();
+    if ((uFlags >> 8 & 1) != 0) {
+        rN.m_fnCreatureCtor();       // FUN_1400623e0
+        int nId18 = rN.m_fnSubId18();
+        int nX = 0, nY = 0;
+        rN.m_fnSubGetPos(nX, nY);
+        // ORIGINAL: FUN_140062460(obj, id,
+        // y, x, 0x59, 0)
+        if (!rN.m_fnCreatureInit(nId18, nY, nX)) {
+            rN.m_fnLogError();        // DAT_1400be0b0
+        } else {
+            int nIdx = rN.m_fnNpcVt8();
+            rN.m_fnCreatureSend(nIdx);
+        }
+        rN.m_fnCreatureDestroy();     // FUN_140062430
+    }
+    // ORIGINAL: if (FUN_14005df70(npc)) return
+    if (rN.m_fnDF70())
+        return true;
+    uFlags = rN.m_fnRowGetFlag();
+    bool bSight = (uFlags >> 3 & 1) != 0 ||
+                  (uFlags >> 4 & 1) != 0 ||
+                  (uFlags >> 0xb & 1) != 0;
+    if (!bSight) {
+        // ORIGINAL: if (0 < +0x2c) { c960(_,0);
+        // return; }
+        if ((int)rN.m_dwField2C > 0) {
+            rN.m_fnC960(0);
+            return true;
+        }
+        // ORIGINAL: if (bit7 && !gen->vt+0x68)
+        // goto LAB_14005eb1c
+        bool bSkip2700 = false;
+        if ((rN.m_fnRowGetFlag() >> 7 & 1) != 0) {
+            int nX = 0, nY = 0;
+            rN.m_fnSubGetPos(nX, nY);
+            if (!rN.m_fnGenArea68(nX, nY))
+                bSkip2700 = true;
+        }
+        if (!bSkip2700) {
+            if (!rN.m_fn2700())
+                return true;
+        }
+    }
+    // LAB_14005eb1c
+    rN.m_nField44 = 0;             // +0x44 = 0
+    rN.m_nField3D = 0;             // +0x3d = 0
+    // ORIGINAL: two sub vtable+0x20 word fetches
+    uint32_t uW1 = rN.m_fnSubGetWord20(0);
+    uint32_t uW2 = rN.m_fnSubGetWord20(1);
+    // ORIGINAL: !(w1 bit5) && !(w2 bit3) && BC80
+    if ((uW1 >> 5 & 1) == 0 &&
+        (uW2 >> 3 & 1) == 0 && rN.m_fnBC80()) {
+        CNpcTargetSeam* pT =
+            rN.m_fnFindTarget(rN.m_nTargetId);
+        if (pT == nullptr) {
+            // ORIGINAL: logERROR + row vt+8 +
+            // npc vt+8 + the literal WARNING
+            rN.m_fnLogError();
+            rN.m_fnRowVt8();
+            rN.m_fnNpcVt8();
+            rN.m_fnLogWarn();
+        } else {
+            int nD1 = rN.m_fnSubDist(pT->m_nX,
+                                     pT->m_nY);
+            int nD2 = rN.m_fnSubDist48(
+                pT->m_nField48);
+            // ORIGINAL: if (d1 <= d2) { 59c90;
+            // 2c=0; state=8; return; }
+            if (nD1 <= nD2) {
+                rN.m_fn59c90();
+                rN.m_dwField2C = 0;
+                rN.m_nState = 8;
+                return true;
+            }
+            // ORIGINAL: if (FUN_14005ad00) ...
+            if (rN.m_fnAD00()) {
+                if (rN.m_dwField2C != 0) {
+                    rN.m_nState = 7;
+                    return true;
+                }
+                // ORIGINAL: FUN_140057d30 &&
+                // 0x4f < RandGet(100)
+                if (rN.m_fn57d30() &&
+                    0x4f < rN.m_fnRandGet(100)) {
+                    rN.m_dwField2C = 0;
+                    rN.m_nState = 6;
+                    return true;
+                }
+                return true;
+            }
+        }
+    }
+    // ===== the movement section =====
+    uFlags = rN.m_fnRowGetFlag();
+    bSight = (uFlags >> 3 & 1) != 0 ||
+             (uFlags >> 4 & 1) != 0 ||
+             (uFlags >> 0xb & 1) != 0;
+    if (bSight) {
+        if ((int)rN.m_dwField2C > 0) {
+            rN.m_fnC960(0);
+            return true;
+        }
+        if (!rN.m_fn2700())
+            return true;
+    }
+    if (!rN.m_fnAD00())
+        return true;
+    int nX = 0, nY = 0;
+    rN.m_fnSubGetPos(nX, nY);
+    if (rN.m_fnGenArea68(nX, nY)) {
+        // ===== IN gen area: wander =====
+        uFlags = rN.m_fnRowGetFlag();
+        bSight = (uFlags >> 3 & 1) != 0 ||
+                 (uFlags >> 4 & 1) != 0 ||
+                 (uFlags >> 0xb & 1) != 0;
+        if (!bSight) {
+            // ORIGINAL: RandGet(5)==0 &&
+            // FUN_140058500(npc, RandGet(8))
+            if (rN.m_fnRandGet(5) == 0) {
+                if (rN.m_fn58500(
+                        rN.m_fnRandGet(8)))
+                    rN.m_fnC960(0);
+            }
+        } else {
+            // ORIGINAL: (RandGet(5)==0 &&
+            // 1 < gen->vt+0x60()) || 1 < vt+0x38()
+            int nW = rN.m_fnGenVt60();
+            bool bTry = false;
+            if (rN.m_fnRandGet(5) == 0 && 1 < nW)
+                bTry = true;
+            if (!bTry && 1 < rN.m_fnGenVt38())
+                bTry = true;
+            if (bTry) {
+                int nNX = rN.m_fnGenVt50() +
+                    (int)rN.m_fnRandGet(
+                        (uint32_t)rN.m_fnGenVt60());
+                int nNY = rN.m_fnGenVt58() +
+                    (int)rN.m_fnRandGet(
+                        (uint32_t)rN.m_fnGenVt38());
+                if (rN.m_fn580e0(nNX, nNY, 0))
+                    rN.m_fnC960(0);
+            }
+        }
+    } else {
+        // ===== OUT of gen area: go home =====
+        uFlags = rN.m_fnRowGetFlag();
+        bool b357 = (uFlags >> 3 & 1) != 0 ||
+                    (uFlags >> 4 & 1) != 0 ||
+                    (uFlags >> 7 & 1) != 0;
+        if (!b357 && rN.m_fnRandGet(5) != 0)
+            return true;      // LAB_14005efc8
+        // ORIGINAL: gen->vt+0x28 spawn res
+        int nLo = 0, nHi = 0;
+        rN.m_fnGenGetSpawn(nLo, nHi);
+        if (rN.m_fn580e0(nLo, nHi, 0)) {
+            rN.m_fnC960(0);
+        } else {
+            uFlags = rN.m_fnRowGetFlag();
+            bool bTele = (uFlags >> 3 & 1) != 0 ||
+                         (uFlags >> 4 & 1) != 0 ||
+                         (uFlags >> 5 & 1) != 0;
+            if (bTele)
+                rN.m_fn59f40(nLo, nHi,
+                             rN.m_fnSubId18());
+        }
+    }
+    return true;              // LAB_14005efc8
+}
+
 bool CNpcState8(CNpcStateData& rN) {
     CNpcTargetSeam* pTarget =
         rN.m_fnFindTarget(rN.m_nTargetId);
