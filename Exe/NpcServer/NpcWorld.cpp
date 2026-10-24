@@ -1,4 +1,5 @@
 #include "NpcWorld.h"
+#include "NpcWorldTick.h"
 #include <cstdio>
 #include <cstring>
 
@@ -42,11 +43,13 @@ void CNpcWorld::OnTimer() {
     switch (m_nState) {
     case 2: {
         if (m_dwGenDelay == 0) {
-            // world tick family: FUN_14003c520,
-            // FUN_140037f80(+0x38), FUN_14002b380(+0x30)
-            // (CTickAnalyst 0x51), FUN_14001d230,
-            // FUN_1400489b0 - TBD bodies
-            if (m_fnTick) m_fnTick();
+            // world tick family in the ORIGINAL order
+            // (FUN_14001d390 case 2):
+            TickNoop();              // FUN_14003c520 (empty)
+            if (m_fnUserWalk) m_fnUserWalk(); // +0x38
+            if (m_fnTick) m_fnTick(); // CTickAnalyst 0x51
+                                     // + FUN_14002b380
+            if (m_fnAiProcess) m_fnAiProcess();
             // stats display every +0x20 secs
             if (m_dwStatInterval + m_dwStatLast <= dwNow) {
                 m_dwStatLast = dwNow;

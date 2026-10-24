@@ -1,4 +1,6 @@
 #include "NpcAssembly.h"
+#include "NpcWorldTick.h"
+#include <chrono>
 #include <cstdio>
 #include <cstring>
 
@@ -52,6 +54,40 @@ bool CNpcServerApp::Boot() {
         else m_world.OnConnectOK(); };
     m_world.m_fnTick = [this]{ WorldTick(); }; // family
     m_world.m_fnGenStats = [this]{ return GenStats(); };
+    // unit 14: the world tick family in the ORIGINAL
+    // FUN_14001d390 order - user walk (+0x38, empty in
+    // this assembly) then the CAIStrategyMgr epoch
+    // trainer (FUN_14001d230 + FUN_1400489b0)
+    m_world.m_fnUserWalk = []{
+        npc::UserCollection coll;
+        coll.m_fnGetCount = []{ return 0u; };
+        coll.m_fnGetAt = [](uint32_t, const char*,
+                            uint32_t, uint32_t){
+            return (npc::UserObj*)nullptr; };
+        npc::UserManager mgr;
+        mgr.m_fnGetCollection = [&]{ return &coll; };
+        mgr.m_fnUserTick = [](npc::UserObj*){};
+        npc::UserManagerWalk(mgr); };
+    m_world.m_fnAiProcess = []{
+        auto& ai = npc::CAIStrategyMgr::Instance();
+        if (!ai.m_fnNowMs) {
+            ai.m_fnNowMs = []{
+                return (uint32_t)
+                    (std::chrono::duration_cast<
+                        std::chrono::milliseconds>(
+                    std::chrono::steady_clock::
+                        now().time_since_epoch())
+                    .count() & 0xffffffff); };
+            ai.m_fnSysLog = [](const char*, const char*){};
+            ai.m_fnLog = [](const char*){};
+            ai.m_fnReload = []{};
+            ai.m_fnEvolve = []{};
+            ai.m_fnPerGenD0 = [](npc::CAIStrategyMgr::
+                                 Strategy*){};
+            ai.m_fnGetGen = [](npc::CAIStrategyMgr::
+                               Strategy*){ return 0; };
+        }
+        ai.Process(); };
 
     // ---- manager wiring ----
     m_mgr.m_fnLog = [this](const char* szName,

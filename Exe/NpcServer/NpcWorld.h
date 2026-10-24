@@ -40,7 +40,11 @@ public:
     PrintFn  m_fnPrint;            // +0x10 console
     AuthFn   m_fnAuth;             // FUN_140048da0
     ConnectFn m_fnConnect;         // FUN_14001c5f0
-    std::function<void()> m_fnTick;// world tick family
+    std::function<void()> m_fnTick;// manager budget walk
+                                   // (FUN_14002b380)
+    std::function<void()> m_fnUserWalk;  // FUN_140037f80
+    std::function<void()> m_fnAiProcess; // FUN_14001d230
+                                         // +FUN_1400489b0
     // the +0x30 manager walk (FUN_140025b50 vcalls)
     std::function<std::vector<GenStat>()> m_fnGenStats;
     // counter seam for the MYASSERT default branch

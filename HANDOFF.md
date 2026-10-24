@@ -1,7 +1,47 @@
 
 # ⚠️ دليل الوكيل التالي — ابدأ من هنا (آخر تحديث 2026-10-24 18:30)
 
-## 0) حالة NpcServer لحظياً (جلسة 24/10 — محدث 18:55)
+## 0) حالة NpcServer لحظياً (جلسة 24/10 — محدث 19:15)
+- **جديد:** الوحدة 14: **عيلة التيك كاملة + هوية
+  السنجلتون = CAIStrategyMgr**. الاكتشافات:
+  (1) **FUN_14001d390 (تيكة CNpcWorld، فتحة الجدول
+  موثقة بـ RTTI ".?AVCNpcWorld@@") بتنادي 4 خطوات
+  بالترتيب**: FUN_14003c520 (فارغة تماماً — جسم RET
+  واحد)، FUN_140037f80 (مشية المستخدمين على +0x38)،
+  CTickAnalyst(0x51) + FUN_14002b380 (المدير — الوحدات
+  11-13)، ثم FUN_14001d230 → FUN_1400489b0.
+  (2) **FUN_14001d230 = tq::Singleton<CAIStrategyMgr>**
+  (ctor FUN_140045ff0 بيحط vftable السنجلتون ثم
+  CAIStrategyMgr، 0x98 بايت، زوج shared_ptr عالمي
+  DAT_140103c70/78 مع رقصة refcount LOCK/UNLOCK).
+  (3) **FUN_1400489b0 = CAIStrategyMgr::Process —
+  مدرّب الحقب (epoch) للـ AI العصبي!** كل 599999ms
+  (~10 دقائق): عدّ الاستراتيجيات اللي fitness
+  (vtable+8, double) بتاعتها <= 2.220446049250313e-16
+  (epsilon الآلة، DAT_1400c7218)؛ لو count*8 < عدد
+  السكان → لو مرت 10800000ms (3 ساعات) من آخر
+  reload → FUN_140043700 ثم ++generation (+0x8)؛
+  لكل جين: FUN_1400670d0/e0 ولو generation > 1 →
+  لوج حرفي SysLogSave("ainpc", "Gene[%d]\tGeneration
+  [%d]\tFitness[%d]")؛ ثم "Epoch neural AI generation
+  %d" و FUN_1400476a0 (التطوير) و "CAIStrategyMgr::
+  Process() update neural AI generation %d.".
+  (4) **FUN_140037f80**: مشية عكسية على مجموعة
+  المستخدمين مع إعادة جلب العدد كل لفة (توقف لو اتغير)
+  و accessor بيحمل المسار الحرفي "f:\version\cqserver-
+  78.0.11-1204\npcserver\npckernel\usermanager.cpp"
+  سطر 0x3a (نمط MSVC vector::at) ثم FUN_140066820
+  لكل مستخدم (تيكة مستخدم بزوج 1s +0xa0/+0xa4 — جسم
+  TBD).
+  (5) **حفر RTTI**: الجدول بتاع FUN_140056fd0 هو
+  CGameData<szNpcType,szID> (+0x18)؛ الثنكات
+  FUN_1400222e0/310/330 = CGameData<szInstanceTypeTable,
+  szID> — كلها استدعاءات جداول DB **مش** رستوك
+  المولد. نداء vtable+0x90 (العدّاد) موثوق من CNpc::
+  Create (FUN_14005e2e0) — مسار إنشاء الـ NPC بيزود
+  عدادات المولد. **متبقي**: مين بينادي restock
+  (vtable+0x78 = FUN_14005fb30) عند موت NPC — نبدأ من
+  مسار Close/الـ dtor بتاع CNpc (مؤشر المولد +0x100).
 - **جديد:** الوحدة 13: **Process الحقيقي
   (FUN_140060b00) + تصحيح معاني الحقول من vtable
   محفور من البيناري**. الاكتشافات:
@@ -226,14 +266,14 @@
 3. ~~استبدال main.cpp النموذجي~~ **مكتمل** (الوحدة 11)
    و~~عيلة Process بتاعة المولد (FUN_14005fc90/
    FUN_14005f7e0/FUN_14005fb30)~~ **مكتملة** (الوحدة 12).
-4. المتبقي قبل القفل: (أ) بقية عيلة التيك
-   (FUN_14003c520، FUN_14001d230، FUN_1400489b0)؛
-   (ب) بقية أعضاء كلاستر المولد (FUN_14005f630
-   InArea — معروف من vtable+0x70 لكن مش متنقل؛
-   FUN_140060030 العدّاد +0x90)؛ (ج) مسار موت NPC
-   (مين بينادي vtable+0x78 restock و vtable+0x90).
-   بعدها: قفل NpcServer والانتقال لـ Loaderhock
-   (الترتيب الموثق في الخطة).
+4. المتبقي قبل القفل: (أ) مسار موت NPC: مين بينادي
+   restock (vtable+0x78) والعدّاد (vtable+0x90) —
+   ابدأ من Close/dtor بتاع CNpc (المؤشر +0x100)؛
+   (ب) جسم تيكة المستخدم FUN_140066820 (زوج 1s)؛
+   (ج) جسم عيلة CAIStrategyMgr العميقة
+   (FUN_140043700 reload، FUN_1400476a0 evolve،
+   FUN_1400670d0/e0). بعدها: قفل NpcServer والانتقال
+   لـ Loaderhock (الترتيب الموثق في الخطة).
 - عناوين مفاتيح للفتوة القادمة: FUN_140084300 (إدراج
   اللست)، FUN_1400846d0 (بناء العقدة)، FUN_140081e30،
   FUN_1400824c0 (إشارة الطابور)، FUN_14008d7c0/14008d7e0

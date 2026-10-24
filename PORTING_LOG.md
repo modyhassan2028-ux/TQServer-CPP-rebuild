@@ -3562,3 +3562,38 @@ FUN_140022f40 (تفاصيل كتابة الحقل)، FUN_1400232b0 (مسار
 5. **الرجريشن 13/13 خضرا** (genproc اتوسع بـ 8 حالات
    للـ Process) + ops 205/207/208 + record 201 ضد
    القاعدة + سموك main. Commit بعد الخُضر الكامل.
+
+## جلسة 2026-10-24 19:15 — NpcServer الوحدة 14:
+## عيلة التيك (FUN_14003c520/140037f80/14001d230/
+## 1400489b0) + هوية CAIStrategyMgr
+1. **حفر RTTI من البيناري**: جدول FUN_140056fd0 =
+   .?AV?$CGameData@$1?szNpcType@@$1?szID@@ (الفتحة
+   +0x18)؛ جدول العالم = .?AVCNpcWorld@@ (FUN_14001d390
+   فيه)؛ الثنكات FUN_1400222e0/310/330 =
+   CGameData<szInstanceTypeTable,szID>.
+2. **FUN_14003c520**: فارغة (RET) — بورتت no-op
+   موثقة.
+3. **FUN_140037f80**: مشية المستخدمين العكسية مع
+   إعادة جلب المجموعة والعدد كل لفة + المسار الحرفي
+   usermanager.cpp سطر 0x3a في at() + FUN_140066820
+   seam. بورتت في NpcWorldTick.cpp.
+4. **FUN_14001d230**: tq::Singleton<CAIStrategyMgr>
+   (ctor 140045ff0: vftable سنجلتون ثم CAIStrategyMgr،
+   0x98 بايت، زوج shared_ptr عالمي مع LOCK/UNLOCK
+   refcount) — بورتت Meyers singleton بنفس الكسل.
+5. **FUN_1400489b0 = CAIStrategyMgr::Process**: مدرّب
+   الحقب للـ AI العصبي — بورت حرفياً: أعلام الختم
+   bit0/bit1، بوابة 599999ms، عدّ fitness <=
+   2.220446049250313e-16 (DAT_1400c7218)، بوابة count*8
+   < السكان، reload كل 10800000ms (FUN_140043700)،
+   ++generation (+0x8)، لكل جين FUN_1400670d0/e0 +
+   اللوجات الحرفية "Gene[%d]\tGeneration[%d]\tFitness
+   [%d]" / "Epoch neural AI generation %d" / 
+   "CAIStrategyMgr::Process() update neural AI
+   generation %d.".
+6. **CNpcWorld::OnTimer**: العيلة بتتنفذ بترتيب
+   الأصل (noop → user walk → manager walk → AI
+   trainer) عبر m_fnUserWalk/m_fnAiProcess seams.
+   التجميعة بتوصّلهم بالحقيقي.
+7. **NPC_WORLDTICK_OK** جديد + **الرجريشن 14/14
+   خضرا** + ops/record DB + سموك main. Commit.

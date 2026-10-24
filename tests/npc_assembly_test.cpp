@@ -130,6 +130,10 @@ int main() {
            "ids, +0x1c grid-cap gate), manager 3-tick "
            "AI walk -> "
            "wander dispatch -> steplist arrival, 30s stats "
-           "block, CMsgAiNpcInfo create/dup/notify98\n");
+           "block, CMsgAiNpcInfo create/dup/notify98, "
+           "unit-14 tick family (FUN_14003c520 noop + "
+           "FUN_140037f80 user walk + FUN_14001d230/"
+           "FUN_1400489b0 CAIStrategyMgr epoch trainer "
+           "in OnTimer order)\n");
     return 0;
 }
