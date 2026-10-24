@@ -156,6 +156,26 @@ public:
     // `return 1` in the send paths, fallthrough break = false)
     bool Process(uint32_t dwCmd, void* pCmd);
 
+    // ---- ORIGINAL LAB_14002f500 / C2-5 / C8 relays:
+    // post a 0x7562 send on the resolved slot with the
+    // frame's C/A/B and payload (the exact command word
+    // layout of the posts is TBD - partially recovered)
+    bool RelaySend(uint32_t dwSlot, uint32_t dwC,
+                   uint32_t /*unused*/, uint32_t dwA,
+                   uint32_t dwB, int nPay,
+                   const uint8_t* pPay) {
+        CCrossSocket** pp = Slot(dwSlot);
+        if (!pp || !*pp) return false;
+        std::vector<uint32_t> cmd(
+            6 + (nPay + 3) / 4, 0);
+        cmd[0] = dwSlot;
+        cmd[1] = dwA; cmd[2] = dwB;
+        cmd[3] = 0; cmd[4] = dwC;   // TBD: TYPE word
+        cmd[5] = (uint32_t)nPay;
+        std::memcpy(cmd.data() + 6, pPay, nPay);
+        return Process(SockCmd_Send, cmd.data());
+    }
+
     // ---- ORIGINAL FUN_14002b560:
     // CSocketKernel::SendOSMulitClient ------------------------
     // relays a stripped message to every target id (the mode-6

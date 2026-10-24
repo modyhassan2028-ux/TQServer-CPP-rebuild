@@ -198,9 +198,14 @@ int main() {
         return true; };
     pw->m_fnPostCmd = [&](int nSel, int nCode,
                           const char* sz) {
-        ++nPosted;
-        assert(nSel == 3 && nCode == 0x3ef);
-        assert(std::strstr(sz, "Server07") != nullptr);
+        if (nCode == 0x3ef) {   // hello bind post
+            ++nPosted;
+            assert(nSel == 3);
+            assert(std::strstr(sz, "Server07") != nullptr);
+        } else {
+            assert(nSel == 3 && nCode == 0x3ec);
+            // the corrupt C='Q' frame: route-miss kick
+        }
     };
     pw->m_fnDeliverMsg = [&](uint16_t t, const uint8_t*,
                              int) {
@@ -224,14 +229,14 @@ int main() {
     char b1[] = "55 0", b2[] = "56 1";
     k4.Process(SockCmd_BindPair, b1);
     k4.Process(SockCmd_BindPair, b2);
-    // frame B=6, A=3 target words: 55, -1 (skip), 56
+    // frame C=6 (mode), A=3 target words: 55, -1, 56
     std::string msg = "HELLO-HUB";
     std::string tgt;
     auto w = [](uint32_t id, uint32_t sz) -> uint32_t {
         return ((sz & 0xfff) << 20) | (id & 0xfffff); };
     tgt.append((const char*)&std::vector<uint32_t>{
         w(55, 64), 0xffffffffu, w(56, 64)}[0], 12);
-    uint16_t cc=1, type=40065; uint32_t aa=3, bb=6;
+    uint16_t cc=6, type=40065; uint32_t aa=3, bb=0;
     std::string f(16, '\0');
     std::memcpy(&f[0], &cc, 2); std::memcpy(&f[4], &aa, 4);
     std::memcpy(&f[8], &bb, 4);
@@ -262,6 +267,55 @@ int main() {
     assert(fr.size() == 0x10 + msg.size());
     assert(std::memcmp(fr.data() + 0x10, msg.data(),
                        msg.size()) == 0);
+
+// ---- C in 2..5: single-target by server id (B) ----
+{
+    auto mkc = [](uint16_t c, uint32_t a, uint32_t b,
+                  uint16_t type, const char* pay) {
+        std::string f(16, '\0');
+        std::memcpy(&f[0], &c, 2); std::memcpy(&f[4], &a, 4);
+        std::memcpy(&f[8], &b, 4);
+        uint16_t sz = (uint16_t)(16 + std::strlen(pay));
+        std::memcpy(&f[0xc], &sz, 2);
+        std::memcpy(&f[0xe], &type, 2);
+        f += pay; return f;
+    };
+    // C=3, B=56 -> slot of server 56 = 1 (pb_)
+    static std::string s_zF3 =
+        mkc(3, 77, 56, 40066, "STATE");
+    CServerSocket* p3 = new CServerSocket(
+        (CCrossServerSocketKernel*)&k4, 44,
+        [](void* p, int n) -> int {
+            if (n == 0) return (int)s_zF3.size();
+            int g = n < (int)s_zF3.size()
+                  ? n : (int)s_zF3.size();
+            std::memcpy(p, s_zF3.data(), g);
+            s_zF3.erase(0, g); return g; },
+        [](CServerSocket* so) { so->WalkFrames(); });
+    k4.AddSocket(std::unique_ptr<CCrossSocket>(p3));
+    k4.RegisterByHandle(44, p3);
+    uint64_t hh = 44;
+    k4.Process(SockCmd_Recv, &hh);
+    assert(pb_->vecSent.size() == 2);   // relayed to 56
+    assert(pa_->vecSent.size() == 1);   // 55 untouched
+    // unknown server -> the PacketType log, no send
+    std::string s_zF4 = mkc(4, 1, 999, 40066, "X");
+    s_zF3 = s_zF4;
+    CServerSocket* p4 = new CServerSocket(
+        (CCrossServerSocketKernel*)&k4, 45,
+        [](void* p, int n) -> int {
+            if (n == 0) return (int)s_zF3.size();
+            int g = n < (int)s_zF3.size()
+                  ? n : (int)s_zF3.size();
+            std::memcpy(p, s_zF3.data(), g);
+            s_zF3.erase(0, g); return g; },
+        [](CServerSocket* so) { so->WalkFrames(); });
+    k4.AddSocket(std::unique_ptr<CCrossSocket>(p4));
+    k4.RegisterByHandle(45, p4);
+    hh = 45;
+    k4.Process(SockCmd_Recv, &hh);
+    assert(pb_->vecSent.size() == 2);   // nothing new
+}
 }
 }
     // unknown handle -> FindByHandle null, no crash

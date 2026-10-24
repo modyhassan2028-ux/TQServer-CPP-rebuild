@@ -146,46 +146,131 @@ size_t CServerSocket::WalkFrames() {
                 }
                 // TBD: case 5 tail (partially recovered)
             }
-        } else if (uC < 2 || uC == 10) {
-            // ---- LAB_14002f500 family ----
-            // route lookup by (slotid, A); on miss the
-            // ORIGINAL kicks with PostCommand(3, 0x3ec).
-            // TBD: that miss tail and the mode-8 sub-walk.
-            // ---- ORIGINAL mode-6 multi-target relay ----
-            // A = count of trailing 32-bit target words; each
-            // packs (id 20 bits | required-size 12 bits):
-            //   c9c = word >> 0x14 (pool buffer capacity)
-            //   ca0 = word & 0xfffff (target id)
-            // the words are stripped, the message relayed via
-            // FUN_14002b560 SendOSMulitClient
-            if (uB == 6) {
-                // A = count of trailing 32-bit target words;
-                // each packs (id 20 bits | required-size 12
-                // bits): c9c = word >> 0x14 (pool buffer
-                // capacity), ca0 = word & 0xfffff (target id).
-                // Words are stripped (FUN_14002e650 pool init,
-                // FUN_14002e1c0 buffer find, FUN_140014e20
-                // word append) then FUN_14002b560 relays.
-                int nMsg = nPay - (int)uA * 4;
-                if (nMsg >= 0 && m_pKernel) {
-                    std::vector<uint32_t> vecTargets;
-                    for (uint32_t i = 0; i < uA; ++i) {
-                        uint32_t w; std::memcpy(&w,
-                            pay + nMsg + i * 4, 4);
-                        if (w != 0xffffffff)
-                            vecTargets.push_back(
-                                w & 0xfffff);
-                    }
-                    m_pKernel->SendOSMulitClient(uType,
-                        (uint32_t)nMsg, pay, vecTargets);
+        } else if (uC < 2) {
+            // ---- LAB_14002f500: route-map single relay ----
+            // key = CONCAT44(A, socket slot id); miss ->
+            // PostCommand(3, 0x3ec); hit -> the value pair at
+            // node+0x20/+0x24 (B override when B == 0xffffffff)
+            // and PostCommand(1, 0x7562, 0x418) with C word = 7
+            if (m_pKernel) {
+                uint64_t ullKey =
+                    ((uint64_t)uA << 32) |
+                    (uint32_t)(uintptr_t)m_ullOsHandle;
+                uint64_t ullVal =
+                    m_pKernel->RouteGet(ullKey);
+                if (ullVal == 0) {
+                    if (m_fnPostCmd)
+                        m_fnPostCmd(3, 0x3ec, "");
+                } else {
+                    uint32_t dwSlot =
+                        (uint32_t)(ullVal >> 32);
+                    // TBD: the node+0x20/+0x24 word order
+                    // of the value pair is partially
+                    // recovered; slot = value hi word here
+                    m_pKernel->RelaySend(dwSlot, uC, uType,
+                                         uA, uB, nPay, pay);
                 }
-            } else {
-                if (m_fnDeliverMsg)
-                    m_fnDeliverMsg(uType, pay, nPay);
+            }
+        } else if (uC >= 2 && uC < 6) {
+            // ---- C in 2..5: single-target by server id ----
+            // B = target server id; bimap (+0xa0) lookup ->
+            // miss: "CSocketKernel::ProcessSocket
+            // PacketType(%u) Msgtype(%u) Can not find
+            // server(%u) socket." -> hit: send on the
+            // resolved slot (node+0x1c)
+            if (m_pKernel) {
+                uint32_t dwSlot =
+                    m_pKernel->SlotOfServer(uB);
+                if (dwSlot == 0xffffffffu) {
+                    printf("[SOCKETKERNEL] CSocketKernel::"
+                        "ProcessSocket PacketType(%u) "
+                        "Msgtype(%u) Can not find server"
+                        "(%u) socket.\n", uC, uType, uB);
+                } else {
+                    m_pKernel->RelaySend(dwSlot, uC, uType,
+                                         uA, uB, nPay, pay);
+                }
+            }
+        } else if (uC == 6) {
+            // ---- ORIGINAL mode-6 multi-target relay ----
+            // A = count of trailing 32-bit target words;
+            // each packs (id 20 bits | required-size 12
+            // bits): c9c = word >> 0x14 (pool buffer
+            // capacity), ca0 = word & 0xfffff (target id).
+            // Words are stripped (FUN_14002e650 pool init,
+            // FUN_14002e1c0 buffer find, FUN_140014e20
+            // word append) then FUN_14002b560 relays.
+            int nMsg = nPay - (int)uA * 4;
+            if (nMsg >= 0 && m_pKernel) {
+                std::vector<uint32_t> vecTargets;
+                for (uint32_t i = 0; i < uA; ++i) {
+                    uint32_t w; std::memcpy(&w,
+                        pay + nMsg + i * 4, 4);
+                    if (w != 0xffffffff)
+                        vecTargets.push_back(w & 0xfffff);
+                }
+                m_pKernel->SendOSMulitClient(uType,
+                    (uint32_t)nMsg, pay, vecTargets);
+            }
+        } else if (uC == 8) {
+            // ---- ORIGINAL mode-8: OS2GS_OR_GS2OS ----
+            // B = target server id: fwd bimap miss ->
+            // "CSocketKernel::ProcessSocket OS2GS_OR_GS2OS_
+            // MSG Msgtype(%u) Can not find server(%u)
+            // socket."; hit -> reverse bimap by the
+            // receiving socket's slot (local_878) ->
+            // miss: "... Can not find socket(%u) server."
+            // -> hit: swap pair words and post the send
+            if (m_pKernel) {
+                uint32_t dwSlot =
+                    m_pKernel->SlotOfServer(uB);
+                if (dwSlot == 0xffffffffu) {
+                    printf("[SOCKETKERNEL] CSocketKernel::"
+                        "ProcessSocket OS2GS_OR_GS2OS_MSG "
+                        "Msgtype(%u) Can not find server"
+                        "(%u) socket.\n", uType, uB);
+                } else {
+                    uint32_t dwSrv = m_pKernel->
+                        ServerOfSocket((uint32_t)(uintptr_t)
+                            m_ullOsHandle);
+                    if (dwSrv == 0xffffffffu) {
+                        printf("[SOCKETKERNEL] "
+                            "CSocketKernel::ProcessSocket "
+                            "OS2GS_OR_GS2OS_MSG Msgtype(%u)"
+                            " Can not find socket(%u) "
+                            "server.\n", uType,
+                            (uint32_t)(uintptr_t)
+                                m_ullOsHandle);
+                    } else {
+                        m_pKernel->RelaySend(dwSlot, uC,
+                            uType, dwSrv, uB, nPay, pay);
+                    }
+                }
+            }
+        } else if (uC != 10) {
+            // ---- C in 7, 9, 11+: goto LAB (route relay) ----
+            if (m_pKernel) {
+                uint64_t ullKey =
+                    ((uint64_t)uA << 32) |
+                    (uint32_t)(uintptr_t)m_ullOsHandle;
+                uint64_t ullVal =
+                    m_pKernel->RouteGet(ullKey);
+                if (ullVal == 0) {
+                    if (m_fnPostCmd)
+                        m_fnPostCmd(3, 0x3ec, "");
+                } else {
+                    m_pKernel->RelaySend(
+                        (uint32_t)(ullVal >> 32), uC, uType,
+                        uA, uB, nPay, pay);
+                }
             }
         } else {
-            // TBD: the remaining walker tails (mode-8 walk)
-            if (m_fnDeliverMsg)
+            // ---- C == 10: the +0xa0 bimap walk ----
+            // ORIGINAL: walks every bimap node checking the
+            // node+0x21 connected flag; TBD: the per-node
+            // send words are unrecovered (only the walk and
+            // the flag checks are visible)
+            if (m_pKernel && m_fnDeliverMsg)
                 m_fnDeliverMsg(uType, pay, nPay);
         }
         // consume the frame: socket vcall[1](size) and the
