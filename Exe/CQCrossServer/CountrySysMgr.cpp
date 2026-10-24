@@ -143,12 +143,103 @@ uint32_t CCountrySysMgr::GetCountryByUser(uint32_t dwUserId) const {
     return 0xffffffff;
 }
 const CountryLeague* CCountrySysMgr::TokenLowerBound(
-        uint32_t dwCountryDate) const {
+        uint32_t dwIdServer) const {
     // ORIGINAL FUN_14001a240: lower_bound walk over the token map
-    // keyed by the country date; end() -> the original returns the
-    // end iterator (checked by the caller).
-    auto it = m_mapTokens.lower_bound(dwCountryDate);
+    // keyed by the server id; end() -> nullptr (checked by the
+    // caller, the tree walk merges lower_bound + exact match).
+    auto it = m_mapTokens.lower_bound(dwIdServer);
     return it == m_mapTokens.end() ? nullptr : &it->second;
+}
+
+const CountryLeague* CCountrySysMgr::CurrentLeagueOf(
+        uint32_t dwIdServer) const {
+    // ORIGINAL FUN_140019f80: the +0x20 map walk for the server
+    // (first league of the (server,*) range wins in our port)
+    auto it = m_leagues.lower_bound({dwIdServer, 0});
+    if (it != m_leagues.end() && it->first.first == dwIdServer)
+        return &it->second;
+    return nullptr;
+}
+
+uint32_t CCountrySysMgr::CountryDateOf(uint32_t dwIdServer,
+                                       uint32_t dwIdLeague) const {
+    auto it = m_leagues.find({dwIdServer, dwIdLeague});
+    return it == m_leagues.end() ? 0 : it->second.dwCountryDate;
+}
+
+bool CCountrySysMgr::OnChooseNewCountryLeague(
+        uint32_t dwIdServer, uint32_t dwIdLeague) {
+    // ORIGINAL FUN_14001ee50 - see header for the verbatim flow.
+    // 1. current league: reset its token touch to 0 + commit
+    if (CountryLeague* pCur = const_cast<CountryLeague*>(
+            CurrentLeagueOf(dwIdServer))) {
+        m_mapTokenTouch.erase(pCur->dwIdLeague); // FUN_140022e40(.., 0, 1)
+    }
+    // 2. target league must exist
+    auto it = m_leagues.find({dwIdServer, dwIdLeague});
+    if (it == m_leagues.end()) {
+        printf("[COUNTRY] CCountrySysMgr::OnChooseNewCountryLeague:"
+               "server %u, league %u is not exsit\n",
+               dwIdServer, dwIdLeague);
+        return false;
+    }
+    CountryLeague lg = it->second;
+    // 3. erase the old entry, install the target as the server's
+    //    league (the +0x20 map erase+insert)
+    for (auto jt = m_leagues.begin(); jt != m_leagues.end(); ) {
+        if (jt->first.first == dwIdServer && jt->first.second != dwIdLeague)
+            jt = m_leagues.erase(jt);
+        else ++jt;
+    }
+    lg.dwIdServer = dwIdServer;
+    m_leagues[{dwIdServer, dwIdLeague}] = lg;
+    // 4. notify mode-3 processors (FUN_14001c990(mgr, 3, ..))
+    printf("[COUNTRY] OnChooseNewCountryLeague: server %u -> "
+           "league %u (mode-3 notify)\n", dwIdServer, dwIdLeague);
+    // 5. touch = now + commit; country date += league amount
+    const uint32_t dwNow = (uint32_t)(std::chrono::system_clock::now()
+        .time_since_epoch().count() / 10000000ULL);
+    m_mapTokenTouch[lg.dwIdLeague] = dwNow;
+    m_leagues[{dwIdServer, dwIdLeague}].dwCountryDate +=
+        lg.dwAmount; // FUN_140022d40(league, amount+date, 1)
+    // 6. token map: the server slot now points at the new league
+    m_mapTokens[dwIdServer] = m_leagues[{dwIdServer, dwIdLeague}];
+    return true;
+}
+
+bool CCountrySysMgr::OnProduceFirstCountryLeague(
+        uint32_t dwIdServer, uint32_t dwKey,
+        uint64_t& outPackedId, uint32_t& outTouch) {
+    // ORIGINAL FUN_14001d790 - see header for the verbatim flow.
+    outPackedId = 0; outTouch = 0;
+    // 1. an existing country fails the flow
+    if (m_mapTokens.count(dwIdServer)) {
+        printf("[COUNTRY] CCountrySysMgr::OnProduceFirstCountryLeague:"
+               " server %lu country is exist\n", (unsigned long)dwIdServer);
+        return false;
+    }
+    // 2. the server must already own a league
+    const CountryLeague* pCur = CurrentLeagueOf(dwIdServer);
+    if (!pCur) {
+        printf("[COUNTRY] CCountrySysMgr::OnProduceFirstCountryLeague:"
+               " server %lu  has no league\n", (unsigned long)dwIdServer);
+        return false;
+    }
+    CountryLeague lg = *pCur;
+    // 3. score write from the manager config (mgr+0x10), no commit
+    // 4. touch = now + commit
+    const uint32_t dwNow = (uint32_t)(std::chrono::system_clock::now()
+        .time_since_epoch().count() / 10000000ULL);
+    m_mapTokenTouch[lg.dwIdLeague] = dwNow;
+    // 5. token map insert for the server
+    m_mapTokens[dwIdServer] = lg;
+    // 6. mode-5 processor notify (FUN_14001c990(mgr, 5, ..))
+    printf("[COUNTRY] OnProduceFirstCountryLeague: server %u "
+           "(mode-5 notify)\n", dwIdServer);
+    // 7. packed reply id: server*1000000 + key (FUN_1400243b0)
+    outPackedId = (uint64_t)dwIdServer * 1000000ULL + dwKey;
+    outTouch = dwNow;
+    return true;
 }
 bool CCountrySysMgr::UpdateCountryDate(uint32_t dwIdServer,
                                        uint32_t dwDate) {

@@ -57,6 +57,10 @@ public:
     // case 4: UpdateCountryDate - on success the hub refreshes its
     // country-date state and echoes the request back
     void OnCountryDateUpd(uint64_t ullSocket, const CountryDateUpd& req);
+    // case 2: choose a new league for the server
+    void OnCountryChoose(uint64_t ullSocket, const CountryChooseReq& req);
+    // case 6: produce the first country league
+    void OnCountryFirst(uint64_t ullSocket, const CountryFirstReq& req);
     // the hub owns the manager (Init'ed from cq_league_info)
     class CCountrySysMgr* CountrySys() { return m_pCountrySys.get(); }
     // test seam (production wiring is the hub shell after Init)

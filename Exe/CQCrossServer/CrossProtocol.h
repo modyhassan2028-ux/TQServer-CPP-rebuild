@@ -57,6 +57,16 @@ enum : uint16_t {
     //   back with FUN_14000a0b0(kernel, 0, msg+0x414, ...).
     MsgType_CountryDateUpd  = 9014, // server -> hub: case 4 update
     MsgType_CountryDateAck  = 9015, // hub -> server: state refreshed
+    // case 2 (~29579): OnChooseNewCountryLeague - switch the
+    //   server's league to (server, league); no reply payload
+    //   beyond the original message echo in the binary.
+    MsgType_CountryChooseReq  = 9016, // server -> hub: case 2
+    MsgType_CountryChooseAck  = 9017, // hub -> server: installed
+    // case 6 (~29609): OnProduceFirstCountryLeague - the packed
+    //   reply id is server*1000000 + key (FUN_1400243b0), with
+    //   the touch timestamp now (TimeGet(2)/10000).
+    MsgType_CountryFirstReq  = 9018, // server -> hub: case 6
+    MsgType_CountryFirstAck = 9019, // hub -> server: packed id + now
 };
 
 // case 0 query/response payloads (see CCountrySysMgr accessors)
@@ -78,6 +88,13 @@ struct CountryScoreResp {
 // confirmed is the hub's tracked country date state
 struct CountryDateUpd { uint32_t dwIdServer; uint32_t dwDate; };
 struct CountryDateAck { uint32_t dwIdServer; uint32_t dwDate; };
+// case 2: install (server, league) as the server's league
+struct CountryChooseReq { uint32_t dwIdServer; uint32_t dwIdLeague; };
+struct CountryChooseAck { uint32_t dwIdServer; uint32_t dwIdLeague; };
+// case 6: first league for a country; the ack carries the packed
+// id (server*1000000 + key) and the touch timestamp
+struct CountryFirstReq { uint32_t dwIdServer; uint32_t dwKey; };
+struct CountryFirstAck { uint64_t ullPackedId; uint32_t dwTouch; };
 struct CountryStatusResp {
     char szLeagueName[64];  // AddString #1 ("" when league unknown)
     char szLeaderTitle[64]; // AddString #2

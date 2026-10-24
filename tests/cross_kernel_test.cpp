@@ -178,9 +178,8 @@ int main() {
         std::memcpy(&sresp, sent.back().payload.data() + sizeof(tq::MsgHead),
                     sizeof(sresp));
         assert(sresp.dwCountryId == 7 && sresp.dwCountryDate == 15);
-        // --- case 4 lookup helpers (FUN_14001a240 lower_bound) ---
-        mgr->InsertTokenForTest(10, lg);    // token at country date 10
-        assert(mgr->TokenLowerBound(5) == nullptr || true); // map holds 10+
+        // --- lookup helpers (FUN_14001a240 lower_bound, server key) ---
+        mgr->InsertTokenForTest(10, lg);    // server 10 -> league 42
         const CountryLeague* hit = mgr->TokenLowerBound(10);
         assert(hit != nullptr && hit->dwIdLeague == 42);
         const CountryLeague* miss = mgr->TokenLowerBound(99);
@@ -196,6 +195,36 @@ int main() {
         size_t nPre = sent.size();
         kern2.OnCountryDateUpd(111, {7, 999}); // unknown date -> no reply
         assert(sent.size() == nPre);
+        // --- case 2: OnChooseNewCountryLeague ---
+        CountryLeague lg2 = lg; lg2.dwIdLeague = 43;
+        lg2.dwAmount = 5; lg2.dwCountryDate = 20;
+        mgr->InsertLeagueForTest(lg2); // (7,43) joins the pool
+        // token map is server-keyed now (case 2 sets local_528=server)
+        CountryLeague lg3 = lg; lg3.dwIdServer = 9; lg3.dwIdLeague = 50;
+        mgr->InsertLeagueForTest(lg3);
+        kern2.OnCountryChoose(111, {7, 43});
+        assert(sent.back().type == MsgType_CountryChooseAck);
+        // the server's league is now (7,43): old (7,42) was erased
+        assert(mgr->HasLeague(7, 43) && !mgr->HasLeague(7, 42));
+        // country date advanced by the league amount (FUN_140022d40)
+        assert(mgr->CountryDateOf(7, 43) == 20 + 5);
+        size_t nMiss = sent.size();
+        kern2.OnCountryChoose(111, {7, 9999}); // unknown league
+        assert(sent.size() == nMiss); // silent drop
+        // --- case 6: OnProduceFirstCountryLeague ---
+        kern2.OnCountryFirst(111, {9, 77});
+        assert(sent.back().type == MsgType_CountryFirstAck);
+        CountryFirstAck fack{};
+        std::memcpy(&fack, sent.back().payload.data() + sizeof(tq::MsgHead),
+                    sizeof(fack));
+        assert(fack.ullPackedId == 9ULL * 1000000ULL + 77); // FUN_1400243b0
+        assert(fack.dwTouch > 0);
+        assert(mgr->TokenLowerBound(9) != nullptr); // token installed
+        nMiss = sent.size();
+        kern2.OnCountryFirst(111, {9, 88}); // country already exists
+        assert(sent.size() == nMiss); // "country is exist" -> silent
+        kern2.OnCountryFirst(111, {55, 1}); // no league at all
+        assert(sent.size() == nMiss); // "has no league" -> silent
         // --- CCountrySysMgr::Init against the live cq DB ---
         {
             CMySQLClient db;

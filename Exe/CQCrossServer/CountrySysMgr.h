@@ -72,10 +72,11 @@ public:
     // Usage ~20268: "FUN_14000d620(kernel, uid) != -1" gates the
     // SendMsg reply - a member without a country gets nothing.
     uint32_t GetCountryByUser(uint32_t dwUserId) const;
-    // ORIGINAL FUN_14001a240 (case 4, 434 bytes): the SAME
-    // lower_bound walk over the token map (mgr+0x90) keyed by the
-    // country date; returns the league entry holding the token.
-    const CountryLeague* TokenLowerBound(uint32_t dwCountryDate) const;
+    // ORIGINAL FUN_14001a240 (case 4, 434 bytes): lower_bound walk
+    // over the token map (mgr+0x90) - keyed by the SERVER id (case
+    // 2 sets local_528[0] = param_2 = server before the insert);
+    // returns the league holding the server's token.
+    const CountryLeague* TokenLowerBound(uint32_t dwIdServer) const;
 
     bool HasLeague(uint32_t dwIdServer, uint32_t dwIdLeague) const;
 
@@ -91,6 +92,57 @@ public:
     // the update landed; the kernel then refreshes its state
     // timestamp and echoes the request back.
     bool UpdateCountryDate(uint32_t dwIdServer, uint32_t dwDate);
+
+    // ---- case 2 (~29579): OnChooseNewCountryLeague ----
+    // ORIGINAL FUN_14001ee50 (1743 bytes; the name is verbatim in
+    // the failure log). Flow, verbatim:
+    //  1. FUN_140019f80(mgr, server) - the current league; if
+    //     found, FUN_140022e40(league, 0, 1) resets its token
+    //     touch to 0 and commits
+    //  2. FUN_140019e20(mgr, server, league) - the target league;
+    //     missing -> "OnChooseNewCountryLeague:server %u, league
+    //     %u is not exsit" and FAIL
+    //  3. erase the old entry from the +0x20 map
+    //     (FUN_140018c10), insert the target as the server's new
+    //     league (tree insert + FUN_140019910 rebalance)
+    //  4. FUN_14001c990(mgr, 3, ...) - notify mode-3 processors
+    //  5. now = TimeGet(2)/10000; FUN_140022e40(league, now, 1)
+    //     - touch + commit; FUN_140022d40(league, amount +
+    //     country_date, 1) - add the league amount into the
+    //     country date record and commit
+    //  6. FUN_14001a700(mgr+0x90, server) -> the token map slot
+    //     receives the new league pointer
+    bool OnChooseNewCountryLeague(uint32_t dwIdServer,
+                                  uint32_t dwIdLeague);
+
+    // ---- case 6 (~29609): OnProduceFirstCountryLeague ----
+    // ORIGINAL FUN_14001d790 (1677 bytes; name verbatim in the
+    // failure logs). Flow:
+    //  1. the server's country map (+0xc0) walk - an existing
+    //     country -> "OnProduceFirstCountryLeague: server %lu
+    //     country is exist" and FAIL
+    //  2. the +0x20 map lookup - missing -> "server %lu has no
+    //     league" and FAIL
+    //  3. FUN_140022d40(league, *(uint*)(mgr+0x10), 0) - write
+    //     the manager config amount (mgr+0x10) into the score
+    //     field, NO commit
+    //  4. now = TimeGet(2)/10000; FUN_140022e40(league, now, 1)
+    //  5. token map (+0x90) insert for the server
+    //  6. FUN_14001c990(mgr, 5, ...) - notify mode-5 processors
+    //  7. packer reply: FUN_1400243b0(packer, 3,
+    //     server*1000000 + dwKey, now) - the packed id and the
+    //     touch timestamp travel back to the caller
+    // returns the packed id (server*1000000 + dwKey) and the
+    // touch timestamp via the out params; false on failure.
+    bool OnProduceFirstCountryLeague(uint32_t dwIdServer,
+                                     uint32_t dwKey,
+                                     uint64_t& outPackedId,
+                                     uint32_t& outTouch);
+    // ORIGINAL: score field write target of FUN_140022d40
+    // (mgr+0x10 config in case 6, country_date+amount in case 2)
+    uint32_t CountryDateOf(uint32_t dwIdServer, uint32_t dwIdLeague) const;
+    // ORIGINAL: FUN_140019f80 - the server's CURRENT league
+    const CountryLeague* CurrentLeagueOf(uint32_t dwIdServer) const;
     // field 4 of the league record: FUN_140022e40's +0xb0 write
     uint32_t LastTokenTouch(uint32_t dwIdServer) const;
     size_t LeagueCount() const { return m_leagues.size(); }
@@ -120,8 +172,9 @@ private:
     std::map<std::pair<uint32_t, uint32_t>, CountryLeague> m_leagues;
     // ORIGINAL member->country map (mgr+0xa8, FUN_14000d620)
     std::map<uint32_t, uint32_t> m_mapMemberCountry;
-    // ORIGINAL token map (mgr+0x90, FUN_14001a240): sorted by
-    // country date; LoadLeagueInfo inserts token count > 0 rows
+    // ORIGINAL token map (mgr+0x90): server id -> league. Filled
+    // by OnChooseNewCountryLeague / OnProduceFirstCountryLeague
+    // (FUN_14001a700 inserts, local_528[0] = the server id)
     std::map<uint32_t, CountryLeague> m_mapTokens;
     // ORIGINAL field 4 of the country record: FUN_140022e40's
     // +0xb0 vcall writes now (TimeGet(2)/10000) into it

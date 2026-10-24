@@ -208,6 +208,33 @@ void CCrossServerKernel::OnCountryDateUpd(
     if (m_fnSend) m_fnSend(ullSocket, Encode(MsgType_CountryDateAck, ack));
 }
 
+void CCrossServerKernel::OnCountryChoose(
+        uint64_t ullSocket, const CountryChooseReq& req) {
+    // ORIGINAL case 2 (~29579): FUN_14001ee50(countryMgr, idserver,
+    // kernelStateDate); success -> echo ack, failure -> silent.
+    if (!m_pCountrySys) return;
+    if (!m_pCountrySys->OnChooseNewCountryLeague(
+            req.dwIdServer, req.dwIdLeague))
+        return;
+    CountryChooseAck ack{ req.dwIdServer, req.dwIdLeague };
+    if (m_fnSend) m_fnSend(ullSocket, Encode(MsgType_CountryChooseAck, ack));
+}
+
+void CCrossServerKernel::OnCountryFirst(
+        uint64_t ullSocket, const CountryFirstReq& req) {
+    // ORIGINAL case 6 (~29609): FUN_14001d790(countryMgr,
+    // idserver, kernelStateDate); the packed reply id is
+    // server*1000000 + key with the touch timestamp (FUN_1400243b0
+    // with mode 3), sent back to the requesting socket.
+    if (!m_pCountrySys) return;
+    uint64_t ullPackedId; uint32_t dwTouch;
+    if (!m_pCountrySys->OnProduceFirstCountryLeague(
+            req.dwIdServer, req.dwKey, ullPackedId, dwTouch))
+        return;
+    CountryFirstAck ack{ ullPackedId, dwTouch };
+    if (m_fnSend) m_fnSend(ullSocket, Encode(MsgType_CountryFirstAck, ack));
+}
+
 void CCrossServerKernel::OnCountryBroadcast(const char* szText) {
     // ORIGINAL case 5 (~29605): FUN_14000a0b0-style broadcast of a
     // system talk (msg type 0x961) to every server socket.
