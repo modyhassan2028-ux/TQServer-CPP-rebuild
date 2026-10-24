@@ -48,6 +48,21 @@ public:
     uint32_t GetMapId() const { return m_dwMapId; }
     void SetMapId(uint32_t dwMapId) { m_dwMapId = dwMapId; }
 
+    // kernel slot accessors (session-9 damage chain)
+    void SetKernelSlots(uint32_t mn, uint32_t mx, uint32_t atk, uint32_t def) {
+        m_dwHitMin = mn; m_dwHitMax = mx; m_dwKernelAttack = atk; m_dwKernelDefense = def; }
+    uint32_t GetHitMin() const { return m_dwHitMin; }
+    uint32_t GetHitMax() const { return m_dwHitMax; }
+    uint32_t GetKernelAttack() const { return m_dwKernelAttack; }
+    uint32_t GetKernelDefense() const { return m_dwKernelDefense; }
+    void SetBless(uint32_t v) { m_dwBless = v; }
+    uint32_t GetBless() const { return m_dwBless; }
+    void SetDeduct(uint32_t v) { m_dwDeduct = v; }
+    uint32_t GetDeduct() const { return m_dwDeduct; }
+    uint32_t GetRank() const { return m_dwRank; }
+    void SetRank(uint32_t r) { m_dwRank = r; }
+    bool IsDie() const { return m_dwLife == 0; } // ORIGINAL vtable+0x290
+    bool IsBoss() const { return false; } // ORIGINAL vtable+0x288 (monsters only)
     uint32_t GetLife() const { return m_dwLife; }
     uint32_t GetMaxLife() const { return m_dwMaxLife; }
     void SetMaxLife(uint32_t v) { m_dwMaxLife = v; }
@@ -657,7 +672,14 @@ public:
     uint16_t m_wSpeed{0};         // cq_user.Speed, attrib 16, +0xEDC
     uint16_t m_wHealth{0};        // cq_user.health, attrib 14, +0xEDE
     uint16_t m_wSoul{0};          // cq_user.soul, attrib 13, +0xEE0
-    uint32_t m_dwRank{0};         // rank manager value
+    uint32_t m_dwRank{0};         // rank manager value (kernel slot 0x38)
+    // ---- kernel slots (session-9 damage chain, FUN_1403ec0a0 ABI) ----
+    uint32_t m_dwHitMin{0};        // 0x88: physical hit min
+    uint32_t m_dwHitMax{0};        // 0x90: physical hit max
+    uint32_t m_dwKernelAttack{0};  // 0xa0: kernel attack
+    uint32_t m_dwKernelDefense{0};// 0xb8: kernel defense (atk-def component)
+    uint32_t m_dwBless{0};         // 0x200: bless bonus (step 13)
+    uint32_t m_dwDeduct{0};        // 0x210: deduct (step 13 subtraction)
     uint32_t m_dwIterator{0};     // user+0xA78 (iter_var_data)
     uint32_t m_dwCrime{0};        // crime state
     int32_t  m_nVirtue{0};        // cq_user.virtue, attrib 23

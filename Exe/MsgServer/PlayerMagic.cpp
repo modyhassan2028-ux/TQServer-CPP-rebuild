@@ -19,7 +19,8 @@ bool CMagicTypePool::LoadFromDB(CMySQLClient* pDB) {
             "SELECT id, type, sort, name, crime, ground, multi, target, level,"
             " use_mp, power, intone_speed, percent, step_secs, `range`, distance,"
             " status, need_prof, need_exp, need_level, need_time, delay_ms, weapon_subtype,\n"
-            " weapon_hit, status_data0, status_data1"
+            " weapon_hit, status_data0, status_data1, status_data2,"
+            " attr_power, data"
             " FROM cq_magictype")) {
         printf("[MAGIC] cq_magictype load failed: %s\n", pDB->GetError().c_str());
         return false;
@@ -55,6 +56,9 @@ bool CMagicTypePool::LoadFromDB(CMySQLClient* pDB) {
         t.dwWeaponHit = row.size() > 23 ? u32(23) : 0;
         t.dwStatusData0 = row.size() > 24 ? u32(24) : 0;
         t.dwStatusData1 = row.size() > 25 ? u32(25) : 0;
+        t.nStatusData2 = row.size() > 26 ? (int32_t)strtol(row[26].c_str(), nullptr, 10) : 0;
+        t.nAttrPower = row.size() > 27 ? (int32_t)strtol(row[27].c_str(), nullptr, 10) : 0;
+        t.nData = row.size() > 28 ? (int32_t)strtol(row[28].c_str(), nullptr, 10) : 0;
         m_oTypes[((uint64_t)t.dwType << 16) | (uint16_t)t.dwLevel] = t;
     }
     printf("[MAGIC] cq_magictype: %zu stage(s) loaded.\n", m_oTypes.size());
@@ -128,6 +132,12 @@ int32_t CMagicTypeInfo::Field(uint32_t dwCol) const {
     case 30: return (int32_t)dwWeaponHit;
     case 35: return (int32_t)dwStatusData0;
     case 36: return (int32_t)dwStatusData1;
+    case 37: return nStatusData2;       // record attr 0x89
+    case 39: return nAttrPower;         // record attr 0x8b (damage cap)
+    case 44: return nData;              // record attr 0x90
+    case 45: case 46: return 0;         // attrs 0x91/0x92: runtime cols, loaded
+                                        // from the ephemeral object - 0 until
+                                        // the launch-loop source is decoded
     default:
         printf("[MAGIC] magictype column %u not carried by the port yet\n", dwCol);
         return 0;

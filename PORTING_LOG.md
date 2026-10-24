@@ -1599,3 +1599,58 @@ segfault عشوائي بـ ABI mismatch.
 
 **تذكير**: توسيع أي كلاس → rebuild كامل (قائمة objs4) وإلا
 segfault عشوائي ABI.
+
+
+## جلسة 2026-10-24 (عاشرة) — بورت خطة الضرر: خانات kernel + المكوّنات الأربعة + LaunchDamage
+نفذت خطوات 1-2-3 من خطة الجلسة التاسعة كاملة (الاختبارات خضراء):
+
+- **خانات kernel على CUser (خطوة 1):** 0x88/0x90 (HitMin/HitMax)، 0xa0
+  (KernelAttack)، 0xb8 (KernelDefense)، 0x200 (Bless)، 0x210 (Deduct)
+  + IsDie (vtable+0x290) وIsBoss (vtable+0x288، دايماً false للاعب)
+  + SetKernelSlots للاختبارات. 0x38 (Rank) كانت موجودة.
+- **أعمدة cq_magictype الناقصة (ABI سجل النوع):** أضيفت status_data2
+  (عمود 37، attr 0x89)، attr_power (عمود 39، attr 0x8b — سقف الضرر)،
+  data (عمود 44، attr 0x90) على CMagicTypeInfo + الـ SELECT + Field().
+  الأعمدة 45/46 (attrs 0x91/0x92) بترجع 0 موثقة (runtime خارج الجدول).
+- **المكوّنات الأربعة (خطوة 2):** Exe/MsgServer/DamageRoll.h —
+  PhysRollWeapon (FUN_1403e98e0: RandGet(max-min)+min، لو سلاح +luck%
+  + بونص جودة >12 كنسبة)، PhysRollDiff (FUN_1403e9e30: max(atk-def,0)
+  + luckM% + نفس البونصات)، MagicRollWeapon/MagicRollDiff
+  (1403ea400/1403eaad0 بنفس الهيكل حرفياً). الستابات الموثقة كحقول
+  DamageCtx قابلة للحقن: PK-adjust (14031caa0)، الحماية (1401619e0)،
+  جودة السلاح (140162250)، الحظ 140181080/140181280، الصد 140182560،
+  التوجيه 14031d8a0، الكريتيكال 14031cfb0، التسوية 1403eb000، aggro
+  (1402f2de0/1402f2e10)، vtable+800 (ApplyDamage).
+- **FUN_1403ec0a0 LaunchDamage (خطوة 3):** التسلسل الـ14 حرفياً:
+  بوابات الرفض (نقط دفاع 0x1001 + بوابات 0x230/0x238 + حالة 0x27 +
+  IsDie → return 1)، اختيار المعادلة (0x260/0x268 سحري وإلا جسدي —
+  stub off حالياً)، رفع الحظ +50% (سلاح && luck>209)، خصم دفاع 1
+  (cap 100: dmg -= (dmg/2*val)/100)، تضعيف السلاح ×2، التوجيه
+  (stub delta)، خصم دفاع 2 (/100)، الكريتيكال ×1.5 (MulDiv 150/100)،
+  الصد (RandGet(10000) < dodgeVal → /2)، بونص الخاتمة (Bless−Deduct
+  مع caps 1000 لنوع 8001/وجود سلاح، non-boss)، التسوية + floor 2.
+- **اختبارات (خطوة 5 جزئياً):** tests/damage_roll_test.cpp — 12 حالة
+  بتثبيت كل خطوة مفكوكة (الأساس 120، الكريتيكال 180، السلاح ×2،
+  الحظ +210% ثم +50% ثم ×2 = 990، نقاط الدفاع 100→60→30،
+  Bless/Deduct، cap نوع 8001، الصد دايماً /2، floor 2، بوابات الرفض،
+  الهدف الميت). بذور ثابتة (srand) وRandGet موجود في Core/CQBase/Msg.h.
+- **ملاحظة بيئة (مهم للجلسات الجاية):** ساندبوكس اليوم اتقفل TCP
+  للقاعدة — اتعمل ALTER USER root@localhost بكلمة مرور فارغة
+  (+ CREATE USER root@127.0.0.1) عشان TryMySQL("127.0.0.1",...) يشتغل.
+  لو الاختبارات وقعت على TryMySQL تاني: شغّل service mariadb start
+  وبعدها الأمرين دول.
+
+### المتبقي (خطط الجلسة التاسعة — بالترتيب)
+4. **FUN_1404847d0 DamageCalc حرفياً** من مواصفة الجلسة تاسعة:
+   فرع السموم (sort 13)، فرع الجسدي (sort 37 + skillPower، نوع 0x305c
+   power=status_data0)، فرع السحري (sort 57/أنواع 0x2d5a/0x2f30/0x3002/
+   0x2f26/0x2ed6/... كل منطق اختيار power)، الحالات المضاعفة (0x6c/0x78
+   ×2)، نوع 0x3070 يفضل 1 HP، نوع 0x305c سقف attr_power، عامل المستوى
+   FUN_1400a76d0 (10000 ثابت مؤقتاً). الربط بـ CPlayerMagic (caster+0x90)
+   وCMagicTypePool::Field (GetAttrib 0x66=sort إلخ — مضاف دلوقتي).
+5. ريك ويند FUN_1402f3100 (الجسدي بمهارة — مقروء جزئياً من سطر 789)
+6. FUN_1404a1f70 كامل + حلقة المروحة + FUN_140499830 + FUN_14048c4c0
+7. ثم: عائلة C المتبقية (2009/2007/2002/2201/2205 ~140 صف) أو عائلة
+   D (201، 974) حسب أولوية المستخدم
+
+**تذكير**: توسيع أي كلاس → rebuild كامل وإلا segfault ABI.

@@ -57,6 +57,9 @@ struct CMagicTypeInfo {
     uint32_t dwWeaponHit{0};   // column 30 (record attr 0x82)
     uint32_t dwStatusData0{0}; // column 35 (record attr 0x87)
     uint32_t dwStatusData1{0}; // column 36 (record attr 0x88)
+    int32_t  nStatusData2{0};  // column 37 (record attr 0x89) - power selector field
+    int32_t  nAttrPower{0};   // column 39 (record attr 0x8b) - damage cap
+    int32_t  nData{0};         // column 44 (record attr 0x90) - generic data
 
     // ORIGINAL record ABI reads cq_magictype columns by index
     // (FUN_140418c50: idx >= 100 -> the stage object, field idx - 100)
