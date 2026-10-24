@@ -57,11 +57,25 @@ chk_sum بمعادلة FUN_1400fe140 كاملة + LAST_INSERT_ID)،
 - بوابات التست الحالية (gates 10/30، stamina 20/30، ضرر 2.5x/1.5x)
   في tests/skills_test.cpp.
 
+**مبورت خلاص كمان (اتكوميت 07d137f + 4c93c92، 2026-10-24)**:
+- عائلة CMsgMagicEffect **كاملة** (1105 = 0x419): Create
+  (FUN_140386800)، CreateWithTarget (FUN_1403868f0)، AppendTarget
+  (FUN_140386d00 بسقف < 0x400)، CreateFull (FUN_140386e00 بغرابة
+  param_9 على قاعدة الإدخال التالي) — MsgMagicEffect.h/cpp،
+  تخطيطات بايت-مطابقة مختبرة (tests/magic_effect_packets_test.cpp).
+- عائلة CMsgMagicInfo **كاملة** (1103 = 0x44f، FUN_140457240): mode 4
+  (attach) و mode 6 (drop) — MsgMagicInfo.h/cpp.
+- دوال الأثر الثلاثة على CUser: AllowLaunchEffect (FUN_14048c770)،
+  AttachEffectType (FUN_14048c7e0)، DropMagicEffect (FUN_14048c4c0
+  بسقف 40 سجل + صنف التحول 0x2dd5b6=3000694) — User.h/cpp.
+  ملاحظة: available_effect_type العمود افتراضه 1 (بت 0).
+
 **الناقص (محرك الإطلاق الفعلي — نقطة البداية المحددة في الدمب)**:
-- عائلة CMsgMagicEffect (المدخل): FUN_140386720 (ctor)،
-  FUN_1403867d0 (dtor)، FUN_1403872c0 (الرسالة invalid log)،
-  FUN_1403872d0 (العملية الرئيسية للباكِت عند 711356).
-- عائلة CMsgMagicInfo: FUN_140456ea0 / FUN_140456f80 (869377+).
+- ~~عائلة CMsgMagicEffect~~ **تمت** — فاضل Process (FUN_1403872d0
+  عند 711356) و ctor/dtor/invalid-log (140386720/1403867d0/1403872c0)
+  وهي باكِت من العميل للسيرفر في المعالجة.
+- عائلة CMsgMagicInfo: ~~FUN_140457240~~ تمت — فاضل Process عند
+  869377+ (FUN_140456ea0/140456f80 طاقة ctor/dtor).
 - المرسلات/التأثير: FUN_1404851b0، FUN_140486fb0،
   FUN_14048c4c0 (2 إشارة MagicEffect — ده غالبًا Launch/Apply).
 - الحلقة المفقودة: Intone (شحن السحر) → Launch (إطلاق) → التحقق
