@@ -357,6 +357,15 @@ public:
     // monopoly mask bit is also cleared and the monopoly item is paid;
     // pushes MsgMagicInfo (mode 6). Magic-count gate: 40 records max.
     bool DropMagicEffect(uint32_t dwMagicType, uint8_t byEffect);
+    // FUN_1404851b0 SendMagicEffectAfterProcess: builds the FULL 1105 from
+    // the record (attr 2 type, 3 level, 7 current-effect flag) + caller
+    // damage/data fields and broadcasts it map-wide (original map
+    // vtable+0x348 with flag 1 = include self). Caller-param mapping
+    // (verified against FUN_140386e00's 13 params): data5 / d3 / d2 /
+    // damage / target id.
+    bool SendMagicEffectAfterProcess(uint32_t dwMagicType, uint32_t dwData5,
+                                     uint32_t dwD3, uint32_t dwD2,
+                                     uint32_t dwDamage, uint32_t dwTargetId);
     // attr-0 counter (original CUser+0x88) for newly created records
     uint32_t m_dwMagicCounter{0};
     // returns an error message, or "" on success

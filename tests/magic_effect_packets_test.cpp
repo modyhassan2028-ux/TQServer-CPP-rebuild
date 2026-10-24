@@ -13,6 +13,8 @@
 #include "MsgMagicEffect.h"
 #include "MsgMagicInfo.h"
 #include "User.h"
+#include "UserManager.h"
+#include "MapManager.h"
 #include "Account.h"
 #include "Dialog.h"
 #include <cassert>
@@ -140,7 +142,44 @@ int main() {
     // second drop refused (bit no longer available)
     assert(!u.DropMagicEffect(1000, 3));
 
+    // ---------- SendMagicEffectAfterProcess (FUN_1404851b0 broadcast) ----
+    auto upFx = std::make_shared<CUser>(777001); upFx->SetName("FxSender");
+    auto upObs = std::make_shared<CUser>(777002); upObs->SetName("FxWatcher");
+    upFx->SetMapId(777000); upObs->SetMapId(777000);
+    assert(CUserManager::Instance().AddUser(upFx));
+    assert(CUserManager::Instance().AddUser(upObs));
+    auto pFxMap = CMapManager::Instance().GetOrCreate(777000, "FxMap");
+    assert(pFxMap->AddUser(upFx) && pFxMap->AddUser(upObs));
+    assert(upFx->LearnMagic(1000, 0));                 // thunder record
+    assert(upFx->AttachEffectType(1000, 3, false, true)); // current effect = 3
+    // failure paths: unknown magic, target 0 -> CreateFull refuses both
+    assert(!upFx->SendMagicEffectAfterProcess(987654, 1, 2, 3, 4, 0x2002));
+    assert(!upFx->SendMagicEffectAfterProcess(1000, 1, 2, 3, 4, 0));
+    int nSeen = 0;
+    upObs->SetPacketSink([&](const void* pv, uint16_t sz) {
+        nSeen++;
+        const char* b = (const char*)pv;
+        assert(sz == 0x54);                            // 0x34 + 0x20 entry
+        assert(rd32(b, 0x00) == 777001);               // attacker (proxy id)
+        assert(rd32(b, 0x04) == 0x2002);               // target id
+        assert(rd16(b, 0x08) == 1000);                 // magic type
+        assert(rd16(b, 0x0a) == 0);                    // record level
+        assert(rd8(b, 0x0e) == 0);                    // dir
+        assert(rd8(b, 0x0f) == 1);                    // one target entry
+        assert(rd8(b, 0x10) == 3);                    // flag = current effect
+        assert(rd32(b, 0x14) == 0x2002);               // entry id
+        assert(rd32(b, 0x18) == 150);                  // damage
+        assert(rd32(b, 0x1c) == 0xDD);                 // d2
+        assert(rd32(b, 0x24) == 0);                    // d4 (scene diff)
+        assert(rd32(b, 0x30) == 0xAABB);               // d5
+        assert(rd32(b, 0x2c) == 777001);               // d6 = kernel role id
+        assert(rd32(b, 0x34) == 0xCC);                 // d3 NEXT-entry quirk
+    });
+    assert(upFx->SendMagicEffectAfterProcess(1000, 0xAABB, 0xCC, 0xDD, 150, 0x2002));
+    assert(nSeen == 1);                                // observer got the 1105
+
     printf("MAGIC_EFFECT_OK: 1105 base/append/withtarget/full layouts byte-exact, "
-           "1103 layout byte-exact, effect masks attach/launch/drop verified\n");
+           "1103 layout byte-exact, effect masks attach/launch/drop verified, "
+           "SendMagicEffectAfterProcess broadcast byte-exact\n");
     return 0;
 }

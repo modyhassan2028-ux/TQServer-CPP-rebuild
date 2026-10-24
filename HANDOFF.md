@@ -71,9 +71,10 @@ chk_sum بمعادلة FUN_1400fe140 كاملة + LAST_INSERT_ID)،
   ملاحظة: available_effect_type العمود افتراضه 1 (بت 0).
 
 **الناقص (محرك الإطلاق الفعلي — نقطة البداية المحددة في الدمب)**:
-- ~~عائلة CMsgMagicEffect~~ **تمت** — فاضل Process (FUN_1403872d0
-  عند 711356) و ctor/dtor/invalid-log (140386720/1403867d0/1403872c0)
-  وهي باكِت من العميل للسيرفر في المعالجة.
+- ~~عائلة CMsgMagicEffect~~ **تمت كاملة** بما فيها Process
+  (FUN_1403872c0 ستب بلوج "invalid msg CMsgMagicEffect." الحرفي)
+  و FUN_1404851b0 SendMagicEffectAfterProcess (بث 1105 FULL من
+  السجل للخريطة كلها) — جلسة 2026-10-24 الخامسة، ريجريشن 33/33.
 - عائلة CMsgMagicInfo: ~~FUN_140457240~~ تمت — فاضل Process عند
   869377+ (FUN_140456ea0/140456f80 طاقة ctor/dtor).
 - المرسلات/التأثير: FUN_1404851b0، FUN_140486fb0،

@@ -1,0 +1,43 @@
+[1/8] MsgServer.exe (net core + packet handlers)...
+Exe/MsgServer/Npc.cpp:56:13: warning: enumeration value 'Dialog' not handled in switch [-Wswitch]
+   56 |     switch (m_type) {
+      |             ^~~~~~
+Exe/MsgServer/Npc.cpp:345:53: warning: unsequenced modification and access to 'dwGateId' [-Wunsequenced]
+  345 |         auto pGate = std::make_shared<CNpc>(dwGateId++, g.name,
+      |                                                     ^
+  346 |             CNpc::Type::Teleporter, 1002, 330, 270 + (uint16_t)(dwGateId - NPC_ID_BASE));
+      |                                                                 ~~~~~~~~
+2 warnings generated.
+[2/8] CQCrossServer.exe (cross hub)...
+[3/8] game-system module DLLs (original Modules/ ABI)...
+[4/8] NpcServer.exe...
+[5/8] Syndicate.dll...
+[6/8] Trade.dll...
+[7/8] CustomGM.dll...
+[8/8] ServerLoader.exe...
+OK. Binaries in ./build/
+total 65849
+drwxr-xr-x 1 root root     1520 Oct 24 08:39 .
+drwxr-xr-x 1 root root      240 Oct 24 08:35 ..
+-rw-r--r-- 1 root root    18524 Oct 23 12:00 Account.lib
+-rwxr-xr-x 1 root root  1155584 Oct 24 08:39 CQCrossServer.exe
+-rw-r--r-- 1 root root  7036928 Oct 24 08:39 CQCrossServer.pdb
+-rwxr-xr-x 1 root root   801792 Oct 24 08:39 CustomGM.dll
+-rw-r--r-- 1 root root     4936 Oct 24 06:45 CustomGM.lib
+-rw-r--r-- 1 root root  5586944 Oct 24 08:39 CustomGM.pdb
+drwxr-xr-x 1 root root     5980 Oct 24 08:39 Modules
+-rwxr-xr-x 1 root root  6389760 Oct 24 08:39 MsgServer.exe
+-rw-r--r-- 1 root root 22540288 Oct 24 08:39 MsgServer.pdb
+-rwxr-xr-x 1 root root   807936 Oct 24 08:39 NpcServer.exe
+-rw-r--r-- 1 root root  5918720 Oct 24 08:39 NpcServer.pdb
+-rwxr-xr-x 1 root root  1543168 Oct 24 08:39 ServerLoader.exe
+-rw-r--r-- 1 root root  8278016 Oct 24 08:39 ServerLoader.pdb
+-rwxr-xr-x 1 root root   386048 Oct 24 08:39 Syndicate.dll
+-rw-r--r-- 1 root root     4962 Oct 24 06:45 Syndicate.lib
+-rw-r--r-- 1 root root  2908160 Oct 24 08:39 Syndicate.pdb
+-rwxr-xr-x 1 root root   320000 Oct 24 08:39 Trade.dll
+-rw-r--r-- 1 root root     4838 Oct 24 06:45 Trade.lib
+-rw-r--r-- 1 root root  2097152 Oct 24 08:39 Trade.pdb
+-rw-r--r-- 1 root root  1618054 Oct 24 08:38 liblua.a
+drwxr-xr-x 1 root root     1960 Oct 24 08:38 luaobj
+-rw-r--r-- 1 root root     5138 Oct 24 08:39 main.lib

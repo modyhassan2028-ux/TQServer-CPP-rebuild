@@ -8,6 +8,7 @@
 #include "MsgNpcInfo.h"
 #include "Account.h"
 #include "MySQLClient.h"
+#include "MsgMagicEffect.h"
 #include "MsgMagicInfo.h"
 
 CUser::CUser(uint32_t dwId) : m_dwId(dwId) {}
@@ -584,6 +585,45 @@ bool CUser::DropMagicEffect(uint32_t dwMagicType, uint8_t byEffect) {
     if (info.Create(6, dwMagicType, (uint8_t)pRec->GetAttrib(7),
                     (uint32_t)pRec->GetAttrib(8), (uint32_t)pRec->GetAttrib(10)))
         SendMsg(info.GetBuf(), info.GetSize());
+    return true;
+}
+
+// ===========================================================================
+// ORIGINAL FUN_1404851b0: CPlayerMagic::SendMagicEffectAfterProcess.
+// Builds ONE full CMsgMagicEffect (1105) from the record and broadcasts it
+// to every user on the map (map vtable+0x348 with flag 1 = include self).
+// Stack-arg mapping verified against FUN_140386e00's 13 params:
+//   param_2 -> entry d5 (+0x30)   param_3 -> d3 (next-entry quirk slot)
+//   param_4 -> entry d2 (+0x1c)   param_5 -> damage (+0x18)
+//   param_6 -> target id (header +0x04 AND entry id +0x14)
+//   dir = 0; d4 (+0x24) = proxy-scene minus own-role-scene id diff (0 for
+//   an attached proxy in our port; ORIGINAL FUN_14018eb30 - FUN_14018ed10);
+//   d6 (+0x2c) = the record owner's kernel role id (= GetId());
+//   flag = attr 7 (current effect type).
+// ===========================================================================
+bool CUser::SendMagicEffectAfterProcess(uint32_t dwMagicType, uint32_t dwData5,
+                                        uint32_t dwD3, uint32_t dwD2,
+                                        uint32_t dwDamage, uint32_t dwTargetId) {
+    CPlayerMagic* pRec = FindMagic(dwMagicType);
+    if (!pRec) {                                          // ORIGINAL +0x90 gate
+        printf("[MAGIC] CPlayerMagic::SendMagicEffectAfterProcess(), user:%u, magic_type:%d record is null.\n",
+               m_dwId, (int)dwMagicType);
+        return false;
+    }
+    CMsgMagicEffect effect;
+    if (!effect.CreateFull(m_dwId, dwTargetId,
+                           (uint16_t)pRec->GetAttrib(2), (uint16_t)pRec->GetAttrib(3),
+                           0 /* dir */, dwDamage, dwD2, dwD3, 0 /* scene diff */,
+                           dwData5, m_dwId, (uint8_t)pRec->GetAttrib(7))) {
+        // ORIGINAL: CreateFull already logged the generic error; the caller
+        // then logs its own line with the three ids before returning.
+        printf("[MAGIC] CPlayerMagic::SendMagicEffectAfterProcess, user_id[%u], target_id[%u], magic_type[%d].\n",
+               m_dwId, dwTargetId, (int)dwMagicType);
+        return false;
+    }
+    // ORIGINAL: broadcast via the map group's vtable+0x348 with flag 1
+    // (include the attacker); our port routes through CMapManager.
+    CMapManager::Instance().Broadcast(m_dwMapId, effect.GetBuf(), effect.GetSize());
     return true;
 }
 

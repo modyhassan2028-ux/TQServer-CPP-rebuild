@@ -120,5 +120,7 @@ bool CMsgMagicEffect::CreateFull(uint32_t dwAttacker, uint32_t dwTarget, uint16_
 
 void CMsgMagicEffect::Process(uint32_t) {
     // ORIGINAL CMsgMagicEffect is server->client only; the receive path
-    // logs "invalid msg CMsgMagicEffect." (FUN_1403872c0).
+    // logs "invalid msg CMsgMagicEffect." and drops it (FUN_1403872c0,
+    // vtable slot 3).
+    tq::MyLogSave("gmlog/all", "invalid msg CMsgMagicEffect.");
 }

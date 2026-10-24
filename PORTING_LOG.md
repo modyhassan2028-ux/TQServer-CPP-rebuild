@@ -1309,3 +1309,29 @@ CUser vtable+0x50 — يلزم تفريغ الـ vtable)، 1023 (0x11 cq_bonus)�
   25,143 صنف). PASS.
 - **ريجريشن**: skills_test + action_final_families_test (33 سيناريو)
   PASS على البناء الجديد. بيلد كامل 8/8 بينaries بـ zig نضيف.
+
+## جلسة 2026-10-24 (خامسة) — بث 1105 من السجل: SendMagicEffectAfterProcess
+- **FUN_1404851b0 (CPlayerMagic::SendMagicEffectAfterProcess) — مبورت
+  حرفيًا** (User.h/cpp): يبني 1105 FULL واحد من سجل السحر (attr 2
+  نوع، attr 3 مستوى، attr 7 علم الأثر الحالي) + باراميترات المرسِل
+  ويبثه لكل الخريطة (الأصل: mapgroup vtable+0x348 بعلم 1 = يشمل
+  المهاجم نفسه؛ عندنا عبر CMapManager::Broadcast). خرائط باراميترات
+  المرسِل متحققة ضد الـ 13 باراميتر بتوع FUN_140386e00: data5=param_2،
+  d3=param_3 (غرابة القاعدة التالية)، d2=param_4، damage=param_5،
+  target=param_6 (هيدر + إدخال)، dir=0، d4=فرق السين (0 عندنا)،
+  d6=kernel role id = GetId().
+- **مسارا الفشل الأصليان حرفيين**: سجل مفقود → لوج record is null +
+  false؛ CreateFull فشل → لوج user_id/target_id/magic_type + false.
+- **FUN_1403872c0 (Process 1105 من العميل)** — ستب: الباكِت من العميل
+  للسيرفر غير صالح بالتصميم، الأصل بيسجل "invalid msg
+  CMsgMagicEffect." في gmlog/all ويرميه — نفذنا نفس اللوج حرفيًا.
+- **اختبار**: magic_effect_packets_test اتوسع بقسم البث — مستخدمان
+  على خريطة (مبثوث + مراقب) وكل بايت في 1105 المستلم عند المراقب
+  متحقق (attacker/target/type/level/dir/count=1/flag=3/entry
+  id/damage/d2/d4=0/d5/d6/غرابة d3 على 0x34) + مسارا الرفض.
+  PASS. **ريجريشن كاملة 33/33** (كل tests/*.cpp بما فيها
+  cross_kernel و cross_socket_e2e بعد إصلاح ربطهما: CrossKernel.cpp
+  كان ناقص من سكريبت الرابط + #include <atomic> ناقص في التست).
+- **التالي**: FUN_140486fb0 (SendMagicEffectAfterProcessGroupByPos —
+  بث 1105 لكل هدف بموضعه + معالجة مشاهد الوحوش/اللاعبين) — هو أول
+  جزء من محرك الإطلاق نفسه (الحلقة المفقودة Intone→Launch→ضرر).

@@ -3,6 +3,7 @@
 #include "CrossKernel.h"
 #include "CrossProtocol.h"
 #include <arpa/inet.h>
+#include <atomic>
 #include <cassert>
 #include <chrono>
 #include <cstdio>
