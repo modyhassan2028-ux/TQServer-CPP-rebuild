@@ -4481,3 +4481,52 @@ M1: عيلة لوجين الـ NpcServer (أول وحدة حرفية في MsgSer
   سليم)، والواصف المزروع.
 - **الرجريشن 46/46 أخضر** (45 NpcServer +
   M1) + سموك main.
+
+## جلسة 2026-10-26 02:05 — MsgServer الوحدة
+M2: عيلة سجل الشات CMsgTalk الحقيقية + تصحيح فهم M1
+
+### الوحدة M2 (Exe/MsgServer/Port/MsgTalkRecord)
+- **FUN_14015b240 (ctor):** vftable عند +0،
+  ctor الـ CStringPacker عند +0x430،
+  **+0x428 = this+0x10** (ترويسة الشات الداخلية)،
+  SetBuf(this+0x2d, **0x3e1**, true).
+- **FUN_14015b300 (Create) حرفية بـ 11 وسيطًا:**
+  - **بوابات الأطوال (تصحيح مهم):** الـ idiom
+    `uVar8 = -1 → ينقص لكل حرف بما فيه الـ NUL`
+    بيرجع **len** نفسه (uVar8 = -(len+2)؛
+    ~uVar8-1 = len) — فالبوابات هي len < 0x10
+    (name/to)، len < 0x100 (from)،
+    text غير الفاضي: !(0xf < len).
+  - **الترتيب الحرفي للكتابة:** ترويسة +0x428
+    (+4 dword، +8/+10 words، +0xc SysTimeGet،
+    +0x14/+0x18 dwords، +0x1c byte)، ثم
+    AddString×4 بالترتيب **name, to, TEXT,
+    from**، ثم TimeGet(0) عند +0، و**+8 = 0x3ec**،
+    و+0xc = GetSize + 0x1f، والإرجاع
+    = AND الأربعة.
+  - الوسائط null بتمر لـ AddString زي ما هي
+    (نص الحوار الفاضي بيركب كـ empty).
+- **FUN_14015b2c0 (dtor):** vftable + dtor
+  الـ packer + 1402b55f0.
+- **تصحيح M1 (فهم حاسم):** الحقول اللي
+  اتفهمت غلط في M1 كـ "واصف مزروع" هي في
+  الحقيقة **وسائط الستاك الصادرة** بتاعة
+  Create نفسها: local_4c8 = النص (null)،
+  _4c0 = 0xffffff (dword)، _4b8 = 0x835
+  (word)، _4b0/_4a8/_4a0 = 0، _498 = 1
+  (byte). نداء b990 اتصحح لنداء Create
+  الحقيقي بالوسائط الـ 11.
+- **ملاحظة:** الـ CStringPacker نفسه
+  import من الـ DLL المشتركة (مش مفكوك في
+  MsgServer.exe) — seams: ctor/dtor/SetBuf/
+  AddString/GetSize + TimeGet/SysTimeGet.
+- **الاختبار:** البوابات على الحروف (16
+  يفشل/15 يعدّي، 256 يفشل/255 يعدّي، النص
+  16 يفشل/15 يعدّي)، الترتيب name,to,
+  (null),ANSWER_OK، الكتابة +0x428 = +0x10،
+  +8 = 0x3ec، +0xc = 4×10+0x1f = 0x47،
+  ترويسة كاملة، AND الـ AddStrings،
+  null name/to/from يفشل، و(ctor لازم
+  قبل Create — ub الأصل محفوظ).
+- **الرجريشن 46/46 أخضر** (45 NpcServer +
+  M1+M2).

@@ -59,40 +59,37 @@ bool MsgNpcLoginB990(MsgNpcLoginData& rD,
             rD.m_fnSend(pSender, 0xe, 0x2720, 0xea65);
         rD.m_fnSend(pSender, 0xe, 0x2722, 0xea65);
 
-        MsgChatRecord rec;
-        rD.m_fnRecInit(&rec);
-        rec.bFlag = 1;
-        rec.dwA = 0;
-        rec.dwB = 0;
-        rec.wC = 0;
-        rec.wColor835 = 0x835;
-        rec.dwColorFFFFFF = 0xffffff;
-        rec.szText = nullptr;
-        if (rD.m_fnRecBuild(&rec, "SYSTEM", "ALLUSERS",
-                            "ANSWER_OK")) {
-            rD.m_fnBroadcast(pKernel, &rec);
+        // the outgoing stack args rebuilt VERBATIM:
+        // local_4c8 (text) = 0, _4c0 (dword) =
+        // 0xffffff, _4b8 (word) = 0x835, _4b0 = 0,
+        // _4a8 = 0, _4a0 = 0, _498 (byte) = 1
+        MsgTalkCtor(&rD.m_recTalk);
+        if (MsgTalkCreate(&rD.m_recTalk, "SYSTEM",
+                          "ALLUSERS", "ANSWER_OK",
+                          nullptr, 0xffffff, 0x835, 0,
+                          0, 0, 1)) {
+            rD.m_fnBroadcast(pKernel, &rD.m_recTalk);
         }
-        rD.m_fnRecRelease(&rec);
+        MsgTalkDtor(&rD.m_recTalk);
 
         rD.m_fnLog("NPC server login OK."); // local_4c8
         rD.m_fnSend(pSender, 0, 0x9c41,
             InlineStrlen1("NPC server login OK."));
         return 1;
     }
-    MsgChatRecord rec;
-    rD.m_fnRecInit(&rec);
-    rec.bFlag = 1;
-    rec.dwA = 0;
-    rec.dwB = 0;
-    rec.wC = 0;
-    rec.wColor835 = 0x835;
-    rec.dwColorFFFFFF = 0xffffff;
-    rec.szText = nullptr;
-    if (rD.m_fnRecBuild(&rec, "SYSTEM", "ALLUSERS",
-                        "ERROR: login refuse!")) {
-        rD.m_fnBroadcast(pKernel, &rec);
+    MsgTalkCtor(&rD.m_recTalk);
+    // the same stack-arg rebuild (the text rides
+    // as "ERROR: login refuse!" here? NO - verbatim:
+    // local_4c8 = 0 again in the ORIGINAL refuse
+    // block; the ERROR string goes to the BUILD
+    // param_4 (from))
+    if (MsgTalkCreate(&rD.m_recTalk, "SYSTEM",
+                      "ALLUSERS", "ERROR: login refuse!",
+                      nullptr, 0xffffff, 0x835, 0,
+                      0, 0, 1)) {
+        rD.m_fnBroadcast(pKernel, &rD.m_recTalk);
     }
-    rD.m_fnRecRelease(&rec);
+    MsgTalkDtor(&rD.m_recTalk);
     return 0;
 }
 

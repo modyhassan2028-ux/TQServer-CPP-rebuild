@@ -12,24 +12,9 @@
 #include <functional>
 #include <string>
 #include <vector>
+#include "MsgTalkRecord.h" 
 
 namespace msg {
-
-// FUN_14015b240..14015b2c0 record family (the
-// SYSTEM/ALLUSERS chat record; 0x450 buffer + the
-// descriptor fields written INLINE by FUN_14045b990:
-// local_498=1, _4a0=0, _4a8=0, _4b0=0,
-// _4b8=0x835, _4c0=0xffffff, _4c8=0)
-struct MsgChatRecord {
-    uint8_t  bFlag = 0;        // local_498 (1)
-    uint32_t dwA = 0;           // local_4a0
-    uint32_t dwB = 0;           // local_4a8
-    uint16_t wC = 0;            // local_4b0
-    uint16_t wColor835 = 0;      // local_4b8 (0x835)
-    uint32_t dwColorFFFFFF = 0; // local_4c0
-    const char* szText = nullptr; // local_4c8
-    char buf[0x450] = {0};      // local_478 (1104)
-};
 
 // the login wire record at param_1+0x428
 // (+0 dword key 0x3ade68b1/b2, +4 "NpcServer Tqdig"
@@ -64,14 +49,11 @@ struct MsgNpcLoginData {
         m_fnSend;
     // the +0x30 kernel broadcast: (rec, 0)
     std::function<void(void*, void*)> m_fnBroadcast;
-    // FUN_14015b240(rec) - record init
-    std::function<void(MsgChatRecord*)> m_fnRecInit;
-    // FUN_14015b300(rec,"SYSTEM","ALLUSERS",s) -> bool
-    std::function<bool(MsgChatRecord*, const char*,
-                       const char*, const char*)>
-        m_fnRecBuild;
-    // FUN_14015b2c0(rec) - release
-    std::function<void(MsgChatRecord*)> m_fnRecRelease;
+    // the CMsgTalk record family (M2: REAL bodies
+    // in MsgTalkRecord) - the +0x428 stack-arg
+    // rebuild slots (local_4c8.._498) are the
+    // outgoing Create args, documented there
+    MsgTalkRecord m_recTalk;
 };
 
 // FUN_14045b990(this, param_2, key==0x3ade68b1)
