@@ -3,6 +3,7 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <set>
 #include <mutex>
 
 class CUser;
@@ -82,7 +83,24 @@ public:
     uint32_t GetChallengeDomain() const { return m_dwChallengeDomain; }
     void SetChallengeDomain(uint32_t v) { m_dwChallengeDomain = v; }
 
+    // ---- 701-732 family (FUN_140128290 ProcessActionSyn) facade ----
+    // guild-to-guild relations by syn id: the 711-714 chains
+    // ("hostile"/"reconciled"/"allied"/"unallied" dialog texts)
+    bool IsHostileTo(uint32_t synId) const { return m_hostile.count(synId) > 0; }
+    bool IsAlliedTo(uint32_t synId) const { return m_allies.count(synId) > 0; }
+    void SetHostile(uint32_t synId, bool on) { if (on) m_hostile.insert(synId); else m_hostile.erase(synId); }
+    void SetAlly(uint32_t synId, bool on) { if (on) m_allies.insert(synId); else m_allies.erase(synId); }
+    // 715 (mgr +0x118): deputy appointed by leader, by member name
+    uint32_t GetDeputyId() const { return m_dwDeputyId; }
+    void SetDeputyId(uint32_t id) { m_dwDeputyId = id; }
+    // 717 "member_title =" (mgr +0x110): syn-wide member title byte
+    uint8_t GetMemberTitle() const { return m_ucMemberTitle; }
+    bool SetMemberTitle(uint8_t t) { m_ucMemberTitle = t; return true; }
+
 private:
+    std::set<uint32_t> m_hostile, m_allies;
+    uint32_t m_dwDeputyId{0};
+    uint8_t m_ucMemberTitle{0};
     std::map<uint32_t, SMemberSyn> m_synRec;
     int64_t m_qwTreasury{0};
     uint32_t m_dwHoldDomain{0};
@@ -134,6 +152,41 @@ public:
     bool AddTreasuryOf(uint32_t dwUserId, int64_t n);  // vcall+0x190
     bool SetTreasuryOf(uint32_t dwUserId, int64_t n);  // vcall+0x1a0
 
+    // ---- 701-732 family (FUN_140128290 ProcessActionSyn) facade ----
+    // Mappings documented per-case against the decompiled switch; the
+    // manager is the ORIGINAL syn-manager singleton (FUN_140087ed0).
+    bool IsValidSyn(uint32_t synId);                        // +0x248
+    int64_t GetSynTreasuryById(uint32_t synId);             // +0x268 (717 "money <")
+    void AddSynTreasuryById(uint32_t synId, int64_t n);     // +0x270 (717 "money +=")
+    bool SetSynMemberTitle(uint32_t synId, uint8_t t);      // +0x110 (717 "member_title =")
+    bool SynHasDomain(uint32_t synId);                       // +0x2e8 (717 "has_domain ==")
+    bool NextSynIter(uint32_t& rSlot);                      // +0x260 (720: writes slot)
+    uint32_t GetSynIdByName(const std::string& name);       // +0x250 (721)
+    bool NextSynMemberIter(uint32_t dwSynId, uint32_t& rSlot); // +0xb8 (722)
+    bool CreateSynForAction(std::shared_ptr<CUser> pUser,
+                            const std::string& name, int64_t n0); // +0x228 (701)
+    bool JoinLeague(std::shared_ptr<CUser> pUser);           // +0x230 (702, +0x510 gate)
+    bool DonateToSyn(std::shared_ptr<CUser> pUser,
+                     uint32_t synId, int64_t n);             // +0x138/+0x198 (703/707)
+    bool SetAnnouncementOf(std::shared_ptr<CUser> pUser,
+                           const std::string& text);          // +0xe8 (704)
+    bool InviteMemberByName(std::shared_ptr<CUser> pUser,
+                            const std::string& name);         // +0xd8 (706)
+    bool SetHostileByName(std::shared_ptr<CUser> pUser,
+                          const std::string& name);           // +0x1a8 (711)
+    bool SetReconcileByName(std::shared_ptr<CUser> pUser,
+                            const std::string& name);         // +0x1b8 (712)
+    bool AcceptAlly(std::shared_ptr<CUser> pUser);           // +0x1a0 (713, ally list)
+    void AddAllyRequest(uint32_t dwSynId, uint32_t dwTargetSynId); // ally list source
+    bool SetUnallyByName(std::shared_ptr<CUser> pUser,
+                         const std::string& name);            // +0x1b0 (714)
+    bool AppointDeputyByName(std::shared_ptr<CUser> pUser,
+                             const std::string& name);        // +0x118 (715)
+    // %iter_member_name resolver support: the member iterator state
+    // (which syn is being walked; the slot index lives on the user)
+    void SetIterMemberSyn(uint32_t synId) { m_dwIterMemberSyn = synId; }
+    std::string GetIterMemberName(uint32_t dwIdx);
+
     // cq_action 218 (0x14013ca63): create clan from the typed dialog name.
     // Duplicate name / already member -> false (chain shows "taken" text).
     bool CreateForAction(uint32_t dwUserId, const std::string& name);
@@ -148,6 +201,8 @@ public:
 
 private:
     CGuildManager() = default;
+    std::map<uint32_t, uint32_t> m_allyRequests; // target syn id -> requester syn id
+    uint32_t m_dwIterMemberSyn{0};               // 722 walk state
     std::map<std::string, std::shared_ptr<CGuild>> m_byName;
     std::map<uint32_t, std::shared_ptr<CGuild>> m_byId;
     std::map<uint32_t, std::shared_ptr<CGuild>> m_byMember;

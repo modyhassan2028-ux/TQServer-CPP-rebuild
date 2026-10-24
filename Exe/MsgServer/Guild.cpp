@@ -1,4 +1,8 @@
 ﻿#include "Guild.h"
+#include <strings.h>
+#ifndef _stricmp
+#define _stricmp strcasecmp
+#endif
 #include <map>
 #include "User.h"
 #include "UserManager.h"
@@ -502,5 +506,207 @@ bool CGuildManager::DisbandForAction(uint32_t dwUserId) {
     for (uint32_t uid : g->GetMembers()) m_byMember.erase(uid);
     m_byName.erase(g->GetName());
     m_byId.erase(g->GetId());
+    return true;
+}
+
+// ============================================================================
+// 701-732 family (FUN_140128290 ProcessActionSyn) manager facade.
+// Each method maps one vtable slot of the ORIGINAL syn-manager singleton
+// (FUN_140087ed0); semantics cross-checked against the live cq_action
+// chains (10330 create, 10359 league, 10363/120023 donate,
+// 10373 announce, 10393 invite, 10403-10434 relations, 10443/10683/100013
+// iterators, 20120+ money ops).
+// ============================================================================
+bool CGuildManager::IsValidSyn(uint32_t synId) { // +0x248
+    std::lock_guard<std::mutex> lock(m_mutex);
+    return m_byId.count(synId) > 0;
+}
+
+int64_t CGuildManager::GetSynTreasuryById(uint32_t synId) { // +0x268
+    std::lock_guard<std::mutex> lock(m_mutex);
+    auto it = m_byId.find(synId);
+    return it == m_byId.end() ? 0 : it->second->GetTreasury();
+}
+
+void CGuildManager::AddSynTreasuryById(uint32_t synId, int64_t n) { // +0x270
+    std::lock_guard<std::mutex> lock(m_mutex);
+    auto it = m_byId.find(synId);
+    if (it != m_byId.end()) it->second->AddTreasury(n);
+}
+
+bool CGuildManager::SetSynMemberTitle(uint32_t synId, uint8_t t) { // +0x110
+    std::lock_guard<std::mutex> lock(m_mutex);
+    auto it = m_byId.find(synId);
+    if (it == m_byId.end()) return false;
+    return it->second->SetMemberTitle(t);
+}
+
+bool CGuildManager::SynHasDomain(uint32_t synId) { // +0x2e8
+    std::lock_guard<std::mutex> lock(m_mutex);
+    auto it = m_byId.find(synId);
+    return it != m_byId.end() && it->second->GetHoldDomain() != 0;
+}
+
+bool CGuildManager::NextSynIter(uint32_t& rSlot) { // +0x260 (720)
+    // ORIGINAL walks the manager's guild list; the slot (role+0xa68)
+    // receives the next syn id; false when the walk ends.
+    std::lock_guard<std::mutex> lock(m_mutex);
+    for (auto& kv : m_byId) {
+        if (kv.first > rSlot) { rSlot = kv.first; return true; }
+    }
+    return false;
+}
+
+uint32_t CGuildManager::GetSynIdByName(const std::string& name) { // +0x250 (721)
+    std::lock_guard<std::mutex> lock(m_mutex);
+    auto it = m_byName.find(name);
+    return it == m_byName.end() ? 0 : it->second->GetId();
+}
+
+bool CGuildManager::NextSynMemberIter(uint32_t dwSynId, uint32_t& rSlot) { // +0xb8 (722)
+    std::lock_guard<std::mutex> lock(m_mutex);
+    auto it = m_byId.find(dwSynId);
+    if (it == m_byId.end()) return false;
+    m_dwIterMemberSyn = dwSynId; // the walk target for %iter_member_name
+    const auto& v = it->second->GetMembers();
+    if (rSlot < v.size()) { rSlot = rSlot + 1; return true; }
+    return false;
+}
+
+std::string CGuildManager::GetIterMemberName(uint32_t dwIdx) {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    auto it = m_byId.find(m_dwIterMemberSyn);
+    if (it == m_byId.end()) return "";
+    const auto& v = it->second->GetMembers();
+    if (dwIdx == 0 || dwIdx > v.size()) return ""; // slot is 1-based after ++
+    auto u = CUserManager::Instance().GetUser(v[dwIdx - 1]);
+    return u ? u->GetName() : "";
+}
+
+bool CGuildManager::CreateSynForAction(std::shared_ptr<CUser> pUser,
+                                       const std::string& name, int64_t n0) { // +0x228 (701)
+    // n0 = the first sscanf number of the live 701 row ("90 1000000
+    // 500000"); the ORIGINAL passes it to mgr+0x228 alongside the name.
+    if (!pUser) return false;
+    (void)n0; // recorded: create-side level/money gates live inside the
+             // ORIGINAL manager; the rebuilt manager validates dup/member
+    return CreateForAction(pUser->GetId(), name);
+}
+
+bool CGuildManager::JoinLeague(std::shared_ptr<CUser> pUser) { // +0x230 (702)
+    if (!pUser) return false;
+    CGuild* g = GetSynOf(pUser->GetId());
+    if (!g) return false; // gate: mgr+0x510 (in-league?) side: no syn
+    // ORIGINAL: the user's syn joins the NPC-owner league; single league
+    // per syn. Model: league 1 marker on the syn (0 = none).
+    // (kept on the treasury-adjacent domain state: challenge slot reuse)
+    if (g->GetChallengeDomain() != 0) return false; // already in a league
+    g->SetChallengeDomain(1);
+    return true;
+}
+
+bool CGuildManager::DonateToSyn(std::shared_ptr<CUser> pUser,
+                                uint32_t synId, int64_t n) { // +0x138/+0x198 (703/707)
+    if (!pUser || !synId || n <= 0) return false;
+    CGuild* g = GetSynById(synId);
+    if (!g) return false;
+    if ((int64_t)pUser->GetMoney() < n) return false; // user must afford it
+    pUser->AddMoney((int32_t)-n);
+    g->AddTreasury(n);
+    printf("[SYN] %s donates %lld to syn %u (%s)\n",
+           pUser->GetName().c_str(), (long long)n, synId, g->GetName().c_str());
+    return true;
+}
+
+bool CGuildManager::SetAnnouncementOf(std::shared_ptr<CUser> pUser,
+                                      const std::string& text) { // +0xe8 (704)
+    if (!pUser) return false;
+    CGuild* g = GetSynOf(pUser->GetId());
+    if (!g) return false;
+    g->SetAnnouncement(text);
+    return true;
+}
+
+bool CGuildManager::InviteMemberByName(std::shared_ptr<CUser> pUser,
+                                       const std::string& name) { // +0xd8 (706)
+    if (!pUser) return false;
+    CGuild* g = GetSynOf(pUser->GetId());
+    if (!g) return false;
+    auto target = CUserManager::Instance().GetUserByName(name);
+    if (!target) return false; // ORIGINAL: FUN_140087650 name lookup null
+    if (!g->AddMember(target->GetId())) return false;
+    // register the membership in the manager-side index (like Create-
+    // ForAction does for the leader; ORIGINAL mgr+0xd8 keeps both)
+    auto sp = GetSynByIdShared(g->GetId());
+    if (sp) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_byMember[target->GetId()] = sp;
+    }
+    return true;
+}
+
+bool CGuildManager::SetHostileByName(std::shared_ptr<CUser> pUser,
+                                     const std::string& name) { // +0x1a8 (711)
+    if (!pUser) return false;
+    CGuild* g = GetSynOf(pUser->GetId());
+    std::lock_guard<std::mutex> lock(m_mutex);
+    auto it = m_byName.find(name);
+    if (!g || it == m_byName.end() || it->second->GetId() == g->GetId())
+        return false; // ORIGINAL false -> chain "This guild does not exist."
+    g->SetHostile(it->second->GetId(), true);
+    return true;
+}
+
+bool CGuildManager::SetReconcileByName(std::shared_ptr<CUser> pUser,
+                                       const std::string& name) { // +0x1b8 (712)
+    if (!pUser) return false;
+    CGuild* g = GetSynOf(pUser->GetId());
+    std::lock_guard<std::mutex> lock(m_mutex);
+    auto it = m_byName.find(name);
+    if (!g || it == m_byName.end()) return false;
+    g->SetHostile(it->second->GetId(), false);
+    return true;
+}
+
+void CGuildManager::AddAllyRequest(uint32_t dwSynId, uint32_t dwTargetSynId) {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_allyRequests[dwTargetSynId] = dwSynId;
+}
+
+bool CGuildManager::AcceptAlly(std::shared_ptr<CUser> pUser) { // +0x1a0 (713)
+    // ORIGINAL: FUN_140118320 returns the ally-request list; the first
+    // entry whose syn id != the user's syn gets accepted via mgr+0x1a0.
+    if (!pUser) return false;
+    CGuild* g = GetSynOf(pUser->GetId());
+    if (!g) return false;
+    std::lock_guard<std::mutex> lock(m_mutex);
+    auto it = m_allyRequests.find(g->GetId());
+    if (it == m_allyRequests.end() || it->second == g->GetId()) return false;
+    g->SetAlly(it->second, true);
+    m_allyRequests.erase(it);
+    return true;
+}
+
+bool CGuildManager::SetUnallyByName(std::shared_ptr<CUser> pUser,
+                                    const std::string& name) { // +0x1b0 (714)
+    if (!pUser) return false;
+    CGuild* g = GetSynOf(pUser->GetId());
+    std::lock_guard<std::mutex> lock(m_mutex);
+    auto it = m_byName.find(name);
+    if (!g || it == m_byName.end()) return false;
+    g->SetAlly(it->second->GetId(), false);
+    return true;
+}
+
+bool CGuildManager::AppointDeputyByName(std::shared_ptr<CUser> pUser,
+                                        const std::string& name) { // +0x118 (715)
+    if (!pUser) return false;
+    CGuild* g = GetSynOf(pUser->GetId());
+    if (!g) return false;
+    if (_stricmp(name.c_str(), pUser->GetName().c_str()) == 0)
+        return false; // ORIGINAL: own name -> fall out -> 0
+    auto target = CUserManager::Instance().GetUserByName(name);
+    if (!target || !g->IsMember(target->GetId())) return false;
+    g->SetDeputyId(target->GetId());
     return true;
 }

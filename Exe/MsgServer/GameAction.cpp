@@ -1075,6 +1075,186 @@ bool CGameAction::ProcessActionFamily8xx(std::shared_ptr<CUser> pUser,
     return false;
 }
 
+// ============================================================================
+// ORIGINAL CGameAction::ProcessActionSyn - FUN_140128290 (objdump-verified
+// 0x140128290..0x14012a670). The 701..732 guild/syndicate family.
+//
+// Verified flow (each step cross-checked against the decompile):
+//  - entry: node null -> CHECKF 0x1601; types outside [725..729] require
+//    nothing extra, 725..729 require the user object (gate at 0x1401282d0)
+//  - 701 (0x2bd): sscanf "%d %d %d" < 3 -> DBERR+false; typed name
+//    (param_7 = ctx.strInput) len 2..35 + NameStrCheck, mgr+0x228
+//    (user, name, n0) creates; taken/invalid -> STR_INVALID_GUILD_NAME,
+//    false. Live row 10330 "90 1000000 500000".
+//  - 702 (0x2be): mgr+0x510 in-league gate, STR_SYN_IN_LEAGUE on refuse,
+//    else register + mgr+0x230 join league. Live row 10359.
+//  - 703 (0x2bf): strtol(param_7) < 1 -> 0; mgr+0x138 (user, amount).
+//    Live row 10363 ("type in the amount you wish" chain).
+//  - 704 (0x2c0): mgr+0xe8 (user, param_7, 0) set announcement.
+//    Live row 10373.
+//  - 705/708/709: NO CASE in the ORIGINAL switch (0x2c1/0x2c4/0x2c5
+//    absent from the decompile) -> default -> DBERR bad type -> false.
+//    The live rows 10383/100100/100120 therefore END their chains in the
+//    original - literal behavior, kept here.
+//  - 706 (0x2c2): name lookup (FUN_140087650) -> STR_NOT_HERE on miss,
+//    self-target refused, mgr+0xd8 (user, target id) invite.
+//    Live row 10393.
+//  - 707 (0x2c3): strtoul(param_7) -> mgr+0x198 (user, dialogSynId
+//    slot, amount) - donate to the dialog clan. Live row 120023 (the
+//    "Please type in the amount" -> "Thanks for your great
+//    contribution" chain).
+//  - 711 (0x2c7): mgr+0x1a8 (user, name) hostile. Live 10403 ->
+//    "Your guild is hostile to the target".
+//  - 712 (0x2c8): mgr+0x1b8 (user, name) reconcile. Live 10413 ->
+//    "You are reconciled with the target".
+//  - 713 (0x2c9): FUN_140118320 ally list, first other syn ->
+//    mgr+0x1a0 (user, id) accept. Live 10423 -> "has allied".
+//  - 714 (0x2ca): mgr+0x1b0 (user, name) unally. Live 10433 ->
+//    "You have unallied".
+//  - 715 (0x2cb): len < 36, own name refused, mgr+0x118 (user, name)
+//    appoint deputy. Live rows 31100/100070.
+//  - 716 (0x2cc): sscanf "%u %u %d" >= 2; guild-map monster spawn with
+//    arena/market-map rejects (ports with the guild-map subsystem;
+//    zero live rows - pass-open default kept until then).
+//  - 717 (0x2cd): sscanf "%s %s %d %u": field op value synId; synId 0
+//    -> the USER's syn (user vcall+0x170); mgr+0x248 validity gate;
+//    "money" += (<- mgr+0x270) / < (mgr+0x268); "member_title" =
+//    (mgr+0x110); "has_domain" == (mgr+0x2e8). Any other field (e.g.
+//    the live "fealty ==" rows) -> ORIGINAL fall-out -> 0.
+//  - 720 (0x2d0): mgr+0x260(&slot) - next guild in the list walk;
+//    %iter_syn_* resolve through the slot. Live rows 10683+.
+//  - 721 (0x2d1): len < 16, mgr+0x250(name) -> slot; return != 0.
+//    Live row 10443/120015 (typed guild name -> %iter_syn_* output).
+//  - 722 (0x2d2): user syn id (vcall+0x170) -> mgr+0xb8 (synId, &slot)
+//    next member; %iter_member_name resolves. Live rows 100013+.
+//  - 723..732 (0x2d3..0x2dc): member attr ops, loyalty date check,
+//    league/family-battle packets, guild-map teleport and sub-syn
+//    creation; zero live rows in cq_action - documented in the header
+//    comment, left to the league/family-battle subsystem pass.
+// ============================================================================
+bool CGameAction::ProcessActionSyn(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode) {
+    if (!pUser || !pNode) return false; // ORIGINAL: node null -> CHECKF 0x1601
+    auto& mgr = CGuildManager::Instance();
+    const char* szInput = pUser->m_stDialogCtx.strInput.c_str(); // param_7
+
+    switch (pNode->dwType) {
+    case 701: { // 0x2bd: create guild with the typed name
+        int64_t n[3] = {0, 0, 0};
+        if (sscanf(pNode->strParam.c_str(), "%lld %lld %lld", &n[0], &n[1], &n[2]) < 3) {
+            printf("[DBERR] table:cq_action/cq_newaction, ACTION %u wrong param number\n", pNode->dwId);
+            return false;
+        }
+        if (!mgr.CreateSynForAction(pUser, szInput, n[0])) {
+            pUser->SendSysMsg("STR_INVALID_GUILD_NAME"); // ORIGINAL string table
+            return false;
+        }
+        return true;
+    }
+    case 702: { // 0x2be: join the NPC league
+        if (!mgr.JoinLeague(pUser)) {
+            pUser->SendSysMsg("STR_SYN_IN_LEAGUE");
+            return false;
+        }
+        return true;
+    }
+    case 703: { // 0x2bf: donate the typed amount to the OWN guild
+        long lAmt = strtol(szInput, nullptr, 10);
+        if (lAmt < 1) return false; // ORIGINAL: < 1 -> 0
+        uint32_t dwSyn = mgr.GetSynIdOfUser(pUser->GetId());
+        return mgr.DonateToSyn(pUser, dwSyn, lAmt);
+    }
+    case 704: { // 0x2c0: set the guild announcement from the typed text
+        return mgr.SetAnnouncementOf(pUser, szInput);
+    }
+    case 706: { // 0x2c2: invite the named player
+        return mgr.InviteMemberByName(pUser, szInput);
+    }
+    case 707: { // 0x2c3: donate the typed amount to the DIALOG clan
+        uint32_t dwAmt = strtoul(szInput, nullptr, 10);
+        if (!dwAmt) return false;
+        return mgr.DonateToSyn(pUser, pUser->GetIterSynState(), dwAmt);
+    }
+    case 711: // 0x2c7: declare hostile by typed guild name
+        return mgr.SetHostileByName(pUser, szInput);
+    case 712: // 0x2c8: reconcile by typed guild name
+        return mgr.SetReconcileByName(pUser, szInput);
+    case 713: // 0x2c9: accept the first pending ally request
+        return mgr.AcceptAlly(pUser);
+    case 714: // 0x2ca: unally by typed guild name
+        return mgr.SetUnallyByName(pUser, szInput);
+    case 715: { // 0x2cb: appoint the named member as deputy
+        if (strlen(szInput) < 0x24 && _stricmp(szInput, pUser->GetName().c_str()) != 0)
+            return mgr.AppointDeputyByName(pUser, szInput);
+        return false; // ORIGINAL: own name -> fall out -> 0
+    }
+    case 716: // 0x2cc: guild-map monster spawn (arena/market rejects).
+        // Zero live rows; ports with the guild-map subsystem.
+        printf("[PORT-PENDING] 716 guild-map monster spawn (no live rows)\n");
+        return false;
+    case 717: { // 0x2cd: guild attr op "<field> <op> <value> <synId>"
+        char szField[256] = {0}, szOp[256] = {0};
+        int64_t llVal = 0; uint32_t dwSynArg = 0;
+        int nGot = sscanf(pNode->strParam.c_str(), "%255s %255s %lld %u",
+                          szField, szOp, &llVal, &dwSynArg);
+        if (nGot < 3) { // ORIGINAL: sscanf < 3 -> DBERR -> false
+            printf("[DBERR] table:cq_action/cq_newaction, ACTION %u wrong param number\n", pNode->dwId);
+            return false;
+        }
+        uint32_t dwSyn = dwSynArg ? dwSynArg
+                                  : mgr.GetSynIdOfUser(pUser->GetId()); // vcall+0x170
+        if (!dwSyn || !mgr.IsValidSyn(dwSyn)) // ORIGINAL mgr+0x248 gate
+            return false;
+        if (_stricmp(szField, "money") == 0) {
+            if (strcmp(szOp, "+=") == 0) {
+                mgr.AddSynTreasuryById(dwSyn, llVal); // mgr+0x270
+                return true;
+            }
+            if (strcmp(szOp, "<") == 0)
+                return mgr.GetSynTreasuryById(dwSyn) < llVal; // mgr+0x268
+        } else if (_stricmp(szField, "member_title") == 0) {
+            if (strcmp(szOp, "=") == 0)
+                return mgr.SetSynMemberTitle(dwSyn, (uint8_t)llVal); // +0x110
+        } else if (_stricmp(szField, "has_domain") == 0) {
+            if (strcmp(szOp, "==") == 0)
+                return mgr.SynHasDomain(dwSyn); // +0x2e8
+        }
+        // fealty / other fields: the ORIGINAL has no branch -> 0
+        return false;
+    }
+    case 720: { // 0x2d0: walk to the next guild in the manager list
+        uint32_t dwSlot = pUser->GetIterSynState();
+        bool bMore = mgr.NextSynIter(dwSlot);
+        pUser->SetIterSynState(dwSlot);
+        return bMore;
+    }
+    case 721: { // 0x2d1: resolve the typed guild name into the slot
+        if (strlen(szInput) < 0x10) {
+            uint32_t dwId = mgr.GetSynIdByName(szInput); // mgr+0x250
+            pUser->SetIterSynState(dwId);
+            return dwId != 0;
+        }
+        return false;
+    }
+    case 722: { // 0x2d2: walk to the next member of the user's guild
+        uint32_t dwSyn = mgr.GetSynIdOfUser(pUser->GetId());
+        if (!dwSyn) { // ORIGINAL: syn id 0 -> LAB fall-out
+            printf("[DBERR] table:cq_action/cq_newaction, ACTION %u syn not found\n", pNode->dwId);
+            return false;
+        }
+        uint32_t dwSlot = pUser->GetIterSynState();
+        bool bMore = mgr.NextSynMemberIter(dwSyn, dwSlot);
+        pUser->SetIterSynState(dwSlot);
+        return bMore;
+    }
+    default:
+        // 705/708/709 land here in the ORIGINAL TOO (no switch case in
+        // the decompile) - DBERR bad type + false, literal.
+        printf("[DBERR] table:cq_action/cq_newaction, ProcessActionSyn() ActionID=%u, ActionType=%u bad type\n",
+               pNode->dwId, pNode->dwType);
+        return false;
+    }
+}
+
 bool CGameAction::ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode) {
     if (!pUser || !pNode) return false;
     switch (pNode->dwType) {
@@ -3835,8 +4015,8 @@ static bool ProcessActionDispatch(std::shared_ptr<CUser> pUser,
         return CGameAction::ProcessActionUser(pUser, pNode);
     if (dwType >= 601 && dwType <= 698) // -0x259 <= 0x61: FUN_140127820 (PORT-PENDING family)
         return CGameAction::ProcessActionUser(pUser, pNode);
-    if (dwType >= 701 && dwType <= 798) // -0x2bd <= 0x61: FUN_140128290 (PORT-PENDING family)
-        return CGameAction::ProcessActionUser(pUser, pNode);
+    if (dwType >= 701 && dwType <= 798) // -0x2bd <= 0x61: FUN_140128290
+        return CGameAction::ProcessActionSyn(pUser, pNode);
     if (dwType >= 801 && dwType <= 898) // -0x321 <= 0x61: FUN_140127070
         return CGameAction::ProcessActionFamily8xx(pUser, pNode);
     if (dwType >= 1001 && dwType <= 1998) // -0x3e9 <= 0x3e5: FUN_14012a6e0 (user types)
@@ -4014,6 +4194,25 @@ void CGameAction::ReplacePercentStr(std::shared_ptr<CUser> pUser,
                     else if (Tok("name")) { Put(ctx.strName); bMatched = true; }
                     else if (Tok("data")) { Put(std::to_string(ctx.dwData)); bMatched = true; }
                     else if (Tok("id")) { Put(std::to_string(ctx.dwId)); bMatched = true; }
+                    // 720/721/722 iterator outputs: resolve through the
+                    // user's dialog syn slot (role+0xa68)
+                    else if (Tok("iter_syn_name")) {
+                        auto g = CGuildManager::Instance().GetSynByIdShared(pUser->GetIterSynState());
+                        Put(g ? g->GetName() : ""); bMatched = true;
+                    }
+                    else if (Tok("iter_syn_leader")) {
+                        auto g = CGuildManager::Instance().GetSynByIdShared(pUser->GetIterSynState());
+                        auto u = g ? CUserManager::Instance().GetUser(g->GetLeaderId()) : nullptr;
+                        Put(u ? u->GetName() : ""); bMatched = true;
+                    }
+                    else if (Tok("iter_syn_amount")) {
+                        Put(std::to_string(CGuildManager::Instance().GetSynTreasuryById(pUser->GetIterSynState())));
+                        bMatched = true;
+                    }
+                    else if (Tok("iter_member_name")) {
+                        Put(CGuildManager::Instance().GetIterMemberName(pUser->GetIterSynState()));
+                        bMatched = true;
+                    }
                 }
             }
             // ORIGINAL: unmatched tokens (and tokens whose systems are

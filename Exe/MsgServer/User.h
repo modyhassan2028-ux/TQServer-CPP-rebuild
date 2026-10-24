@@ -600,6 +600,12 @@ public:
         // replies land here (MsgDialog::Process stub).
         std::string strInput;
     } m_stDialogCtx;
+    // ORIGINAL role+0xa68 (param_4[0x14d]): the family-70x dialog syn
+    // slot - 720 guild-list iterator state, 721 name-resolved syn id,
+    // 722 member-iterator index, 707 donate target. One field, four uses.
+    uint32_t m_dwIterSynState{0};
+    uint32_t GetIterSynState() const { return m_dwIterSynState; }
+    void SetIterSynState(uint32_t v) { m_dwIterSynState = v; }
     // ORIGINAL family 801/802 (FUN_140127070) queries its "0x1002" object -
     // the monster record the action runs from (monster AI chains). The
     // query failing fails the whole handler; modeled as the source
