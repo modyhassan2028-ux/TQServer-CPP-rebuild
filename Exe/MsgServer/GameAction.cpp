@@ -2789,9 +2789,12 @@ bool bAll = (llAll == 1);
         // "###Bonus: AccountID(%u), Player(%u) take bonus(%u).");
         // field(3) = flag set to 1; field(5) = time set to TimeStampGet();
         // return 1. No row -> return 0.
-        // PORT-PENDING: FUN_140145f60 (grant engine, 15KB, ~40 sub-calls) is
-        // not yet ported; while pending we do NOT claim the row (flag stays
-        // 0) so the bonus is never eaten without being granted.
+        // NOTE: FUN_140145f60 (the master chain engine) is ported
+        // (CGameAction::ProcessAction below) and this case is verified
+        // live: tests/action_1023_bonus_test.cpp walks row 17510 ->
+        // grant chain 4010171 (UltraBadge 721716) -> flag=1 + time in
+        // cq_bonus, reclaim empty, bag-full gate. Chain-end literal:
+        // a failed claim walks id_nextfail=0 -> engine returns 1.
         if (pUser->GetInventory().size() >= 0x28) { // ORIGINAL: STR_BAG_FULL
             pUser->SendSysMsg("STR_BAG_FULL");
             return false;
