@@ -1,5 +1,6 @@
 #include "NpcAssembly.h"
 #include "NpcWorldTick.h"
+#include "NpcClose.h"
 #include <chrono>
 #include <cstdio>
 #include <cstring>
@@ -373,7 +374,26 @@ bool CNpcServerApp::HandleAiNpcInfo(
                                             r);
         return (rr & 0xFF) == 1; };
     msg.m_fnNpcFailF0 = [&, this](CNpcObj*){
-        delete pCreated; pCreated = nullptr; };
+        // unit 15: the authentic vtable+0xf0 body -
+        // FUN_14005f020 CNpc::Close (transform reset +
+        // map removal + release; the gen is null at the
+        // Create-fail moment so band-broadcast and
+        // restock are skipped, verbatim) then the
+        // deleting dtor (vtable+0 (_,1))
+        CNpcCloseData cd;
+        cd.m_fnGetId = [pCreated]{
+            return pCreated->dwId; };
+        cd.m_fnResetTransform = []{};
+        cd.m_fnRemoveFromMap = []{};
+        cd.m_fnIsSpecial = [](uint32_t){ return false; };
+        cd.m_fnBroadcastLeave = [](uint32_t){};
+        cd.m_fnReportProcess = []{};
+        cd.m_fnUnregisterGen = [](uint32_t){};
+        cd.m_fnFinalRelease = []{};
+        cd.m_pGen = nullptr;      // not assigned yet
+        CNpcCloseAndDelete(cd,
+            [&, this](CNpcCloseData&){ delete pCreated;
+                                     pCreated = nullptr; }); };
     msg.m_fnNpcRegister = [&, this](CNpcObj*){
         pCreated->anchor.nX =
             pCreated->obj.At<int32_t>(0x34);

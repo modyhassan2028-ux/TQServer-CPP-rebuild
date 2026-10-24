@@ -3597,3 +3597,33 @@ FUN_140022f40 (تفاصيل كتابة الحقل)، FUN_1400232b0 (مسار
    التجميعة بتوصّلهم بالحقيقي.
 7. **NPC_WORLDTICK_OK** جديد + **الرجريشن 14/14
    خضرا** + ops/record DB + سموك main. Commit.
+
+## جلسة 2026-10-24 20:10 — NpcServer الوحدة 15:
+## مسار موت الـ NPC (FUN_14005f020/FUN_14005f450)
+1. **تصحيح العناوين**: كل عناوين الجداول السابقة
+   كانت raw file offsets. الجداول الحقيقية: CNpc
+   VA 0x1400c92f8 (raw 0xc78f8، 37 فتحة)،
+   CNpcGenerator VA 0x1400c99c8 (raw 0xc7fc8 ✓
+   الوحدة 13)، CDefaultAIStrategy raw 0xc4ac8،
+   CNeuralAIStrategy raw 0xc56e8، CAIStrategyMgr
+   raw 0xc53e0.
+2. **FUN_14005f450 = CNpc vtable+0xf0** =
+   CloseAndDelete: FUN_14005f020 ثم deleting dtor
+   vtable+0(_,1) — نفس فتحة فشل الإنشاء (الوحدة 9).
+3. **FUN_14005f020 = CNpc::Close**: بورت حرفي في
+   NpcClose.cpp — reset تحوّل +0x118/+0x114، إزالة
+   خريطة FUN_14004c900، لوج مغادرة نطاق الوحوش
+   0x61a82..0x7a11e (FUN_14001c7a0→FUN_140025c20→
+   FUN_14005e230)، **RESTOCK gen vtable+0x78(gen,id)
+   عند الموت** ببوابة FUN_14001c1c0(+0x80) OR
+   (+0x128&&+0x12c)، مسار التقرير FUN_14005df30 +
+   إلغاء تسجيل المولد (report-mgr vtable+0x28(mgr,
+   genId)) لو gen vtable+0x20()==0، ثم
+   FUN_14005da00.
+4. **FUN_14005f3b0** مُوزّع حالات الموت (معالجات
+   1/6/7/8 موثقة للوحدة القادمة) +
+   FUN_14005b5c0 تيكة الموت/الرستوك + حديقة RTTI
+   للستراتيجيات.
+5. NPC_CLOSE_OK جديد + ربط مسار فشل الإنشاء في
+   التجميعة بالـ Close الحقيقي. الرجريشن 15/15
+   خضرا + DB ops/record + سموك main. Commit.
