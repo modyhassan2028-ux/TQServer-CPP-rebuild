@@ -2656,3 +2656,65 @@ signup end → 20:00 حرب بعداد → 21:00 انتهاء)، كل بوابا
 **build.sh:** خطوة CQCrossServer دلوقتي بتربط CountrySysMgr.cpp
 + MySQLClient.cpp + SHA1.cpp. البيلد الكروس بـ zig مش متاح في
 الساندبوكس (يُنفذ في بيئة بـ zig).
+
+## جلسة 2026-10-24 23:20 — مسح رسائل CQCrossServer المتبقية (League + OS)
+**جرد كامل لفئات الرسائل من الـ vftables في الديكمبايل:**
+
+| الفئة | النوع (hex/dec) | الاتجاه | الحالة |
+|---|---|---|---|
+| CCrossMsgServerAction | 0x9c5c/40060 | hub←server | ✔ منفذ (سويتش الكونتري 0-6) |
+| CCrossMsgLeagueInfo | 0x9c62/40066 | hub←server | **TBD هذه الجولة** |
+| CCrossMsgLeagueStr | 0x9c63/40067 | hub←server | **TBD** |
+| CCrossMsgPlunderWarInfo | 0x9c69/40041 | hub←server | ✔ منفذ |
+| CCrossMsgPlunderWarStatus | 0x9c6a/40042 | hub→server | ✔ منفذ |
+| CCrossMsgLeagueList | 0x9c68/40072 | hub→server | TBD (encoder) |
+| CCrossMsgLeagueRank | 0x9c64/40068 | hub→server | TBD (encoder) |
+| CCrossMsgLeagueBrick | 0x9c61/40065 | ؟ | TBD (له Process + catch log) |
+| CCrossMsgOSConnectInfo | 0x9c57/40023 | hub→OS | TBD |
+| CCrossMsgServerName | ? | hub→server | TBD |
+| CCrossMsgEnterOSUserSocketOpt | 0x9c55/40021 | hub←OS | TBD (المستقبِل يعالجه مباشرة: أكشن 0/1/3) |
+
+**مصنع الرسائل (FUN_140022990):** يستقبل 4 أنواع inbound فقط
+(40060/40066/40067/40041) — ينشئ الكائن، يخزن (server في +0x414،
+type في +8، len في +0xc، buf في +0x10)، يستدعي Init
+(vtable+0x18) ثم Process(vtable+0). الباقي outbound أو
+بيعالجه مستقبِل السوكيت مباشرة (0x9c4f/40015 و0x9c55/40021
+في دالة الاستقبال الكبيرة).
+
+**CCrossMsgLeagueInfo (40066) — wire:**
+- info عند +0x430: usAction(+0)، usCount(+2)، ثم entries
+  كل واحدة 0x3c بايت: {id:+4، val:+0xc (دبالمسافة +0xc من
+  أول entry = param_3[2]؟)، str1:+0x10، str2:+0x20، str3:+0x30}
+  (StrCopy بقص 0x10). len الرسالة = 4 + count*0x3c (تُضبط
+  0x40 لأول entry).
+- **Process (FUN_140023c60):** usAction 0 → FUN_140021c90،
+  1 → FUN_14001a0a0، غير كده سيلنت (مفيش wrong-action log).
+- **FUN_140021c90 (أكشن 0 = إنشاء ليج):** INSERT في cq_league_info
+  (الأعمدة 1=idserver, 2=id, 3=int, 4=int, 5=str(+0xc), 6=str(+0x1c),
+  7=str(+0x2c))؛ لو السجل موجود → مسار الخطأ FUN_1400232b0؛
+  وإلا: FUN_1400212d0 (تثبيت الليج في الخريطة) + لو الحقل
+  الرابع ≠ 0 → FUN_14001a700 (خريطة التوكنات +0x90) +
+  FUN_14001c990(mgr, **7**, قائمة, server) = إشعار mode-7، ثم
+  بناء رد LeagueInfo بأكشن **2** (FUN_140023a40) من getters
+  FUN_140022c20/c80/de0 (server/league/date).
+- **FUN_14001a0a0 (أكشن 1 = تحديث):** يلاقي الليج بمفتاح
+  السيرفر في الـ bimap (شجرة +0x50)، FUN_1400191f0 (إعادة
+  تمفتيح)، ثم FUN_140022f40(league, 6, str(entry+0x1c), 0) و
+  FUN_140022f40(league, 5, str(entry+0xc), 1) — الحقول 5/6
+  (اسم الليج/زعيمه) والفلاج = commit.
+
+**CCrossMsgLeagueStr (40067) — wire:**
+- info عند +0x430: usAction(+0)، dwParam1(+4)، dwParam2(+8)،
+  بعدها CStringPacker (سلسلة واحدة بقص 0x10 في Process).
+  len = packerSize + 0xf (بدون سلسلة: 0x10).
+- **Process (FUN_1400243f0):** أكشن 0 → FUN_14001bca0،
+  1 → FUN_14001c600، 2 → FUN_14001c030 (كلها بنمط موحد:
+  walk الـ bimap بالسيرفر/الليج ثم كتابة سلسلة + commit)،
+  غير كده سيلنت.
+
+**ملاحظة:** FUN_14001c990 = إشعار الأنماط (شفتها mode-7 هنا،
+وmode-5 في case 6 السابق) — تُوثق كاملة عند التنفيذ.
+**الخطوة التالية:** قراءة FUN_14001bca0/c600/c030 كاملة +
+FUN_140022f40/1400212d0/14001c990، ثم تنفيذ الرسالتين
+(OnLeagueInfo/OnLeagueStr في الكيرنل + CountrySysMgr) مع
+اختبار شامل.
