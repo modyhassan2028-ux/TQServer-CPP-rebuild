@@ -200,6 +200,44 @@ int main() {
                             }
                             break;
                         }
+                        case cross::MsgType_LeagueInfo: {
+                            // ORIGINAL CCrossMsgLeagueInfo (40066):
+                            // payload = usAction(+0), usCount(+2),
+                            // then usCount entries of 0x3c from +4.
+                            // Process (FUN_140023c60): action 0/1
+                            // only, everything else falls silent.
+                            if (payload.size() >= 4) {
+                                uint16_t usAction, usCount;
+                                std::memcpy(&usAction, payload.data(), 2);
+                                std::memcpy(&usCount, payload.data() + 2, 2);
+                                uint16_t usUsable = usCount;
+                                if (usUsable > 16) usUsable = 16;
+                                if ((uint32_t)usUsable <=
+                                        (payload.size() - 4) / 0x3c) {
+                                    for (uint16_t i = 0; i < usUsable; ++i) {
+                                        cross::LeagueInfoEntry e{};
+                                        std::memcpy(&e,
+                                            payload.data() + 4 + 0x3cu * i,
+                                            sizeof(e));
+                                        kernel.OnLeagueInfo(
+                                            (uint64_t)client, usAction, e);
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                        case cross::MsgType_LeagueStr: {
+                            // ORIGINAL CCrossMsgLeagueStr (40067):
+                            // usAction(+0), dwIdServer(+4),
+                            // dwIdLeague(+8), one packer string
+                            // (cap 0x10, Process FUN_1400243f0).
+                            if (payload.size() >= sizeof(cross::LeagueStrData)) {
+                                cross::LeagueStrData d{};
+                                std::memcpy(&d, payload.data(), sizeof(d));
+                                kernel.OnLeagueStr((uint64_t)client, d);
+                            }
+                            break;
+                        }
                         default:
                             break; // unknown cross message: ignore
                         }

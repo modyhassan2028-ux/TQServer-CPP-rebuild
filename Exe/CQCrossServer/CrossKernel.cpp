@@ -332,11 +332,71 @@ void CCrossServerKernel::WireCountrySinks() {
             // the string resource files are a separate porting unit.
             OnCountryBroadcast(strKey.c_str()); },
         [this](uint32_t dwId) { AddPlunderScheduleServer(dwId); });
+    // FUN_14000d620(kernel, server) for OnBrickChange: a SERVER
+    // is a member of the member->country map in the original
+    // (the hub registers the game servers as members).
+    m_pCountrySys->SetCountryOfServerFn(
+        [this](uint32_t dwId) {
+            return m_pCountrySys->GetCountryByUser(dwId); });
 }
 
 void CCrossServerKernel::OnCountryTimer() {
     // hub shell: drives CCountrySysMgr::OnTimer (FUN_14001abc0)
     if (m_pCountrySys) m_pCountrySys->OnTimer();
+}
+
+
+uint32_t CCrossServerKernel::ServerIdOfSocket(
+        uint64_t ullSocket) const {
+    // the original factory reads the sender id off the message
+    // itself (FUN_140022990 stores it at +0x414); the hub-side
+    // rebuild resolves it from the connection registry instead
+    for (const auto& kv : m_mapServers)
+        if (kv.second.ullSocket == ullSocket)
+            return kv.first;
+    return 0;
+}
+
+// ================= LEAGUE (40066 / 40067) =================
+void CCrossServerKernel::OnLeagueInfo(uint64_t ullSocket,
+        uint16_t usAction, const LeagueInfoEntry& entry) {
+    // ORIGINAL CCrossMsgLeagueInfo::Process (FUN_140023c60) -
+    // the dwServer rides the message at +0x414 in the original;
+    // the hub resolves it from the socket first.
+    const uint32_t dwIdServer = ServerIdOfSocket(ullSocket);
+    if (!m_pCountrySys) return;
+    switch (usAction) {
+    case 0: {
+        // FUN_140021c90 OnProduceNewLeague; on success the reply
+        // (action 2, one entry) broadcasts to every country
+        // server EXCEPT the source (FUN_140018870 3rd arg).
+        LeagueInfoEntry reply{};
+        if (m_pCountrySys->OnProduceNewLeague(dwIdServer, entry, reply)) {
+            BroadcastToCountryServers(
+                EncodeLeagueInfo(2, &reply, 1), dwIdServer);
+        }
+        break;
+    }
+    case 1:
+        // FUN_14001a0a0: re-key + field writes, no reply
+        m_pCountrySys->OnUpdateLeagueInfo(dwIdServer, entry);
+        break;
+    default:
+        break; // SILENT - no wrong-action log in the original
+    }
+}
+
+void CCrossServerKernel::OnLeagueStr(uint64_t ullSocket,
+        const LeagueStrData& data) {
+    // ORIGINAL CCrossMsgLeagueStr::Process (FUN_1400243f0):
+    // action 0/1/2 only, else SILENT. The rebroadcast rules
+    // (exclude none / exclude the source on action 2) live in
+    // CCountrySysMgr::OnLeagueStr.
+    const uint32_t dwIdServer = ServerIdOfSocket(ullSocket);
+    if (!m_pCountrySys) return;
+    if (data.usAction > 2) return;
+    m_pCountrySys->OnLeagueStr(data.usAction, dwIdServer,
+                                data.dwIdLeague, data.szText);
 }
 
 } // namespace cross

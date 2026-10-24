@@ -46,6 +46,21 @@ public:
     void OnHeartbeat(uint64_t ullFromSocket, const HeartbeatData& beat, uint64_t ullNowMs);
     void OnWhoReq(uint64_t ullFromSocket);                          // SendMsgToOtherServer
 
+    // socket -> server id (0 when the socket is unknown) - the
+    // original reads the sender straight off the message (+0x414)
+    uint32_t ServerIdOfSocket(uint64_t ullSocket) const;
+
+    // ---- league system (CCrossMsgLeagueInfo/LeagueStr Process) ----
+    // ORIGINAL FUN_140023c60 (LeagueInfo): action 0 ->
+    // OnProduceNewLeague, action 1 -> OnUpdateLeagueInfo, else
+    // SILENT (no wrong-action log). The action-0 reply
+    // (LeagueInfo action 2) broadcasts with FUN_140018870(mgr,
+    // msg, dwIdServer) - every country server EXCEPT the source.
+    void OnLeagueInfo(uint64_t ullSocket, uint16_t usAction,
+                      const LeagueInfoEntry& entry);
+    // ORIGINAL FUN_1400243f0 (LeagueStr): the manager performs
+    // the find/write/rebroadcast; the kernel only feeds it.
+    void OnLeagueStr(uint64_t ullSocket, const LeagueStrData& data);
     // ---- country system (m_pCountrySysMgr) ----
     // case 0 of the crossmsg switch: pack league name, leader title
     // and the country date and reply to the requesting socket

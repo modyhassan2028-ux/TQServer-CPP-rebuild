@@ -70,6 +70,18 @@ enum : uint16_t {
     // plunder war wire types (see the plunder section below)
     MsgType_PlunderWarInfo   = 40041, // ORIGINAL 0x9c69
     MsgType_PlunderWarStatus = 40042, // ORIGINAL 0x9c6a
+
+// ---- LEAGUE messages (CCrossMsgLeagueInfo / LeagueStr / LeagueBrick) ----
+// ORIGINAL wire types: CCrossMsgLeagueInfo  = 0x9c62 (40066, ctor
+// FUN_140023990, obj 0x438), CCrossMsgLeagueStr = 0x9c63 (40067, ctor
+// FUN_140024260, obj 0x450), CCrossMsgLeagueBrick = 0x9c61 (40065,
+// ctor FUN_140024040). All three reach the hub through the message
+// factory FUN_140022990 (LeagueStr/LeagueInfo) or are hub-built
+// outbound (LeagueBrick, in FUN_14001c990 OnBrickChange).
+    MsgType_LeagueInfo  = 40066, // ORIGINAL 0x9c62
+    MsgType_LeagueStr  = 40067, // ORIGINAL 0x9c63
+    MsgType_LeagueBrick = 40065, // ORIGINAL 0x9c61
+
 };
 
 // case 0 query/response payloads (see CCountrySysMgr accessors)
@@ -135,6 +147,114 @@ struct PlunderWarInfoData {
 };
 #pragma pack(pop)
 constexpr uint16_t PLUNDER_WIRE_CAP = 0x3ff; // ORIGINAL AppendTarget size gate
+
+// ORIGINAL CCrossMsgLeagueInfo wire (encoders FUN_140023a40 header /
+// FUN_140023a90 first entry / FUN_140023b60 append):
+// info+0 usAction, info+2 usCount, entries 0x3c each from info+4.
+// Entry: id +0x00, amount +0x04 (read as param_3[1] in the create),
+// country_date +0x08 (param_3[2]), league_name +0x0c (param_3+3),
+// leader_name +0x1c (param_3+7), title +0x2c (param_3+0xb - append
+// only). StrCopy caps are 0x10. Size = 4 + 0x3c*count, capped at
+// 0x3ff by the append gate; a reply carries usAction 2 (FUN_140023a40
+// writes action 2 before the entry fills).
+#pragma pack(push, 1)
+struct LeagueInfoEntry {
+    uint32_t dwIdLeague;      // +0x00 (request: idleague; reply: idleague + idserver*1000000)
+    uint32_t dwAmount;        // +0x04 (request: amount; reply: country_date)
+    uint32_t dwCountryDate;   // +0x08 (request: country_date)
+    char szName[0x10];        // +0x0c league_name
+    char szLeader[0x10];     // +0x1c leader_name
+    char szTitle[0x10];      // +0x2c title
+};
+struct LeagueInfoData {
+    uint16_t usAction;               // +0
+    uint16_t usCount;                // +2
+    LeagueInfoEntry entries[16];     // +4, max (0x3ff-4)/0x3c = 16
+};
+// ORIGINAL CCrossMsgLeagueStr wire (encoders FUN_140024350 with
+// string / FUN_1400243b0 without): info+0 usAction, +4 dwIdServer,
+// +8 dwIdLeague, then ONE CStringPacker string (GetString cap 0x10
+// in Process FUN_1400243f0). Msg size = packerSize + 0xf, or 0x10
+// with no string. TBD: CStringPacker byte framing is a separate
+// porting unit (hub-internal fixed 0x10 slot here).
+#pragma pack(pop)
+#pragma pack(push, 1)
+struct LeagueStrData {
+    uint16_t usAction;     // +0
+    uint16_t usPad2;       // +2 (unwritten, zero)
+    uint32_t dwIdServer;   // +4
+    uint32_t dwIdLeague;   // +8
+    char szText[0x10];     // +0xc packer string #1
+};
+// ORIGINAL CCrossMsgLeagueBrick wire (FUN_1400240f0 header, size 0x10;
+// FUN_140024170 entries, +8 each): info+0 usMode, +4 dwIdLeague,
+// +8 dwCountryDate, +0xc usCount, entries {dwIdLeague, dwAmount} from
+// +0x10. The append gate fails past 0x3ff and FUN_14001c990 flushes
+// the full brick first (FUN_14000a0b0) and re-encodes the header.
+#pragma pack(pop)
+#pragma pack(push, 1)
+struct LeagueBrickEntry { uint32_t dwIdLeague; uint32_t dwAmount; };
+struct LeagueBrickData {
+    uint16_t usMode;                // +0
+    uint16_t usPad2;                // +2 (unwritten, zero)
+    uint32_t dwIdLeague;           // +4
+    uint32_t dwCountryDate;         // +8
+    uint16_t usCount;               // +0xc
+    uint16_t usPadE;                // +0xe
+    LeagueBrickEntry entries[125];  // +0x10, max (0x3ff-0x10)/8 = 125
+};
+#pragma pack(pop)
+constexpr uint16_t LEAGUE_INFO_WIRE_CAP = 0x3ff; // append gate
+// variable-length encode, ORIGINAL size = 4 + 0x3c*count
+inline std::vector<uint8_t> EncodeLeagueInfo(uint16_t usAction,
+        const LeagueInfoEntry* pEntries, uint16_t usCount) {
+    const uint16_t usSize = (uint16_t)(4 + 0x3cu * usCount);
+    tq::MsgHead head;
+    head.type = MsgType_LeagueInfo;
+    head.length = static_cast<uint16_t>(sizeof(tq::MsgHead) + usSize);
+    std::vector<uint8_t> pkt(head.length, 0);
+    std::memcpy(pkt.data(), &head, sizeof(head));
+    uint8_t* p = pkt.data() + sizeof(tq::MsgHead);
+    std::memcpy(p + 0, &usAction, 2);
+    std::memcpy(p + 2, &usCount, 2);
+    for (uint16_t i = 0; i < usCount; ++i)
+        std::memcpy(p + 4 + 0x3cu * i, pEntries + i, sizeof(LeagueInfoEntry));
+    return pkt;
+}
+// forward declaration (the template lives below)
+template <typename T>
+std::vector<uint8_t> Encode(uint16_t usType, const T& data);
+// ORIGINAL CCrossMsgLeagueStr encode with one packer string
+// (FUN_140024350: size = packer size + 0xf; fixed 0x1c slot here)
+inline std::vector<uint8_t> EncodeLeagueStr(uint16_t usAction,
+        uint32_t dwIdServer, uint32_t dwIdLeague, const char* szText) {
+    LeagueStrData d{};
+    d.usAction = usAction;
+    d.dwIdServer = dwIdServer;
+    d.dwIdLeague = dwIdLeague;
+    if (szText) std::strncpy(d.szText, szText, sizeof(d.szText) - 1);
+    return Encode(MsgType_LeagueStr, d);
+}
+// ORIGINAL CCrossMsgLeagueBrick encode (header 0x10 + 8*count)
+inline std::vector<uint8_t> EncodeLeagueBrick(uint16_t usMode,
+        uint32_t dwIdLeague, uint32_t dwCountryDate,
+        const LeagueBrickEntry* pEntries, uint16_t usCount) {
+    const uint16_t usSize = (uint16_t)(0x10 + 8u * usCount);
+    tq::MsgHead head;
+    head.type = MsgType_LeagueBrick;
+    head.length = static_cast<uint16_t>(sizeof(tq::MsgHead) + usSize);
+    std::vector<uint8_t> pkt(head.length, 0);
+    std::memcpy(pkt.data(), &head, sizeof(head));
+    uint8_t* p = pkt.data() + sizeof(tq::MsgHead);
+    std::memcpy(p + 0, &usMode, 2);
+    std::memcpy(p + 4, &dwIdLeague, 4);
+    std::memcpy(p + 8, &dwCountryDate, 4);
+    std::memcpy(p + 0xc, &usCount, 2);
+    for (uint16_t i = 0; i < usCount; ++i)
+        std::memcpy(p + 0x10 + 8u * i, pEntries + i, sizeof(LeagueBrickEntry));
+    return pkt;
+}
+
 constexpr uint8_t  PLUNDER_MAX_TARGETS = 10; // gate in the war flows
 
 // forward declaration: Encode<T> is defined below

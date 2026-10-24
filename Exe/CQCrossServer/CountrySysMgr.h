@@ -35,6 +35,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include "CrossProtocol.h"
 
 class CMySQLClient;
 
@@ -146,6 +147,79 @@ public:
                                      uint32_t dwKey,
                                      uint64_t& outPackedId,
                                      uint32_t& outTouch);
+
+    // ================= CCrossMsgLeagueInfo (40066) =================
+    // ORIGINAL Process FUN_140023c60: usAction 0 -> FUN_140021c90
+    // (OnProduceNewLeague), 1 -> FUN_14001a0a0, any other value
+    // falls through SILENTLY (no wrong-action log, unlike
+    // PlunderWarInfo).
+    // ---- action 0: FUN_140021c90 OnProduceNewLeague ----
+    // Flow, verbatim from the decompile:
+    //  1. DB handle null -> log error, FAIL (log text
+    //     unrecovered, error branch at 140021d20)
+    //  2. INSERT INTO cq_league_info (idserver, idleague,
+    //     amount, country_date, league_name, leader_name, title)
+    //     - statement fields 1..7 map to the columns in this
+    //     order; entry strings cap 0x10
+    //  3. duplicate record (the execute "already exists" path)
+    //     -> FUN_1400232b0 completion with the error, NO reply,
+    //     NO map changes
+    //  4. FUN_1400212d0: insert into the (server, league) map
+    //  5. amount != 0 -> token map (+0x90) insert
+    //     (FUN_14001a700)
+    //  6. FUN_14001c990(mgr, 7, {new league}, server) - the
+    //     mode-7 brick notify (BuildBrickNotify below)
+    //  7. reply: CCrossMsgLeagueInfo action 2, one entry
+    //     { id: idleague + idserver*1000000, +4: country_date,
+    //     +0xc/+0x1c/+0x2c: the league strings } sent via
+    //     FUN_140018870(mgr, msg, dwIdServer) - broadcast to
+    //     every country server EXCEPT the source.
+    // On success returns the reply entry via outReply.
+    bool OnProduceNewLeague(uint32_t dwIdServer,
+                            const LeagueInfoEntry& entry,
+                            LeagueInfoEntry& outReply);
+    // ---- action 1: FUN_14001a0a0 ----
+    // Find the server's league in the +0x50 tree (keyed by
+    // server), FUN_1400191f0 re-key it by the entry id, then
+    // FUN_140022f40(league, 6, entry+0x1c leader_name, 0) - no
+    // commit - and FUN_140022f40(league, 5, entry+0xc
+    // league_name, 1) - commit. Missing league -> silent FAIL.
+    bool OnUpdateLeagueInfo(uint32_t dwIdServer,
+                            const LeagueInfoEntry& entry);
+    // ================= CCrossMsgLeagueStr (40067) =================
+    // ORIGINAL Process FUN_1400243f0: usAction 0 -> FUN_14001bca0,
+    // 1 -> FUN_14001c600, 2 -> FUN_14001c030, else silent.
+    // All three: empty string -> silent FAIL; find the (server,
+    // league) record; write the field with commit:
+    //   action 0: field 5 = league_name
+    //   action 1: field 6 = leader_name
+    //   action 2: field 7 = title (guards server!=0 &&
+    //             league!=0 first)
+    // then re-encode the SAME action/server/league/string and
+    // broadcast it: FUN_140018870(mgr, msg, 0) for actions 0/1,
+    // FUN_140018870(mgr, msg, dwIdServer) for action 2 (the
+    // source is excluded from its own announce).
+    bool OnLeagueStr(uint16_t usAction, uint32_t dwIdServer,
+                     uint32_t dwIdLeague, const char* szText);
+    // ================= FUN_14001c990 OnBrickChange =================
+    // Mode notify used by the league flows (mode 3 in case 2,
+    // mode 5 in case 6, mode 7 in OnProduceNewLeague):
+    //  1. FUN_14000d620(kernel, server) - the country; -1 logs
+    //     "OnBrickChange:socket %u of server %u not exist" and
+    //     the notify still runs (the country value only rides
+    //     the chunk-flush queue target)
+    //  2. FUN_140019f80(mgr, server) - the current league; the
+    //     header carries its idleague (field 2) and
+    //     country_date (field 4); league missing -> both 0
+    //  3. entries: (idleague, amount) per league in the list,
+    //     8 bytes each; FUN_140024170 fails past 0x3ff -> flush
+    //     the full brick, re-encode the header, re-append
+    //  4. the final brick broadcasts with FUN_140018870(mgr,
+    //     brick, 0) - every country server, no exclusion.
+    // Returns the ready wire packets (one per chunk).
+    std::vector<std::vector<uint8_t>> BuildBrickNotify(
+            uint16_t usMode, uint32_t dwIdServer,
+            const std::vector<const CountryLeague*>& vecLeagues);
     // ORIGINAL: score field write target of FUN_140022d40
     // (mgr+0x10 config in case 6, country_date+amount in case 2)
     uint32_t CountryDateOf(uint32_t dwIdServer, uint32_t dwIdLeague) const;
@@ -215,6 +289,12 @@ public:
     using PlunderTalkFn = std::function<void(const std::string&)>;
     // FUN_1400143c0(FUN_140009ed0(kernel), id): plunder schedule add
     using PlunderScheduleFn = std::function<void(uint32_t)>;
+    // FUN_14000d620(kernel, server) sink for OnBrickChange: the
+    // country id of a SERVER (0xffffffff = not exist)
+    using CountryOfServerFn = std::function<uint32_t(uint32_t)>;
+    void SetCountryOfServerFn(CountryOfServerFn fn) {
+        m_fnCountryOfServer = std::move(fn);
+    }
     void SetPlunderSinks(PlunderBroadcastFn fnBroadcast,
                          PlunderTalkFn fnTalk,
                          PlunderScheduleFn fnSchedule);
@@ -362,6 +442,7 @@ private:
     uint32_t m_dwPlunderWarEnd = 0;     // mgr+0xdc
     std::map<uint32_t, PlunderWarRecord> m_mapPlunderWarToday; // +0xe0
     PlunderBroadcastFn m_fnBroadcast;  // FUN_140018870 sink
+    CountryOfServerFn m_fnCountryOfServer; // FUN_14000d620 sink
     PlunderTalkFn m_fnTalk;             // FUN_14000a310 sink
     PlunderScheduleFn m_fnSchedule;     // FUN_1400143c0 sink
     std::set<uint32_t> m_setSchedulePushed; // mirror for inspection

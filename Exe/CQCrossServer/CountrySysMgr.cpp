@@ -376,6 +376,252 @@ uint32_t CCountrySysMgr::LastTokenTouch(uint32_t dwIdServer) const {
         }
     return 0;
 }
+
+// ================= CCrossMsgLeagueInfo (40066) =================
+// ORIGINAL Process FUN_140023c60 - see CountrySysMgr.h for the flow.
+namespace {
+std::string SqlQuote(const char* sz) {
+    std::string r = "'";
+    if (sz) for (; *sz; ++sz) {
+        if (*sz == '\\' || *sz == '\'') r += '\\';
+        r += *sz;
+    }
+    return r + "'";
+}
+} // namespace
+
+bool CCountrySysMgr::OnProduceNewLeague(uint32_t dwIdServer,
+        const LeagueInfoEntry& entry, LeagueInfoEntry& outReply) {
+    // ORIGINAL FUN_140021c90 OnProduceNewLeague.
+    // 1. DB handle gate (the 140021d20 error branch; log text
+    //    unrecovered - DAT reference)
+    if (!m_pDBPlunder) {
+        printf("[COUNTRY] CCountrySysMgr::OnProduceNewLeague: "
+               "no DB handle\n");
+        return false;
+    }
+    // 3. duplicate gate: the original INSERT bounces off an
+    //    existing (idserver, idleague) row into the
+    //    FUN_1400232b0 completion path - NO reply, NO map
+    //    changes. The map-level rule mirrors LoadLeagueInfo.
+    const auto key = std::make_pair(dwIdServer, entry.dwIdLeague);
+    if (m_leagues.count(key)) {
+        printf("[COUNTRY] CCountrySysMgr::OnProduceNewLeague: "
+               "server %u league %u is exist\n",
+               dwIdServer, entry.dwIdLeague);
+        return false;
+    }
+    // 2. INSERT - statement fields 1..7 =
+    //    (idserver, idleague, amount, country_date,
+    //    league_name, leader_name, title)
+    char sql[640];
+    snprintf(sql, sizeof sql,
+        "INSERT INTO cq_league_info (idserver,idleague,amount,"
+        "country_date,league_name,leader_name,title) VALUES "
+        "(%u,%u,%u,%u,%s,%s,%s)",
+        dwIdServer, entry.dwIdLeague, entry.dwAmount,
+        entry.dwCountryDate, SqlQuote(entry.szName).c_str(),
+        SqlQuote(entry.szLeader).c_str(),
+        SqlQuote(entry.szTitle).c_str());
+    if (!m_pDBPlunder->Query(sql)) {
+        printf("[COUNTRY] CCountrySysMgr::OnProduceNewLeague: "
+               "record insert error, server %u league %u\n",
+               dwIdServer, entry.dwIdLeague);
+        return false;
+    }
+    // 4. FUN_1400212d0: (server, league) map insert
+    CountryLeague lg;
+    // the original binds the new record object (its id lives in
+    // the ORM); we mirror with LAST_INSERT_ID on the same session
+    if (m_pDBPlunder->Query("SELECT LAST_INSERT_ID()")) {
+        const auto& rowsLid = m_pDBPlunder->GetRows();
+        if (!rowsLid.empty() && !rowsLid[0].empty())
+            lg.dwId = (uint32_t)strtoul(rowsLid[0][0].c_str(),
+                                        nullptr, 10);
+    }
+    lg.dwIdServer = dwIdServer;
+    lg.dwIdLeague = entry.dwIdLeague;
+    lg.dwAmount = entry.dwAmount;
+    lg.dwCountryDate = entry.dwCountryDate;
+    lg.strLeagueName = entry.szName;
+    lg.strLeaderName = entry.szLeader;
+    lg.strTitle = entry.szTitle;
+    m_leagues[key] = lg;
+    // 5. amount != 0 -> token map (+0x90) insert (FUN_14001a700)
+    if (entry.dwAmount != 0)
+        m_mapTokens[dwIdServer] = lg;
+    // 6. FUN_14001c990(mgr, 7, {new league}, server): the
+    //    mode-7 brick notify broadcasts with NO exclusion
+    for (const auto& pkt :
+         BuildBrickNotify(7, dwIdServer, {&m_leagues[key]}))
+        if (m_fnBroadcast) m_fnBroadcast(pkt, 0);
+    // 7. reply entry (usAction 2):
+    //    +0  = FUN_140022c80 (field 2 idleague) +
+    //           FUN_140022c20 (field 1 idserver)*1000000
+    //    +4  = FUN_140022de0 (field 4 country_date)
+    //    +0xc/+0x1c/+0x2c = FUN_140022ee0 strings. NOTE: Ghidra
+    //    collapsed the register-passed field index of the three
+    //    GetString calls; the 5/6/7 mapping follows the
+    //    create-path column order at the identical entry
+    //    offsets (league_name, leader_name, title).
+    const CountryLeague& cur = m_leagues[key];
+    outReply = LeagueInfoEntry{};
+    outReply.dwIdLeague = (uint32_t)(cur.dwIdLeague +
+        (uint64_t)dwIdServer * 1000000ULL);
+    outReply.dwAmount = cur.dwCountryDate;
+    CopyStr(outReply.szName, sizeof(outReply.szName), cur.strLeagueName);
+    CopyStr(outReply.szLeader, sizeof(outReply.szLeader), cur.strLeaderName);
+    CopyStr(outReply.szTitle, sizeof(outReply.szTitle), cur.strTitle);
+    return true;
+}
+
+bool CCountrySysMgr::OnUpdateLeagueInfo(
+        uint32_t dwIdServer, const LeagueInfoEntry& entry) {
+    // ORIGINAL FUN_14001a0a0.
+    // the +0x50 tree walk keyed by the server id
+    auto it = m_leagues.lower_bound({dwIdServer, 0});
+    if (it == m_leagues.end() || it->first.first != dwIdServer)
+        return false; // silent fail in the original
+    CountryLeague lg = it->second;
+    const uint32_t dwOldLeague = it->first.second;
+    // FUN_1400191f0: re-key the league side by the entry id
+    m_leagues.erase(it);
+    lg.dwIdLeague = entry.dwIdLeague;
+    m_leagues[{dwIdServer, entry.dwIdLeague}] = lg;
+    // FUN_140022f40(league, 6, entry+0x1c, 0): leader_name,
+    // buffer only - NO commit yet
+    // FUN_140022f40(league, 5, entry+0xc, 1): league_name +
+    // commit (the commit flushes BOTH buffered fields)
+    m_leagues[{dwIdServer, entry.dwIdLeague}].strLeaderName =
+        entry.szLeader;
+    m_leagues[{dwIdServer, entry.dwIdLeague}].strLeagueName =
+        entry.szName;
+    if (m_pDBPlunder) {
+        char sql[640];
+        // ORIGINAL: the commit flushes the record buffer via the
+        // bound record (vcall+0x38) - the row keeps its OLD
+        // idleague column; the re-key is in-memory only. Key the
+        // UPDATE by the record pk when known, else by the old
+        // (idserver, idleague).
+        snprintf(sql, sizeof sql,
+            "UPDATE cq_league_info SET league_name=%s,leader_name=%s"
+            " WHERE %s",
+            SqlQuote(m_leagues[{dwIdServer, entry.dwIdLeague}]
+                     .strLeagueName.c_str()).c_str(),
+            SqlQuote(m_leagues[{dwIdServer, entry.dwIdLeague}]
+                     .strLeaderName.c_str()).c_str(),
+            lg.dwId != 0
+                ? (std::string("id=") + std::to_string(lg.dwId)).c_str()
+                : (std::string("idserver=") + std::to_string(dwIdServer)
+                   + " AND idleague=" +
+                   std::to_string(dwOldLeague)).c_str());
+        m_pDBPlunder->Query(sql);
+    }
+    return true;
+}
+
+// ================= CCrossMsgLeagueStr (40067) =================
+bool CCountrySysMgr::OnLeagueStr(uint16_t usAction, uint32_t dwIdServer,
+        uint32_t dwIdLeague, const char* szText) {
+    // ORIGINAL FUN_14001bca0 (0) / FUN_14001c600 (1) /
+    // FUN_14001c030 (2) - one shared shape.
+    // ORIGINAL Process FUN_1400243f0: actions 0/1/2 only -
+    // anything else never reaches a handler
+    if (usAction > 2) return false;
+    // empty string -> silent fail (all three handlers)
+    if (!szText || !*szText) return false;
+    // action 2 guards server!=0 && league!=0 first
+    if (usAction == 2 && (dwIdServer == 0 || dwIdLeague == 0))
+        return false;
+    // the (server, league) record must exist
+    auto it = m_leagues.find({dwIdServer, dwIdLeague});
+    if (it == m_leagues.end()) return false;
+    // field write + commit: 5 = league_name, 6 = leader_name,
+    // 7 = title (FUN_140022f40 field ids)
+    const char* szColumn = usAction == 0 ? "league_name"
+                       : usAction == 1 ? "leader_name" : "title";
+    if (usAction == 0) it->second.strLeagueName = szText;
+    else if (usAction == 1) it->second.strLeaderName = szText;
+    else it->second.strTitle = szText;
+    if (m_pDBPlunder) {
+        char sql[320];
+        // ORIGINAL: FUN_140022f40 commits through the bound
+        // record - key by the record pk when known, else by
+        // (idserver, idleague)
+        snprintf(sql, sizeof sql,
+            "UPDATE cq_league_info SET %s=%s WHERE %s",
+            szColumn, SqlQuote(szText).c_str(),
+            it->second.dwId != 0
+                ? (std::string("id=") +
+                   std::to_string(it->second.dwId)).c_str()
+                : (std::string("idserver=") +
+                   std::to_string(dwIdServer) + " AND idleague=" +
+                   std::to_string(dwIdLeague)).c_str());
+        m_pDBPlunder->Query(sql);
+    }
+    // re-encode the SAME message and broadcast it:
+    // actions 0/1 -> FUN_140018870(mgr, msg, 0) - everybody;
+    // action 2 -> FUN_140018870(mgr, msg, dwIdServer) - the
+    // source server is excluded from its own announce.
+    if (m_fnBroadcast)
+        m_fnBroadcast(EncodeLeagueStr(usAction, dwIdServer,
+                    dwIdLeague, szText),
+            usAction == 2 ? dwIdServer : 0);
+    return true;
+}
+
+// ================= FUN_14001c990 OnBrickChange =================
+std::vector<std::vector<uint8_t>> CCountrySysMgr::BuildBrickNotify(
+        uint16_t usMode, uint32_t dwIdServer,
+        const std::vector<const CountryLeague*>& vecLeagues) {
+    // 1. FUN_14000d620(kernel, server): the country; -1 logs the
+    //    "not exist" line but the notify still runs (the value
+    //    only rides the chunk-flush queue target).
+    if (!m_fnCountryOfServer ||
+        m_fnCountryOfServer(dwIdServer) == 0xffffffffu) {
+        // ORIGINAL: "OnBrickChange:socket %u of server %u not
+        // exist" - the socket handle lives in the kernel; the
+        // manager sees only the server id here
+        printf("[COUNTRY] CCountrySysMgr::OnBrickChange:socket %u of "
+               "server %u not exist\n", 0u, dwIdServer);
+    }
+    // 2. FUN_140019f80(mgr, server): the current league; header
+    //    carries idleague (field 2) and country_date (field 4)
+    uint32_t dwIdLeague = 0, dwCountryDate = 0;
+    if (const CountryLeague* pCur = CurrentLeagueOf(dwIdServer)) {
+        dwIdLeague = pCur->dwIdLeague;
+        dwCountryDate = pCur->dwCountryDate;
+    }
+    // 3. entries: (idleague, amount) 8 bytes each; the 0x3ff
+    //    append gate flushes the full brick and re-encodes the
+    //    header (FUN_140024170 fail -> FUN_14000a0b0 ->
+    //    FUN_1400240f0 again)
+    std::vector<std::vector<uint8_t>> out;
+    std::vector<LeagueBrickEntry> chunk;
+    for (const CountryLeague* pLg : vecLeagues) {
+        if (!pLg) {
+            // null league -> the DAT_140058a00 error branch,
+            // then LAB_14001d10d skips the entry
+            printf("[COUNTRY] OnBrickChange: null league entry\n");
+            continue;
+        }
+        if (0x10 + 8u * (chunk.size() + 1) > LEAGUE_INFO_WIRE_CAP) {
+            out.push_back(EncodeLeagueBrick(usMode, dwIdLeague,
+                dwCountryDate, chunk.data(), (uint16_t)chunk.size()));
+            chunk.clear();
+        }
+        LeagueBrickEntry e;
+        e.dwIdLeague = pLg->dwIdLeague;   // FUN_140022c80 field 2
+        e.dwAmount = pLg->dwAmount;       // FUN_140022ce0 field 3
+        chunk.push_back(e);
+    }
+    // 4. the final brick: FUN_140018870(mgr, brick, 0) - every
+    //    country server, no exclusion
+    out.push_back(EncodeLeagueBrick(usMode, dwIdLeague, dwCountryDate,
+        chunk.data(), (uint16_t)chunk.size()));
+    return out;
+}
+
 // ================= PLUNDER WAR: the flow bodies =================
 
 void CCountrySysMgr::SetPlunderSinks(PlunderBroadcastFn fnBroadcast,
