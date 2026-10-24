@@ -509,17 +509,40 @@ bool CCrossServerSocketKernel::Process(uint32_t dwCmd, void* pCmd) {
         break;
     }
     case SockCmd_Accept: { // ------------- ORIGINAL case 0x756c
-        // accept plumbing: FUN_140030390 creates the socket
-        // object, FUN_14002c260 finds a free +0x18 slot,
-        // FUN_14002bba0 registers it in the +0x60 accept map,
-        // vcall +0x40 binds the id, then the accept handshake
-        // (FUN_14002fcc0 walks) queues a message to the kernel
-        // through the +0x50 backlink vcall +0x50.
-        // TBD: the FUN_140030390 accept object internals and
-        // the +0x50 post-accept message payload are unrecovered;
-        // the rebuild models the slot/bind part so the class can
-        // be driven by the tests.
-        // (the test seam AddSocket covers the observable part)
+        // CTickAnalyst(0x60); handle == -1 -> nothing.
+        // count live sockets, gate DAT_14007ad4c == 0 &&
+        // live < 0x2000; FUN_140030390 ctor (0x1030: two
+        // 0x800 buffers, slot 0xffffffff, osHandle, kernel
+        // backlink, +0x100c); free-slot scan of +0x18, else
+        // FUN_14002c260 append; FUN_14002bba0 accept-map
+        // insert (handle -> socket); vcall+0x40 binds the
+        // slot index; over 0x1fff slots -> the 0x2000 error
+        uint64_t ullHandle = *(uint64_t*)pCmd;
+        if (ullHandle == (uint64_t)-1) break;
+        if (m_nAcceptGate != 0 || !m_fnAccept) break;
+        size_t nLive = 0;
+        for (CCrossSocket* p : m_vecSockets)
+            if (p) ++nLive;
+        if (nLive >= 0x2000) break;   // ORIGINAL cap
+        std::unique_ptr<CCrossSocket> pNew =
+            m_fnAccept(ullHandle);
+        if (!pNew) break;             // ctor/OS reg failed
+        // free-slot scan, else append (FUN_14002c260)
+        size_t nSlot = m_vecSockets.size();
+        for (size_t i = 0; i < m_vecSockets.size(); ++i)
+            if (!m_vecSockets[i]) { nSlot = i; break; }
+        if (nSlot == m_vecSockets.size()) {
+            m_vecSockets.push_back(nullptr);
+            if (m_vecSockets.size() > 0x2000)
+                printf("[SOCKETKERNEL] accept slot cap "
+                       "0x2000 exceeded\n"); // DAT_1400619b8
+        }
+        m_vecSockets[nSlot] = pNew.release();
+        CCrossSocket* pSock = m_vecSockets[nSlot];
+        pSock->BindId((uint32_t)nSlot);   // vcall +0x40
+        if (CServerSocket* pSrv =
+                dynamic_cast<CServerSocket*>(pSock))
+            RegisterByHandle(ullHandle, pSrv);
         break;
     }
     case SockCmd_Recv: { // --------------- ORIGINAL case 0x756d

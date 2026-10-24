@@ -321,6 +321,35 @@ int main() {
     // unknown handle -> FindByHandle null, no crash
     uint64_t ullBad = 888;
     k2.Process(SockCmd_Recv, &ullBad);
+
+// ---- 0x756c Accept: ctor, free slot, map, bind ----
+{
+    CCrossServerSocketKernel k5(2); // slots 0,1 exist
+    auto dummy = std::make_unique<MockSock>();
+    k5.AddSocket(std::move(dummy));          // slot 0 filled
+    static int nCtor = 0;
+    k5.m_fnAccept = [](uint64_t h) ->
+        std::unique_ptr<CCrossSocket> {
+        ++nCtor;
+        return std::make_unique<MockSock>(); };
+    uint64_t ha = 900;
+    k5.Process(SockCmd_Accept, &ha);
+    assert(nCtor == 1);
+    // slot 1 was free -> used, id bound
+    CCrossSocket** pp1 = k5.SlotAt(1);
+    assert(pp1 && *pp1 && (*pp1)->GetId() == 1);
+    // accept map registered by handle (CServerSocket only
+    // through the real path; MockSock -> not in map)
+    uint64_t hb = 901;
+    k5.Process(SockCmd_Accept, &hb);
+    assert(nCtor == 2);          // slot 2 appended
+    CCrossSocket** pp2 = k5.SlotAt(2);
+    assert(pp2 && *pp2 && (*pp2)->GetId() == 2);
+    // handle -1 -> no ctor
+    uint64_t hbad = (uint64_t)-1;
+    k5.Process(SockCmd_Accept, &hbad);
+    assert(nCtor == 2);
+}
 }
     puts("cross_socketkernel_test: ALL OK");
     return 0;

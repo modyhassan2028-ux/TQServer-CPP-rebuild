@@ -101,6 +101,12 @@ public:
           m_fnRecv(std::move(fnRecv)),
           m_fnDrain(std::move(fnDrain)) {}
 
+    // ORIGINAL FUN_140030390: alloc 0x1030, vftable, slot =
+    // 0xffffffff, osHandle@+0x1018, kernel@+0x1020, recv
+    // count@+0x808 = 0, +0x100c = 0, memset both 0x800
+    // buffers; then FUN_14002fcd0 (OS registration) - on
+    // failure vcall+0x20 Close and return null
+
     bool Send(const void*, uint32_t) override { return true; }
     bool IsConnected() const override { return m_ullOsHandle != 0; }
     void Close() override { m_ullOsHandle = 0; }
@@ -136,8 +142,11 @@ public:
         m_fnDeliverMsg;
     size_t m_ullRecvBytes = 0; // DAT_14007ad10
 
-    uint32_t m_dwId = 0;
-    uint8_t  m_byBuf[SOCKET_BUF] = {0};   // +0x8
+    uint32_t m_dwId = 0xffffffff;        // slot index
+    uint8_t  m_byBuf[SOCKET_BUF] = {0};   // +0x8 recv
+    // ORIGINAL ctor FUN_140030390 also zeroes a SECOND
+    // 0x800 buffer at +0x80c (the send side) and +0x100c
+    uint8_t  m_bySendBuf[SOCKET_BUF] = {0}; // +0x80c
     int      m_nBufBytes = 0;             // +0x101 (0x808)
     CCrossServerSocketKernel* m_pKernel; // +0x204
     uint64_t m_ullOsHandle;               // +0x205 (0x1028)
@@ -203,6 +212,14 @@ public:
             ? 0xffffffffu : it->second;
     }
 
+    // ---- ORIGINAL case 0x756c Accept ----
+    // gate: DAT_14007ad4c == 0 && live sockets < 0x2000;
+    // factory seam = FUN_140030390 + FUN_14002fcd0
+    using AcceptFn = std::function<
+        std::unique_ptr<CCrossSocket>(uint64_t)>;
+    AcceptFn m_fnAccept;
+    int      m_nAcceptGate = 0; // DAT_14007ad4c
+
     // ---- ORIGINAL FUN_14002bad0: socket by OS handle ----
     CServerSocket* FindByHandle(uint64_t ullHandle) {
         if (ullHandle == (uint64_t)-1) return nullptr;
@@ -213,6 +230,12 @@ public:
         m_mapAccept[ullHandle] = p;
     }
 
+public:
+    // test access to the ORIGINAL +0x18 slot vector
+    CCrossSocket** SlotAt(size_t i) {
+        return i < m_vecSockets.size()
+            ? &m_vecSockets[i] : nullptr; }
+public:
     // ---- test seams / rebuild wiring ----
     void SetSocket(uint32_t dwIdx, CCrossSocket* p) {
         if (dwIdx < m_vecSockets.size())
