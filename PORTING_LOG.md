@@ -3213,3 +3213,23 @@ FUN_140022f40 (تفاصيل كتابة الحقل)، FUN_1400232b0 (مسار
    0x586، chebyshev، بتات الإشغال، بوابة 26، فرع الوصول.
    رجريشن NpcServer كله أخضر (world/manager/generator/
    wander).
+
+## جلسة 2026-10-24 23:00 — NpcServer الوحدة 6: نقل قائمة الخطوات + تأكيد البيناري
+1. **FUN_140086430 = CNpcStepList::AppendChain** (اللي
+   بيناديه فرع الوصول في التجوال): مشيّة سلسلة عقد
+   (+0x18 التالي) وإدراج كل عقدة في اللست @+0x68 عبر
+   FUN_140084300 مع عدّاد الحجم @+0x98 وحد
+   **0xfffffffffffffff** — لما يتوصل بيرمي
+   std::length_error **"list<T> too long"** بالنص الحرفي
+   (بمسار basic_string → exception → logic_error →
+   length_error المتسلسل الأصلي)؛ الـ refcount للمالكين
+   (+0x20 وبجسم العقدة) بأزواج LOCK/UNLOCK
+2. **تأكيد رفع البيناري:** NpcServer.exe الأصلي (1,153,024
+   بايت، MD5 8c5495f4ca35f4693fe78b26b4b6fbd1، blob
+   82f7bfec) موجود فعلاً على ريموت الريبو المفكك
+   conquer-online-v6159-decompiled في
+   orig_binaries/Source/NpcServer.exe جنب MsgServer.exe —
+   مفيش حاجة ناقصة
+3. Exe/NpcServer/NpcStepList.{h,cpp} + tests/
+   npc_steplist_test — **NPC_STEPLIST_OK**. رجريشن
+   NpcServer الخمسة كلها خضرا.
