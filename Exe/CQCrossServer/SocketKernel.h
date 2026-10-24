@@ -22,9 +22,12 @@
 //   0x756b CloseSocket  0x756c Accept
 //   0x756d Recv         0x756e OnClose
 //
-// Wire frame built by the send cases (0x10 bytes + payload):
-//   +0 u16 type | +4 u32 A | +8 u32 B
-//   +0xc u16 total size (payload + 0x10) | +0xe u16 C
+// Wire frame (CONFIRMED by the walker FUN_14002e6d0, which
+// reads type@0xe):
+//   +0 u16 C | +4 u32 A | +8 u32 B
+//   +0xc u16 total size (payload + 0x10) | +0xe u16 MSG TYPE
+// so in the send commands p[3] is the message TYPE and p[4]
+// is the C word (p[4] lands at +0, p[3] at +0xe).
 // =====================================================================
 #pragma once
 #include <cstdint>
@@ -108,6 +111,31 @@ public:
     // ---- ORIGINAL FUN_1400301d0: recv drain loop ----
     void ProcessIncomingPacket();
 
+    // ---- ORIGINAL FUN_14002e6d0: the frame walker ----
+    // walks COMPLETE frames in m_byBuf (gate: >0x10 bytes,
+    // size <= buffered, 0xf < size < 0x419), dispatches by
+    // MSG TYPE @0xe, then ConsumeBytes(size) and adds to the
+    // DAT_14007ad10 recv counter.
+    size_t WalkFrames();
+
+    // walker seams (TBD units, see SocketKernel.cpp):
+    // ORIGINAL FUN_140022780 - ServerName frame parser
+    using ParseNameFn =
+        std::function<bool(uint32_t*, char*, const uint8_t*)>;
+    ParseNameFn m_fnParseName;
+    // ORIGINAL FUN_140049090 - EnterOSUserSocketOpt parser:
+    // (mode, server_id, socket_slot) out-params
+    using ParseOsOptFn = std::function<
+        int(uint16_t*, uint32_t*, uint32_t*, const uint8_t*)>;
+    ParseOsOptFn m_fnParseOsOpt;
+    // ORIGINAL kernel+0x50 vcall+0x50 PostCommand(sel, code, str)
+    std::function<void(int, int, const char*)> m_fnPostCmd;
+    // ORIGINAL FUN_14002b560 - main message delivery to the
+    // kernel's app layer (mode 6 frames)
+    std::function<void(uint16_t, const uint8_t*, int)>
+        m_fnDeliverMsg;
+    size_t m_ullRecvBytes = 0; // DAT_14007ad10
+
     uint32_t m_dwId = 0;
     uint8_t  m_byBuf[SOCKET_BUF] = {0};   // +0x8
     int      m_nBufBytes = 0;             // +0x101 (0x808)
@@ -127,6 +155,22 @@ public:
     // returns true when the command produced a send (ORIGINAL
     // `return 1` in the send paths, fallthrough break = false)
     bool Process(uint32_t dwCmd, void* pCmd);
+
+    // ---- walker support (route map of FUN_14002e6d0) ----
+    // ORIGINAL route key/value are u64 CONCAT44 packs
+    void RoutePut(uint32_t a, uint32_t b, uint32_t c,
+                  uint32_t d) {
+        m_mapRoute[((uint64_t)a << 32) | b] =
+            ((uint64_t)c << 32) | d;
+    }
+    void RouteDel(uint32_t a, uint32_t b) {
+        m_mapRoute.erase(((uint64_t)a << 32) | b);
+    }
+    uint32_t SlotOfServer(uint32_t dwSrv) {
+        auto it = m_mapServerToSocket.find(dwSrv);
+        return it == m_mapServerToSocket.end()
+            ? 0xffffffffu : it->second;
+    }
 
     // ---- ORIGINAL FUN_14002bad0: socket by OS handle ----
     CServerSocket* FindByHandle(uint64_t ullHandle) {

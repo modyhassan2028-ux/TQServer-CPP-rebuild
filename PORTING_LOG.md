@@ -2969,3 +2969,31 @@ FUN_140022f40 (تفاصيل كتابة الحقل)، FUN_1400232b0 (مسار
 4. cross_socketkernel_test اتوسع (drain loop بحسابين
    فريمات + unknown handle) — **ALL OK**، والرجريشن الستة
    كلها خضرا.
+
+## جلسة 2026-10-24 19:25 — FUN_14002e6d0 مشّاء الفريمات (الهيكل الأساسي)
+1. **[منفذ ✔]** حلقة المشي على فريمات كاملة من بافر السوكت:
+   - تخطيط الفريم مؤكد من البايناري: {u16 C@0, u32 A@4,
+     u32 B@8, u16 size@0xc, **u16 TYPE@0xe**} — تصحيح مهم:
+     نوع الرسالة عند 0xe مش 0 (تعليقات الإرسال اتظبطت،
+     البايتات زي ما هي)
+   - البوابات الحرفية: avail>0x10، size@0xc ≤ avail،
+     0xf < size < 0x419
+   - **TYPE 0x9c4f (ServerName/hello):** slot من vcall+0x48 →
+     FUN_140022780 (seam جاهز) → sprintf "%u %u %u %s" →
+     PostCommand(3, 0x3ef) (seam) — أمر الربط النصي. الـ
+     sprintf الوسيطة الثالثة %u غير مستخرجة → TBD(0)
+   - **TYPE 0x9c55 (EnterOSUserSocketOpt):** FUN_140049090
+     (seam) → mode 0/1/3: RoutePut + PostCommand(1, 0x7562,
+     0x418)؛ mode 2/4: RouteDel + لوج "ENTER_OS_USER_SOCKET_
+     OPT_DEL, not find server(%u) soket" الحرفي
+   - **uC<2 / uC==10 (LAB_14002f500):** مسار ما قبل التسجيل —
+     تسليم عبر seam m_fnDeliverMsg
+   - الاستهلاك: vcall[1](size) + عداد DAT_14007ad10
+2. **TBD (تفاصيل جوا المشّاء):** مسار mode-6 الرئيسي
+   (FUN_14002e650 → FUN_14002e1c0 → FUN_140014e20 →
+   FUN_14002b560 تسليم الرسائل للنواة)، مسار mode-8 (مشية
+   الـ bimap بعلم node+0x21 connected)، حالة 0x9c55 mode-5،
+   وذيل فشل البوابة. + حالة 0x756c Accept (FUN_140030390).
+3. اختبار المشّاء اتضاف (hello فريم → PostCommand بصيغة
+   "%u %u %u Server07"، عداد الاستقبال) — **ALL OK** والرجريشن
+   الستة كلها خضرا.

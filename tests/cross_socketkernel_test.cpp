@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cstdio>
 #include <string>
+#include <cstring>
 
 using namespace cross;
 
@@ -159,6 +160,60 @@ int main() {
     k2.Process(SockCmd_Recv, &ullHandle);
     assert(ps->m_nBufBytes == 16); // both frames buffered
     assert(nDrains >= 1);          // frame walk ran
+
+// ---- FUN_14002e6d0 frame walker ----
+{
+    CCrossServerSocketKernel k3(4);
+    static std::string s_zFeed;
+    s_zFeed.clear();
+    // frame: C@0 A@4 B@8 size@0xc TYPE@0xe + payload
+    auto mk = [](uint16_t c, uint32_t a, uint32_t b,
+                 uint16_t type, const char* pay) {
+        std::string f(16, '\0');
+        std::memcpy(&f[0], &c, 2); std::memcpy(&f[4], &a, 4);
+        std::memcpy(&f[8], &b, 4);
+        uint16_t sz = (uint16_t)(16 + std::strlen(pay));
+        std::memcpy(&f[0xc], &sz, 2);
+        std::memcpy(&f[0xe], &type, 2);
+        f += pay;
+        return f;
+    };
+    s_zFeed += mk(0, 0, 0, 0x9c4f, "Server07");   // hello
+    s_zFeed += mk(1, 7, 0xffffffff, 40065, "XY"); // msg frame
+    s_zFeed[24] = 'Q'; // corrupt the 2nd frame's head -> gate
+    int nPosted = 0, nDelivered = 0;
+    static std::string s_zName; s_zName.clear();
+    CServerSocket* pw = new CServerSocket(&k3, 42,
+        [](void* p, int n) -> int {
+            if (n == 0) return (int)s_zFeed.size();
+            int nGot = n < (int)s_zFeed.size() ? n
+                     : (int)s_zFeed.size();
+            std::memcpy(p, s_zFeed.data(), nGot);
+            s_zFeed.erase(0, nGot);
+            return nGot; },
+        [&](CServerSocket*) { pw->WalkFrames(); });
+    pw->m_fnParseName = [](uint32_t* pdw, char* sz,
+                           const uint8_t* pay) -> bool {
+        *pdw = 1234; std::strcpy(sz, (const char*)pay);
+        return true; };
+    pw->m_fnPostCmd = [&](int nSel, int nCode,
+                          const char* sz) {
+        ++nPosted;
+        assert(nSel == 3 && nCode == 0x3ef);
+        assert(std::strstr(sz, "Server07") != nullptr);
+    };
+    pw->m_fnDeliverMsg = [&](uint16_t t, const uint8_t*,
+                             int) {
+        (void)t; ++nDelivered; };
+    k3.AddSocket(std::unique_ptr<CCrossSocket>(pw));
+    k3.RegisterByHandle(42, pw);
+    uint64_t h = 42;
+    k3.Process(SockCmd_Recv, &h);
+    // hello frame walked + posted; 2nd frame is corrupt ->
+    // gate stops the walk (byte 24 = size field low byte 'Q')
+    assert(nPosted == 1);
+    assert(pw->m_ullRecvBytes >= 23); // DAT_14007ad10
+}
     // unknown handle -> FindByHandle null, no crash
     uint64_t ullBad = 888;
     k2.Process(SockCmd_Recv, &ullBad);

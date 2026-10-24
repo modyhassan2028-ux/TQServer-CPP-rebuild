@@ -70,6 +70,104 @@ void CServerSocket::ProcessIncomingPacket() {
     }
 }
 
+
+// ===== FUN_14002e6d0: the frame walker =======================
+size_t CServerSocket::WalkFrames() {
+    size_t nWalked = 0;
+    const uint8_t* p = m_byBuf;
+    int nAvail = m_nBufBytes;
+    while (true) {
+        // ORIGINAL gate: avail < 1 -> done (return 1)
+        if (nAvail < 1) return nWalked;
+        // ORIGINAL: 0x10 < avail && size@0xc <= avail &&
+        //           0xf < size && size < 0x419
+        if (!(0x10 < nAvail)) return nWalked;
+        uint16_t uSize; std::memcpy(&uSize, p + 0xc, 2);
+        if (!((int)uSize <= nAvail && 0xf < uSize
+              && uSize < 0x419)) {
+            // TBD: the original's failure tail beyond the gate
+            // (frame drop/flush) is unrecovered at port time
+            return nWalked;
+        }
+        uint16_t uC;   std::memcpy(&uC, p + 0x0, 2);
+        uint32_t uA;   std::memcpy(&uA, p + 0x4, 4);
+        uint32_t uB;   std::memcpy(&uB, p + 0x8, 4);
+        uint16_t uType; std::memcpy(&uType, p + 0xe, 2);
+        const int nPay = uSize - 0x10;
+        const uint8_t* pay = p + 0x10;
+
+        if (uType == 0x9c4f) {
+            // ---- ORIGINAL ServerName/hello frame ----
+            // socket slot lookup (vcall +0x48 = slot id), then
+            // FUN_140022780 parse; on success sprintf
+            // "%u %u %u %s" (slotid, vcall+0x28, name) and
+            // PostCommand(3, 0x3ef, len) - the BIND command
+            char szName[80] = {0};
+            uint32_t dwPeer = 0;
+            if (m_fnParseName && m_fnParseName(&dwPeer, szName,
+                                               pay)) {
+                char szCmd[160];
+                // ORIGINAL: sprintf("%u %u %u %s", slotid,
+                // vcall+0x28 result, ???, name) - the third
+                // %u argument is unrecovered in the decompile;
+                // TBD(0) placeholder rather than a guess
+                int nLen = std::snprintf(szCmd, sizeof szCmd,
+                    "%u %u %u %s", (uint32_t)(uintptr_t)
+                    m_ullOsHandle, dwPeer, 0, szName);
+                if (m_fnPostCmd) m_fnPostCmd(3, 0x3ef, szCmd);
+            }
+        } else if (uType == 0x9c55) {
+            // ---- EnterOSUserSocketOpt (FUN_140049090) ----
+            uint16_t usMode = 0xffff;
+            uint32_t dwSrv = 0, dwSlot = 0xffffffff;
+            if (m_fnParseOsOpt && m_fnParseOsOpt(&usMode, &dwSrv,
+                                                 &dwSlot, pay)) {
+                if (usMode == 0 || usMode == 1 || usMode == 3) {
+                    // bind: route[(slot, srv)] = (B, peer-slot)
+                    // + PostCommand(1, 0x7562, 0x418)
+                    if (m_pKernel)
+                        m_pKernel->RoutePut(uA, dwSlot, uB,
+                                            dwSrv);
+                    if (m_fnPostCmd)
+                        m_fnPostCmd(1, 0x7562, "\x18");
+                } else if (usMode == 2 || usMode == 4) {
+                    // del: log on server miss +
+                    // route erase of (dwSlot-of-srv, B)
+                    uint32_t dwSl = dwSlot;
+                    if (dwSrv != 0 && m_pKernel)
+                        dwSl = m_pKernel->SlotOfServer(dwSrv);
+                    if (dwSl == 0xffffffff)
+                        printf("[SOCKETKERNEL] CCrossMsgEnterOS"
+                               "UserSocketOpt::ENTER_OS_USER_"
+                               "SOCKET_OPT_DEL, not find server"
+                               "(%u) soket\n", dwSrv);
+                    if (m_pKernel)
+                        m_pKernel->RouteDel(uA, dwSl);
+                }
+                // TBD: case 5 tail (partially recovered)
+            }
+        } else if (uC < 2 || uC == 10) {
+            // ---- LAB_14002f500: pre-registration frames ----
+            // route lookup by (slotid, A); miss ->
+            // PostCommand(3, 0x3ec); TBD: the recovered
+            // sub-walk with the node+0x21 connected flag and
+            // the mode-6/8 tails (FUN_14002e650/e1c0,
+            // FUN_140014e20, FUN_14002b560 delivery)
+            if (m_fnDeliverMsg)
+                m_fnDeliverMsg(uType, pay, nPay);
+        } else {
+            // TBD: remaining walker branches (mode 6 main
+            // delivery chain FUN_14002b560, mode 8 bimap walk)
+            if (m_fnDeliverMsg)
+                m_fnDeliverMsg(uType, pay, nPay);
+        }
+        // consume the frame: socket vcall[1](size) and the
+        // DAT_14007ad10 recv counter
+        p += uSize; nAvail -= uSize; nWalked += uSize;
+        m_ullRecvBytes += uSize;
+    }
+}
+
 bool CCrossServerSocketKernel::Process(uint32_t dwCmd, void* pCmd) {
     // every case reinterprets the command buffer: u32 words for
     // the binary cases, a text line for the sscanf cases
