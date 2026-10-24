@@ -10,6 +10,7 @@
 #include "Dialog.h"
 #include "MsgAction.h"
 #include "UserManager.h"
+#include "GroundItems.h"
 #include "MonsterManager.h"
 #include "Npc.h"
 #include "StallPole.h"
@@ -819,6 +820,243 @@ static uint32_t ChkSum11(uint32_t p1, uint32_t p2, uint32_t p3, uint32_t p4,
                          uint32_t p9, uint32_t p10, uint32_t p11) {
     return (p3 + p6 * 3 + (p4 + 1 + p5) * 0x2537 + p7 * 2 +
             p8 + p9 + p10 + p11) ^ p1 ^ 0xb00cfU ^ p2;
+}
+
+// ============================================================================
+// ORIGINAL FUN_1401199d0 (CGameAction::ProcessActionItemOnly): the 401..498
+// window (objdump lea -0x191 / cmp $0x61 -> [401, 498]).
+// 401 (0x191): "%u %d %d %d %d" > 3 parsed -> [user+0xa34] = first token
+//   (idNextTask) + FUN_140117b50 sets the string at +0xa38 to ""; the
+//   EVENT_LAYNPC msg (Create(5, tok4, tok5) + SendMsg) defers the chain -
+//   the client's cell reply continues the task. tok0 == 0 -> CHECKF
+//   "idNextTask != ID_NONE" (0x1064) -> FALSE. <= 3 parsed -> DBERR 0x1060.
+//   Model: the deferral rides the same pending-input mechanism as dialog
+//   103 (MsgTalk stores the reply as ctx.strInput and jumps to the task).
+// 402 (0x192): "%s %s %s %d" != 4 -> DBERR 0x1078 -> FALSE. Count from the
+//   mapgroup dynamic-npc registry (FUN_1400875f0) on the user's map:
+//   "all" (vcall+0x90) / "furniture" (vcall+0x98) / "name" (vcall+0xa0) /
+//   "type" (vcall+0xa8, strtoul token2); then op "<" -> cnt < tok4,
+//   op "==" -> cnt == tok4, else FALSE. (Data confirms furniture = type 25.)
+// 403 (0x193): pszAccept (the client cell reply; modeled as ctx.strInput)
+//   must be non-empty (CHECKF 0x109d) and parse "%d %d %d %d %d" >= 3
+//   (IF_NOT_ 0x10ac). IsPassable (FUN_1402c3cc0) then the cell must be
+//   free (FUN_1402c8370(map, x, y, 0x1040) == 0). Spec from param:
+//   "%s %d %d %d %d %d %d %u %u %d*12 %s" < 5 parsed -> DBERR 0x10c3.
+//   sort (tok2) 0x19/0x65/4 -> pGameMap MYASSERT + mapgroup-id checks
+//   (modeled: single mapgroup, checks hold); sort 9 -> user fields + stall
+//   count * 0x10000 (FUN_140087ed0 + vcall+0xf8); sort 0xf with
+//   FUN_140119510 gate -> STR_DISABLE_LAY_SYNTRANS -> FALSE. tok7 != 0 ->
+//   FUN_1402c68a0(map, roleType, x, y): a role of that type must exist at
+//   the cell (model: ground drops for type 3, npc/monster otherwise).
+//   owner (tok8, %u): 0 -> 0; 1 -> user id; 2 -> ctx owner (0 -> FALSE);
+//   3 -> MYASSERT !"OWNER_NPC" log. Then CNpc::Create (FUN_1402c2390)
+//   with the info block, registry insert, [user+0xa30] = npc id,
+//   [role+0x10] = npc -> TRUE. Create failure -> IF_OK 0x1118 -> FALSE.
+// 498 (0x1f2): FUN_140340190(user, param_6, 1, 1) - the item consume
+//   engine (modeled: the runtime item context = ctx.dwData; erase from
+//   inventory on success), then [user+0x14c] = 0 + STR_USE_ITEM to the
+//   client -> TRUE; failure -> DBERR DAT_14070c140 -> FALSE.
+// Any other type in the window: DBERR DAT_14070c140 -> FALSE.
+// ============================================================================
+bool CGameAction::ProcessActionItemOnly(std::shared_ptr<CUser> pUser,
+                                         const CDialogEngine::Node* pNode)
+{
+    if (!pNode) {
+        // ORIGINAL 0x1050: CHECKF pAction
+        tq::MyLogSave("gmlog/all", "CHECKF in %s, %d", "pAction", 0x1050);
+        return false;
+    }
+    if (!pUser) {
+        // ORIGINAL 0x1054: DBERR "ProcessActionItemOnly() ActionID=%u, ActionType=%u"
+        printf("[DBERR] cq_action %u type %u ProcessActionItemOnly null user\n",
+               pNode->dwId, pNode->dwType);
+        return false;
+    }
+    const uint32_t dwType = pNode->dwType;
+    const std::string strParam = pNode->strParam;
+
+    if (dwType == 401) { // ORIGINAL 0x191: EVENT_LAYNPC registration
+        unsigned uNextTask = 0;
+        int d2 = 0, d3 = 0, d4 = 0, d5 = 0;
+        int n = sscanf(strParam.c_str(), "%u %d %d %d %d",
+                       &uNextTask, &d2, &d3, &d4, &d5);
+        if (n > 3) {
+            if (uNextTask != 0) {
+                pUser->m_dwLayNpcTask = uNextTask;   // [user+0xa34]
+                pUser->m_strLayNpcBuf = "";         // FUN_140117b50(user, "")
+                // ORIGINAL: msg Create(EVENT_LAYNPC, d4, d5) + SendMsg - the
+                // client cell reply continues the task; model via the same
+                // pending-input carrier the 103 dialogs use.
+                pUser->SetPendingInput(uNextTask);
+                return true;
+            }
+            tq::MyLogSave("gmlog/all", "CHECKF in %s, %d",
+                          "idNextTask != ID_NONE", 0x1064);
+            return false;
+        }
+        printf("[DBERR] cq_action %u type 401 bad lay-npc param (%d tokens)\n",
+               pNode->dwId, n);
+        return false;
+    }
+
+    if (dwType == 402) { // ORIGINAL 0x192: dynamic npc count condition
+        char szWhat[256] = {0}, szArg[256] = {0}, szOp[256] = {0};
+        int iVal = 0;
+        int n = sscanf(strParam.c_str(), "%255s %255s %255s %d",
+                       szWhat, szArg, szOp, &iVal);
+        if (n != 4) {
+            // ORIGINAL 0x1078 DBERR
+            printf("[DBERR] cq_action %u type 402 bad count param\n",
+                   pNode->dwId);
+            return false;
+        }
+        auto& rNpcMgr = CNpcManager::Instance();
+        const uint32_t dwMap = pUser->GetMapId();
+        const auto vec = rNpcMgr.GetNpcsOnMap(dwMap);
+        int iCnt = 0;
+        std::string sWhat = szWhat;
+        for (auto& c : sWhat) c = (char)tolower((unsigned char)c);
+        if (sWhat == "all") {
+            iCnt = (int)vec.size(); // vcall+0x90
+        } else if (sWhat == "furniture") {
+            // vcall+0x98; the live data ("type 25 < 8" gating furniture
+            // messages) pins furniture to raw type 25
+            for (auto& p : vec)
+                if (p->m_dwNpcType == 25) ++iCnt;
+        } else if (sWhat == "name") {
+            for (auto& p : vec)
+                if (p->GetName() == szArg) ++iCnt; // vcall+0xa0(map, name)
+        } else if (sWhat == "type") {
+            uint32_t dwT = strtoul(szArg, nullptr, 10);
+            for (auto& p : vec)
+                if (p->m_dwNpcType == dwT) ++iCnt; // vcall+0xa8(map, type)
+        } else {
+            return false; // ORIGINAL: no stricmp match -> 0
+        }
+        std::string sOp = szOp;
+        for (auto& c : sOp) c = (char)tolower((unsigned char)c);
+        if (sOp == "<" && iCnt < iVal)
+            return true;
+        if (sOp == "==" && iCnt == iVal)
+            return true;
+        return false;
+    }
+
+    if (dwType == 403) { // ORIGINAL 0x193: lay the npc at the picked cell
+        // pszAccept: the client's cell reply; carried as the dialog input
+        const std::string& strAccept = pUser->m_stDialogCtx.strInput;
+        if (strAccept.empty()) {
+            tq::MyLogSave("gmlog/all", "CHECKF in %s, %d",
+                          "pszAccept && strlen(pszAccept) > 0", 0x109d);
+            return false;
+        }
+        int nX = 0, nY = 0, nExtra[3] = {0, 0, 0};
+        int n = sscanf(strAccept.c_str(), "%d %d %d %d %d",
+                       &nX, &nY, &nExtra[0], &nExtra[1], &nExtra[2]);
+        if (n < 3) {
+            tq::MyLogSave("gmlog/all", "IF_NOT_ in %s, %d", "ret >= 3", 0x10ac);
+            return false;
+        }
+        const uint32_t dwMap = pUser->GetMapId();
+        auto pMap = CMapManager::Instance().GetMap(dwMap);
+        if (!pMap || !pMap->IsPassable((uint16_t)nX, (uint16_t)nY))
+            return false; // FUN_1402c3cc0
+        // FUN_1402c8370(map, x, y, 0x1040) != 0 -> abort (cell taken)
+        for (auto& p : CNpcManager::Instance().GetNpcsOnMap(dwMap))
+            if (p->GetX() == (uint16_t)nX && p->GetY() == (uint16_t)nY)
+                return false;
+        // the big spec parse (22 slots; the 0x6c info block)
+        char szName[256] = {0}, szTail[256] = {0};
+        int nSort = 0, nLook = 0, nBase = 0, nDir = 0, nLife = 0, nGate = 0;
+        unsigned uOwner = 0, u2 = 0;
+        int t[12] = {0};
+        int m = sscanf(strParam.c_str(),
+            "%255s %d %d %d %d %d %d %u %u %d %d %d %d %d %d %d %d %d %d %d %d %255s",
+            szName, &nSort, &nLook, &nBase, &nDir, &nLife, &nGate,
+            &uOwner, &u2, &t[0], &t[1], &t[2], &t[3], &t[4], &t[5],
+            &t[6], &t[7], &t[8], &t[9], &t[10], &t[11], szTail);
+        if (m < 5) {
+            printf("[DBERR] cq_action %u type 403 bad spec param\n", pNode->dwId);
+            return false;
+        }
+        if (nSort == 0xf) {
+            // ORIGINAL: FUN_140119510 gate + STR_DISABLE_LAY_SYNTRANS sent
+            // to the client, then FALSE
+            pUser->SendTalkMsg("STR_DISABLE_LAY_SYNTRANS", 2000);
+            return false;
+        }
+        if (nGate != 0) {
+            // FUN_1402c68a0(map, roleType, x, y): a role of type nGate must
+            // exist at the cell; model: 3 = ground drop there, otherwise
+            // an npc/monster of that raw type
+            bool bFound = false;
+            if (nGate == 3) {
+                for (auto& kv : CGroundItemManager::Instance().AllDrops())
+                    if (kv.second.dwMapId == dwMap &&
+                        kv.second.usX == (uint16_t)nX &&
+                        kv.second.usY == (uint16_t)nY)
+                        { bFound = true; break; }
+            } else {
+                for (auto& p : CNpcManager::Instance().GetNpcsOnMap(dwMap))
+                    if (p->m_dwNpcType == (uint32_t)nGate &&
+                        p->GetX() == (uint16_t)nX && p->GetY() == (uint16_t)nY)
+                        { bFound = true; break; }
+            }
+            if (!bFound)
+                return false;
+        }
+        // owner select (local_7f4)
+        uint32_t dwOwnerId = 0;
+        if (uOwner == 1) {
+            dwOwnerId = pUser->GetId();
+        } else if (uOwner == 2) {
+            dwOwnerId = pUser->m_stDialogCtx.dwNpcOwnerId;
+            if (dwOwnerId == 0)
+                return false;
+        } else if (uOwner == 3) {
+            tq::MyLogSave("gmlog/all", "MYASSERT in %s, %d",
+                          "!\"OWNER_NPC\"", 0x1110);
+        }
+        // CNpc::Create + registry insert ([user+0xa30] = npc id,
+        // [role+0x10] = the created npc)
+        uint32_t dwNpcId = CNpcManager::NPC_ID_BASE +
+                           1000000 + (uint32_t)CNpcManager::Instance()
+                               .GetNpcsOnMap(dwMap).size();
+        auto pNpc = CNpcManager::Instance().SpawnDynamic(
+            dwNpcId, szName, (uint32_t)nLook, (uint32_t)nSort,
+            dwMap, (uint16_t)nX, (uint16_t)nY, t[0] ? (uint32_t)t[0] : 0);
+        if (!pNpc) {
+            tq::MyLogSave("gmlog/all", "IF_OK in %s, %d",
+                "pNpc->Create(m_idProcess, &info, pItem->GetInt(ITEMDATA_TYPE), pName)",
+                0x1118);
+            return false;
+        }
+        pUser->m_dwCreatedNpcId = dwNpcId; // [user+0xa30]
+        (void)dwOwnerId; // owner rides the npc info block (single-owner map in the model)
+        return true;
+    }
+
+    if (dwType == 498) { // ORIGINAL 0x1f2: use-item consume
+        // FUN_140340190(user, param_6, 1, 1): the runtime item context.
+        // Model: the item riding the dialog ctx (the use-item engine
+        // sets it when ported); consume = erase from inventory.
+        uint32_t dwItem = pUser->m_stDialogCtx.dwData;
+        bool bOk = false;
+        if (dwItem != 0)
+            bOk = pUser->ConsumeByType(dwItem);
+        if (bOk) {
+            pUser->m_dwUseItemPos = 0;    // [user+0x14c] = 0
+            pUser->SendTalkMsg("STR_USE_ITEM", 2000); // vcall+0x358
+            return true;
+        }
+        printf("[DBERR] cq_action %u type 498 item use failed\n", pNode->dwId);
+        return false;
+    }
+
+    // ORIGINAL tail: DBERR DAT_14070c140 (bad type in this window) -> FALSE
+    printf("[DBERR] cq_action %u type %u not an item-only type\n",
+           pNode->dwId, dwType);
+    return false;
 }
 
 bool CGameAction::ProcessActionFamily8xx(std::shared_ptr<CUser> pUser,
@@ -2925,7 +3163,11 @@ bool bAll = (llAll == 1);
             // ORIGINAL GetTimeZoneInformation: local = t + Bias*-60 (== t +
             // tm_gmtoff), day = local / 86400 (0x15180)
             long nGmtoff = 0;
+#ifdef _WIN32
+            { long lBias = 0; _get_timezone(&lBias); nGmtoff = -lBias; } // GetTimeZoneInformation: Bias*-60
+#else
             { time_t t = (time_t)dwNow; struct tm tmL; localtime_r(&t, &tmL); nGmtoff = tmL.tm_gmtoff; }
+#endif
             uint32_t dwStoredDay = (uint32_t)(((int64_t)dwStored + nGmtoff) / 86400);
             uint32_t dwNowDay = (uint32_t)(((int64_t)dwNow + nGmtoff) / 86400);
             if (!_stricmp(szOp, ">=")) {
@@ -3580,41 +3822,42 @@ static bool ProcessActionDispatch(std::shared_ptr<CUser> pUser,
     // int parser, >=4 numbers, map object spawn), 224 home count check
     // ("%u %d %d" + mgr vcall+0xa8). 206/209/220/223-adjacent handlers
     // exist in the original but have zero cq_action rows.
+    if (dwType >= 201 && dwType <= 298) // -0xc9 <= 0x61: FUN_14013b950 (family B)
         return CGameAction::ProcessActionUser(pUser, pNode);
-    if (dwType >= 301 && dwType <= 362) // -0x12d <= 0x61: FUN_14013d790 (family B port)
+    if (dwType >= 301 && dwType <= 398) // -0x12d <= 0x61: FUN_14013d790 (family B port)
         return CGameAction::ProcessActionUser(pUser, pNode);
-    if (dwType >= 401 && dwType <= 462) // -0x191 <= 0x61: FUN_1401199d0 (PORT-PENDING family)
+    if (dwType >= 401 && dwType <= 498) // -0x191 <= 0x61: FUN_1401199d0 (family F port)
+        return CGameAction::ProcessActionItemOnly(pUser, pNode);
+    if (dwType >= 501 && dwType <= 598) // -0x1f5 <= 0x61: FUN_140123590 (family A port)
         return CGameAction::ProcessActionUser(pUser, pNode);
-    if (dwType >= 501 && dwType <= 562) // -0x1f5 <= 0x61: FUN_140123590 (family A port)
+    if (dwType >= 601 && dwType <= 698) // -0x259 <= 0x61: FUN_140127820 (PORT-PENDING family)
         return CGameAction::ProcessActionUser(pUser, pNode);
-    if (dwType >= 601 && dwType <= 662) // -0x259 <= 0x61: FUN_140127820 (PORT-PENDING family)
+    if (dwType >= 701 && dwType <= 798) // -0x2bd <= 0x61: FUN_140128290 (PORT-PENDING family)
         return CGameAction::ProcessActionUser(pUser, pNode);
-    if (dwType >= 701 && dwType <= 762) // -0x2bd <= 0x61: FUN_140128290 (PORT-PENDING family)
-        return CGameAction::ProcessActionUser(pUser, pNode);
-    if (dwType >= 801 && dwType <= 862) // -0x321 <= 0x61: FUN_140127070
+    if (dwType >= 801 && dwType <= 898) // -0x321 <= 0x61: FUN_140127070
         return CGameAction::ProcessActionFamily8xx(pUser, pNode);
-    if (dwType >= 1001 && dwType <= 1384) // -0x3e9 <= 0x3e5: FUN_14012a6e0 (user types)
+    if (dwType >= 1001 && dwType <= 1998) // -0x3e9 <= 0x3e5: FUN_14012a6e0 (user types)
         return CGameAction::ProcessActionUser(pUser, pNode);
-    if (dwType >= 2001 && dwType <= 2062) // -0x7d1 <= 0x61: FUN_140146a10 (family C)
+    if (dwType >= 2001 && dwType <= 2098) // -0x7d1 <= 0x61: FUN_140146a10 (family C)
         return CGameAction::ProcessActionUser(pUser, pNode);
-    if (dwType >= 2101 && dwType <= 2162) // -0x835 <= 0x61: FUN_140146a10
+    if (dwType >= 2101 && dwType <= 2198) // -0x835 <= 0x61: FUN_140146a10
         return CGameAction::ProcessActionUser(pUser, pNode);
-    if (dwType >= 2201 && dwType <= 2262) // -0x899 <= 0x61: FUN_140141c80 (pk bonus)
+    if (dwType >= 2201 && dwType <= 2298) // -0x899 <= 0x61: FUN_140141c80 (pk bonus)
         return CGameAction::ProcessActionUser(pUser, pNode);
-    if (dwType >= 3001 && dwType <= 3062) // -0xbb9 <= 0x61: FUN_14011a7e0 (PORT-PENDING family)
+    if (dwType >= 3001 && dwType <= 3098) // -0xbb9 <= 0x61: FUN_14011a7e0 (PORT-PENDING family)
         return CGameAction::ProcessActionUser(pUser, pNode);
-    if (dwType >= 3501 && dwType <= 3562) // -0xdad <= 0x61: FUN_140140380 (PORT-PENDING family)
+    if (dwType >= 3501 && dwType <= 3598) // -0xdad <= 0x61: FUN_140140380 (PORT-PENDING family)
         return CGameAction::ProcessActionUser(pUser, pNode);
-    if (dwType >= 3601 && dwType <= 3662) // -0xe11 <= 0x61: FUN_14011b5e0 (PORT-PENDING family)
+    if (dwType >= 3601 && dwType <= 3698) // -0xe11 <= 0x61: FUN_14011b5e0 (PORT-PENDING family)
         return CGameAction::ProcessActionUser(pUser, pNode);
-    if (dwType >= 3701 && dwType <= 3762) {
+    if (dwType >= 3701 && dwType <= 3798) {
         // -0xe75 <= 0x61: FUN_14011dcb0 — ORIGINAL ignores its result and
         // returns 1 immediately for this whole window
         return true;
     }
-    if (dwType >= 3801 && dwType <= 3862) // -0xed9 <= 0x61: FUN_14011bfa0 (PORT-PENDING family)
+    if (dwType >= 3801 && dwType <= 3898) // -0xed9 <= 0x61: FUN_14011bfa0 (PORT-PENDING family)
         return CGameAction::ProcessActionUser(pUser, pNode);
-    if (dwType >= 3901 && dwType <= 3962) // -0xf3d <= 0x61: FUN_14011c610 (PORT-PENDING family)
+    if (dwType >= 3901 && dwType <= 3998) // -0xf3d <= 0x61: FUN_14011c610 (PORT-PENDING family)
         return CGameAction::ProcessActionUser(pUser, pNode);
     if (dwType >= 8001 && dwType <= 8384) // -0x1f41 <= 0x3e5: FUN_14011c9e0 (PORT-PENDING)
         return CGameAction::ProcessActionUser(pUser, pNode);

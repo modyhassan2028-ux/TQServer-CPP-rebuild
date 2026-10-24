@@ -514,6 +514,13 @@ private:
     uint16_t m_wProfession{0};   // cq_user.profession (short @ +0xef4)
     uint32_t m_dwMana{0};
 public:
+    // ORIGINAL lay-npc state block: [user+0xa34] next task, [user+0xa38]
+    // the accept buffer string (set "" by FUN_140117b50), [user+0xa30]
+    // the created npc id (403), [user+0x14c] use-item state (498)
+    uint32_t m_dwLayNpcTask{0};
+    std::string m_strLayNpcBuf;
+    uint32_t m_dwCreatedNpcId{0};
+    uint32_t m_dwUseItemPos{0};
     // ---- ORIGINAL ACTION_USER_ATTR (cq_action type 1001) fields ----
     // In-memory mirrors of the cq_user attribute set read/written by the
     // original case-0 field chain (gameaction.cpp 242240-244770). Setters

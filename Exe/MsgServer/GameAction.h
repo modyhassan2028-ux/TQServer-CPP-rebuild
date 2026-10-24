@@ -35,10 +35,17 @@ public:
     // 1001..1121. Returns true on success (chain continues id_next),
     // false on failure (chain continues id_nextfail).
     static bool ProcessActionUser(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode);
-    // ORIGINAL FUN_140127070: the 801..862 window (dropitem/dropmoney +
+    // ORIGINAL FUN_140127070: the 801..898 window (dropitem/dropmoney +
     // per-monster money piles). Anything but 801/802 in the window is
     // "wrong action type" -> FALSE.
     static bool ProcessActionFamily8xx(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode);
+    // ORIGINAL FUN_1401199d0 (ProcessActionItemOnly): the 401..498 window.
+    // 401 = register EVENT_LAYNPC continuation ([user+0xa34] + empty
+    // buffer at +0xa38, FUN_140117b50), 402 = npc count condition
+    // (all/furniture/name/type < N / == N), 403 = lay the npc at the
+    // client-picked cell (pszAccept = ctx.strInput model), 498 = use-
+    // item consume + STR_USE_ITEM. Others in the window: DBERR + FALSE.
+    static bool ProcessActionItemOnly(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode);
     static bool ProcessItemQuench(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode,
                                    uint32_t dwItemId, uint32_t dwMatId); // ORIGINAL FUN_14011b910
 

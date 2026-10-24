@@ -14,7 +14,15 @@ Run from the repo root:  python3 tools/modules/gen_module_skeletons.py
 """
 import re, os, sys, json
 
-DEC = "../conquer-online-v6159-decompiled/Native-Decompiled"
+# Decompiled sources: prefer the classic sibling checkout, fall back to
+# the in-repo copy. IMPORTANT: when the decompiled tree is unavailable the
+# generator must NEVER emit empty skeletons over committed module files -
+# it exits as a no-op instead (build.sh relies on this).
+import os as _os
+DEC = next((p for p in (
+    "../conquer-online-v6159-decompiled/Native-Decompiled",
+    "../co_repo/Native-Decompiled",
+) if _os.path.isdir(p)), None)
 
 # folder -> (dll, key, description, db tables)
 SYSTEMS = {
@@ -170,6 +178,11 @@ EXPORT_MODULE_FULL({ns}::C{cls},
     lines_meta.append((folder, name, dll, ns, info))
 
 def main():
+    if DEC is None:
+        print("WARN: decompiled tree not found - skeleton generation skipped "
+              "(committed modules/abi.json kept as-is)")
+        return
+
     meta = []
     for folder, (dll, key, desc, tables) in SYSTEMS.items():
         p = os.path.join(DEC, dll + ".decompiled.c")

@@ -54,3 +54,25 @@ table:cq_action/cq_newaction, ACTION (id=9200007,type=3501): Wrong param
 table:cq_action/cq_newaction, ACTION (id=9200009,type=3501): Wrong param
 table:cq_action/cq_newaction, ACTION (id=9200010,type=3501): Wrong param
 table:cq_action/cq_newaction, ACTION (id=9200015,type=3501): Wrong param number
+CHECKF in idNextTask != ID_NONE, 4196
+CHECKF in idNextTask != ID_NONE, 4196
+CHECKF in idNextTask != ID_NONE, 4196
+IF_NOT_ in ret >= 3, 4268
+IF_NOT_ in ret >= 3, 4268
+CHECKF in idNextTask != ID_NONE, 4196
+IF_NOT_ in ret >= 3, 4268
+IF_NOT_ in ret >= 3, 4268
+CHECKF in idNextTask != ID_NONE, 4196
+IF_NOT_ in ret >= 3, 4268
+IF_NOT_ in ret >= 3, 4268
+CHECKF in idNextTask != ID_NONE, 4196
+IF_NOT_ in ret >= 3, 4268
+IF_NOT_ in ret >= 3, 4268
+CHECKF in idNextTask != ID_NONE, 4196
+IF_NOT_ in ret >= 3, 4268
+IF_NOT_ in ret >= 3, 4268
+CHECKF in idNextTask != ID_NONE, 4196
+CHECKF in idNextTask != ID_NONE, 4196
+CHECKF in pszAccept && strlen(pszAccept) > 0, 4253
+IF_NOT_ in ret >= 3, 4268
+IF_NOT_ in ret >= 3, 4268
