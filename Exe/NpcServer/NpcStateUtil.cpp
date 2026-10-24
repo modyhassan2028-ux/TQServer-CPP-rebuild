@@ -77,4 +77,112 @@ bool CNpcWanderStep(CNpcStateData& rN, uint32_t uDir) {
     return true;
 }
 
+bool CNpcRateGate(int32_t& rnStamp, int nWindow,
+                  std::function<uint32_t()>& fnTimeGet) {
+    // ORIGINAL FUN_14005a8f0
+    uint32_t uNow = fnTimeGet();
+    int32_t nStamp = rnStamp;
+    // ORIGINAL: if (uVar2 < param_2 + iVar1) return 0
+    if (uNow < (uint32_t)(nWindow + nStamp))
+        return false;
+    // ORIGINAL: if (iVar1 + param_2*2 <= uVar2)
+    if ((uint32_t)(nStamp + nWindow * 2) <= uNow) {
+        rnStamp = (int32_t)fnTimeGet();  // reset
+        return true;
+    }
+    // ORIGINAL: stamp += window; return 1
+    rnStamp = nStamp + nWindow;
+    return true;
+}
+
+bool CNpcAttachAlive(bool bHasAttach) {
+    // ORIGINAL FUN_140069750:
+    // +8 != 0 && +0x10 != 0 - modeled by the
+    // single has-attach flag of the seam
+    return bHasAttach;
+}
+
+bool CNpcC960(CNpcStateData& rN, uint32_t uFlavor) {
+    // ORIGINAL: key = param_2 ? 0x1a : 0x13
+    uint32_t uKey = uFlavor ? 0x1a : 0x13;
+    int nWindow = rN.m_fnRowGetInt(uKey);
+    // ORIGINAL: FUN_14005a8f0(npc+0xb8, iVar2)
+    if (!CNpcRateGate(rN.m_nA8f0Stamp, nWindow,
+                      rN.m_fnTimeGet))
+        return true;         // rate-held: handled
+    // ORIGINAL: if (+0x2c < 1) return 0
+    if ((int)rN.m_dwField2C < 1)
+        return false;
+    // ORIGINAL: (int8)queue[0] % 8 - the Ghidra
+    // sign-mod idiom (x>>31 & 7)
+    int nDir = (int)(int8_t)rN.m_dirQueue[0] % 8;
+    // ORIGINAL: len = +0x2c - 1; the queue shift
+    int nLen = (int)rN.m_dwField2C - 1;
+    rN.m_dwField2C = (uint32_t)nLen;
+    if (nLen != 0) {
+        // memcpy(npc+0x40, npc+0x41, len)
+        for (int i = 0; i < nLen && i < 15; i++)
+            rN.m_dirQueue[i] =
+                rN.m_dirQueue[i + 1];
+    }
+    rN.m_nField40 = rN.m_dirQueue[0];
+    // ORIGINAL: FUN_14005b9e0(npc, dir, flavor)
+    if (rN.m_fnB9e0(nDir, uFlavor))
+        return true;
+    if (!rN.m_bHasAttach ||
+        !CNpcAttachAlive(rN.m_bHasAttach)) {
+        // ===== no-attach path =====
+        // ORIGINAL: FUN_140058260(npc, dir)
+        if (rN.m_fnAttack260(nDir) &&
+            rN.m_dwField2C != 0) {
+            // LAB_14005caf0
+            rN.m_dwField2C = 0;
+            return rN.m_fnB9e0(
+                (int)(int8_t)rN.m_dirQueue[0],
+                uFlavor);
+        }
+        // ORIGINAL: row(0x15) bit5 -> home
+        if ((rN.m_fnRowGetFlag() >> 5 & 1) != 0) {
+            int nLo = 0, nHi = 0;
+            rN.m_fnGenGetSpawn(nLo, nHi);
+            // ORIGINAL: FUN_140059f40(npc, lo,
+            // hi, id) - the real teleport body
+            return CNpcTeleportApproach(rN, nLo,
+                                        nHi,
+                                        rN.m_fnSubId18());
+        }
+        return false;
+    }
+    // ===== the attach path =====
+    int nResLo = 0, nResHi = 0;
+    // ORIGINAL: FUN_140058b80(npc, &res) - fills
+    // BOTH res18/res1c words
+    if (!rN.m_fn58b80(nResLo, nResHi))
+        return false;
+    rN.m_dwField2C = 0;
+    // ORIGINAL: RandGet(100) < 0x46 ? 0
+    // : row->vt+0x10(row, 0x10)
+    uint32_t uParam4 =
+        rN.m_fnRandGet(100) < 0x46
+            ? 0 : (uint32_t)rN.m_fnRowGetInt(0x10);
+    // ORIGINAL: FUN_1400580e0(npc, lo, hi, p4)
+    bool bMoved = rN.m_fn580e0(nResLo, nResHi,
+                               (int)uParam4);
+    if (bMoved &&
+        !rN.m_fnB9e0((int)(int8_t)rN.m_dirQueue[0],
+                     uFlavor) &&
+        rN.m_fn588b0(nResLo, nResHi, nDir) &&
+        rN.m_dwField2C != 0) {
+        // LAB_14005caf0
+        rN.m_dwField2C = 0;
+        return rN.m_fnB9e0(
+            (int)(int8_t)rN.m_dirQueue[0],
+            uFlavor);
+    }
+    // ORIGINAL: return uVar5 & mask - the packed
+    // low byte here is bVar1 = the FUN_1400580e0
+    // move result, NOT a plain false
+    return bMoved;
+}
+
 } // namespace npc

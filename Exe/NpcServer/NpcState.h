@@ -131,6 +131,26 @@ struct CNpcStateData {
     std::function<bool(int, int, int, uint32_t)>
         m_fnMapWalkable;
         // FUN_14004bff0(map, x, y, dir, u48, 0x1a)
+    // ===== c960 (unit 21) members =====
+    uint8_t m_dirQueue[16] = {0};
+        // +0x40 the 8-dir walk queue
+        // (+0x2c = its length, m_dwField2C)
+    int32_t m_nA8f0Stamp = 0;
+        // +0xbc (npc + 0xb8 + 4) rate stamp
+    std::function<uint32_t()> m_fnTimeGet;
+        // tq::TimeGet(0)
+    bool m_bHasAttach = false;
+        // npc +0x140 (param_1[0x28]) != 0
+        // AND FUN_140069750(+8!=0 && +0x10!=0)
+    std::function<bool(int&, int&)> m_fn58b80;
+        // FUN_140058b80(npc, &res) - fills BOTH
+        // res18 (lo) and res1c (hi)
+    std::function<bool(int, int, int)> m_fn588b0;
+        // FUN_1400588b0(npc, resLo, resHi, dir)
+    std::function<bool(int, uint32_t)> m_fnB9e0;
+        // FUN_14005b9e0(npc, dir, flavor)
+    std::function<bool(int)> m_fnAttack260;
+        // FUN_140058260(npc, dir) - attack
 };
 
 // ============================================================

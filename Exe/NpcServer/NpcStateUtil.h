@@ -10,6 +10,7 @@
 //  family FUN_140069xxx - a later unit)
 // ============================================================
 #include "NpcState.h"
+#include <functional>
 
 namespace npc {
 
@@ -72,5 +73,74 @@ bool CNpcTeleportApproach(CNpcStateData& rN, int nTX,
 // +0x2c = 1;                       // walk lock
 // return 1;
 bool CNpcWanderStep(CNpcStateData& rN, uint32_t uDir);
+
+// ============================================================
+// ===== ORIGINAL FUN_14005a8f0 (rate gate) ============
+// ============================================================
+// uVar2 = TimeGet(0);
+// iVar1 = *(int*)(p + 4);            // the stamp
+// if (uVar2 < (uint)(param_2 + iVar1))
+//   return 0;                         // too soon
+// if ((uint)(iVar1 + param_2 * 2) <= uVar2) {
+//   *(ulong*)(p + 4) = TimeGet(0);    // full reset
+//   return 1;
+// }
+// *(int*)(p + 4) = iVar1 + param_2;   // advance
+// return 1;
+bool CNpcRateGate(int32_t& rnStamp, int nWindow,
+                  std::function<uint32_t()>& fnTimeGet);
+
+// ============================================================
+// ===== ORIGINAL FUN_140069750 (attach alive) ========
+// ============================================================
+// return *(int*)(p + 8) != 0 && *(int*)(p + 0x10) != 0;
+// (the npc +0x140 attach object)
+bool CNpcAttachAlive(bool bHasAttach);
+
+// ============================================================
+// ===== ORIGINAL FUN_14005c960 (AI step executor) =====
+// ============================================================
+// key = param_2 ? 0x1a : 0x13;
+// iVar2 = row->vt+0x10(row, key);       // GetInt
+// if (!FUN_14005a8f0(npc+0xb8, iVar2))
+//   return 1;                            // rate-held
+// if (+0x2c < 1) return 0;               // empty
+// iVar10 = (int8)queue[0] % 8;           // signed mod
+// len = +0x2c - 1; +0x2c = len;
+// if (len) memmove(queue, queue+1, len); // the shift
+// if (FUN_14005b9e0(npc, iVar10, param_2)) return 1;
+// if (!attach || !FUN_140069750) {       // no attach
+//   if (FUN_140058260(npc, iVar10) &&
+//       +0x2c != 0) {
+// LAB_14005caf0:
+//     +0x2c = 0;
+//     return FUN_14005b9e0(npc,
+//         (int8)queue[0], param_2);
+//   }
+//   if (row(0x15) bit5) {
+//     gen->vt+0x28(gen, &res);
+//     id = sub->vt+0x18();
+//     return FUN_140059f40(npc,
+//         res.lo, res.hi, id);   // teleport home
+//   }
+//   return 0;
+// } else {                               // attach
+//   if (!FUN_140058b80(npc, &res))
+//     return 0;
+//   +0x2c = 0;
+//   iVar2 = RandGet(100);
+//   uVar3 = iVar2 < 0x46 ? 0
+//                        : row->vt+0x10(row, 0x10);
+//   bVar1 = FUN_1400580e0(npc, res.lo,
+//                         res.hi, uVar3);
+//   if (bVar1 &&
+//       !FUN_14005b9e0(npc, (int8)queue[0],
+//                      param_2) &&
+//       FUN_1400588b0(npc, res.lo, res.hi,
+//                     iVar10) && +0x2c != 0)
+//     goto LAB_14005caf0;
+//   return 0;
+// }
+bool CNpcC960(CNpcStateData& rN, uint32_t uFlavor);
 
 } // namespace npc
