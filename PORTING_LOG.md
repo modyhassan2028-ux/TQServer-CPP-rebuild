@@ -3330,3 +3330,48 @@ FUN_140022f40 (تفاصيل كتابة الحقل)، FUN_1400232b0 (مسار
    9/9 خضرا:** world/manager/generator/wander/steplist/
    aitick/transform + ops 205/207/208 + record 201
    (الاتنان الأخيران ضد القاعدة الحية).
+
+## جلسة 2026-10-24 18:40 — NpcServer الوحدة 9: CMsgAiNpcInfo كاملة
+1. **تصحيح موقع مهم:** CMsgAiNpcInfo موجودة داخل
+   NpcServer.exe نفسه (FUN_140061220 وFUN_140061270
+   بتعيينان CMsgAiNpcInfo::vftable) — عناوين
+   140067320/140074f20/140082eb0 في names_final.tsv هي
+   نسخة MsgServer (world_kernel) ومش هي بتاعة
+   NpcServer. الشغل تم على ديكمبايل NpcServer.
+2. **الفئة (بترث CNetMsg):** FUN_140034920/140034820/
+   140034810 (القاعدة: بافر 0x400@+0x10، id@+8،
+   size@+0xc، مؤشر بافر ذاتي @+0x418 = this+0x10).
+3. **Create (FUN_1400612a0) حرفياً:** بوابة ver==1
+   وإلا لوج DAT_1400be0b0؛ *(this+0xc)=**0x38** و
+   *(this+8)=**0x4e21** (20001)؛ ترتيب الكتابة الحرفي
+   للسجل: dw@0x00(param_3)، p[1]=param_6، p[2]=param_4،
+   p[3]=0، p[4]=0، word@0x14=param_7، word@0x16=
+   param_8، **word@0x18=1 (التاج)**، word@0x1a=
+   param_5، word@0x1c=0، p[8]=param_9، p[9]=param_10،
+   p[10]=param_12، byte@0x2c=param_11، p[0xd]=param_13
+   (السجل 0x38؛ +0x30 لا يُكتب أبداً في Create).
+4. **CreateFromBuffer (FUN_1400613a0):** بوابة
+   word@0x18==1 (نفس التاج) وإلا لوج؛ memcpy 0x38.
+   **SetBuffer (FUN_140061430):** بوابة pBuf==0.
+   **Deleting dtor (FUN_140061490):** علم الحذف & 1.
+5. **Process (FUN_1400614f0) حرفياً:** pConn==0 → خروج؛
+   rec = *(this+0x418)؛ المجموعة عبر FUN_14001c7a0 →
+   FUN_140025c40 (جالب +8 — مقارنةً بـ FUN_140025be0
+   جالب +0x20)؛ بحث vtable+0x40(rec[0]) → **موجود =
+   لا شيء** (الرسالة إنشائية فقط)؛ غير موجود →
+   FUN_14005d9c0 (operator_new(0x158) + ctor
+   FUN_14005ce80) → **FUN_14005e2e0 (CNpc::Create
+   الحقيقي، 1565 بايت — seam موثق للوحدة 10)** بترتيب
+   الحقول الحرفي: rec[0]، (word)+0x1a، rec[1]،
+   (word)+0x14، (word)+0x16، rec[2]، rec[3]،
+   (word)+0x1c، rec[4]، rec[9]، rec[8]، (byte)rec[0xb]،
+   rec[10]، rec[0xc]؛ فشل → vtable+0xf0(npc+0x10)؛
+   نجاح → vtable+0x28 (تسجيل) + لو rec[0xd]≠0 (سجل
+   +0x34) → vtable+0x98(npc+0x10). ملاحظة بنائية: كل
+   vcalls في Process على npc+0x10 (الكائن الفرعي
+   بتاعة vtable CNpc) — متسقة مع اكتشاف الوحدة 7.
+6. Exe/NpcServer/MsgAiNpcInfo.{h,cpp} + tests/
+   npc_msgainfo_test — **NPC_MSGAINFO_OK**. **الرجريشن
+   10/10 خضرا** (world/manager/generator/wander/
+   steplist/aitick/transform/msgainfo + ops 205/207/208
+   + record 201 ضد القاعدة الحية).

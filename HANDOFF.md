@@ -1,7 +1,22 @@
 
 # ⚠️ دليل الوكيل التالي — ابدأ من هنا (آخر تحديث 2026-10-24 18:15)
 
-## 0) حالة NpcServer لحظياً (جلسة 24/10 — محدث 18:15)
+## 0) حالة NpcServer لحظياً (جلسة 24/10 — محدث 18:40)
+- **جديد:** الوحدة 9: CMsgAiNpcInfo كاملة (رسالة 0x4e21)
+  من NpcServer.exe نفسه (مش من MsgServer): ctor
+  FUN_140061220 / dtor FUN_140061270 / Create
+  FUN_1400612a0 (بوابة ver==1 + سجل 0x38 بتاج
+  word@0x18=1 + ترتيب الحقول الحرفي) / CreateFromBuffer
+  FUN_1400613a0 (بوابة التاج) / SetBuffer FUN_140061430 /
+  deleting dtor FUN_140061490 / **Process FUN_1400614f0**:
+  conn==0→خروج، بحث بالمعرف vtable+0x40 → موجود = لا
+  شيء، غير موجود → FUN_14005d9c0 (new CNpc 0x158) →
+  FUN_14005e2e0 (CNpc::Create بسجل 0x38، **seam للوحدة
+  10**) → فشل: vtable+0xf0(npc+0x10)؛ نجاح: vtable+0x28
+  (تسجيل) + لو سجل+0x34≠0 → vtable+0x98. الملفات:
+  Exe/NpcServer/MsgAiNpcInfo.{h,cpp} + tests/
+  npc_msgainfo_test — **NPC_MSGAINFO_OK**، رجريشن 10/10
+  خضرا (8 وحدات + اختبارا DB).
 - **جديد:** الوحدة 8: زوج التحويل CNpc::CheckTransform
   (FUN_14005a660) + CNpc::Transform (FUN_14005a3b0) —
   الهوية من نصوص اللوجات الحرفية جواهم ("CNpc::Transform,
@@ -63,9 +78,14 @@
    BindTransform، لا صلة بالديكمبايل بـ CNpcWander).
    المتبقي TBD موثق: ذيل FUN_14002a690 (نزع حلقة
    المعرفات عبر FUN_140026b80) — seam فقط.
-2. **CMsgAiNpcInfo**: معالج الرسالة (RTTI جاهز في
-   names_final.tsv) — استقبال بيانات الوحوش من
-   السيرفر الرئيسي وربطها بالتيكة.
+2. ~~CMsgAiNpcInfo~~ **مكتملة** (الوحدة 9 — الفئة
+   داخل NpcServer.exe نفسه: FUN_140061220..1400614f0،
+   والـ RTTI في names_final.tsv بتاعة MsgServer كان
+   عنوانه مضلل). **الجاي مباشرة:** CNpc::Create
+   الحقيقي **FUN_14005e2e0 (1565 بايت)** مع عائلته
+   (FUN_14005ce80 ctor 0x158، FUN_14005dc80،
+   FUN_14006a4c0، FUN_14004ae30، FUN_14003ca10...)
+   — هو seam جاهز في CMsgAiNpcInfo::Process.
 3. **استبدال main.cpp النموذجي** بتجميعة حقيقية: world
    → manager → generator → wander/steplist loop.
 4. بعدها: قفل NpcServer والانتقال لـ Loaderhock (الترتيب
