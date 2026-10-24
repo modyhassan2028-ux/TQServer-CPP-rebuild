@@ -3464,6 +3464,40 @@ bool bAll = (llAll == 1);
         }
         return false;
     }
+    case 1004: { // ORIGINAL family-E block @245092: enter map.
+        // sscanf "%u %d %d" (mapid, x, y) == 3; then
+        // FUN_1402f1e70(mapmgr-from-FUN_1400877e0, userId, node-data,
+        // mapid, y!=0 flag, x==0 flag) returns the result (partially
+        // read). The data column (0 in all live rows) rides the call.
+        // Ported: map lookup (null -> false), capacity gate open
+        // (documented - ORIGINAL logs DBERR 0x2779 when the map is
+        // full via FUN_14014df00), then Teleport like case 304.
+        uint32_t dwMap = 0; int32_t nX = 0, nY = 0;
+        if (sscanf(pNode->strParam.c_str(), "%u %d %d",
+                   &dwMap, &nX, &nY) != 3)
+            return false;
+        auto pMap = CMapManager::Instance().GetMap(dwMap);
+        if (!pMap) return false; // ORIGINAL: map lookup 0 -> false
+        pUser->Teleport(dwMap, (uint16_t)nX, (uint16_t)nY);
+        return true;
+    }
+    case 1084: { // ORIGINAL family-E block @247734: resolve id into
+        // two vars. sscanf "%I64d %u %u" == 3; FUN_140382d20(user,
+        // f1, &out1, &out2) resolves the id (helper not yet
+        // identified - stubbed to 0/0); FUN_140164520(user, f2, out1)
+        // and (user, f3, out2) assign var(f2)/var(f3) -> return 1.
+        // Live rows are all "N 6 7" (99 rows) writing vars 6 and 7.
+        long long f1 = 0; uint32_t f2 = 0, f3 = 0;
+        if (sscanf(pNode->strParam.c_str(), "%lld %u %u",
+                   &f1, &f2, &f3) != 3)
+            return false; // parse != 3 -> LAB false
+        int64_t out1 = 0, out2 = 0; // FUN_140382d20 stub
+        printf("[RESOLVE] cq_action %u resolve %lld -> vars %u,%u (FUN_140382d20 stub 0,0)\n",
+               pNode->dwId, f1, f2, f3);
+        pUser->SetIterVarData(f2, out1);
+        pUser->SetIterVarData(f3, out2);
+        return true;
+    }
     case 1003: { // ORIGINAL switch case 2: teleport "mapid x y [force]"
         uint32_t dwMap = 0; int nX = 0, nY = 0, nForce = 0;
         if (sscanf(pNode->strParam.c_str(), "%u %d %d %d", &dwMap, &nX, &nY, &nForce) < 3) {

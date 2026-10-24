@@ -1753,6 +1753,25 @@ system("mariadb -u root cq -e \"DELETE FROM cq_item WHERE owner_id=888001 AND ty
     assert(!CGameAction::ProcessActionUser(u5, &nd1651));
     u5->m_stDialogCtx.dwId = 1015;
 
+    // --- family E batch 4: 1004 / 1084 (live rows) ---
+    // 1004: "1002 300 280" (live) - enter TwinCity at coords
+    CDialogEngine::Node nd1004; nd1004.dwType = 1004;
+    nd1004.strParam = "1002 300 280";
+    assert(CGameAction::ProcessActionUser(u5, &nd1004));
+    assert(u5->GetMapId() == 1002);
+    nd1004.strParam = "9999 300 280"; // map lookup 0 -> false
+    assert(!CGameAction::ProcessActionUser(u5, &nd1004));
+    nd1004.strParam = "1002 300"; // parse < 3 -> false
+    assert(!CGameAction::ProcessActionUser(u5, &nd1004));
+
+    // 1084: "13901336 6 7" (live) - id resolved into vars 6,7
+    CDialogEngine::Node nd1084; nd1084.dwType = 1084;
+    nd1084.strParam = "13901336 6 7";
+    assert(CGameAction::ProcessActionUser(u5, &nd1084));
+    assert(u5->GetIterVarData(6) == 0 && u5->GetIterVarData(7) == 0);
+    nd1084.strParam = "13901336 6"; // parse < 3 -> false
+    assert(!CGameAction::ProcessActionUser(u5, &nd1084));
+
     printf("DIALOG FIDELITY TEST PASSED\n");
     return 0;
 }
