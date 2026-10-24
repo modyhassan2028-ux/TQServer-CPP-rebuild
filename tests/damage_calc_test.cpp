@@ -117,6 +117,64 @@ int main() {
     d = tq::DamageCalc(att.get(), tgt.get(), rec, &tHeal, 0, 0, c);
     assert(d == 120);
 
+    // ---- SkillDamage (FUN_1402f3100) literal-tail tests ----
+    // S1: neutral ctx: base flows through unchanged (no def points)
+    assert(tq::SkillDamage(att.get(), tgt.get(), 500, 0, c) == 500);
+
+    // S2: target defense point: base 500 - floor(500/4) = 375
+    tq::DamageCtx cs = c; cs.bTargetDefensePoint = true;
+    assert(tq::SkillDamage(att.get(), tgt.get(), 500, 0, cs) == 375);
+
+    // S3: percent bonus after the def/4 cut: 500-125=375, +90% -> 712
+    tq::DamageCtx cs3 = cs; cs3.iTgtE0 = 90;
+    assert(tq::SkillDamage(att.get(), tgt.get(), 500, 0, cs3) == 712);
+    // S3b: over cap: tgtE0=200 -> p caps at 90 -> 712
+    tq::DamageCtx cs3b = cs; cs3b.iTgtE0 = 200;
+    assert(tq::SkillDamage(att.get(), tgt.get(), 500, 0, cs3b) == 712);
+
+    // S4: attacker defense point: luckM 20% + atkMax 40 + lucky(>179) 5%:
+    //     500 +100 +40 = 640; 640 + 32 = 672
+    tq::DamageCtx cs4 = c; cs4.bAttackerDefensePoint = true;
+    cs4.iLuckM = 20; cs4.iMagicAtkMax = 40; cs4.iTgtE0 = 0;
+    assert(tq::SkillDamage(att.get(), tgt.get(), 500, 0, cs4) == 640);
+    cs4.iLuckM = 180;
+    // 500 + 900 = 1400 + 40 = 1440; lucky: +1440/20=72 -> 1512
+    assert(tq::SkillDamage(att.get(), tgt.get(), 500, 0, cs4) == 1512);
+
+    // S5: target def subtractions (all after def/4):
+    //     500-125=375; pct1=100: -(375/2)*100/100=187 -> 188;
+    //     pct2=50: -94 -> 94
+    tq::DamageCtx cs5 = c; cs5.bTargetDefensePoint = true;
+    cs5.iTargetDefPct1 = 100; cs5.iTargetDefPct2 = 50;
+    assert(tq::SkillDamage(att.get(), tgt.get(), 500, 0, cs5) == 94);
+
+    // S6: weaken x2 + 1040 x10: 500 -> 1000 -> 10000
+    tq::DamageCtx cs6 = c; cs6.bAttackerDefensePoint = true;
+    cs6.bWeaponWeaken = true; cs6.bTgt1040Attr10 = true;
+    assert(tq::SkillDamage(att.get(), tgt.get(), 500, 0, cs6) == 10000);
+
+    // S7: crit probe 2 (FUN_14031d020): x2 -> 1000
+    tq::DamageCtx cs7 = c; cs7.bCritProbe2 = true;
+    assert(tq::SkillDamage(att.get(), tgt.get(), 500, 0, cs7) == 1000);
+
+    // S8: final bonus: slot208=300, tgtSlot218=100 -> +200 -> 700;
+    //     quality present caps at 1000 (not hit here)
+    tq::DamageCtx cs8 = c; cs8.iSlot208 = 300; cs8.iTgtSlot218 = 100;
+    assert(tq::SkillDamage(att.get(), tgt.get(), 500, 0, cs8) == 700);
+    // S8b: cap: slot208=5000, quality present + att def point -> 1000 -> 1500
+    tq::DamageCtx cs8b = c; cs8b.iSlot208 = 5000; cs8b.bAttackerDefensePoint = true;
+    cs8b.bQualityPresent = true;
+    assert(tq::SkillDamage(att.get(), tgt.get(), 500, 0, cs8b) == 1500);
+
+    // S9: floor at 1 (distinct from FUN_1403ec0a0's floor 2)
+    assert(tq::SkillDamage(att.get(), tgt.get(), 0, 0, c) == 1);
+    assert(tq::SkillDamage(att.get(), tgt.get(), 1, 0, c) == 1);
+
+    // S10: gates -> return 1
+    tq::DamageCtx cs10 = c; cs10.bTargetDefensePoint = true;
+    cs10.bGate230 = true;
+    assert(tq::SkillDamage(att.get(), tgt.get(), 500, 0, cs10) == 1);
+
     printf("DAMAGE CALC TEST PASSED\n");
     return 0;
 }

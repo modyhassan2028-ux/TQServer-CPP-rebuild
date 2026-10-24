@@ -62,6 +62,21 @@ struct DamageCtx {
     bool    bStatus6c = false;       // status 0x6c on the attacker (x2)
     bool    bStatus78 = false;       // status 0x78 on the attacker (x2)
     bool    bTargetMonster = false;  // target->vtable+0x240 (monster kernel)
+    // ---- SkillDamage (FUN_1402f3100) runtime stubs ----
+    bool    bAttackerDefensePoint = false; // attacker GetPoint(0x1001) != 0
+    int32_t iAttDef98 = 0;         // attacker def-point vtable+0x98 (2nd call)
+    bool    bTargetRankBelow3000 = false;  // target 0x1002 vtable+0x50 < 3000
+    int32_t iTgtE0 = 0;             // target vtable+0xe0 (percent base)
+    int32_t iAttB60 = 0;            // FUN_140180b60 (attacker side)
+    int32_t iTgtC70 = 0;            // FUN_140160c70 (target side)
+    int32_t iTgt74f0 = 0;           // FUN_1401874f0 (target def subtraction)
+    bool    bWeaponWeaken = false;  // FUN_14016e4c0(att, tgt) != 0 -> x2
+    bool    bTgt1040Attr10 = false; // 0x1040 point, attr 4 == 10 -> x10
+    bool    bCritProbe2 = false;    // FUN_14031d020 (x2 crit, distinct probe)
+    bool    bQualityPresent = false; // FUN_140161560() != 0 (bonus cap)
+    int32_t iTgtSlot218 = 0;        // target vtable+0x218 (bonus deduction)
+    bool    bEcf70Check = false;    // FUN_1402ecf70 -> return dmg unchanged
+    bool    bTgtHas1002Rank = false; // target 0x1002 point with rank != 10000
 };
 
 // ---- component 1: FUN_1403e98e0 (weapon roll, physical) ----
@@ -191,19 +206,96 @@ inline bool IsMagicHit(const CMagicTypeInfo* pType, const DamageCtx& c) {
     return wh == 1 || (wh != 0 && !c.bAttackerWeapon);
 }
 
-// ---- FUN_1402f3100: the physical-with-skill roll (partially read past
-// line 789; the adjustment tail mirrors FUN_1403e98e0's - re-verify) ----
-inline uint32_t PhysRollSkill(CUser* pAtt, const DamageCtx& c, uint32_t dwBase) {
-    uint32_t dmg = dwBase; // ORIGINAL: damage starts from param_4, not the roll
-    if (c.bAttackerWeapon) {
-        dmg += (uint32_t)((uint64_t)dmg * (uint64_t)c.iLuck / 100);
-        if (c.iWeaponQualityPct > 0)
-            dmg += (uint32_t)((uint64_t)dmg * (uint64_t)c.iWeaponQualityPct / 100);
+// ---- FUN_1402f3100: SkillDamage - read COMPLETE (def 600555-600873).
+// Original signature: (battleCtx, att, tgt, baseDmg, power64). Literal
+// sequence after the rejection gates (same 0x230/0x238 + 0x27 gates as
+// FUN_1403ec0a0, with extra FUN_14016cfc0/14016cff0 sub-checks on the 0x27
+// path - not modeled yet, gated via bGateStatus27):
+inline uint32_t SkillDamage(CUser* pAtt, CUser* pTgt, uint32_t dwBase,
+                            uint64_t uPower64, const DamageCtx& c)
+{
+    // gates -> return 1
+    if (c.bTargetDefensePoint && c.bGate230 && !c.bGate238) return 1;
+    if (c.bTargetDefensePoint && c.bGateStatus27) return 1;
+    if (pTgt->IsDie()) return 1;
+    int32_t dmg = (int32_t)dwBase;
+    // attacker defense point (local_40): vtable+0x98 called twice, the
+    // second value is added (decompile artifact kept as iAttDef98)
+    if (c.bAttackerDefensePoint)
+        dmg += c.iAttDef98;
+    if (!c.bTargetDefensePoint) {
+        // no target defense point: target 0x1002 rank < 3000 -> PK adjust
+        if (c.bTargetRankBelow3000)
+            dmg += c.iPkAdjust; // FUN_14031caa0(att, tgt, dmg) - value stub
+    } else {
+        // target defense point: dmg -= floor(dmg/4)
+        // ORIGINAL: dmg - (dmg + (dmg>>31 & 3)) >> 2 (signed floor trick)
+        dmg = dmg - ((dmg + ((dmg >> 31) & 3)) >> 2);
     }
-    dmg = (uint32_t)((int32_t)dmg + c.iPkAdjust);
-    if (c.bPkProtection)
-        dmg = (uint32_t)((int32_t)dmg - c.iPkProtectionVal);
-    return dmg;
+    // percent bonus: p = tgtE0 + (tgtC70 - attB60), only if >= 0, cap 90
+    int32_t pct = 0;
+    if (c.iTgtE0 + (c.iTgtC70 - c.iAttB60) >= 0) {
+        pct = c.iTgtE0 + (c.iTgtC70 - c.iAttB60);
+        if (pct > 0x5a) pct = 0x5a; // cap 90
+    }
+    // ORIGINAL: (pct*dmg * -0x51eb851f)>>32>>5 = dmg*pct/100 (magic /100)
+    dmg += (int32_t)(((int64_t)pct * dmg) / 100);
+    if (c.bAttackerDefensePoint) {
+        int32_t luckM = c.iLuckM; // FUN_140181280
+        dmg += (int32_t)(((int64_t)luckM * dmg) / 100);
+        dmg += c.iMagicAtkMax;    // FUN_1401873c0(attacker def point)
+        if (luckM > 0xb3)        // > 179 -> +5%
+            dmg += dmg / 0x14;
+        // FUN_1401631c0(attDefPoint, &dmg, tgt) settle - stub passthrough
+    }
+    if (c.bTargetDefensePoint) {
+        dmg -= c.iTgt74f0;       // FUN_1401874f0 (target def point)
+        int32_t val = c.iTargetDefPct1; // FUN_140181180
+        if (val >= 0x65) val = 100;
+        // dmg += (-(dmg/2) * val)/100  (defense subtract 1, cap 100)
+        dmg += (int32_t)((-(int64_t)(dmg / 2) * val) / 100);
+    }
+    // weapon weakening: attacker def point && FUN_14016e4c0 -> x2
+    if (c.bAttackerDefensePoint && c.bWeaponWeaken) dmg *= 2;
+    if (dmg < 0) dmg = 0;
+    // target 0x1040 point: attr 4 == 10 && FUN_1402bc2c0 -> x10
+    if (c.bTgt1040Attr10) dmg *= 10;
+    // backstab steering: FUN_14031d8a0(att, tgt, dmg, power64) - stub delta
+    dmg += c.iSteerDelta;
+    // apply: tgt->vtable+0x328(tgt, att, dmg) - stub passthrough
+    if (c.bTargetDefensePoint) {
+        int32_t val = c.iTargetDefPct2; // FUN_140181380
+        if (val < 0x65) { if (val < 1) goto skip_sub2; }
+        else val = 100;
+        { // dmg -= dmg*val/100 (magic /100 constant)
+            dmg -= (int32_t)(((int64_t)val * dmg) / 100);
+        }
+    }
+skip_sub2:
+    // crit probe FUN_14031d020 -> MulDiv(dmg, 200, 100) = x2 (!), and
+    // FUN_14031cee0(power64, 4) break-notify (stub)
+    if (c.bCritProbe2)
+        dmg = (int32_t)(((int64_t)dmg * 200) / 100);
+    // final bonus: (no 0x1002 or rank 10000) && target not boss:
+    //   bonus = att slot 0x208; attacker not boss: -= tgt slot 0x218;
+    //   attacker def point && quality present -> cap 1000
+    int32_t bonus = 0;
+    bool bFinalBonus = !c.bTgtHas1002Rank /* or vtable+0x38()==10000 */
+                       && !pTgt->IsBoss();
+    if (bFinalBonus) {
+        bonus = c.iSlot208;
+        if (!pAtt->IsBoss())
+            bonus -= c.iTgtSlot218;
+        if (c.bAttackerDefensePoint && c.bQualityPresent && bonus > 1000)
+            bonus = 1000;
+        dmg += bonus;
+    }
+    // target defense point && FUN_1402ecf70(battle, attId, tgtId, &dmg)
+    // -> return the value as-is (stub flag)
+    if (c.bTargetDefensePoint && c.bEcf70Check)
+        return (uint32_t)dmg;
+    if (dmg < 2) dmg = 1; // ORIGINAL floors at 1 here (not 2)
+    return (uint32_t)dmg;
 }
 
 // ---- FUN_1404847d0: total damage calculation (session-9 literal spec) ----
@@ -263,7 +355,8 @@ inline uint32_t DamageCalc(CUser* pCaster, CUser* pTarget,
     // ---- non-poison branch 1: physical (FUN_140481400) ----
     if (bPhys) {
         if (dwSort == 37 && iSkillPower) { // sort 0x25 with skill power
-            uVar10 = PhysRollSkill(pCaster, c, (uint32_t)iSkillPower);
+            uVar10 = SkillDamage(pCaster, pTarget, (uint32_t)iSkillPower,
+                                 uPower64, c);
             if (bHasDef) {
                 // (atkMin + atkMax + luckM*sum/100 + slot0x208 + skillPower)
                 //   * res8 / 10000   (sum = atkMin + atkMax, literal)
@@ -277,7 +370,7 @@ inline uint32_t DamageCalc(CUser* pCaster, CUser* pTarget,
             // type 0x305c (12380) && *(char*)(caster+300)==1 -> status_data0
             if (dwType == 0x305c && c.bCasterByte300)
                 dwPower = (uint32_t)pType->Field(35);
-            uVar10 = PhysRollSkill(pCaster, c, dwPower);
+            uVar10 = SkillDamage(pCaster, pTarget, dwPower, uPower64, c);
             if (bHasDef) {
                 // (sum + luckM*sum/100 + slot0x208 + power + atkMin + atkMax)
                 //   * res8 / 10000   (sum = atkMin + atkMax, literal reading)
