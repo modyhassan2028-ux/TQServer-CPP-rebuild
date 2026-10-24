@@ -3957,14 +3957,33 @@ bool bAll = (llAll == 1);
                pNode->dwId, u1, u2, pUser->GetId());
         return true;
     }
-    case 1116: { // ORIGINAL rank 0x69 (case @249051): sscanf "%u %d" ->
-        // module chain; final uVar41 = 0. 1 live row.
-        unsigned u = 0; int d = 0;
-        if (sscanf(pNode->strParam.c_str(), "%u %d", &u, &d) != 2)
-            return false;
-        printf("[SYNVAR] cq_action %u: %u %d user %u\n",
-               pNode->dwId, u, d, pUser->GetId());
-        return false; // ORIGINAL tail: uVar41 = 0
+    case 1116: { // ORIGINAL rank 0x69 (case @249051): team-share
+        // nested action. sscanf "%u %d" -> (nested action id, mode).
+        // Synvar module 0x1e gates: vcall+0x28(user) = the team
+        // (none -> false); vcall+0x50(group, 0) = member count
+        // (< 2 -> false). Then iterate members: mode 1 = local
+        // user lookup + FUN_140145f60 launch; mode 2 = same-map
+        // check (vcall+0x168 on both) then launch; mode 3 =
+        // cross-map lookup then the same launch. Loop completes ->
+        // unlock, uVar41 = 1 (the success tail). 1 live row
+        // (3585500: "4109070 1" - launch 4109070 on each member).
+        unsigned uNested = 0; int nMode = 0;
+        if (sscanf(pNode->strParam.c_str(), "%u %d",
+                   &uNested, &nMode) != 2) {
+            return false; // DBERR 0x2ac4 path -> 0
+        }
+        auto pTeam = CTeamManager::Instance().GetTeamOf(pUser->GetId());
+        if (!pTeam) return false;                    // vcall+0x28 -> 0
+        if (pTeam->MemberCount() < 2) return false;  // vcall+0x50 < 2
+        for (uint32_t dwMember : pTeam->GetMembers()) {
+            auto pMember = CUserManager::Instance().GetUser(dwMember);
+            if (!pMember) continue; // lookup -> 0: skip
+            if (nMode == 2 && // ORIGINAL: map id equality gate
+                pMember->GetMapId() != pUser->GetMapId())
+                continue;
+            CGameAction::ProcessAction(pMember, uNested); // FUN_140145f60
+        }
+        return true; // ORIGINAL tail after the loop: uVar41 = 1
     }
     case 1202: { // ORIGINAL rank 0x6e (case @249380): sscanf "%d" ->
         // FUN_140167070(user); success path FUN_1401787e0(user, u) ->

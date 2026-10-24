@@ -2021,6 +2021,35 @@ system("mariadb -u root cq -e \"DELETE FROM cq_item WHERE owner_id=888001 AND ty
         CUserManager::Instance().RemoveUser(uMate->GetId());
     }
 
+    // --- 1116: team-share nested action (case 0x69) ---
+    {
+        CDialogEngine::Node n; n.dwType = 1116; n.dwId = 3585500;
+        n.strParam = "4109070 1"; // the live row's param
+        // a fresh user with no team -> false (vcall+0x28 gate)
+        auto uT = std::make_shared<CUser>(999101);
+        CUserManager::Instance().AddUser(uT);
+        assert(!CGameAction::ProcessActionUser(uT, &n));
+        // solo "team" of one -> false (member count < 2 gate)
+        auto t1 = std::make_shared<CTeam>(uT->GetId());
+        CTeamManager::Instance().InsertTeamForTest(t1);
+        assert(!CGameAction::ProcessActionUser(uT, &n));
+        // solo leader quits, disbanding the 1-man team
+        assert(CTeamManager::Instance().Quit(uT).empty());
+        // 2 members, nested 4109070 (1056 isexit on task 1021):
+        // the action LAUNCHES on each member (its own result is not
+        // 1116's concern) and 1116 itself returns 1
+        auto t2 = std::make_shared<CTeam>(uT->GetId());
+        auto uB = std::make_shared<CUser>(999102);
+        uB->SetAlive(true); uB->SetMapId(1002);
+        CUserManager::Instance().AddUser(uB);
+        t2->AddMember(uB->GetId());
+        CTeamManager::Instance().InsertTeamForTest(t2);
+        assert(CGameAction::ProcessActionUser(uT, &n));
+        // unknown nested id: still iterates, returns true
+        n.strParam = "999999999 1";
+        assert(CGameAction::ProcessActionUser(uT, &n));
+    }
+
     // --- lottery: module 10 (pLotteryProvider) + 1508 ---
     {
         auto* pLot = CModuleManager::Instance().Lottery();
