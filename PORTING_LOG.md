@@ -1654,3 +1654,51 @@ segfault عشوائي ABI.
    D (201، 974) حسب أولوية المستخدم
 
 **تذكير**: توسيع أي كلاس → rebuild كامل وإلا segfault ABI.
+
+
+## جلسة 2026-10-24 (عاشرة، تكملة) — DamageCalc (FUN_1404847d0) حرفياً — خطوة 4 تمت
+- **البنية:** `DamageCalc(caster, target, pRec, pType, power64, skillPower, ctx)`:
+  pRec null (caster+0x90) → log → 0؛ الهدف ميت (vtable+0x290) → 1.
+  **النوع بيُقرأ من سجل اللاعب GetAttrib(rec,2) = عمود cq_magic 2**
+  (اتأكد حرفياً في ذيل 0x3070/0x305c) — مش من سجل النوع.
+- **IsPhysicalHit/IsMagicHit (140481400/140481560):** wh==0 → جسدي؛
+  wh==1 → سحري؛ غير كده فحص السلاح (ستاب bAttackerWeapon) معكوس —
+  **الفرعان يتجمعان** (uVar10 += في السحري، حرفي).
+- **فرع السموم (sort 13 عبر IsMagicHit) — رجوع مبكر:** power=Field(10)؛
+  uVar6=LaunchDamage(...,0,1,power,0,power64,0)؛ لو دفاع:
+  dmg=((min+RandGet(max-min)+luck*(min+rand)/100+Bless0x200)*res8)/10000؛
+  0x6c && وحش && مش بوس → ×2؛ النتيجة max(uVar6, dmg).
+- **فرع الجسدي:** sort 37 && skillPower → PhysRollSkill(1402f3100،
+  مقروء جزئياً: نفس ذيل تعديلات 1403e98e0 على قاعدة بدل الرول)؛ بدفاع
+  uVar17=(atkMin+atkMax+luckM*sum/100+slot0x208+skillPower)*res8/10000.
+  غير كده power=Field(10)؛ نوع 0x305c && caster+300==1 → power=
+  status_data0؛ بدفاع uVar17=(sum+luckM*sum/100+slot0x208+power+
+  atkMin+atkMax)*res8/10000 (sum=atkMin+atkMax حرفي — مراجعة سطر 789+).
+- **فرع السحري (اختيار power حرفي):** sort 57/نوع 11610: بوس→30100،
+  وإلا max(30010, status_data0)؛ نوع 12080: مسافة تشيبيشيف <4 →
+  data+30000؛ نوع 12290 نفس منطق 57؛ نوع 12070: محدد caster+0xf8
+  (1→status_data2، 2/3→أعمدة runtime 45/46=0)؛ أنواع 11926/12110/12240
+  بدون دفاع: sendFlag=0, power=status_data0؛ أنواع 12320/12298/12340
+  والشفاء 12120/12130/12140 بدون دفاع: power=status_data0.
+- **الذيل الحرفي (متأكد من الديكومبايل 905075-905100):** 0x78 &&
+  وحش (0x240) → ×2؛ 0x6c && وحش مش بوس → ×2 (قبلها)؛ النهائي=
+  max(uVar10,uVar17)؛ نوع 0x3070 (من السجل!) && دفاع (local_48!=0)
+  && GetLife<=النتيجة → النتيجة=GetLife-1 (بيفضل 1 HP)؛ نوع 0x305c
+  && دفاع && attr_power<=النتيجة → النتيجة=attr_power (الحرف بيلتهم
+  أي نتيجة لو attr_power=0 — هكذا الأصل).
+- **DamageCtx ستابات جديدة:** iMagicAtkMin/iMagicAtkMax (1401805b0/
+  1401873c0)، iSlot208، bCasterByte300، iCasterSelector (caster+0xf8)،
+  bStatus6c/bStatus78، bTargetMonster (0x240). dwLevelFactor=10000
+  مؤقت (FUN_1400a76d0).
+- **اختبارات:** tests/damage_calc_test.cpp — 12 حالة (null rec، ميت،
+  سموم بلا/بدفاع، sort37+skillPower=570، مسار 0x305c+byte300=840،
+  sort57، 12080 قريب/بعيد، 12070 محدد، 0x3070 يفضل 1HP=99، سقف
+  0x305c=50، شفاء). النوع في السجل بيتغير لكل حالة (زي الأصل).
+  الثلاث سويتات خضراء بعد rebuild كامل.
+- **قاعدة ملاحظة من الديكومبايل:** نوع 12380 (0x305c) مش موجود في
+  cq_magictype أصلاً (المسار موجود في الكود بس)؛ 12400 attr_power=0
+  في كل الصفوف.
+- **المتبقي:** (5) ريك ويند FUN_1402f3100 من سطر 789 (الذيل المفترض
+  حالياً)، (6) FUN_1404a1f70 كامل + حلقة المروحة + FUN_140499830 +
+  FUN_14048c4c0 — دي حلقة الإطلاق اللي بتربط DamageCalc بالـ kernel
+  الفعلي، (7) عائلة C المتبقية (2009/2007/2002/2201/2205) أو D.
