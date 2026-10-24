@@ -147,17 +147,44 @@ size_t CServerSocket::WalkFrames() {
                 // TBD: case 5 tail (partially recovered)
             }
         } else if (uC < 2 || uC == 10) {
-            // ---- LAB_14002f500: pre-registration frames ----
-            // route lookup by (slotid, A); miss ->
-            // PostCommand(3, 0x3ec); TBD: the recovered
-            // sub-walk with the node+0x21 connected flag and
-            // the mode-6/8 tails (FUN_14002e650/e1c0,
-            // FUN_140014e20, FUN_14002b560 delivery)
-            if (m_fnDeliverMsg)
-                m_fnDeliverMsg(uType, pay, nPay);
+            // ---- LAB_14002f500 family ----
+            // route lookup by (slotid, A); on miss the
+            // ORIGINAL kicks with PostCommand(3, 0x3ec).
+            // TBD: that miss tail and the mode-8 sub-walk.
+            // ---- ORIGINAL mode-6 multi-target relay ----
+            // A = count of trailing 32-bit target words; each
+            // packs (id 20 bits | required-size 12 bits):
+            //   c9c = word >> 0x14 (pool buffer capacity)
+            //   ca0 = word & 0xfffff (target id)
+            // the words are stripped, the message relayed via
+            // FUN_14002b560 SendOSMulitClient
+            if (uB == 6) {
+                // A = count of trailing 32-bit target words;
+                // each packs (id 20 bits | required-size 12
+                // bits): c9c = word >> 0x14 (pool buffer
+                // capacity), ca0 = word & 0xfffff (target id).
+                // Words are stripped (FUN_14002e650 pool init,
+                // FUN_14002e1c0 buffer find, FUN_140014e20
+                // word append) then FUN_14002b560 relays.
+                int nMsg = nPay - (int)uA * 4;
+                if (nMsg >= 0 && m_pKernel) {
+                    std::vector<uint32_t> vecTargets;
+                    for (uint32_t i = 0; i < uA; ++i) {
+                        uint32_t w; std::memcpy(&w,
+                            pay + nMsg + i * 4, 4);
+                        if (w != 0xffffffff)
+                            vecTargets.push_back(
+                                w & 0xfffff);
+                    }
+                    m_pKernel->SendOSMulitClient(uType,
+                        (uint32_t)nMsg, pay, vecTargets);
+                }
+            } else {
+                if (m_fnDeliverMsg)
+                    m_fnDeliverMsg(uType, pay, nPay);
+            }
         } else {
-            // TBD: remaining walker branches (mode 6 main
-            // delivery chain FUN_14002b560, mode 8 bimap walk)
+            // TBD: the remaining walker tails (mode-8 walk)
             if (m_fnDeliverMsg)
                 m_fnDeliverMsg(uType, pay, nPay);
         }
@@ -166,6 +193,40 @@ size_t CServerSocket::WalkFrames() {
         p += uSize; nAvail -= uSize; nWalked += uSize;
         m_ullRecvBytes += uSize;
     }
+}
+
+
+// ===== FUN_14002b560: CSocketKernel::SendOSMulitClient =====
+// ORIGINAL walk: for each target id in the packet's word list,
+// FUN_14000d040 bimap lookup by id -> node+0x1c socket slot,
+// then PostCommand(1, 0x7562, 0x418) with the built send
+// command {slot, A, ?, size, payload}. The 4-word vs 5-word
+// command variants and the exact A word of the posted command
+// are TBD (partially recovered); the rebuild posts through the
+// real 0x7562 dispatch on the resolved slot.
+size_t CCrossServerSocketKernel::SendOSMulitClient(
+        uint16_t usType, uint32_t dwSize, const uint8_t* pMsg,
+        const std::vector<uint32_t>& vecTargets) {
+    size_t nSent = 0;
+    for (uint32_t dwId : vecTargets) {
+        uint32_t dwSlot = SlotOfServer(dwId);
+        if (dwSlot == 0xffffffffu) continue;
+        CCrossSocket** pp = Slot(dwSlot);
+        if (!pp || !*pp) continue;
+        // the ORIGINAL 0x7562 command: {slot, A, B, C, size...}
+        // p[5] = payload size; payload from +6
+        std::vector<uint32_t> cmd(6 + (dwSize + 3) / 4, 0);
+        cmd[0] = dwSlot;
+        cmd[1] = 0; cmd[2] = 0;   // TBD: original A/B words
+        cmd[3] = 0; cmd[4] = 0;   // TBD: C/type words
+        cmd[5] = dwSize;
+        std::memcpy(cmd.data() + 6, pMsg, dwSize);
+        // NOTE: the hub re-writes the frame type on relay;
+        // the ORIGINAL rebuilds {C,A,B,size,TYPE} from the
+        // recovered command words - filled here from usType
+        if (Process(SockCmd_Send, cmd.data())) ++nSent;
+    }
+    return nSent;
 }
 
 bool CCrossServerSocketKernel::Process(uint32_t dwCmd, void* pCmd) {

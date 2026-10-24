@@ -213,6 +213,56 @@ int main() {
     // gate stops the walk (byte 24 = size field low byte 'Q')
     assert(nPosted == 1);
     assert(pw->m_ullRecvBytes >= 23); // DAT_14007ad10
+
+// ---- mode-6 multi-target relay (B==6) ----
+{
+    CCrossServerSocketKernel k4(4);
+    auto pa = std::make_unique<MockSock>();   // target 55
+    auto pb = std::make_unique<MockSock>();   // target 56
+    MockSock* pa_ = pa.get(); MockSock* pb_ = pb.get();
+    k4.AddSocket(std::move(pa)); k4.AddSocket(std::move(pb));
+    char b1[] = "55 0", b2[] = "56 1";
+    k4.Process(SockCmd_BindPair, b1);
+    k4.Process(SockCmd_BindPair, b2);
+    // frame B=6, A=3 target words: 55, -1 (skip), 56
+    std::string msg = "HELLO-HUB";
+    std::string tgt;
+    auto w = [](uint32_t id, uint32_t sz) -> uint32_t {
+        return ((sz & 0xfff) << 20) | (id & 0xfffff); };
+    tgt.append((const char*)&std::vector<uint32_t>{
+        w(55, 64), 0xffffffffu, w(56, 64)}[0], 12);
+    uint16_t cc=1, type=40065; uint32_t aa=3, bb=6;
+    std::string f(16, '\0');
+    std::memcpy(&f[0], &cc, 2); std::memcpy(&f[4], &aa, 4);
+    std::memcpy(&f[8], &bb, 4);
+    uint16_t sz = (uint16_t)(16 + msg.size() + tgt.size());
+    std::memcpy(&f[0xc], &sz, 2);
+    std::memcpy(&f[0xe], &type, 2);
+    f += msg + tgt;
+    // feed it through a socket whose drain walks frames
+    static std::string s_zFeed2; s_zFeed2 = f;
+    CServerSocket* pr = new CServerSocket(&k4, 43,
+        [](void* p, int n) -> int {
+            if (n == 0) return (int)s_zFeed2.size();
+            int nGot = n < (int)s_zFeed2.size() ? n
+                     : (int)s_zFeed2.size();
+            std::memcpy(p, s_zFeed2.data(), nGot);
+            s_zFeed2.erase(0, nGot);
+            return nGot; },
+        [&](CServerSocket* so) { so->WalkFrames(); });
+    k4.AddSocket(std::unique_ptr<CCrossSocket>(pr));
+    k4.RegisterByHandle(43, pr);
+    uint64_t h = 43;
+    k4.Process(SockCmd_Recv, &h);
+    // both real targets got the STRIPPED message (no target
+    // words), 0xffffffff skipped
+    assert(pa_->vecSent.size() == 1);
+    assert(pb_->vecSent.size() == 1);
+    const auto& fr = pa_->vecSent[0];
+    assert(fr.size() == 0x10 + msg.size());
+    assert(std::memcmp(fr.data() + 0x10, msg.data(),
+                       msg.size()) == 0);
+}
 }
     // unknown handle -> FindByHandle null, no crash
     uint64_t ullBad = 888;

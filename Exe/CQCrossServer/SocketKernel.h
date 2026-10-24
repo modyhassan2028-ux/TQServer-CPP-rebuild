@@ -156,6 +156,17 @@ public:
     // `return 1` in the send paths, fallthrough break = false)
     bool Process(uint32_t dwCmd, void* pCmd);
 
+    // ---- ORIGINAL FUN_14002b560:
+    // CSocketKernel::SendOSMulitClient ------------------------
+    // relays a stripped message to every target id (the mode-6
+    // trailing target words, 20-bit ids): resolves each id in
+    // the +0xa0 bimap and posts a 0x7562 send command for it.
+    // Returns the number of targets actually sent.
+    size_t SendOSMulitClient(uint16_t usType, uint32_t dwSize,
+                             const uint8_t* pMsg,
+                             const std::vector<uint32_t>&
+                                 vecTargets);
+
     // ---- walker support (route map of FUN_14002e6d0) ----
     // ORIGINAL route key/value are u64 CONCAT44 packs
     void RoutePut(uint32_t a, uint32_t b, uint32_t c,
