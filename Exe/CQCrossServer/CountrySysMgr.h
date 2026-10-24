@@ -78,6 +78,21 @@ public:
     const CountryLeague* TokenLowerBound(uint32_t dwCountryDate) const;
 
     bool HasLeague(uint32_t dwIdServer, uint32_t dwIdLeague) const;
+
+    // ---- case 4 (~29589): CCountrySysMgr::UpdateCountryDate ----
+    // ORIGINAL FUN_14001a240 (the FULL 434 bytes, not just the
+    // lookup): find the league of dwIdServer, walk its date map
+    // for the entry whose value (FUN_140022c80) equals dwDate,
+    // then FUN_140022e40(league, now/10000, 1) - update field 4
+    // of the record to now and commit (vcall+0x38 with 0).
+    // Failure logs the original lines: "UpdateCountryDate:
+    // server %u country league is not exist" / "UpdateCountryDate:
+    // country league %u is not exist,server=%u". Returns whether
+    // the update landed; the kernel then refreshes its state
+    // timestamp and echoes the request back.
+    bool UpdateCountryDate(uint32_t dwIdServer, uint32_t dwDate);
+    // field 4 of the league record: FUN_140022e40's +0xb0 write
+    uint32_t LastTokenTouch(uint32_t dwIdServer) const;
     size_t LeagueCount() const { return m_leagues.size(); }
     uint32_t TotalCountryDate() const { return m_nCountryDateTotal; }
 
@@ -108,6 +123,9 @@ private:
     // ORIGINAL token map (mgr+0x90, FUN_14001a240): sorted by
     // country date; LoadLeagueInfo inserts token count > 0 rows
     std::map<uint32_t, CountryLeague> m_mapTokens;
+    // ORIGINAL field 4 of the country record: FUN_140022e40's
+    // +0xb0 vcall writes now (TimeGet(2)/10000) into it
+    std::map<uint32_t, uint32_t> m_mapTokenTouch; // key: league id
     uint32_t m_nCountryDateTotal = 0;   // local_1b8 in LoadLeagueInfo
     uint32_t m_dwCapacityPerServer = 0; // *(param+0x10)
     uint32_t m_dwServerCount = 0;       // *(param+200)

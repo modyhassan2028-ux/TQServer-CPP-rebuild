@@ -1,5 +1,6 @@
 ﻿// CCrossServerKernel: the routing core of the CQCrossServer rebuild.
 #include "CrossKernel.h"
+#include <chrono>
 #include <algorithm>
 #include <cstdio>
 
@@ -187,6 +188,24 @@ void CCrossServerKernel::OnCountryScoreReq(
         m_pCountrySys->CountryDate(req.dwIdServer, req.dwIdLeague);
     auto pkt = Encode(MsgType_CountryScoreResp, resp);
     if (m_fnSend) m_fnSend(ullSocket, pkt);
+}
+
+void CCrossServerKernel::OnCountryDateUpd(
+        uint64_t ullSocket, const CountryDateUpd& req) {
+    // ORIGINAL case 4 (~29589): FUN_14001a240(countryMgr, idserver,
+    // kernelStateDate) must return true; the hub then overwrites
+    // its state (kernel+0x430[+8]) with TimeGet(2)/10000 and
+    // echoes the original message with FUN_14000a0b0(kernel, 0,
+    // msg+0x414, msg+8, msg+0x10, msg+0xc, 1). On false there is
+    // NO reply (the league/date pair was not found).
+    if (!m_pCountrySys) return;
+    if (!m_pCountrySys->UpdateCountryDate(req.dwIdServer, req.dwDate))
+        return;
+    const uint32_t dwNow =
+        (uint32_t)(std::chrono::system_clock::now()
+                   .time_since_epoch().count() / 10000000ULL);
+    CountryDateAck ack{ req.dwIdServer, dwNow };
+    if (m_fnSend) m_fnSend(ullSocket, Encode(MsgType_CountryDateAck, ack));
 }
 
 void CCrossServerKernel::OnCountryBroadcast(const char* szText) {

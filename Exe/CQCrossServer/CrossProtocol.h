@@ -50,6 +50,13 @@ enum : uint16_t {
     //   FUN_14000a0b0 sends it, ~20268 shows the same -1 gate).
     MsgType_CountryScoreReq  = 9012, // server -> hub: case 1 query
     MsgType_CountryScoreResp = 9013, // hub -> server: country + score
+    // case 4 (~29589): UpdateCountryDate. The original reads
+    //   idserver from msg+0x420 and the kernel-state date from
+    //   kernel+0x430[+8]; on success (FUN_14001a240 returns true)
+    //   it refreshes that state to now and echoes the message
+    //   back with FUN_14000a0b0(kernel, 0, msg+0x414, ...).
+    MsgType_CountryDateUpd  = 9014, // server -> hub: case 4 update
+    MsgType_CountryDateAck  = 9015, // hub -> server: state refreshed
 };
 
 // case 0 query/response payloads (see CCountrySysMgr accessors)
@@ -67,6 +74,10 @@ struct CountryScoreResp {
     uint32_t dwCountryId;  // FUN_14000d620 result (never -1 here)
     uint32_t dwCountryDate; // FUN_14001bc50 -> FUN_140022ce0
 };
+// case 4 payload: idserver comes from msg+0x420; the date being
+// confirmed is the hub's tracked country date state
+struct CountryDateUpd { uint32_t dwIdServer; uint32_t dwDate; };
+struct CountryDateAck { uint32_t dwIdServer; uint32_t dwDate; };
 struct CountryStatusResp {
     char szLeagueName[64];  // AddString #1 ("" when league unknown)
     char szLeaderTitle[64]; // AddString #2

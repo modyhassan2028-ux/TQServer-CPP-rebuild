@@ -54,6 +54,9 @@ public:
     // case 1: war score query - members without a country (-1)
     // are silently dropped, exactly like the original gate
     void OnCountryScoreReq(uint64_t ullSocket, const CountryScoreReq& req);
+    // case 4: UpdateCountryDate - on success the hub refreshes its
+    // country-date state and echoes the request back
+    void OnCountryDateUpd(uint64_t ullSocket, const CountryDateUpd& req);
     // the hub owns the manager (Init'ed from cq_league_info)
     class CCountrySysMgr* CountrySys() { return m_pCountrySys.get(); }
     // test seam (production wiring is the hub shell after Init)

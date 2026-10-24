@@ -1,6 +1,7 @@
 #include "CountrySysMgr.h"
 #include "MySQLClient.h"
 #include <cstdio>
+#include <chrono>
 #include <cstdlib>
 
 namespace cross {
@@ -148,5 +149,37 @@ const CountryLeague* CCountrySysMgr::TokenLowerBound(
     // end iterator (checked by the caller).
     auto it = m_mapTokens.lower_bound(dwCountryDate);
     return it == m_mapTokens.end() ? nullptr : &it->second;
+}
+bool CCountrySysMgr::UpdateCountryDate(uint32_t dwIdServer,
+                                       uint32_t dwDate) {
+    // ORIGINAL FUN_14001a240: league tree walk for dwIdServer,
+    // then the date-map entry whose FUN_140022c80 value == dwDate.
+    bool bFound = false;
+    for (auto& kv : m_leagues) {
+        if (kv.first.first != dwIdServer) continue;
+        if (kv.second.dwCountryDate != dwDate) continue;
+        // ORIGINAL: FUN_140022e40(league, TimeGet(2)/10000, 1)
+        // - write now into record field 4 and commit
+        const uint32_t dwNow =
+            (uint32_t)(std::chrono::system_clock::now()
+                       .time_since_epoch().count() / 10000000ULL);
+        m_mapTokenTouch[kv.second.dwIdLeague] = dwNow;
+        bFound = true;
+        break;
+    }
+    if (!bFound) {
+        // ORIGINAL failure lines (verbatim, best-effort args)
+        printf("[COUNTRY] CCountrySysMgr::UpdateCountryDate: "
+               "server %u country league is not exist\n", dwIdServer);
+    }
+    return bFound;
+}
+uint32_t CCountrySysMgr::LastTokenTouch(uint32_t dwIdServer) const {
+    for (auto& kv : m_leagues)
+        if (kv.first.first == dwIdServer) {
+            auto it = m_mapTokenTouch.find(kv.second.dwIdLeague);
+            return it == m_mapTokenTouch.end() ? 0 : it->second;
+        }
+    return 0;
 }
 } // namespace cross

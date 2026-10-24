@@ -185,6 +185,17 @@ int main() {
         assert(hit != nullptr && hit->dwIdLeague == 42);
         const CountryLeague* miss = mgr->TokenLowerBound(99);
         assert(miss == nullptr); // end() -> null
+        // --- case 4: UpdateCountryDate (FUN_14001a240 + ack) ---
+        kern2.OnCountryDateUpd(111, {7, 15}); // valid server+date
+        assert(sent.back().type == MsgType_CountryDateAck);
+        CountryDateAck ack{};
+        std::memcpy(&ack, sent.back().payload.data() + sizeof(tq::MsgHead),
+                    sizeof(ack));
+        assert(ack.dwIdServer == 7 && ack.dwDate > 0);
+        assert(mgr->LastTokenTouch(7) == ack.dwDate); // state written
+        size_t nPre = sent.size();
+        kern2.OnCountryDateUpd(111, {7, 999}); // unknown date -> no reply
+        assert(sent.size() == nPre);
         // --- CCountrySysMgr::Init against the live cq DB ---
         {
             CMySQLClient db;
