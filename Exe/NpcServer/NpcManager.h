@@ -25,6 +25,16 @@ struct NpcGenerator {
 struct NpcObj {
     std::function<void()> m_fnAITick;
     bool m_bFlag29 = false;   // +0x29 tree flag (TBD use)
+    // +0x10: the embedded I3DObj interface pointer.
+    // FUN_140038010 returns the container hit's
+    // BASE + 0x10, and the callers deref the result
+    // as an object whose first qword is a vptr
+    // (vt+0x38/vt+0x40 = the position getters) -
+    // this field models that embedded interface.
+    void* m_pIface10 = nullptr;
+    // the id (the map key of the ORIGINAL by-id
+    // container, vt+0x30(id))
+    uint64_t m_uId = 0;
 };
 
 class CNpcManager {
@@ -35,6 +45,10 @@ public:
     // test seams / state
     std::vector<NpcGenerator*> m_vecGenSet;   // +0x10
     std::map<uint64_t, NpcObj*> m_mapNpcSet;  // +0x8
+    // the ORIGINAL live-object by-id container
+    // access (the vt+0x30(id) of FUN_140038010's
+    // container): 0 when absent
+    NpcObj* LookupByIdVt30(uint64_t uId);
     // DAT_1401028c0: global per-tick spawn budget
     uint32_t m_dwBudget = 100;
     // DAT_1401045cc: the every-3rd-tick counter

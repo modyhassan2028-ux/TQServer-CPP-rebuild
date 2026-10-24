@@ -49,8 +49,16 @@ CNpcMapBinder::CNpcMapBinder(TqGameMapCore* pMap)
 }
 
 void CNpcMapBinder::BindCellCheck() {
+    // null guards (a documented port deviation:
+    // the ORIGINAL faults on a null map; the
+    // binder binds only what exists so tests can
+    // use a bare core)
+    if (m_pMap == nullptr)
+        return;
     TqMapData* pMd = m_pMap->m_pMapData;
     // ===== the mapdata accessors (unit 37) =====
+    if (pMd == nullptr)
+        return;
     m_cell.m_fnMdWidth28 = [pMd]() {
         return pMd->WidthVt28(); };
     m_cell.m_fnMdHeight20 = [pMd]() {
@@ -64,6 +72,8 @@ void CNpcMapBinder::BindCellCheck() {
     // ===== the blocker grid chain (49580 ->
     //      3e890 -> *uint) =====
     TqBlockerGrid* pGr = m_pMap->m_pBlockers;
+    if (pGr == nullptr)
+        return;
     pGr->m_fnInvalidParam =
         [this]() {
             if (m_fnInvalidParam) m_fnInvalidParam(); };
@@ -178,6 +188,23 @@ void CNpcMapBinder::BindTargetSearchFinale(
             sprintf(buf, "%s", pszFmt);
             CNpcShout586b0(rShout, buf,
                            nullptr);
+        };
+}
+
+void CNpcMapBinder::BindLookupContainer(
+        TqLookupMgr& rL) {
+    // the ORIGINAL: FUN_14001c210()->+0x8
+    // container vt+0x30(id) -> the LIVE NPC
+    // base; FUN_140038010 then returns base+0x10
+    // (the offset is verbatim in the ported
+    // TqLookupById38100)
+    CNpcManager* pMgr = m_pManager;
+    rL.m_fnContainerVt30 =
+        [pMgr](int nId) -> void* {
+            if (!pMgr)
+                return nullptr;
+            return pMgr->LookupByIdVt30(
+                (uint64_t)(uint32_t)nId);
         };
 }
 

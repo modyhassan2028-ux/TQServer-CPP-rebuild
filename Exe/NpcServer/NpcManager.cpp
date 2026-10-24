@@ -65,4 +65,12 @@ void CNpcManager::ProcessGenerators() {
     }
 }
 
+// ===== the by-id container access (vt+0x30 model) =====
+NpcObj* CNpcManager::LookupByIdVt30(uint64_t uId) {
+    auto it = m_mapNpcSet.find(uId);
+    if (it == m_mapNpcSet.end())
+        return nullptr;
+    return it->second;
+}
+
 } // namespace npc

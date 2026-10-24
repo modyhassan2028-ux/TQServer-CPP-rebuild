@@ -22,6 +22,8 @@
 #include "NpcCellObjects.h"
 #include "NpcStrTable.h"
 #include "NpcStateUtil.h"
+#include "NpcManager.h"
+#include "TqKernel.h"
 
 namespace npc {
 
@@ -107,6 +109,14 @@ public:
     void BindTargetSearchFinale(
         CNpcTargetSearchData& rT,
         CNpcShoutData& rShout);
+    // bind the kernel lookup container leg
+    // (FUN_140038010's vt+0x30(id)) to the REAL
+    // manager by-id map (the +0x10 offset stays
+    // verbatim inside the ported lookup)
+    void BindLookupContainer(TqLookupMgr& rL);
+    // the manager this binder binds (owned by
+    // the runtime harness)
+    CNpcManager* m_pManager = nullptr;
 
     // bind the transform's 49310 probes:
     //   m_fnMapWidth  = mapdata vt+0x28
