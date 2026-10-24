@@ -161,12 +161,11 @@ int main() {
     {   // id gate +0x80: 0x61a81..499999 -> SpawnNewNpcID
         CNpcTransform t; setup(t, 0);
         t.m_ucFlag108 = 1; t.m_nType110 = 42;
-        NpcTypeRecord rec; NpcIdAllocator a; a.m_qwQueueRemain = 0;
+        NpcTypeRecord rec; NpcIdAllocator a;
         a.m_dwCounter = 499998;
         t.m_pAllocator = &a;
         int nSpawn = 0;
         t.m_fnFindType = [&](int32_t){ return (void*)&rec; };
-        t.m_fnPopQueueId = [&]{ return 400001u; };
         t.m_fnSend100V88 = [&](uint32_t&){ return true; };
         (void)nSpawn;
         t.m_dwId80 = 400001;                   // in [0x61a81,499999]
@@ -187,10 +186,13 @@ int main() {
         assert(t.Transform());
         assert(a.m_dwCounter == 0x61a81);
         assert(t.m_vecLogs.size() == 1);      // ID空间回卷 log
-        // queue path: +0x18 != 0 -> FUN_14002a690 pop
-        a.m_qwQueueRemain = 5;
+        // the freed-ring path (2b270 FIRST path):
+        // pop the recycled id BEFORE the counter
+        a.m_dwCounter = 499998;
+        a.m_ring.Push(400777);
         t.m_ucFlag108 = 1;
         assert(t.Transform());
+        assert(a.m_dwCounter == 499998);   // counter NOT touched
     }
 
     printf("NPC_TRANSFORM_OK: CheckTransform "

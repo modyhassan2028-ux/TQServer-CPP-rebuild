@@ -22,11 +22,27 @@ int NpcMulDiv(int nNumber, int nNumerator, int nDenominator) {
 //       // DAT_1400c3fd0 (GBK) =
 //       // "CNpcManager::SpawnNewNpcID() MONSTER的ID空间回卷 at %s, %d"
 //   return *param_1;
+// ===== unit 46: the composed mgr map KEY SPACE
+// (the unit-42 TBD resolved by the primary
+// evidence of FUN_14002b270 + FUN_140038090 +
+// FUN_14001c1d0):
+//   generated monsters: [400001, 500000]
+//     (2b270: the ring first, then the counter
+//     < 499999, wrap -> 400001 + the error log)
+//   pets:    [700001, 800000)  (38090)
+//   players: [1000000, 1000000+0xee5be5c0) (38090)
+//   transform gate: (id - 0x61a81) < 299999
+//     = [400001, 700000) (1c1d0) - covers the
+//     monster space fully; 700000 is the gap
+//     before the pet band.
+//   the cq_monstertype record ids (1..823) are
+//   TYPE keys (a separate lookup), NOT mgr map
+//   keys - which is why the 38110 players gate
+//   [1,300000) can safely block them.
 uint32_t CNpcTransform::SpawnNewNpcID() {
-    if (m_pAllocator->m_qwQueueRemain != 0) {
-        // ORIGINAL: FUN_14002a690(instance+0x28) ring-buffer
-        // pop (via FUN_140026b80 index walk) - TBD
-        return m_fnPopQueueId();
+    // ORIGINAL: the freed-id ring FIRST
+    if (!m_pAllocator->m_ring.Empty()) {
+        return m_pAllocator->m_ring.Pop();
     }
     if (m_pAllocator->m_dwCounter < 499999u) {
         m_pAllocator->m_dwCounter = m_pAllocator->m_dwCounter + 1;
@@ -35,6 +51,51 @@ uint32_t CNpcTransform::SpawnNewNpcID() {
     m_pAllocator->m_dwCounter = 0x61a81;
     Log("CNpcManager::SpawnNewNpcID() MONSTER\xB5\xC4ID\xBF\xD5\xBC\xE4\xBB\xD8\xBE\xED at %s, %d");
     return m_pAllocator->m_dwCounter;
+}
+
+// ===== the freed-id ring (FUN_14002a690
+// verbatim) =====
+uint32_t NpcIdRing::Pop() {
+    if (m_uCount == 0) return 0;
+        // guarded upstream, kept verbatim
+    size_t nCap = m_vIds.size() == 0 ? 1 : m_vIds.size();
+    // ORIGINAL: if (head + count < head)
+    //   -> _invalid_parameter_noinfo
+    // (the overflow guard - modeled as a clamp)
+    if (m_nHead + m_uCount < m_nHead) return 0;
+    uint32_t uId = m_vIds[m_nHead];
+    m_nHead = m_nHead + 1;
+    if (m_nHead >= nCap) m_nHead = 0;
+        // ((cap<<2) <= head) in bytes ==>= elements
+    if (m_uCount > 0) --m_uCount;
+    if (m_uCount == 0) m_nHead = 0;   // the reset
+    return uId;
+}
+
+void NpcIdRing::Push(uint32_t uId) {
+    if (m_vIds.empty()) {   // the ring grows from 0
+        m_vIds.push_back(uId);
+        m_nHead = 0; m_uCount = 1;
+        return;
+    }
+    size_t nCap = m_vIds.size();
+    if (m_uCount >= nCap) {
+        // full: compact the live elements to
+        // index 0 (FIFO order kept) AND grow by
+        // one slot (the vector's growth models
+        // the ORIGINAL's capacity field)
+        std::vector<uint32_t> v(m_uCount);
+        for (size_t i = 0; i < m_uCount; ++i)
+            v[i] = m_vIds[(m_nHead + i) % nCap];
+        v.push_back(uId);   // the new slot
+        m_vIds.swap(v);
+        m_nHead = 0;
+        ++m_uCount;
+        return;
+    }
+    size_t nTail = (m_nHead + m_uCount) % nCap;
+    m_vIds[nTail] = uId;
+    ++m_uCount;
 }
 
 // ===== ORIGINAL FUN_140049310 (position gate) =====

@@ -20,9 +20,40 @@ namespace npc {
 // FUN_14001c7a0 -> DAT_1401045b8+0x30
 //   +0x00 : uint32 counter (FUN_14002b270 wrap path)
 //   +0x18 : queue remaining count (longlong in binary)
+// ===== unit 46: the REAL freed-id ring
+// (FUN_14002a690 decoded - a FIFO ring buffer,
+// NOT a tree):
+//   ring+0x00: the element vector ptr
+//   ring+0x14: capacity (BYTES; <<2 /4 = the
+//              element count)
+//   ring+0x18: head index
+//   ring+0x1C: the live count
+// pop (2a690): if count == 0 -> 0 (guarded by
+// the 2b270 non-empty check); the overflow
+// check head+count < head ->
+// _invalid_parameter_noinfo (the SAME
+// 0x1298-family check); id = ring[head];
+// head = (head+1) % capacity; --count; if
+// count == 0 -> head = 0 (the reset).
+struct NpcIdRing {
+    std::vector<uint32_t> m_vIds;   // the backing elements
+    size_t   m_nHead = 0;           // +0x18
+    uint64_t m_uCount = 0;          // +0x1C
+    // the REAL pop (FUN_14002a690 verbatim)
+    uint32_t Pop();
+    // the recycle push (the death path feeds
+    // the ring; capacity growth = the vector's)
+    void Push(uint32_t uId);
+    bool Empty() const { return m_uCount == 0; }
+};
+
 struct NpcIdAllocator {
-    uint32_t m_dwCounter = 0x61a81;   // *param_1
-    uint64_t m_qwQueueRemain = 0;     // *(param_1+0x18)
+    uint32_t m_dwCounter = 0x61a81;   // *param_1 (boot value; the wrap floor)
+    // the freed-id ring (the 2b270 FIRST path:
+    // if (*(longlong*)(param_1+0x18) != 0) ->
+    // FUN_14002a690 - pop a recycled id BEFORE
+    // the counter)
+    NpcIdRing m_ring;                 // the +0x28 sub-object
 };
 
 // The monster-type record returned by the 3-step lookup
@@ -33,6 +64,8 @@ struct NpcTypeRecord {
 
 class CNpcTransform {
 public:
+    // ===== ORIGINAL FUN_14002b270 (CNpcManager::SpawnNewNpcID) =====
+    uint32_t SpawnNewNpcID();
     // ===== ORIGINAL FUN_14005a660 (CNpc::CheckTransform) =====
     bool CheckTransform();
     // ===== ORIGINAL FUN_14005a3b0 (CNpc::Transform) =====
@@ -88,14 +121,12 @@ public:
     std::vector<std::string> m_vecLogs;
 
     // ASSEMBLY GLUE (not an ORIGINAL symbol): the port of
-    // FUN_14002b270 lives private here until the manager
-    // unit owns it; NpcAssembly calls it through this
-    // passthrough so the id-space walk has ONE source.
+    // FUN_14002b270 lives here; NpcAssembly calls it
+    // through this passthrough so the id-space walk
+    // has ONE source.
     uint32_t SpawnNewNpcID_External() { return SpawnNewNpcID(); }
 
 private:
-    // ===== ORIGINAL FUN_14002b270 (CNpcManager::SpawnNewNpcID) =====
-    uint32_t SpawnNewNpcID();
     // ===== ORIGINAL FUN_140049310 (position gate) =====
     bool PosValid(int nX, int nY);
     void Log(const char* sz) { m_vecLogs.push_back(sz); }
