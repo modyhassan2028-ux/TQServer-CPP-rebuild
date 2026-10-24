@@ -95,7 +95,6 @@ public:
 private:
     void Console(const char* sz) { m_vecConsole.push_back(sz); }
     void WorldTick();          // the state-2 tick family
-    bool SpawnFromGenerator(uint32_t i);
     void WireNpc(LiveNpc* p);
     std::vector<GenStat> GenStats();
 };

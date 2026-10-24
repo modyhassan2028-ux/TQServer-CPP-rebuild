@@ -9,6 +9,8 @@
 
 namespace npc {
 
+struct AiNpcInfoRecord;   // MsgAiNpcInfo.h
+
 // generator config record (read via vcall+0x10 GetInt(i))
 struct GenConfig {
     // ORIGINAL call indices recovered in FUN_140061040:
@@ -77,6 +79,62 @@ public:
     std::function<uint32_t()> m_fnTime;          // tq::TimeGet
     std::function<void(const char*)> m_fnLog;
     GenConfig m_cfg;
+
+    // ---------- counters (ORIGINAL offsets, ctor
+    // FUN_140060d60 zeros all five) ----------
+    int32_t  m_nAmount10 = 0;       // +0x10 m_nAmount (FUN_14005fb30)
+    int32_t  m_nRest14 = 0;        // +0x14 remaining to
+                                    // spawn (Generator loop
+                                    // gate; the ORIGINAL
+                                    // writer is TBD - not
+                                    // in FUN_140061040;
+                                    // likely the +0x38 walk)
+    int32_t  m_nGenAmount18 = 0;   // +0x18 m_nGenAmount
+    int32_t  m_nMonsters20 = 0;   // +0x20 in-game count
+                                    // (stats vcall+0x30)
+    uint32_t m_dwLastLogMs24 = 0; // +0x24 idle-log ms
+
+    // ---------- FUN_14005fc90 seams ----------
+    // FUN_14004cc70(map, x, y): position usable
+    // (nonzero -> the probe loop breaks and the spawn
+    // proceeds)
+    std::function<bool(void*, int, int)> m_fnCellOk;
+    // FUN_140049310(map, x, y): position valid (feeds the
+    // bVar2 flag that suppresses the idle log)
+    std::function<bool(void*, int, int)> m_fnPosValid;
+    // FUN_14001c7a0 + FUN_14002b270: SpawnNewNpcID
+    std::function<uint32_t()> m_fnSpawnNewNpcId;
+    // vcall+0x40 on the generator vtable -> record +0x04
+    std::function<uint32_t()> m_fnGetMapId;
+    // vtable+8 (GetId) -> record +0x08 / log %u
+    std::function<uint32_t()> m_fnGetId;
+    // FUN_140061220 ctor + FUN_1400613a0
+    // CreateFromBuffer(&record): build the 0x38
+    // CMsgAiNpcInfo from the filled record
+    std::function<bool(const AiNpcInfoRecord&)>
+        m_fnBuildSpawnMsg;
+    // FUN_14001c200 + FUN_14001c5f0(inst, 0, msg) -
+    // the assembled buffer is the record
+    std::function<void(const AiNpcInfoRecord&)>
+        m_fnSendMsg;
+    // vtable+0x10 on the +0x40 cluster object by index
+    // (weights 2,4,..0x14 / types 3,5,..0x15)
+    std::function<int(uint32_t)> m_fnClusterVal;
+    // sinks: log_InlineLogDBERROR(DAT_1400c9af0) /
+    // InlineLogMessage / InlineLogERROR(DAT_1400be0b0)
+    std::vector<std::string> m_vecDbErrLogs;
+    std::vector<std::string> m_vecMsgLogs;
+
+    // ===== ORIGINAL FUN_14005fc90: CNpcGenerator::
+    // Generator (CTickAnalyst 0x53; the vtable+0x80 slot
+    // the CNpcManager walk calls with the budget) =====
+    uint32_t Generator(uint32_t dwBudget);
+    // ===== ORIGINAL FUN_14005f7e0: weighted cluster type
+    // (RandGet(100) over cluster columns) =====
+    uint32_t ClusterType();
+    // ===== ORIGINAL FUN_14005fb30: amount restock on NPC
+    // leave/death (glue name) =====
+    void AdjustAmountOnLeave();
 };
 
 } // namespace npc

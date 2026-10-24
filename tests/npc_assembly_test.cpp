@@ -54,25 +54,30 @@ int main() {
     ms = BASE + 10000u; app.KernelTick();
     assert(Has(app.m_vecConsole, "Generator begin."));
 
-    // ===== the tick family: generator -> CNpc::Create
-    //       -> manager -> AI tick -> wander -> steplist ==
+    // ===== the tick family: FUN_14005fc90 Generator ->
+    //       CMsgAiNpcInfo 0x38 record -> loop-back ->
+    //       CNpc::Create -> manager -> AI tick -> wander
+    //       -> steplist. The real Generator drains the
+    //       +0x14 rest (cap 2) in one budgeted call ==
     int n0 = (int)app.m_vecNpcs.size();
     ms = BASE + 11000u; app.KernelTick();
-    assert((int)app.m_vecNpcs.size() == n0 + 1);
-    auto* p1 = app.m_vecNpcs.back().get();
+    assert((int)app.m_vecNpcs.size() == n0 + 2);
+    auto* p1 = app.m_vecNpcs[n0].get();
+    auto* p2 = app.m_vecNpcs[n0 + 1].get();
     assert(p1->dwId >= 0x61a81);           // SpawnNewNpcID
+    assert(p2->dwId == p1->dwId + 1);
     assert(p1->obj.At<uint32_t>(0x80) == p1->dwId);
     assert(p1->obj.At<uint32_t>(0x98) == (uintptr_t)0x55);
     assert(p1->obj.At<int32_t>(0xa8) == 3); // 1000*3/1000
+    // the record x/y words (500+RandGet(40) / 300+
+    // RandGet(30)) flow into CNpc::Create's +0x34/+0x38
+    assert(p1->obj.At<int32_t>(0x34) == 520);
+    assert(p1->obj.At<int32_t>(0x38) == 315);
     assert(app.m_mgr.m_mapNpcSet.count(p1->dwId) == 1);
 
-    // cap enforcement (dwCap = 2)
+    // +0x14 rest drained: no further spawns
     ms = BASE + 12000u; app.KernelTick();
     assert((int)app.m_vecNpcs.size() == n0 + 2);
-    ms = BASE + 13000u; app.KernelTick();
-    assert((int)app.m_vecNpcs.size() == n0 + 2);
-    auto* p2 = app.m_vecNpcs.back().get();
-    assert(p2->dwId == p1->dwId + 1);
 
     // the 3-tick AI walk drives tick + wander dispatch
     int nAI = p1->nAICalls;
@@ -89,7 +94,9 @@ int main() {
     assert(Has(app.m_vecConsole, "NPC active / total: "));
     assert(Has(app.m_vecConsole,
                 "Generator: active+full+over / total"));
-    assert(Has(app.m_vecConsole, "\t0 + 1 + 0 / 2"));
+    // nCur = +0x20 monsters (2), nAct = +0x48 cap (0 =
+    // unlimited mode) -> classified "over": 0 + 0 + 1
+    assert(Has(app.m_vecConsole, "\t0 + 0 + 1 / 2"));
 
     // ===== unit 9 -> 10: message create path =====
     AiNpcInfoRecord rec; memset(&rec, 0, sizeof(rec));

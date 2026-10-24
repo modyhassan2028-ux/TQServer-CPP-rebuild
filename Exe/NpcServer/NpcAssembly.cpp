@@ -82,41 +82,14 @@ void CNpcServerApp::WorldTick() {
     m_mgr.ProcessGenerators();    // FUN_14002b380
 }
 
-// ===== per-generator spawn (assembly cadence) =====
-// NOTE (assembly glue, TBD): the ORIGINAL per-generator
-// Process family (FUN_140060xxx) is not ported yet. The
-// assembly attempts one spawn per tick under the cap:
-// FUN_140061040 (CNpcGenerator::CreateNpc, ported) then
-// FUN_14005d9c0 + FUN_14005e2e0 (new CNpc + CNpc::Create,
-// ported) with the generator's computed fields. The
-// remaining Create params (8..15) come from the
-// generator config in the original - TBD seam (zeros).
-bool CNpcServerApp::SpawnFromGenerator(uint32_t i) {
-    CNpcGenerator* pGen = m_vecGens[i].get();
-    if (pGen->m_bClosed) return false;
-    if (m_vecGenSpawned[i] >= pGen->m_dwFieldF) return false;
-
-    // FUN_140061040: fixed/random mode + geo step + rand
-    // X (NOTE: the ORIGINAL map-object lookup uses the
-    // generator's +0x54 type slot, verbatim in the port)
-    if (!pGen->CreateNpc(nullptr, 0)) return false;
-
-    auto p = std::make_unique<LiveNpc>();
-    p->dwId = NextNpcId();          // FUN_14002b270
-    // FUN_14005e2e0 with the generator's fields
-    WireNpc(p.get());
-    uint64_t r = p->obj.Create(p->dwId, pGen->m_dwType,
-                               pGen->m_dwMap, pGen->m_nX, 0,
-                               (int)m_dwNextGenId - 1, 0, 0,
-                               0, 0, 0, 0, 0, 0);
-    if ((r & 0xFF) != 1) return false;
-    p->anchor.nX = pGen->m_nX;
-    p->anchor.nY = 0;
-    m_mgr.m_mapNpcSet[p->dwId] = &p->mgrNpc;
-    m_vecNpcs.push_back(std::move(p));
-    ++m_vecGenSpawned[i];
-    return true;
-}
+// ===== the generator spawn loop-back =====
+// The real cadence is CNpcGenerator::Generator
+// (FUN_14005fc90, unit 12). Its FUN_14001c5f0 send is
+// the socket loop-back seam: the built CMsgAiNpcInfo
+// arrives as a message and runs the unit-9 Process path
+// (find / new / CNpc::Create / register). The generator
+// needs the record its Generator() built, so the send
+// seam captures it per spawn.
 
 // ===== LiveNpc seam wiring (all seams = ORIGINAL
 // callees; in-memory kernel objects stand in for the
@@ -224,22 +197,32 @@ std::vector<GenStat> CNpcServerApp::GenStats() {
     std::vector<GenStat> v;
     for (uint32_t i = 0; i < m_vecGens.size(); ++i) {
         GenStat g;
-        g.nCur = m_vecGenSpawned[i];       // vcall+0x30
-        g.nAct = m_vecGens[i]->m_dwFieldF; // vcall+0x48
-        g.nLim = m_vecGens[i]->m_dwFieldF; // vcall+0x20
+        // vcall+0x30: in-game count (+0x20)
+        g.nCur = (uint32_t)m_vecGens[i]->m_nMonsters20;
+        // vcall+0x48: the 0xf cap (0 = unlimited mode)
+        g.nAct = m_vecGens[i]->m_dwFieldF;
+        // vcall+0x20 slot
+        g.nLim = (uint32_t)m_vecGens[i]->m_nMonsters20;
         v.push_back(g);
     }
     return v;
 }
 
 // ===== generator registration =====
+// The ORIGINAL boot path (FUN_140032800) loads the
+// cq_generator rows, calls CNpcGenerator::CreateNpc once
+// per row and registers the object in the generator set.
+// The assembly mirrors that: CreateNpc once here, the
+// cap lives in +0x14 (the ORIGINAL writer of +0x14 is
+// not in FUN_140061040 - likely the +0x38 world walk),
+// and the per-tick cadence is the real FUN_14005fc90
+// (unit 12) wired to the real CMsgAiNpcInfo path.
 void CNpcServerApp::AddGenerator(uint32_t dwMap,
                                  uint32_t dwType,
                                  uint32_t dwCap) {
     auto p = std::make_unique<CNpcGenerator>();
     p->m_dwMap = dwMap;                    // +0x50
     p->m_dwType = dwType;                  // +0x54
-    p->m_dwFieldF = dwCap;                // +0x48
     p->m_fnCurrentMapId = [dwMap]{ return dwMap; };
     p->m_fnRandomMapId = [dwMap]{ return dwMap; };
     p->m_fnFindMap = [this](uint32_t dwId){
@@ -250,33 +233,71 @@ void CNpcServerApp::AddGenerator(uint32_t dwMap,
     p->m_fnTime = m_fnTime;
     p->m_fnLog = [this](const char* sz){ Console(sz); };
     // GenConfig GetInt seam (ORIGINAL indices of
-    // FUN_140061040): 1 type, 0xf cap, 0x10 field,
-    // 0x12 bit0 = random-map mode (0 = fixed),
-    // 4/5/6/7/8 spawn geometry, 0x11 cluster flag
-    // (0 = FUN_140060e60 tail skips the DB cluster)
-    p->m_cfg.m_fnGetInt = [dwType, dwCap](int idx){
+    // FUN_140061040 / FUN_14005fc90): 1 type, 9 the
+    // record type word, 0xf cap (0 = the unlimited
+    // spawner mode FUN_14005fc90 runs in), 2/4 + 3/5
+    // the random spawn rect (and the probe attempt
+    // count max(1, 5*4)), 0xc/0xd the fixed point
+    // (0xc = 0 -> random), 8 restock batch,
+    // 0x11 cluster flag (0 = skip the DB cluster),
+    // 0x12 random-map mode (0 = fixed)
+    p->m_cfg.m_fnGetInt = [dwType](int idx){
         return idx == 1 ? (int)dwType
-             : idx == 0xf ? (int)dwCap
+             : idx == 9 ? (int)dwType
+             : idx == 0xf ? 0
              : idx == 0x10 ? 0
              : idx == 0x12 ? 0
              : idx == 0x11 ? 0
-             : idx == 4 ? 45
-             : idx == 5 ? 50
+             : idx == 2 ? 500
+             : idx == 3 ? 300
+             : idx == 4 ? 40
+             : idx == 5 ? 30
              : idx == 6 ? 10
              : idx == 7 ? 40
              : idx == 8 ? 1
+             : idx == 0xc ? 0
+             : idx == 0xd ? 0
              : 0; };
     m_mapGens[(int)m_dwNextGenId] = p.get();
+    uint32_t dwGenId = m_dwNextGenId;
     ++m_dwNextGenId;
     m_vecGenSpawned.push_back(0);
-    // manager registration: vcall +0x80 = Process(budget)
+    // ---- FUN_14005fc90 seams ----
+    // FUN_14004cc70 / FUN_140049310 stubs
+    p->m_fnCellOk = [](void*, int, int){ return true; };
+    p->m_fnPosValid = [](void*, int, int){
+        return false; };
+    p->m_fnSpawnNewNpcId = [this]{ return NextNpcId(); };
+    p->m_fnGetMapId = [dwMap]{ return dwMap; };
+    p->m_fnGetId = [dwGenId]{ return dwGenId; };
+    // FUN_140061220 + FUN_1400613a0: the real
+    // CMsgAiNpcInfo assembly from the 0x38 record
+    p->m_fnBuildSpawnMsg =
+        [](const AiNpcInfoRecord& r){
+            CMsgAiNpcInfo m;
+            return m.CreateFromBuffer(&r); };
+    // FUN_14001c5f0 send: socket loop-back seam -> the
+    // unit-9 Process path (find/new/CNpc::Create/
+    // register) exactly as a wire-delivered message
+    p->m_fnSendMsg = [this](const AiNpcInfoRecord& r){
+        HandleAiNpcInfo(r); };
+    // ---- boot load: CreateNpc once (FUN_140032800
+    // pattern; map object lookup by the +0x54 TYPE
+    // slot - the map table must hold it) ----
+    if (!p->CreateNpc(nullptr, 0)) return;
+    p->m_dwFieldF = 0;        // GetInt(0xf) = 0 above
+    // +0x14 remaining: ORIGINAL writer TBD - the
+    // assembly seeds it with the requested cap
+    p->m_nRest14 = (int32_t)dwCap;
+    // manager registration: vcall +0x80 = Generator
     NpcGenerator* pReg = new NpcGenerator();
     uint32_t i = (uint32_t)(m_vecGens.size());
-    pReg->m_fnProcess = [this, i](uint32_t){
-        return SpawnFromGenerator(i) ? 1u : 0u; };
+    pReg->m_fnProcess = [this, i](uint32_t dwBudget){
+        return m_vecGens[i]->Generator(dwBudget); };
     m_mgr.m_vecGenSet.push_back(pReg);
     m_vecGens.push_back(std::move(p));
 }
+
 
 CNpcServerApp::LiveNpc* CNpcServerApp::FindNpc(uint32_t dwId) {
     for (auto& p : m_vecNpcs)

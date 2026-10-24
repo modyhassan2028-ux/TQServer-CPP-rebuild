@@ -3485,3 +3485,44 @@ FUN_140022f40 (تفاصيل كتابة الحقل)، FUN_1400232b0 (مسار
 10. **الرجريشن 12/12 خضرا** (10 وحدات + التجميعة +
    ops 205/207/208 + record 201 ضد القاعدة الحية) +
    smoke لـ main الحقيقي (boot → "Login OK...").
+
+## جلسة 2026-10-24 18:30 — NpcServer الوحدة 12: عيلة
+## CNpcGenerator::Generator الحقيقية (الـ cadence)
+1. **FUN_14005fc90 (CTickAnalyst 0x53 = "CNpcGenerator::
+   Generator"، سلف vtable+0x80 اللي مشية FUN_14002b380
+   بتناديه بالبودجت)** بورت حرفياً في NpcGenerator.cpp:
+   بوابات الثلاث، attempts = max(1, GetInt(5)*GetInt(4))،
+   probe ثابت/عشوائي، FUN_14004cc70/fUN_140049310، بناء
+   سجل 0x38 (نفس تخطيط CMsgAiNpcInfo بتاع الوحدة 9 —
+   تأكيد قاطع: التاج word@0x18=1 والنوع word@0x1a)،
+   العدادات +0x14/- و+0x18/+ و+0x20/+، إرسال
+   FUN_14001c5f0، وقفل البودجت.
+2. **لوج الخمول فُك من البيناري** (tools: قراءة مباشرة
+   من orig_binaries/Source/NpcServer.exe بـ PE offsets):
+   DAT_1400c9af0 (GBK) = "cq_generator.id=%u，出生点不可站"
+   وDAT_1400c9620 = "table:cq_generator,cq_generator表找
+   不到这个GeneratorID[%u] MonsterType[%u] Map[%u][%d,
+   %d]." — الاتنين متسجلين حرفياً في الكود/الاختبار.
+3. **FUN_14005f7e0 (نوع الكلاستر المرجّح)**: RandGet(100)،
+   أعمدة الأوزان 2,4,..,0x14 وأنواعها 1,3,..,0x15
+   (idx*2+1 — أول نوع عمود 1 مش 3)، إرهاق الأعمدة أو
+   مجموع <100 بدون إصابة → 0 → Generator يرجع فوراً.
+4. **FUN_14005fb30 (إعادة تعبئة +0x10 عند مغادرة NPC)**:
+   GetInt(8) > 0 → مزامنة +0x18=+0x10 مع اللوج الحرفي
+   "GeneratorID[%u]: m_nGenAmount[%d] < m_nAmount[%d]"،
+   وفرع +0x10<=0 مع لوج الخطأ الحرفي.
+5. **التجميعة**: SpawnFromGenerator (glue) اتشال خالص؛
+   AddGenerator بيعمل CreateNpc مرة عند التسجيل (نمط
+   FUN_140032800) وبعدها كل تيك Manager بيمرر البودجت
+   للـ Generator الحقيقي؛ سجل الـ 0x38 بيتلوب عبر seam
+   (m_fnSendMsg → HandleAiNpcInfo) فيمشى مسار الوحدة 9
+   الحقيقي (find/new/CNpc::Create/register). GenStats
+   بقرأت +0x20 (in-game) كـ vcall+0x30. كاتب +0x14
+   الأصلي TBD — التجميعة بتزرع dwCap فيه.
+6. **main الحقيقي**: اتضاف كائن خريطة لخانة النوع (1)
+   لأن FUN_14003ca10 بتبحث بالـ TYPE slot؛ الدورة كاملة
+   ظهرت في السموك: boot → Login OK → Generator begin. →
+   3 وحوش in-game في الإحصائيات.
+7. **الرجريشن 13/13 خضرا** (11 وحدة + genproc + التجميعة
+   + ops 205/207/208 + record 201 ضد القاعدة الحية) +
+   سموك main. Commit بعد الاختبارات خضرا بالكامل.
