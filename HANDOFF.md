@@ -1,4 +1,4 @@
-# HANDOFF — نقطة تسليم للأجنت التالي (آخر تحديث: 2026-10-24 متأخراً — نظام الكونتري + حرب السلب في CQCrossServer مكتملان، السويتش الوظيفي للـ cq_action مكتمل 100% من الصفوف الحية)
+# HANDOFF — نقطة تسليم للأجنت التالي (آخر تحديث: 2026-10-24 متأخراً (جلسة 3) — قاعدة البيانات الكاملة المعدلة مرفوعة في الريبو + خطة موسعة بقرار المالك: NpcServer + RevampedLoader + أيقونات + وحوش الريلام + conquer.exe)
 
 > هذا الملف هو نقطة البداية لأي أجنت يكمل الشغل. اقرأ PORTING_LOG.md للمنهجية
 > والتاريخ الكامل، وهذا الملف لمعرفة "أنا فين دلوقتي بالظبط".
@@ -31,6 +31,54 @@
   `(ls Exe/MsgServer/*.cpp | grep -v main.cpp; echo tests/stub_cross_client.cpp; ls Exe/MsgServer/Activity/ActivityManager.cpp Exe/MsgServer/LuaScript/LuaVM.cpp Core/CQBase/*.cpp Core/DB/*.cpp Core/Root/*.cpp) | xargs -P $(nproc) -I{} sh -c 'f="{}"; g++ -std=c++17 -O0 "-D__declspec(x)=" -I. -Iinclude -ICore/CQBase -ICore/DB -ICore/Root -IExe/MsgServer -IExe/NpcServer -IExe/CQCrossServer -Ivendor/lua -Wno-unused-parameter -c "$f" -o /tmp/objs2/$(echo $f | tr "/" "_")'`
   (غيّر امتداد .cpp إلى .o في الاسم). الربط النهائي بـ g++ مش zig.
 - ملاحظات مالية: لو الرسائل/الدفعات فشلت: انتظر تجديد الـ credits الشهرية.
+
+
+## خطة موسعة بقرار المالك (جلسة 2026-10-24 الثالثة — بالترتيب)
+1. **[تم ✔]** إصلاح القاعدة: صف cq_config type=149883 (أوقات حرب
+   السلب) اتضاف للقاعدة الحية (id=80278) **وللريبو**:
+   sql/original_full/cq_with_plunder_war.sql.gz (الدمب الكامل 267
+   جدول + الصف، 9.8MB مضغوط، محمّل ومختبر) + sql/patches/
+   cq_config_plunder_war_149883.sql (ترقيع لقاعدة موجودة) +
+   Docs/DB_SETUP.md. أي قاعدة هدف لازم تتظبط كده.
+2. **[TBD — التالي بعد استكمال CQCrossServer]** إكمال CQCrossServer:
+   رسائل الليج (LeagueInfo 40066 / LeagueStr 40067 — التحليل
+   الكامل في PORTING_LOG جلسة 23:20) ثم LeagueList/LeagueRank/
+   LeagueBrick/OSConnectInfo/ServerName/EnterOSUserSocketOpt
+   (الجرد في نفس الجلسة).
+3. **[TBD]** **NpcServer.exe كامل** — القرار: البورت طبق الأصل.
+   الديكمبايل موجود وجاهز: /app/co_repo/Native-Decompiled/
+   NpcServer.exe.decompiled.c (**181,583 سطر** — كبير: يُبورت
+   وحدة وحدة زي MsgServer). مجلدنا Exe/NpcServer فيه بس
+   vcxproj + main.cpp. **البيناري الأصلي مش موجود في البيئة**
+   (ساحة المحادثة القديمة اتمسحت) — للأيقونات والتحقق بـ objdump
+   محتاجين البيناري يترفع تاني.
+4. **[TBD]** **RevampedLoader.exe** (= "Loaderhock.exe" بتاع
+   المالك): الديكمبايل موجود: RevampedLoader.exe.decompiled.c
+   (**4,331 سطر** — صغير ومناسب كبداية) + في نفس العائلة
+   EpochHook.dll وRevampedHook.dll. يُنشأ مشروع Exe/RevampedLoader
+   بورت حرفي. البيناري الأصلي مش موجود (نفس ملاحظة 3).
+5. **[TBD]** **الأيقونات/الريسورسز**: مطابقة صور وايقونات
+   البرامج للأصل. البيناري الوحيد المتاح حالياً:
+   /tmp/orig_src/CQCrossServer.exe (أيقونته تُستخرج بـ wrestool/
+   icoutils أو python-pefile). باقي البيناريات (MsgServer/
+   NpcServer/Loader/...) مطلوب رفعها من عند المالك.
+6. **[TBD]** **وحوش الكروس سيرفر في الريلام**: المطلوب إضافة
+   وحوش الخريطة العابرة القارات في القاعدة (cq_monsters؟) —
+   يُبحث في الدمب الكامل (الجداول الـ 267) عن جداول الوحوش
+   وأعمدة الريلام/الكروس، ويتحقق من CQCrossServer/الديكمبايل
+   لو فيه منطق spawn. **لو ناقص باتشات عندنا**: المالك عنده
+   ملف conquer.exe (الكلينت) قابل للفك بأداة "Rea" اللي بعتها
+   قبل كده — **الأداة والملف مش موجودين في البيئة الحالية
+   (المحادثة القديمة اتمسحت) — يُطلب من المالك رفعهما تاني**
+   لاستخراج أي packets/assets ناقصة.
+
+**ملاحظة بيئة مهمة:** ساحة المحادثة القديمة
+(/app/conversations/6ad8ed949883f31f1959689c — فيها conquer_src/
+Source بالبيناريات الأصلية وghidra وأداة Rea) **اتمسحت**.
+الناجي: /app/co_repo/Native-Decompiled (كل الديكمبايل) و
+/tmp/orig_src (CQCrossServer.exe + cq.sql + pendtime.sql) و
+/opt/ghidra. البيناريات الأصلية الناقصة لازم تترفع من المالك
+قبل خطوات 3/5/6.
 
 ## وين وصلنا — CQCrossServer (نظام الكونتري + حرب السلب) ✔ مكتمل (2026-10-24)
 - **CCountrySysMgr:** Init الثلاثي (LoadLeagueInfo + التوزيع
