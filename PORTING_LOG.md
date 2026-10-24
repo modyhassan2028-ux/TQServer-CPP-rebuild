@@ -2739,3 +2739,29 @@ FUN_140019650 تكرار، علم node+0x29 يُفحص — ثم:
 getters 140022c20/c80/de0)، FUN_14001c990 (إشعار mode-7)،
 FUN_140022f40 (تفاصيل كتابة الحقل)، FUN_1400232b0 (مسار
 السجل المكرر)، دلالة علم node+0x29.
+
+## جلسة 2026-10-24 23:55 — إصلاح القاعدة الكامل + جرد الخطة الموسعة (قرار المالك)
+1. **[تم]** صف 149883 اتضاف: للقاعدة الحية (auto id=80278) وللدمب
+   الكامل (id=296 داخل سيكشن cq_config قبل الجدول اللي بعده —
+   التحقاق: تحميل كامل على cq_test نظيف، 267 جدول، 296 صف
+   cq_config). المرفوع: sql/original_full/cq_with_plunder_war.sql.gz
+   (9.8MB) + sql/patches/ + Docs/DB_SETUP.md.
+2. **جرد بيئة:** ساحة المحادثة القديمة (فيها conquer_src/Source
+   بالبيناريات + ghidra scripts) اتمسحت. الناجي: /app/co_repo/
+   Native-Decompiled (96 ملف: كل الديكمبايل بما فيه
+   **NpcServer.exe.decompiled.c بـ 181,583 سطر** و
+   **RevampedLoader.exe.decompiled.c بـ 4,331 سطر**) و
+   /tmp/orig_src (CQCrossServer.exe + cq.sql) و /opt/ghidra.
+3. **سكوب RevampedLoader.exe:** مش مجرد loader — واجهة Win32
+   GUI بعنوان "RevampedHook — Server Launcher" (CreateWindowExW
+   class "RevampedHookLoader"): زر "Launch Server" بيعمل
+   CreateProcessA للسيرفر + حقن DLL كلاسيكي
+   (GetProcAddress("LoadLibraryA") + CreateRemoteThread) —
+   ده الـ "Loaderhock" اللي المالك طلب بورته. صغير وقابل
+   للبورت الكامل. عائلته: EpochHook.dll وRevampedHook.dll
+   (ديكمبايل موجود).
+4. **جداول الوحوش/الكروس في القاعدة:** cq_monstertype (649 نوع؟)،
+   cq_monster_cluster، cq_monster_type_magic، cq_killmonster،
+   cq_cross_merit، cq_cross_vexillum، cq_item_cross. البحث عن
+   وحوش الريلام (spawn الجغرافيا) لسه محتاج تحديد جدول
+   الـ spawn/generator + خرائط الريلام.
