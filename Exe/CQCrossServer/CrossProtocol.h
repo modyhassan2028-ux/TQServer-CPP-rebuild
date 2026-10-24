@@ -163,10 +163,18 @@ constexpr uint16_t PLUNDER_WIRE_CAP = 0x3ff; // ORIGINAL AppendTarget size gate
 // 0x3ff by the append gate; a reply carries usAction 2 (FUN_140023a40
 // writes action 2 before the entry fills).
 #pragma pack(push, 1)
+// LeagueInfoEntry = the RECORD layout (the append SOURCE -
+// param_2 of FUN_140023b60): u32[0]@0, u32[1]@4 (amount - NOT
+// copied to the wire!), u32[2]@8 (country_date), strings at
+// +0xc/+0x1c/+0x2c (league/leader/title). The WIRE destination
+// (FUN_140023b60) is DIFFERENT: u32@+0, u32@+8, str@+0x10,
+// str@+0x20, str@+0x30, stride 0x3c - the +0x30 title (cap 0x10)
+// OVERLAPS the next entry by 4 bytes (original quirk, kept).
 struct LeagueInfoEntry {
     uint32_t dwIdLeague;      // +0x00 (request: idleague; reply: idleague + idserver*1000000)
-    uint32_t dwAmount;        // +0x04 (request: amount; reply: country_date)
-    uint32_t dwCountryDate;   // +0x08 (request: country_date)
+    uint32_t dwCountryDate;   // +0x04 (f4 country_date; NOT copied to
+                              //  the wire by FUN_140023b60)
+    uint32_t dwAmount;        // +0x08 (f3 amount -> wire +8)
     char szName[0x10];        // +0x0c league_name
     char szLeader[0x10];     // +0x1c leader_name
     char szTitle[0x10];      // +0x2c title
@@ -213,18 +221,52 @@ constexpr uint16_t LEAGUE_INFO_WIRE_CAP = 0x3ff; // append gate
 // variable-length encode, ORIGINAL size = 4 + 0x3c*count
 inline std::vector<uint8_t> EncodeLeagueInfo(uint16_t usAction,
         const LeagueInfoEntry* pEntries, uint16_t usCount) {
+    // ORIGINAL FUN_140023b60 append: wire entry i at +4+0x3c*i
+    // with u32@+0 (record +0), u32@+8 (record +8), str@+0x10
+    // (record +0xc), str@+0x20 (record +0x1c), str@+0x30
+    // (record +0x2c, cap 0x10 -> 4-byte overlap into the next
+    // entry - original quirk; the encode grows slack then trims)
     const uint16_t usSize = (uint16_t)(4 + 0x3cu * usCount);
     tq::MsgHead head;
     head.type = MsgType_LeagueInfo;
-    head.length = static_cast<uint16_t>(sizeof(tq::MsgHead) + usSize);
+    head.length = static_cast<uint16_t>(sizeof(tq::MsgHead) +
+                                       usSize);
     std::vector<uint8_t> pkt(head.length, 0);
     std::memcpy(pkt.data(), &head, sizeof(head));
     uint8_t* p = pkt.data() + sizeof(tq::MsgHead);
     std::memcpy(p + 0, &usAction, 2);
     std::memcpy(p + 2, &usCount, 2);
-    for (uint16_t i = 0; i < usCount; ++i)
-        std::memcpy(p + 4 + 0x3cu * i, pEntries + i, sizeof(LeagueInfoEntry));
+    for (uint16_t i = 0; i < usCount; ++i) {
+        uint8_t* e = p + 4 + 0x3cu * i;
+        std::memcpy(e + 0x0, &pEntries[i].dwIdLeague, 4);
+        std::memcpy(e + 0x8, &pEntries[i].dwAmount, 4);
+        // the +0x30 slot needs 4 bytes past the 0x3c stride for
+        // the last entry - the ORIGINAL buffer is 0x3ff+ (roomy)
+        size_t nAvail = pkt.size() - (size_t)(e - pkt.data());
+        char tmp[0x10];
+        std::memcpy(tmp, pEntries[i].szTitle, 0x10);
+        size_t nTitle = 0x10;
+        if (nAvail < 0x30 + 0x10) nTitle = nAvail - 0x30;
+        std::memcpy(e + 0x30, tmp, nTitle);
+        std::strncpy((char*)e + 0x10, pEntries[i].szName, 0x10);
+        std::strncpy((char*)e + 0x20, pEntries[i].szLeader, 0x10);
+    }
     return pkt;
+}
+// ORIGINAL wire -> record decode (the mirror of the append)
+inline LeagueInfoEntry DecodeLeagueInfoEntry(const uint8_t* pWire) {
+    LeagueInfoEntry r{};
+    std::memcpy(&r.dwIdLeague, pWire + 0x0, 4);
+    std::memcpy(&r.dwAmount, pWire + 0x8, 4);
+    // dwCountryDate stays 0: FUN_140023b60 never copies record +4
+    std::strncpy(r.szName, (const char*)pWire + 0x10, 0x10);
+    r.szName[0x10 - 1] = 0;
+    std::strncpy(r.szLeader, (const char*)pWire + 0x20, 0x10);
+    r.szLeader[0x10 - 1] = 0;
+    std::strncpy(r.szTitle, (const char*)pWire + 0x30, 0x10);
+    r.szTitle[0x10 - 1] = 0;
+    // dwAmount stays 0: FUN_140023b60 never copies record +4
+    return r;
 }
 
 // forward declaration (the template lives below)

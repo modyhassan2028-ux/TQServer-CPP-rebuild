@@ -468,7 +468,8 @@ bool CCountrySysMgr::OnProduceNewLeague(uint32_t dwIdServer,
     outReply = LeagueInfoEntry{};
     outReply.dwIdLeague = (uint32_t)(cur.dwIdLeague +
         (uint64_t)dwIdServer * 1000000ULL);
-    outReply.dwAmount = cur.dwCountryDate;
+    outReply.dwCountryDate = cur.dwCountryDate;
+    // f3 (+8, amount) stays 0: FUN_140021c90 never writes it
     CopyStr(outReply.szName, sizeof(outReply.szName), cur.strLeagueName);
     CopyStr(outReply.szLeader, sizeof(outReply.szLeader), cur.strLeaderName);
     CopyStr(outReply.szTitle, sizeof(outReply.szTitle), cur.strTitle);

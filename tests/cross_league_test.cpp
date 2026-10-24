@@ -82,13 +82,16 @@ int main() {
         uint16_t a, c; const uint8_t* p = pkt.data() + sizeof(h);
         std::memcpy(&a, p, 2); std::memcpy(&c, p + 2, 2);
         assert(a == 2 && c == 1);
-        uint32_t id, amt, date;
-        std::memcpy(&id, p + 4, 4); std::memcpy(&amt, p + 8, 4);
-        std::memcpy(&date, p + 0xc, 4);
-        assert(id == 77 && amt == 12 && date == 345);
-        assert(std::strcmp((const char*)p + 0x10, "Pharaohs") == 0);
-        assert(std::strcmp((const char*)p + 0x20, "Mody") == 0);
-        assert(std::strcmp((const char*)p + 0x30, "Kingdom") == 0);
+        uint32_t id, pad, amt;
+        std::memcpy(&id, p + 4, 4); std::memcpy(&pad, p + 8, 4);
+        std::memcpy(&amt, p + 0xc, 4);
+        // WIRE (FUN_140023b60): +0 id, +4 PAD (country_date NEVER
+        // travels - f4 is record-only), +8 amount, strings
+        // +0x10/+0x20/+0x30 (entry offsets from p+4)
+        assert(id == 77 && pad == 0 && amt == 12);
+        assert(std::strcmp((const char*)p + 0x14, "Pharaohs") == 0);
+        assert(std::strcmp((const char*)p + 0x24, "Mody") == 0);
+        assert(std::strcmp((const char*)p + 0x34, "Kingdom") == 0);
     }
 
     // ============ 2. OnProduceNewLeague (FUN_140021c90) ============
@@ -105,7 +108,8 @@ int main() {
         // reply entry: id = league + server*1000000 (u32 wrap),
         // +4 = country_date, strings per fields 5/6/7
         assert(r.dwIdLeague == 77u + 55u * 1000000u);
-        assert(r.dwAmount == 345);
+        assert(r.dwCountryDate == 345);
+        assert(r.dwAmount == 0); // f3 never written in the reply
         assert(std::strcmp(r.szName, "Pharaohs") == 0);
         assert(std::strcmp(r.szLeader, "Mody") == 0);
         assert(std::strcmp(r.szTitle, "Kingdom") == 0);
@@ -280,9 +284,11 @@ int main() {
         uint16_t a, c;
         std::memcpy(&a, p, 2); std::memcpy(&c, p + 2, 2);
         assert(a == 2 && c == 1);
-        LeagueInfoEntry re{};
-        std::memcpy(&re, p + 4, sizeof(re));
+        auto re = DecodeLeagueInfoEntry(p + 4);
         assert(re.dwIdLeague == 88u + 55u * 1000000u);
+        // the reply wire carries f2 + f5/6/7 only
+        assert(re.dwCountryDate == 0 && re.dwAmount == 0);
+        assert(std::strcmp(re.szName, "Kings") == 0);
         // LeagueStr through the kernel: action 1 = leader_name,
         // rebroadcast with NO exclusion -> both members
         wire.clear();

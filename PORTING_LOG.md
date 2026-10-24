@@ -2833,3 +2833,40 @@ FUN_140022f40 (تفاصيل كتابة الحقل)، FUN_1400232b0 (مسار
    سطر: بناء PlunderWarInfo لكل الحروب + LeagueRank ثم
    LeagueList مع تجزئة، مصدرها عند اتصال سيرفر) + الدالة
    الثانية عند 23419-24036 — لوحدة الجاية.
+
+## جلسة 2026-10-24 17:50 — تصحيح wire الـ LeagueInfo + تحليل ProcessServerConnectOK
+1. **[تصحيح مهم ✔]** wire الـ LeagueInfo (FUN_140023b60) اتأكد
+   بالمقارنة المباشرة واتصحح: الـ wire entry (stride 0x3c من
+   +4): u32@+0 (id) + **+4 غير مكتوب أبداً** (الـ country_date
+   f4 record-only — **لا يسافر على الـ wire!**) + u32@+8
+   (amount f3) + str@+0x10 (league_name من rec+0xc) + str@+0x20
+   (leader من rec+0x1c) + str@+0x30 (title من rec+0x2c، سعة
+   0x10 = **overlap 4 بايتات مع المدخل التالي** — quirk أصلي
+   متسق مع LeagueRank). تصحيحات: LeagueInfoEntry بقى تخطيط
+   الـ record الموثق (f4 country_date@+4 حسب رد FUN_140021c90،
+   f3 amount@+8) وEncodeLeagueInfo/DecodeLeagueInfoEntry
+   بيحوّلوا wire↔record زي FUN_140023b60 بالظبط، ورد
+   OnProduceNewLeague بقى يكتب f4@+4 (f3 يفضل 0). رد الـ wire
+   فعلياً = {id مركّب، 0، 0، name، leader، title}.
+2. **[تحليل موثق]** ProcessServerConnectOK (FUN_14001ade0،
+   ~600 سطر) هيكله اتحل بالكامل وجاهز للتنفيذ:
+   - iVar5 = FUN_14000d620(kernel, server) = **country** (مش
+     socket!)؛ -1 → لا شيء (الطابور FUN_14000a0b0 بيبعت
+     للـ country)
+   - (أ) brick mode-1: FUN_1400240f0(1, idleague السيرفر,
+     countrydate السيرفر) + مداخل (idleague, amount) لكل
+     ليجات السيرفر عبر FUN_140024170 + تجزئة عند 0x3ff
+   - (ب) LeagueRank action 0: مداخل 0x2c من vector عند
+     mgr+0x60 عبر FUN_1400230a0 (TBD: مصدر الـ vector وكائنات
+     الرانك)
+   - (ج) LeagueInfo action 2: ليجات السيرفرات **الأخرى**
+     (skip node[3]==server) عبر FUN_140023b60 + تجزئة
+   - (د) PlunderWarInfo mode-3 (اعلان) ثم لكل حرب في mgr+0xe0:
+     رسالة mode-0 (warid=node[3]) بمداخل سجلات **3..12** (عشرة
+     عبر vcall+0x10 لكل idx) عبر FUN_140023790 مع لوج
+     "ProcessServerConnectOK msg size error, idPlunder[%lu]!"
+   - (هـ) LeagueList action 0: كل الليجات من lower_bound(server)
+     للنهاية عبر FUN_1400235c0 + تجزئة
+   - فشل ترويسة mode-3 → تدمير بدون إرسال (قسم الحروب كله
+     يتخطى)
+3. كل الاختبارات خضرا (league + os + plunder + kernel).
