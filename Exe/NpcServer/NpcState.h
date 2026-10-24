@@ -154,6 +154,27 @@ struct CNpcStateData {
     std::function<bool()> m_fnSubHasMap80;
         // sub vtable+0x80 (map object getter,
         // null-check inside FUN_140058260)
+    // ===== 588b0 / 58b80 (unit 24) =====
+    uint32_t m_nRescGarbage = 0;
+        // FUN_1400588b0 local_resc - the
+        // UNINITIALIZED local the original
+        // reads when the target lookup fails
+        // (verbatim; tests control the value)
+    std::function<void()> m_fn696d0;
+        // FUN_1400696d0(attach) - result
+        // DISCARDED verbatim in 58b80
+    std::function<uint64_t()> m_fn34e00Holder;
+        // FUN_14001c200 -> FUN_14001c130 ->
+        // FUN_140034e00 chain result (0 gate)
+    std::function<bool()> m_fn69910Attach;
+        // FUN_140069910(attach)
+    std::function<uint64_t()> m_fn65750;
+        // FUN_140065750(holder) - 0 -> the
+        // +0x100 gen vt+0x28 fallback
+    std::function<void(int&, int&)> m_fn657c0;
+        // FUN_1400657c0(holder, &res)
+    std::function<void(int&, int&)> m_fn65510;
+        // FUN_140065510(holder, &res)
 };
 
 // ============================================================

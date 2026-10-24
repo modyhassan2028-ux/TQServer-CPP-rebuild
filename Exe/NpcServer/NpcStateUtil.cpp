@@ -260,4 +260,104 @@ bool CNpcAttackDir(CNpcStateData& rN, int nCurDir) {
     return (uRet & 0xff) != 0;
 }
 
+bool CNpcAttackDirNear(CNpcStateData& rN,
+                       int nResX, int nResY,
+                       int nCurDir) {
+    // ORIGINAL FUN_1400588b0 - same scan as
+    // FUN_140058260 (see CNpcAttackDir) with
+    // the caller res as the reference
+    if (!rN.m_bHasMap) {
+        rN.m_fnLogError();       // DAT_1400be0b0
+        return false;
+    }
+    rN.m_dwField2C = 0;          // +0x2c = 0
+    int nRefX = nResX, nRefY = nResY;
+    if (rN.m_nTargetId != 0) {
+        CNpcTargetSeam* pT =
+            rN.m_fnFindTarget(rN.m_nTargetId);
+        if (pT == nullptr) {
+            // ORIGINAL: ref = the
+            // UNINITIALIZED local_resc
+            nRefX = nRefY =
+                (int)rN.m_nRescGarbage;
+        } else {
+            nRefX = pT->m_nX;
+            nRefY = pT->m_nY;
+        }
+    }
+    int nRef = rN.m_fnSubDist(nRefX, nRefY);
+    int nBest = -1;
+    uint32_t uRet;
+    int nRand = (int)rN.m_fnRandGet(8);
+    uRet = (uint32_t)(nRand + 8);
+    for (int i = nRand; i < nRand + 8; i++) {
+        int nDir = i % 8;
+        if (nDir == nCurDir) continue;
+        if (!rN.m_fnSubHasMap80()) {
+            uRet = 0;
+            continue;
+        }
+        uint32_t u48 = rN.m_fnSubVt48NoArgs();
+        int nX = rN.m_fnSubGetX38();
+        int nY = rN.m_fnSubGetY40();
+        if (!rN.m_fnMapWalkable(nX, nY, nDir,
+                                u48)) {
+            uRet = 0;
+            continue;
+        }
+        int nDX = (nX + s_nDirX[nDir]) - nRefX;
+        int nDY = (nY + s_nDirY[nDir]) - nRefY;
+        int nADX = nDX < 0 ? -nDX : nDX;
+        int nADY = nDY < 0 ? -nDY : nDY;
+        int nD = nADY < nADX ? nADX : nADY;
+        int nSign = rN.m_nField3C != 0 ? 1
+                                        : -1;
+        if (0 < nSign * (nRef - nD)) {
+            nBest = nDir;
+            nRef = nD;
+        }
+        uRet = (uint32_t)nD;   // the leak
+    }
+    if (nBest != -1) {
+        rN.m_dirQueue[0] = (uint8_t)nBest;
+        rN.m_nField40 = (uint32_t)(uint8_t)nBest;
+        rN.m_dwField2C = 1;
+        return true;
+    }
+    return (uRet & 0xff) != 0;
+}
+
+bool CNpcAttachRes(CNpcStateData& rN,
+                   int& rnResLo, int& rnResHi) {
+    // ORIGINAL FUN_140058b80
+    if (!rN.m_bHasAttach) {     // +0x140 == 0
+        rN.m_fnLogError();      // DAT_1400be0b0
+        return false;
+    }
+    // ORIGINAL: FUN_1400696d0(+0x140) -
+    // the result is DISCARDED verbatim
+    rN.m_fn696d0();
+    // ORIGINAL: FUN_14001c200 ->
+    // FUN_14001c130 -> FUN_140034e00
+    uint64_t uHolder = rN.m_fn34e00Holder();
+    if (uHolder == 0) {
+        rN.m_fnLogError();      // DAT_1400be0b0
+        return false;
+    }
+    if (rN.m_fn69910Attach()) {
+        // ORIGINAL: FUN_140065750(holder)
+        if (rN.m_fn65750() == 0) {
+            // the +0x100 gen vt+0x28
+            rN.m_fnGenGetSpawn(rnResLo,
+                               rnResHi);
+        } else {
+            rN.m_fn657c0(rnResLo, rnResHi);
+        }
+    } else {
+        rN.m_fn65510(rnResLo, rnResHi);
+    }
+    // ORIGINAL: *param_2 = *puVar5
+    return true;
+}
+
 } // namespace npc

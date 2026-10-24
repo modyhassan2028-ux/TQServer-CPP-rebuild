@@ -178,4 +178,44 @@ bool CNpcC960(CNpcStateData& rN, uint32_t uFlavor);
 // return (uRet & 0xff) != 0;   // original leak
 bool CNpcAttackDir(CNpcStateData& rN, int nCurDir);
 
+// ============================================================
+// ===== ORIGINAL FUN_1400588b0 (pursuit dir pick) ===
+// ============================================================
+// Same 8-dir greedy scan as FUN_140058260 but
+// the reference is the caller's res pair,
+// OVERRIDDEN by the +0x84 target position.
+// NOTE the verbatim quirk: when the target id
+// is set but the lookup fails, the original
+// assigns the UNINITIALIZED local_resc to
+// all three ref vars (kept verbatim via the
+// m_nRescGarbage seam field).
+// if (!map) { log; return 0; }
+// +0x2c = 0;  ref = (p2, p3);
+// if (+0x84) { t = find;
+//   if (!t) ref = garbage; else ref = t->pos; }
+// refDist = sub->vt+8(sub, refX, refY);
+// ... identical ring scan to 58260 ...
+// if (best != -1) { +0x40; +0x2c = 1; ret 1; }
+// return (leak & 0xff) != 0;
+bool CNpcAttackDirNear(CNpcStateData& rN,
+                       int nResX, int nResY,
+                       int nCurDir);
+
+// ============================================================
+// ===== ORIGINAL FUN_140058b80 (attach res) ====
+// ============================================================
+// if (+0x140 == 0) { log; return 0; }
+// FUN_1400696d0(+0x140);   // discarded
+// holder = FUN_140034e00(
+//     FUN_14001c130(FUN_14001c200()));
+// if (!holder) { log; return 0; }
+// if (FUN_140069910(+0x140)) {
+//   if (FUN_140065750(holder) == 0)
+//     gen(+0x100)->vt+0x28(&res);
+//   else FUN_1400657c0(holder, &res);
+// } else FUN_140065510(holder, &res);
+// *out = res (both words); return 1;
+bool CNpcAttachRes(CNpcStateData& rN,
+                   int& rnResLo, int& rnResHi);
+
 } // namespace npc
