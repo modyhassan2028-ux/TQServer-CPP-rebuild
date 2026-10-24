@@ -3375,3 +3375,56 @@ FUN_140022f40 (تفاصيل كتابة الحقل)، FUN_1400232b0 (مسار
    10/10 خضرا** (world/manager/generator/wander/
    steplist/aitick/transform/msgainfo + ops 205/207/208
    + record 201 ضد القاعدة الحية).
+
+## جلسة 2026-10-24 19:30 — NpcServer الوحدة 10: CNpc::Create (FUN_14005e2e0)
+1. **كائن CNpcObject (0x158):** أوفستات بايتية مستخرجة
+   حرفياً من ترميز الديكمبايل (param_1 عنصر longlong*):
+   param_1[0x14]=+0xa0، *(param_1+0x21)=+0x108 (byte)،
+   param_1[0x22]=+0x110، param_1+0x23=+0x118،
+   param_1+0x10=+0x80 (id)، param_1[0x13]=+0x98 (map)،
+   (longlong)+0x34=x، param_1+7=+0x38=y، حلقة
+   lVar9=5..0 → تصفير +0xe8..+0xfc، (longlong)+0x1c،
+   param_1+4=+0x20، param_1+0x15=+0xa8، +0xac،
+   param_1+0x17=+0xb8، +0xbc، param_1+0x16=+0xb0=0x3c،
+   +0xb4، (longlong)+0x8c، param_1+5=+0x28،
+   (longlong)+0x84، param_1+3=+0x18، param_1+0x18=+0xc0
+   (كائن الاسم)، param_1[0x20]=+0x100 (gen)،
+   param_1+0x25=+0x128، param_1+0x26=+0x130 (byte)،
+   +300=+0x12c، +0x134. متسقة كلها مع حقول
+   CheckTransform/Transform (الوحدة 8).
+2. **الحقول الدلالية:** val(0x35)→byte+0x108، val(0x36)→
+   +0x10c، val(0x37)→+0x110؛ لو byte==1 و+0x10c≠0 →
+   +0x114=+0x10c و+0x118=TimeGet(0)/1000 (زوج بداية
+   التحويل الذي يقرأه CheckTransform). speed +0xa8 =
+   max(1, val(0x12)*3/1000). +0x28=param_9 إلا لو
+   param_8==0. bit8 من val(0x15) (أول قراءة: (v>>8)&1)
+   → +0x84=param_10 و+0x18=8؛ (تانية قراءة عبر AH:
+   (~AH&1) أي bit8==0) → قراءة X (vtable+0x40) وY
+   (vtable+0x38) على npc+0x10 ثم FUN_14004ae30(map,y,x)
+   ولو صحّت → إعادة قراءة val(4)/val(5) إلى +0x1c/
+   +0x20 و+0x2c=0 و+0x18=0.
+3. **بلوك الاسم (val(0x27)≠0):** FUN_14001d230 →
+   FUN_140042b80(inst,&wrap,1) → FUN_1400402d0
+   (npc+0xc0, pair[0], pair[1]) + رقصة refcount
+   الحرفية (LOCK/dec@+0x10/صفر→vtable+0/LOCK/dec@+0x14/
+   صفر→vtable+8/UNLOCK) — نمذجة seam موثقة.
+4. **المسارات:** خريطة مفقودة → vtable+0x18(*(rec+0x10),1)
+   + اللوج الحرفي "CNpc::Create(), Create Npc(type:%d,
+   name:%s) can't find map(%u) at %s, %d"؛ مولد
+   (param_7≠0) عبر FUN_140025b50/vtable+0x30 وإلا لوج
+   DAT_1400c9620؛ مولد صناعي لو param_7==0 والحمولة
+   (param_11/12/14≠0): FUN_14006a4c0(type,map,x,y,4,4)
+   ولو فشل → لوج DAT_1400be0b0 + مسار الرسالة
+   (FUN_140063b90/140063c60(...,4,p11,p11,0,p12,0,p14)/
+   FUN_14001c5f0(inst,0,msg)/FUN_140063c20) بإرجاع
+   uVar13 & 0xffffffffffffff00؛ FUN_14001c1c0(id) فروع
+   vt90(gen, vtable+8(npc)) ± FUN_14001c220؛ الحمولة
+   +0x128=param_12، +0x130=param_13، +0x12c=param_11،
+   +0x134=param_15؛ FUN_14005dc80(npc,param_14) لو
+   الثلاثة ≠0؛ الإرجاع CONCAT71(uVar13>>8, 1).
+5. محوّل NpcCreateFromAiRecord بترتيب استدعاء Process
+   (FUN_1400614f0) الحرفي. Exe/NpcServer/NpcCreate.{h,cpp}
+   + tests/npc_create_test — **NPC_CREATE_OK**.
+   **الرجريشن 11/11 خضرا** (world/manager/generator/
+   wander/steplist/aitick/transform/msgainfo/create + ops
+   205/207/208 + record 201 ضد القاعدة الحية).

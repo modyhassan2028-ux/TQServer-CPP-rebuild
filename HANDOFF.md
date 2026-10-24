@@ -1,7 +1,31 @@
 
 # ⚠️ دليل الوكيل التالي — ابدأ من هنا (آخر تحديث 2026-10-24 18:15)
 
-## 0) حالة NpcServer لحظياً (جلسة 24/10 — محدث 18:40)
+## 0) حالة NpcServer لحظياً (جلسة 24/10 — محدث 19:30)
+- **جديد:** الوحدة 10: **CNpc::Create (FUN_14005e2e0،
+  1565 بايت)** حرفياً في Exe/NpcServer/NpcCreate.{h,cpp}
+  — كائن CNpcObject كامل 0x158 بأوفستات بايتية
+  مستخرجة (+0x80 id، +0x98 map، +0xa0 type، +0x100 gen،
+  +0x108..0x118 حقول التحويل — نفس بتاعة CheckTransform/
+  Transform، +0x128/+0x12c/+0x130/+0x134 الحمولة،
+  +0x1c/+0x20 life، +0x34/+0x38 x/y، +0xa8 speed
+  =max(1,val(0x12)*3/1000)، +0xb0=0x3c، +0xac/+0xb4 born
+  sec، +0xbc born ms، +0xc0 كائن الاسم، +0xe8..+0xfc
+  تصفير 6 dwords)؛ كل المسارات: بوابة id==0/type،
+  تهيئة التحويل (0x35/0x36/0x37 + زوج +0x114/+0x118)،
+  bit8 من val(0x15) مرتين (+0x84/+0x18=8 ثم فرع
+  إعادة قراءة X/Y عبر vt40/vt38 مع FUN_14004ae30)،
+  بلوك الاسم (0x27 → FUN_140042b80 + FUN_1400402d0 +
+  رقصة refcount)، خريطة مفقودة → vtable+0x18(rec,1) +
+  اللوج الحرفي "CNpc::Create(), Create Npc(type:%d,
+  name:%s) can't find map(%u) at %s, %d"، مولد مفقود →
+  لوج DAT_1400c9620، مولد صناعي FUN_14006a4c0(…,4,4) مع
+  مسار رسالة الفشل (FUN_140063b90/c60/c20 +
+  FUN_14001c5f0)، vt90/gen + FUN_14001c1c0/fun_14001c220،
+  FUN_14005dc80، والإرجاع CONCAT71(uVar13>>8, 1).
+  محوّل NpcCreateFromAiRecord بترتيب Process الحرفي.
+  tests/npc_create_test — **NPC_CREATE_OK**، رجريشن 11/11
+  خضرا.
 - **جديد:** الوحدة 9: CMsgAiNpcInfo كاملة (رسالة 0x4e21)
   من NpcServer.exe نفسه (مش من MsgServer): ctor
   FUN_140061220 / dtor FUN_140061270 / Create

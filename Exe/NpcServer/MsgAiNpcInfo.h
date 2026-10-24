@@ -44,6 +44,8 @@ struct AiNpcInfoRecord {
 // CNpc object (allocated by FUN_14005d9c0:
 // operator_new(0x158) + ctor FUN_14005ce80). The vtable
 // calls in Process run on the +0x10 sub-object.
+// Full 0x158 layout lives in NpcCreate.h (CNpcObject);
+// here only the carrier seam.
 struct CNpcObj {
     void* m_pSub10 = nullptr;          // npc + 0x10
 };
