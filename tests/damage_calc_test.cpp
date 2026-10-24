@@ -175,6 +175,51 @@ int main() {
     cs10.bGate230 = true;
     assert(tq::SkillDamage(att.get(), tgt.get(), 500, 0, cs10) == 1);
 
+    // ---- LaunchOnTarget (FUN_1404a1f70) literal tests ----
+    auto tSort50 = mkType(11000, 50, 1, 100, 0);
+    auto tSort80 = mkType(11100, 80, 1, 100, 444); // status_data0=444
+    tSort80.dwStatusData1 = 555;
+
+    // L1: null target -> -1
+    tq::LaunchOut o;
+    assert(tq::LaunchOnTarget(att.get(), nullptr, rec, &t305c, 0, c, &o) == -1);
+
+    // L2: not attackable (vtable+0x220) -> -1
+    tgt->SetAttackable(false);
+    assert(tq::LaunchOnTarget(att.get(), tgt.get(), rec, &t305c, 0, c, &o) == -1);
+    tgt->SetAttackable(true);
+
+    // L3: PK-zone gate rejects -> -1
+    tq::DamageCtx cg = c; cg.bGatePkZone = true;
+    assert(tq::LaunchOnTarget(att.get(), tgt.get(), rec, &t305c, 0, cg, &o) == -1);
+
+    // L4: sort 50 -> damage 0 (no roll at all)
+    assert(tq::LaunchOnTarget(att.get(), tgt.get(), rec, &tSort50, 0, c, &o) == 0);
+    assert(o.dwDamage == 0 && o.dwEffectSlot == 0 && o.dwPost == 0);
+
+    // L5: sort 80 without defense -> status_data0 (444)
+    assert(tq::LaunchOnTarget(att.get(), tgt.get(), rec, &tSort80, 0, c, &o) == 444);
+    // L5b: with defense -> status_data1 (555)
+    tq::DamageCtx c80 = c; c80.bTargetDefensePoint = true;
+    assert(tq::LaunchOnTarget(att.get(), tgt.get(), rec, &tSort80, 0, c80, &o) == 555);
+
+    // L6: sort 14 -> delegates to DamageCalc: 120 (neutral ctx, slots set)
+    assert(tq::LaunchOnTarget(att.get(), tgt.get(), rec, &tPois, 0, c, &o) == 120);
+    assert(o.dwDamage == 120);
+
+    // L7: status probe hit -> -2 with all outs zeroed
+    tq::DamageCtx cp = c; cp.bProbeHit = true;
+    tPois.ucCrime = 1; // attr 0x68 = col 4 (crime) -> probe path enabled
+    assert(tq::LaunchOnTarget(att.get(), tgt.get(), rec, &tPois, 0, cp, &o) == -2);
+    assert(o.dwDamage == -2 && o.dwEffectSlot == 0 && o.dwPost == 0);
+    tPois.ucCrime = 0;
+
+    // L8: map gate (vtable+0x398) rejects when sort != 50
+    tq::DamageCtx cm = c; cm.bMapGate398 = true;
+    assert(tq::LaunchOnTarget(att.get(), tgt.get(), rec, &tPois, 0, cm, &o) == -1);
+    // L8b: sort 50 bypasses the map gate
+    assert(tq::LaunchOnTarget(att.get(), tgt.get(), rec, &tSort50, 0, cm, &o) == 0);
+
     printf("DAMAGE CALC TEST PASSED\n");
     return 0;
 }

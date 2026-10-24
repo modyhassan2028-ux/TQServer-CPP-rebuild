@@ -63,6 +63,9 @@ public:
     void SetRank(uint32_t r) { m_dwRank = r; }
     bool IsDie() const { return m_dwLife == 0; } // ORIGINAL vtable+0x290
     bool IsBoss() const { return false; } // ORIGINAL vtable+0x288 (monsters only)
+    bool m_bAttackable{true}; // ORIGINAL vtable+0x220 probe target
+    bool IsAttackable() const { return m_bAttackable; }
+    void SetAttackable(bool b) { m_bAttackable = b; }
     uint32_t GetLife() const { return m_dwLife; }
     uint32_t GetMaxLife() const { return m_dwMaxLife; }
     void SetMaxLife(uint32_t v) { m_dwMaxLife = v; }

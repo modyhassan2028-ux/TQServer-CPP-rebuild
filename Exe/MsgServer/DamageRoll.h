@@ -77,6 +77,12 @@ struct DamageCtx {
     int32_t iTgtSlot218 = 0;        // target vtable+0x218 (bonus deduction)
     bool    bEcf70Check = false;    // FUN_1402ecf70 -> return dmg unchanged
     bool    bTgtHas1002Rank = false; // target 0x1002 point with rank != 10000
+    // ---- launch-chain gate stubs (FUN_1404864f0 / 1404831f0 / map gate) ----
+    bool    bGatePkZone = false;    // PK-map branch (STR_PK message) -> reject
+    bool    bGatePkSwitch = false;  // attack-sort switch (0x1002 probe) -> reject
+    bool    bGateMapFinal = false;  // FUN_140186200 final gate -> reject
+    bool    bMapGate398 = false;    // target vtable+0x398 map rejection
+    bool    bProbeHit = false;      // FUN_1403e9290 status probe hit
 };
 
 // ---- component 1: FUN_1403e98e0 (weapon roll, physical) ----
@@ -436,5 +442,110 @@ inline uint32_t DamageCalc(CUser* pCaster, CUser* pTarget,
         && (uint32_t)pType->Field(39) <= result)
         result = (uint32_t)pType->Field(39);
     return result;
+}
+
+// ===========================================================================
+// Launch chain (session "Fan Loop" step 6) - FUN_1404a1f70 and its helpers.
+// ORIGINAL: uint LaunchOnTarget(caster, target, p3, p4, p5, p6, skillPower)
+// where p3/p4/p5/p6 are collector lists (written via FUN_1401af440 /
+// FUN_14000f0a0 / FUN_1402751c0) that the fan loop (FUN_140499830) later
+// broadcasts as MsgMagicEffect. Modeled here as a LaunchOut struct.
+//
+// ABI note: FUN_1404847d0's "power64" (param_3) is actually a POINTER to a
+// stack slot holding the launched effect record (&local_34 in the caller,
+// initialized to 0): null-checked (param_3 == 0), then handed down to
+// FUN_14031cee0(ptr, 4/8) notify calls and FUN_14031d8a0 steering. Our
+// uPower64 param carries that pointer opaquely.
+// ===========================================================================
+struct LaunchOut {
+    int32_t dwDamage = 0;    // param_4 list: the rolled damage
+    uint32_t dwEffectSlot = 0; // param_5 list: the effect-record slot (local_34)
+    uint32_t dwPost = 0;      // param_6 list: FUN_140484670 result (local_30)
+};
+
+// record attr helper: ORIGINAL FUN_140418c50(rec, idx) - idx >= 0x64
+// resolves through the magic TYPE record (attr - 100 = column), smaller
+// indices are the record's own columns (2 = type).
+inline int32_t RecAttrib(const CPlayerMagic* pRec, const CMagicTypeInfo* pType,
+                         uint32_t dwIdx) {
+    return dwIdx >= 100 ? pType->Field(dwIdx - 100)
+                        : pRec->GetAttrib(dwIdx);
+}
+
+// ---- FUN_1404864f0: the PK-zone launch gate. Returns true = REJECT. ----
+// Structure literal; the deep PK checks (FUN_14017ef50/14011dbb0/14016cc30,
+// PK level 0xef4, STR_PK message, FUN_140186200 and the target 0x1002 probe)
+// need the map/battle kernel and are stubbed via ctx flags (neutral = pass).
+inline bool LaunchGate(const DamageCtx& c) {
+    if (c.bGatePkZone) return true;      // the PK-map branch (STR_PK message)
+    if (c.bGatePkSwitch) return true;   // the attack-sort switch (0x1002 probe)
+    return c.bGateMapFinal;              // FUN_140186200 result (false = pass)
+}
+
+// ---- FUN_140483270: pre-register the target's 0x1001 defense point with
+// the battle module (6-arg 0x2d8 call). Documented stub - needs the
+// battle-module kernel. ----
+inline void PreRegisterDefensePoint(CUser*, CUser*) {}
+
+// ---- FUN_1404831f0: status-probe gate. Returns true -> caller returns -2.
+inline bool StatusProbeGate(const CMagicTypeInfo* pType, const CPlayerMagic* pRec,
+                            uint32_t dwType, bool bType2d46, const DamageCtx& c) {
+    // ORIGINAL: (rec null || GetAttrib(rec, 0x68) == 0) && !type2d46 -> 0;
+    // else FUN_1403e9290(target) decides (stubbed: ctx.bProbeHit)
+    bool bAttr68 = pRec == nullptr || pType->Field(4) != 0; // attr 0x68 = col 4
+    if (!bAttr68 && !bType2d46) return false;
+    return c.bProbeHit; // FUN_1403e9290(target) - stub
+}
+
+// ---- FUN_140484670: apply/post-process - registers the status effect on
+// the battle module (FUN_1402ec380 with col 38 + attr_power 0x8b, then
+// FUN_1402ecf10) and notifies (FUN_14031cee0(effect, 8)). Documented stub:
+// returns 0 until the battle-module kernel lands. ----
+inline uint32_t ApplyPostDamage(CUser*, CUser*, uint32_t*, uint32_t*) {
+    return 0;
+}
+
+// ---- FUN_1404a1f70: LaunchOnTarget (literal) ----
+// Returns -1 (0xffffffff) on rejection, -2 (0xfffffffe) on the status-probe
+// block, else the rolled damage (also mirrored into pOut).
+inline int32_t LaunchOnTarget(CUser* pCaster, CUser* pTarget,
+                              const CPlayerMagic* pRec, const CMagicTypeInfo* pType,
+                              int32_t iSkillPower, const DamageCtx& c,
+                              LaunchOut* pOut = nullptr)
+{
+    if (!pTarget || !pTarget->IsAttackable()) return -1; // vtable+0x220
+    const uint32_t dwSort = (uint32_t)pType->Field(2); // GetAttrib(rec, 0x66)
+    if (LaunchGate(c)) return -1;                       // FUN_1404864f0
+    PreRegisterDefensePoint(pCaster, pTarget);          // FUN_140483270
+    const uint32_t dwType = (uint32_t)pRec->GetAttrib(2);
+    if (StatusProbeGate(pType, pRec, dwType, dwType == 0x2d46, c)) {
+        if (pOut) { pOut->dwDamage = -2; pOut->dwEffectSlot = 0; pOut->dwPost = 0; }
+        return -2; // ORIGINAL writes -2 into all four collectors
+    }
+    // sort != 0x32: map rejection gate vtable+0x398(mapId, type, level)
+    // (stubbed: ctx.bMapGate398)
+    if (dwSort != 0x32 && c.bMapGate398) return -1;
+    uint32_t dwEffectSlot = 0; // local_34
+    int32_t dwDamage = 0;      // local_38
+    if (dwSort == 0x32) {
+        dwDamage = 0; // sort 50: no damage roll at all
+    } else if (dwSort == 0x50) {
+        // sort 80: target 0x1001 defense point picks the column:
+        //   no defense -> attr 0x87 (col 35 = status_data0)
+        //   defense    -> attr 0x88 (col 36 = status_data1)
+        dwDamage = c.bTargetDefensePoint ? pType->Field(36) : pType->Field(35);
+    } else {
+        dwDamage = (int32_t)DamageCalc(pCaster, pTarget, pRec, pType,
+                                       (uint64_t)(uintptr_t)&dwEffectSlot,
+                                       iSkillPower, c);
+    }
+    uint32_t dwPost = ApplyPostDamage(pCaster, pTarget, &dwEffectSlot,
+                                      (uint32_t*)&dwDamage);
+    if (pOut) {
+        pOut->dwDamage = dwDamage;
+        pOut->dwEffectSlot = dwEffectSlot;
+        pOut->dwPost = dwPost;
+    }
+    return dwDamage;
 }
 } // namespace tq
