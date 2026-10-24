@@ -1,3 +1,87 @@
+
+# ⚠️ دليل الوكيل التالي — ابدأ من هنا (آخر تحديث 2026-10-24 21:00)
+
+> هذا القسم مكتوب خصيصاً عشان أي وكيل يكمل الشغل بدون ما
+> يتلغبط. اقرأه كاملاً قبل أي تنفيذ، ثم التفاصيل التاريخية
+> تحت.
+
+## 1) القواعد الصارمة (لا تنتهكها أبداً)
+- **ممنوع أي كود مخمّن/مصنوع.** كل تنفيذ طبق حرفي للديكمبايل
+  (Native-Decompiled) مع توثيق عنوان الدالة الأصلية
+  (مثال: `FUN_14002b560`) والأوفستات ونصوص اللوجات
+  الحرفية في التعليقات.
+- أي جزء ناقص يوثّق كـ `TBD` بعنوانه. لا تخترع.
+- قبل كل commit: **كل الاختبارات خضرا**. لا ترفع كود أحمر.
+- بعد كل وحدة: commit + push فوراً (أول بأول).
+
+## 2) المسارات الأساسية
+| ماذا | أين |
+|---|---|
+| الريبو (rebuild) | `/app/conversations/6adcadb4d59db513a6af5968/tqserver-rebuild` (remote: TQServer-CPP-rebuild، التوكن داخل رابط origin) |
+| الريبو الرئيسي (الأصول) | `/app/co_repo` (remote: conquer-online-v6159-decompiled، **نفس التوكن**: انسخه من رابط origin بتاع الريبو الأول عند الحاجة) |
+| الديكمبايل | `/app/co_repo/Native-Decompiled/<Name>.exe.decompiled.c` |
+| فهرس الدوال | `<Name>.exe.index.tsv` (العنوان/الحجم/الحالة) |
+| أسماء RTTI | `/app/co_repo/NameIndex/names_final.tsv` |
+| الدمب المصحح | `sql/original_full/cq_with_plunder_war.sql.gz` |
+| ملاحظة git | لو فشل commit: `git -c user.name="Mody Hassan" -c user.email="mody@local" commit ...` |
+
+## 3) الحالة الحالية (لا تكرر شغل مخلص)
+- **CQCrossServer: مقفول ✅ كامل** — 7 اختبارات regression
+  كلها ALL OK: cross_kernel, cross_league, cross_os_msg,
+  cross_plunder_war, cross_connect_ok, cross_socketkernel.
+  لا تعيد فتحه إلا لو اختبار كسر.
+  المتبقي فيه فقط 16 ملاحظة TBD "جزئي الاستخراج" موثقة
+  بعناوينها (معظمها كلمات أوامر إرسال داخلية).
+- الأصل مرفوع بالكامل على الريبو الرئيسي (سورس v6159 +
+  patch + cq.sql.gz). الـ 7z (791M) وcq.sql الخام (108M)
+  فوق حد GitHub — مقصودين بـ .gitignore وموجودين في
+  السانبوكس.
+
+## 4) خطتك الفورية: NpcServer.exe (الوحدة 1)
+- `Exe/NpcServer/main.cpp` **الحالي stub تمثيلي قديم
+  (كود مخمّن) — استبدله بالبورت الحقيقي، لا تبني عليه**.
+- الديكمبايل: `NpcServer.exe.decompiled.c` (181,583 سطر،
+  7,240 دالة). ابدأ بـ:
+  1. **آلة حالة الاتصال بالـ MsgServer**: `FUN_14001c700`
+     (سطر ~23690 في الديكمبايل): state=2 @+8،
+     `tq::TimeGet(0)/1000` @+0x1c، "Login OK. generator
+     monster after %d secs" عبر vcall @+0x10. واعرف
+     عائلتها (من يدخل الحالة 1؟ من ينادي state=2؟) عبر
+     البحث عن `FUN_14001c7` والدوال المجاورة
+     (`InstanceGet @14001c780`، `FUN_14001c790/a0/b0`).
+  2. **world_kernel + المولّد** (بعد اللوجن: "Generator
+     begin." سطر ~24734) — ابحث عن عائلة
+     "Generator active/full/over".
+  3. **رسائل AI-NPC**: `CMsgAiNpcInfo@world_kernel`
+     (أسماء RTTI جاهزة في names_final.tsv، عناوين
+     140067320/140074f20/140082eb0..).
+  4. **DLLs الجانبية**: Arenic.dll, Booth.dll,
+     Analyst.dll, AntiCheat.dll (ديكمبايلاتها جاهزة).
+- نفي البورت: نفس أسلوب CQCrossServer (classes في
+  `Exe/NpcServer/`، اختبار `tests/npc_*_test.cpp`، سطر
+  البناء يتصرف من أخواته في PORTING_LOG.md).
+- **ترتيب البناء للسيرفرات**: g++ مثل سطور الرجريشن في
+  PORTING_LOG.md (شوف آخر أمر build كامل هناك).
+
+## 5) بعد NpcServer
+1. Loaderhock.exe (الموديول الأخير، الديكمبايل جاهز).
+2. الأيقونات/الصور مطابقة للأصل (القاعدة الثابتة).
+3. وحوش الكروس سيرفر في الريلم (cq_config المرمّع صف
+   149883 هو المرجع القياسي).
+4. أي ناقص من conquer.exe بأداة Rea في /app/co_repo.
+
+## 6) نصائح عدم التلغبط
+- الدالة تقرأ بأمر:
+  `awk '/Function: NAME @/,/^}$/' <file>.decompiled.c`
+- مقاس الدالة قبل القراءة:
+  `grep NAME <file>.index.tsv`.
+- اعمل grep على نصوص اللوجات الإنجليزية ("Login game",
+  "Generator"...) للوصول السريع للمناطق الوظيفية.
+- آلية الحفظ: PORTING_LOG.md = سجل تفصيلي لكل جلسة،
+  HANDOFF.md = الحالة والخطة، وحدّث القسم ده دايماً.
+
+---
+
 # HANDOFF — نقطة تسليم للأجنت التالي (آخر تحديث: 2026-10-24 متأخراً (جلسة 3) — قاعدة البيانات الكاملة المعدلة مرفوعة في الريبو + خطة موسعة بقرار المالك: NpcServer + RevampedLoader + أيقونات + وحوش الريلام + conquer.exe)
 
 > هذا الملف هو نقطة البداية لأي أجنت يكمل الشغل. اقرأ PORTING_LOG.md للمنهجية
