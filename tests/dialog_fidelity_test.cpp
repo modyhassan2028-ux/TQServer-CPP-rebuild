@@ -5,6 +5,7 @@
 //   -> 3050(102 opt "No~thanks." ->0) -> 10004(104 listbox) -> 10005(120)
 #include "Account.h"
 #include "Team.h"
+#include "ModuleSystem.h"
 #include "Npc.h"
 #include "Dialog.h"
 #include "GameAction.h"
@@ -1942,7 +1943,8 @@ system("mariadb -u root cq -e \"DELETE FROM cq_item WHERE owner_id=888001 AND ty
     { auto n = mkE(512, "1");                assert(!CGameAction::ProcessActionUser(u5,&n)); }
     { auto n = mkE(516, "1 2 abc 3 to 4");   assert( CGameAction::ProcessActionUser(u5,&n)); }
     { auto n = mkE(519, "");                 assert( CGameAction::ProcessActionUser(u5,&n)); }
-    { auto n = mkE(528, "1");                assert( CGameAction::ProcessActionUser(u5,&n)); }
+    // 528 now gates on EXACTLY 9 fields (original iVar18 == 9)
+    { auto n = mkE(528, "1");                assert(!CGameAction::ProcessActionUser(u5,&n)); }
     { auto n = mkE(529, "1 2");              assert( CGameAction::ProcessActionUser(u5,&n)); }
     { auto n = mkE(542, "1 2 3 4 5 6 7 8");  assert( CGameAction::ProcessActionUser(u5,&n)); }
     { auto n = mkE(543, "");                 assert( CGameAction::ProcessActionUser(u5,&n)); }
@@ -2003,6 +2005,37 @@ system("mariadb -u root cq -e \"DELETE FROM cq_item WHERE owner_id=888001 AND ty
         // leave-team restores the false path
         pTeam->RemoveMember(uMate->GetId());
         CUserManager::Instance().RemoveUser(uMate->GetId());
+    }
+
+    // --- module system (module 0x1e synvar) + 528 + 1102 ---
+    {
+        // 528: exact 9-field gate + map attr writes
+        CDialogEngine::Node nd528; nd528.dwType = 528;
+        nd528.strParam = "600 13 0 0 0 0 0 0 0";
+        u5->SetMapId(1002);
+        assert(CGameAction::ProcessActionUser(u5, &nd528));
+        auto pMap = CMapManager::Instance().GetMap(1002);
+        assert(pMap && pMap->GetMapInfo(4) == 600);
+        assert(pMap->GetMapInfo(5) == 13 && pMap->GetMapInfo(0xd) == 13);
+        nd528.strParam = "600 13 0 0"; // <9 fields -> DBERR
+        assert(!CGameAction::ProcessActionUser(u5, &nd528));
+        // 1102: named module var compare (live shape "count == 5")
+        auto* syn = CModuleManager::Instance().Synvar();
+        syn->WriteName("count", 5);
+        CDialogEngine::Node nd1102; nd1102.dwType = 1102;
+        nd1102.strParam = "count == 5";
+        assert(CGameAction::ProcessActionUser(u5, &nd1102));
+        nd1102.strParam = "count == 4";
+        assert(!CGameAction::ProcessActionUser(u5, &nd1102));
+        nd1102.strParam = "count >= 3";
+        assert(CGameAction::ProcessActionUser(u5, &nd1102));
+        nd1102.strParam = "mate"; // existence: unset -> false
+        assert(!CGameAction::ProcessActionUser(u5, &nd1102));
+        syn->WriteName("mate", 1);
+        assert(CGameAction::ProcessActionUser(u5, &nd1102));
+        // module factory: unknown id -> absent
+        assert(CModuleManager::Instance().GetModule(0x99) == nullptr);
+        assert(CModuleManager::Instance().GetModule(0x1e) != nullptr);
     }
 
     // 1084: "13901336 6 7" (live) - id resolved into vars 6,7

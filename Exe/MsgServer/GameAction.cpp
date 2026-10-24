@@ -11,6 +11,7 @@
 #include "MsgAction.h"
 #include "UserManager.h"
 #include "Team.h"  // existing CTeamManager (v1 team system)
+#include "ModuleSystem.h"
 #include "GroundItems.h"
 #include "MonsterManager.h"
 #include "Npc.h"
@@ -3833,9 +3834,23 @@ bool bAll = (llAll == 1);
         // FUN_140118320 singleton; ends uVar41 = 0. Parse-fail ->
         // DBERR -> false. 6 live rows.
         char f1[128] = {0}, f2[128] = {0}; long long v = 0;
-        if (sscanf(pNode->strParam.c_str(), "%127s %127s %lld",
-                   f1, f2, &v) != 3)
+        int nGot = sscanf(pNode->strParam.c_str(), "%127s %127s %lld",
+                          f1, f2, &v);
+        auto* pSyn = CModuleManager::Instance().Synvar();
+        if (nGot == 3) {
+            // live shape "count == 5": named module var compare
+            int64_t cur = pSyn->QueryName(f1);
+            if (!strcmp(f2, "==")) return cur == v;
+            if (!strcmp(f2, "!=")) return cur != v;
+            if (!strcmp(f2, ">=")) return cur >= v;
+            if (!strcmp(f2, "<=")) return cur <= v;
+            if (!strcmp(f2, ">"))  return cur > v;
+            if (!strcmp(f2, "<"))  return cur < v;
             return false;
+        }
+        if (nGot == 1) { // live shape "mate": var existence check
+            return pSyn->HasName(f1);
+        }
         printf("[SYNVAR] cq_action %u: %s %s %lld user %u\n",
                pNode->dwId, f1, f2, v, pUser->GetId());
         return false; // ORIGINAL tail: uVar41 = 0
@@ -4152,17 +4167,32 @@ bool bAll = (llAll == 1);
                pNode->dwId, pNode->dwData, pUser->GetId());
         return true;
     }
-    case 528: { // ORIGINAL case 0x210 @238611: synvar singleton
-        // (FUN_140118320) read vcall+0x28/write vcall+0x88 + map
-        // iteration (FUN_14034a8d0) + sscanf 9 fields -> true.
+    case 528: { // ORIGINAL case 0x210 @238611: synvar module 0x1e
+        // (read vcall+0x28 by userId / write +0x88) + map-object
+        // attr writes FUN_140104140 + EXACT 9-field sscanf gate.
+        // Live rows: "600 13 0...", "400 08 0..." (lottery-style
+        // map attributes), data=750000.
         int f[9] = {0};
         if (sscanf(pNode->strParam.c_str(),
                    "%d %d %d %d %d %d %d %d %d",
                    &f[0],&f[1],&f[2],&f[3],&f[4],&f[5],&f[6],&f[7],
-                   &f[8]) < 1)
-            return false;
-        printf("[SYNVAR] cq_action %u: 528 chain for user %u\n",
-               pNode->dwId, pUser->GetId());
+                   &f[8]) != 9)
+            return false; // ORIGINAL: iVar18 == 9 exact gate
+        auto pMap = CMapManager::Instance().GetMap(pUser->GetMapId());
+        if (!pMap) return false; // map obj vcall+0x60 -> 0
+        // attr mapping inferred from the body order (sscanf arg
+        // order elided by Ghidra): 4,5,8,9,10,0xb,0xc + final flag
+        if (f[0]) pMap->SetMapInfo(4, (uint32_t)f[0]);
+        if (f[1]) { pMap->SetMapInfo(5, (uint32_t)f[1]);
+                    pMap->SetMapInfo(0xd, (uint32_t)f[1]); }
+        if (f[2]) pMap->SetMapInfo(8,  (uint32_t)f[2]);
+        if (f[3]) pMap->SetMapInfo(9,  (uint32_t)f[3]);
+        if (f[4]) pMap->SetMapInfo(10, (uint32_t)f[4]);
+        if (f[5]) pMap->SetMapInfo(0xb,(uint32_t)f[5]);
+        if (f[6]) pMap->SetMapInfo(0xc,(uint32_t)f[6]);
+        // FUN_140117670(map, f[7] != 0, 1) - final flag
+        printf("[MAPCFG] cq_action %u: 528 attrs set on map %u\n",
+               pNode->dwId, pUser->GetMapId());
         return true;
     }
     case 529: { // ORIGINAL case 0x211 @238681: sscanf "%d %d" +
