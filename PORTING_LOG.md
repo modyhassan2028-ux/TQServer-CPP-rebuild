@@ -2920,3 +2920,32 @@ FUN_140022f40 (تفاصيل كتابة الحقل)، FUN_1400232b0 (مسار
    LeagueInfo/LeagueList/LeagueRank/LeagueBrick (بالمخططات
    المصححة)، PlunderWar كاملة، ProcessServerConnectOK.
    الباقي: FUN_14002c4e0 ثم تدقيق مطابقة نهائي ضد البايناري.
+
+## جلسة 2026-10-24 18:40 — FUN_14002c4e0 (socket kernel dispatch) منفذة
+1. **[تحديد ✔]** FUN_14002c4e0 طلعت **CCrossServerSocketKernel::
+   Process** (من نص اللوج: crossserver\crossserversocket\
+   socketkernel.cpp) — ديسباتش أوامر/أحداث طبقة سوكت الهَب:
+   - 0x7562 Send: فريم {u16 type@0, u32@4, u32@8, u16
+     totalsize@0xc, u16@0xe} + payload، بوابة 0x419 مع MYASSERT
+     "nNetPacketSize" سطر 0x123، عدادات DAT_14007ad0c/ad0c8/ad08
+   - 0x7563 ConnectResult "%lu %d": بوابة IsConnected (vcall
+     +0x18)، flag 0 → Close (vcall+0x20) + FUN_14002b380 تنظيف
+     + صفّر الخانة + FUN_140030480 تدمير؛ flag 1 → يفضل؛
+     لوج "SOCKET_CHECK_CONNECT_RESULT has a bad param" 0x18b/0x191
+   - 0x7564 Send32: زي 0x7562 مع payload كلمات u32 (count=p[1])
+     بوابة 0x419 سطر 0x14a
+   - 0x7565 BindPair "%u %u": bimap سيرفر⇄سوكت (+0xa0/+0xe0)
+   - 0x7566 Unbind: مسح الزوج من الاتجاهين (quirk أصلي: مسح
+     rev[b] بيقطع ربط لاحق fwd خلافه — متحقق في الاختبار)
+   - 0x7567/0x7568 RoutePut/Del: خريطة +0x120 مفاتيح u64
+   - 0x7569 Relay: إرسال نفس الفريم لكل سوكتات الـ bimap عدا
+     الأصل (منطق skip-origin الأصلي)
+   - 0x756b Close (نصي 0x7563 flag-0)، 0x756e OnClose (vcall
+     +0x48)
+   - **TBD موثق:** 0x756c Accept (FUN_140030390 إنشاء السوكت +
+     FUN_14002c260 خانة حرة + تسجيل +0x60 + المصافحة ورسالة
+     kernel+0x50) و0x756d Recv (FUN_14002bad0 → FUN_1400301d0
+     محلل الفريمات الداخلية) — دوالهم الداخلية لسه
+   2. ملفات جديدة: Exe/CQCrossServer/SocketKernel.{h,cpp} +
+   اختبار tests/cross_socketkernel_test.cpp: **ALL OK**
+   3. الرجريشن الستة كلها خضرا.
