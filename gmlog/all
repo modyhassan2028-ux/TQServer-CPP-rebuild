@@ -287,3 +287,7 @@ CHECKF in pRole->QueryObj(OBJ_NPC, IPP_OF(pNpc)), 3027
 table:cq_action/cq_newaction, ACTION 9100705: wrong param count at gameaction.cpp, 3114
 CHECKF in pRole->QueryObj(OBJ_NPC, IPP_OF(pNpc)), 3125
 CHECKF in pRole, 3063
+CHECKF in pRole->QueryObj(OBJ_NPC, IPP_OF(pNpc)), 3027
+table:cq_action/cq_newaction, ACTION 9100705: wrong param count at gameaction.cpp, 3114
+CHECKF in pRole->QueryObj(OBJ_NPC, IPP_OF(pNpc)), 3125
+CHECKF in pRole, 3063
