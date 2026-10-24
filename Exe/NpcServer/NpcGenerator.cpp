@@ -53,7 +53,7 @@ bool CNpcGenerator::CreateNpc(TypeRecord* pType,
     }
     m_pMap = m_fnFindMap(m_dwType);
     if (m_pMap) {
-        if (m_fnTailInit) m_fnTailInit(); // FUN_140060e60
+        if (!LoadCluster()) return false; // FUN_140060e60
         m_dwFieldF = (uint32_t)m_cfg.m_fnGetInt(0xf);
         m_byField10 = (uint8_t)m_cfg.m_fnGetInt(0x10);
         return true;
@@ -66,6 +66,47 @@ bool CNpcGenerator::CreateNpc(TypeRecord* pType,
         m_dwType, m_dwMap);
     if (m_fnLog) m_fnLog(buf);
     return false;
+}
+
+// ===== ORIGINAL FUN_140060e60: CNpcGenerator::LoadCluster =====
+// config GetInt(0x11) == 0 -> true (no cluster).
+// else: id = GetInt(9); new CGameData<szMonsterClusterTable>
+// (0x18) -> this+0x40; alloc fail -> log @0x1d8, false.
+// snprintf(0x40, "SELECT * FROM %s WHERE id = %d LIMIT 1")
+// -> InstanceGet()->vcall+0x10(sql, 2): null -> log @0x1e2,
+// delete cluster (+0x40 = 0), false. rows (vcall+0x40) ==
+// 0 -> log @0x1ea, delete cluster + result, false.
+// else: cluster->vcall+0x30(res) (LoadFromRow), free res.
+bool CNpcGenerator::LoadCluster() {
+    if (m_cfg.m_fnGetInt(0x11) == 0) return true;
+    uint32_t dwId = (uint32_t)m_cfg.m_fnGetInt(9);
+    m_pCluster = new CGameDataCluster(); // operator_new(0x18)
+    if (m_pCluster)
+        m_pCluster->m_fnLoadRow = m_fnClusterLoadRow;
+    if (!m_pCluster) {
+        m_vecErrLogs.push_back("log_InlineLogERROR line 0x1d8");
+        return false;
+    }
+    char szSql[0x40];
+    std::snprintf(szSql, sizeof szSql,
+        "SELECT * FROM %s WHERE id = %d LIMIT 1",
+        "<szMonsterClusterTable: name TBD>", (int)dwId);
+    DbResult* pRes = m_fnQuery(szSql, 2, (int)dwId);
+    if (!pRes) {
+        m_vecErrLogs.push_back("log_InlineLogERROR line 0x1e2");
+        delete m_pCluster; m_pCluster = nullptr; // +0x40 = 0
+        return false;
+    }
+    if (pRes->nRows == 0) {
+        m_vecErrLogs.push_back("log_InlineLogERROR line 0x1ea");
+        delete m_pCluster; m_pCluster = nullptr;
+        delete pRes;                       // (**vtable)(res)
+        return false;
+    }
+    bool bOk = m_pCluster->m_fnLoadRow
+        ? m_pCluster->m_fnLoadRow(pRes) : true;
+    delete pRes;                           // vcall+0x30 tail
+    return bOk;
 }
 
 } // namespace npc

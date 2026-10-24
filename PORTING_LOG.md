@@ -3163,3 +3163,26 @@ FUN_140022f40 (تفاصيل كتابة الحقل)، FUN_1400232b0 (مسار
 2. Exe/NpcServer/NpcGenerator.{h,cpp} + tests/
    npc_generator_test — **NPC_GENERATOR_OK**. رجريشن
    NpcServer الثلاثة كلها خضرا (world/manager/generator).
+
+## جلسة 2026-10-24 22:20 — NpcServer الوحدة 4: ذيل الإنشاء (Cluster)
+1. **FUN_140060e60 = CNpcGenerator::LoadCluster** (الذيل
+   اللي بيناديه FUN_140061040 بعد نجاح الخريطة):
+   - علم config **0x11 == 0** → نجاح فوري (مفيش كلستر)
+   - وإلا: id = GetInt(9)، new **CGameData<&szMonsterCluster
+     Table,&szID>** (0x18 بايت: vftable/نتيجة @+0x8/علم
+     @+0x10) → @+0x40 — فشل الألوكيشن → لوج @**0x1d8**
+   - **الاستعلام الحرفي:** `snprintf(0x40, "SELECT * FROM
+     %s WHERE id = %d LIMIT 1")` عبر `InstanceGet()->vcall
+     +0x10(sql, 2)` (نفس نمط MySQLClient المتسق)
+   - نتيجة null → لوج @**0x1e2** + مسح الكلستر (@+0x40=0)؛
+     صفوف (vcall+0x40) == 0 → لوج @**0x1ea** + مسح الكلستر
+     والنتيجة؛ وإلا الكلستر vcall+0x30 = LoadFromRow
+     وتحرير النتيجة
+   - اسم جدول الكلستر الحرفي TBD (الرمز
+     szMonsterClusterTable غير محلول في الديكمبايل)
+   - **FUN_140060610 = ctor الكلستر** (علم/نتيجة) — اتوثق
+2. Exe/NpcServer/NpcGenerator.{h,cpp} اتوسع بـ LoadCluster
+   + CGameDataCluster/DbResult، وtests/npc_generator_test
+   اتوسع بكل المسارات: علم 0x11، فشل الاستعلام، صفر صفوف،
+   نجاح الصف. **NPC_GENERATOR_OK** + رجريشن NpcServer
+   الثلاثة خضرا.

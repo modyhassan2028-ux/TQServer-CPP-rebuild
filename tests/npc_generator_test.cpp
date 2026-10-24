@@ -26,8 +26,7 @@ int main() {
     g.m_fnRandomMapId = []{ return 800; };
     g.m_fnFindMap = [&](uint32_t t)->void*{
         return t == 1111 ? (void*)0x1234 : nullptr; };
-    int nTail = 0;
-    g.m_fnTailInit = [&]{ ++nTail; };
+    int nTail = 0;             // 0x11 = 0: no cluster
     TypeRecord rec; rec.m_fnGetGroup = []{ return 42; };
 
     // fixed mode: map from lookup, type from config 1
@@ -39,7 +38,7 @@ int main() {
     // step = (100/10) * (100/10) = 100
     assert(g.m_nStep == 100);
     assert(g.m_dwFieldF == 0x2a && g.m_byField10 == 0x1);
-    assert(nTail == 1 && logs.empty());
+    assert(g.m_pCluster == nullptr && logs.empty());
 
     // random mode (0x12 bit0): type from param, map random
     vals[0x12] = 1; vals[1] = 2222;
@@ -72,8 +71,53 @@ int main() {
     assert(g.CreateNpc(&rec, 0));
     assert(g.m_nStep == 0);
 
+    // ---- LoadCluster (FUN_140060e60) ----
+    CNpcGenerator c;
+    int cvals[0x13] = {}; cvals[9] = 77; cvals[0x11] = 0;
+    c.m_cfg.m_fnGetInt = [&](int i){ return cvals[i]; };
+    c.m_fnTime = []{ return 0; };
+    c.m_fnRand = [](int){ return 0; };
+    c.m_fnCurrentMapId = []{ return 1; };
+    c.m_fnFindMap = [](uint32_t){ return (void*)1; };
+    // flag 0x11 == 0 -> immediate true, no query
+    assert(c.LoadCluster() && c.m_pCluster == nullptr);
+    cvals[0x11] = 1;
+    int nQ = 0, nFree = 0; bool bRow = false;
+    c.m_fnQuery = [&](const char* sql, int, int id){
+        ++nQ;
+        // the formatted ORIGINAL: %s = the cluster table
+        // (name TBD), %d = GetInt(9) = 77; the 0x40 buffer
+        // truncates the placeholder tail, so assert the
+        // surviving prefix
+        assert(std::string(sql).find(
+            "SELECT * FROM <szMonsterClusterTable") ==
+            0);
+        assert(std::string(sql).find("WHERE id = 77") !=
+            std::string::npos);
+        DbResult* r = new DbResult();
+        r->nRows = bRow ? 1 : 0;
+        return r; };
+    // rows 0 -> fail, log 0x1ea, cluster freed
+    assert(!c.LoadCluster());
+    assert(nQ == 1 && c.m_pCluster == nullptr);
+    assert(c.m_vecErrLogs.size() == 1 &&
+           c.m_vecErrLogs[0].find("0x1ea") != std::string::npos);
+    // rows > 0 -> LoadRow (the class' fixed vtable loader)
+    bRow = true; nQ = 0; c.m_vecErrLogs.clear();
+    int nRow = 0;
+    c.m_fnClusterLoadRow = [&](DbResult*){ ++nRow;
+        return true; };
+    assert(c.LoadCluster() && nQ == 1 && nRow == 1);
+    assert(c.LoadCluster() && nRow == 2);
+    // query null -> log 0x1e2
+    c.m_fnQuery = [](const char*, int, int){
+        return (DbResult*)nullptr; };
+    assert(!c.LoadCluster());
+    assert(c.m_vecErrLogs.size() == 1 &&
+           c.m_vecErrLogs[0].find("0x1e2") != std::string::npos);
+
     printf("NPC_GENERATOR_OK: fixed/random modes, group "
            "filter, geo step, rand X, born sec, invalid-map "
-           "verbatim log\n");
+           "verbatim log\n");  // + cluster load flows
     return 0;
 }

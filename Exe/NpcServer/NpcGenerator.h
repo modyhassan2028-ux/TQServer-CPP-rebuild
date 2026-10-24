@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <functional>
+#include <string>
+#include <vector>
 
 namespace npc {
 
@@ -18,6 +20,21 @@ struct GenConfig {
 // monster-type record: vcall+0x28 -> vcall+0x40 (group id)
 struct TypeRecord {
     std::function<int64_t()> m_fnGetGroup;
+};
+
+// ORIGINAL CGameData<&szMonsterClusterTable,&szID>:
+// 0x18 bytes - vftable, result @+0x8, flag @+0x10
+// (ctor FUN_140060610, vcall+0x30 = LoadFromRow,
+//  vcall+0x58 = delete). The exact table name string of
+// szMonsterClusterTable is TBD in the decompile.
+struct DbResult {                  // SQL result: vcall+0x40
+    int nRows = 0;
+};
+
+class CGameDataCluster {
+public:
+    bool m_bFlag = false;          // +0x10
+    std::function<bool(DbResult*)> m_fnLoadRow; // vcall+0x30
 };
 
 class CNpcGenerator {
@@ -44,7 +61,18 @@ public:
     std::function<uint32_t()> m_fnCurrentMapId; // DAT_140102d90
     std::function<uint32_t()> m_fnRandomMapId;  // FUN_14002b2d0
     std::function<void*(uint32_t)> m_fnFindMap; // FUN_14003ca10
-    std::function<void()> m_fnTailInit;          // FUN_140060e60
+    // ORIGINAL FUN_140060e60: LoadCluster - the CreateNpc
+    // tail (config 0x11 flag, SELECT * FROM <cluster table>
+    // WHERE id = GetInt(9) LIMIT 1 via InstanceGet)
+    bool LoadCluster();
+    CGameDataCluster* m_pCluster = nullptr;   // +0x40
+    // InstanceGet()->vcall+0x10(sql, 2): query seam
+    std::function<DbResult*(const char*, int,
+                            int)> m_fnQuery;
+    // the cluster class' fixed vtable row loader
+    // (vcall+0x30) as a seam
+    std::function<bool(DbResult*)> m_fnClusterLoadRow;
+    std::vector<std::string> m_vecErrLogs;    // 1400be0b0
     std::function<int(int)> m_fnRand;            // tq::RandGet
     std::function<uint32_t()> m_fnTime;          // tq::TimeGet
     std::function<void(const char*)> m_fnLog;
