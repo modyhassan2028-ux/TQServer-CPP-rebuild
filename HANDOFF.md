@@ -83,9 +83,16 @@ chk_sum بمعادلة FUN_1400fe140 كاملة + LAST_INSERT_ID)،
   (407 في خانة البيانات والاتجاه في خانة الـ action — حرفي). الخضائرات
   كلها مبورتة (جلسة سادسة): CreateGroup=FUN_140386a50،
   AppendGroup=FUN_140387150، JumpPos=FUN_140388a40،
-  IsValidPos=FUN_14015f9d0. فاضل FUN_140499830 وFUN_1404a1f70
-  (الحلقة المفقودة Intone→Launch→ضرر) وFUN_14048c4c0 (إشارتا
-  MagicEffect — غالبًا Launch/Apply).
+  IsValidPos=FUN_14015f9d0. بوابات الإطلاق تمت (جلسة ثامنة):
+  FUN_1404864f0 (IsTargetProtected حرفي: منطقة/PK>999+STR_PK/
+  حصانة السورتات/friendly) وFUN_1404831f0+1403e9290 (بوابة
+  السحب: status 0xa0 + رول مقاومة) وFUN_140483270 (هوك خامل).
+  **اكتشاف ABI**: GetAttrib(idx>=100) = عمود cq_magictype
+  (0x66=sort/0x68=crime/0x7a=weapon_subtype/0x82=weapon_hit/
+  0x87+0x88=status_data) — CPlayerMagic اتوسع بيه. فاضل
+  FUN_1404847d0/140484670 (حساب الضرر) ثم FUN_1404a1f70 كامل +
+  حلقة المروحة (DAT_140786e20) ثم FUN_140499830 وFUN_14048c4c0
+  (إشارتا MagicEffect — غالبًا Launch/Apply).
 - الحلقة المفقودة: Intone (شحن السحر) → Launch (إطلاق) → التحقق
   من الهدف/المسافة/crime → حساب الضرر من cq_magictype (power/
   percent/level) → تطبيق التأثير على الأهداف → بث MsgMagicEffect
