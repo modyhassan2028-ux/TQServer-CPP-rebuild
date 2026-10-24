@@ -447,3 +447,24 @@ chk_sum بمعادلة FUN_1400fe140 كاملة + LAST_INSERT_ID)،
   الديكمبايل جاهز في Native-Decompiled) → Loaderhock.exe →
   الأيقونات/الصور مطابقة للأصل → وحوش الكروس في الريلم +
   conquer.exe باداة Rea إن نقص شي.
+
+
+---
+
+## تحديث 2026-10-24 (قفل CQCrossServer)
+
+**CQCrossServer: مقفول ✅** — كل الدوال الرئيسية منفذة حرفياً
+ومختبرة (رجريشن 7/7). الـ TBDs المتبقية (16) موثقة بعناوينها
+كلها تفاصيل جزئية الاستخراج.
+
+**الجبهة المفتوحة: NpcServer.exe**
+- الديكمبايل: Native-Decompiled/NpcServer.exe.decompiled.c
+  (181,583 سطر، 7,240 دالة)، فهرس .index.tsv، أسماء RTTI
+  في NameIndex/names_final.tsv (world_kernel::*).
+- **main.cpp الحالي هو stub تمثيلي قديم — هيتم استبداله
+  بالبورت الحقيقي حسب الآتي:**
+  1. آلة حالة الاتصال بالـ MsgServer (FUN_14001c700:
+     "Login OK. generator monster after %d secs")
+  2. world_kernel + المولّد (Generator) وحلقة الوحوش
+  3. رسائل AI-NPC (CMsgAiNpcInfo) وبروتوكولاتها
+  4. DLLs الجانبية: Arenic, Booth, Analyst, AntiCheat

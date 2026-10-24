@@ -3066,3 +3066,27 @@ FUN_140022f40 (تفاصيل كتابة الحقل)، FUN_1400232b0 (مسار
    cq.sql مضغوط 9.4M). الـ 7z (791M) والـ sql الخام (108M)
    بره الجت بـ .gitignore (فوق حد GitHub 100M) — الخامات
    موجودة في الـ sandbox.
+
+## جلسة 2026-10-24 20:55 — قفل CQCrossServer رسمياً + فتح جبهة NpcServer
+1. **[تدقيق القفل ✔]** حالة CQCrossServer: كل الوحدات
+   الرئيسية منفذة ومختبرة (Kernel بكل الرسائل، League،
+   CountrySysMgr، PlunderWar، OS msgs، طبقة السوكت كاملة:
+   drain 1400301d0، مشّاء 14002e6d0 بكل شجرة توجيه C،
+   Accept 0x756c، SendOSMulitClient). المتبقي 16 ملاحظة
+   TBD كلها "جزئي الاستخراج" وموثقة بعناوينها — مقبولة
+   بقواعد المشروع. الرجريشن 7/7 خضرا.
+2. **فتح NpcServer.exe:** الديكمبايل 181,583 سطر / 7,240
+   دالة (الفهرس NpcServer.exe.index.tsv)، أسماء RTTI
+   جاهزة من names_final.tsv (namespace world_kernel،
+   CMsgAiNpcInfo، InstanceGet@14001c780 مسمّاة أصلاً في
+   الديكمبايل).
+3. **أول قراءة معمارية:** FUN_14001c700 = معالج حالة
+   الاتصال بالـ MsgServer: state=2 @+8، tq::TimeGet(0)/1000
+   @+0x1c، ثم "Login OK. generator monster after %d secs"
+   عبر vcall @+0x10 (واجهة الكونسول). مولّد الوحوش =
+   الحالة التالية بعد تسجيل الدخول.
+4. **خطة NpcServer (ترتيب HANDOFF):** (أ) آلة حالة الاتصال
+   (FUN_14001c700 وعائلتها: Connect/Login/Generate)، (ب)
+   world_kernel: حلقة الوحوش والمولّد، (ج) رسائل AI-NPC
+   (CMsgAiNpcInfo)، (د) ربط DLLs الجانبية (Arenic/Booth/
+   Analyst/AntiCheat).
