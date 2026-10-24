@@ -3119,3 +3119,23 @@ FUN_140022f40 (تفاصيل كتابة الحقل)، FUN_1400232b0 (مسار
 4. Exe/NpcServer/NpcWorld.{h,cpp} + tests/npc_world_test —
    **NPC_WORLD_OK** (كل الحالات + البوابات الزمنية +
    تصنيف الإحصاءات + MYASSERT). الرجريشن 7/7 كلها خضرا.
+
+## جلسة 2026-10-24 21:40 — NpcServer الوحدة 2: CNpcManager
+1. **FUN_14002b380 = CNpcManager::ProcessGenerators**
+   (npcmanager.cpp — الهوية من سلاسل CHECKF/MYASSERT):
+   - مشيّة مولّدات m_pNpcGenSet @+0x10 بميزانية عالمية
+     **DAT_1401028c0** (بتتقرأ جديدة كل تيكة): كل مولّد
+     بيستهلك عبر vcall+0x80 والميزانية بتنقص لحد ما تقل
+     عن 1 (CTickAnalyst 0x52)
+   - CHECKF("m_pNpcGenSet") @0x1a1 و
+     MYASSERT("pNpcGenerator") @0x16b بالنصوص الأصلية
+   - **DAT_1401045cc**: عدّاد mod 3 — كل تيكة ثالثة مشيّة
+     مجموعة الـ NPC (m_pNpcSet @+8، CHECKF @0x1d4):
+     الحارسان FUN_140028820 وFUN_140057cf0 يمنعان
+     التيكة، وإلا vcall+0xe0 = تيكة الـ AI
+     (CTickAnalyst 0x54). مشية عقد الشجرة بعلم +0x29
+     جزئية الاستخراج (مطرودة بالـ map، موثقة TBD).
+2. Exe/NpcServer/NpcManager.{h,cpp} + tests/npc_manager_test
+   — **NPC_MANAGER_OK** (استهلاك الميزانية وحدّها الأعلى،
+   إيقاف مبكر عند النفاد، mod-3، الحارس، MYASSERT/CHECKF).
+   ملاحظة: ميزانية كل تيكة بتتجدد زي الأصل.
