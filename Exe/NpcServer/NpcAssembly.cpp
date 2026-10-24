@@ -411,3 +411,52 @@ bool CNpcServerApp::HandleAiNpcInfo(
 }
 
 } // namespace npc
+
+
+// ===== unit 44: the REAL stats panel =====
+namespace npc {
+
+std::string FormatStatsPanel(
+        const NpcStatsPanelData& d) {
+    // ORIGINAL VERBATIM (_snprintf(buf, 0x800,
+    // ...) of FUN_14001d230 - the window panel
+    // of the ORIGINAL NpcServer console):
+    //   "Player + Pet + Other: %u + %u + %u
+    //    \nNPC active / total: %u / %u
+    //    \nNPC: in game / generated / limit
+    //    \n\t%d / %d / %d
+    //    \nGenerator: active+full+over / total
+    //    \n\t%u + %u + %u / %u
+    //    \nSynPet: %u"
+    char buf[0x800];
+    snprintf(buf, sizeof(buf),
+        "Player + Pet + Other: %u + %u + %u\n"
+        "NPC active / total: %u / %u\n"
+        "NPC: in game / generated / limit\n"
+        "\t%d / %d / %d\n"
+        "Generator: active+full+over / total\n"
+        "\t%u + %u + %u / %u\n"
+        "SynPet: %u",
+        d.uPlayers, d.uPets, d.uOthers,
+        d.uNpcActive, d.uNpcTotal,
+        d.nInGame, d.nGenerated, d.nLimit,
+        d.uGenActive, d.uGenFull, d.uGenOver,
+        d.uGenTotal, d.uSynPet);
+    return std::string(buf);
+}
+
+std::string FormatKernelMs(uint32_t uSum,
+                           uint32_t uCount,
+                           long lMax) {
+    // ORIGINAL VERBATIM: if (count == 0)
+    // avg = 0 else avg = sum / count;
+    // Format(this + 0x1a0, "kernel(ms):
+    // %d/%ld", avg, max)
+    uint32_t uAvg = (uCount == 0) ? 0
+        : uSum / uCount;
+    char buf[64];
+    snprintf(buf, sizeof(buf),
+        "kernel(ms): %d/%ld", uAvg, lMax);
+    return std::string(buf);
+}
+} // namespace npc

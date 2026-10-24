@@ -73,4 +73,59 @@ NpcObj* CNpcManager::LookupByIdVt30(uint64_t uId) {
     return it->second;
 }
 
+// ===== FUN_140038090: the id-space counters
+// (usermanager.cpp; the FOURTH literal assert
+// context after npc.cpp 0x68f/0x6b2 and
+// gamemap.cpp 0x129) =====
+void CountPlayerPetOther38090(
+        TqObjContainer* pCont,
+        std::function<uint64_t(uint64_t)> fnItemId,
+        int* pPlayers, int* pPets, int* pOthers) {
+    // ORIGINAL VERBATIM:
+    //   if (!param_2 || !param_3) log; return;
+    //   *players = 0; *pets = 0; others = 0;
+    //   n = cont->vt+0x10();
+    //   for (i = 0; i < n; ++i) {
+    //     item = cont->vt+0x18(i,
+    //       "f:\version\cqserver-78.0.11-1204"
+    //       "\npcserver\npckernel\usermanager.cpp",
+    //       0x6a);
+    //     if (item) {
+    //       id = item->vt+0x8();
+    //       if (id - 0xaae61U < 99999)  ++*pets;
+    //       else if (id - 1000000U
+    //                 < 0xee5be5c0U)  ++*players;
+    //       else                       ++others;
+    //     }
+    //     n = cont->vt+0x10();   // re-read LIVE
+    //   }
+    if (pPlayers == nullptr || pPets == nullptr) {
+        // ORIGINAL: log_InlineLogERROR + return
+        return;
+    }
+    *pPlayers = 0;
+    *pPets = 0;
+    if (pOthers) *pOthers = 0;
+    if (pCont == nullptr) return;
+    uint32_t uCount = pCont->CountVt10();
+    for (uint32_t i = 0; i < uCount; ++i) {
+        uint64_t h = pCont->GetVt18(i,
+            "f:\\version\\cqserver-78.0.11-1204"
+            "\\npcserver\\npckernel\\usermanager.cpp",
+            0x6a);
+        if (h != 0 && fnItemId) {
+            uint64_t id = fnItemId(h);
+            if (id - 0xaae61U < 99999U) {
+                ++(*pPets);
+            } else if (id - 1000000U
+                    < 0xee5be5c0U) {
+                ++(*pPlayers);
+            } else if (pOthers) {
+                ++(*pOthers);
+            }
+        }
+        uCount = pCont->CountVt10();
+            // the ORIGINAL re-reads the count
+    }
+}
 } // namespace npc

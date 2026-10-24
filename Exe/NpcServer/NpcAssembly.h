@@ -34,6 +34,30 @@
 
 namespace npc {
 
+// ===== unit 44: the REAL stats panel
+// (FUN_14001d230's _snprintf + the kernel-ms
+// format) =====
+struct NpcStatsPanelData {
+    uint32_t uPlayers = 0, uPets = 0,
+             uOthers = 0;
+    uint32_t uNpcActive = 0, uNpcTotal = 0;
+    int nInGame = 0, nGenerated = 0,
+        nLimit = 0;
+    uint32_t uGenActive = 0, uGenFull = 0,
+             uGenOver = 0, uGenTotal = 0;
+    uint32_t uSynPet = 0;
+};
+// the VERBATIM panel format (the literal
+// _snprintf string of FUN_14001d230)
+std::string FormatStatsPanel(
+    const NpcStatsPanelData& d);
+// the kernel-ms line (the avg = sum/count
+// with the 0 guard, the max): "kernel(ms):
+// %d/%ld"
+std::string FormatKernelMs(uint32_t uSum,
+                           uint32_t uCount,
+                           long lMax);
+
 class CNpcServerApp {
 public:
     // ---------- seams ----------

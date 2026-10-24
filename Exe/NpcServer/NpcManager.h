@@ -3,6 +3,8 @@
 // strings of FUN_14002b380)
 #pragma once
 #include <stdint.h>
+// (unit 44: FUN_140038090 needs the container)
+#include "NpcCellObjects.h"
 #include <functional>
 #include <map>
 #include <memory>
@@ -36,6 +38,20 @@ struct NpcObj {
     // container, vt+0x30(id))
     uint64_t m_uId = 0;
 };
+
+// ===== FUN_140038090: the Player/Pet/Other
+// id-space counters (usermanager.cpp) - the
+// PRIMARY-EVIDENCE id spaces of the server:
+//   pets:    id in [0xaae61, 0xaae61+0x1869f)
+//            = [700001, 800000)  (0xaae61 = 700001
+//            - JUST above the 700000 transform gate!)
+//   players: id in [1000000, 1000000+0xee5be5c0)
+//   others:  everything else (the monsters)
+void CountPlayerPetOther38090(
+    TqObjContainer* pCont,
+    std::function<uint64_t(uint64_t)> fnItemId,
+        // the item's vt+0x8 id getter
+    int* pPlayers, int* pPets, int* pOthers);
 
 class CNpcManager {
 public:
