@@ -3976,11 +3976,37 @@ bool bAll = (llAll == 1);
                pNode->dwId, d, pUser->GetId());
         return true;
     }
-    case 1508: { // ORIGINAL rank 0x8a (case @250066): lottery -
-        // pLotteryProvider call result (FUN at puVar30). 13 live rows.
-        printf("[LOTTERY] cq_action %u: lottery for user %u\n",
-               pNode->dwId, pUser->GetId());
-        return true; // provider result assumed success (documented)
+    case 1508: { // ORIGINAL rank 0x8a (case @250066): strtoul(param)
+        // -> lottery type (live rows 1..5), module 10 (pLotteryProvider)
+        // vtable[0](userId, type, dataId). Module absent -> IF_NOT
+        // pLotteryProvider ERROR -> false. 13 live rows.
+        uint32_t uType = (uint32_t)strtoul(pNode->strParam.c_str(),
+                                           nullptr, 10);
+        auto* pLot = CModuleManager::Instance().Lottery();
+        if (!pLot) {
+            printf("[LOTTERY] IF_NOT pLotteryProvider -> false\n");
+            return false; // ORIGINAL: module 10 absent
+        }
+        CLotteryModule::SPrize prize;
+        if (!pLot->RollPrize(uType, prize))
+            return false; // no rows of this type
+        const ItemTypeDef* pDef =
+            CItemLibrary::Instance().Lookup(prize.dwItem);
+        if (!pDef) return false;
+        ItemInfo item;
+        item.dwId = MakeItemId(g_dwItemSeq++);
+        item.dwType = prize.dwItem;
+        CItemLibrary::Instance().Apply(item);
+        item.ucPlus = prize.ucAddition; // addition_lev -> +n
+        item.dwPosition = 255;          // bag
+        item.dwAmount = 1;
+        printf("[LOTTERY] cq_action %u: user %u type %u won %s "
+               "(item %u, rank %u, color %u, holes %u, +%u)\n",
+               pNode->dwId, pUser->GetId(), uType, prize.strName.c_str(),
+               prize.dwItem, prize.uRank, prize.ucColor,
+               prize.ucHoles, prize.ucAddition);
+        pUser->AddItem(item);
+        return true; // provider call result
     }
     case 1509: { // ORIGINAL rank 0x8b (case @250087): sscanf 6 fields
         // "%u %d %d %d %d %d" -> FUN_1401c7e10(user, f1) gate; then

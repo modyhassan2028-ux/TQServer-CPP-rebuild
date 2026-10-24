@@ -46,12 +46,36 @@ public:
     uint32_t GetId() const override { return 0xd; }
 };
 
+// module 10 = pLotteryProvider (original IF_NOT error names it in
+// gameaction.cpp case 0x8a / cq_action 1508). vtable[0](userId,
+// lotteryType, dataId) plays a roll against the cq_lottery table:
+// rows of the given type, weighted by the chance column; the prize
+// is the row's prize_item (+ color/hole_num/addition_lev).
+class CLotteryModule : public IModule {
+public:
+    uint32_t GetId() const override { return 10; }
+    struct SPrize {
+        uint32_t dwRowId{0};
+        uint8_t  uRank{0};
+        uint32_t uChance{0};
+        uint32_t dwItem{0};      // cq_lottery.prize_item (cq_itemtype id)
+        uint8_t  ucColor{0};     // color column
+        uint8_t  ucHoles{0};     // hole_num (sockets)
+        uint8_t  ucAddition{0};  // addition_lev (+n)
+        std::string strName;     // prize_name
+    };
+    // vtable[0] core: weighted roll within the type. false = no rows.
+    bool RollPrize(uint32_t uType, SPrize& out);
+    size_t RowCount(uint32_t uType);
+};
+
 class CModuleManager {
 public:
     static CModuleManager& Instance();
     // ORIGINAL factory vcall+0x20: get-or-create module by id
     std::shared_ptr<IModule> GetModule(uint32_t dwId);
     CSynvarModule* Synvar(); // typed accessor (FUN_140118320)
+    CLotteryModule* Lottery(); // typed accessor (pLotteryProvider, id 10)
     size_t ModuleCount() const { return m_modules.size(); }
 
 private:

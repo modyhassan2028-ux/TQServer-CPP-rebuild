@@ -1928,7 +1928,7 @@ system("mariadb -u root cq -e \"DELETE FROM cq_item WHERE owner_id=888001 AND ty
     // assumed-success effects: 1070/1077/1508/1511/1652 -> true
     { auto n = mkE(1070, "1 2 3");assert( CGameAction::ProcessActionUser(u5,&n)); }
     { auto n = mkE(1077, "", 3);  assert( CGameAction::ProcessActionUser(u5,&n)); }
-    { auto n = mkE(1508, "");     assert( CGameAction::ProcessActionUser(u5,&n)); }
+    { auto n = mkE(1508, "3");   assert( CGameAction::ProcessActionUser(u5,&n)); } // real lottery roll (type 3)
     { auto n = mkE(1511, "");     assert( CGameAction::ProcessActionUser(u5,&n)); }
     { auto n = mkE(1652, "");     assert( CGameAction::ProcessActionUser(u5,&n)); }
     // 1033: 10-field parse
@@ -2019,6 +2019,21 @@ system("mariadb -u root cq -e \"DELETE FROM cq_item WHERE owner_id=888001 AND ty
         // leave-team restores the false path
         pTeam->RemoveMember(uMate->GetId());
         CUserManager::Instance().RemoveUser(uMate->GetId());
+    }
+
+    // --- lottery: module 10 (pLotteryProvider) + 1508 ---
+    {
+        auto* pLot = CModuleManager::Instance().Lottery();
+        assert(pLot && pLot->RowCount(3) == 326); // cq_lottery type 3
+        CLotteryModule::SPrize prize;
+        assert(pLot->RollPrize(3, prize)); // weighted roll succeeds
+        assert(prize.dwItem != 0);         // grants a real cq_itemtype id
+        assert(!pLot->RollPrize(77, prize)); // unknown type -> false
+        CDialogEngine::Node nd; nd.dwType = 1508; nd.dwData = 3;
+        nd.strParam = "3";
+        const size_t nBefore = u5->GetInventory().size();
+        assert(CGameAction::ProcessActionUser(u5, &nd));
+        assert(u5->GetInventory().size() == nBefore + 1); // prize granted
     }
 
     // --- module system (module 0x1e synvar) + 528 + 1102 ---
