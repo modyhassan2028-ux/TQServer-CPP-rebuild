@@ -20,6 +20,8 @@
 #include "NpcUserTick.h"
 #include "NpcMapData.h"
 #include "NpcCellObjects.h"
+#include "NpcStrTable.h"
+#include "NpcStateUtil.h"
 
 namespace npc {
 
@@ -97,6 +99,14 @@ public:
     // bind the user-tick container seams (the
     // user pass: npc.cpp line 0x6b2)
     void BindUserTickCells(CNpcUserTickData& rU);
+    // bind the target-search finale: the
+    // shout chain theInstance()->get(key) +
+    // sprintf + FUN_1400586b0(npc, buf, 0)
+    // (the string table unit 40 + the ported
+    // shout unit 33)
+    void BindTargetSearchFinale(
+        CNpcTargetSearchData& rT,
+        CNpcShoutData& rShout);
 
     // bind the transform's 49310 probes:
     //   m_fnMapWidth  = mapdata vt+0x28

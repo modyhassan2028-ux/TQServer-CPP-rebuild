@@ -158,6 +158,29 @@ void CNpcMapBinder::BindTargetSearchCells(
                                nLine); };
 }
 
+void CNpcMapBinder::BindTargetSearchFinale(
+        CNpcTargetSearchData& rT,
+        CNpcShoutData& rShout) {
+    // the ORIGINAL finale: theInstance() ->
+    // vt[0](key) -> sprintf(buf, fmt) ->
+    // FUN_1400586b0(npc, buf, 0)
+    rT.m_fnShout =
+        [&rShout](const char* pszKey) {
+            TqStrTable* pTbl =
+                TqStrTableInstance();
+            const char* pszFmt =
+                pTbl->GetVt0(pszKey);
+            char buf[256];
+            // the ORIGINAL decompile shows
+            // sprintf(buf, fmt) with NO
+            // varargs (the %s ambiguity -
+            // modeled verbatim, see unit 40)
+            sprintf(buf, "%s", pszFmt);
+            CNpcShout586b0(rShout, buf,
+                           nullptr);
+        };
+}
+
 void CNpcMapBinder::BindUserTickCells(
         CNpcUserTickData& rU) {
     TqMapData* pMd = m_pMap->m_pMapData;

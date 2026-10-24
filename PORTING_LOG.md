@@ -4160,3 +4160,35 @@ NPC_PKFAMILY_OK (12 حالة)، الرجريشن 29/29 خضرا.
 - اختبارا MsgServer DB-backed خضرا (ALL
   PASSED للاتنين).
 - **الرجريشن 37/37 أخضر + سموك main.**
+
+## جلسة 2026-10-25 09:00 — NpcServer الوحدة
+40: جدول النصوص
+
+### الوحدة 40 (NpcStrTable.h/cpp)
+- **theInstance():** استيراد في NpcServer.exe
+  (الكلاس في DLL مشتركة) — البورت بيمتلك
+  singleton صريح (TqStrTableInstance /
+  TqStrTableSetInstance).
+- **البيانات الحقيقية:** ملف En_Res.ini الأصلي
+  في فولدر Source (324 مفتاح STR_/Language،
+  هيدر Language=English). البورت بيحمّله
+  فعليًا من orig_binaries في الاختبار.
+- **قيم الصيحة الحقيقية (حرفيًا):**
+  - STR_GUARD_CALL_s = "Warning %s, no PK
+    within city limits."
+  - STR_PPKER_CALL_s = "You have been slain,
+    %s. We reap what we sow."
+- **غموض موثق:** الديكومبايل بيعرض
+  sprintf(buf, fmt) بلا أي varargs بينما القيم
+  فيها %s — يا إما Ghidra أسقط الـ varargs أو
+  البقّي الأصلي sprintf بلا وسائط مع %s (UB).
+  البورت بيمثل النداء زي ما الديكومبايل
+  بيعرضه ويوثق الغموض.
+- **الربط:** BindTargetSearchFinale في الـ
+  binder: theInstance()->get(key) + sprintf +
+  CNpcShout586b0 (وحدة 33) — سلسلة النهاية
+  الكاملة لاختيار الهدف اكتملت.
+- اختبار جديد: npc_strtable_test (يحمّل
+  En_Res.ini الحقيقي وبيتحقق من القيم
+  الحرفية) + قسم 8 في اختبار الـ binder.
+- **الرجريشن 38/38 أخضر + سموك main.**

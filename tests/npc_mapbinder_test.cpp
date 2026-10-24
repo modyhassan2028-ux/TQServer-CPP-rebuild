@@ -168,6 +168,43 @@ int main() {
             "npc.cpp", 0x57, 0, 0) == 0x66);
     }
 
+    // ===== 8) the finale: the string table
+    //      chain (unit 40) =====
+    {
+        TqStrTable tbl;
+        tbl.LoadIni(
+            "Language=English\n"
+            "STR_GUARD_CALL_s=Warning %s, no PK "
+            "within city limits.\n"
+            "STR_PPKER_CALL_s=You have been "
+            "slain, %s. We reap what we sow.\n");
+        TqStrTableSetInstance(&tbl);
+        std::string sShouted;
+        CNpcShoutData sh;
+        sh.m_fnLogError = []{};
+        sh.m_fnGetName = []{ return "Guard"; };
+        sh.m_fnNpcId8 = []{ return (uint32_t)
+            0x7d1; };
+        sh.m_fnCompose =
+            [](const char* msg,
+               const char* name,
+               const char* chan) { return true; };
+        sh.m_fnSend = [&](uint32_t uId) {
+            (void)uId; sShouted = "sent"; return
+            true; };
+        // capture via the compose: the text lands
+        // in the msg object; here verify the
+        // chain fires and returns
+        CNpcTargetSearchData ts2;
+        b.BindTargetSearchFinale(ts2, sh);
+        ts2.m_fnShout("STR_GUARD_CALL_s");
+        assert(!sShouted.empty());
+        sShouted.clear();
+        ts2.m_fnShout("STR_PPKER_CALL_s");
+        assert(!sShouted.empty());
+        TqStrTableSetInstance(nullptr);
+    }
+
     printf("NPC_MAPBINDER_OK: the map seam binder" " wired the real TqMapData (37) and the"
            " blocker grid (49580 -> 3e890 -> *uint"
            " checked chain) into the ported seams -"
