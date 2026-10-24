@@ -1692,6 +1692,47 @@ system("mariadb -u root cq -e \"DELETE FROM cq_item WHERE owner_id=888001 AND ty
     ndE.strParam = "self add 2";
     assert(!CGameAction::ProcessActionUser(u5, &ndE));
 
+    // --- family E batch 2: 1083 / 1096 / 1098 / 1554 (live rows) ---
+    CDialogEngine::Node ndE2; ndE2.dwType = 1554;
+
+    // 1083: "+= 2" (101 rows) matches no op -> literal DBERR false
+    CDialogEngine::Node nd1083; nd1083.dwType = 1083;
+    nd1083.strParam = "+= 2";
+    assert(!CGameAction::ProcessActionUser(u5, &nd1083));
+    nd1083.strParam = "add 1";   // FUN_14039a150 -> true
+    assert(CGameAction::ProcessActionUser(u5, &nd1083));
+    nd1083.strParam = "clr 1";   // FUN_14039a1b0 -> true
+    assert(CGameAction::ProcessActionUser(u5, &nd1083));
+    nd1083.strParam = "chk 1";   // FUN_14039a210 stub -> false
+    assert(!CGameAction::ProcessActionUser(u5, &nd1083));
+    nd1083.strParam = "add";     // parse < 2 -> false
+    assert(!CGameAction::ProcessActionUser(u5, &nd1083));
+
+    // 1096: "200 0 5 0 5 1" (live) -> parse gate + module stub
+    CDialogEngine::Node nd1096; nd1096.dwType = 1096;
+    nd1096.strParam = "200 0 5 0 5 1";
+    assert(CGameAction::ProcessActionUser(u5, &nd1096));
+    nd1096.strParam = "200 0 5"; // parse < 6 -> false
+    assert(!CGameAction::ProcessActionUser(u5, &nd1096));
+    nd1096.strParam = "200 -1 5 0 5 1"; // negative -> 0
+    assert(!CGameAction::ProcessActionUser(u5, &nd1096));
+
+    // 1098: profession whitelist (data=0 branch)
+    u5->SetProfession(10);
+    CDialogEngine::Node nd1098; nd1098.dwType = 1098;
+    nd1098.strParam = "29 30 31 32 33 34 35 37 38 45 46 48 111 12 10";
+    assert(CGameAction::ProcessActionUser(u5, &nd1098));
+    nd1098.strParam = "29 30 31 32 33 35 36 37 38 45 46 48 111 12 15";
+    assert(!CGameAction::ProcessActionUser(u5, &nd1098));
+
+    // 1554: "add"/"chk" single-token rows with monster id in data col
+    ndE2.strParam = "add"; ndE2.dwData = 11029; // live pattern
+    assert(CGameAction::ProcessActionUser(u5, &ndE2));
+    ndE2.strParam = "chk"; ndE2.dwData = 11029; // stub false
+    assert(!CGameAction::ProcessActionUser(u5, &ndE2));
+    ndE2.strParam = "other"; // no match -> tail -> false
+    assert(!CGameAction::ProcessActionUser(u5, &ndE2));
+
     printf("DIALOG FIDELITY TEST PASSED\n");
     return 0;
 }

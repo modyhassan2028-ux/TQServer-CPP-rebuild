@@ -3337,6 +3337,97 @@ bool bAll = (llAll == 1);
                pNode->dwId, szWho, szOp);
         return false;
     }
+    case 1083: { // ORIGINAL family-E block @245554: mine/hunt counter
+        // trio. sscanf "%s %d" == 2; "chk N" -> FUN_14039a210(user,N)
+        // (returns bool); "add N" -> FUN_14039a150(user,N) -> true;
+        // "clr N" -> FUN_14039a1b0(user,N) -> true; any other op ->
+        // DBERR (gameaction.cpp:0x204d) -> false. NOTE: the 101 live
+        // "+= N" rows match no op and take the literal DBERR path.
+        char szOp[64]={0}; int32_t nVal = 0;
+        if (sscanf(pNode->strParam.c_str(), "%63s %d", szOp, &nVal) != 2)
+            return false; // parse != 2 -> break -> false
+        if (!_stricmp(szOp, "chk")) { // 20 rows
+            printf("[COUNTER] cq_action %u chk %d (FUN_14039a210)\n",
+                   pNode->dwId, nVal);
+            return false; // helper not yet identified - stubbed
+        }
+        if (!_stricmp(szOp, "add")) { // FUN_14039a150
+            printf("[COUNTER] cq_action %u add %d (FUN_14039a150)\n",
+                   pNode->dwId, nVal);
+            return true;
+        }
+        if (!_stricmp(szOp, "clr")) { // FUN_14039a1b0
+            printf("[COUNTER] cq_action %u clr %d (FUN_14039a1b0)\n",
+                   pNode->dwId, nVal);
+            return true;
+        }
+        printf("[DBERR] cq_action/cq_newaction type 1083 op (%s)\n", szOp);
+        return false;
+    }
+    case 1096: { // ORIGINAL family-E block @247970: dynamic event on
+        // the FUN_1401181a0 module. sscanf "%d %d %d %d %d %d" needs
+        // 6 (all >= 0 else return 0), then: node data-column id via
+        // vcall chain, module vcall+0xd8(mapId) "already present"
+        // check - absent -> module create with packed args; tail
+        // compares module vcall+0xb0(user) against param[4].
+        int f[6] = {0,0,0,0,0,0};
+        if (sscanf(pNode->strParam.c_str(), "%d %d %d %d %d %d",
+                   &f[0],&f[1],&f[2],&f[3],&f[4],&f[5]) < 6)
+            return false;
+        for (int i = 0; i < 6; i++)
+            if (f[i] < 0) return 0; // ORIGINAL: any negative -> 0
+        printf("[Dynevent] cq_action %u module event (%d %d %d %d %d %d)\n",
+               pNode->dwId, f[0],f[1],f[2],f[3],f[4],f[5]);
+        return true;
+    }
+    case 1098: { // ORIGINAL family-E block @248082: profession
+        // whitelist. sscanf 15 ints; count 1..15 ok. data column
+        // picks the branch: 0 -> check the user's current profession
+        // against the list (match -> return 1; end -> return 0);
+        // 1 -> same check via the FUN_1401181a0 module (original-
+        // profession read, helper stubbed to current).
+        int f[15]; int n = 0;
+        n = sscanf(pNode->strParam.c_str(),
+                   "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
+                   &f[0],&f[1],&f[2],&f[3],&f[4],&f[5],&f[6],&f[7],
+                   &f[8],&f[9],&f[10],&f[11],&f[12],&f[13],&f[14]);
+        if (n < 1 || n > 15)
+            return false;
+        uint16_t wProf = pUser->GetProfession();
+        for (int i = 0; i < n; i++) {
+            if ((uint16_t)f[i] == wProf)
+                return true; // user profession in list -> 1
+        }
+        return false; // end of list -> 0
+    }
+    case 1554: { // ORIGINAL case 0x52 @247819: kill-stat module ops.
+        // CurrentInstanceGet() gate (CHECKF pRoot / IF_NOT pProvider
+        // at 0x1d0d/0x1d11), then module 0xe via vtable+0x20(inst,
+        // 0xe). FULL-PARAM stricmp on param_3: "add"/"del"/"chk" ->
+        // module vtable +0/+8/+0x10 with (userId, node-data-column
+        // id) - the data column carries the monster type
+        // (11019-11029 in live rows). Every result is the module
+        // call's return. No stricmp match -> falls to the "amount"
+        // sscanf tail (no live rows).
+        // module gate stubbed present
+        if (!_stricmp(pNode->strParam.c_str(), "add")) { // 471 rows
+            printf("[KILLSTAT] cq_action %u add monster %u for user %u (module 0xe)\n",
+                   pNode->dwId, pNode->dwData, pUser->GetId());
+            return true;
+        }
+        if (!_stricmp(pNode->strParam.c_str(), "del")) {
+            printf("[KILLSTAT] cq_action %u del monster %u (module 0xe)\n",
+                   pNode->dwId, pNode->dwData);
+            return true;
+        }
+        if (!_stricmp(pNode->strParam.c_str(), "chk")) { // 29 rows
+            printf("[KILLSTAT] cq_action %u chk monster %u (module 0xe) - stub false\n",
+                   pNode->dwId, pNode->dwData);
+            return false; // module 0xe check - not yet identified
+        }
+        // "amount"/other shapes: 0 live rows; sscanf tail documented
+        return false;
+    }
     case 1003: { // ORIGINAL switch case 2: teleport "mapid x y [force]"
         uint32_t dwMap = 0; int nX = 0, nY = 0, nForce = 0;
         if (sscanf(pNode->strParam.c_str(), "%u %d %d %d", &dwMap, &nX, &nY, &nForce) < 3) {
