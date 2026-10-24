@@ -29,30 +29,30 @@ bool CNpcGenerator::CreateNpc(TypeRecord* pType,
         return false;                    // LAB_1400611cb
     if ((m_cfg.m_fnGetInt(0x12) & 1) == 0) {
         // fixed mode: the +8 object lookup by DAT_140102d90
-        m_dwMap = m_fnCurrentMapId();
-        m_dwType = (uint32_t)m_cfg.m_fnGetInt(1);
+        m_dwGenId = m_fnCurrentGenId();
+        m_dwMapId = (uint32_t)m_cfg.m_fnGetInt(1);
     } else {
         if (nTypeParam == 0) return false;
-        m_dwType = (uint32_t)nTypeParam;
-        m_dwMap = m_fnRandomMapId();
+        m_dwMapId = (uint32_t)nTypeParam;
+        m_dwGenId = m_fnRandomGenId();
     }
     int nGeo7 = m_cfg.m_fnGetInt(7);
-    m_nX = nGeo7 + m_fnRand(nGeo7);
+    m_nTimerSec30 = nGeo7 + m_fnRand(nGeo7);
     m_dwBornSec = m_fnTime() / 1000;
     int nStepIn = m_cfg.m_fnGetInt(8);
     if (nStepIn == 0) {
-        m_nStep = 0;
+        m_nMaxCap = 0;
     } else {
         int h = m_cfg.m_fnGetInt(6);
         if (h > 0) {
-            m_nStep = (m_cfg.m_fnGetInt(5) / h) *
-                      (m_cfg.m_fnGetInt(4) / h);
-            if (m_nStep <= 0) m_nStep = 1;
+            m_nMaxCap = (m_cfg.m_fnGetInt(5) / h) *
+                        (m_cfg.m_fnGetInt(4) / h);
+            if (m_nMaxCap <= 0) m_nMaxCap = 1;
         } else {
-            m_nStep = 1;
+            m_nMaxCap = 1;
         }
     }
-    m_pMap = m_fnFindMap(m_dwType);
+    m_pMap = m_fnFindMap(m_dwMapId);
     if (m_pMap) {
         if (!LoadCluster()) return false; // FUN_140060e60
         m_dwFieldF = (uint32_t)m_cfg.m_fnGetInt(0xf);
@@ -64,7 +64,7 @@ bool CNpcGenerator::CreateNpc(TypeRecord* pType,
     char buf[128];
     std::snprintf(buf, sizeof buf,
         "Error: npc generator [%u] got invalid map [%u]!",
-        m_dwType, m_dwMap);
+        m_dwGenId, m_dwMapId);
     if (m_fnLog) m_fnLog(buf);
     return false;
 }
@@ -309,4 +309,76 @@ void CNpcGenerator::AdjustAmountOnLeave() {
         "GeneratorID[%u]: m_nAmount <= 0");
 }
 
+
+// ============================================================
+// ===== ORIGINAL FUN_140002700: spawn-timer pair check ==
+// ============================================================
+// int* pair = &+0x30 (+0x30 interval, +0x34 last):
+// if ((uint)(pair[1] + pair[0]) <= TimeGet(0)/1000) {
+//     pair[1] = TimeGet(0)/1000; return true; }
+// return false;
+bool CNpcGenerator::TimerDue() {
+    uint32_t uNow = m_fnTime() / 1000;
+    if ((uint32_t)(m_dwBornSec + (uint32_t)m_nTimerSec30)
+        <= uNow) {
+        m_dwBornSec = uNow;                 // +0x34
+        return true;
+    }
+    return false;
+}
+
+// ============================================================
+// ===== ORIGINAL FUN_140060b00: Process (vtable+0x80) ===
+// ============================================================
+// int FUN_140060b00(gen, budget) - the slot the manager
+// walk calls; wraps FUN_14005fc90:
+//   if (+0x48 != 0) return 0;                      // cap
+//   if (bit1(GetInt(0x12)) && vcall+0x48 (+0x1c
+//       max) <= +0x20 monsters) return 0;
+//   if (vcall+0x48 (+0x1c) <= vcall+0x30 (+0x18
+//       genAmount)) return 0;
+//   A = vcall+0x30 (+0x18); B = vcall+0x20 (+0x10);
+//   if (A - B < budget) {
+//     budget = (budget - B) + A;                  // = A-B+budget
+//     if (vcall+0x48 - vcall+0x30 < budget)        // max - genAmount
+//       budget = vcall+0x48 - vcall+0x30;
+//     if (FUN_140002700(&+0x30)) {                // due
+//       if (599 < GetInt(7)) {
+//         +0x30 = RandGet(GetInt(7)) + GetInt(7); // rearm
+//         +0x34 = TimeGet(0) / 1000;
+//       }
+//       +0x14 = GetInt(8);       // <<<< THE +0x14 WRITER
+//     }
+//     rest = +0x14; if (rest < 1) return 0;
+//     if (rest < budget) budget = rest;
+//     return FUN_14005fc90(gen, budget);
+//   }
+//   return 0;
+uint32_t CNpcGenerator::Process(uint32_t dwBudget) {
+    if ((int32_t)m_dwFieldF != 0) return 0;        // +0x48
+    int nMax = m_nMaxCap;                          // vcall+0x48
+    if (((m_cfg.m_fnGetInt(0x12) >> 1) & 1) != 0 &&
+        nMax <= m_nMonsters20) return 0;           // +0x20
+    if (nMax <= m_nGenAmount18) return 0;          // +0x18
+    int nGen = m_nGenAmount18;                     // vcall+0x30
+    int nAmount = m_nAmount10;                     // vcall+0x20
+    if (nGen - nAmount < (int32_t)dwBudget) {
+        int nBudget = ((int32_t)dwBudget - nAmount)
+                      + nGen;
+        if (nMax - nGen < nBudget) nBudget = nMax - nGen;
+        if (TimerDue()) {                // FUN_140002700
+            int nGeo7 = m_cfg.m_fnGetInt(7);
+            if (599 < nGeo7) {
+                m_nTimerSec30 = nGeo7
+                    + m_fnRand(nGeo7);    // +0x30 rearm
+                m_dwBornSec = m_fnTime() / 1000;
+            }
+            m_nRest14 = m_cfg.m_fnGetInt(8);  // +0x14
+        }
+        if (m_nRest14 < 1) return 0;
+        if (m_nRest14 < nBudget) nBudget = m_nRest14;
+        return Generator((uint32_t)nBudget);
+    }
+    return 0;
+}
 } // namespace npc

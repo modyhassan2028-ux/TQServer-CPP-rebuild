@@ -221,10 +221,12 @@ void CNpcServerApp::AddGenerator(uint32_t dwMap,
                                  uint32_t dwType,
                                  uint32_t dwCap) {
     auto p = std::make_unique<CNpcGenerator>();
-    p->m_dwMap = dwMap;                    // +0x50
-    p->m_dwType = dwType;                  // +0x54
-    p->m_fnCurrentMapId = [dwMap]{ return dwMap; };
-    p->m_fnRandomMapId = [dwMap]{ return dwMap; };
+    // +0x50 = the generator's own id (vtable+8 /
+    // rec+0x08 / the findGenerator key), +0x54 = the
+    // map id (the map-object lookup key in CreateNpc)
+    uint32_t dwGenIdNext = m_dwNextGenId;
+    p->m_fnCurrentGenId = [dwGenIdNext]{ return dwGenIdNext; };
+    p->m_fnRandomGenId = [dwGenIdNext]{ return dwGenIdNext; };
     p->m_fnFindMap = [this](uint32_t dwId){
         auto it = m_mapMaps.find(dwId);
         return it != m_mapMaps.end() ? it->second
@@ -241,8 +243,13 @@ void CNpcServerApp::AddGenerator(uint32_t dwMap,
     // (0xc = 0 -> random), 8 restock batch,
     // 0x11 cluster flag (0 = skip the DB cluster),
     // 0x12 random-map mode (0 = fixed)
-    p->m_cfg.m_fnGetInt = [dwType](int idx){
-        return idx == 1 ? (int)dwType
+    p->m_cfg.m_fnGetInt = [dwType, dwMap](int idx){
+        // GetInt(1) = the MAP id (+0x54 in fixed mode),
+        // GetInt(9) = the record type word,
+        // GetInt(6) = the geo step -> grid-cell cap
+        // (30/20)*(40/20) = 2, GetInt(7) = 1s spawn
+        // interval, GetInt(8) = restock batch 1/tick
+        return idx == 1 ? (int)dwMap
              : idx == 9 ? (int)dwType
              : idx == 0xf ? 0
              : idx == 0x10 ? 0
@@ -252,8 +259,8 @@ void CNpcServerApp::AddGenerator(uint32_t dwMap,
              : idx == 3 ? 300
              : idx == 4 ? 40
              : idx == 5 ? 30
-             : idx == 6 ? 10
-             : idx == 7 ? 40
+             : idx == 6 ? 20
+             : idx == 7 ? 1
              : idx == 8 ? 1
              : idx == 0xc ? 0
              : idx == 0xd ? 0
@@ -286,14 +293,14 @@ void CNpcServerApp::AddGenerator(uint32_t dwMap,
     // slot - the map table must hold it) ----
     if (!p->CreateNpc(nullptr, 0)) return;
     p->m_dwFieldF = 0;        // GetInt(0xf) = 0 above
-    // +0x14 remaining: ORIGINAL writer TBD - the
-    // assembly seeds it with the requested cap
-    p->m_nRest14 = (int32_t)dwCap;
-    // manager registration: vcall +0x80 = Generator
+    // +0x14: written by Process (FUN_140060b00) from
+    // GetInt(8) on each due timer - no seeding
+    // manager registration: vcall +0x80 = Process
+    // (FUN_140060b00 wraps the Generator FUN_14005fc90)
     NpcGenerator* pReg = new NpcGenerator();
     uint32_t i = (uint32_t)(m_vecGens.size());
     pReg->m_fnProcess = [this, i](uint32_t dwBudget){
-        return m_vecGens[i]->Generator(dwBudget); };
+        return m_vecGens[i]->Process(dwBudget); };
     m_mgr.m_vecGenSet.push_back(pReg);
     m_vecGens.push_back(std::move(p));
 }

@@ -22,8 +22,8 @@ int main() {
     vals[0xf] = 0x2a; vals[0x10] = 0x1;
     vals[0x12] = 0;                          // fixed mode
     g.m_cfg.m_fnGetInt = [&](int i){ return vals[i]; };
-    g.m_fnCurrentMapId = []{ return 700; };
-    g.m_fnRandomMapId = []{ return 800; };
+    g.m_fnCurrentGenId = []{ return 700; };
+    g.m_fnRandomGenId = []{ return 800; };
     g.m_fnFindMap = [&](uint32_t t)->void*{
         return t == 1111 ? (void*)0x1234 : nullptr; };
     int nTail = 0;             // 0x11 = 0: no cluster
@@ -31,12 +31,12 @@ int main() {
 
     // fixed mode: map from lookup, type from config 1
     assert(g.CreateNpc(&rec, 0));
-    assert(g.m_dwMap == 700 && g.m_dwType == 1111);
+    assert(g.m_dwGenId == 700 && g.m_dwMapId == 1111);
     // X = 50 + RandGet(50) = 50 + 49
-    assert(g.m_nX == 99);
+    assert(g.m_nTimerSec30 == 99);
     assert(g.m_dwBornSec == 5);
     // step = (100/10) * (100/10) = 100
-    assert(g.m_nStep == 100);
+    assert(g.m_nMaxCap == 100);
     assert(g.m_dwFieldF == 0x2a && g.m_byField10 == 0x1);
     assert(g.m_pCluster == nullptr && logs.empty());
 
@@ -44,7 +44,7 @@ int main() {
     vals[0x12] = 1; vals[1] = 2222;
     g.m_fnFindMap = [](uint32_t){ return (void*)0x5678; };
     assert(g.CreateNpc(&rec, 3333));
-    assert(g.m_dwType == 3333 && g.m_dwMap == 800);
+    assert(g.m_dwMapId == 3333 && g.m_dwGenId == 800);
     // random mode, param 0 -> fail
     assert(!g.CreateNpc(&rec, 0));
 
@@ -54,7 +54,9 @@ int main() {
     assert(!g.CreateNpc(&rec, 1));
     assert(logs.empty());
 
-    // map not found: Close + verbatim error with type first
+    // map not found: Close + verbatim error - the
+    // ORIGINAL arg order is [vtable+8 = +0x50 gen id]
+    // then [+0x54 map id]
     g.m_fnGroupFilter = [](GenConfig*, TypeRecord*, int64_t){
         return true; };
     vals[0x12] = 0; vals[1] = 5555;
@@ -62,14 +64,14 @@ int main() {
     assert(!g.CreateNpc(&rec, 0));
     assert(g.m_bClosed);
     assert(logs.size() == 1 &&
-           logs[0].find("Error: npc generator [5555] got "
-                        "invalid map [700]!") ==
+           logs[0].find("Error: npc generator [700] got "
+                        "invalid map [5555]!") ==
            std::string::npos ? false : true);
     // step input 0 -> step 0
     vals[8] = 0;
     g.m_fnFindMap = [](uint32_t){ return (void*)1; };
     assert(g.CreateNpc(&rec, 0));
-    assert(g.m_nStep == 0);
+    assert(g.m_nMaxCap == 0);
 
     // ---- LoadCluster (FUN_140060e60) ----
     CNpcGenerator c;
@@ -77,7 +79,7 @@ int main() {
     c.m_cfg.m_fnGetInt = [&](int i){ return cvals[i]; };
     c.m_fnTime = []{ return 0; };
     c.m_fnRand = [](int){ return 0; };
-    c.m_fnCurrentMapId = []{ return 1; };
+    c.m_fnCurrentGenId = []{ return 1; };
     c.m_fnFindMap = [](uint32_t){ return (void*)1; };
     // flag 0x11 == 0 -> immediate true, no query
     assert(c.LoadCluster() && c.m_pCluster == nullptr);

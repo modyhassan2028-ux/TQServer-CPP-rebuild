@@ -39,8 +39,8 @@ int main() {
     app.m_mapMaps[1000] = (void*)0x1000;   // map objects
     app.m_mapMaps[1001] = (void*)0x1001;
     // FUN_14003ca10 in the CreateNpc path looks the map
-    // object up by the generator's +0x54 TYPE slot
-    app.m_mapMaps[1] = (void*)0x2000;
+    // object up by the +0x54 MAP-id slot (vtable dump:
+    // +0x08 is the generator id at +0x50)
     app.AddGenerator(1000, 1, 3);          // 3 monsters
 
     // "NPC Server KernelThread": 1 Hz OnTimer loop

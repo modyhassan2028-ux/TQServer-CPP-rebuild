@@ -47,12 +47,35 @@ public:
 
     // object fields (ORIGINAL offsets)
     void*    m_pMap = nullptr;      // +0x28 (map object)
-    int      m_nStep = 0;           // +0x1c
-    int      m_nX = 0;             // +0x30 (random X)
-    uint32_t m_dwBornSec = 0;       // +0x34 (TimeGet/1000)
-    void*    m_pMapIdCell = nullptr; // +0x50 slot source
-    uint32_t m_dwMap = 0;          // +0x50 (map id)
-    uint32_t m_dwType = 0;         // +0x54 (npc type)
+    // vtable dump (vftable at 0x1400c7fc8 in the
+    // binary): +0x00 deleting dtor 140060ad0, +0x08
+    // GetGenId 14005f510 -> field +0x50, +0x20
+    // GetAmount 14005f4e0 -> +0x10, +0x30 GetGenAmount
+    // 14005f4f0 -> +0x18, +0x28 GetCenter 1400600d0,
+    // +0x38/50/58/60 = GetInt(5)/(2)/(3)/(4) void,
+    // +0x68 InRect 14005f580, +0x70 InArea 14005f630,
+    // +0x78 restock 14005fb30, +0x80 Process 140060b00
+    // (calls Generator 14005fc90), +0x88 DB-row spawner
+    // 14005f8c0, +0x90 counter 140060030, +0xa0 Close
+    // 14005f7a0. rec+0x08 = vtable+8 = +0x50 = THE
+    // GENERATOR ID (the CNpc::Create findGenerator
+    // key), NOT a map id.
+    int      m_nMaxCap = 0;        // +0x1c grid-cell
+                                   // cap (5/6)*(4/6)
+                                   // or 1 (vcall+0x48
+                                   // getter; NOT a
+                                   // step)
+    int      m_nTimerSec30 = 0;   // +0x30 spawn
+                                   // interval sec
+                                   // (FUN_140002700
+                                   // pair + +0x34)
+    uint32_t m_dwBornSec = 0;     // +0x34 last spawn
+                                   // sec (TimeGet/1000)
+    uint32_t m_dwGenId = 0;       // +0x50 (vtable+8)
+    uint32_t m_dwMapId = 0;       // +0x54 (the map
+                                   // object lookup
+                                   // key in the
+                                   // CreateNpc path)
     uint32_t m_dwFieldF = 0;       // +0x48 (config 0xf)
     uint8_t  m_byField10 = 0;      // +0x4c (config 0x10)
     bool     m_bClosed = false;    // vcall+8 Close
@@ -60,8 +83,8 @@ public:
     // test seams (kernel lookups)
     std::function<bool(GenConfig*, TypeRecord*, int64_t)>
         m_fnGroupFilter;                 // FUN_14005f9d0
-    std::function<uint32_t()> m_fnCurrentMapId; // DAT_140102d90
-    std::function<uint32_t()> m_fnRandomMapId;  // FUN_14002b2d0
+    std::function<uint32_t()> m_fnCurrentGenId;   // +0x50 fixed // DAT_140102d90
+    std::function<uint32_t()> m_fnRandomGenId;    // +0x50 random  // FUN_14002b2d0
     std::function<void*(uint32_t)> m_fnFindMap; // FUN_14003ca10
     // ORIGINAL FUN_140060e60: LoadCluster - the CreateNpc
     // tail (config 0x11 flag, SELECT * FROM <cluster table>
@@ -126,9 +149,15 @@ public:
     std::vector<std::string> m_vecMsgLogs;
 
     // ===== ORIGINAL FUN_14005fc90: CNpcGenerator::
-    // Generator (CTickAnalyst 0x53; the vtable+0x80 slot
-    // the CNpcManager walk calls with the budget) =====
+    // Generator (CTickAnalyst 0x53) =====
     uint32_t Generator(uint32_t dwBudget);
+    // ===== ORIGINAL FUN_140060b00 (THE vtable+0x80
+    // slot the CNpcManager walk calls with the budget;
+    // wraps FUN_14005fc90 and IS the +0x14 writer) =====
+    uint32_t Process(uint32_t dwBudget);
+    // ===== ORIGINAL FUN_140002700: spawn-timer pair
+    // (+0x30 interval sec + +0x34 last spawn sec) =====
+    bool TimerDue();
     // ===== ORIGINAL FUN_14005f7e0: weighted cluster type
     // (RandGet(100) over cluster columns) =====
     uint32_t ClusterType();

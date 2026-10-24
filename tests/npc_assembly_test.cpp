@@ -60,7 +60,10 @@ int main() {
     //       -> steplist. The real Generator drains the
     //       +0x14 rest (cap 2) in one budgeted call ==
     int n0 = (int)app.m_vecNpcs.size();
+    // Process (FUN_140060b00): restock 1 per due tick
     ms = BASE + 11000u; app.KernelTick();
+    assert((int)app.m_vecNpcs.size() == n0 + 1);
+    ms = BASE + 12000u; app.KernelTick();
     assert((int)app.m_vecNpcs.size() == n0 + 2);
     auto* p1 = app.m_vecNpcs[n0].get();
     auto* p2 = app.m_vecNpcs[n0 + 1].get();
@@ -75,8 +78,8 @@ int main() {
     assert(p1->obj.At<int32_t>(0x38) == 315);
     assert(app.m_mgr.m_mapNpcSet.count(p1->dwId) == 1);
 
-    // +0x14 rest drained: no further spawns
-    ms = BASE + 12000u; app.KernelTick();
+    // the +0x1c grid-cell cap (2): genAmount reached it
+    ms = BASE + 13000u; app.KernelTick();
     assert((int)app.m_vecNpcs.size() == n0 + 2);
 
     // the 3-tick AI walk drives tick + wander dispatch
@@ -120,9 +123,12 @@ int main() {
     printf("NPC_ASSEMBLY_OK: boot order (libevent method/"
            "worker thread/literal socket-fail log), state "
            "0->2 with 0x3ade68b1 login + OnConnectOK, 10s "
-           "Generator begin., generator cap via "
-           "CNpcGenerator::CreateNpc + CNpc::Create + "
-           "SpawnNewNpcID ids, manager 3-tick AI walk -> "
+           "Generator begin., real Process "
+           "FUN_140060b00 (timer restock GetInt(8) -> "
+           "Generator FUN_14005fc90 -> 0x38 record "
+           "loop-back -> CNpc::Create + SpawnNewNpcID "
+           "ids, +0x1c grid-cap gate), manager 3-tick "
+           "AI walk -> "
            "wander dispatch -> steplist arrival, 30s stats "
            "block, CMsgAiNpcInfo create/dup/notify98\n");
     return 0;

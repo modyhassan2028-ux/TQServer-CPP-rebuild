@@ -185,6 +185,71 @@ int main() {
       assert(f.g.m_vecMsgLogs[0].find(
           "GeneratorID[%u]: m_nAmount <= 0") == 0); }
 
+    // ===== Process (FUN_140060b00, vtable+0x80) =====
+    // cap field gate
+    { Fix f; f.Wire();
+      f.g.m_dwFieldF = 3;                 // +0x48 != 0
+      assert(f.g.Process(100) == 0); }
+    // +0x1c grid cap <= generated -> stop
+    { Fix f; f.Wire();
+      f.g.m_nMaxCap = 2; f.g.m_nGenAmount18 = 2;
+      assert(f.g.Process(100) == 0); }
+    // bit1(GetInt(0x12)) gate: max <= monsters
+    { Fix f; f.Wire();
+      f.g.m_nMaxCap = 2; f.g.m_nMonsters20 = 2;
+      // GetInt(0x12) = 2 -> bit1 set
+      f.g.m_cfg.m_fnGetInt = [&f](int idx){
+          return idx == 0x12 ? 2
+               : idx == 8 ? 1 : idx == 9 ? 7777
+               : idx == 2 ? 500 : idx == 3 ? 300
+               : idx == 4 ? 40 : idx == 5 ? 30
+               : 0; };
+      assert(f.g.Process(100) == 0); }
+    // headroom gate: genAmount - amount >= budget -> 0
+    { Fix f; f.Wire();
+      f.g.m_nGenAmount18 = 50; f.g.m_nAmount10 = 10;
+      assert(f.g.Process(100) == 0); }
+    // budget clamp to max - genAmount
+    { Fix f; f.Wire();
+      f.g.m_nMaxCap = 3; f.g.m_nGenAmount18 = 1;
+      // timer due (interval 1 sec passed)
+      uint32_t ms = 500000;
+      f.g.m_fnTime = [&]{ return ms; };
+      f.g.m_nTimerSec30 = 1;
+      f.g.m_dwBornSec = 0;              // due now
+      f.g.m_nRest14 = 0;                // restock sets it
+      // clamp: max - genAmount = 2, restock GetInt(8)
+      // = 1 -> budget 1 -> ONE spawn this tick
+      assert(f.g.Process(100) == 1);
+      assert(f.g.m_nRest14 == 0);         // spent by Generator
+      assert(f.g.m_nGenAmount18 == 2);   // 1 + 1 spawn
+      assert(f.g.m_nMonsters20 == 1);    // +0x20 spawn
+      assert(f.g.m_dwBornSec == 500);    // pair update
+      assert(f.sent.size() == 1); }
+    // restock gate: +0x14 < 1 after (no) timer due
+    { Fix f; f.Wire();
+      f.g.m_nTimerSec30 = 10; f.g.m_dwBornSec =
+          f.g.m_fnTime() / 1000;        // not due
+      f.g.m_nRest14 = 0;
+      assert(f.g.Process(100) == 0); }
+    // rearm: GetInt(7) > 599 -> new interval
+    { Fix f; f.Wire();
+      f.g.m_cfg.m_fnGetInt = [](int idx){
+          return idx == 7 ? 1000
+               : idx == 8 ? 1 : idx == 9 ? 7777
+               : idx == 2 ? 500 : idx == 3 ? 300
+               : idx == 4 ? 40 : idx == 5 ? 30
+               : 0; };
+      uint32_t ms = 900000;
+      f.g.m_fnTime = [&]{ return ms; };
+      f.g.m_nMaxCap = 5;      // +0x1c gate (Wire leaves 0)
+      f.g.m_nTimerSec30 = 1; f.g.m_dwBornSec = 0;
+      f.g.m_fnRand = [](int n){ return n / 2; };
+      assert(f.g.Process(100) >= 1);
+      // rearm: +0x30 = 1000 + RandGet(1000) = 1500
+      assert(f.g.m_nTimerSec30 == 1500);
+      assert(f.g.m_dwBornSec == 900); }
+
     printf("NPC_GENPROC_OK: gates (map +0x28 / cap +0x48 "
            "/ budget), attempts max(1, GetInt(5)*GetInt(4)), "
            "fixed 0xc/0xd + random 2/4 3/5 probes, "
@@ -195,6 +260,11 @@ int main() {
            "idle DB log GBK verbatim + 999ms throttle, "
            "cluster weighted type cols 2..0x14/3,5,..0x15 "
            "with early 0-return, restock GetInt(8) + sync "
-           "log verbatim\n");
+           "log verbatim, Process FUN_140060b00 (cap field "
+           "+ bit1 gate, +0x1c grid-cap, headroom "
+           "genAmount-amount, budget clamp max-genAmount, "
+           "FUN_140002700 timer pair due + rearm "
+           "GetInt(7)>599, +0x14 = GetInt(8) restock, "
+           "min(rest,budget) -> Generator)\n");
     return 0;
 }
