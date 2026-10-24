@@ -13,7 +13,7 @@
 int main() {
     auto& acc = CAccountManager::Instance();
     acc.SetAutoCreate(false);
-    bool ok = acc.TryMySQL("127.0.0.1", 3306, "root", "", "cq");
+    bool ok = acc.TryMySQL("127.0.0.1", 3306, "tqserver", "tqpass123", "cq");
     assert(ok && acc.IsMySQLMode());
     printf("[ok] connected to original cq database\n");
 

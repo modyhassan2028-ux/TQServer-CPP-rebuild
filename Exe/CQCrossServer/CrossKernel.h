@@ -1,4 +1,4 @@
-﻿// CCrossServerKernel (v1 rebuild from the decompiled CQCrossServer.exe):
+// CCrossServerKernel (v1 rebuild from the decompiled CQCrossServer.exe):
 // pure routing state for the cross-server hub. All socket work lives in
 // main.cpp; the kernel only maps server ids -> connections and relays
 // messages, which makes the routing rules unit-testable offline.
@@ -7,6 +7,7 @@
 #include <functional>
 #include <map>
 #include <mutex>
+#include <set>
 #include <string>
 #include <vector>
 #include "CrossProtocol.h"
@@ -63,10 +64,34 @@ public:
     void OnCountryFirst(uint64_t ullSocket, const CountryFirstReq& req);
     // the hub owns the manager (Init'ed from cq_league_info)
     class CCountrySysMgr* CountrySys() { return m_pCountrySys.get(); }
-    // test seam (production wiring is the hub shell after Init)
+    // test seam (production wiring is the hub shell after Init).
+    // Setting the manager also wires its plunder sinks exactly the
+    // way the hub does: FUN_140018870 broadcast / FUN_14000a310
+    // (0x961) system talk / FUN_1400143c0 schedule-set insert.
     void SetCountrySysForTest(std::shared_ptr<CCountrySysMgr> p) {
         m_pCountrySys = std::move(p);
+        if (m_pCountrySys) WireCountrySinks();
     }
+
+    // ---- plunder war (CCrossMsgPlunderWarInfo, FUN_140023800) ----
+    // Action 1 -> CCountrySysMgr::SignUpPlunderWar, action 10 ->
+    // PublishSupportToken; anything else logs the original
+    // "CCrossMsgPlunderWarInfo::Process wrong action[%u]" (0x140060270).
+    // A null country manager hits the original m_pCountrySysMgr null
+    // gate (log 0x140058a00) and nothing else happens.
+    void OnPlunderWarInfo(uint64_t ullSocket, const PlunderWarInfoData& info);
+    // FUN_140018870: broadcast to every ONLINE server that owns a
+    // country (FUN_14000d620(server) != -1), skipping dwExclude
+    void BroadcastToCountryServers(const std::vector<uint8_t>& pkt,
+                                    uint32_t dwExclude);
+    // FUN_1400143c0(FUN_140009ed0(kernel), id): the kernel+0x28
+    // plunder schedule set (server ids); ProcessServerConnectOK
+    // (FUN_14001ade0, a later unit) checks membership
+    void AddPlunderScheduleServer(uint32_t dwId);
+    bool IsPlunderScheduleServer(uint32_t dwId) const;
+    // the country manager's OnTimer (FUN_14001abc0) - the hub
+    // shell timer thread drives it every second
+    void OnCountryTimer();
 
     size_t ServerCount();
     uint64_t LastBeat(uint32_t dwServerId);
@@ -80,6 +105,8 @@ private:
     SendFn m_fnSend;
     LogFn m_fnLog;
     std::shared_ptr<class CCountrySysMgr> m_pCountrySys;
+    std::set<uint32_t> m_setPlunderSchedule; // kernel+0x28 set
+    void WireCountrySinks();
 };
 
 } // namespace cross

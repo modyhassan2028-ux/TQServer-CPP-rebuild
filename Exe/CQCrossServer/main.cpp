@@ -1,4 +1,4 @@
-﻿// CQCrossServer shell (v1 rebuild): listens for game-server connections,
+// CQCrossServer shell (v1 rebuild): listens for game-server connections,
 // frames messages, feeds the routing kernel, runs the OnTimer heartbeat
 // sweep. Mirrors crossshell.cpp from the decompiled binary.
 #include "CrossKernel.h"
@@ -105,10 +105,17 @@ int main() {
     // OnTimer thread: heartbeat sweep every 10s (same steady_clock epoch
     // the heartbeat dispatch uses - mixing clocks would drop live servers)
     std::thread timer([&kernel]() {
+        int nTick = 0;
         while (g_bRunning.load()) {
-            std::this_thread::sleep_for(std::chrono::seconds(10));
+            std::this_thread::sleep_for(std::chrono::seconds(1));
             if (!g_bRunning.load()) break;
-            kernel.OnDropSilent(NowMs());
+            // CCountrySysMgr::OnTimer (FUN_14001abc0) runs every
+            // second in the original hub (CTickAnalyst(0x5d) tick)
+            kernel.OnCountryTimer();
+            if (++nTick >= 10) { // heartbeat sweep keeps its 10s cadence
+                nTick = 0;
+                kernel.OnDropSilent(NowMs());
+            }
         }
     });
 
@@ -171,6 +178,28 @@ int main() {
                         case cross::MsgType_WhoReq:
                             kernel.OnWhoReq((uint64_t)client);
                             break;
+                        case cross::MsgType_PlunderWarInfo: {
+                            // ORIGINAL CCrossMsgPlunderWarInfo: size is
+                            // 0x10 + 4*count (payload+0xc); the base
+                            // fields live in the first 0x10 bytes
+                            if (payload.size() >= 0x10) {
+                                cross::PlunderWarInfoData info{};
+                                std::memcpy(&info, payload.data(), 0x10);
+                                const uint8_t byCount = info.byCount;
+                                // clamp reads to the received frame,
+                                // keeping at most the 10 the struct holds
+                                uint8_t byUsable = byCount;
+                                if (byUsable > 10) byUsable = 10;
+                                if ((uint32_t)byUsable <=
+                                        (payload.size() - 0x10) / 4)
+                                    std::memcpy(info.dwTargets,
+                                                payload.data() + 0x10,
+                                                byUsable * 4);
+                                kernel.OnPlunderWarInfo((uint64_t)client,
+                                                          info);
+                            }
+                            break;
+                        }
                         default:
                             break; // unknown cross message: ignore
                         }

@@ -20,7 +20,7 @@
 int main() {
     auto& acc = CAccountManager::Instance();
     acc.SetAutoCreate(false);
-    assert(acc.TryMySQL("127.0.0.1", 3306, "root", "", "cq"));
+    assert(acc.TryMySQL("127.0.0.1", 3306, "tqserver", "tqpass123", "cq"));
     auto* pDB = acc.GetDB();
     assert(CDialogEngine::Instance().LoadFromDB(pDB) > 190000);
     assert(CItemLibrary::Instance().LoadFromDB(pDB) > 0);

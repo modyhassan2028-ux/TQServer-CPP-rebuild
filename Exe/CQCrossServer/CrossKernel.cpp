@@ -1,4 +1,4 @@
-﻿// CCrossServerKernel: the routing core of the CQCrossServer rebuild.
+// CCrossServerKernel: the routing core of the CQCrossServer rebuild.
 #include "CrossKernel.h"
 #include <chrono>
 #include <algorithm>
@@ -243,6 +243,100 @@ void CCrossServerKernel::OnCountryBroadcast(const char* szText) {
     talk.dwServerId = 0;
     std::snprintf(talk.szText, sizeof(talk.szText), "%s", szText);
     BroadcastAll(Encode(MsgType_CountryBroadcast, talk));
+}
+
+
+// ---------------------------------------------------------------------------
+// PLUNDER WAR (CCrossMsgPlunderWarInfo::Process, FUN_140023800)
+// ---------------------------------------------------------------------------
+void CCrossServerKernel::OnPlunderWarInfo(
+        uint64_t ullSocket, const PlunderWarInfoData& info) {
+    // ORIGINAL FUN_140023800: the null-manager gate is the kernel's
+    // "m_pCountrySysMgr" assert (log_InlineLogERROR(&DAT_140058a00),
+    // the generic "\xa1\xef%s(%s)\xa1\xef in %s, %d" format) - here
+    // logged with the original msg class + source file so the shape
+    // matches. The catch path
+    // ("CCrossMsgPlunderWarInfo::Process catch. @%s,%d", 0x140060240)
+    // is exception-only: no C++ exceptions cross this port, so it is
+    // unreachable by construction.
+    if (!m_pCountrySys) {
+        if (m_fnLog)
+            m_fnLog("\xa1\xef%s(%s)\xa1\xef in %s, %d");
+        return;
+    }
+    switch (info.usAction) {
+    case 1: // ORIGINAL: m_pCountrySysMgr->SignUpPlunderWar(
+            //   id (payload+4), count (payload+0xc), targets (+0x10))
+        m_pCountrySys->SignUpPlunderWar(info.dwId, info.byCount,
+                                        info.dwTargets);
+        break;
+    case 10: // ORIGINAL: m_pCountrySysMgr->PublishSupportToken(
+            //   id, count, targets)
+        m_pCountrySys->PublishSupportToken(info.dwId, info.byCount,
+                                           info.dwTargets);
+        break;
+    default:
+        // ORIGINAL log_InlineLogERROR(0x140060270):
+        // "CCrossMsgPlunderWarInfo::Process wrong action[%u]"
+        if (m_fnLog)
+            m_fnLog("CCrossMsgPlunderWarInfo::Process wrong action["
+                    + std::to_string((unsigned)info.usAction) + "]");
+        break;
+    }
+}
+
+void CCrossServerKernel::BroadcastToCountryServers(
+        const std::vector<uint8_t>& pkt, uint32_t dwExclude) {
+    // ORIGINAL FUN_140018870: walk the online server list
+    // (FUN_140015140 on kernel+0x28), skip dwExclude (0 = nobody),
+    // require FUN_14000d620(mgr, serverId) != -1 (the server owns a
+    // country) and send via FUN_14000a0b0. The port sends directly
+    // to the server socket (the socket-kernel routing is modelled
+    // by the m_fnSend sink).
+    std::vector<uint64_t> targets;
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        for (auto& kv : m_mapServers) {
+            if (kv.second.ullSocket == 0) continue;
+            if (dwExclude != 0 && kv.first == dwExclude) continue;
+            if (!m_pCountrySys ||
+                m_pCountrySys->GetCountryByUser(kv.first) == 0xffffffffu)
+                continue;
+            targets.push_back(kv.second.ullSocket);
+        }
+    }
+    for (uint64_t s : targets) m_fnSend(s, pkt);
+}
+
+void CCrossServerKernel::AddPlunderScheduleServer(uint32_t dwId) {
+    // ORIGINAL FUN_1400143c0(FUN_140009ed0(kernel), id): set insert
+    // into the kernel+0x28 plunder schedule tree
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_setPlunderSchedule.insert(dwId);
+}
+
+bool CCrossServerKernel::IsPlunderScheduleServer(uint32_t dwId) const {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    return m_setPlunderSchedule.count(dwId) != 0;
+}
+
+void CCrossServerKernel::WireCountrySinks() {
+    // FUN_140018870 / FUN_14000a310 (0x961) / FUN_1400143c0
+    m_pCountrySys->SetPlunderSinks(
+        [this](const std::vector<uint8_t>& pkt, uint32_t dwExclude) {
+            BroadcastToCountryServers(pkt, dwExclude); },
+        [this](const std::string& strKey) {
+            // ORIGINAL: IStringManager::theInstance() resolves the
+            // STR_* key, then FUN_14000a310(kernel, text, 0, 0xffffff,
+            // 0x961) broadcasts it. The STR key passes through here -
+            // the string resource files are a separate porting unit.
+            OnCountryBroadcast(strKey.c_str()); },
+        [this](uint32_t dwId) { AddPlunderScheduleServer(dwId); });
+}
+
+void CCrossServerKernel::OnCountryTimer() {
+    // hub shell: drives CCountrySysMgr::OnTimer (FUN_14001abc0)
+    if (m_pCountrySys) m_pCountrySys->OnTimer();
 }
 
 } // namespace cross

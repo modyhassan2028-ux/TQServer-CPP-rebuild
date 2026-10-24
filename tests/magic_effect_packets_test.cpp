@@ -108,7 +108,7 @@ int main() {
     // ---------- effect-mask API on a user record ----------
     auto& acc = CAccountManager::Instance();
     acc.SetAutoCreate(false);
-    assert(acc.TryMySQL("127.0.0.1", 3306, "root", "", "cq"));
+    assert(acc.TryMySQL("127.0.0.1", 3306, "tqserver", "tqpass123", "cq"));
     auto* pDB = acc.GetDB();
     assert(CMagicTypePool::Instance().LoadFromDB(pDB));
     assert(CItemLibrary::Instance().LoadFromDB(pDB) > 0);

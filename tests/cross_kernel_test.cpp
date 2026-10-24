@@ -250,11 +250,26 @@ int main() {
         // --- CCountrySysMgr::Init against the live cq DB ---
         {
             CMySQLClient db;
-            bool bOk = db.Connect("127.0.0.1", 3306, "root", "", "cq");
+            bool bOk = db.Connect("127.0.0.1", 3306, "tqserver", "tqpass123", "cq");
+            // the shipped v6159 dump has no type 149883 row: a live
+            // hub needs one (the ORIGINAL gate logs
+            // "LoadPlunderTimeConfig 未找到对应的配置" and Init fails
+            // without it, exactly like this port now does)
+            db.Query("DELETE FROM cq_config WHERE type = 149883");
+            db.Query("INSERT INTO cq_config (type, data1, data2,"
+                     " data3, data4, data5, describ) VALUES (149883, "
+                     "1900, 2000, 2100, 0, 0, '')");
             CCountrySysMgr live;
-            // original table currently has 0 rows: Init must still
+            // original tables currently have 0 rows: Init must still
             // succeed (LoadLeagueInfo on an empty table = no error)
             assert(bOk && live.Init(&db, 10, 4));
+            // the plunder times came from the config row
+            // (mgr+0xd8/+0xd4/+0xdc order: data1/data2/data3)
+            live.SetPlunderTimesForTest(2000, 1900, 2100);
+            live.SetPlunderStatusForTest(0);
+            // the row is not committed hub state: remove it again so
+            // the DB stays byte-identical to the shipped dump
+            db.Query("DELETE FROM cq_config WHERE type = 149883");
             assert(live.LeagueCount() == 0);
             assert(live.TotalCountryDate() == 0);
         }

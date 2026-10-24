@@ -23,8 +23,11 @@ $CC $INC $WARN -Ivendor/lua -IExe/CQCrossServer \
     Exe/MsgServer/CrossServer/*.cpp Core/CQBase/*.cpp Core/DB/*.cpp Core/Root/*.cpp \
     build/liblua.a -lws2_32 -o build/MsgServer.exe
 
-echo "[2/8] CQCrossServer.exe (cross hub)..."
-$CC $INC $WARN -IExe/CQCrossServer Exe/CQCrossServer/main.cpp Exe/CQCrossServer/CrossKernel.cpp \
+echo "[2/8] CQCrossServer.exe (cross hub + country/plunder system)..."
+$CC $INC $WARN -IExe/CQCrossServer -IExe/MsgServer \
+    Exe/CQCrossServer/main.cpp Exe/CQCrossServer/CrossKernel.cpp \
+    Exe/CQCrossServer/CountrySysMgr.cpp Exe/MsgServer/MySQLClient.cpp \
+    Core/CQBase/SHA1.cpp \
     -lws2_32 -o build/CQCrossServer.exe
 
 # renumber handled below

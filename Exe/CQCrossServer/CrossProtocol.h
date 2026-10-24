@@ -1,4 +1,4 @@
-﻿// Cross-server wire protocol (v1), reconstructed from the decompiled
+// Cross-server wire protocol (v1), reconstructed from the decompiled
 // CQCrossServer.exe (CCrossServerKernel / crossshell.cpp model):
 // the hub accepts game-server connections, records them by server id and
 // relays messages between servers (SendMsgToOtherServer / BroadcastOtherServerMsg).
@@ -67,6 +67,9 @@ enum : uint16_t {
     //   the touch timestamp now (TimeGet(2)/10000).
     MsgType_CountryFirstReq  = 9018, // server -> hub: case 6
     MsgType_CountryFirstAck = 9019, // hub -> server: packed id + now
+    // plunder war wire types (see the plunder section below)
+    MsgType_PlunderWarInfo   = 40041, // ORIGINAL 0x9c69
+    MsgType_PlunderWarStatus = 40042, // ORIGINAL 0x9c6a
 };
 
 // case 0 query/response payloads (see CCountrySysMgr accessors)
@@ -100,6 +103,69 @@ struct CountryStatusResp {
     char szLeaderTitle[64]; // AddString #2
     uint32_t dwCountryDate; // written back to the request msg+8
 };
+
+
+// ---- plunder war (CCrossMsgPlunderWarInfo / CCrossMsgPlunderWarStatus) ----
+// ORIGINAL wire types: CCrossMsgPlunderWarInfo  = 0x9c69 (40041),
+// CCrossMsgPlunderWarStatus = 0x9c6a (40042).
+// ORIGINAL CCrossMsgPlunderWarStatus::Create (FUN_140023410): payload
+// +0 = action (u16), +4 = param (u32); MsgHead size = 8.
+// Actions seen in the binary: 0 = war-start countdown (param = the
+// FUN_14001a400 formula), 1 = war ended, 2 = new day, 3 = signup ended.
+#pragma pack(push, 1)
+struct PlunderWarStatusData {
+    uint16_t usAction;  // payload+0
+    uint16_t usPad;     // payload+2 (unwritten by Create, kept zero)
+    uint32_t dwParam;   // payload+4
+};
+// ORIGINAL CCrossMsgPlunderWarInfo::Create (FUN_140023730): payload
+// +0 = action (u16), +4 = id (u32), +0xc = target count (u8, starts 0),
+// targets appended from +0x10 (FUN_140023790, +4 each); bytes +8..+0xb
+// are never written by Create/Append - kept zero here. Size = 0x10 +
+// 4*count, capped at 0x3ff (beyond the cap Append fails -> the caller
+// logs "msg size error").
+struct PlunderWarInfoData {
+    uint16_t usAction;      // payload+0
+    uint16_t usPad0;        // payload+2 (unwritten, zero)
+    uint32_t dwId;          // payload+4
+    uint32_t dwPad8;        // payload+8..0xb (unwritten, zero)
+    uint8_t  byCount;       // payload+0xc
+    uint8_t  usPad13[3];    // payload+0xd..0xf (unwritten, zero)
+    uint32_t dwTargets[10]; // payload+0x10.. (max 10 in the flows)
+};
+#pragma pack(pop)
+constexpr uint16_t PLUNDER_WIRE_CAP = 0x3ff; // ORIGINAL AppendTarget size gate
+constexpr uint8_t  PLUNDER_MAX_TARGETS = 10; // gate in the war flows
+
+// forward declaration: Encode<T> is defined below
+template <typename T>
+std::vector<uint8_t> Encode(uint16_t usType, const T& data);
+
+// variable-length encode: ORIGINAL size = 0x10 + 4*count (PlunderWarInfo)
+inline std::vector<uint8_t> EncodePlunderWarInfo(uint16_t usAction,
+        uint32_t dwId, const uint32_t* pTargets, uint8_t byCount) {
+    const uint16_t usSize = (uint16_t)(0x10 + 4u * byCount);
+    tq::MsgHead head;
+    head.type = MsgType_PlunderWarInfo;
+    head.length = static_cast<uint16_t>(sizeof(tq::MsgHead) + usSize);
+    std::vector<uint8_t> pkt(head.length, 0);
+    std::memcpy(pkt.data(), &head, sizeof(head));
+    uint8_t* p = pkt.data() + sizeof(tq::MsgHead);
+    std::memcpy(p + 0x0, &usAction, 2);
+    std::memcpy(p + 0x4, &dwId, 4);
+    *(p + 0xc) = byCount;
+    for (uint8_t i = 0; i < byCount; ++i)
+        std::memcpy(p + 0x10 + 4u * i, pTargets + i, 4);
+    return pkt;
+}
+// ORIGINAL CCrossMsgPlunderWarStatus: fixed size 8
+inline std::vector<uint8_t> EncodePlunderWarStatus(uint16_t usAction,
+                                                   uint32_t dwParam) {
+    PlunderWarStatusData d{};
+    d.usAction = usAction;
+    d.dwParam = dwParam;
+    return Encode(MsgType_PlunderWarStatus, d);
+}
 
 constexpr uint32_t MAX_ROSTER = 64;
 constexpr uint32_t NAME_LEN = 24;

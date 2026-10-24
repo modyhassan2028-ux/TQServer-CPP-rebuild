@@ -30,7 +30,9 @@
 //   (exact round-robin order documented TBD - lines 26700-26760).
 #pragma once
 #include <cstdint>
+#include <functional>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -173,10 +175,167 @@ public:
         m_mapTokens[dwCountryDate] = lg;
     }
 
+    // ==================== PLUNDER WAR ====================
+    // The unit begins here: FUN_1400165d0 (LoadPlunderTimeConfig),
+    // FUN_140019bc0 (LoadPlunderWarInfo), FUN_14001abc0 (OnTimer:
+    // day change + FUN_14001a400 status machine), FUN_14001de20
+    // (SignUpPlunderWar), FUN_14001e700 (PublishSupportToken).
+    // Manager state, verbatim offsets:
+    //   +0xc   m_dwPlunderDay      - last seen TimeGet(3) snapshot
+    //   +0xd0  m_nPlunderStatus     - 0 idle, 1 signup ended, 2 war,
+    //                                 3 ended (written by FUN_14001a400
+    //                                 and the OnTimer day change)
+    //   +0xd4  m_dwPlunderWarStart  - cq_config type 149883 data2 (HHMM)
+    //   +0xd8  m_dwPlunderSignupEnd - cq_config type 149883 data1 (HHMM)
+    //   +0xdc  m_dwPlunderWarEnd    - cq_config type 149883 data3 (HHMM)
+    //   +0xe0/+0x110 m_mapPlunderWarToday - keyed by apply_id
+    //   kernel+0x28 set (FUN_140009ed0/FUN_1400143c0) - plunder
+    //   schedule server ids, modelled on the kernel (see
+    //   CCrossServerKernel::AddPlunderScheduleServer); the manager
+    //   pushes into it through the schedule sink.
+    enum { PLUNDER_IDLE = 0, PLUNDER_SIGNUP_ENDED = 1,
+           PLUNDER_WAR = 2, PLUNDER_ENDED = 3 };
+
+    struct PlunderWarRecord {
+        uint32_t dwId = 0;       // cq_plunder_war.id (auto)
+        uint32_t dwApplyDate = 0; // col 1 (apply_date, TimeGet(3)%100)
+        uint32_t dwApplyId = 0;   // col 2 (apply_id, the packed
+                                  // server*1000000+league id)
+        uint32_t dwTargets[10] = {0}; // cols 3..12
+        uint8_t byCount = 0;     // number of valid targets
+    };
+
+    // ---- sinks wired by the kernel after Init ----
+    // FUN_140018870: broadcast a built packet to every online server
+    // that owns a country (FUN_14000d620 != -1), skipping dwExclude.
+    using PlunderBroadcastFn =
+        std::function<void(const std::vector<uint8_t>& pkt,
+                           uint32_t dwExclude)>;
+    // FUN_14000a310(kernel, text, 0, 0xffffff, 0x961): system talk
+    using PlunderTalkFn = std::function<void(const std::string&)>;
+    // FUN_1400143c0(FUN_140009ed0(kernel), id): plunder schedule add
+    using PlunderScheduleFn = std::function<void(uint32_t)>;
+    void SetPlunderSinks(PlunderBroadcastFn fnBroadcast,
+                         PlunderTalkFn fnTalk,
+                         PlunderScheduleFn fnSchedule);
+
+    // ---- FUN_1400165d0 (real DB load, verbatim) ----
+    // SELECT * FROM cq_config WHERE type = 149883 LIMIT 1;
+    // col 2 (data1) -> +0xd8 (signup end, HHMM; the ORIGINAL gate is
+    // "data1/100 must be >= 2 and <= 22" - the binary string says
+    // "data1 must be greater than 1 and less than 23,type[%d]"),
+    // col 3 (data2) -> +0xd4 (war start), col 4 (data3) -> +0xdc
+    // (war end). No row -> "table:cq_config, CCountrySysMgr::
+    // LoadPlunderTimeConfig no corresponding config found,type[%d]"
+    // (0x14005e190, GBK) -> FAIL.
+    bool LoadPlunderTimeConfig(CMySQLClient* pDB);
+
+    // ---- FUN_140019bc0 (real DB load, verbatim) ----
+    // SELECT * FROM cq_plunder_war; only rows with col 1 ==
+    // TimeGet(3)%100 (today) enter the map; col 2 (apply_id) == 0 ->
+    // "id[%lu] idPlunder[%lu] is error"; duplicate key ->
+    // "id[%lu] Plunder[%lu] is exist"; wrong date ->
+    // "id[%lu] date[%lu] is error" (all log, all skip).
+    bool LoadPlunderWarInfo(CMySQLClient* pDB);
+
+    // ---- FUN_14001abc0 (OnTimer, verbatim) ----
+    // Day change (mgr+0xc != TimeGet(3)):
+    //   - non-empty map -> "CCountrySysMgr::OnTimer
+    //     m_mapPlunderWarToday is not empty", then every record is
+    //     released and the map erased (FUN_1400110a0-style walk)
+    //   - +0xd0 = 0 (status reset)
+    //   - PlunderWarStatus(action 2, param 0) broadcast
+    // Then FUN_14001a400 ALWAYS runs:
+    //   status 0: TimeGet(4)/100 >= +0xd8 -> empty map ? status 3
+    //             : status 1 + PlunderWarStatus(3,0) broadcast +
+    //             STR_PLUNDER_WAR_SIGNUP_END talk
+    //   status 1: TimeGet(4)/100 >= +0xd4 -> status 2 +
+    //             PlunderWarStatus(0, (((end/100)*60+(start/100)*40)
+    //             - start)*60 + (end%100)*60 + TimeGet(1)) broadcast
+    //   status 2: TimeGet(4)/100 >= +0xdc -> status 3 +
+    //             PlunderWarStatus(1,0) broadcast + the today-map
+    //             is cleared (FUN_140018a40)
+    void OnTimer();
+
+    // ---- FUN_14001de20 (SignUpPlunderWar, verbatim) ----
+    // Action 1 of CCrossMsgPlunderWarInfo. Gates in order:
+    //   1. id == 0 || count < 1 -> "id is error idPlunder[%lu]!"
+    //   2. status == 2 || 3 -> "status is error idPlunder[%lu]!"
+    //   3. duplicate apply_id in the today map ->
+    //      "record is exist idPlunder[%lu]!"
+    //   4. FUN_140019e20(mgr, id/1000000, id%1000000) == 0 ->
+    //      "can not find league idPlunder[%lu]!"
+    //   5. target loop (target == 0 or == id skipped; the target
+    //      server must have a league - "can not find league
+    //      idPlundered[%lu],  idPlunder[%lu]!" (double space, 0x5f1e0);
+    //      target%1000000 must equal the target league's country
+    //      (FUN_140022c80) - "is not country league idPlundered[%lu],
+    //      idPlunder[%lu]!" (0x5f240); bad targets are skipped)
+    //   6. no valid target, or count == 0 or > 10 ->
+    //      "idPlunder[%lu] target num[%d] !"
+    //   7. INSERT cq_plunder_war: col1 = TimeGet(3)%100 (byte),
+    //      col2 = id, cols 3.. = targets; commit fail ->
+    //      "record insert error, idPlunder[%lu]!" /
+    //      "create record error, idPlunder[%lu]!" (no table handle)
+    //   8. map insert; PlunderWarInfo(action 2, id, targets)
+    //      broadcast (FUN_140018870, exclude 0); the msg build is
+    //      capped at 0x3ff -> "msg size error, idPlunder[%lu]!"
+    //   9. schedule set: first valid target's league id + the
+    //      attacker's league id (FUN_1400143c0 x2)
+    //  10. STR_PLUNDER_WAR_TOMORROW_BEGIN talk (0x961) + return true
+    bool SignUpPlunderWar(uint32_t dwIdPlunder, uint32_t dwCount,
+                          const uint32_t* pTargets);
+
+    // ---- FUN_14001e700 (PublishSupportToken, verbatim) ----
+    // Action 10 of CCrossMsgPlunderWarInfo. Gates in order:
+    //   1. id == 0 || count < 1 || count > 10 ->
+    //      "id is error idServerLeague[%lu], nAmount[%d]!"
+    //   2. status == 1 || 2 -> "status is error idServerLeague[%lu]!"
+    //   3. target league lookup/gates as SignUp (same strings with
+    //      idPlundered); valid targets 0 or > 10 ->
+    //      "idServerLeague[%lu] nAmount[%d] !" (target num)
+    //   4. PlunderWarInfo(action 11, id, targets) broadcast
+    //   5. schedule set: the FIRST VALID TARGET's server id
+    //      (param_2/1000000 = the attacker server) - the first target
+    //      id is added TWICE verbatim (FUN_140022fe0/c20 called twice),
+    //      then the attacker server id (FUN_1400143c0(obj, local_5e0))
+    //   6. STR_PUBLISH_SUPPORT_TOKEN_SUCCESS talk + return true
+    bool PublishSupportToken(uint32_t dwIdServerLeague, uint32_t dwCount,
+                             const uint32_t* pTargets);
+
+    // ---- test/inspection seams ----
+    int  PlunderStatus() const { return m_nPlunderStatus; }
+    void SetPlunderStatusForTest(int n) { m_nPlunderStatus = n; }
+    void SetPlunderTimesForTest(uint32_t dwStart, uint32_t dwSignupEnd,
+                                uint32_t dwEnd) {
+        m_dwPlunderWarStart = dwStart; m_dwPlunderSignupEnd = dwSignupEnd;
+        m_dwPlunderWarEnd = dwEnd;
+    }
+    // TimeGet modelings used by the unit (conventions consistent with
+    // every observed use): TimeGet(3) = local yyyymmdd, TimeGet(4) =
+    // local HHMM, TimeGet(1) = local seconds since midnight. The test
+    // clock overrides all three.
+    void SetClockForTest(uint32_t dwTimeGet1, uint32_t dwTimeGet3,
+                         uint32_t dwTimeGet4) {
+        m_bClockForTest = true;
+        m_dwClock1 = dwTimeGet1; m_dwClock3 = dwTimeGet3;
+        m_dwClock4 = dwTimeGet4;
+    }
+    void ClearClockForTest() { m_bClockForTest = false; }
+    uint32_t PlunderDay() const { return m_dwPlunderDay; }
+    size_t PlunderWarCount() const { return m_mapPlunderWarToday.size(); }
+    bool PlunderScheduleHas(uint32_t dwId) const {
+        return m_setSchedulePushed.count(dwId) != 0;
+    }
+    // the loaded/inserted war record (null when absent)
+    const PlunderWarRecord* FindPlunderWar(uint32_t dwApplyId) const;
+    void SetPlunderDayForTest(uint32_t d) { m_dwPlunderDay = d; }
+    // the DB handle the INSERT path uses (kept from Init, like the
+    // original keeps the record-set/table handles of the instance)
+    void SetPlunderDBForTest(CMySQLClient* pDB) { m_pDBPlunder = pDB; }
+
 private:
     bool LoadLeagueInfo(CMySQLClient* pDB);
-    bool LoadPlunderTimeConfig();  // FUN_1400165d0: config file load
-    bool LoadPlunderWarInfo();     // FUN_140019bc0: war info load
 
     // key: (idserver, idleague) - the ORIGINAL per-server map at +0x20
     std::map<std::pair<uint32_t, uint32_t>, CountryLeague> m_leagues;
@@ -192,6 +351,26 @@ private:
     uint32_t m_nCountryDateTotal = 0;   // local_1b8 in LoadLeagueInfo
     uint32_t m_dwCapacityPerServer = 0; // *(param+0x10)
     uint32_t m_dwServerCount = 0;       // *(param+200)
+
+    // ---- plunder war state (offsets in the header block above) ----
+    uint32_t m_dwPlunderDay = 0;        // mgr+0xc (0 in the ctor - the
+                                       // first OnTimer after startup
+                                       // always sees a day change)
+    int m_nPlunderStatus = 0;           // mgr+0xd0
+    uint32_t m_dwPlunderWarStart = 0;    // mgr+0xd4
+    uint32_t m_dwPlunderSignupEnd = 0;  // mgr+0xd8
+    uint32_t m_dwPlunderWarEnd = 0;     // mgr+0xdc
+    std::map<uint32_t, PlunderWarRecord> m_mapPlunderWarToday; // +0xe0
+    PlunderBroadcastFn m_fnBroadcast;  // FUN_140018870 sink
+    PlunderTalkFn m_fnTalk;             // FUN_14000a310 sink
+    PlunderScheduleFn m_fnSchedule;     // FUN_1400143c0 sink
+    std::set<uint32_t> m_setSchedulePushed; // mirror for inspection
+    CMySQLClient* m_pDBPlunder = nullptr; // Init's handle
+    bool m_bClockForTest = false;
+    uint32_t m_dwClock1 = 0, m_dwClock3 = 0, m_dwClock4 = 0;
+    uint32_t TimeGet1() const; // local seconds since midnight
+    uint32_t TimeGet3() const; // local yyyymmdd
+    uint32_t TimeGet4() const; // local HHMM
 };
 
 } // namespace cross
