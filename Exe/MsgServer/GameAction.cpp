@@ -3635,8 +3635,9 @@ bool bAll = (llAll == 1);
                pNode->dwId, dwVal, pUser->GetId());
         return true;
     }
-    case 1058: { // ORIGINAL rank 0x32 (case 0x32 @246455): module-7
-        // var ops. sscanf "%s %s %d" <3 -> DBERR "Wrong param number"
+    case 1058: { // ORIGINAL rank 0x32 (case 0x32 @246455): module-0xd
+        // (FUN_140118220 = the TASK MANAGER, task_detail-backed) var
+        // ops; the vcall+0x20 gate checks the task var is registered. sscanf "%s %s %d" <3 -> DBERR "Wrong param number"
         // -> false. Gate: vcall+0x20(FUN_140118220 singleton, userId,
         // dataId) - false when the var is not registered. Then
         // f1=="time": read val = vcall+0x38(user, dataId, 7) and ops

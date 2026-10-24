@@ -35,6 +35,17 @@ private:
     std::map<std::string, int64_t> m_byName;
 };
 
+// module 0xd = THE TASK MANAGER (FUN_140118220 target). Its vtable
+// map (verified against cq_action cases 0x30/0x32): +0x10 create task,
+// +0x20 exists, +0x18 delete(action id), +0x38 read var,
+// +0x40 write var - all backed by the task_detail table via
+// CUserTaskManager. This adapter only binds it into the module
+// factory; the implementation stays in CUserTaskManager.
+class CTaskManagerModule : public IModule {
+public:
+    uint32_t GetId() const override { return 0xd; }
+};
+
 class CModuleManager {
 public:
     static CModuleManager& Instance();
