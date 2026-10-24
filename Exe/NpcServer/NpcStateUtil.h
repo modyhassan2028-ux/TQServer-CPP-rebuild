@@ -306,4 +306,29 @@ bool CNpcFreeGate(CNpcStateData& rN);
 // // stuck-update path
 uint32_t CNpcStuckHandler(CNpcStateData& rN);
 
+// ============================================================
+// ===== ORIGINAL FUN_1400597f0 (the walk msg) ======
+// ============================================================
+// map = +0x98; if (!map) { log; return; }
+// if (x >= 0 && x < FUN_140049480(map) &&
+//     y >= 0 && y < FUN_140049430(map)) {
+//   +0x2c = 0;
+//   FUN_140058610(npc, x, y);   // move
+//   +0x24 = dir;
+//   FUN_1400623e0(msg);         // ctor
+//   xs = (short)sub->vt+0x38();
+//   ys = (short)sub->vt+0x40();
+//   id = npc->vt+0x8();
+//   ok = FUN_140062530(msg, id,
+//          xs, ys, (short)dir,
+//          0x89, (short)x, (short)y, 0);
+//   if (ok) FUN_14001c5f0(
+//       FUN_14001c200(), id, msg);  // send
+//   FUN_140062430(msg);         // dtor
+// }
+// else log;
+void CNpcWalkMsg(CNpcStateData& rN,
+                 int nX, int nY,
+                 uint32_t uDir);
+
 } // namespace npc

@@ -518,4 +518,47 @@ uint32_t CNpcStuckHandler(CNpcStateData& rN) {
     return uRet & 0xff;
 }
 
+void CNpcWalkMsg(CNpcStateData& rN,
+                 int nX, int nY,
+                 uint32_t uDir) {
+    // ORIGINAL FUN_1400597f0
+    if (!rN.m_bHasMap) {       // +0x98 == 0
+        rN.m_fnLogError();     // DAT_1400be0b0
+        return;
+    }
+    // ORIGINAL: the map bounds gate
+    if (nX >= 0 &&
+        nX < rN.m_fn49480Width() &&
+        nY >= 0 &&
+        nY < rN.m_fn49430Height()) {
+        rN.m_dwField2C = 0;    // +0x2c = 0
+        // ORIGINAL: FUN_140058610(npc,
+        // x, y) - the move
+        rN.m_fn58610(nX, nY);
+        rN.m_nField24 = uDir; // +0x24 = dir
+        // ORIGINAL: FUN_1400623e0(msg)
+        // ctor (local 0x420-byte buffer)
+        // ORIGINAL: the SHORT-truncated
+        // sub getters
+        short sX = (short)rN.m_fnSubGetX38();
+        short sY = (short)rN.m_fnSubGetY40();
+        uint32_t uId = rN.m_fnNpcId8();
+        // ORIGINAL: FUN_140062530(msg,
+        // id, xs, ys, (short)dir, 0x89,
+        // (short)x, (short)y, 0)
+        bool bOk = rN.m_fn62530(
+            uId, sX, sY, (short)uDir,
+            (short)nX, (short)nY);
+        if (bOk) {
+            // ORIGINAL: FUN_14001c5f0(
+            // FUN_14001c200(), id, msg)
+            rN.m_fn1c5f0Send(uId);
+        }
+        // ORIGINAL: FUN_140062430(msg)
+        // dtor
+        return;
+    }
+    rN.m_fnLogError();         // DAT_1400be0b0
+}
+
 } // namespace npc

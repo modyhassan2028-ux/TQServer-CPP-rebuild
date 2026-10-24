@@ -230,7 +230,14 @@ struct CNpcStateData {
     std::function<uint32_t(int, int, uint32_t)>
         m_fn597f0;
         // FUN_1400597f0(npc, x, y, +0x24 dir)
-        // - the walk msg (next unit)
+        // - the walk msg (real body: unit 28)
+    // ===== 597f0 (unit 28) =====
+    std::function<bool(uint32_t, short, short,
+        short, short, short)> m_fn62530;
+        // FUN_140062530(msg, id, xShort,
+        // yShort, dirShort, 0x89, x, y, 0)
+        // - the msg fill (SHORT-truncated
+        // args verbatim)
 };
 
 // ============================================================
