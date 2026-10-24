@@ -115,12 +115,13 @@ public:
                       uint32_t dwCap);
     uint32_t NextNpcId();     // FUN_14002b270
     LiveNpc* FindNpc(uint32_t dwId);
+    // the +0x30 stats walk (the OnTimer display)
+    std::vector<GenStat> GenStats();
 
 private:
     void Console(const char* sz) { m_vecConsole.push_back(sz); }
     void WorldTick();          // the state-2 tick family
     void WireNpc(LiveNpc* p);
-    std::vector<GenStat> GenStats();
 };
 
 } // namespace npc

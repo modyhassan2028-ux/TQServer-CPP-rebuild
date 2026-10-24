@@ -132,6 +132,10 @@ void CNpcServerApp::WorldTick() {
 // callees; in-memory kernel objects stand in for the
 // FUN_14001c7a0/14001c790 singletons) =====
 void CNpcServerApp::WireNpc(LiveNpc* p) {
+    // ---- unit 8: the transform pair owns the app
+    // allocator (the ORIGINAL's CNpcManager singleton
+    // +0x30 spawns ids for CNpc::Transform) ----
+    p->tr.m_pAllocator = &m_idAlloc;
     // ---- unit 10: CNpcObject::Create seams ----
     p->obj.m_fnFindType = [this](uint32_t dwType){
         return dwType != 0 ? &m_typeRec
@@ -280,7 +284,7 @@ void CNpcServerApp::AddGenerator(uint32_t dwMap,
     // (0xc = 0 -> random), 8 restock batch,
     // 0x11 cluster flag (0 = skip the DB cluster),
     // 0x12 random-map mode (0 = fixed)
-    p->m_cfg.m_fnGetInt = [dwType, dwMap](int idx){
+    p->m_cfg.m_fnGetInt = [dwType, dwMap, dwCap](int idx){
         // GetInt(1) = the MAP id (+0x54 in fixed mode),
         // GetInt(9) = the record type word,
         // GetInt(6) = the geo step -> grid-cell cap
@@ -294,7 +298,13 @@ void CNpcServerApp::AddGenerator(uint32_t dwMap,
              : idx == 0x11 ? 0
              : idx == 2 ? 500
              : idx == 3 ? 300
-             : idx == 4 ? 40
+             // the rect config the ORIGINAL derives
+             // m_nMaxCap from (FUN_140061040 step 4):
+             // (GetInt(5)/h) * (GetInt(4)/h) with
+             // h = GetInt(6) - here shaped so the
+             // cell cap EQUALS the dwCap row param:
+             // (30/20) * (dwCap*20/20) = 1 * dwCap
+             : idx == 4 ? (int)dwCap * 20
              : idx == 5 ? 30
              : idx == 6 ? 20
              : idx == 7 ? 1
