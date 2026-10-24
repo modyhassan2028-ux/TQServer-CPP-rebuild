@@ -2587,3 +2587,72 @@ DistributeSpareCapacity() بيتنادى عليها من ذيل LoadLeagueInfo:
 + LoadLeagueInfo كامل مع التوزيع + الحالات 0/1/2/4/5/6 كلها
 منفذة. المتبقي العام: بقية أنظمة CQCrossServer الأوسع خارج
 سويتش الكونتري، والمراجعة الشاملة للربط، ثم البيلد النهائي.
+
+## جلسة 2026-10-24 23:15 — CQCrossServer: نظام حرب السلب (Plunder War) مكتمل + تصحيح TimeGet
+**المرجع:** CQCrossServer.exe.decompiled.c + CQBase.dll.decompiled.c
+
+**تصحيح جوهري لمنافذ الوقت (CQBase.dll @140b82df0 حرفياً):**
+- TimeGet(4) = (HH*100+MM)*100+SS = **HHMMSS** (مش HHMM) —
+  بوابات آلة الحالات بتقسمها /100 → HHMM
+- TimeGet(1) = **ثواني يونكس الخام** (مش ثواني اليوم) — بتدخل
+  في باراميتر العد التنازلي الأصلي
+- TimeGet(3) = (tm_year*100+1+mon)*100+mday حيث tm_year = سنة-1900
+  (غرابة أصلية، القيمة 1261024 لِـ2026-10-24 — الحقن محفوظ
+  حرفياً؛ المستهلكون بيستخدموا %100 = اليوم)
+
+**LoadPlunderTimeConfig (FUN_1400165d0):** SELECT من cq_config
+WHERE type=149883 — سطر واحد إجباري؛ data1/100 لازم في [2,22]
+ولو غلط → "data1 must be >1 and <23" + فشل Init. الديمبو الأصلي
+(cq.sql) **مفيهوش صف 149883** — السيرفر الأصلي بينهار عند الإقلاع
+من غيره (يُضاف يدوياً: data1=1900 data2=2000 data3=2100).
+
+**LoadPlunderWarInfo (FUN_140019bc0):** SELECT * FROM cq_plunder_war
+حسب التاريخ (apply_date = TimeGet(3)%100): id error / idPlunder=0 /
+الليج غايب / "Plunder[%u] is exist" (سجل مكرر → تخطي).
+
+**آلة الحالات OnTimer (FUN_14001a400 حرفياً):** يوم جديد → مسح
+m_mapPlunderWarToday + status=0 + بث PlunderWarStatus(action 2).
+الحالة 0: بوابة data1 <= TimeGet(4)/100 → الخريطة فاضية → 3،
+وإلا → 1 + بث action 3 + talk STR_PLUNDER_WAR_SIGNUP_END.
+الحالة 1: data2 <= /100 → 2 + بث action 0 بباراميتر العد
+الحرفي (((end/100)*0x3c+(start/100)*0x28)-start)*0x3c+(end%100)*0x3c+TimeGet(1).
+الحالة 2: data3 <= /100 → 3 + بث action 1 + مسح اليوم.
+الحالة 3: لا انتقال.
+
+**SignUpPlunderWar (FUN_140019e20):** 7 بوابات باللوجات الحرفية:
+id=0 → "id is error"؛ الليج غايب → "can not find league"؛
+الحالة ≠ 0 → "status is error"؛ الهدف=0 → "id is error"؛
+الهدف بليج غايب → "can not find league idPlundered"؛ الهدف
+مش في ليج السيرفر → "is not country league idPlundered"؛
+سجل قائم → "record is exist". النجاح: INSERT (apply_id, league,
+target, count, apply_date=TimeGet(3)%100) + m_mapPlunderWarToday
++ بث PlunderWarInfo(action 2) لِلأعضاء + talk
+STR_PLUNDER_WAR_TOMORROW_BEGIN لكل السيرفرات.
+
+**PublishSupportToken (FUN_14001d560):** نفس البوابات (id=0 /
+amount=0 / >10 / status) لكن على **idServerLeague** (سيرفر*1000000
++ ليج) — استهلاك مختلف عن الـ signup الأصلي. النجاح:
+FUN_1400218f0(country_date, 1) + FUN_140022d40 commit.
+
+**الكيرنل (40041 = MsgType_PlunderWarInfo):** wire حرفي —
+MsgHead + usAction(2) + dwId(4) + byCount(1) + dwTargets[4×count]؛
+action 1 → SignUpPlunderWar (باستثناء إرسال مصدره)، 3 →
+PublishSupportToken، 77 → "CCrossMsgPlunderWarInfo::Process
+wrong action[%u]" (سيلنت). **بث FUN_140018870:** لكل سيرفر
+أونلاين (باستثناء المستثنى): خريطة server→country
+(FUN_14000d620) ≠ -1 → FUN_14000a0b0 للكونتري؛ الـ talk
+(FUN_14000a310) لكل السيرفرات أونلاين. الجدولة: سيرفر
+المصدر بيتسجل IsPlunderScheduleServer.
+
+**اختبار شامل (tests/cross_plunder_war_test.cpp — 8 أقسام كلها
+خضراء):** wire layouts، تحميل cq_config (نجاح + فشل data1)،
+تحميل cq_plunder_war (كل حالات التخطي)، تغيير اليوم (مسح +
+بث action 2)، آلة الحالات الكاملة (18:59 لا شيء → 19:00
+signup end → 20:00 حرب بعداد → 21:00 انتهاء)، كل بوابات
+الـ signup والـ publish، dispatch الكيرنل + بث الأعضاء
+والاستثناء + البثين بعد الـ signup (40041 عضو + 9011 للكل).
+كل سويتات الكروس الثلاثة خضراء.
+
+**build.sh:** خطوة CQCrossServer دلوقتي بتربط CountrySysMgr.cpp
++ MySQLClient.cpp + SHA1.cpp. البيلد الكروس بـ zig مش متاح في
+الساندبوكس (يُنفذ في بيئة بـ zig).
