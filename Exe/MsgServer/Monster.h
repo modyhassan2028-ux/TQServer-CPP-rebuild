@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <cstdint>
+#include <map>
 #include <memory>
 #include <atomic>
 
@@ -62,6 +63,24 @@ public:
     // FUN_1401669f0 — 802 fixed-amount money pile near the monster
     bool SpawnMoneyPile(uint64_t qwAmount, uint8_t cFlag);
     bool IsBoss() const { return m_bBoss; }
+    // ORIGINAL FUN_14016cfc0 (read via target GetPoint(0x1002)): monster
+    // dyna-type record field 0x58 bit 3 = immune to the gate's sort list.
+    // The cq_monstertype loader is not ported yet; the port carries the
+    // bit as a flag.
+    void SetSortImmune(bool b) { m_bSortImmune = b; }
+    bool IsSortImmune() const { return m_bSortImmune; }
+    // ORIGINAL status probe vtable+0x2d8 (FUN_1403e9290 reads 0xa0):
+    // the port stores the status resistance value with the status.
+    void AddStatus(uint32_t dwStatus, uint32_t dwValue) { m_mapStatus[dwStatus] = dwValue; }
+    bool HasStatus(uint32_t dwStatus) const { return m_mapStatus.count(dwStatus) != 0; }
+    bool GetStatusValue(uint32_t dwStatus, uint32_t& dwValue) const {
+        auto it = m_mapStatus.find(dwStatus);
+        if (it == m_mapStatus.end()) return false;
+        dwValue = it->second; return true;
+    }
+    bool m_bSortImmune{false};
+    std::map<uint32_t, uint32_t> m_mapStatus;
+
     void SetBoss(bool b) { m_bBoss = b; }
     void SetLevel(uint32_t dwLevel) { m_dwLevel = dwLevel; }
 

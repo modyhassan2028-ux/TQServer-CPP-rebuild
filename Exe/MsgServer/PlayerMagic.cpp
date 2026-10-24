@@ -18,7 +18,8 @@ bool CMagicTypePool::LoadFromDB(CMySQLClient* pDB) {
     if (!pDB->Query(
             "SELECT id, type, sort, name, crime, ground, multi, target, level,"
             " use_mp, power, intone_speed, percent, step_secs, `range`, distance,"
-            " status, need_prof, need_exp, need_level, need_time, delay_ms, weapon_subtype"
+            " status, need_prof, need_exp, need_level, need_time, delay_ms, weapon_subtype,\n"
+            " weapon_hit, status_data0, status_data1"
             " FROM cq_magictype")) {
         printf("[MAGIC] cq_magictype load failed: %s\n", pDB->GetError().c_str());
         return false;
@@ -51,6 +52,9 @@ bool CMagicTypePool::LoadFromDB(CMySQLClient* pDB) {
         t.dwNeedTime  = row.size() > 20 ? u32(20) : 0;
         t.dwDelayMs = row.size() > 21 ? u32(21) : 0;
         t.dwWeaponSub = row.size() > 22 ? u32(22) : 0;
+        t.dwWeaponHit = row.size() > 23 ? u32(23) : 0;
+        t.dwStatusData0 = row.size() > 24 ? u32(24) : 0;
+        t.dwStatusData1 = row.size() > 25 ? u32(25) : 0;
         m_oTypes[((uint64_t)t.dwType << 16) | (uint16_t)t.dwLevel] = t;
     }
     printf("[MAGIC] cq_magictype: %zu stage(s) loaded.\n", m_oTypes.size());
@@ -77,8 +81,55 @@ int32_t CPlayerMagic::GetAttrib(uint32_t dwIdx) const {
     case 9: return (int32_t)m_dwEffectMonopoly;
     case 10: return (int32_t)m_dwEffectExorbitant;
     default:
+        if (dwIdx >= 100) {
+            // ORIGINAL FUN_140418c50: >= 100 reads the lazy cq_magictype
+            // stage (FUN_1404187b0), column idx - 100
+            const CMagicTypeInfo* pT =
+                CMagicTypePool::Instance().Find(m_wType, m_wLevel);
+            if (!pT) {
+                // ORIGINAL: log + logDBERRor, return 0
+                printf("[MAGIC] GetAttrib(%u): stage (type %u, level %u) not found\n",
+                       dwIdx, m_wType, m_wLevel);
+                return 0;
+            }
+            return pT->Field(dwIdx - 100);
+        }
         // ORIGINAL logs an InlineLogDBERROR for out-of-range fields
         printf("[MAGIC] GetAttrib(%u) out of range (type %u)\n", dwIdx, m_wType);
+        return 0;
+    }
+}
+
+int32_t CMagicTypeInfo::Field(uint32_t dwCol) const {
+    switch (dwCol) {
+    case 0: return (int32_t)dwId;
+    case 1: return (int32_t)dwType;
+    case 2: return (int32_t)dwSort;
+    case 3: return 0;                    // name (string column)
+    case 4: return (int32_t)ucCrime;
+    case 5: return (int32_t)ucGround;
+    case 6: return (int32_t)ucMulti;
+    case 7: return (int32_t)dwTarget;
+    case 8: return (int32_t)dwLevel;
+    case 9: return (int32_t)dwUseMp;
+    case 10: return nPower;
+    case 11: return (int32_t)dwIntoneSpeed;
+    case 12: return (int32_t)dwPercent;
+    case 13: return (int32_t)dwStepSecs;
+    case 14: return (int32_t)dwRange;
+    case 15: return (int32_t)dwDistance;
+    case 16: return nStatus;
+    case 17: return (int32_t)dwNeedProf;
+    case 18: return nNeedExp;
+    case 19: return (int32_t)dwNeedLevel;
+    case 20: return (int32_t)dwNeedTime;
+    case 33: return (int32_t)dwDelayMs;
+    case 22: return (int32_t)dwWeaponSub;
+    case 30: return (int32_t)dwWeaponHit;
+    case 35: return (int32_t)dwStatusData0;
+    case 36: return (int32_t)dwStatusData1;
+    default:
+        printf("[MAGIC] magictype column %u not carried by the port yet\n", dwCol);
         return 0;
     }
 }

@@ -38,3 +38,7 @@ npc change position:NpcID:800001, OwnerID:0, NpcName: Table, OldPosX:10, OldPosY
 npc change position:NpcID:800002, OwnerID:0, NpcName: Chair, OldPosX:11, OldPosY:11, NewPosX:55, NewPosY:47
 npc change position:NpcID:800001, OwnerID:0, NpcName: Table, OldPosX:10, OldPosY:10, NewPosX:20, NewPosY:20
 npc change position:NpcID:800001, OwnerID:0, NpcName: Table, OldPosX:20, OldPosY:20, NewPosX:30, NewPosY:30
+npc change position:NpcID:800001, OwnerID:0, NpcName: Table, OldPosX:10, OldPosY:10, NewPosX:55, NewPosY:50
+npc change position:NpcID:800002, OwnerID:0, NpcName: Chair, OldPosX:11, OldPosY:11, NewPosX:55, NewPosY:47
+npc change position:NpcID:800001, OwnerID:0, NpcName: Table, OldPosX:10, OldPosY:10, NewPosX:20, NewPosY:20
+npc change position:NpcID:800001, OwnerID:0, NpcName: Table, OldPosX:20, OldPosY:20, NewPosX:30, NewPosY:30

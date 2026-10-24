@@ -411,6 +411,39 @@ public:
     // the sweep: position move; the user-side teleport packet of the
     // original slot is outside the ported slice (TODO with FUN_140499830).
     void JumpPos(uint16_t usX, uint16_t usY);
+
+    // ---- ORIGINAL launch-loop per-target gates (FUN_1404a1f70 call
+    // chain, ported literal) ----
+
+    // FUN_1404864f0 CPlayerMagic::IsTargetProtected: nonzero in the
+    // original = skip the hit entirely. Record null or target null ->
+    // gate open (0). Sort 50 (0x32) -> gate open. Zone check (map
+    // vtable+0x3d8, sorts 6..7 pass the in-map flag) refused -> skip.
+    // PK-warning cascade (target 0x278 == 0 = user OR PK map OR
+    // weapon_hit == 0 OR weapon_subtype 500/610 OR sort 65 OR type
+    // 11030) with map pk-count > 999 -> STR_PK tip + skip. The ~30-sort
+    // switch runs the monster dyna-type immunity bit (FUN_14016cfc0).
+    // Final gate: FUN_140186200 friendly-fire check.
+    bool IsTargetProtected(uint32_t dwMagicType, const SMagicTarget& t);
+
+    // FUN_1404831f0 CPlayerMagic::SweepTarget: the -2 sweep only fires
+    // for (record crime attr 0x68 != 0 OR magic type == 0x2d46) AND the
+    // target IsAlive, and then FUN_1403e9290 must roll true: target
+    // status 0xa0 + kernel resistance roll (10000 sides, resistance
+    // from kernel slot 0xb0(id, 0xa0); the port stores the value with
+    // the status).
+    bool SweepTarget(uint32_t dwMagicType, const SMagicTarget& t, bool bTypeEq2d46);
+
+    // FUN_140483270: pre-hit attack-position registry hook (singleton
+    // FUN_140087ed0 slot 0x2d8: target id, attacker id, life, x, y) behind
+    // a double FUN_140167b70 trace-toggle read. The registry subsystem is
+    // outside the ported slice; the hook stays inert and logged.
+    void RecordHitPos(const SMagicTarget& t);
+
+    // FUN_140186200 model (friendly fire): the attacker himself is
+    // always protected; team/guild/marriage cascade lands with those
+    // systems.
+    bool IsFriendlyTarget(const SMagicTarget& t) const;
     // attr-0 counter (original CUser+0x88) for newly created records
     uint32_t m_dwMagicCounter{0};
     // returns an error message, or "" on success
@@ -549,6 +582,16 @@ private:
     uint32_t m_dwId{0};
     bool     m_bOsUser{false}; // ORIGINAL CUser+0x12fc (set when OS users exist)
     bool     m_bAlive{true};   // ORIGINAL user vcall+0x220 IsAlive gate
+    // ORIGINAL status probe vtable+0x2d8 (FUN_1404864f0 checks 0x6e);
+    // the port stores the status resistance value with the status.
+    void AddStatus(uint32_t dwStatus, uint32_t dwValue) { m_mapStatus[dwStatus] = dwValue; }
+    bool HasStatus(uint32_t dwStatus) const { return m_mapStatus.count(dwStatus) != 0; }
+    bool GetStatusValue(uint32_t dwStatus, uint32_t& dwValue) const {
+        auto it = m_mapStatus.find(dwStatus);
+        if (it == m_mapStatus.end()) return false;
+        dwValue = it->second; return true;
+    }
+    std::map<uint32_t, uint32_t> m_mapStatus;
                                // (ProcessActionCrossServer 8011 denies dead users)
     std::string m_name;
     uint32_t m_dwMapId{1002}; // Twin City default

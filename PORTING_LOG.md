@@ -1395,3 +1395,41 @@ CUser vtable+0x50 — يلزم تفريغ الـ vtable)، 1023 (0x11 cq_bonus)�
 - **التالي**: FUN_140499830 (SendMagicEffectAfterProcess للوضع الثالث/
   التأخير) وبعده FUN_1404a1f70 — الحلقة المفقودة Intone→Launch→ضرر
   (المنادي اللي بيملأ المصفوفات اللي بياكلها GroupByPos).
+
+## جلسة 2026-10-24 (ثامنة) — بوابات الإطلاق + ABI أعمدة cq_magictype
+- **اكتشاف ABI حاسم**: FUN_140418c50 GetAttr(idx>=100) بيقرأ كائن
+  cq_magictype الكسول (this+0x10، FUN_1404187b0 LoadType) بعمود
+  idx-100. يعني كل GetAttrib(0xNN) في محرك السحر ده = عمود من
+  cq_magictype: 0x66=sort، 0x68=crime، 0x7a=weapon_subtype،
+  0x82=weapon_hit، 0x87/0x88=status_data0/1. CPlayerMagic::GetAttrib
+  اتوسع + CMagicTypeInfo::Field بكل الأعمدة المخزنة (تصحيح مؤشرات:
+  need_level=19/need_time=20/delay_ms=33) واللودر بقى يجيب
+  weapon_hit/status_data0/1.
+- **FUN_1404864f0 (IsTargetProtected) مبورت حرفيًا**: بوابة الهدف
+  في حلقة الإطلاق — سورت 50 بوابته مفتوحة دايمًا، فحص المنطقة
+  (map vtable+0x3d8 بسورتات 6-7)، كاسكاد تحذير PK (هدف لاعب أو
+  خريطة PK أو weapon_hit=0 أو weapon_subtype 500/610 أو سورت 65 أو
+  نوع 11030، مع عداد >999 → رسالة STR_PK للمهاجم)، سويتش الحصانة
+  الـ 30 سورت (FUN_14016cfc0: بت نوع الوحش)، والبوابة النهائية
+  FUN_140186200 (model: المهاجم نفسه محمي).
+- **FUN_1404831f0 (SweepTarget) + FUN_1403e9290 مبورتين حرفيين**:
+  بوابة السحب: الهدف حي + (crime!=0 أو النوع 0x2d46) + رول
+ FUN_1403e9290: حالة 0xa0 على الهدف + رول 10000 ضد مقاومة
+  (kernel slot 0xb0(id,0xa0)؛ البورت بيخزن القيمة مع الحالة).
+- **FUN_140483270 (RecordHitPos)**: هوك سجل مواضع الضرب (anti-cheat
+  singleton slot 0x2d8) خلف قراءة مزدوجة لـ FUN_140167b70 — خارج
+  الشريحة، بيفضل خامل وموثق.
+- **موديلات جنب البورت**: CUser/CMonster status map (قيمة المقاومة
+  مع الحالة)، CGameMap::AllowsAttackTarget/SetSafeZone (كانت موجودة)
+  + SetPkMap/SetPkCount، CMonster::SetSortImmune (بت نوع الوحش من
+  cq_monstertype لما يجي اللودر).
+- **اختبار**: ABI الأعمدة (سورت Thunder=1، crime=1)، بوابة سورت 50
+  مفتوحة، المنطقة الآمنة تمنع، الحصانة بالسورت 65، عداد PK=1000
+  يطلق STR_PK ويمنع، السجل المفقود بوابته مفتوحة، السحب (حالة
+  0xa0 بمقاومة 10000/0، الجريم 0، النوع 0x2d46، الهدف الميت).
+  PASS ×3 + ريجريشن 33/33.
+- **درس البناء**: توسيع أعضاء CUser/CMonster/CGameMap يكسر
+  الـ .o القديمة (ABI) — ظهر كـ segfault/free-corruption عشوائي؛
+  لازم rebuild كامل للـ 50 object. objs4 = القائمة الرسمية.
+- **التالي**: FUN_1404847d0/140484670 (حساب الضرر) وبعدها
+  FUN_1404a1f70 كامل + حلقة المروحة (8 اتجاهات، DAT_140786e20).

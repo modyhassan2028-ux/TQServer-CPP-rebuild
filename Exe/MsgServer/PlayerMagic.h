@@ -53,7 +53,14 @@ struct CMagicTypeInfo {
     uint32_t dwNeedLevel{0};
     uint32_t dwNeedTime{0};   // cq_magictype.need_time (levtime per stage)
     uint32_t dwDelayMs{0};
-    uint32_t dwWeaponSub{0};
+    uint32_t dwWeaponSub{0};   // column 22 (record attr 0x7a)
+    uint32_t dwWeaponHit{0};   // column 30 (record attr 0x82)
+    uint32_t dwStatusData0{0}; // column 35 (record attr 0x87)
+    uint32_t dwStatusData1{0}; // column 36 (record attr 0x88)
+
+    // ORIGINAL record ABI reads cq_magictype columns by index
+    // (FUN_140418c50: idx >= 100 -> the stage object, field idx - 100)
+    int32_t Field(uint32_t dwCol) const;
 };
 
 class CMagicTypePool {
@@ -75,8 +82,12 @@ private:
 class CPlayerMagic {
 public:
     // ---- ORIGINAL record ABI (FUN_140418c50 / FUN_140418d90) ----
-    // 0..10 = cq_magic fields (see header comment), 100+ would be the
-    // runtime-only fields (used by the live cast engine - port pending).
+    // 0..10 = cq_magic fields (see header comment). 100+ = the
+    // cq_magictype stage fields: the original record object holds the
+    // learned row at +8 and the lazy-loaded type stage at +0x10
+    // (FUN_1404187b0 LoadType); GetAttr(idx>=100) reads stage column
+    // idx-100 (verified: 0x66/0x68/0x7a/0x82/0x87/0x88 = sort/crime/
+    // weapon_subtype/weapon_hit/status_data0/status_data1).
     int32_t GetAttrib(uint32_t dwIdx) const;
     bool SetAttrib(uint32_t dwIdx, int32_t nValue);
 

@@ -226,3 +226,36 @@ CHECKF in pRole->QueryObj(OBJ_NPC, IPP_OF(pNpc)), 3027
 table:cq_action/cq_newaction, ACTION 9100705: wrong param count at gameaction.cpp, 3114
 CHECKF in pRole->QueryObj(OBJ_NPC, IPP_OF(pNpc)), 3125
 CHECKF in pRole, 3063
+Create MagicEffect packet failed.
+Create MagicEffect packet failed.
+Create MagicInfo packet failed.
+Create MagicEffect packet failed.
+Create MagicEffect packet failed.
+Create MagicEffect packet failed.
+Create MagicEffect packet failed.
+Create MagicEffect packet failed.
+Create MagicInfo packet failed.
+Create MagicEffect packet failed.
+Create MagicEffect packet failed.
+Create MagicInfo packet failed.
+Create MagicEffect packet failed.
+Create MagicEffect packet failed.
+Create MagicEffect packet failed.
+CHECKF in idNextTask != ID_NONE, 4196
+CHECKF in pszAccept && strlen(pszAccept) > 0, 4253
+IF_NOT_ in ret >= 3, 4268
+IF_NOT_ in ret >= 3, 4268
+table:cq_action/cq_newaction, ACTION (id=9200007,type=3501): Wrong param
+table:cq_action/cq_newaction, ACTION (id=9200009,type=3501): Wrong param
+table:cq_action/cq_newaction, ACTION (id=9200010,type=3501): Wrong param
+table:cq_action/cq_newaction, ACTION (id=9200015,type=3501): Wrong param number
+Create MagicEffect packet failed.
+Create MagicEffect packet failed.
+Create MagicInfo packet failed.
+Create MagicEffect packet failed.
+Create MagicEffect packet failed.
+Create MagicEffect packet failed.
+CHECKF in pRole->QueryObj(OBJ_NPC, IPP_OF(pNpc)), 3027
+table:cq_action/cq_newaction, ACTION 9100705: wrong param count at gameaction.cpp, 3114
+CHECKF in pRole->QueryObj(OBJ_NPC, IPP_OF(pNpc)), 3125
+CHECKF in pRole, 3063

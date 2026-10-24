@@ -630,6 +630,94 @@ bool CUser::SendMagicEffectAfterProcess(uint32_t dwMagicType, uint32_t dwData5,
 }
 
 
+// ---------------------------------------------------------------------------
+// ORIGINAL launch-loop per-target gates (FUN_1404a1f70 call chain)
+
+bool CUser::IsFriendlyTarget(const SMagicTarget& t) const {
+    // FUN_140186200 model: team-partner bit 0x400000 + guild/marriage
+    // cascade below the ported cut; the attacker himself is protected.
+    if (!t.pUser && !t.pMonster) return false;
+    const uint32_t dwId = t.pUser ? t.pUser->GetId() : t.pMonster->GetId();
+    return dwId == m_dwId;
+}
+
+bool CUser::IsTargetProtected(uint32_t dwMagicType, const SMagicTarget& t) {
+    CPlayerMagic* pRec = FindMagic(dwMagicType);
+    if (!pRec) {
+        // ORIGINAL: log_InlineLogERROR then return 0 (gate open)
+        printf("[MAGIC] CPlayerMagic::IsTargetProtected(), user:%u record null (gate open).\n", m_dwId);
+        return false;
+    }
+    if (!t.pUser && !t.pMonster) {
+        printf("[MAGIC] CPlayerMagic::IsTargetProtected(), user:%u target null.\n", m_dwId);
+        return false;
+    }
+    const uint32_t dwSort = (uint32_t)pRec->GetAttrib(0x66);   // stage col 2
+    if (dwSort == 0x32) return false;              // sort 50: gate open
+    auto pMap = CMapManager::Instance().GetMap(m_dwMapId);
+    // ORIGINAL: sorts 6..7 pass the in-map flag into the zone check
+    const bool bSort67 = (5 < dwSort && dwSort < 8);
+    if (!pMap || !pMap->AllowsAttackTarget(bSort67)) return true;
+    const bool bHas6e = t.pUser ? t.pUser->HasStatus(0x6e)
+                                : t.pMonster->HasStatus(0x6e);
+    const bool bTgtIsUser = t.pUser != nullptr;    // ORIGINAL 0x278 == 0
+    const bool bPkMap = pMap->IsPkMap();          // ORIGINAL map 0x278 != 0
+    if (!bHas6e && (bTgtIsUser || bPkMap ||
+                    pRec->GetAttrib(0x82) == 0 ||          // weapon_hit
+                    pRec->GetAttrib(0x7a) == 500 ||        // weapon_subtype
+                    pRec->GetAttrib(0x7a) == 610 ||
+                    dwSort == 0x41 ||                       // sort 65
+                    pRec->GetAttrib(2) == 11030)) {
+        // ORIGINAL: pk-count > 999 -> map PK-state cascade
+        // (FUN_14017ef50/14011dbb0/14016cc30) + target team level < 30 ->
+        // STR_PK tip to the attacker + return 1. The state/team cascade
+        // is not ported yet; the pk-count gate stays literal.
+        if (pMap->GetPkCount() > 999) {
+            printf("[MAGIC] STR_PK warning to attacker %u (map pk count %u).\n",
+                   m_dwId, pMap->GetPkCount());
+            return true;
+        }
+    }
+    // ORIGINAL: the ~30-sort switch runs the monster dyna-type immunity
+    // bit (FUN_14016cfc0 via GetPoint(0x1002))
+    switch (dwSort) {
+    case 3: case 4: case 5: case 8: case 0xe: case 0x15: case 0x1b:
+    case 0x1c: case 0x1e: case 0x1f: case 0x25: case 0x26: case 0x28:
+    case 0x30: case 0x31: case 0x36: case 0x38: case 0x39: case 0x3c:
+    case 0x3d: case 0x3f: case 0x40: case 0x41: case 0x43: case 0x44:
+    case 0x45: case 0x47: case 0x49: case 0x4b: case 0x4f:
+        if (t.pMonster && t.pMonster->IsSortImmune()) return true;
+        break;
+    default: break;
+    }
+    // ORIGINAL final: FUN_140186200 friendly-fire gate
+    return IsFriendlyTarget(t);
+}
+
+bool CUser::SweepTarget(uint32_t dwMagicType, const SMagicTarget& t, bool bTypeEq2d46) {
+    // FUN_1404831f0: null target / dead target -> 0
+    if (!t.pUser && !t.pMonster) return false;
+    const bool bAlive = t.pUser ? t.pUser->IsAlive() : t.pMonster->IsAlive();
+    if (!bAlive) return false;
+    CPlayerMagic* pRec = FindMagic(dwMagicType);
+    // ORIGINAL: ((record null || attr 0x68 == 0) && type != 0x2d46) -> 0
+    if (((!pRec) || pRec->GetAttrib(0x68) == 0) && !bTypeEq2d46) return false;
+    // FUN_1403e9290: target status 0xa0, then a 10000-side roll against
+    // the kernel resistance (slot 0xb0(id, 0xa0); the port stores the
+    // resistance with the status)
+    uint32_t dwResist = 0;
+    if (t.pUser) { if (!t.pUser->GetStatusValue(0xa0, dwResist)) return false; }
+    else         { if (!t.pMonster->GetStatusValue(0xa0, dwResist)) return false; }
+    return (uint32_t)tq::RandGet(10000) <= dwResist;
+}
+
+void CUser::RecordHitPos(const SMagicTarget& t) {
+    // FUN_140483270: FUN_140167b70 double-toggle read, then the
+    // attack-position registry singleton (slot 0x2d8: target id,
+    // attacker id, life, x, y). Registry outside the slice -> inert.
+    (void)t;
+}
+
 void CUser::JumpPos(uint16_t usX, uint16_t usY) {
     // ORIGINAL creature vtable slot 0x378: reposition. The user-side
     // teleport packet built inside the original slot is outside the

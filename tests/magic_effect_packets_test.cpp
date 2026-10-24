@@ -343,6 +343,65 @@ int main() {
             999999, 0, 0, tu, du, u5, u6, xu));
     }
 
+    // ---------- launch gates (FUN_1404864f0 / 1404831f0 / 1403e9290) ----
+    {
+        // stage-field ABI: GetAttrib(100+N) = cq_magictype column N
+        CPlayerMagic* pRec = upFx->FindMagic(1000);
+        assert(pRec);
+        assert(pRec->GetAttrib(0x66) == 1);    // col 2  sort  (Thunder)
+        assert(pRec->GetAttrib(0x68) == 1);    // col 4  crime
+        assert(pRec->GetAttrib(0x7a) == 0);    // col 22 weapon_subtype
+        assert(pRec->GetAttrib(0x82) == 0);    // col 30 weapon_hit
+        assert(pRec->GetAttrib(0x87) == 0 && pRec->GetAttrib(0x88) == 0);
+
+        CMonster monI(555010, 1, "GateMon"); monI.SetMapId(777000);
+        std::vector<CUser::SMagicTarget> gt{{nullptr, &monI}};
+        // ordinary sort 1 monster hit: gate open (pk count 0, no immunity)
+        assert(!upFx->IsTargetProtected(1000, gt[0]));
+        // the attacker himself: friendly (FUN_1404864f0 final gate)
+        std::vector<CUser::SMagicTarget> gs{{upFx.get(), nullptr}};
+        assert(upFx->IsTargetProtected(1000, gs[0]));
+        // safe zone (map vtable+0x3d8 refused): skip
+        pFxMap->SetSafeZone(true);
+        assert(upFx->IsTargetProtected(1000, gt[0]));
+        pFxMap->SetSafeZone(false);
+        // sort 50 (0x32): gate always open
+        assert(upFx->LearnMagic(10430, 0));            // sort 50, crime 0
+        assert(!upFx->IsTargetProtected(10430, gs[0]));
+        // sort 65 + sort-immune monster: skip via the 30-sort switch
+        assert(upFx->LearnMagic(11180, 0));           // sort 65
+        assert(!upFx->IsTargetProtected(11180, gt[0]));
+        monI.SetSortImmune(true);
+        assert(upFx->IsTargetProtected(11180, gt[0]));
+        monI.SetSortImmune(false);
+        // pk-count > 999 cascade: STR_PK + skip
+        pFxMap->SetPkCount(1000);
+        assert(upFx->IsTargetProtected(1000, gs[0]));
+        pFxMap->SetPkCount(0);
+        // missing record: ORIGINAL logs and leaves the gate OPEN
+        assert(!upFx->IsTargetProtected(999999, gt[0]));
+
+        // sweep gate (FUN_1404831f0): Thunder crime=1 but no 0xa0 status
+        assert(!upFx->SweepTarget(1000, gt[0], false));
+        monI.AddStatus(0xa0, 10000);                  // resist 10000: roll always <=
+        assert(upFx->SweepTarget(1000, gt[0], false));
+        // crime 0 (sort-50 stage 10430) + not type 0x2d46: the gate
+        // refuses even though the target carries the status
+        assert(!upFx->SweepTarget(10430, gt[0], false));
+        monI.AddStatus(0xa0, 0);                       // resist 0: roll never <=
+        assert(!upFx->SweepTarget(1000, gt[0], false));
+        monI.AddStatus(0xa0, 10000);
+        assert(upFx->SweepTarget(1000, gt[0], true)); // type 0x2d46 bypass
+        // dead target: refused
+        CMonster monDead(555011, 1, "DeadMon"); monDead.SetMapId(777000);
+        monDead.SetLife(0);
+        std::vector<CUser::SMagicTarget> gd{{nullptr, &monDead}};
+        monDead.AddStatus(0xa0, 10000);
+        assert(!upFx->SweepTarget(1000, gd[0], true));
+        // registry hook stays inert
+        upFx->RecordHitPos(gt[0]);
+    }
+
     printf("MAGIC_EFFECT_OK: 1105 base/append/withtarget/full layouts byte-exact, "
            "1103 layout byte-exact, effect masks attach/launch/drop verified, "
            "SendMagicEffectAfterProcess broadcast byte-exact, "

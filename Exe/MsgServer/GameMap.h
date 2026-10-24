@@ -45,6 +45,20 @@ public:
     // (vtable+0x28) and y in [0, height) (vtable+0x20). Without a .DMap
     // the port stays with the synthetic free-movement convention (true).
     bool IsValidPos(int nX, int nY) const;
+
+    // ORIGINAL map vtable+0x3d8 (FUN_1404864f0 zone gate, with the
+    // in-map flag set for sorts 6..7): 0 = attacks refused here. The
+    // original safe-zone/arena logic rides the map/port system; the
+    // port carries the permissive default + the flag.
+    bool AllowsAttackTarget(bool bSort67) const { (void)bSort67; return !m_bSafeZone; }
+    // ORIGINAL map vtable+0x278 (PK map flag in the gate cascade)
+    void SetPkMap(bool b) { m_bPkMap = b; }
+    bool IsPkMap() const { return m_bPkMap; }
+    // ORIGINAL short at mapgroup+0xef4 (PK counter in the >999 cascade)
+    void SetPkCount(uint32_t v) { m_dwPkCount = v; }
+    uint32_t GetPkCount() const { return m_dwPkCount; }
+    bool m_bPkMap{false};
+    uint32_t m_dwPkCount{0};
     std::vector<uint32_t> GetUserIds() const;
 
     // load real collision data from a .DMap file (original client maps)
