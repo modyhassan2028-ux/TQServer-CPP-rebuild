@@ -424,4 +424,98 @@ bool CNpcStepAttack(CNpcStateData& rN,
     return false;
 }
 
+bool CNpcFreeGate(CNpcStateData& rN) {
+    // ORIGINAL FUN_140059770
+    if (rN.m_nField28 == 2)   // +0x28 == 2
+        return false;
+    // ORIGINAL: row(0x15)->vt+0x10(0x15)
+    // via *(+0xa0) + 0x10
+    uint32_t v =
+        (uint32_t)rN.m_fnRowGetInt(0x15);
+    if (((v >> 3) & 1) == 0 &&
+        ((v >> 4) & 1) == 0 &&
+        ((v >> 0xb) & 1) == 0)
+        return true;
+    return false;
+}
+
+uint32_t CNpcStuckHandler(CNpcStateData& rN) {
+    // ORIGINAL FUN_14005b2d0
+    uint32_t uRet = 0;
+    if (CNpcFreeGate(rN)) {    // 59770 gate
+        if (rN.m_bHasAttach) { // +0x140
+            // ORIGINAL: FUN_140069750
+            bool bAlive =
+                rN.m_fn69750Alive();
+            uRet = bAlive ? 1u : 0u;
+            if (bAlive)
+                return uRet;   // LAB_14005b3db
+        }
+        // ORIGINAL: FUN_14005ad00
+        uRet = rN.m_fnAd00() ? 1u : 0u;
+        if (uRet != 0 &&
+            (uRet = rN.m_fnSubVt50() ? 1u : 0u)
+             != 0) {
+            if (rN.m_bHasField18) {  // +0x18
+                int nX = rN.m_nField34;
+                if (nX ==
+                    rN.m_nStuckX) {   // +0x11c
+                    // ORIGINAL: +0x124++
+                    rN.m_nStuckCount++;
+                    if (10 <
+                        rN.m_nStuckCount) {
+                        // ORIGINAL:
+                        // RandGet(8)-4
+                        int nNX = (int)
+                            rN.m_fnRandGet(8)
+                            - 4 + nX;
+                        int nNY = (int)
+                            rN.m_fnRandGet(8)
+                            - 4 +
+                            rN.m_nField38;
+                        // ORIGINAL:
+                        // FUN_14004cc70
+                        bool bW =
+                            rN.m_fn4cc70(nNX,
+                                         nNY);
+                        uRet = bW ? 1u : 0u;
+                        if (bW) {
+                            // ORIGINAL:
+                            // max(c-5, 0)
+                            int nC =
+                                rN.m_nStuckCount
+                                - 5;
+                            if (nC < 0) nC = 0;
+                            rN.m_nStuckCount =
+                                nC;
+                            // FUN_1400597f0(
+                            //   npc, nx, ny,
+                            //   dir(+0x24))
+                            uRet = rN.m_fn597f0(
+                                nNX, nNY,
+                                rN.m_nField24);
+                        }
+                    }
+                    // ORIGINAL: the literal
+                    // 1 return on this path
+                    return 1;
+                }
+                // ORIGINAL: remember the pos
+                rN.m_nStuckX = nX;   // +0x11c
+                // +0x120 via the ORIGINAL's
+                // param_1+0x24 pointer-arith
+                rN.m_nStuckY =
+                    rN.m_nField38;
+                // the VERBATIM y leak
+                uRet =
+                    (uint32_t)rN.m_nField38;
+            }
+            // ORIGINAL: +0x124 = 0
+            rN.m_nStuckCount = 0;
+        }
+    }
+    // ORIGINAL: low byte of uVar6
+    return uRet & 0xff;
+}
+
 } // namespace npc

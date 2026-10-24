@@ -201,6 +201,36 @@ struct CNpcStateData {
         //     kernel, id, msg) send
     std::function<void(int, int)> m_fn58610;
         // FUN_140058610(npc, nx, ny) jump
+    // ===== 59770 / b2d0 (unit 26) =====
+    int32_t m_nField28 = 0;
+        // +0x28 the npc state (2 = the 59770
+        // gate's dead state)
+    bool m_bHasField18 = false;
+        // +0x18 (param_1[3]) != 0 - the stuck
+        // tracking gate in b2d0
+    int32_t m_nStuckX = 0;
+        // +0x11c the remembered x
+    int32_t m_nStuckY = 0;
+        // +0x120 the remembered y (written
+        // via the ORIGINAL's pointer-
+        // arithmetic quirk param_1+0x24)
+    int32_t m_nStuckCount = 0;
+        // +0x124 the stuck counter
+    std::function<bool()> m_fn69750Alive;
+        // FUN_140069750(attach) - real body
+        // exists (unit 21); seam here
+    std::function<bool()> m_fnAd00;
+        // FUN_14005ad00 - real body exists
+        // (unit 20, CNpcCanAct); seam here
+    std::function<bool()> m_fnSubVt50;
+        // sub vtable+0x50
+    std::function<bool(int, int)> m_fn4cc70;
+        // FUN_14004cc70(map, x, y) - the cell
+        // walkable check
+    std::function<uint32_t(int, int, uint32_t)>
+        m_fn597f0;
+        // FUN_1400597f0(npc, x, y, +0x24 dir)
+        // - the walk msg (next unit)
 };
 
 // ============================================================

@@ -255,4 +255,55 @@ bool CNpcStepAttack(CNpcStateData& rN,
                     int nDir,
                     uint32_t uFlavor);
 
+// ============================================================
+// ===== ORIGINAL FUN_140059770 (free gate) =============
+// ============================================================
+// if (+0x28 != 2) {
+//   v = row(0x15)->vt+0x10(0x15);
+//   if (bit3 clear && bit4 clear && bit11 clear)
+//     return 1;
+// }
+// return 0;
+bool CNpcFreeGate(CNpcStateData& rN);
+
+// ============================================================
+// ===== ORIGINAL FUN_14005b2d0 (stuck handler) =========
+// ============================================================
+// r = FUN_140059770(npc);
+// if (r) {
+//   if (attach(+0x140)) {
+//     b = FUN_140069750(attach);
+//     if (b) return 1;   // attach alive: done
+//   }
+//   r = FUN_14005ad00(npc);
+//   if (r && sub->vt+0x50()) {
+//     if (+0x18 != 0) {
+//       if (x(+0x34) == stuckX(+0x11c)) {
+//         stuckCount(+0x124)++;
+//         if (10 < stuckCount) {
+//           nx = RandGet(8) - 4 + x;
+//           ny = RandGet(8) - 4 + y(+0x38);
+//           w = FUN_14004cc70(map, nx, ny);
+//           if (w) {
+//             stuckCount =
+//               max(stuckCount - 5, 0);
+//             r = FUN_1400597f0(npc,
+//                     nx, ny, dir(+0x24));
+//           }
+//         }
+//         return 1;    // ALWAYS true here
+//       }
+//       stuckX = x;    // +0x11c
+//       stuckY = y;    // +0x120 (the
+//                      // pointer-arith quirk)
+//       r = y;         // the leak below
+//     }
+//     stuckCount = 0;
+//   }
+// }
+// return (low byte of r);  // the VERBATIM
+// // leak: callers see (y & 0xff) on the
+// // stuck-update path
+uint32_t CNpcStuckHandler(CNpcStateData& rN);
+
 } // namespace npc
