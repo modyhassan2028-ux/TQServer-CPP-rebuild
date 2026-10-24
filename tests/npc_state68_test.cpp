@@ -39,7 +39,7 @@ struct Cfg {
         d.m_fnB030 = [this]{ return bB030; };
         d.m_fnWanderStart = [this](uint32_t v){
             assert(v == uRow10 * 2); ++nWandCalls; };
-        d.m_fnC960 = [this](uint32_t f){ nC960=(int)f; };
+        d.m_fnC960 = [this](uint32_t f){ nC960=(int)f; return true; };
         d.m_fnBC80 = [this]{ return bBC80; };
         d.m_fnAD00 = [this]{ return bAD00; };
         d.m_fn2700 = [this]{ return b2700; };
