@@ -29,6 +29,15 @@ std::shared_ptr<IModule> CModuleManager::GetModule(uint32_t dwId) {
     if (dwId == 0x1e) p = std::make_shared<CSynvarModule>();
     if (dwId == 0xd)  p = std::make_shared<CTaskManagerModule>(); // task mgr binding (task_detail)
     if (dwId == 10)   p = std::make_shared<CLotteryModule>(); // pLotteryProvider
+    // presence bindings: ids the original factory resolves (ModuleCreate
+    // provider DLLs); behavior ports live with their systems
+    if (dwId == 2)  p = std::make_shared<CDocumentedProviderModule>(2, "config-2");
+    if (dwId == 3)  p = std::make_shared<CDocumentedProviderModule>(3, "config-3");
+    if (dwId == 4)  p = std::make_shared<CDocumentedProviderModule>(4, "config-4");
+    if (dwId == 5)  p = std::make_shared<CDocumentedProviderModule>(5, "config-5");
+    if (dwId == 6)  p = std::make_shared<CDocumentedProviderModule>(6, "config-6");
+    if (dwId == 0xe)  p = std::make_shared<CDocumentedProviderModule>(0xe, "pProvider-stats");
+    if (dwId == 0x12) p = std::make_shared<CDocumentedProviderModule>(0x12, "pTrunk");
     if (!p) return nullptr; // unknown module id -> module absent
     m_modules[dwId] = p;
     return p;

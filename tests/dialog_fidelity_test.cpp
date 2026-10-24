@@ -2021,6 +2021,19 @@ system("mariadb -u root cq -e \"DELETE FROM cq_item WHERE owner_id=888001 AND ty
         CUserManager::Instance().RemoveUser(uMate->GetId());
     }
 
+    // --- module factory: every id the original resolves exists ---
+    {
+        auto& mm = CModuleManager::Instance();
+        // behavior modules
+        assert(mm.Synvar() && mm.Synvar()->GetId() == 0x1e);
+        assert(mm.Lottery() && mm.Lottery()->GetId() == 10);
+        // presence bindings (original: provider DLLs via ModuleCreate)
+        for (uint32_t id : {2u, 3u, 4u, 5u, 6u, 0xdu, 0xeu, 0x12u})
+            assert(mm.GetModule(id) != nullptr);
+        // unknown id resolves to nothing (IF_NOT path)
+        assert(mm.GetModule(0x7f) == nullptr);
+    }
+
     // --- 1116: team-share nested action (case 0x69) ---
     {
         CDialogEngine::Node n; n.dwType = 1116; n.dwId = 3585500;

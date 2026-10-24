@@ -69,6 +69,39 @@ public:
     size_t RowCount(uint32_t uType);
 };
 
+// The original kernel loads provider DLLs whose ONLY export is
+// ModuleCreate (verified against bin/Lottery.dll and
+// orig/Source/Syndicate.dll). The factory (CurrentInstanceGet
+// -> vcall+0x20(id)) instantiates them by id. Ids observed in the
+// decompile, with their call sites:
+//   2..6  - config providers: boot-time loop reads vcall+0x50 of
+//           each into user-record offsets 0x23c..0x24c
+//           (MsgServer.exe.decompiled.c ~line 14730)
+//   0xd   - the TASK MANAGER (task_detail-backed; see
+//           CTaskManagerModule)
+//   0xe   - "pProvider": the statistics module behind 1082
+//           (self add vtable[0], self del vtable[8], from case 0x52)
+//   0x12  - the TRUNK (warehouse) module: 1047 vcall+0x80(user,
+//           data, 10) and 1076 ACTION_USER_CHECK_ITEM_IN_TRUNCK
+//           vcall+0x58(user, action, 0x14)
+//   10    - pLotteryProvider (Lottery.dll, cq_lottery-backed)
+//   0x1e  - the synvar/registry module (FUN_140118320)
+// Every id the original factory knows must resolve to a module -
+// a null result takes the IF_NOT error path and fails the action.
+// Ids whose behavior is not yet ported register here so presence
+// semantics match the original.
+class CDocumentedProviderModule : public IModule {
+public:
+    explicit CDocumentedProviderModule(uint32_t dwId,
+                                       const char* szName)
+        : m_dwId(dwId), m_strName(szName) {}
+    uint32_t GetId() const override { return m_dwId; }
+    const std::string& Name() const { return m_strName; }
+private:
+    uint32_t m_dwId;
+    std::string m_strName;
+};
+
 class CModuleManager {
 public:
     static CModuleManager& Instance();
