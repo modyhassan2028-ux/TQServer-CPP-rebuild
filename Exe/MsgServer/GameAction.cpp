@@ -3375,7 +3375,22 @@ bool bAll = (llAll == 1);
                    pNode->dwId, pNode->dwData);
             return false; // module 0xe check - not yet identified
         }
-        return false; // "amount" tail: 0 live rows
+        // sscanf "%s %s %d": "amount" < <= == > >= the module-0xe count
+        // (count source not fully read - stubbed at 0, documented)
+        char szA[256] = {0}, szO[256] = {0}; int nN = 0;
+        if (sscanf(pNode->strParam.c_str(), "%255s %255s %d", szA, szO, &nN) == 3
+            && !_stricmp(szA, "amount")) {
+            printf("[MOD0E] cq_action %u amount %s %d (count stub 0)\n",
+                   pNode->dwId, szO, nN);
+            int nCount = 0; // module-0xe count - helper unidentified
+            if (!strcmp(szO, "<"))  return nCount < nN;
+            if (!strcmp(szO, "<=")) return nCount <= nN;
+            if (!strcmp(szO, "==")) return nCount == nN;
+            if (!strcmp(szO, ">"))  return nCount > nN;
+            if (!strcmp(szO, ">=")) return nCount >= nN;
+            return false;
+        }
+        return false;
     }
     case 1096: { // ORIGINAL family-E block @247970: dynamic event on
         // the FUN_1401181a0 module. sscanf "%d %d %d %d %d %d" needs
@@ -3435,7 +3450,12 @@ bool bAll = (llAll == 1);
                    pNode->dwId, pNode->dwData);
             return true;
         }
-        return false; // remaining branches: 0 live rows
+        if (!strcmp(szOp, "clr")) { // rank 0x99 third token -> FUN_140113380
+            printf("[KILLSTAT] cq_action %u clr data %u (FUN_140113380)\n",
+                   pNode->dwId, pNode->dwData);
+            return true;
+        }
+        return false; // 4-token module branch: 0 live rows
     }
     case 1651: { // ORIGINAL family-E block @251130: NPC name/data
         // check. Head: sscanf(param_7,"%u") -> npcId (param_7 = the
@@ -3839,12 +3859,34 @@ bool bAll = (llAll == 1);
         }
         return true;
     }
-    case 1025: // ORIGINAL switch case 0x13 (remap 1025->0x13): same FUN_140164440
-    case 1027: { // ORIGINAL switch case 0x13 -> FUN_140164440:
-        // return (user->vtable+0x48)() != 0 - the mate id (cq_user.mateid).
-        // NOTE: the cq_action param ("self angelwing", 3,379 rows) is NEVER
-        // read by the original server; those rows only chain id_next.
+    case 1025: { // ORIGINAL rank 0x13 (case 0x13 @245388):
+        // uVar41 = FUN_140164440(user) - the mate-id check (return
+        // (user->vtable+0x48)() != 0, cq_user.mateid). The cq_action
+        // param is never read by the original server.
         return pUser->GetSpouseID() != 0;
+    }
+    case 1027: { // ORIGINAL rank 0x15 (case 0x15 @245395): send effect
+        // msg. sscanf "%s %s %s" - only 2 tokens required (<2 -> DBERR
+        // false). f3 == "del" -> actType 0x18 else 0xa. f1 "self" ->
+        // FUN_14037dfb0/e0a0(msg, actType, f2-effectName, userId) ->
+        // send vcall+0x348(user, msg, 1) -> return 1 (even if msg.Create
+        // fails: only LOGERR). "couple" -> same for self AND the mate
+        // (FUN_140164440 mate-exists gate, mate lookup via +0x48 id).
+        // "team" -> same via the team roster. Other f1 -> false.
+        // The original NEVER reads cq_user.mateid here - the old
+        // spouse-check port was wrong (real body found via rank map).
+        char f1[256] = {0}, f2[256] = {0}, f3[256] = {0};
+        int nTok = sscanf(pNode->strParam.c_str(), "%255s %255s %255s",
+                          f1, f2, f3);
+        if (nTok < 2) return false; // DBERR 0x2124
+        const int nActType = !_stricmp(f3, "del") ? 0x18 : 0xa;
+        if (!_stricmp(f1, "self") || !_stricmp(f1, "couple") ||
+            !_stricmp(f1, "team")) {
+            printf("[EFFECT] cq_action %u: send %s effect '%s' actType %d for user %u\n",
+                   pNode->dwId, f1, f2, nActType, pUser->GetId());
+            return true; // send always succeeds in the port (msg stub)
+        }
+        return false;
     }
     case 1056: { // ORIGINAL switch case 0x30: task new / delete / isexit
         char szOp[256] = {0}; uint32_t dwTok2 = 0, dwMinutes = 0;
@@ -3959,6 +4001,8 @@ bool bAll = (llAll == 1);
         std::string strFile = strParam.substr(t, (e == std::string::npos) ? std::string::npos : e - t);
         std::string strRest = (e == std::string::npos) ? std::string() : strParam.substr(e + 1);
         tq::MyLogSave(strFile.c_str(), "%s", strRest.c_str());
+        // (rank 0x4b also parses "%u %u" -> 1 and "stc(%u, %u) %s"
+        // delete/isexit branches - both have 0 live rows, not ported)
         return true;
     }
     case 1020: { // ORIGINAL switch case 0xe: magic ops ("check/learn/uplevel/del/addexp")
