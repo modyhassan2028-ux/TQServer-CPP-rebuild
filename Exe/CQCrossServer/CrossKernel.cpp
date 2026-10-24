@@ -399,4 +399,84 @@ void CCrossServerKernel::OnLeagueStr(uint64_t ullSocket,
                                 data.dwIdLeague, data.szText);
 }
 
+
+// ===== OS connect notifications (40023) =====
+void CCrossServerKernel::NotifyOSConnect(uint32_t dwIdServer,
+                                         uint64_t ullIdSocket) {
+    // ORIGINAL FUN_14000cc90
+    const uint32_t dwIdSocket = (uint32_t)ullIdSocket;
+    if (dwIdSocket == 0 || dwIdSocket == 0xffffffffu ||
+        dwIdServer == 0xffffffffu) {
+        printf("[CROSS] CCrossServerKernel::NotifyOSConnect "
+               "idServer:%u, idSocket:%u.\n", dwIdServer,
+               dwIdSocket);
+        return;
+    }
+    // collect every OTHER registered server's socket id
+    std::vector<uint32_t> vecPeers;
+    for (const auto& kv : m_mapServers) {
+        if (kv.second.ullSocket == 0 ||
+            (uint32_t)kv.second.ullSocket == dwIdSocket)
+            continue; // skip the new socket
+        if (4 + 4u * (vecPeers.size() + 1) > 0x3ff) {
+            // ORIGINAL: log + abort the whole notify
+            printf("[CROSS] CCrossServerKernel::NotifyOSConnect msg "
+                   "append failed, count:%u.\n",
+                   (unsigned)vecPeers.size());
+            return;
+        }
+        vecPeers.push_back((uint32_t)kv.second.ullSocket);
+    }
+    if (vecPeers.empty()) {
+        // ORIGINAL: no peers -> destroy the message, send NOTHING
+        return;
+    }
+    // peers list -> the new server (original: FUN_14000a0b0 queue
+    // push type 4; the rebuild has no queue - direct send)
+    auto itNew = m_mapServers.find(dwIdServer);
+    if (itNew != m_mapServers.end() && itNew->second.ullSocket != 0 &&
+        m_fnSend) {
+        m_fnSend(itNew->second.ullSocket,
+                 EncodeOSConnectInfo(0, vecPeers.data(),
+                                      (uint8_t)vecPeers.size()));
+    }
+    // then: clear + append the NEW socket + broadcast to all
+    // OTHER servers (FUN_14000a1c0 BroadcastOtherServerMsg)
+    {
+        const uint32_t dwOne[1] = { dwIdSocket };
+        // same message object: action 0 with the new socket
+        BroadcastOtherServers(EncodeOSConnectInfo(0, dwOne, 1),
+                              dwIdServer);
+    }
+}
+
+void CCrossServerKernel::NotifyOSDisConnect(uint32_t dwIdServer,
+                                            uint64_t ullIdSocket) {
+    // ORIGINAL FUN_14000b500
+    const uint32_t dwIdSocket = (uint32_t)ullIdSocket;
+    if (dwIdSocket == 0 || dwIdSocket == 0xffffffffu ||
+        dwIdServer == 0xffffffffu) {
+        printf("[CROSS] CCrossServerKernel::NotifyOSDisConnect "
+               "idServer:%u, idSocket:%u.\n", dwIdServer,
+               dwIdSocket);
+        return;
+    }
+    const uint32_t dwOne[1] = { dwIdSocket };
+    BroadcastOtherServers(EncodeOSConnectInfo(1, dwOne, 1),
+                          dwIdServer);
+}
+
+
+void CCrossServerKernel::BroadcastOtherServers(
+        const std::vector<uint8_t>& pkt, uint32_t dwExclude) {
+    // ORIGINAL FUN_14000a1c0 BroadcastOtherServerMsg: every
+    // registered server except dwExclude, no country filter
+    if (!m_fnSend) return;
+    for (const auto& kv : m_mapServers) {
+        if (kv.first == dwExclude || kv.second.ullSocket == 0)
+            continue;
+        m_fnSend(kv.second.ullSocket, pkt);
+    }
+}
+
 } // namespace cross

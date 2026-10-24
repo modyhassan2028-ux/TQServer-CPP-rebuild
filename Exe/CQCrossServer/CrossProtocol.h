@@ -78,6 +78,11 @@ enum : uint16_t {
 // ctor FUN_140024040). All three reach the hub through the message
 // factory FUN_140022990 (LeagueStr/LeagueInfo) or are hub-built
 // outbound (LeagueBrick, in FUN_14001c990 OnBrickChange).
+    MsgType_ServerName   = 40015, // ORIGINAL 0x9c4f (CCrossMsgServerName)
+    MsgType_EnterOSUserSocketOpt = 40021, // ORIGINAL 0x9c55
+    MsgType_OSConnectInfo = 40023, // ORIGINAL 0x9c57
+    MsgType_LeagueRank  = 40036, // ORIGINAL 0x9c64 (CCrossMsgLeagueRank)
+    MsgType_LeagueList  = 40040, // ORIGINAL 0x9c68 (CCrossMsgLeagueList)
     MsgType_LeagueInfo  = 40066, // ORIGINAL 0x9c62
     MsgType_LeagueStr  = 40067, // ORIGINAL 0x9c63
     MsgType_LeagueBrick = 40065, // ORIGINAL 0x9c61
@@ -221,6 +226,194 @@ inline std::vector<uint8_t> EncodeLeagueInfo(uint16_t usAction,
         std::memcpy(p + 4 + 0x3cu * i, pEntries + i, sizeof(LeagueInfoEntry));
     return pkt;
 }
+
+// forward declaration (the template lives below)
+template <typename T>
+std::vector<uint8_t> Encode(uint16_t usType, const T& data);
+
+// ---- ORIGINAL CCrossMsgOSConnectInfo wire (0x9c57, ctor
+// FUN_140022370, obj 0x438): append-target resets by FUN_140022420
+// (action u16 @0, count BYTE @2, size 4) and appends u32 entries at
+// 4 + count*4 (FUN_1400224b0, gate 0x3ff -> InlineLogERROR
+// "create failed" style log + FALSE); FUN_140022560 clears
+// (size 4, count 0); FUN_1400225b0 reads the byte count.
+#pragma pack(push, 1)
+struct OSConnectInfoData {
+    uint16_t usAction;     // +0 (0 = connect notify, 1 = disconnect)
+    uint8_t  byCount;      // +2 (BYTE count, unlike the u16 counts)
+    uint8_t  byPad3;       // +3
+    uint32_t dwSockets[63]; // +4, max (0x3ff-4)/4 = 255 -> clamped
+};
+#pragma pack(pop)
+// variable-length encode, ORIGINAL size = 4 + 4*count
+inline std::vector<uint8_t> EncodeOSConnectInfo(uint16_t usAction,
+        const uint32_t* pdwSockets, uint8_t byCount) {
+    const uint16_t usSize = (uint16_t)(4 + 4u * byCount);
+    tq::MsgHead head;
+    head.type = MsgType_OSConnectInfo;
+    head.length = static_cast<uint16_t>(sizeof(tq::MsgHead) + usSize);
+    std::vector<uint8_t> pkt(head.length, 0);
+    std::memcpy(pkt.data(), &head, sizeof(head));
+    uint8_t* p = pkt.data() + sizeof(tq::MsgHead);
+    std::memcpy(p + 0, &usAction, 2);
+    p[2] = byCount;
+    for (uint8_t i = 0; i < byCount; ++i)
+        std::memcpy(p + 4 + 4u * i, pdwSockets + i, 4);
+    return pkt;
+}
+// ---- ORIGINAL CCrossMsgServerName wire (0x9c4f, ctor FUN_140022620):
+// FUN_1400226d0(msg, id, name): name[0x10] @0 (strncpy), id u32 @0x10,
+// size 0x14; FUN_140022780 reads id from +0x10, name from +0.
+#pragma pack(push, 1)
+struct ServerNameData {
+    char     szName[0x10]; // +0
+    uint32_t dwIdServer;   // +0x10
+};
+#pragma pack(pop)
+inline std::vector<uint8_t> EncodeServerName(uint32_t dwIdServer,
+                                             const char* szName) {
+    ServerNameData d{};
+    if (szName) std::strncpy(d.szName, szName, sizeof(d.szName) - 1);
+    d.dwIdServer = dwIdServer;
+    return Encode(MsgType_ServerName, d);
+}
+// ---- ORIGINAL CCrossMsgEnterOSUserSocketOpt wire (0x9c55, ctor
+// FUN_140048f40): FUN_140048ff0(msg, a, b, c): u16 @0, u32 @4,
+// u32 @8, size 0xc; FUN_140049090 reads them back. No hub-side
+// Process caller in CQCrossServer.exe (game-server side owns it).
+#pragma pack(push, 1)
+struct EnterOSUserSocketOptData {
+    uint16_t usAction;      // +0
+    uint16_t usPad2;        // +2
+    uint32_t dwParam1;      // +4
+    uint32_t dwParam2;      // +8
+};
+#pragma pack(pop)
+inline std::vector<uint8_t> EncodeEnterOSUserSocketOpt(
+        uint16_t usAction, uint32_t dwParam1, uint32_t dwParam2) {
+    EnterOSUserSocketOptData d{};
+    d.usAction = usAction; d.dwParam1 = dwParam1; d.dwParam2 = dwParam2;
+    return Encode(MsgType_EnterOSUserSocketOpt, d);
+}
+// ---- ORIGINAL CCrossMsgLeagueList wire (0x9c68, ctor FUN_1400234b0):
+// FUN_140023560(msg, action): u16 @0, flag BYTE @2 = 1, count u16 @4,
+// size 8; FUN_1400235c0 appends u32 at 8 + count*4 (gate 0x3ff);
+// FUN_140023610 clears (flag 0, count 0, size 8).
+#pragma pack(push, 1)
+struct LeagueListData {
+    uint16_t usAction;     // +0
+    uint8_t  byFlag;       // +2 (1 while appending, 0 after clear)
+    uint8_t  byPad3;       // +3
+    uint16_t usCount;      // +4
+    uint16_t usPad6;       // +6
+    uint32_t dwLeagues[63]; // +8, max (0x3ff-8)/4 = 255 -> clamped
+};
+#pragma pack(pop)
+inline std::vector<uint8_t> EncodeLeagueList(uint16_t usAction,
+        const uint32_t* pdwLeagues, uint16_t usCount) {
+    const uint16_t usSize = (uint16_t)(8 + 4u * usCount);
+    tq::MsgHead head;
+    head.type = MsgType_LeagueList;
+    head.length = static_cast<uint16_t>(sizeof(tq::MsgHead) + usSize);
+    std::vector<uint8_t> pkt(head.length, 0);
+    std::memcpy(pkt.data(), &head, sizeof(head));
+    uint8_t* p = pkt.data() + sizeof(tq::MsgHead);
+    std::memcpy(p + 0, &usAction, 2);
+    p[2] = 1;
+    std::memcpy(p + 4, &usCount, 2);
+    for (uint16_t i = 0; i < usCount; ++i)
+        std::memcpy(p + 8 + 4u * i, pdwLeagues + i, 4);
+    return pkt;
+}
+// ---- ORIGINAL CCrossMsgLeagueRank wire (0x9c64, ctor FUN_140023de0):
+// FUN_140023e90(msg, action): u16 @0, flag BYTE @2 = 1, count u16 @4,
+// size 8; FUN_140023ef0 appends 0x2c entries from +8:
+//   +0/+4/+8 u32s, str@+0x14 (from ptr+0xc, cap 0x10),
+//   str@+0x24 (from ptr+0x1c, cap 0x10) - NOTE: the original stride
+//   is 0x2c, so the second 0x10 string slot OVERLAPS the next
+//   entry by 8 bytes (kept verbatim); FUN_140023fd0 clears.
+#pragma pack(push, 1)
+struct LeagueRankEntry {
+    uint32_t dwParam0;     // +0 (from ptr[0])
+    uint32_t dwParam4;     // +4 (from ptr[1])
+    uint32_t dwParam8;     // +8 (from ptr[2])
+    char     szPad[8];     // +0xc (unwritten gap)
+    char     szStr1[0x10]; // +0x14 (from ptr+0xc, cap 0x10)
+    // NOTE: entry stride is 0x2c - szStr2@0x24 overlaps this entry
+};
+struct LeagueRankData {
+    uint16_t usAction;     // +0
+    uint8_t  byFlag;       // +2
+    uint8_t  byPad3;       // +3
+    uint16_t usCount;      // +4
+    uint16_t usPad6;       // +6
+    uint8_t  entries[1];   // +8, 0x2c each (opaque: stride overlap)
+};
+#pragma pack(pop)
+// raw entry append exactly like FUN_140023ef0, 0x2c stride
+inline bool LeagueRankAppend(std::vector<uint8_t>& pkt,
+        uint32_t a, uint32_t b, uint32_t c,
+        const char* s1, const char* s2) {
+    // pkt excludes MsgHead; size gate = 0x3ff total message
+    if (pkt.size() + 0x2c > 0x3ff) return false;
+    const size_t nCount = (pkt.size() - 8) / 0x2c;
+    const size_t nBase = 8 + 0x2cu * nCount;
+    // the ORIGINAL message buffer is 0x3ff+ with room beyond the
+    // logical end - szStr2@+0x24 (cap 0x10) writes 8 bytes past the
+    // 0x2c stride. Grow with slack, write, then trim to logical.
+    pkt.resize(nBase + 0x2c + 8, 0);
+    uint8_t* p = pkt.data() + nBase;
+    std::memcpy(p + 0, &a, 4); std::memcpy(p + 4, &b, 4);
+    std::memcpy(p + 8, &c, 4);
+    if (s1) std::strncpy((char*)p + 0x14, s1, 0x10);
+    if (s2) std::strncpy((char*)p + 0x24, s2, 0x10); // overlaps next
+    pkt.resize(nBase + 0x2c);
+    // count up (u16 @4)
+    uint16_t n; std::memcpy(&n, pkt.data() + 4, 2); ++n;
+    std::memcpy(pkt.data() + 4, &n, 2);
+    return true;
+}
+// one rank record = the 0x2c-stride append inputs
+struct LeagueRankRec {
+    uint32_t dwA, dwB, dwC;
+    char szStr1[0x10], szStr2[0x10];
+};
+// chunked encode at the 0x3ff gate; returns one wire packet per
+// chunk (msg without head - head is added by the caller, or use
+// LeagueRankWrap)
+inline std::vector<std::vector<uint8_t>> EncodeLeagueRank(
+        uint16_t usAction, const std::vector<LeagueRankRec>& recs) {
+    std::vector<std::vector<uint8_t>> out;
+    std::vector<uint8_t> body(8, 0);
+    std::memcpy(body.data(), &usAction, 2);
+    body[2] = 1;
+    for (const auto& r : recs) {
+        if (!LeagueRankAppend(body, r.dwA, r.dwB, r.dwC,
+                              r.szStr1, r.szStr2)) {
+            out.push_back(body);
+            body.assign(8, 0);
+            std::memcpy(body.data(), &usAction, 2);
+            body[2] = 1;
+            LeagueRankAppend(body, r.dwA, r.dwB, r.dwC,
+                            r.szStr1, r.szStr2);
+        }
+    }
+    out.push_back(body);
+    return out;
+}
+inline std::vector<uint8_t> LeagueRankWrap(
+        std::vector<uint8_t>& body) {
+    tq::MsgHead head;
+    head.type = MsgType_LeagueRank;
+    head.length = static_cast<uint16_t>(sizeof(tq::MsgHead) +
+                                        body.size());
+    std::vector<uint8_t> pkt(head.length, 0);
+    std::memcpy(pkt.data(), &head, sizeof(head));
+    std::memcpy(pkt.data() + sizeof(tq::MsgHead), body.data(),
+                body.size());
+    return pkt;
+}
+
 // forward declaration (the template lives below)
 template <typename T>
 std::vector<uint8_t> Encode(uint16_t usType, const T& data);

@@ -2794,3 +2794,42 @@ FUN_140022f40 (تفاصيل كتابة الحقل)، FUN_1400232b0 (مسار
    مطابق للديكمبايل → العناوين الموثقة كلها صحيحة. الـ
    cq.sql الرسمي **ناقص فعلاً** صف 149883 (تأكيد ترقيعنا).
    أداة REA في /opt/rea (MCP، npm: rea-agents).
+
+## جلسة 2026-10-24 17:30 — رسائل OS الخمسة + NotifyOSConnect/DisConnect
+1. **[تم ✔]** مشفرات wire الخمس في CrossProtocol.h:
+   - OSConnectInfo (40023 = 0x9c57): action u16@0 + count
+     **byte**@2 + مداخل u32 من @4 (FUN_140022420/4b0/560/5b0،
+     بواب 0x3ff)
+   - ServerName (40015 = 0x9c4f): name[0x10]@0 + id@0x10،
+     حجم 0x14 (FUN_1400226d0/780)
+   - EnterOSUserSocketOpt (40021 = 0x9c55): u16@0 + u32@4 +
+     u32@8، حجم 0xc (FUN_140048ff0/49090) — **لا يوجد Process
+     في هَب CQCrossServer** (تُستخدم من جهة game server)
+   - LeagueList (40040 = 0x9c68): action@0 + flag byte@2=1 +
+     count u16@4 + مداخل u32 من @8 (FUN_140023560/5c0/610)
+   - LeagueRank (40036 = 0x9c64): مداخل stride 0x2c:
+     u32×3@0/4/8 + str[0x10]@0x14 + str[0x10]@0x24 — **سلوك
+     الأصل حرفياً: السلاش الثاني عند +0x24 (سعة 0x10) يكتب 8
+     بايتات فوق مدخل الـ stride التالي** (اتحفظ كما هو؛ في
+     البورت مساحة slack مؤقتة تمنع الكسر ثم trim)
+2. **[تم ✔]** NotifyOSConnect (FUN_14000cc90): حراس
+   socket==0/-1 أو server==-1 → لوج "idServer:%u, idSocket:%u."
+   ولا إرسال؛ جمع سوكيتات كل السيرفرات الأخرى (تخطي الجديد)؛
+   فشل append عند 0x3ff → لوج "msg append failed, count:%u."
+   وإيقاف؛ قائمة الأقران تُرسل للسيرفر الجديد (الأصل:
+   FUN_14000a0b0 queue push بنوع 4 — **TBD طابور البورت**،
+   عندنا إرسال مباشر)؛ ثم clear + append السوكيت الجديد +
+   BroadcastOtherServerMsg (FUN_14000a1c0) لكل السيرفرات عدا
+   الجديد. لا أقران → لا شيء إطلاقاً.
+3. **[تم ✔]** NotifyOSDisConnect (FUN_14000b500): action 1
+   بمدخل واحد + BroadcastOtherServerMsg (المستثنى =
+   السيرفر الراحل).
+4. **[تم ✔]** BroadcastOtherServers (FUN_14000a1c0): إرسال لكل
+   مسجل عدا مستثنى — **بدون فلتر country** (هذا شأن
+   FUN_140018870 فقط).
+5. **tests/cross_os_msg_test.cpp: ALL OK** + كل الاختبارات
+   القديمة خضرا.
+6. **[التالي]** FUN_14001ade0 (ProcessServerConnectOK، ~600
+   سطر: بناء PlunderWarInfo لكل الحروب + LeagueRank ثم
+   LeagueList مع تجزئة، مصدرها عند اتصال سيرفر) + الدالة
+   الثانية عند 23419-24036 — لوحدة الجاية.

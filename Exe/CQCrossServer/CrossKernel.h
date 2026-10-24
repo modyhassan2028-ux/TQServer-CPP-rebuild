@@ -46,10 +46,37 @@ public:
     void OnHeartbeat(uint64_t ullFromSocket, const HeartbeatData& beat, uint64_t ullNowMs);
     void OnWhoReq(uint64_t ullFromSocket);                          // SendMsgToOtherServer
 
+    // ORIGINAL FUN_14000a1c0 BroadcastOtherServerMsg(kernel, msg,
+    // dwExclude): send a message to every REGISTERED server except
+    // dwExclude - no country filter (that is FUN_140018870).
+    void BroadcastOtherServers(const std::vector<uint8_t>& pkt,
+                               uint32_t dwExclude);
     // socket -> server id (0 when the socket is unknown) - the
     // original reads the sender straight off the message (+0x414)
     uint32_t ServerIdOfSocket(uint64_t ullSocket) const;
 
+    // ---- OS connect notifications (CCrossMsgOSConnectInfo 40023) ----
+    // ORIGINAL NotifyOSConnect FUN_14000cc90(kernel, idServer,
+    // idSocket): action 0. Guards: socket 0/-1 or server -1 ->
+    // "CCrossServerKernel::NotifyOSConnect idServer:%u,
+    // idSocket:%u." (ERROR) and NOTHING is sent. Collects the
+    // socket ids of every OTHER registered OS entry (skipping the
+    // new socket and itself); append failure at the 0x3ff gate ->
+    // "CCrossServerKernel::NotifyOSConnect msg append failed,
+    // count:%u." and STOP (the original aborts the whole notify).
+    // With peers collected: FUN_14000a0b0(kernel, 0, idServer, ..,
+    // 4) queues the peer list TO the new server (our hub sends
+    // directly - no queue in the rebuild; TBD queue semantics),
+    // then the list is cleared, the NEW socket appended, and
+    // FUN_14000a1c0 BroadcastOtherServerMsg(msg, idServer) tells
+    // every OTHER server. No peers -> nothing at all is sent.
+    void NotifyOSConnect(uint32_t dwIdServer, uint64_t ullIdSocket);
+    // ORIGINAL NotifyOSDisConnect FUN_14000b500(kernel, idServer,
+    // idSocket): action 1, one entry (the socket), then
+    // FUN_14000a1c0 BroadcastOtherServerMsg(msg, idServer) - the
+    // disconnecting server is excluded (it is gone). Same guards
+    // with the DisConnect log text.
+    void NotifyOSDisConnect(uint32_t dwIdServer, uint64_t ullIdSocket);
     // ---- league system (CCrossMsgLeagueInfo/LeagueStr Process) ----
     // ORIGINAL FUN_140023c60 (LeagueInfo): action 0 ->
     // OnProduceNewLeague, action 1 -> OnUpdateLeagueInfo, else
