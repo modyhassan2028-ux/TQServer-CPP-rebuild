@@ -813,6 +813,25 @@ public:
     uint32_t GetHairStyle() const { return m_dwHairStyle; }
     void SetHairStyle(uint32_t v) { m_dwHairStyle = v; printf("[USER] %u hair -> %u\n", m_dwId, v); }
 
+    // cq_action 1004 (ORIGINAL rank 3): SetRecordPos "mapid x y" -
+    // the return position stored at user+0xe78 (FUN_1401732e0 family;
+    // "CUser::SetRecordPos()" in the original log strings).
+    struct RecordPos { uint32_t dwMap{0}; uint16_t wX{0}, wY{0}; } m_stRecordPos;
+    void SetRecordPos(uint32_t m, uint16_t x, uint16_t y) {
+        m_stRecordPos = {m, x, y};
+        printf("[USER] %u record pos -> %u (%u, %u)\n", m_dwId, m, x, y);
+    }
+    const RecordPos& GetRecordPos() const { return m_stRecordPos; }
+    // cq_action 1083 (ORIGINAL rank 0x49): the stat counter backing
+    // FUN_140382b00 (add) / FUN_140382960 (read).
+    int64_t m_nStatCounter{0};
+    int64_t GetStatCounter() const { return m_nStatCounter; }
+    void AddStatCounter(int64_t v) { m_nStatCounter += v; }
+    // cq_action 1002 (rank 1) "mana": restore to max (vcall+0x88 read)
+    uint32_t m_dwMaxMana{100};
+    uint32_t GetMaxMana() const { return m_dwMaxMana; }
+    void SetMaxMana(uint32_t v) { m_dwMaxMana = v; }
+
     void SetTransform(int32_t v) { m_nTransform = v; printf("[USER] %u transform -> %d\n", m_dwId, v); }
     uint32_t GetIteratorVar() const { return m_dwIterator; }
     void SetIteratorVar(uint32_t v) { m_dwIterator = v; }

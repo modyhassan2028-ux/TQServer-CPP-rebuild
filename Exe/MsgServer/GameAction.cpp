@@ -3233,25 +3233,20 @@ bool bAll = (llAll == 1);
     }
     case 1001: // ORIGINAL switch case 0: user data condition ("field op value")
         return ProcessDataCondition(pUser, pNode->strParam);
-    case 1002: { // ORIGINAL family-E block @242244: user attribute by
-        // NAME. sscanf "%s %s %s %s" needs >= 3 tokens, else DBERR
-        // (gameaction.cpp:0x215a) -> false. Named fields in the dead
-        // body: life, mana, mentor, lookface, look, face, sex,
-        // transform, money, e_money_trial - each with ops (+=, ==,
-        // ...) reading/writing user attrs. ALL 78 live rows carry a
-        // single token ("life" 42 / "mana" 36) so every one takes
-        // the literal parse-fail DBERR path -> false -> id_nextfail.
-        char szA[256]={0}, szB[64]={0}, szC[64]={0}, szD[64]={0};
-        int nTok = sscanf(pNode->strParam.c_str(), "%255s %63s %63s %63s",
-                          szA, szB, szC, szD);
-        if (nTok < 3) {
-            printf("[DBERR] cq_action %u type 1002 param (%s) parse %d < 3\n",
-                   pNode->dwId, pNode->strParam.c_str(), nTok);
-            return false;
+    case 1002: { // ORIGINAL rank 1 (case 1 @244807): full restore by
+        // NAME. stricmp full-param: "life" -> SetAttrib(0, GetMaxLife(),
+        // broadcast 1); "mana" -> SetAttrib(2, vcall+0x88 max, 1).
+        // No match -> goto LAB false. (NOTE: the @242244 named-attr
+        // block I first read is rank 0 = type 1001's body, not this.)
+        const char* szP = pNode->strParam.c_str();
+        if (!_stricmp(szP, "life")) { // 42 rows
+            pUser->SetLife(pUser->GetMaxLife());
+            return true;
         }
-        // named-field body: 0 live rows reach here; document + stub
-        printf("[STUB] cq_action %u type 1002 named field %s op %s\n",
-               pNode->dwId, szA, szB);
+        if (!_stricmp(szP, "mana")) { // 36 rows
+            pUser->SetMana(pUser->GetMaxMana());
+            return true;
+        }
         return false;
     }
     case 1005: { // ORIGINAL family-E block @244932: hair style/color.
@@ -3337,32 +3332,50 @@ bool bAll = (llAll == 1);
                pNode->dwId, szWho, szOp);
         return false;
     }
-    case 1083: { // ORIGINAL family-E block @245554: mine/hunt counter
-        // trio. sscanf "%s %d" == 2; "chk N" -> FUN_14039a210(user,N)
-        // (returns bool); "add N" -> FUN_14039a150(user,N) -> true;
-        // "clr N" -> FUN_14039a1b0(user,N) -> true; any other op ->
-        // DBERR (gameaction.cpp:0x204d) -> false. NOTE: the 101 live
-        // "+= N" rows match no op and take the literal DBERR path.
-        char szOp[64]={0}; int32_t nVal = 0;
+    case 1083: { // ORIGINAL rank 0x49 (case 0x49 @247651): stat
+        // counter ops. sscanf "%s %d" == 2: "<" -> FUN_140382960(user,
+        // 2, 0) < val; "==" -> FUN_140382960(user, 2) == val;
+        // "+=" -> FUN_140382b00(user, val) -> return 1 (101 live
+        // rows); "chk" -> val != 0 ? FUN_140382350(user) :
+        // FUN_140383750(user) (helpers stubbed); other -> false.
+        char szOp[64] = {0}; int32_t nVal = 0;
         if (sscanf(pNode->strParam.c_str(), "%63s %d", szOp, &nVal) != 2)
-            return false; // parse != 2 -> break -> false
-        if (!_stricmp(szOp, "chk")) { // 20 rows
-            printf("[COUNTER] cq_action %u chk %d (FUN_14039a210)\n",
-                   pNode->dwId, nVal);
-            return false; // helper not yet identified - stubbed
-        }
-        if (!_stricmp(szOp, "add")) { // FUN_14039a150
-            printf("[COUNTER] cq_action %u add %d (FUN_14039a150)\n",
-                   pNode->dwId, nVal);
+            return false;
+        if (!strcmp(szOp, "<"))
+            return pUser->GetStatCounter() < nVal;
+        if (!strcmp(szOp, "=="))
+            return pUser->GetStatCounter() == nVal;
+        if (!strcmp(szOp, "+=")) {
+            pUser->AddStatCounter(nVal);
             return true;
         }
-        if (!_stricmp(szOp, "clr")) { // FUN_14039a1b0
-            printf("[COUNTER] cq_action %u clr %d (FUN_14039a1b0)\n",
+        if (!strcmp(szOp, "chk")) { // 20 live rows
+            printf("[STAT] cq_action %u chk %d (FUN_140382350/140383750)\n",
                    pNode->dwId, nVal);
-            return true;
+            return false; // helpers not yet identified - stubbed
         }
-        printf("[DBERR] cq_action/cq_newaction type 1083 op (%s)\n", szOp);
         return false;
+    }
+    case 1093: { // ORIGINAL rank 0x52 (case 0x52 @247819): kill-stat
+        // module ops (CurrentInstanceGet() gate + module 0xe via
+        // vtable+0x20(inst, 0xe)). FULL-PARAM stricmp add/del/chk ->
+        // module vtable +0/+8/+0x10 with (userId, node-data-col id).
+        if (!_stricmp(pNode->strParam.c_str(), "add")) {
+            printf("[MOD0E] cq_action %u add data %u for user %u\n",
+                   pNode->dwId, pNode->dwData, pUser->GetId());
+            return true;
+        }
+        if (!_stricmp(pNode->strParam.c_str(), "del")) {
+            printf("[MOD0E] cq_action %u del data %u\n",
+                   pNode->dwId, pNode->dwData);
+            return true;
+        }
+        if (!_stricmp(pNode->strParam.c_str(), "chk")) {
+            printf("[MOD0E] cq_action %u chk data %u - stub false\n",
+                   pNode->dwId, pNode->dwData);
+            return false; // module 0xe check - not yet identified
+        }
+        return false; // "amount" tail: 0 live rows
     }
     case 1096: { // ORIGINAL family-E block @247970: dynamic event on
         // the FUN_1401181a0 module. sscanf "%d %d %d %d %d %d" needs
@@ -3400,33 +3413,29 @@ bool bAll = (llAll == 1);
         }
         return false; // end of list -> 0
     }
-    case 1554: { // ORIGINAL case 0x52 @247819: kill-stat module ops.
-        // CurrentInstanceGet() gate (CHECKF pRoot / IF_NOT pProvider
-        // at 0x1d0d/0x1d11), then module 0xe via vtable+0x20(inst,
-        // 0xe). FULL-PARAM stricmp on param_3: "add"/"del"/"chk" ->
-        // module vtable +0/+8/+0x10 with (userId, node-data-column
-        // id) - the data column carries the monster type
-        // (11019-11029 in live rows). Every result is the module
-        // call's return. No stricmp match -> falls to the "amount"
-        // sscanf tail (no live rows).
-        // module gate stubbed present
-        if (!_stricmp(pNode->strParam.c_str(), "add")) { // 471 rows
-            printf("[KILLSTAT] cq_action %u add monster %u for user %u (module 0xe)\n",
-                   pNode->dwId, pNode->dwData, pUser->GetId());
-            return true;
+    case 1554: { // ORIGINAL rank 0x99 (case 0x99 @250843): quest
+        // kill-stat helpers. sscanf "%s": "chk" -> FUN_140171090(user,
+        // node-data-col) return (stub false); "add" ->
+        // FUN_140170e90(user, data-col) -> return 1 (471 live rows);
+        // a third short token -> FUN_140113380 (0 live rows, stubbed
+        // false); 4-token module branch (FUN_1401181a0, 0 live rows).
+        char szOp[64] = {0};
+        if (sscanf(pNode->strParam.c_str(), "%63s", szOp) < 1) {
+            printf("[DBERR] cq_action %u type 1554 param (0x2f3b)\n",
+                   pNode->dwId);
+            return false;
         }
-        if (!_stricmp(pNode->strParam.c_str(), "del")) {
-            printf("[KILLSTAT] cq_action %u del monster %u (module 0xe)\n",
+        if (!strcmp(szOp, "chk")) { // 29 rows
+            printf("[KILLSTAT] cq_action %u chk data %u (FUN_140171090) - stub false\n",
+                   pNode->dwId, pNode->dwData);
+            return false;
+        }
+        if (!strcmp(szOp, "add")) {
+            printf("[KILLSTAT] cq_action %u add data %u (FUN_140170e90)\n",
                    pNode->dwId, pNode->dwData);
             return true;
         }
-        if (!_stricmp(pNode->strParam.c_str(), "chk")) { // 29 rows
-            printf("[KILLSTAT] cq_action %u chk monster %u (module 0xe) - stub false\n",
-                   pNode->dwId, pNode->dwData);
-            return false; // module 0xe check - not yet identified
-        }
-        // "amount"/other shapes: 0 live rows; sscanf tail documented
-        return false;
+        return false; // remaining branches: 0 live rows
     }
     case 1651: { // ORIGINAL family-E block @251130: NPC name/data
         // check. Head: sscanf(param_7,"%u") -> npcId (param_7 = the
@@ -3464,20 +3473,35 @@ bool bAll = (llAll == 1);
         }
         return false;
     }
-    case 1004: { // ORIGINAL family-E block @245092: enter map.
-        // sscanf "%u %d %d" (mapid, x, y) == 3; then
-        // FUN_1402f1e70(mapmgr-from-FUN_1400877e0, userId, node-data,
-        // mapid, y!=0 flag, x==0 flag) returns the result (partially
-        // read). The data column (0 in all live rows) rides the call.
-        // Ported: map lookup (null -> false), capacity gate open
-        // (documented - ORIGINAL logs DBERR 0x2779 when the map is
-        // full via FUN_14014df00), then Teleport like case 304.
+    case 1004: { // ORIGINAL rank 3 (case 3 @244894): SetRecordPos
+        // "mapid x y". sscanf "%u %d %d" == 3; map lookup
+        // FUN_1400876b0+vtable+0x20(map,1) -> null: LOGERR 0x2729 ->
+        // 0; FUN_1402c3cc0(map, x, y) pos check -> record at user
+        // (SetRecordPos, "CUser::SetRecordPos()" log string) -> true.
         uint32_t dwMap = 0; int32_t nX = 0, nY = 0;
         if (sscanf(pNode->strParam.c_str(), "%u %d %d",
                    &dwMap, &nX, &nY) != 3)
             return false;
         auto pMap = CMapManager::Instance().GetMap(dwMap);
-        if (!pMap) return false; // ORIGINAL: map lookup 0 -> false
+        if (!pMap) return false; // ORIGINAL: LOGERR 0x2729 -> 0
+        if (!pMap->IsPassable((uint16_t)nX, (uint16_t)nY))
+            return false; // ORIGINAL: pos error -> 0
+        pUser->SetRecordPos(dwMap, (uint16_t)nX, (uint16_t)nY);
+        return true;
+    }
+    case 1011: { // ORIGINAL rank 0xa (case 10 @245087): enter map.
+        // sscanf "%u %d %d" (mapid, x, y) == 3; FUN_1402f1e70(mapmgr
+        // from FUN_1400877e0, userId, node-data, mapid, coord flags)
+        // returns the result (partially read). Ported: map lookup
+        // (null -> false), capacity gate open (documented - ORIGINAL
+        // logs DBERR 0x279 via FUN_14014df00 when the map is full),
+        // then Teleport like case 304.
+        uint32_t dwMap = 0; int32_t nX = 0, nY = 0;
+        if (sscanf(pNode->strParam.c_str(), "%u %d %d",
+                   &dwMap, &nX, &nY) != 3)
+            return false;
+        auto pMap = CMapManager::Instance().GetMap(dwMap);
+        if (!pMap) return false;
         pUser->Teleport(dwMap, (uint16_t)nX, (uint16_t)nY);
         return true;
     }

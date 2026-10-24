@@ -1654,11 +1654,17 @@ system("mariadb -u root cq -e \"DELETE FROM cq_item WHERE owner_id=888001 AND ty
     // --- family E batch 1: 1002 / 1005 / 1075 / 1082 (live rows) ---
     CDialogEngine::Node ndE; ndE.dwType = 1082;
 
-    // 1002: all 78 live rows are single-token -> literal DBERR false
+    // 1002 (rank 1): "life"/"mana" full restore; other -> false
     CDialogEngine::Node nd1002; nd1002.dwType = 1002;
-    nd1002.strParam = "life";   // 42 rows like this
-    assert(!CGameAction::ProcessActionUser(u5, &nd1002));
-    nd1002.strParam = "mana";   // 36 rows
+    u5->SetLife(37);
+    nd1002.strParam = "life";
+    assert(CGameAction::ProcessActionUser(u5, &nd1002));
+    assert(u5->GetLife() == u5->GetMaxLife());
+    u5->SetMana(3);
+    nd1002.strParam = "mana";
+    assert(CGameAction::ProcessActionUser(u5, &nd1002));
+    assert(u5->GetMana() == u5->GetMaxMana());
+    nd1002.strParam = "other"; // goto LAB false
     assert(!CGameAction::ProcessActionUser(u5, &nd1002));
 
     // 1005: style 13 (live) - style formula on attr 0x1a
@@ -1695,17 +1701,22 @@ system("mariadb -u root cq -e \"DELETE FROM cq_item WHERE owner_id=888001 AND ty
     // --- family E batch 2: 1083 / 1096 / 1098 / 1554 (live rows) ---
     CDialogEngine::Node ndE2; ndE2.dwType = 1554;
 
-    // 1083: "+= 2" (101 rows) matches no op -> literal DBERR false
+    // 1083 (rank 0x49): stat counter ops
     CDialogEngine::Node nd1083; nd1083.dwType = 1083;
-    nd1083.strParam = "+= 2";
-    assert(!CGameAction::ProcessActionUser(u5, &nd1083));
-    nd1083.strParam = "add 1";   // FUN_14039a150 -> true
+    nd1083.strParam = "+= 5";  // 101 live rows: add then true
     assert(CGameAction::ProcessActionUser(u5, &nd1083));
-    nd1083.strParam = "clr 1";   // FUN_14039a1b0 -> true
+    assert(u5->GetStatCounter() == 5);
+    nd1083.strParam = "== 5";
     assert(CGameAction::ProcessActionUser(u5, &nd1083));
-    nd1083.strParam = "chk 1";   // FUN_14039a210 stub -> false
+    nd1083.strParam = "< 100";
+    assert(CGameAction::ProcessActionUser(u5, &nd1083));
+    nd1083.strParam = "== 6";
     assert(!CGameAction::ProcessActionUser(u5, &nd1083));
-    nd1083.strParam = "add";     // parse < 2 -> false
+    nd1083.strParam = "chk 1";  // helper stub -> false
+    assert(!CGameAction::ProcessActionUser(u5, &nd1083));
+    nd1083.strParam = "add 1";  // unknown op -> false
+    assert(!CGameAction::ProcessActionUser(u5, &nd1083));
+    nd1083.strParam = "add";    // parse < 2 -> false
     assert(!CGameAction::ProcessActionUser(u5, &nd1083));
 
     // 1096: "200 0 5 0 5 1" (live) -> parse gate + module stub
@@ -1754,15 +1765,28 @@ system("mariadb -u root cq -e \"DELETE FROM cq_item WHERE owner_id=888001 AND ty
     u5->m_stDialogCtx.dwId = 1015;
 
     // --- family E batch 4: 1004 / 1084 (live rows) ---
-    // 1004: "1002 300 280" (live) - enter TwinCity at coords
+    // 1004 (rank 3): "1002 300 280" -> record pos, NO map move
     CDialogEngine::Node nd1004; nd1004.dwType = 1004;
+    uint32_t dwOldMap = u5->GetMapId();
     nd1004.strParam = "1002 300 280";
     assert(CGameAction::ProcessActionUser(u5, &nd1004));
-    assert(u5->GetMapId() == 1002);
+    assert(u5->GetRecordPos().dwMap == 1002);
+    assert(u5->GetRecordPos().wX == 300 && u5->GetRecordPos().wY == 280);
+    assert(u5->GetMapId() == dwOldMap); // record only
     nd1004.strParam = "9999 300 280"; // map lookup 0 -> false
     assert(!CGameAction::ProcessActionUser(u5, &nd1004));
     nd1004.strParam = "1002 300"; // parse < 3 -> false
     assert(!CGameAction::ProcessActionUser(u5, &nd1004));
+
+    // 1011 (rank 0xa): enter map - Teleport
+    CDialogEngine::Node nd1011; nd1011.dwType = 1011;
+    nd1011.strParam = "1002 300 280";
+    assert(CGameAction::ProcessActionUser(u5, &nd1011));
+    assert(u5->GetMapId() == 1002);
+    nd1011.strParam = "9999 300 280";
+    assert(!CGameAction::ProcessActionUser(u5, &nd1011));
+    nd1011.strParam = "1002 300";
+    assert(!CGameAction::ProcessActionUser(u5, &nd1011));
 
     // 1084: "13901336 6 7" (live) - id resolved into vars 6,7
     CDialogEngine::Node nd1084; nd1084.dwType = 1084;
