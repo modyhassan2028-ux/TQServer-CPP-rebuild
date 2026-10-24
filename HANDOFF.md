@@ -3,7 +3,28 @@
 
 > 🔵 **أي agent هيكمل من هنا: اقرأ `NEXT_AGENT_HANDOFF.md` الأول** — فيه الحالة والمتبقي والنمط والفخاخ.
 
-## 0) حالة NpcServer لحظياً (جلسة 24/10 — محدث 25/10 07:00)
+## 0) حالة NpcServer لحظياً (جلسة 24/10 — محدث 25/10 08:00)
+- **جديد (وحدة 37): كائن بيانات الخريطة CMapData**
+  (NpcMapData.h/cpp — الـ vtable من الباينري
+  0x1400d0798): دوال الـ vt اللي كود الـ NPC
+  بيستخدمها — Alt 84a00 / Access 84bc0 /
+  CellType 84d80 بقيم الخروج خارج الحدود
+  الحرفية 0x7fff/0/1، Width/Height (81d60/81d50
+  -> d7b0/d7a0)، موديل الخلية {u16 lo, u16
+  hi=tileIdx}، القارئات الأساسية 902e0/903e0/
+  904d0 (خلية مباشرة 0xffff: lo>>1 / 0 / lo&1،
+  وخلية tile: حقول A/A/B من البافر المشترك)،
+  شجرة الـ overlay (+0x1c0، خريطة cellIdx ->
+  tileIdx في فيكتور +0xb8) بمعاني lower_bound
+  exact-key، ورقصة _Ref_count (LOCK inc/dec)
+  للـ tiles. اختبار NPC_MAPDATA_OK.
+- **الأرشيف الأصلي الكامل اتتنزل من MediaFire**
+  واتفك في /app/co_full (راجع
+  co_decomp/ARCHIVE_NOTE.md): 184 ملف Lua،
+  GameMap.dat، 188 ملف .DMap، وكل الـ DLLs —
+  وNpcServer.exe متطابق MD5 مع مرجعنا.
+- **الرجريشن 35/35 أخضر** + سموك main.
+
 - **جديد:** الوحدتان 35-36:
   **(35) تحقيق آلة الحالات اتقفل بالدليل:**
   الموزّع FUN_14005f3b0 بيعالج 1/6/7/8 فقط
