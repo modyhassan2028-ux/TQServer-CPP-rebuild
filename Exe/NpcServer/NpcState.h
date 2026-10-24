@@ -118,6 +118,19 @@ struct CNpcStateData {
     std::function<int()> m_fnGenVt58;   // gen vtable+0x58
     // gen vtable+0x28 -> (x, y) pair reuses
     // m_fnGenGetSpawn above
+    // ===== util (unit 20) seams =====
+    uint32_t m_nField40 = 0;      // +0x40 facing dir
+    std::function<int()> m_fnSubVt8;
+        // sub vtable+8, no-arg (step count)
+    std::function<uint32_t()> m_fnSubVt48NoArgs;
+        // sub vtable+0x48, no-arg
+    std::function<int()> m_fnSubGetX38;
+        // sub vtable+0x38 (x)
+    std::function<int()> m_fnSubGetY40;
+        // sub vtable+0x40 (y)
+    std::function<bool(int, int, int, uint32_t)>
+        m_fnMapWalkable;
+        // FUN_14004bff0(map, x, y, dir, u48, 0x1a)
 };
 
 // ============================================================
