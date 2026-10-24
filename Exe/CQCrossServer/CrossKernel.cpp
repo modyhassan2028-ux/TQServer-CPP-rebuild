@@ -170,6 +170,25 @@ void CCrossServerKernel::OnCountryStatusReq(
     if (m_fnSend) m_fnSend(ullSocket, pkt);
 }
 
+void CCrossServerKernel::OnCountryScoreReq(
+        uint64_t ullSocket, const CountryScoreReq& req) {
+    // ORIGINAL case 1 (~29507): FUN_14000d620(kernel, uid) must not
+    // be -1 or NO reply is sent (the -1 gate, also visible at
+    // ~20268); the reply packs the country id (FUN_1400246a0) and
+    // the league's country date (FUN_14001bc50 -> FUN_140022ce0)
+    // and is sent back with FUN_14000a0b0(kernel, 0, ...).
+    if (!m_pCountrySys) return;
+    const uint32_t dwCountry =
+        m_pCountrySys->GetCountryByUser(req.dwUserId);
+    if (dwCountry == 0xffffffff) return; // original gate
+    CountryScoreResp resp{};
+    resp.dwCountryId = dwCountry;
+    resp.dwCountryDate =
+        m_pCountrySys->CountryDate(req.dwIdServer, req.dwIdLeague);
+    auto pkt = Encode(MsgType_CountryScoreResp, resp);
+    if (m_fnSend) m_fnSend(ullSocket, pkt);
+}
+
 void CCrossServerKernel::OnCountryBroadcast(const char* szText) {
     // ORIGINAL case 5 (~29605): FUN_14000a0b0-style broadcast of a
     // system talk (msg type 0x961) to every server socket.

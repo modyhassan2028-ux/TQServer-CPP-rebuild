@@ -65,6 +65,18 @@ public:
     const std::string& LeaderTitle(uint32_t dwIdServer, uint32_t dwIdLeague) const;
     uint32_t CountryDate(uint32_t dwIdServer, uint32_t dwIdLeague) const;
 
+    // ---- case 1 (~29507): member -> country lookup ----
+    // ORIGINAL FUN_14000d620: RB-tree lower_bound over the member
+    // map (mgr+0xa8, key uid at node+0x18, value country at
+    // +0x1c); returns 0xffffffff (-1) when the uid is absent.
+    // Usage ~20268: "FUN_14000d620(kernel, uid) != -1" gates the
+    // SendMsg reply - a member without a country gets nothing.
+    uint32_t GetCountryByUser(uint32_t dwUserId) const;
+    // ORIGINAL FUN_14001a240 (case 4, 434 bytes): the SAME
+    // lower_bound walk over the token map (mgr+0x90) keyed by the
+    // country date; returns the league entry holding the token.
+    const CountryLeague* TokenLowerBound(uint32_t dwCountryDate) const;
+
     bool HasLeague(uint32_t dwIdServer, uint32_t dwIdLeague) const;
     size_t LeagueCount() const { return m_leagues.size(); }
     uint32_t TotalCountryDate() const { return m_nCountryDateTotal; }
@@ -72,6 +84,16 @@ public:
     // test seam: inject a validated league (LoadLeagueInfo path)
     void InsertLeagueForTest(const CountryLeague& lg) {
         m_leagues[{lg.dwIdServer, lg.dwIdLeague}] = lg;
+        if ((int32_t)lg.dwCountryDate > 0)
+            m_nCountryDateTotal += lg.dwCountryDate;
+    }
+    // test seam: register a member country (the +0xa8 map)
+    void InsertMemberForTest(uint32_t dwUserId, uint32_t dwCountryId) {
+        m_mapMemberCountry[dwUserId] = dwCountryId;
+    }
+    // test seam: token map entry (plunder-war flows own this map)
+    void InsertTokenForTest(uint32_t dwCountryDate, const CountryLeague& lg) {
+        m_mapTokens[dwCountryDate] = lg;
     }
 
 private:
@@ -81,6 +103,11 @@ private:
 
     // key: (idserver, idleague) - the ORIGINAL per-server map at +0x20
     std::map<std::pair<uint32_t, uint32_t>, CountryLeague> m_leagues;
+    // ORIGINAL member->country map (mgr+0xa8, FUN_14000d620)
+    std::map<uint32_t, uint32_t> m_mapMemberCountry;
+    // ORIGINAL token map (mgr+0x90, FUN_14001a240): sorted by
+    // country date; LoadLeagueInfo inserts token count > 0 rows
+    std::map<uint32_t, CountryLeague> m_mapTokens;
     uint32_t m_nCountryDateTotal = 0;   // local_1b8 in LoadLeagueInfo
     uint32_t m_dwCapacityPerServer = 0; // *(param+0x10)
     uint32_t m_dwServerCount = 0;       // *(param+200)

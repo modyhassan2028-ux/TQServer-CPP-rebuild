@@ -51,6 +51,9 @@ public:
     void OnCountryStatusReq(uint64_t ullSocket, const CountryStatusReq& req);
     // case 5: broadcast a system talk to every connected server
     void OnCountryBroadcast(const char* szText);
+    // case 1: war score query - members without a country (-1)
+    // are silently dropped, exactly like the original gate
+    void OnCountryScoreReq(uint64_t ullSocket, const CountryScoreReq& req);
     // the hub owns the manager (Init'ed from cq_league_info)
     class CCountrySysMgr* CountrySys() { return m_pCountrySys.get(); }
     // test seam (production wiring is the hub shell after Init)

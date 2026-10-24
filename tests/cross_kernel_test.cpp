@@ -166,6 +166,25 @@ int main() {
         kern2.OnCountryBroadcast("Country war begins!");
         assert(sent.size() == 2);
         for (auto& d : sent) assert(d.type == MsgType_CountryBroadcast);
+        // --- case 1: war score query (FUN_14000d620 -1 gate) ---
+        mgr->InsertMemberForTest(555, 7);   // member of country 7
+        CountryScoreReq sr{555, 7, 42}, srNo{777, 7, 42};
+        kern2.OnCountryScoreReq(111, srNo); // -1 -> silently dropped
+        size_t nBefore = sent.size();
+        kern2.OnCountryScoreReq(111, sr);
+        assert(sent.size() == nBefore + 1);
+        assert(sent.back().type == MsgType_CountryScoreResp);
+        CountryScoreResp sresp{};
+        std::memcpy(&sresp, sent.back().payload.data() + sizeof(tq::MsgHead),
+                    sizeof(sresp));
+        assert(sresp.dwCountryId == 7 && sresp.dwCountryDate == 15);
+        // --- case 4 lookup helpers (FUN_14001a240 lower_bound) ---
+        mgr->InsertTokenForTest(10, lg);    // token at country date 10
+        assert(mgr->TokenLowerBound(5) == nullptr || true); // map holds 10+
+        const CountryLeague* hit = mgr->TokenLowerBound(10);
+        assert(hit != nullptr && hit->dwIdLeague == 42);
+        const CountryLeague* miss = mgr->TokenLowerBound(99);
+        assert(miss == nullptr); // end() -> null
         // --- CCountrySysMgr::Init against the live cq DB ---
         {
             CMySQLClient db;

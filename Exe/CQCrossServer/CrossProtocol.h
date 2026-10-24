@@ -43,12 +43,29 @@ enum : uint16_t {
     MsgType_CountryStatusReq  = 9009, // server -> hub: case 0 query
     MsgType_CountryStatusResp = 9010, // hub -> server: name/title/date
     MsgType_CountryBroadcast  = 9011, // hub -> all: case 5 system talk
+    // case 1 (~29507): war score query. The original first resolves
+    //   FUN_14000d620(kernel, msg+0x420) - the member's country id
+    //   (0xffffffff when absent) - and only members WITH a country
+    //   get the packed reply (FUN_1400246a0 packs the country id,
+    //   FUN_14000a0b0 sends it, ~20268 shows the same -1 gate).
+    MsgType_CountryScoreReq  = 9012, // server -> hub: case 1 query
+    MsgType_CountryScoreResp = 9013, // hub -> server: country + score
 };
 
 // case 0 query/response payloads (see CCountrySysMgr accessors)
 struct CountryStatusReq {
     uint32_t dwIdServer;   // msg+8 in the original layout
     uint32_t dwIdLeague;   // msg+0x10
+};
+// case 1 payload: uid is read from msg+0x420 in the original
+struct CountryScoreReq {
+    uint32_t dwUserId;    // FUN_14000d620 key
+    uint32_t dwIdServer;  // FUN_14001bc50 arg
+    uint32_t dwIdLeague;   // FUN_14001bc50 arg
+};
+struct CountryScoreResp {
+    uint32_t dwCountryId;  // FUN_14000d620 result (never -1 here)
+    uint32_t dwCountryDate; // FUN_14001bc50 -> FUN_140022ce0
 };
 struct CountryStatusResp {
     char szLeagueName[64];  // AddString #1 ("" when league unknown)

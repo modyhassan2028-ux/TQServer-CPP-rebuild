@@ -68,7 +68,10 @@ bool CCountrySysMgr::LoadLeagueInfo(CMySQLClient* pDB) {
         m_leagues[key] = lg;
         // ORIGINAL: country_date > 0 rows join the date accounting
         // (local_1b8 += FUN_140022ce0) and the map at +0x60;
-        // token count > 0 rows go to the map at +0x90
+        // token count > 0 rows go to the map at +0x90 (no token
+        // column is read from cq_league_info itself - the token
+        // map is populated by the plunder-war flows, so nothing
+        // is inserted here)
         if ((int32_t)lg.dwCountryDate > 0)
             m_nCountryDateTotal += lg.dwCountryDate;
     }
@@ -130,4 +133,20 @@ bool CCountrySysMgr::HasLeague(uint32_t dwIdServer,
     return m_leagues.count({dwIdServer, dwIdLeague}) != 0;
 }
 
+uint32_t CCountrySysMgr::GetCountryByUser(uint32_t dwUserId) const {
+    // ORIGINAL FUN_14000d620: lower_bound over the member map;
+    // hit only when the found node key == uid, else -1 (0xffffffff)
+    auto it = m_mapMemberCountry.lower_bound(dwUserId);
+    if (it != m_mapMemberCountry.end() && it->first == dwUserId)
+        return it->second;
+    return 0xffffffff;
+}
+const CountryLeague* CCountrySysMgr::TokenLowerBound(
+        uint32_t dwCountryDate) const {
+    // ORIGINAL FUN_14001a240: lower_bound walk over the token map
+    // keyed by the country date; end() -> the original returns the
+    // end iterator (checked by the caller).
+    auto it = m_mapTokens.lower_bound(dwCountryDate);
+    return it == m_mapTokens.end() ? nullptr : &it->second;
+}
 } // namespace cross
