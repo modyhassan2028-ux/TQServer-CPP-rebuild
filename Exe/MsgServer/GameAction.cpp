@@ -3525,6 +3525,179 @@ bool bAll = (llAll == 1);
         pUser->Teleport(dwMap, (uint16_t)nX, (uint16_t)nY);
         return true;
     }
+    case 1043: { // ORIGINAL rank 0x25 (case 0x25 @246007): mount
+        // recharge. uVar41 = FUN_140162620(user) - operates on
+        // user+0x1110 (param_1[0x222], the ride/mount object): reads
+        // current vs max stamina (FUN_14039d8e0/d7e0), recharges to
+        // max (FUN_14039d960(obj, max, 0)), sets state 1
+        // (FUN_14039d8f0), saves (vtable+0x28), then builds and
+        // sends the map-position notify msg (FUN_140362560/362620
+        // with x/y from user+2 vcalls, send vcall+0x350). Increments
+        // the global counter DAT_140975778 and returns 1 on the
+        // success path. Port: recharge + notify stubbed, returns
+        // true like the original tail.
+        printf("[MOUNT] cq_action %u: recharge mount stamina for user %u\n",
+               pNode->dwId, pUser->GetId());
+        return true;
+    }
+    case 1046: { // ORIGINAL rank 0x28 (case 0x28 @246102): send
+        // position msg. No param parse at all. Builds the msg
+        // (FUN_140362560 init) with the node/map id (mgr index 4
+        // vcall+0x48), user coords (+0x50/+0x48/+0x40) and user id
+        // (vcall+8), fills it (FUN_140362620(buf, userId, y, x)),
+        // sends vcall+0x350(user, buf) - then BREAKS WITHOUT setting
+        // the result -> falls out of the switch with the default 0.
+        // Faithful: the msg is sent but the action result is false.
+        printf("[MSG] cq_action %u: send position msg for user %u\n",
+               pNode->dwId, pUser->GetId());
+        return false; // ORIGINAL: break with uVar41 unset (0)
+    }
+    case 1071: { // ORIGINAL rank 0x3d (case 0x3d @247044): action
+        // TIMER. sscanf "%u %u %hu" == 3 (delay-seconds, actionId,
+        // flag): FUN_1401a9b00(user, delay, actionId, 0) registers
+        // the timer (182 live rows like "60 9018985 0"); if the flag
+        // is non-zero, build+send the notify msg (FUN_140362560/
+        // 362620, type 0x9f, send vcall+0x350). return 1. Parse
+        // != 3 -> false (default DBERR path).
+        uint32_t dwDelay = 0, dwActionId = 0; uint16_t wFlag = 0;
+        if (sscanf(pNode->strParam.c_str(), "%u %u %hu",
+                   &dwDelay, &dwActionId, &wFlag) != 3)
+            return false;
+        // FUN_1401a9b00: register timer (delay secs -> execute action)
+        printf("[TIMER] cq_action %u: user %u timer %u s -> action %u\n",
+               pNode->dwId, pUser->GetId(), dwDelay, dwActionId);
+        if (wFlag != 0) { // notify msg (type 0x9f) - send stubbed
+            printf("[TIMER] cq_action %u: notify flag %u for user %u\n",
+                   pNode->dwId, wFlag, pUser->GetId());
+        }
+        return true;
+    }
+    case 1072: { // ORIGINAL rank 0x3e (case 0x3e @247068): send
+        // user/msg 0xd. No param parse (all 68 live rows have empty
+        // params). FUN_1403a5840 init; node/map id (mgr index 4
+        // vcall+0x48); user ids via +0x48/+0x40; FUN_1403a5ce0(buf,
+        // nodeId, uVar19, uVar23) != 0 -> send vcall+0x350. Sets
+        // uVar41 = 1 explicitly before break -> returns TRUE.
+        printf("[MSG] cq_action %u: send msg 0xd for user %u\n",
+               pNode->dwId, pUser->GetId());
+        return true;
+    }
+    case 1203: { // ORIGINAL rank 0x6f (case 0x6f @249403): HP-full
+        // check. uVar12 = player vcall+0x78 (GetLife), uVar13 = player
+        // vcall+0x80 (GetMaxLife - confirmed by 1002's full-restore);
+        // return MaxLife <= Life. Empty params (34 live rows).
+        return pUser->GetMaxLife() <= pUser->GetLife();
+    }
+    case 1204: { // ORIGINAL rank 0x70 (case 0x70 @249408): mana-full
+        // check. CUser vcall+0x80 (GetMana) vs vcall+0x88
+        // (GetMaxMana - confirmed by 1002); return MaxMana <= Mana.
+        return pUser->GetMaxMana() <= pUser->GetMana();
+    }
+    case 1510: { // ORIGINAL rank 0x8c (case 0x8c @250128): heal by
+        // percent. sscanf "%d" (percent, >0 required). Base selection
+        // by cq_action.data (mgr row 4 vcall+0x48): data==0 -> base =
+        // MaxLife (+0x80); data==1 -> base = Life (+0x78). heal =
+        // min(base*pct/100, Life) then FUN_140177000(user, heal)
+        // (AddLife). return 1 on both branches, 0 for other data.
+        int nPct = 0;
+        if (sscanf(pNode->strParam.c_str(), "%d", &nPct) <= 0 || nPct <= 0)
+            return false;
+        uint32_t dwHeal = 0;
+        if (pNode->dwData == 0) {
+            uint32_t dwBase = pUser->GetMaxLife();
+            dwHeal = (uint32_t)((uint64_t)dwBase * nPct / 100);
+            if (pUser->GetLife() < dwHeal) dwHeal = pUser->GetLife();
+        } else if (pNode->dwData == 1) {
+            uint32_t dwBase = pUser->GetLife();
+            dwHeal = (uint32_t)((uint64_t)dwBase * nPct / 100);
+            if (pUser->GetLife() < dwHeal) dwHeal = pUser->GetLife();
+        } else {
+            return false; // ORIGINAL: return 0
+        }
+        // FUN_140177000(user, heal) = AddLife (cap at max - assumption)
+        pUser->SetLife(std::min(pUser->GetLife() + dwHeal, pUser->GetMaxLife()));
+        return true;
+    }
+    case 1650: { // ORIGINAL rank 0xa5 (case 0xa5 @251075): send msg
+        // gated on user+0x968 byte (param_4[0x12d]): gate != 0 ->
+        // falls through with result 0. Gate open: sscanf "%u" <1 ->
+        // DBERR 0x2dcc -> false. Build msg (FUN_140362560/362620 with
+        // coords +0x50/+0x48/+0x40, user id, parsed value) -> send
+        // vcall+0x350; create/send fail -> false, else true. Params
+        // like "12-1007" parse the leading %u. Port: gate field not
+        // identified - stubbed OPEN (documented); send stubbed.
+        uint32_t dwVal = 0;
+        if (sscanf(pNode->strParam.c_str(), "%u", &dwVal) < 1)
+            return false;
+        printf("[MSG] cq_action %u: send msg val %u for user %u (0x968 gate stub-open)\n",
+               pNode->dwId, dwVal, pUser->GetId());
+        return true;
+    }
+    case 1058: { // ORIGINAL rank 0x32 (case 0x32 @246455): module-7
+        // var ops. sscanf "%s %s %d" <3 -> DBERR "Wrong param number"
+        // -> false. Gate: vcall+0x20(FUN_140118220 singleton, userId,
+        // dataId) - false when the var is not registered. Then
+        // f1=="time": read val = vcall+0x38(user, dataId, 7) and ops
+        // >= <= == > < vs the parsed value; "set"/"+=" -> vcall+0x40
+        // (write) -> return its result. f1=="interval(0)": ops vs
+        // (uint)(now - val). f1=="interval(1)": same with a second
+        // var (some ops return 0 in the original). Port: the module
+        // singleton is stubbed by CUser::m_mapVarM7 (documented;
+        // kernel module port pending).
+        char f1[128] = {0}, f2[128] = {0}; int32_t v = 0;
+        if (sscanf(pNode->strParam.c_str(), "%127s %127s %d",
+                   f1, f2, &v) != 3)
+            return false;
+        const int32_t nVal = pUser->GetVarM7(pNode->dwData);
+        if (!_stricmp(f1, "time")) {
+            if (!_stricmp(f2, ">=")) return v <= nVal;
+            if (!_stricmp(f2, "<=")) return nVal <= v;
+            if (!_stricmp(f2, "==")) return nVal == v;
+            if (!_stricmp(f2, ">"))  return v < nVal;
+            if (!_stricmp(f2, "<"))  return nVal < v;
+            if (!_stricmp(f2, "set")) {
+                pUser->SetVarM7(pNode->dwData, v);
+                return true; // vcall+0x40 result stubbed true
+            }
+            if (!_stricmp(f2, "+=")) {
+                pUser->SetVarM7(pNode->dwData, nVal + v);
+                return true;
+            }
+            return false;
+        }
+        if (!_stricmp(f1, "interval(0)")) {
+            const uint32_t dwElapsed =
+                (uint32_t)time(nullptr) - (uint32_t)nVal;
+            if (!_stricmp(f2, ">=")) return (uint32_t)v <= dwElapsed;
+            if (!_stricmp(f2, "==")) return dwElapsed == (uint32_t)v;
+            if (!_stricmp(f2, ">"))  return (uint32_t)v < dwElapsed;
+            if (!_stricmp(f2, "<"))  return dwElapsed < (uint32_t)v;
+            return false;
+        }
+        if (!_stricmp(f1, "interval(1)")) {
+            // ORIGINAL: second-var variant, several ops return 0 -
+            // stubbed against the same store (documented)
+            const uint32_t dwElapsed =
+                (uint32_t)time(nullptr) - (uint32_t)nVal;
+            if (!_stricmp(f2, ">=")) return (uint32_t)v <= dwElapsed;
+            if (!_stricmp(f2, "==")) return dwElapsed == (uint32_t)v;
+            if (!_stricmp(f2, ">"))  return (uint32_t)v < dwElapsed;
+            if (!_stricmp(f2, "<"))  return dwElapsed < (uint32_t)v;
+            return false; // ORIGINAL returns 0 here
+        }
+        return false;
+    }
+    case 1095: { // ORIGINAL rank 0x54 (case 0x54 @247955):
+        // uVar41 = FUN_1401763f0(user, 1) - syncs the user's status
+        // bytes (+0xeda/+0xedb/+0xeee) + metempsychosis
+        // (vtable+0x108) into the manager at [user mgr]+0x100 via
+        // FUN_1402f16c0, returning its result. Empty params (245
+        // live rows). Port: registry call stubbed, result assumed
+        // success (documented).
+        printf("[SYNC] cq_action %u: status sync for user %u\n",
+               pNode->dwId, pUser->GetId());
+        return true;
+    }
     case 1084: { // ORIGINAL family-E block @247734: resolve id into
         // two vars. sscanf "%I64d %u %u" == 3; FUN_140382d20(user,
         // f1, &out1, &out2) resolves the id (helper not yet

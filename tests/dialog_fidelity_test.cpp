@@ -1788,6 +1788,76 @@ system("mariadb -u root cq -e \"DELETE FROM cq_item WHERE owner_id=888001 AND ty
     nd1011.strParam = "1002 300";
     assert(!CGameAction::ProcessActionUser(u5, &nd1011));
 
+    // 1043: mount recharge -> true (FUN_140162620 tail = 1)
+    CDialogEngine::Node nd1043; nd1043.dwType = 1043; nd1043.strParam = "";
+    assert(CGameAction::ProcessActionUser(u5, &nd1043));
+    // 1046: msg sent but result false (break without uVar41)
+    CDialogEngine::Node nd1046; nd1046.dwType = 1046; nd1046.strParam = "";
+    assert(!CGameAction::ProcessActionUser(u5, &nd1046));
+    // 1071: "60 9018985 0" (live) -> timer + true; bad parse -> false
+    CDialogEngine::Node nd1071; nd1071.dwType = 1071;
+    nd1071.strParam = "60 9018985 0";
+    assert(CGameAction::ProcessActionUser(u5, &nd1071));
+    nd1071.strParam = "180 0 1"; // flag path -> true
+    assert(CGameAction::ProcessActionUser(u5, &nd1071));
+    nd1071.strParam = "60 9018985"; // <3 tokens -> false
+    assert(!CGameAction::ProcessActionUser(u5, &nd1071));
+    // 1072: empty param -> msg + true
+    CDialogEngine::Node nd1072; nd1072.dwType = 1072; nd1072.strParam = "";
+    assert(CGameAction::ProcessActionUser(u5, &nd1072));
+
+    // 1203: HP full (max<=life); 1204: mana full (max<=mana)
+    CDialogEngine::Node nd1203; nd1203.dwType = 1203; nd1203.strParam = "";
+    u5->SetLife(u5->GetMaxLife());
+    assert(CGameAction::ProcessActionUser(u5, &nd1203));
+    u5->SetLife(u5->GetMaxLife() / 2);
+    assert(!CGameAction::ProcessActionUser(u5, &nd1203));
+    CDialogEngine::Node nd1204; nd1204.dwType = 1204; nd1204.strParam = "";
+    u5->SetMana(u5->GetMaxMana());
+    assert(CGameAction::ProcessActionUser(u5, &nd1204));
+    u5->SetMana(1);
+    assert(!CGameAction::ProcessActionUser(u5, &nd1204));
+    // 1510: heal pct (data=0 -> pct of maxlife, capped by life)
+    CDialogEngine::Node nd1510; nd1510.dwType = 1510; nd1510.dwData = 0;
+    nd1510.strParam = "50";
+    u5->SetLife(100);
+    assert(CGameAction::ProcessActionUser(u5, &nd1510));
+    // heal = min(maxlife*50/100, life=100) = 100 -> life 200
+    assert(u5->GetLife() == 200);
+    assert(u5->GetLife() <= u5->GetMaxLife());
+    nd1510.dwData = 7; // unsupported data -> return 0
+    assert(!CGameAction::ProcessActionUser(u5, &nd1510));
+    // 1650: "%u" leading parse ("12-1007" -> 12), send -> true
+    CDialogEngine::Node nd1650; nd1650.dwType = 1650;
+    nd1650.strParam = "12-1007";
+    assert(CGameAction::ProcessActionUser(u5, &nd1650));
+    nd1650.strParam = "x";
+    assert(!CGameAction::ProcessActionUser(u5, &nd1650));
+
+    // 1058 (rank 0x32): module-7 var ops ("time set 0" = 228 live rows)
+    CDialogEngine::Node nd1058; nd1058.dwType = 1058; nd1058.dwData = 77;
+    nd1058.strParam = "time set 0";
+    assert(CGameAction::ProcessActionUser(u5, &nd1058));
+    nd1058.strParam = "time set 500";
+    assert(CGameAction::ProcessActionUser(u5, &nd1058));
+    nd1058.strParam = "time == 500";
+    assert(CGameAction::ProcessActionUser(u5, &nd1058));
+    nd1058.strParam = "time > 499";
+    assert(CGameAction::ProcessActionUser(u5, &nd1058));
+    nd1058.strParam = "time < 500";
+    assert(!CGameAction::ProcessActionUser(u5, &nd1058));
+    nd1058.strParam = "time == 499";
+    assert(!CGameAction::ProcessActionUser(u5, &nd1058));
+    nd1058.strParam = "time += 100";
+    assert(CGameAction::ProcessActionUser(u5, &nd1058));
+    nd1058.strParam = "time == 600";
+    assert(CGameAction::ProcessActionUser(u5, &nd1058));
+    nd1058.strParam = "time"; // <3 tokens -> false
+    assert(!CGameAction::ProcessActionUser(u5, &nd1058));
+    // 1095 (rank 0x54): status sync stub -> true
+    CDialogEngine::Node nd1095; nd1095.dwType = 1095; nd1095.strParam = "";
+    assert(CGameAction::ProcessActionUser(u5, &nd1095));
+
     // 1084: "13901336 6 7" (live) - id resolved into vars 6,7
     CDialogEngine::Node nd1084; nd1084.dwType = 1084;
     nd1084.strParam = "13901336 6 7";

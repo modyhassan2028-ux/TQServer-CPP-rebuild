@@ -832,6 +832,17 @@ public:
     uint32_t GetMaxMana() const { return m_dwMaxMana; }
     void SetMaxMana(uint32_t v) { m_dwMaxMana = v; }
 
+    // cq_action 1058 (rank 0x32): the module-7 var store backing
+    // the FUN_140118220 singleton's vcall+0x38 (read) / vcall+0x40
+    // (set/add) interface - per (user, cq_action.data) values.
+    // ("time" vars are timestamps; interval(0) compares now-value.)
+    std::unordered_map<uint32_t, int32_t> m_mapVarM7;
+    int32_t GetVarM7(uint32_t k) const {
+        auto it = m_mapVarM7.find(k);
+        return it == m_mapVarM7.end() ? 0 : it->second;
+    }
+    void SetVarM7(uint32_t k, int32_t v) { m_mapVarM7[k] = v; }
+
     void SetTransform(int32_t v) { m_nTransform = v; printf("[USER] %u transform -> %d\n", m_dwId, v); }
     uint32_t GetIteratorVar() const { return m_dwIterator; }
     void SetIteratorVar(uint32_t v) { m_dwIterator = v; }
