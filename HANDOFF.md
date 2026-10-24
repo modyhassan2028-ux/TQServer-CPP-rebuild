@@ -1,4 +1,4 @@
-# HANDOFF — نقطة تسليم للأجنت التالي (آخر تحديث: 2026-10-24، نهاية جلسة عائلة 401-498 + إصلاح مولّد الهياكل)
+# HANDOFF — نقطة تسليم للأجنت التالي (آخر تحديث: 2026-10-24، نهاية جلسة العائلات الأخيرة 3907/8007/8011/9001 — السويتش الوظيفي مكتمل 100% من الصفوف الحية)
 
 > هذا الملف هو نقطة البداية لأي أجنت يكمل الشغل. اقرأ PORTING_LOG.md للمنهجية
 > والتاريخ الكامل، وهذا الملف لمعرفة "أنا فين دلوقتي بالظبط".
@@ -23,6 +23,13 @@
   `g++ -std=c++17 "-D__declspec(x)=" -I. -Iinclude -ICore/CQBase -ICore/DB -ICore/Root -IExe/MsgServer -IExe/NpcServer -IExe/CQCrossServer -Ivendor/lua -IModules/Syndicate -IModules/Trade -Wno-unused-parameter tests/dialog_fidelity_test.cpp tests/stub_cross_client.cpp $(ls Exe/MsgServer/*.cpp | grep -v main.cpp) Exe/MsgServer/LuaScript/LuaVM.cpp Exe/MsgServer/Activity/ActivityManager.cpp Core/CQBase/*.cpp Core/DB/*.cpp Core/Root/*.cpp /tmp/luao/*.o -lm -ldl -lpthread -o /tmp/fidelity_test`
   (objects لوا في /tmp/luao — لو ضاعت: `cd vendor/lua/src && cc -c *.c` لكل ملف
   إلى /tmp/luao، انظر PORTING_LOG).
+- **بناء سريع (جديد، موصى بيه)**: كاش objects موحّد بـ g++ -O0 في
+  **/tmp/objs2** (48 object، ABI واحد __cxx11 — كان في مشكلة خلط
+  zig/libc++ مع g++/libstdc++ قبل كده). أي اختبار جديد:
+  `g++ -std=c++17 -O0 "-D__declspec(x)=" -I. -Iinclude -ICore/CQBase -ICore/DB -ICore/Root -IExe/MsgServer -IExe/NpcServer -IExe/CQCrossServer -Ivendor/lua -Wno-unused-parameter -c tests/X.cpp -o /tmp/tu.o && g++ -o /tmp/xtest $(ls /tmp/objs2/*.o | grep -v tu_) /tmp/tu.o /tmp/luao/*.o -lm -ldl -lpthread`
+  (~10 ثواني بدل 8 دقايق). لو /tmp/objs2 ضاعت، أعد بناءها متوازيًا:
+  `(ls Exe/MsgServer/*.cpp | grep -v main.cpp; echo tests/stub_cross_client.cpp; ls Exe/MsgServer/Activity/ActivityManager.cpp Exe/MsgServer/LuaScript/LuaVM.cpp Core/CQBase/*.cpp Core/DB/*.cpp Core/Root/*.cpp) | xargs -P $(nproc) -I{} sh -c 'f="{}"; g++ -std=c++17 -O0 "-D__declspec(x)=" -I. -Iinclude -ICore/CQBase -ICore/DB -ICore/Root -IExe/MsgServer -IExe/NpcServer -IExe/CQCrossServer -Ivendor/lua -Wno-unused-parameter -c "$f" -o /tmp/objs2/$(echo $f | tr "/" "_")'`
+  (غيّر امتداد .cpp إلى .o في الاسم). الربط النهائي بـ g++ مش zig.
 - ملاحظات مالية: لو الرسائل/الدفعات فشلت: انتظر تجديد الـ credits الشهرية.
 
 ## وين وصلنا بالظبط — سويتش cq_action (FUN_14012a6e0، 175 case)
@@ -37,7 +44,7 @@ chk_sum بمعادلة FUN_1400fe140 كاملة + LAST_INSERT_ID)،
 **1086** (0x4c levexp var، objdump-verified)، وأصناف 503-520 القديمة.
 **النتيجة: كل الأنواع الصغيرة الشائعة في السويتش خلصت.**
 
-## المتبقي بالترتيب (ابدأ من 1)
+## المتبقي بالترتيب (ابدأ من 1 — المهم دلوقتي: مهارة 3 Skills)
 1. ~~FUN_140145f60 — تم اكتشاف أنه مبورت خلاص (هو ProcessAction
    الرئيسي نفسه، سويتش العائلات الـ22 + العمق + البروفايلنغ)، ومطالبة
    1023 موصولة بيه ومختبرة حية (جلسة 2026-10-24): اختبار
@@ -63,9 +70,14 @@ chk_sum بمعادلة FUN_1400fe140 كاملة + LAST_INSERT_ID)،
      جديد، توكنات %iter_wanted/%iter_police_wanted. اختبار
      action_3001_3012_wanted_test ALL PASSED (15 سيناريو حي).
      3009 مالهاش كيس في الأصل → false حرفي.
-   - **المتبقي الفعلي**: 3907 (5 صفوف)، 8007/8011 (7)، 9001 (1) —
-     كلها عائلات صغيرة جدًا، بعد كده البورت الوظيفي للسويتش الأصلي
-     يبقى مكتمل 100% من ناحية الصفوف الحية.
+   - ~~**المتبقي الفعلي**: 3907 (5 صفوف)، 8007/8011 (7)، 9001 (1)~~ —
+     **تمت (جلسة 2026-10-24 الرابعة)**: 3907 award gate (FUN_140131eb0)،
+     8001-8384 dialog/other-server (FUN_140128b30)، 9001-9384
+     OS-visitor/frontier (FUN_14012f860) كلها مبورتة حرفيًا.
+     اختبار tests/action_final_families_test.cpp الجديد 33 سيناريو
+     ALL PASSED + ريجريشن 7/7 (fidelity 3/3 جولات). تفاصيل objdump
+     كاملة في PORTING_LOG. **السويتش الوظيفي للـ cq_action مكتمل
+     100% من ناحية الصفوف الحية** — كل الأنواع الحية ليها معالج.
 3. **نظام المهارات (Skills)** — أكبر ناقص في الـ gameplay كله، لم يبدأ حرفيًا.
 4. بعد كده: بقية دوال السيرفر الوظيفية (تقدير الحالي: 30-40% معمول،
    نصفه حرفي بالكامل، من أصل 28,042 دالة مفككة).

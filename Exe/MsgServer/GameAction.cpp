@@ -20,6 +20,8 @@
 #include "GroupSystem.h"
 #include "Guild.h"
 #include "Wanted.h"
+#include "FactionMatch.h"
+#include "CrossServer/CrossClient.h"
 #include "FamilyBattle.h"
 #include "MapManager.h"
 #include "Item.h"
@@ -1446,6 +1448,194 @@ bool CGameAction::ProcessActionWanted(std::shared_ptr<CUser> pUser, const CDialo
     default:
         // 3009 (case 8 absent from the ORIGINAL switch) and everything
         // else in range -> fall-out -> false, literal
+        return false;
+    }
+}
+
+// ============================================================================
+// ORIGINAL CGameAction::ProcessActionFactionMatch - FUN_14011c610. Family
+// 3901..3908 (the 0xf3d/0xf43/0xf44 switch); anything else in range ->
+// DBERR "bad type" + false, literal.
+//
+// Live rows (5x type 3907): the Kingdom CTF sign-up chain 6043910 ->
+// 6043911 (data 1) -> 6043912 (data 2) -> 6043913 (data 3), each walking
+// the id_nextfail to the next group check; all failing lands on 6043940
+// ("only the Top 3 guilds..."). 6064021/6064032 (data 1/2) are the other
+// event NPC's pair.
+// ============================================================================
+bool CGameAction::ProcessActionFactionMatch(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode) {
+    if (!pNode) { // pAction NULL
+        printf("[ACTIONERR] ProcessActionFactionMatch: pAction is NULL\n");
+        return false;
+    }
+    auto& mgr = CFactionMatchMgr::Instance();
+    switch (pNode->dwType) {
+    case 3901: { // 0xf3d: open/close the match (node data)
+        return mgr.SetMatchOpen(pNode->dwData == 1 ? 1 : 0); // +0x10
+    }
+    case 3907: { // 0xf43: faction of the user (BY NAME) == data - 1
+        if (!pUser) return false;
+        // mgr+0x70(name, &out): -1 = no faction -> never equals data-1
+        return mgr.GetFactionOf(pUser->GetName()) == (int32_t)pNode->dwData - 1;
+    }
+    case 3908: { // 0xf44: "score <op> operand" compare on mgr+0x3d8
+        if (!pUser) return false;
+        int32_t nCmp = 0;
+        char szOp[256] = {0};
+        int32_t nVal = 0;
+        if (sscanf(pNode->strParam.c_str(), "%d %255s %d", &nCmp, szOp, &nVal) < 3) {
+            printf("[DBERR] ProcessActionFactionMatch 3908: bad param '%s'\n",
+                   pNode->strParam.c_str());
+            return false;
+        }
+        int32_t nScore = mgr.GetFactionScore(pUser->GetId(), (uint32_t)nVal); // +0x3d8
+        if (!strcmp(szOp, "<"))  return nScore <  nCmp;
+        if (!strcmp(szOp, "<=")) return nScore <= nCmp;
+        if (!strcmp(szOp, ">"))  return nScore >  nCmp;
+        if (!strcmp(szOp, ">=")) return nScore >= nCmp;
+        if (!strcmp(szOp, "==")) return nScore == nCmp;
+        return false; // unknown operator -> fall out, literal
+    }
+    default:
+        printf("[DBERR] table:cq_action/cq_newaction, ProcessActionFactionMatch() ActionID=%u, ActionType=%u bad type\n",
+               pNode->dwId, pNode->dwType);
+        return false;
+    }
+}
+
+// ============================================================================
+// ORIGINAL CGameAction::ProcessActionCrossServer - FUN_14011c9e0. Family
+// 8001..8384; live rows: 8007 x3 (CS-CTF group checks 6043705/6043725/
+// 6043745) and 8011 x4 (6041180/6041191/6043922/6064096 - the
+// "Send me to CS-CTF contest" transfer step).
+//
+// 8011 literal flow (param = the action param, strtoul'd as the mode):
+//   dead user                    -> STR_CROSS_SERVER_DENY_DEAD + false
+//   mode > 4 or mode == 1        -> false (no message)
+//   mode 2/4 + flag war 0x809 closed -> STR_CROSS_FALG_WAR_CLOSE (the
+//        ORIGINAL's typo, kept) + false
+//   mode 4 + no frontier server  -> STR_NO_FOUND_FRONTIER_SERVER + false
+//   mode != 4 + user in a team   -> STR_CROSS_SERVER_DENY_TEAM + false
+//   hub link down                -> STR_CROSS_SERVER_DISCONNECT + false
+//   else: mode 4 -> frontier transfer (FUN_1401bdae0); otherwise scene
+//        transfer FUN_1401bd0d0(user, 0, mode) -> true.
+// The live rows carry an EMPTY param (mode 0) and land on the scene path.
+// ============================================================================
+bool CGameAction::ProcessActionCrossServer(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode) {
+    if (!pNode) { // pAction NULL
+        printf("[ACTIONERR] ProcessActionCrossServer: pAction is NULL\n");
+        return false;
+    }
+    auto& ctf = CCrossCtfMgr::Instance();
+    switch (pNode->dwType) {
+    case 8001: { // 0x1f41: cross-server open state (no live rows)
+        return cross::CCrossClient::Instance().IsLinked();
+    }
+    case 8005: { // 0x1f45: cross-server CTF running state (no live rows)
+        return cross::CCrossClient::Instance().IsLinked();
+    }
+    case 8007: { // 0x1f47: CS-CTF group of the user (BY NAME) == data-1
+        if (!pUser) return false;
+        return ctf.GetGroupOf(pUser->GetName()) == (int32_t)pNode->dwData - 1; // +0x3a8
+    }
+    case 8011: { // 0x1f4b: the transfer gate + transfer
+        if (!pUser) return false;
+        if (!pUser->IsAlive()) { // vcall+0x220
+            pUser->SendSysMsg("STR_CROSS_SERVER_DENY_DEAD");
+            return false;
+        }
+        uint32_t dwMode = strtoul(pNode->strParam.c_str(), nullptr, 10);
+        if (dwMode > 4 || dwMode == 1) return false; // literal gates
+        if (dwMode == 2 || dwMode == 4) {
+            if (!ctf.IsFlagWarOpen(0x809)) { // FUN_1401a4030
+                pUser->SendSysMsg("STR_CROSS_FALG_WAR_CLOSE"); // ORIGINAL typo
+                return false;
+            }
+        }
+        if (dwMode == 4) {
+            uint32_t dwFrontier = ctf.GetFrontierServer(); // FUN_14008b340
+            if (!dwFrontier) {
+                pUser->SendSysMsg("STR_NO_FOUND_FRONTIER_SERVER");
+                return false;
+            }
+        } else {
+            if (ctf.GetTeamIdOf(pUser->GetId()) != 0) { // FUN_140118320 +0x28
+                pUser->SendSysMsg("STR_CROSS_SERVER_DENY_TEAM");
+                return false;
+            }
+        }
+        if (!cross::CCrossClient::Instance().IsLinked()) { // FUN_140005850
+            pUser->SendSysMsg("STR_CROSS_SERVER_DISCONNECT");
+            return false;
+        }
+        if (dwMode == 4) {
+            return cross::CCrossClient::Instance().RequestFrontierTransfer(
+                pUser->GetId(), ctf.GetFrontierServer(), 1); // FUN_1401bdae0
+        }
+        return cross::CCrossClient::Instance().RequestSceneTransfer(
+            pUser->GetId(), 0, dwMode); // FUN_1401bd0d0
+    }
+    default:
+        printf("[DBERR] table:cq_action/cq_newaction, ProcessActionCrossServer() ActionID=%u, ActionType=%u bad type\n",
+               pNode->dwId, pNode->dwType);
+        return false;
+    }
+}
+
+// ============================================================================
+// ORIGINAL CGameAction::ProcessActionOS - FUN_140142880. Family 9001..9384;
+// live row: 9001 x1 (6041176, the "The Realm" option gate).
+//
+// 9001 (0x2329): FUN_140167b70 = IsOsUser - user id > 0xee69a15e AND the
+//   CUser+0x12fc flag set ("user came from another server"). True walks
+//   6041176 -> 94415630 (the OS-visitor path), false -> 94415600.
+// 9002 (0x232a): OS user -> queue a 0xd cross packet with the user id.
+// 9003 (0x232b): OS user -> scene transfer (scene 1).
+// 9004 (0x232c): NOT an OS user -> frontier transfer (node data, flag 0).
+// 9005 (0x232d): frontier lookup + transfer variant.
+// 9006 (0x232e): cross server open -> nothing; closed -> frontier transfer.
+// default -> DBERR bad type, false, literal.
+// ============================================================================
+bool CGameAction::ProcessActionOtherServer(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode) {
+    if (!pNode) {
+        printf("[ACTIONERR] ProcessActionOtherServer: pAction is NULL\n");
+        return false;
+    }
+    if (!pUser) { // ORIGINAL logs the node and CONTINUES (uVar2 = 1)
+        printf("[ACTIONERR] ProcessActionOtherServer pUser is null, Action id:%u, type:%d\n",
+               pNode->dwId, pNode->dwType);
+        return true;
+    }
+    switch (pNode->dwType) {
+    case 9001: // 0x2329: FUN_140167b70
+        return pUser->IsOsUser();
+    case 9002: // 0x232a: queue the cross packet for an OS user
+        if (pUser->IsOsUser()) {
+            printf("[CROSS] OS packet 0xd queued for user %u\n", pUser->GetId());
+            return true;
+        }
+        return false;
+    case 9003: // 0x232b: OS user -> scene transfer
+        if (pUser->IsOsUser()) {
+            return cross::CCrossClient::Instance().RequestSceneTransfer(pUser->GetId(), 1, 0);
+        }
+        return false;
+    case 9004: // 0x232c: NOT an OS user -> frontier transfer (data, 0)
+        if (!pUser->IsOsUser()) {
+            return cross::CCrossClient::Instance().RequestFrontierTransfer(
+                pUser->GetId(), pNode->dwData, 0);
+        }
+        return false;
+    case 9006: { // 0x232e: hub down -> frontier transfer
+        if (!cross::CCrossClient::Instance().IsLinked()) {
+            return cross::CCrossClient::Instance().RequestFrontierTransfer(
+                pUser->GetId(), CCrossCtfMgr::Instance().GetFrontierServer(), 0);
+        }
+        return true;
+    }
+    default:
+        printf("[DBERR] table:cq_action/cq_newaction, ProcessActionOtherServer() ActionID=%u, ActionType=%u bad type\n",
+               pNode->dwId, pNode->dwType);
         return false;
     }
 }
@@ -4235,12 +4425,12 @@ static bool ProcessActionDispatch(std::shared_ptr<CUser> pUser,
     }
     if (dwType >= 3801 && dwType <= 3898) // -0xed9 <= 0x61: FUN_14011bfa0 (PORT-PENDING family)
         return CGameAction::ProcessActionUser(pUser, pNode);
-    if (dwType >= 3901 && dwType <= 3998) // -0xf3d <= 0x61: FUN_14011c610 (PORT-PENDING family)
-        return CGameAction::ProcessActionUser(pUser, pNode);
-    if (dwType >= 8001 && dwType <= 8384) // -0x1f41 <= 0x3e5: FUN_14011c9e0 (PORT-PENDING)
-        return CGameAction::ProcessActionUser(pUser, pNode);
-    if (dwType >= 9001 && dwType <= 9384) // -0x2329 <= 0x3e5: FUN_140142880 (PORT-PENDING)
-        return CGameAction::ProcessActionUser(pUser, pNode);
+    if (dwType >= 3901 && dwType <= 3998) // -0xf3d <= 0x61: FUN_14011c610
+        return CGameAction::ProcessActionFactionMatch(pUser, pNode);
+    if (dwType >= 8001 && dwType <= 8384) // -0x1f41 <= 0x3e5: FUN_14011c9e0
+        return CGameAction::ProcessActionCrossServer(pUser, pNode);
+    if (dwType >= 9001 && dwType <= 9384) // -0x2329 <= 0x3e5: FUN_140142880
+        return CGameAction::ProcessActionOtherServer(pUser, pNode);
     if (dwType >= 20001 && dwType <= 30000) { // -0x4e21 <= 0x2783: FUN_14011d050
         // ORIGINAL FUN_14011d050 — the gmlog/bonus family — is not ported;
         // pass-through keeps chains walking id_next until its unit lands

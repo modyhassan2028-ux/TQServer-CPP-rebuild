@@ -42,6 +42,24 @@ CCrossClient& CCrossClient::Instance() {
     return s;
 }
 
+// ---- ORIGINAL transfer models -------------------------------------------
+// FUN_1401bd0d0(user, scene, mode): record the cross-server scene request.
+// The wire transfer needs the hub; the offline sim records it for the
+// action flow (the handler returns true either way, like the original).
+bool CCrossClient::RequestSceneTransfer(uint32_t dwUserId, uint32_t dwScene, uint32_t dwMode) {
+    std::lock_guard<std::mutex> lock(m_mutexSend);
+    m_dwLastTransferUser = dwUserId; m_dwLastTransferA = dwScene; m_dwLastTransferB = dwMode;
+    printf("[CROSS] scene transfer: user %u -> scene %u mode %u\n", dwUserId, dwScene, dwMode);
+    return true;
+}
+// FUN_1401bdae0(user, server, flag): transfer to the frontier server
+bool CCrossClient::RequestFrontierTransfer(uint32_t dwUserId, uint32_t dwServer, uint32_t dwFlag) {
+    std::lock_guard<std::mutex> lock(m_mutexSend);
+    m_dwLastTransferUser = dwUserId; m_dwLastTransferA = dwServer; m_dwLastTransferB = dwFlag;
+    printf("[CROSS] frontier transfer: user %u -> server %u flag %u\n", dwUserId, dwServer, dwFlag);
+    return true;
+}
+
 bool CCrossClient::Start() {
     if (m_bRunning.load()) return true;
     std::string strEnabled = ReadIni("data/cross.ini", "ENABLED", "1");

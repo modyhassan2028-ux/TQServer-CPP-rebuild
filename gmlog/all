@@ -92,3 +92,7 @@ CHECKF in idNextTask != ID_NONE, 4196
 CHECKF in pszAccept && strlen(pszAccept) > 0, 4253
 IF_NOT_ in ret >= 3, 4268
 IF_NOT_ in ret >= 3, 4268
+CHECKF in idNextTask != ID_NONE, 4196
+CHECKF in pszAccept && strlen(pszAccept) > 0, 4253
+IF_NOT_ in ret >= 3, 4268
+IF_NOT_ in ret >= 3, 4268

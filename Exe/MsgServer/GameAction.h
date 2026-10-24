@@ -41,6 +41,16 @@ public:
     // ORIGINAL CGameAction::ProcessActionWanted (FUN_14011a7e0): the
     // 3001..3012 bounty-office family, routed for 3001-3098
     static bool ProcessActionWanted(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode);
+    // ORIGINAL CGameAction::ProcessActionFactionMatch (FUN_14011c610):
+    // the 3901..3908 faction-match family, routed for 3901-3998
+    static bool ProcessActionFactionMatch(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode);
+    // ORIGINAL CGameAction::ProcessActionCrossServer (FUN_14011c9e0):
+    // the 8001..8384 cross-server family (8007 group, 8011 transfer)
+    static bool ProcessActionCrossServer(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode);
+    // ORIGINAL FUN_140142880 (the OTHER "ProcessActionOS": the
+    // 9001..9384 other-server family, routed for 9001-9384; the dialog
+    // renderer FUN_140142db0 keeps the ProcessActionOS name)
+    static bool ProcessActionOtherServer(std::shared_ptr<CUser> pUser, const CDialogEngine::Node* pNode);
     // ORIGINAL FUN_140127070: the 801..898 window (dropitem/dropmoney +
     // per-monster money piles). Anything but 801/802 in the window is
     // "wrong action type" -> FALSE.

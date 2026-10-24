@@ -20,6 +20,18 @@ public:
     bool IsLinked() const { return m_bLinked.load(); }
     const std::string& ServerName() const { return m_strServerName; }
 
+    // ---- ORIGINAL transfer models (no hub needed) -------------------
+    // FUN_1401bd0d0(user, dwScene, dwMode): queue the user's transfer to
+    // a cross-server scene (8011 param mode 0/2; 9003 uses scene 1)
+    bool RequestSceneTransfer(uint32_t dwUserId, uint32_t dwScene, uint32_t dwMode);
+    // FUN_1401bdae0(user, dwServer, dwFlag): transfer to the frontier
+    // server (8011 mode 4 / 9004 / 9006)
+    bool RequestFrontierTransfer(uint32_t dwUserId, uint32_t dwServer, uint32_t dwFlag);
+    // test/offline hook: pretend the hub link is up
+    void DebugSetLinked(bool b) { m_bLinked.store(b); }
+    // last recorded request (verification)
+    uint32_t m_dwLastTransferUser = 0, m_dwLastTransferA = 0, m_dwLastTransferB = 0;
+
     // game -> hub
     void SendTalk(const std::string& strFrom, const std::string& strText);
     void RequestWho(uint32_t dwUserId); // /crosswho: reply goes to this user
