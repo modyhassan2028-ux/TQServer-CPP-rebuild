@@ -76,23 +76,41 @@ bool CCountrySysMgr::LoadLeagueInfo(CMySQLClient* pDB) {
         if ((int32_t)lg.dwCountryDate > 0)
             m_nCountryDateTotal += lg.dwCountryDate;
     }
-    // ORIGINAL tail (~26700): spare capacity distribution
-    //   total = m_dwCapacityPerServer * m_dwServerCount
-    //   if (m_nCountryDateTotal < total) deficit = (total -
-    //   m_nCountryDateTotal) % m_dwServerCount distributed
-    //   round-robin over the sorted league map. The exact
-    //   round-robin ordering is documented TBD (lines 26700-26760);
-    //   the capacity/deficit arithmetic is kept verbatim.
+    DistributeSpareCapacity();
+    return true;
+}
+void CCountrySysMgr::DistributeSpareCapacity() {
+    // ORIGINAL tail (LAB_1400211b0, ~26700-26760): spare capacity
+    //   distribution, ported verbatim:
+    //   uVar3 = capacity total, local_1b8 = the date sum accumulated
+    //   above, iVar14 = server count, uVar7 = deficit % count.
+    //   The loop walks the server map (+0xc0, tree order = ascending
+    //   server id); per node, plVar6[4] is its league entry:
+    //     iVar4 = FUN_140022ce0(league) + (uVar3-local_1b8)/iVar14;
+    //     if (0 < uVar7) { iVar4 += 1; uVar7--; }
+    //     FUN_140022d40(league, iVar4, 1);   // write + commit
+    //   i.e. every league gets its full share, and the FIRST
+    //   (deficit % count) leagues get one extra.
     if (m_dwServerCount >= 1) {
-        const uint32_t dwTotal =
-            m_dwCapacityPerServer * m_dwServerCount;
-        if (m_nCountryDateTotal < dwTotal) {
-            const uint32_t dwDeficit =
-                (dwTotal - m_nCountryDateTotal) % m_dwServerCount;
-            (void)dwDeficit; // assignment loop TBD (see header note)
+        const int32_t nTotal =
+            (int32_t)(m_dwCapacityPerServer * m_dwServerCount);
+        if ((int32_t)m_nCountryDateTotal < nTotal) {
+            const int32_t nShare = (nTotal - (int32_t)m_nCountryDateTotal)
+                                   / (int32_t)m_dwServerCount;
+            int32_t nRem = (nTotal - (int32_t)m_nCountryDateTotal)
+                           % (int32_t)m_dwServerCount;
+            // tree order over the servers: our (server, league) map
+            // enumerates them ascending
+            uint32_t dwLastServer = 0xffffffff;
+            for (auto& kv : m_leagues) {
+                if (kv.first.first == dwLastServer) continue;
+                dwLastServer = kv.first.first;
+                int32_t nNew = (int32_t)kv.second.dwCountryDate + nShare;
+                if (0 < nRem) { nNew += 1; nRem -= 1; } // uVar7 spread
+                kv.second.dwCountryDate = (uint32_t)nNew; // +0xb0 write
+            }
         }
     }
-    return true;
 }
 
 bool CCountrySysMgr::LoadPlunderTimeConfig() {

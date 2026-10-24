@@ -80,6 +80,12 @@ public:
 
     bool HasLeague(uint32_t dwIdServer, uint32_t dwIdLeague) const;
 
+    // ORIGINAL LoadLeagueInfo tail (LAB_1400211b0): distribute the
+    // spare capacity over the leagues - every league gets
+    // (total-dateSum)/serverCount, the first (deficit%count) get
+    // one extra; public so the tail is testable in isolation.
+    void DistributeSpareCapacity();
+
     // ---- case 4 (~29589): CCountrySysMgr::UpdateCountryDate ----
     // ORIGINAL FUN_14001a240 (the FULL 434 bytes, not just the
     // lookup): find the league of dwIdServer, walk its date map
@@ -147,6 +153,10 @@ public:
     uint32_t LastTokenTouch(uint32_t dwIdServer) const;
     size_t LeagueCount() const { return m_leagues.size(); }
     uint32_t TotalCountryDate() const { return m_nCountryDateTotal; }
+    // test seam: the config inputs of the distribution tail
+    void SetCapacityForTest(uint32_t dwCap, uint32_t dwServers) {
+        m_dwCapacityPerServer = dwCap; m_dwServerCount = dwServers;
+    }
 
     // test seam: inject a validated league (LoadLeagueInfo path)
     void InsertLeagueForTest(const CountryLeague& lg) {

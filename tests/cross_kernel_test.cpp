@@ -225,6 +225,28 @@ int main() {
         assert(sent.size() == nMiss); // "country is exist" -> silent
         kern2.OnCountryFirst(111, {55, 1}); // no league at all
         assert(sent.size() == nMiss); // "has no league" -> silent
+        // --- capacity distribution tail (LAB_1400211b0) ---
+        {
+            CCountrySysMgr dist;
+            dist.SetCapacityForTest(10, 3); // total 30
+            CountryLeague a{}; a.dwIdServer = 1; a.dwIdLeague = 1;
+            a.dwCountryDate = 5;
+            CountryLeague b = a; b.dwIdServer = 2; b.dwCountryDate = 5;
+            CountryLeague c = a; c.dwIdServer = 3; c.dwCountryDate = 6;
+            dist.InsertLeagueForTest(a);
+            dist.InsertLeagueForTest(b);
+            dist.InsertLeagueForTest(c);
+            // date sum 16, deficit 14 -> share 4, rem 2: the first
+            // two servers (tree order 1, 2) take the extra +1
+            dist.DistributeSpareCapacity();
+            assert(dist.CountryDateOf(1,1) == 10); // 5+4+1
+            assert(dist.CountryDateOf(2,1) == 10); // 5+4+1
+            assert(dist.CountryDateOf(3,1) == 10); // 6+4
+            // no deficit -> dates untouched
+            dist.SetCapacityForTest(2, 3); // total 6 <= sum 16
+            dist.DistributeSpareCapacity();
+            assert(dist.CountryDateOf(1,1) == 10);
+        }
         // --- CCountrySysMgr::Init against the live cq DB ---
         {
             CMySQLClient db;
