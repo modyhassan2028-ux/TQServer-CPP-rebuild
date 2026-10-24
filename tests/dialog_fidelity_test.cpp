@@ -1953,6 +1953,26 @@ system("mariadb -u root cq -e \"DELETE FROM cq_item WHERE owner_id=888001 AND ty
     { auto n = mkE(20001, "");               assert(!CGameAction::ProcessActionUser(u5,&n)); }
     { auto n = mkE(20002, "");               assert(!CGameAction::ProcessActionUser(u5,&n)); }
 
+    // 1071 timer subsystem (FUN_1401a9b00 ABI): registration + drain
+    {
+        CDialogEngine::Node nd; nd.dwType = 1071; nd.strParam = "60 9018985 0";
+        u5->m_deqTimers.clear();
+        assert(CGameAction::ProcessActionUser(u5, &nd));
+        assert(u5->m_deqTimers.size() == 1);
+        assert(u5->m_deqTimers[0].dwDelay == 60);
+        assert(u5->m_deqTimers[0].nActionId == 9018985);
+        // guard: actionId == 0 -> no registration ("180 0 1" live row)
+        nd.strParam = "180 0 1";
+        assert(CGameAction::ProcessActionUser(u5, &nd));
+        assert(u5->m_deqTimers.size() == 1); // unchanged
+        // drain: not due yet / due after delay
+        auto now = u5->m_deqTimers[0].dwStart;
+        assert(u5->ProcessActionTimers(now).empty());
+        auto fired = u5->ProcessActionTimers(now + 60);
+        assert(fired.size() == 1 && fired[0] == 9018985);
+        assert(u5->m_deqTimers.empty());
+    }
+
     // 1084: "13901336 6 7" (live) - id resolved into vars 6,7
     CDialogEngine::Node nd1084; nd1084.dwType = 1084;
     nd1084.strParam = "13901336 6 7";

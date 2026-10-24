@@ -11,6 +11,8 @@ class CMonster;
 #include <utility>
 #include <functional>
 #include <vector>
+#include <deque>
+#include <ctime>
 #include <map>
 
 class CGameMap;
@@ -831,6 +833,45 @@ public:
     uint32_t m_dwMaxMana{100};
     uint32_t GetMaxMana() const { return m_dwMaxMana; }
     void SetMaxMana(uint32_t v) { m_dwMaxMana = v; }
+
+    // ORIGINAL FUN_1401a9b00 (timer registration, backs cq_action 1071):
+    // guard: (actionId != 0 || param != NULL); record =
+    // { delay u32, start = tq::TimeGet(0)/1000, actionId i32, param str }
+    // pushed into the per-user ring queue at user+0x330 (FUN_1401a4740
+    // push, capacity-checked ring). The drain fires the action when
+    // now >= start + delay (original drain site TBD - documented).
+    struct SActionTimer {
+        uint32_t dwDelay{0};     // local_70 = param_2 (delay seconds)
+        uint32_t dwStart{0};     // local_6c = TimeGet(0)/1000
+        int32_t  nActionId{0};   // local_68 = param_3
+        std::string strParam;    // local_60 ("" when NULL)
+    };
+    std::deque<SActionTimer> m_deqTimers;  // user+0x330 ring
+    void RegisterActionTimer(uint32_t dwDelay, int32_t nActionId,
+                             const char* pszParam) {
+        // ORIGINAL guard: if (param_3 != 0 || param_4 != NULL)
+        if (nActionId == 0 && pszParam == nullptr) return;
+        SActionTimer t;
+        t.dwDelay = dwDelay;
+        t.dwStart = (uint32_t)time(nullptr); // tq::TimeGet(0)/1000
+        t.nActionId = nActionId;
+        t.strParam = pszParam ? pszParam : "";
+        m_deqTimers.push_back(t);
+    }
+    // drain: returns action ids whose timer expired at 'now' (erased)
+    std::vector<uint32_t> ProcessActionTimers(uint32_t uNow) {
+        std::vector<uint32_t> fired;
+        auto it = m_deqTimers.begin();
+        while (it != m_deqTimers.end()) {
+            if (uNow >= it->dwStart + it->dwDelay) {
+                fired.push_back((uint32_t)it->nActionId);
+                it = m_deqTimers.erase(it);
+            } else {
+                ++it;
+            }
+        }
+        return fired;
+    }
 
     // cq_action 1058 (rank 0x32): the module-7 var store backing
     // the FUN_140118220 singleton's vcall+0x38 (read) / vcall+0x40

@@ -3563,9 +3563,9 @@ bool bAll = (llAll == 1);
         if (sscanf(pNode->strParam.c_str(), "%u %u %hu",
                    &dwDelay, &dwActionId, &wFlag) != 3)
             return false;
-        // FUN_1401a9b00: register timer (delay secs -> execute action)
-        printf("[TIMER] cq_action %u: user %u timer %u s -> action %u\n",
-               pNode->dwId, pUser->GetId(), dwDelay, dwActionId);
+        // FUN_1401a9b00(user, delay=param_2, actionId=param_3, NULL):
+        // guard blocks registration when actionId == 0 ("180 0 1" rows)
+        pUser->RegisterActionTimer(dwDelay, (int32_t)dwActionId, nullptr);
         if (wFlag != 0) { // notify msg (type 0x9f) - send stubbed
             printf("[TIMER] cq_action %u: notify flag %u for user %u\n",
                    pNode->dwId, wFlag, pUser->GetId());
