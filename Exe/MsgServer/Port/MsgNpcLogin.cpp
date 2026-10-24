@@ -3,33 +3,29 @@
 
 namespace msg {
 
-// ===== ORIGINAL FUN_14045b990 @ 14045b990 =====
-// VERBATIM flow (the security-cookie frame elided):
-//  1. plVar5 = *(FUN_140008520(*(dword*)(this+0x410))
-//     + 0x80); if null -> log_InlineLogERROR(
-//     &DAT_1406d9c10), plVar5 = 0 (the ORIGINAL then
-//     dereferences the null on the success path -
-//     LITERAL, not fixed here)
-//  2. memcmp16(wire+4,  "NpcServer Tqdig")
-//  3. memcmp16(wire+0x14,"skl8934##VJICW ") - the
-//     trailing space is LITERAL
-//  4. both match:
-//     if key == 0x3ade68b1 (param_3):
-//       send(plVar5, 0xe, 0x2720, 0xea65)
-//     send(plVar5, 0xe, 0x2722, 0xea65)
-//     record: init + INLINE descriptor fields (1,0,0,0,
-//     0x835,0xffffff,0) + build SYSTEM/ALLUSERS/
-//     ANSWER_OK; if built -> kernel vt+0x30(rec,0)
-//     release; then "NPC server login OK." ->
-//     send(plVar5, 0, 0x9c41, ~(uint)loopLen) and 1
-//  5. any mismatch: the ERROR: login refuse! record
-//     (same init + build; broadcast on success) and 0
-// NOTE the strlen idiom: lVar3 starts -1 and decrements
-// per char INCLUDING the NUL iteration, so ~(uint)lVar3
-// = strlen+1 (the NUL rides along) - "NPC server login
-// OK." (20 chars) sends 21.
+// the ORIGINAL do/while 16-byte compare idiom: the
+// flag holds the LAST byte equality and the loop
+// exits on the first mismatch (semantics: all 16
+// bytes equal)
+static bool InlineEq16(const void* p, const char* q) {
+    int l = 0x10;
+    bool b = true;
+    const char* a = (const char*)p;
+    for (;;) {
+        if (l == 0) break;
+        l = l + -1;
+        b = (*a == *q);
+        a = a + 1;
+        q = q + 1;
+        if (!b) break;
+    }
+    return b;
+}
+
+// the ORIGINAL strlen idiom: l starts -1, counts
+// every char INCLUDING the NUL, so ~(uint)l =
+// strlen+1 (the NUL rides along in the keepalive)
 static uint32_t InlineStrlen1(const char* sz) {
-    // the ORIGINAL do/while (lVar3 = -1 loop)
     int64_t l = -1;
     const char* p = sz;
     for (;;) {
@@ -42,67 +38,89 @@ static uint32_t InlineStrlen1(const char* sz) {
     return ~(uint32_t)l;
 }
 
-bool MsgNpcLoginB990(MsgNpcLoginData& rD,
-                     const MsgLoginWire& rWire,
-                     bool bKeyB1) {
-    void* pKernel = rD.m_fnGetKernel();
-    void* pSender = rD.m_fnGetSender(pKernel);
-    if (pSender == nullptr) {
-        rD.m_fnLogError();        // DAT_1406d9c10
-        pSender = nullptr;        // VERBATIM: plVar5 = 0
-    }
-    if (std::memcmp(rWire.szPwd1, "NpcServer Tqdig",
-                   16) == 0 &&
-        std::memcmp(rWire.szPwd2, "skl8934##VJICW ",
-                   16) == 0) {
-        if (bKeyB1)
-            rD.m_fnSend(pSender, 0xe, 0x2720, 0xea65);
-        rD.m_fnSend(pSender, 0xe, 0x2722, 0xea65);
+// ===== ORIGINAL FUN_14045bc00 @ 14045bc00 =====
+// iVar1 = **(int **)(conn + 0x428);  // wire +0
+// if (b1 || b2) b990(conn, key == b1)
+void MsgNpcLoginDispatch(MsgNpcLoginData& rD) {
+    int iKey = (int)rD.pConn->Wire()->dwKey;
+    if (iKey == 0x3ade68b1 || iKey == 0x3ade68b2)
+        MsgNpcLoginB990(rD, iKey == 0x3ade68b1);
+}
 
-        // the outgoing stack args rebuilt VERBATIM:
-        // local_4c8 (text) = 0, _4c0 (dword) =
-        // 0xffffff, _4b8 (word) = 0x835, _4b0 = 0,
-        // _4a8 = 0, _4a0 = 0, _498 (byte) = 1
-        MsgTalkCtor(&rD.m_recTalk);
-        if (MsgTalkCreate(&rD.m_recTalk, "SYSTEM",
-                          "ALLUSERS", "ANSWER_OK",
-                          nullptr, 0xffffff, 0x835, 0,
-                          0, 0, 1)) {
-            rD.m_fnBroadcast(pKernel, &rD.m_recTalk);
+// ===== ORIGINAL FUN_14045b990 @ 14045b990 =====
+// FULL VERBATIM (the security-cookie frame elided).
+// LITERAL UB notes (documented, NOT fixed):
+//  - an invalid group id: FUN_140008520 returns 0
+//    and the ORIGINAL derefs *(0 + 0x80) -> crash
+//    (the log fires inside the lookup first)
+//  - a null sender: log DAT_1406d9c10, plVar5 = 0,
+//    flow CONTINUES - the send paths then deref
+//    the null (the refuse path survives cleanly)
+int MsgNpcLoginB990(MsgNpcLoginData& rD, bool bFlag) {
+    // 1. lVar3 = FUN_140008520(*(dword*)(conn+0x410))
+    MsgKernelObj* pSlot = (MsgKernelObj*)
+        MsgKernelGetSlot(*rD.pRegistry,
+                        rD.pConn->GroupId());
+    // 2. plVar5 = *(lVar3 + 0x80); if null:
+    //    log + plVar5 = 0 (the flow keeps running)
+    MsgSenderObj* pSend = pSlot->Sender();
+    if (pSend == nullptr) {
+        rD.m_fnLogError();          // DAT_1406d9c10
+        pSend = nullptr;
+    }
+    // 3. lVar3 = *(conn + 0x428) - the wire
+    MsgLoginWire* pWire = rD.pConn->Wire();
+    // 4. the two 16-byte literal gates
+    if (InlineEq16(pWire->szPwd1, "NpcServer Tqdig")) {
+        if (InlineEq16(pWire->szPwd2,
+                      "skl8934##VJICW ")) {
+            // 5. the handshake (vt+0x50 = Send)
+            if (bFlag)
+                pSend->pvt->m_fnSend(
+                    0xe, 0x2720, 0xea65);
+            pSend->pvt->m_fnSend(
+                0xe, 0x2722, 0xea65);
+            // 6. the ANSWER_OK record (M2/M3 real
+            //    family; the stack-arg rebuild:
+            //    text null, 0xffffff, 0x835,
+            //    0, 0, 0, byte 1)
+            MsgTalkCtor(&rD.m_recTalk);
+            if (MsgTalkCreate(&rD.m_recTalk, "SYSTEM",
+                              "ALLUSERS", "ANSWER_OK",
+                              nullptr, 0xffffff,
+                              0x835, 0, 0, 0, 1)) {
+                // 7. the SECOND kernel lookup
+                //    (plVar4) - LITERAL, then the
+                //    broadcast (vt+0x30)
+                MsgKernelObj* pSlot2 = (MsgKernelObj*)
+                    MsgKernelGetSlot(*rD.pRegistry,
+                                    rD.pConn->GroupId());
+                pSlot2->VT()->m_fnBcast(
+                    0, &rD.m_recTalk);
+            }
+            MsgTalkDtor(&rD.m_recTalk);
+            // 8. the keepalive: the strlen+1 idiom
+            //    sends 21 for the 20-char literal
+            pSend->pvt->m_fnSend(
+                0, 0x9c41,
+                InlineStrlen1("NPC server login OK."));
+            return 1;
         }
-        MsgTalkDtor(&rD.m_recTalk);
-
-        rD.m_fnLog("NPC server login OK."); // local_4c8
-        rD.m_fnSend(pSender, 0, 0x9c41,
-            InlineStrlen1("NPC server login OK."));
-        return 1;
     }
+    // 9. the refuse record - same stack-arg rebuild
+    //    with the ERROR string as the FROM
     MsgTalkCtor(&rD.m_recTalk);
-    // the same stack-arg rebuild (the text rides
-    // as "ERROR: login refuse!" here? NO - verbatim:
-    // local_4c8 = 0 again in the ORIGINAL refuse
-    // block; the ERROR string goes to the BUILD
-    // param_4 (from))
     if (MsgTalkCreate(&rD.m_recTalk, "SYSTEM",
                       "ALLUSERS", "ERROR: login refuse!",
                       nullptr, 0xffffff, 0x835, 0,
                       0, 0, 1)) {
-        rD.m_fnBroadcast(pKernel, &rD.m_recTalk);
+        MsgKernelObj* pSlot3 = (MsgKernelObj*)
+            MsgKernelGetSlot(*rD.pRegistry,
+                            rD.pConn->GroupId());
+        pSlot3->VT()->m_fnBcast(0, &rD.m_recTalk);
     }
     MsgTalkDtor(&rD.m_recTalk);
     return 0;
-}
-
-// ===== ORIGINAL FUN_14045bc00 @ 14045bc00 =====
-// iVar1 = **(int**)(this+0x428);
-// if (iVar1 == 0x3ade68b1 || iVar1 == 0x3ade68b2)
-//     FUN_14045b990(this, param_2,
-//                   iVar1 == 0x3ade68b1);
-void MsgNpcLoginDispatch(MsgNpcLoginData& rD,
-                         const MsgLoginWire& rWire) {
-    uint32_t dwKey = rWire.dwKey;
-    if (dwKey == 0x3ade68b1 || dwKey == 0x3ade68b2)
-        MsgNpcLoginB990(rD, rWire, dwKey == 0x3ade68b1);
 }
 
 } // namespace msg
