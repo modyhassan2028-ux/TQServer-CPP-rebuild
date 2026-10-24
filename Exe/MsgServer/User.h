@@ -1,5 +1,7 @@
 #pragma once
 #include "Item.h"
+
+class CMonster;
 #include "PlayerMagic.h"
 #include <cstdio>
 #include <string>
@@ -366,6 +368,49 @@ public:
     bool SendMagicEffectAfterProcess(uint32_t dwMagicType, uint32_t dwData5,
                                      uint32_t dwD3, uint32_t dwD2,
                                      uint32_t dwDamage, uint32_t dwTargetId);
+    // ORIGINAL FUN_140486fb0 target handle: the original loops ONE proxy
+    // vector where each proxy resolves to a user or a monster (vtable
+    // 0x220 = IsAlive gate, 0x240 = IsBoss, 0x288/0x290 = dead/ghost
+    // gates, GetPoint(0x1001) = the map record, GetPoint(0x1002) = the
+    // CMonster for -2 sweeps).
+    struct SMagicTarget {
+        CUser* pUser{nullptr};
+        CMonster* pMonster{nullptr};
+    };
+
+    // FUN_140486fb0 CPlayerMagic::SendMagicEffectAfterProcessGroupByPos:
+    // batches ONE 1105 for the whole target group (CreateGroup header +
+    // AppendGroup per target; on the 0x400 gate refusal the packet is
+    // broadcast first, a fresh header is created and the CURRENT target
+    // is re-appended). Per entry: id = target id, damage = the damage
+    // code (the -2 code becomes damage 0 + data5 = 2), d2 = scene diff
+    // (0 in our single-scene port), dwNext/data4 = 0 (leftover stack
+    // slots in the original call), data6 = y, data7 = x. The final
+    // packet is broadcast map-wide (include self, original map proxy
+    // vtable+0x348 flag 1). vecUnused5/vecUnused6 = the original
+    // param_5/param_6 u32 arrays, loaded by the original but only ever
+    // reaching stack slots past the append signature (kept for the
+    // literal call shape). Loop 2 (reposition): alive targets with
+    // damage != -1: code -2 -> CMonster::JumpPos(x, y) (FUN_140388a40);
+    // else JumpPos via the map-bounds path (FUN_14015f9d0; failure logs
+    // the 0x1f00 "user%u map%u(%d, %d) at %s, %d" playermagic.cpp line).
+    // The original then dispatches the kernel scene op (target id,
+    // 0x6e, 0) — FUN_1401181a0 singleton, kernel-side packet outside
+    // our slice, ported as a logged dispatch — and for boss monsters
+    // (0x240) sends CMsgAction(id, x, y, dir = 0, p6 = 3, data = 407,
+    // action = monster dir) to the creature's map.
+    bool SendMagicEffectAfterProcessGroupByPos(
+        uint32_t dwMagicType, uint32_t dwPair0, uint32_t dwPair1,
+        const std::vector<SMagicTarget>& vecTargets,
+        const std::vector<int>& vecDamage,
+        const std::vector<uint32_t>& vecUnused5,
+        const std::vector<uint32_t>& vecUnused6,
+        const std::vector<std::pair<uint32_t, uint32_t>>& vecXY);
+
+    // ORIGINAL creature vtable slot 0x378 (JumpPos) for user targets of
+    // the sweep: position move; the user-side teleport packet of the
+    // original slot is outside the ported slice (TODO with FUN_140499830).
+    void JumpPos(uint16_t usX, uint16_t usY);
     // attr-0 counter (original CUser+0x88) for newly created records
     uint32_t m_dwMagicCounter{0};
     // returns an error message, or "" on success

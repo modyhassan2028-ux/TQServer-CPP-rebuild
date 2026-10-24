@@ -15,6 +15,7 @@
 #include "User.h"
 #include "UserManager.h"
 #include "Monster.h"
+#include "MsgAction.h"
 #include "MapManager.h"
 #include "Account.h"
 #include "Dialog.h"
@@ -253,9 +254,99 @@ int main() {
     assert(pFxMap->IsValidPos(0, 0) && pFxMap->IsValidPos(500, 500));
     assert(!pFxMap->IsValidPos(-1, 100) && !pFxMap->IsValidPos(100, -1));
 
+    // ---------- SendMagicEffectAfterProcessGroupByPos (FUN_140486fb0) ----
+    {
+        CMonster monA(555002, 1, "SweepA");
+        monA.SetMapId(777000); monA.SetPos(30, 40); monA.SetDir(2);
+        CMonster monB(555003, 1, "SweepB");
+        monB.SetMapId(777000); monB.SetPos(35, 45); monB.SetDir(5);
+        monB.SetBoss(true);
+        // (effect 3 already attached at line 156 above)
+        std::vector<CUser::SMagicTarget> tg{{nullptr, &monA}, {nullptr, &monB}};
+        std::vector<int> dmg{100, -2};
+        std::vector<uint32_t> u5{}, u6{};
+        std::vector<std::pair<uint32_t, uint32_t>> xy{{60, 61}, {55, 62}};
+        struct Cap { uint16_t sz; char buf[0x420]; };
+        std::vector<Cap> caps;
+        upObs->SetPacketSink([&](const void* pv, uint16_t sz) {
+            Cap c; c.sz = sz; memcpy(c.buf, pv, sz); caps.push_back(c);
+        });
+        assert(upFx->SendMagicEffectAfterProcessGroupByPos(
+            1000, 0x1111, 0x2222, tg, dmg, u5, u6, xy));
+        // one 1105 (payload 0x74), jump 20002 for each monster, action 10010 for the boss
+        assert(caps.size() == 4);
+        assert(caps[0].sz == 0x74);               // 1105: 0x34 + 2 * 0x20
+        {
+            const char* b = caps[0].buf;
+            assert(rd32(b, 0x00) == 777001);      // attacker
+            assert(rd16(b, 0x08) == 1000);         // type
+            assert(rd8(b, 0x0f) == 2);            // count
+            assert(rd8(b, 0x10) == 3);            // flag (attr 7)
+            assert(rd32(b, 0x14) == 555002);       // entry 1 id
+            assert(rd32(b, 0x18) == 100);         // damage code
+            assert(rd32(b, 0x1c) == 0);           // d2 = scene diff (single scene)
+            assert(rd32(b, 0x24) == 0);           // data4 (leftover slot)
+            assert(rd32(b, 0x28) == 0);           // data5
+            assert(rd32(b, 0x2c) == 61);          // data6 = y
+            assert(rd32(b, 0x30) == 60);          // data7 = x
+            assert(rd32(b, 0x34) == 555003);      // entry 2 id
+            assert(rd32(b, 0x38) == 0);           // -2: damage zeroed
+            assert(rd32(b, 0x3c) == 0);           // d2
+            assert(rd32(b, 0x48) == 2);           // -2: data5 = 2
+            assert(rd32(b, 0x4c) == 62);          // data6
+            assert(rd32(b, 0x50) == 55);          // data7
+        }
+        assert(caps[1].sz == 14 && caps[2].sz == 14);  // two monster jumps
+        assert(rd32(caps[1].buf, 4) == 555002 &&
+               rd16(caps[1].buf, 8) == 60 && rd16(caps[1].buf, 10) == 61);
+        assert(rd32(caps[2].buf, 4) == 555003 &&
+               rd16(caps[2].buf, 8) == 55 && rd16(caps[2].buf, 10) == 62);
+        assert(caps[3].sz == 32);                 // CMsgAction (head+ActionData 28)
+        {
+            const char* b = caps[3].buf;
+            assert(rd16(b, 2) == 10010);          // opcode 0x271a
+            assert(rd32(b, 8) == 555003);         // id (after the u32 time slot)
+            assert(rd32(b, 0xc) == 407);          // data = 0x197
+            assert(rd32(b, 0x14) == 5);           // action = monster dir
+            assert(rd16(b, 0x18) == 3);          // p6 = 3
+            assert(rd16(b, 0x1a) == 0);           // dir = 0
+            assert(rd16(b, 0x1c) == 55);          // x post-jump
+            assert(rd16(b, 0x1e) == 62);          // y post-jump
+        }
+        assert(monA.GetX() == 60 && monA.GetY() == 61);
+        assert(monB.GetX() == 55 && monB.GetY() == 62);
+        // user-target path: reposition via CUser::JumpPos (slot 0x378 model)
+        auto upVic = std::make_shared<CUser>(777003); upVic->SetName("SweptUser");
+        upVic->SetMapId(777000);
+        assert(pFxMap->AddUser(upVic));
+        upVic->SetAlive(true);
+        upVic->SetPos(10, 10);
+        std::vector<CUser::SMagicTarget> tu{{upVic.get(), nullptr}};
+        std::vector<int> du{55};
+        std::vector<std::pair<uint32_t, uint32_t>> xu{{12, 13}};
+        assert(upFx->SendMagicEffectAfterProcessGroupByPos(
+            1000, 0, 0, tu, du, u5, u6, xu));
+        assert(upVic->GetX() == 12 && upVic->GetY() == 13);
+        // dead target: the reposition loop skips it entirely
+        upVic->SetAlive(false);
+        assert(upFx->SendMagicEffectAfterProcessGroupByPos(
+            1000, 0, 0, tu, du, u5, u6, xu));
+        assert(upVic->GetX() == 12 && upVic->GetY() == 13); // unchanged
+        // -1 damage code: skip (ORIGINAL gate)
+        upVic->SetAlive(true);
+        du[0] = -1;
+        assert(upFx->SendMagicEffectAfterProcessGroupByPos(
+            1000, 0, 0, tu, du, u5, u6, xu));
+        assert(upVic->GetX() == 12 && upVic->GetY() == 13); // unchanged
+        // invalid record: whole call refused (ORIGINAL +0x90 gate)
+        assert(!upFx->SendMagicEffectAfterProcessGroupByPos(
+            999999, 0, 0, tu, du, u5, u6, xu));
+    }
+
     printf("MAGIC_EFFECT_OK: 1105 base/append/withtarget/full layouts byte-exact, "
            "1103 layout byte-exact, effect masks attach/launch/drop verified, "
            "SendMagicEffectAfterProcess broadcast byte-exact, "
-           "CreateGroup/AppendGroup/JumpPos/IsValidPos verified\n");
+           "CreateGroup/AppendGroup/JumpPos/IsValidPos verified, "
+           "SendMagicEffectAfterProcessGroupByPos end-to-end\n");
     return 0;
 }

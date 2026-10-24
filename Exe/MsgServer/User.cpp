@@ -10,6 +10,8 @@
 #include "MySQLClient.h"
 #include "MsgMagicEffect.h"
 #include "MsgMagicInfo.h"
+#include "MsgAction.h"
+#include "Monster.h"
 
 CUser::CUser(uint32_t dwId) : m_dwId(dwId) {}
 CUser::~CUser() = default;
@@ -624,6 +626,134 @@ bool CUser::SendMagicEffectAfterProcess(uint32_t dwMagicType, uint32_t dwData5,
     // ORIGINAL: broadcast via the map group's vtable+0x348 with flag 1
     // (include the attacker); our port routes through CMapManager.
     CMapManager::Instance().Broadcast(m_dwMapId, effect.GetBuf(), effect.GetSize());
+    return true;
+}
+
+
+void CUser::JumpPos(uint16_t usX, uint16_t usY) {
+    // ORIGINAL creature vtable slot 0x378: reposition. The user-side
+    // teleport packet built inside the original slot is outside the
+    // ported slice; position update + a trace line until FUN_140499830.
+    SetPos(usX, usY);
+    printf("[MAGIC] CUser::JumpPos user:%u -> (%u, %u)\n", m_dwId, usX, usY);
+}
+
+bool CUser::SendMagicEffectAfterProcessGroupByPos(
+    uint32_t dwMagicType, uint32_t dwPair0, uint32_t dwPair1,
+    const std::vector<SMagicTarget>& vecTargets,
+    const std::vector<int>& vecDamage,
+    const std::vector<uint32_t>& vecUnused5,
+    const std::vector<uint32_t>& vecUnused6,
+    const std::vector<std::pair<uint32_t, uint32_t>>& vecXY) {
+    // ORIGINAL gates: map proxy (this+0x1c8) and magic record (this+0x90)
+    auto pMapGroup = CMapManager::Instance().GetMap(m_dwMapId);
+    CPlayerMagic* pRec = FindMagic(dwMagicType);
+    if (!pMapGroup || !pRec) return false;
+    const uint16_t usType  = (uint16_t)pRec->GetAttrib(2);
+    const uint16_t usLevel = (uint16_t)pRec->GetAttrib(3);
+    const uint8_t  byFlag  = (uint8_t)pRec->GetAttrib(7);
+
+    // ---------- loop 1: one 1105 for the whole group ----------
+    CMsgMagicEffect grp;
+    bool bHavePacket = false;
+    if (!grp.CreateGroup(m_dwId, usType, usLevel, 0 /*dir*/, 0, 0 /*target halves*/,
+                         0 /*entryId*/, dwPair1 /*entryDamage = param_2[1]*/,
+                         dwPair0 /*entryData2 = param_2[0]*/, byFlag)) {
+        // ORIGINAL: log_InlineLogERROR(DAT_1406d9c10) with line 0x1eaf,
+        // then falls through to loop 2 without any broadcast
+        printf("[MAGIC] CPlayerMagic::SendMagicEffectAfterProcessGroupByPos, "
+               "user:%u, magic_type:%d CreateGroup failed (0x1eaf).\n",
+               m_dwId, (int)dwMagicType);
+    } else {
+        bHavePacket = true;
+        for (size_t i = 0; i < vecTargets.size(); i++) {
+            if (i >= vecDamage.size() || i >= vecXY.size()) break;
+            const SMagicTarget& t = vecTargets[i];
+            if (!t.pUser && !t.pMonster) continue;      // ORIGINAL null proxy
+            int nCode = vecDamage[i];
+            uint32_t dwDamage = (uint32_t)(int32_t)nCode;
+            uint32_t dwSpecial = 0;
+            if (nCode == -2) { dwDamage = 0; dwSpecial = 2; }  // ORIGINAL -2 quirk
+            const uint32_t dwX = vecXY[i].first, dwY = vecXY[i].second;
+            const uint32_t dwId = t.pUser ? t.pUser->GetId() : t.pMonster->GetId();
+            // ORIGINAL: d2 = scene diff (FUN_14018eb30 - FUN_14018ed10);
+            // our port runs one scene per map, so the diff is 0.
+            const uint32_t dwSceneDiff = 0;
+            // vecUnused5[i] / vecUnused6[i]: the ORIGINAL loads them into
+            // stack slots past the 9-param append (kept in the signature).
+            (void)vecUnused5; (void)vecUnused6;
+            if (!grp.AppendGroup(dwId, dwDamage, dwSceneDiff,
+                                 0 /*dwNext: leftover dir slot*/, 0 /*data4*/,
+                                 dwSpecial /*data5*/, dwY /*data6*/, dwX /*data7*/)) {
+                // ORIGINAL: broadcast the full packet, fresh header, re-append
+                CMapManager::Instance().Broadcast(m_dwMapId, grp.GetBuf(), grp.GetSize());
+                grp.CreateGroup(m_dwId, usType, usLevel, 0, 0, 0, 0,
+                                dwPair1, dwPair0, byFlag);
+                grp.AppendGroup(dwId, dwDamage, dwSceneDiff, 0, 0,
+                                dwSpecial, dwY, dwX);
+            }
+        }
+        // ORIGINAL final broadcast: map proxy vtable+0x348, flag 1 (include self)
+        CMapManager::Instance().Broadcast(m_dwMapId, grp.GetBuf(), grp.GetSize());
+    }
+
+    // ---------- loop 2: reposition + scene op + boss action ----------
+    for (size_t i = 0; i < vecTargets.size(); i++) {
+        if (i >= vecDamage.size() || i >= vecXY.size()) break;
+        const SMagicTarget& t = vecTargets[i];
+        if (!t.pUser && !t.pMonster) continue;
+        CUser* pU = t.pUser;
+        CMonster* pM = t.pMonster;
+        // ORIGINAL gates: vtable+0x288/0x290 (dead/ghost) must be clear
+        bool bDead = pU ? !pU->IsAlive() : !pM->IsAlive();
+        auto pTgtMap = CMapManager::Instance().GetMap(pU ? pU->GetMapId() : pM->GetMapId());
+        if (bDead || (!pTgtMap && !pM)) continue;
+        int nCode = vecDamage[i];
+        if (nCode == -1) continue;                       // ORIGINAL -1 skip
+        // ORIGINAL vtable+0x220 IsAlive gate
+        bool bAlive = pU ? pU->IsAlive() : pM->IsAlive();
+        if (!bAlive) continue;
+        const uint32_t dwX = vecXY[i].first, dwY = vecXY[i].second;
+        if (nCode != -2) {
+            if (pM == nullptr) {
+                // ORIGINAL: GetPoint(0x1002) == 0 -> proxy vtable+0x378 JumpPos
+                if (pU) pU->JumpPos((uint16_t)dwX, (uint16_t)dwY);
+            } else {
+                // ORIGINAL: GetPoint(0x1001) proxy -> cellmap bounds gate
+                // (FUN_14015f9d0); failure logs the 0x1f00 line and skips
+                if (pTgtMap && !pTgtMap->IsValidPos((int)dwX, (int)dwY)) {
+                    printf("[MAGIC] CPlayerMagic::SendMagicEffectAfterProcessGroupByPos "
+                           "user%%u map%%u(%%d, %%d) at %%s, %%d\n");  // 0x1f00, playermagic.cpp
+                } else {
+                    pM->JumpPos((uint16_t)dwX, (uint16_t)dwY);
+                }
+            }
+        } else {
+            // ORIGINAL: FUN_140388a40(GetPoint(0x1002), x, y)
+            pM->JumpPos((uint16_t)dwX, (uint16_t)dwY);
+        }
+        if (pTgtMap) {
+            // ORIGINAL: FUN_1401181a0 kernel singleton, vtable slot 8 with
+            // (target id, 0x6e, 0). The kernel-side packet for opcode 0x6e
+            // lives outside the ported slice; the dispatch is logged.
+            const uint32_t dwTgt = pU ? pU->GetId() : pM->GetId();
+            printf("[MAGIC] scene op 0x6e data 0 for role %u\n", dwTgt);
+        }
+        // ORIGINAL vtable+0x240: boss monsters get the CMsgAction packet
+        if (pM && pM->IsBoss()) {
+            CMsgAction act;
+            // ORIGINAL call: Create(id, x, y, dir = 0, p6 = 3,
+            // data = 407 (0x197), action = monster dir)
+            if (act.Create(pM->GetId(), pM->GetX(), pM->GetY(), 0, 3,
+                           407, CMsgAction::ActionType(pM->GetDir()))) {
+                // ORIGINAL: creature vtable+0x350 (map send)
+                CMapManager::Instance().Broadcast(pM->GetMapId(),
+                                                  act.GetBuf(), act.GetSize());
+            } else {
+                printf("[MAGIC] CMsgAction::Create failed (0x1f0c)\n");
+            }
+        }
+    }
     return true;
 }
 

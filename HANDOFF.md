@@ -77,12 +77,15 @@ chk_sum بمعادلة FUN_1400fe140 كاملة + LAST_INSERT_ID)،
   السجل للخريطة كلها) — جلسة 2026-10-24 الخامسة، ريجريشن 33/33.
 - عائلة CMsgMagicInfo: ~~FUN_140457240~~ تمت — فاضل Process عند
   869377+ (FUN_140456ea0/140456f80 طاقة ctor/dtor).
-- المرسلات/التأثير: ~~FUN_1404851b0~~ تمت (جلسة خامسة). فاضل
-  FUN_140486fb0 (GroupByPos) وخضائره كلها جاهزة خلاص (جلسة سادسة):
-  CreateGroup=FUN_140386a50، AppendGroup=FUN_140387150 (نفس غرابة
-  dwNext على قاعدة الإدخال التالي)، JumpPos=FUN_140388a40،
-  IsValidPos=FUN_14015f9d0 — كلها مبورتة ومختبرة بايت-مطابق.
-  FUN_14048c4c0 (2 إشارة MagicEffect — ده غالبًا Launch/Apply).
+- المرسلات/التأثير: ~~FUN_1404851b0~~ تمت (جلسة خامسة). ~~FUN_140486fb0
+  GroupByPos~~ **تمت كاملة** (جلسة سابعة): بث 1105 جماعي + سحب الأهداف
+  (JumpPos) + لوج 0x1f00 + بث 0x6e المشهدي (لوج) + CMsgAction الزعيم
+  (407 في خانة البيانات والاتجاه في خانة الـ action — حرفي). الخضائرات
+  كلها مبورتة (جلسة سادسة): CreateGroup=FUN_140386a50،
+  AppendGroup=FUN_140387150، JumpPos=FUN_140388a40،
+  IsValidPos=FUN_14015f9d0. فاضل FUN_140499830 وFUN_1404a1f70
+  (الحلقة المفقودة Intone→Launch→ضرر) وFUN_14048c4c0 (إشارتا
+  MagicEffect — غالبًا Launch/Apply).
 - الحلقة المفقودة: Intone (شحن السحر) → Launch (إطلاق) → التحقق
   من الهدف/المسافة/crime → حساب الضرر من cq_magictype (power/
   percent/level) → تطبيق التأثير على الأهداف → بث MsgMagicEffect
