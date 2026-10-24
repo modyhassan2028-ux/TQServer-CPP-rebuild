@@ -1581,6 +1581,23 @@ system("mariadb -u root cq -e \"DELETE FROM cq_item WHERE owner_id=888001 AND ty
         CUserManager::Instance().RemoveUser(999051);
         printf("[ok] 2201-2205 pk-bonus family matches FUN_140141c80\n");
     }
+    // --- family C complete: 2005 (0x7d5) / 2014 (0x7de), both live rows ---
+    // 2005: the single row 7235756 carries a sentence param -> sscanf
+    // fails -> literal DBERR path -> false (id_nextfail 1010)
+    CDialogEngine::Node ndSpace; ndSpace.dwType = 2005;
+    ndSpace.strParam = "Sorry,you did not have enough space for the item.";
+    ndSpace.dwId = 7235756;
+    assert(!CGameAction::ProcessActionUser(u5, &ndSpace));
+    // 2014: row 5007639 parses all 10 fields -> module 5 side effect,
+    // break-only case -> true
+    CDialogEngine::Node ndMod5; ndMod5.dwType = 2014; ndMod5.dwId = 5007639;
+    ndMod5.strParam = "0 8 1 3 9 1 9 8 1 3";
+    assert(CGameAction::ProcessActionUser(u5, &ndMod5));
+    // malformed 2014 (still true - break-only, module call skipped)
+    CDialogEngine::Node ndMod5b; ndMod5b.dwType = 2014;
+    ndMod5b.strParam = "1 2";
+    assert(CGameAction::ProcessActionUser(u5, &ndMod5b));
+
     printf("DIALOG FIDELITY TEST PASSED\n");
     return 0;
 }

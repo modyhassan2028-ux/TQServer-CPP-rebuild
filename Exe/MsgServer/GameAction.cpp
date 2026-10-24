@@ -2732,6 +2732,52 @@ bool bAll = (llAll == 1);
         }
         return false; // ORIGINAL: unmatched attr/op -> break -> false
     }
+    case 2005: { // ORIGINAL case 0x7d5: item-space check chain (7 fields)
+        // sscanf "%u %u %d %d %d %d %d"; != 7 -> the DBERR path (fetch
+        // param via the user vtable+0x20 string manager, DBERR log,
+        // false - codebase convention for these break-without-return
+        // tails). == 7: manager lookup FUN_1400876b0, object found by
+        // f1 (vtable+0x10(mgr, f1, 1)) -> FUN_140117700(obj, f2) ->
+        // FUN_1401176c0 -> FUN_1403abdb0(res, f3..f7) - the item-space
+        // check; a failed lookup logs 0x31f3 and breaks. The only live
+        // row (7235756, id_nextfail 1010) carries a plain sentence
+        // ("Sorry,you did not have enough space for the item.") so its
+        // literal original path is DBERR -> false -> id_nextfail.
+        std::string strP = pNode->strParam; pUser->ResolveActionVars(strP);
+        uint32_t f1 = 0, f2 = 0; int32_t f3 = 0, f4 = 0, f5 = 0, f6 = 0, f7 = 0;
+        if (sscanf(strP.c_str(), "%u %u %d %d %d %d %d",
+                   &f1, &f2, &f3, &f4, &f5, &f6, &f7) != 7) {
+            printf("[DBERR] cq_action %u type 2005 param (%s)\n",
+                   pNode->dwId, strP.c_str());
+            return false;
+        }
+        // check chain FUN_140117700/1401176c0/1403abdb0 (item-space
+        // system) - documented stub; no live row reaches this path
+        (void)f1; (void)f2; (void)f3; (void)f4; (void)f5; (void)f6; (void)f7;
+        return false;
+    }
+    case 2014: { // ORIGINAL case 0x7de: call process module 5 (10 fields)
+        // sscanf "%d %d %d %d %d %d %d %d %d %d"; > 9 parsed AND
+        // CurrentInstance->module 5 found (vtable+0x20(inst, 5)) ->
+        // module vtable+0(module, userId, v[0], &v[1]) - a side-effect
+        // call; the case only BREAKS on every path (the function tail
+        // returns success), unlike the DBERR cases. The single live
+        // row 5007639 (data=20, param "0 8 1 3 9 1 9 8 1 3") feeds
+        // module 5. Module index 5 not yet identified in Modules/ -
+        // documented stub.
+        std::string strP = pNode->strParam; pUser->ResolveActionVars(strP);
+        int32_t v[10] = {0};
+        int n = sscanf(strP.c_str(), "%d %d %d %d %d %d %d %d %d %d",
+                       &v[0], &v[1], &v[2], &v[3], &v[4],
+                       &v[5], &v[6], &v[7], &v[8], &v[9]);
+        if (n > 9) {
+            // ORIGINAL: module 5 present -> side-effect call (stub)
+            printf("[MOD5] cq_action %u module5 call (%d,%d,%d,%d,%d,%d,%d,%d,%d,%d)\n",
+                   pNode->dwId, v[0], v[1], v[2], v[3], v[4],
+                   v[5], v[6], v[7], v[8], v[9]);
+        }
+        return true; // break-only case: success on every path
+    }
     case 2002: { // ORIGINAL case 0x7d2: delmonsternow
         // ORIGINAL: the data column (GetData(4) -> vcall+0x48) is the record
         // filter; the param column is FETCHED AND DISCARDED (the 5 real rows
