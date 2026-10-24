@@ -9,6 +9,8 @@
 
 namespace npc {
 
+class CNpcTransform;
+
 class CNpcAiTick {
 public:
     // ORIGINAL fields of FUN_14005ada0 (this+0x13c/0x140):
@@ -27,6 +29,12 @@ public:
 
     // ===== ORIGINAL FUN_14005ada0 =====
     void Tick();
+
+    // Wire the FUN_14005a660/FUN_14005a3b0 seams to the
+    // real CNpcTransform port (identity check: the two
+    // callees of FUN_14005ada0 pass (this-0x10), i.e.
+    // the CNpc base owning this +0x10 tick sub-object).
+    void BindTransform(CNpcTransform* p);
 };
 
 } // namespace npc

@@ -3260,3 +3260,73 @@ FUN_140022f40 (تفاصيل كتابة الحقل)، FUN_1400232b0 (مسار
 3. Exe/NpcServer/NpcAiTick.{h,cpp} + tests/npc_aitick_test
    — **NPC_AITICK_OK** + رجريشن NpcServer كله (world/
    manager/generator/wander/steplist/aitick) أخضر.
+
+## جلسة 2026-10-24 18:15 — NpcServer الوحدة 8: زوج التحويل CheckTransform/Transform + إعادة بناء البيئة
+1. **تصحيح هوية مهم:** الدالتين اللتين وصفتهما الجلسة
+   السابقة بـ"فحص الجاهزية" و"خطوة الـ AI الحقيقية"
+   هما فعلياً **CNpc::CheckTransform
+   (FUN_14005a660، 295 بايت) وCNpc::Transform
+   (FUN_14005a3b0، 681 بايت)** — الهوية من نصوص
+   اللوجات الحرفية داخل جسميهما ("CNpc::Transform,
+   wrong postion (%d, %d)" و"CNpc::Transform, wrong
+   transform monster type: %d" و"...transform
+   flag:%u"). ولا يوجد أي استدعاء/إشارة لـ CNpcWander
+   (FUN_140087d50) فيهما — الربط مع التجوال كان تقديراً
+   غير دقيق، والديكمبايل هو الحكم.
+2. **FUN_14005a660 حرفياً** (Exe/NpcServer/NpcTransform.cpp
+   → CheckTransform): بوابة +0xa0 → لوج
+   DAT_1400be0b0 ("！%s(%s)！ in %s, %d" مستخرجة
+   من البيناري بـ python/PE)؛ probe الجاهزية vcall+0x50
+   على الكائن الفرعي +0x10؛ بوابة العلم byte@+0x108 ∈
+   {1,2} مع +0x110≠0 و+0x10c≠0 و+0x128==0 و+0x12c==0؛
+   فرع flag==1: لو +0x118≠0 → **FUN_140002480**
+   (start@+0x114 + delta@+0x118 ≤ TimeGet(0)/1000) →
+   جاهز؛ فرع flag==2: لو +0x10c ≥ **0x3e9** →
+   denom = vcall+0x10(*(*(this+0xa0)+0x10), 4) ثم
+   **MulDiv(denom, +0x10c, 1000)** والجاهزية عند
+   +0x1c ≤ الناتج.
+3. **FUN_14005a3b0 حرفياً** (Transform): حارسا +0xa0/+0x98
+   (لوج DAT_1400be0b0) وحارس +0x100؛ التجميعة الحرفية
+   للـ locals الصفرية (local_38 القيمة وغيرها)؛
+   local_1c = vtable+8(*(this+0x100))؛ بوابة المعرف
+   **+0x80 ∈ [0x61a81, 499999]** → ولّيد معرف عبر
+   FUN_14001c7a0 (المفرد DAT_1401045b8+0x30) +
+   **FUN_14002b270 = CNpcManager::SpawnNewNpcID**؛
+   الموضع x=vcall+0x38/y=vcall+0x40 على +0x10 و
+   local_34 = vtable+8(*(this+0x98))؛ بوابة الموضع
+   **FUN_140049310** (vtable+0x28 عرض/+0x20 طول/
+   +0x18(x,y)==0 سالكة) → وإلا اللوج الحرفي "wrong
+   postion"؛ بحث النوع local_24=+0x110 عبر
+   FUN_14001c7a0 → FUN_140025be0 (*(inst+0x20) وإلا
+   لوج DAT_1400be0b0) → vcall+0x30 → وإلا اللوج
+   الحرفي "wrong transform monster type"؛ flag==1:
+   قيمة = vcall+0x10(*(rec+0x10), 4)؛ flag==2:
+   **MulDiv(+0x1c, numer(rec), denom(+0xa0))**؛ flag
+   آخر → اللوج الحرفي "wrong monster transform flag"؛
+   ثم سقف cap (قيمة rec الأدنى) ثم vtable+0x88 على
+   *(this+0x100) بقيمة التحويل → عند النجاح مسح
+   +0x118/+0x114/+0x108 وإرجاع 1.
+4. **FUN_14002b270 (SpawnNewNpcID) حرفياً**: ذيل
+   الحلقة FUN_14002a690(instance+0x28) (نزع حلقة
+   معرفات عبر FUN_140026b80) — **TBD: نمذج seam فقط
+   (m_fnPopQueueId)**؛ فرع العداد: <499999 → زيادة؛
+   وإلا لف إلى **0x61a81** مع اللوج الحرفي
+   DAT_1400c3fd0 (GBK: "CNpcManager::SpawnNewNpcID()
+   MONSTER的ID空间回卷 at %s, %d" — مستخرج من البيناري
+   ببايتاته).
+5. **الربط بالتيكة:** CNpcAiTick::BindTransform
+   (NpcAiTick.{h,cpp}) — m_fnReady → CheckTransform و
+   m_fnStep → Transform (الأصل: FUN_14005ada0 يمرر
+   this-0x10 = قاعدة CNpc للدالتين).
+6. **إعادة بناء بيئة السانبوكس الجديدة:** سطوب MariaDB
+   (apt عبر https بعد تعديل المصادر — http محجوب)،
+   mysqld_safe شغال، مستخدم tqserver/tqpass123، قاعدة cq
+   محمّلة من sql/original_full/cq_with_plunder_war.sql.gz
+   (صف 149883 موجود)؛ كاش /tmp/objs2 (50 object) و
+   /tmp/luao (32 object) اتبنوا متوازياً زي ما هو موثق.
+7. Exe/NpcServer/NpcTransform.{h,cpp} + tests/
+   npc_transform_test + BindTransform case في
+   npc_aitick_test — **NPC_TRANSFORM_OK**. **الرجريشن
+   9/9 خضرا:** world/manager/generator/wander/steplist/
+   aitick/transform + ops 205/207/208 + record 201
+   (الاتنان الأخيران ضد القاعدة الحية).

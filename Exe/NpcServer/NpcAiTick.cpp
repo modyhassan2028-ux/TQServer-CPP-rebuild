@@ -1,4 +1,5 @@
 #include "NpcAiTick.h"
+#include "NpcTransform.h"
 
 namespace npc {
 
@@ -24,6 +25,14 @@ void CNpcAiTick::Tick() {
         return;
     }
     m_fnStep();                          // FUN_14005a3b0
+}
+
+// ===== wiring of the tick seams to the ported pair =====
+// FUN_14005ada0 calls FUN_14005a660(this-0x10) and, when
+// it returns true, FUN_14005a3b0(this-0x10): the CNpc base.
+void CNpcAiTick::BindTransform(CNpcTransform* p) {
+    m_fnReady = [p]{ return p->CheckTransform(); };
+    m_fnStep  = [p]{ p->Transform(); };
 }
 
 } // namespace npc

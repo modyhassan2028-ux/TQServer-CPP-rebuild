@@ -1,7 +1,25 @@
 
-# ⚠️ دليل الوكيل التالي — ابدأ من هنا (آخر تحديث 2026-10-24 23:10)
+# ⚠️ دليل الوكيل التالي — ابدأ من هنا (آخر تحديث 2026-10-24 18:15)
 
-## 0) حالة NpcServer لحظياً (جلسة 24/10 — محدث 23:20)
+## 0) حالة NpcServer لحظياً (جلسة 24/10 — محدث 18:15)
+- **جديد:** الوحدة 8: زوج التحويل CNpc::CheckTransform
+  (FUN_14005a660) + CNpc::Transform (FUN_14005a3b0) —
+  الهوية من نصوص اللوجات الحرفية جواهم ("CNpc::Transform,
+  wrong postion (%d, %d)"...) — **مش خطوة AI عامة ولا
+  ليهم صلة بـ CNpcWander في الديكمبايل** (تصحيح لتقدير
+  الجلسة السابقة). شامل حرفياً: كل البوابات
+  (+0xa0/+0x98/+0x100/+0x108/+0x10c≥0x3e9/+0x110/+0x114/
+  +0x118/+0x128/+0x12c)، نافذة زمن flag==1 عبر
+  FUN_140002480 (start+delta ≤ TimeGet/1000)، MulDiv
+  flag==2، بوابة الموضع FUN_140049310 (خريطة vtable
+  +0x28/+0x20/+0x18)، بحث النوع (FUN_14001c7a0 →
+  FUN_140025be0 → vcall+0x30)، السقف cap، مسح
+  +0x114/+0x118/+0x108 عند النجاح، و**FUN_14002b270 =
+  CNpcManager::SpawnNewNpcID** (عداد 499999 → لف
+  0x61a81 بسلسلة اللوج الحرفية GBK) — الربط مع التيكة
+  عبر CNpcAiTick::BindTransform. **NPC_TRANSFORM_OK** +
+  رجريشن NpcServer 9/9 خضرا (7 وحدات + اختبارا DB
+  القديمان ops 205/207/208 وrecord 201)
 - **جديد:** الوحدة 7: CNpcAiTick (FUN_14005ada0 =
   vtable+0xe0) — vtable CNpc اتستخرج كاملاً من
   البيناري @ 0x1400c92f0 عبر RTTI. NPC_AITICK_OK
@@ -38,15 +56,13 @@
   بنفس النمط؛ كل binaries قديمة في /tmp لو لسه شغالة)
 
 ## 0.1) ترتيب الشغل الجاي (محدَّث)
-1. ~~تيكة الـ AI (vcall+0xe0)~~ **مكتملة**: الـ vtable
-   اتستخرج من البيناري (CNpc vtable @ 0x1400c92f0،
-   +0xe0 = FUN_14005ada0) والتنفيذ في
-   Exe/NpcServer/NpcAiTick.{h,cpp} (نافذة الإمساك
-   0x13c/0x140 + فرعا التوزيع/الخطوة). **الجاي مباشرة:**
-   (أ) FUN_14005a660 (52 سطر — فحص الجاهزية) و
-   (ب) FUN_14005a3b0 (109 سطر — خطوة الـ AI الحقيقية)
-   — الاتنين seam جاهزين في CNpcAiTick، نفّذهم حرفياً
-   واربطهم بـ CNpcWander.
+1. ~~تيكة الـ AI (vcall+0xe0)~~ **مكتملة** و~~FUN_14005a660/
+   FUN_14005a3b0~~ **مكتملان** (الوحدة 8 — زوج
+   CheckTransform/Transform في
+   Exe/NpcServer/NpcTransform.{h,cpp}، مربوطين بـ
+   BindTransform، لا صلة بالديكمبايل بـ CNpcWander).
+   المتبقي TBD موثق: ذيل FUN_14002a690 (نزع حلقة
+   المعرفات عبر FUN_140026b80) — seam فقط.
 2. **CMsgAiNpcInfo**: معالج الرسالة (RTTI جاهز في
    names_final.tsv) — استقبال بيانات الوحوش من
    السيرفر الرئيسي وربطها بالتيكة.
@@ -76,11 +92,12 @@
 ## 2) المسارات الأساسية
 | ماذا | أين |
 |---|---|
-| الريبو (rebuild) | `/app/conversations/6adcadb4d59db513a6af5968/tqserver-rebuild` (remote: TQServer-CPP-rebuild، التوكن داخل رابط origin) |
-| الريبو الرئيسي (الأصول) | `/app/co_repo` (remote: conquer-online-v6159-decompiled، **نفس التوكن**: انسخه من رابط origin بتاع الريبو الأول عند الحاجة) |
-| الديكمبايل | `/app/co_repo/Native-Decompiled/<Name>.exe.decompiled.c` |
+| الريبو (rebuild) | `/app/co_repo` (remote: TQServer-CPP-rebuild؛ توكن GitHub OAuth داخل رابط origin — لو ضاع: أعد ربط GitHub من الوكيل الرئيسي وset في remote) |
+| الريبو الرئيسي (الأصول) | `/app/co_decomp` (remote: conquer-online-v6159-decompiled، clone عمومي) |
+| الديكمبايل | `/app/co_decomp/Native-Decompiled/<Name>.exe.decompiled.c` |
 | فهرس الدوال | `<Name>.exe.index.tsv` (العنوان/الحجم/الحالة) |
-| أسماء RTTI | `/app/co_repo/NameIndex/names_final.tsv` |
+| أسماء RTTI | `/app/co_decomp/NameIndex/names_final.tsv` |
+| البيناري الأصلي | `/app/co_decomp/orig_binaries/Source/NpcServer.exe` (MD5 8c5495f4ca35f4693fe78b26b4b6fbd1) |
 | الدمب المصحح | `sql/original_full/cq_with_plunder_war.sql.gz` |
 | ملاحظة git | لو فشل commit: `git -c user.name="Mody Hassan" -c user.email="mody@local" commit ...` |
 
@@ -127,7 +144,7 @@
 2. الأيقونات/الصور مطابقة للأصل (القاعدة الثابتة).
 3. وحوش الكروس سيرفر في الريلم (cq_config المرمّع صف
    149883 هو المرجع القياسي).
-4. أي ناقص من conquer.exe بأداة Rea في /app/co_repo.
+4. أي ناقص من conquer.exe بأداة Rea (ريموت morluto/rea) في /app/co_decomp.
 
 ## 6) نصائح عدم التلغبط
 - الدالة تقرأ بأمر:
@@ -158,8 +175,8 @@
 
 ## البيئة
 - المستودع: github.com/modyhassan2028-ux/TQServer-CPP-rebuild (branch main، push مباشر).
-- المرجع: ../co_repo/Native-Decompiled/MsgServer.exe.decompiled.c + الباينري
-  ../conquer_src/Source/MsgServer.exe (للتحقق بـ objdump).
+- المرجع: /app/co_decomp/Native-Decompiled/MsgServer.exe.decompiled.c + الباينري
+  /app/co_decomp/orig_binaries/Source/MsgServer.exe (للتحقق بـ objdump).
 - قاعدة البيانات: `mariadb -u root cq` (صفوف حقيقية v6159: cq_action 48 ألف صف،
   cq_levexp، cq_rebirth 251 صف، cq_bonus موجودة، cq_itemaddition...).
 - بناء اختبار الحوار:
@@ -174,6 +191,13 @@
   `(ls Exe/MsgServer/*.cpp | grep -v main.cpp; echo tests/stub_cross_client.cpp; ls Exe/MsgServer/Activity/ActivityManager.cpp Exe/MsgServer/LuaScript/LuaVM.cpp Core/CQBase/*.cpp Core/DB/*.cpp Core/Root/*.cpp) | xargs -P $(nproc) -I{} sh -c 'f="{}"; g++ -std=c++17 -O0 "-D__declspec(x)=" -I. -Iinclude -ICore/CQBase -ICore/DB -ICore/Root -IExe/MsgServer -IExe/NpcServer -IExe/CQCrossServer -Ivendor/lua -Wno-unused-parameter -c "$f" -o /tmp/objs2/$(echo $f | tr "/" "_")'`
   (غيّر امتداد .cpp إلى .o في الاسم). الربط النهائي بـ g++ مش zig.
 - ملاحظات مالية: لو الرسائل/الدفعات فشلت: انتظر تجديد الـ credits الشهرية.
+- **بيئة سانبوكس جديدة (جلسة 24/10 عصراً):** MariaDB اتسطّب
+  واشتغل (apt مصادر http→https)، المستخدم `tqserver`/
+  `tqpass123` واتعمل، وقاعدة `cq` اتحملت من
+  `sql/original_full/cq_with_plunder_war.sql.gz` (صف
+  149883 موجود). الاثنين DB-backed (ops 205/207/208 و
+  record 201) اشتغلوا وخضرا. لو السانبوكس اتجدد: أعد
+  التسطيب/التحميل بنفس الخطوات دي.
 
 
 ## خطة موسعة بقرار المالك (جلسة 2026-10-24 الثالثة — بالترتيب)
@@ -189,7 +213,7 @@
    LeagueBrick/OSConnectInfo/ServerName/EnterOSUserSocketOpt
    (الجرد في نفس الجلسة).
 3. **[TBD]** **NpcServer.exe كامل** — القرار: البورت طبق الأصل.
-   الديكمبايل موجود وجاهز: /app/co_repo/Native-Decompiled/
+   الديكمبايل موجود وجاهز: /app/co_decomp/Native-Decompiled/
    NpcServer.exe.decompiled.c (**181,583 سطر** — كبير: يُبورت
    وحدة وحدة زي MsgServer). مجلدنا Exe/NpcServer فيه بس
    vcxproj + main.cpp. **البيناري الأصلي مش موجود في البيئة**
