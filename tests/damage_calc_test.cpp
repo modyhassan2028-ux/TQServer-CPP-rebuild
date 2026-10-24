@@ -273,6 +273,49 @@ int main() {
     fr = tq::FanProcess(att.get(), tgs, outs, nullptr, c);
     assert(fr.dwKills == 0 && !fr.bBroadcast);
 
+    // ---- DropMagicEffect (FUN_14048c4c0) literal tests ----
+    // D1: map count gate: count+1 < 41 -> 0
+    tq::CEffRecord eff; tq::DropCtx dc;
+    eff.dwFlag8 = 0b1010; eff.dwFlag10 = 0b1010; eff.dwFlag9 = 0;
+    eff.dwAttr7 = 3;
+    dc.pEffRecord = &eff; dc.dwMapObjCount = 10;
+    assert(tq::DropMagicEffect(att.get(), 11500, 3, dc) == 0);
+    dc.dwMapObjCount = 0x29; // 41: count+1 >= 41 -> proceed
+
+    // D2: full success: slot 3 bit (0b1000): flags 0b1010 -> 0b0010,
+    //     attr7 cleared (was 3), flag10 cleared, award plain (flag9 no bit)
+    assert(tq::DropMagicEffect(att.get(), 11500, 3, dc) == 1);
+    assert(dc.bBroadcast);
+    assert(eff.dwFlag8 == 0b0010 && eff.dwFlag10 == 0);
+    assert(eff.dwAttr7 == 0);
+
+    // D3: flag9 bit set -> "molonoly" award branch, bit cleared
+    eff.dwFlag8 = 0b1000; eff.dwFlag10 = 0b1000; eff.dwFlag9 = 0b1000;
+    eff.dwAttr7 = 0;
+    assert(tq::DropMagicEffect(att.get(), 11500, 3, dc) == 1);
+    assert(eff.dwFlag9 == 0);
+
+    // D4: mask not in flag8 -> 0
+    eff.dwFlag8 = 0b0001; eff.dwFlag10 = 0b1001; eff.dwFlag9 = 0;
+    assert(tq::DropMagicEffect(att.get(), 11500, 3, dc) == 0);
+    assert(!dc.bBroadcast);
+
+    // D5: mask in flag8 but not flag10 -> 0
+    eff.dwFlag8 = 0b1000; eff.dwFlag10 = 0b0001;
+    assert(tq::DropMagicEffect(att.get(), 11500, 3, dc) == 0);
+
+    // D6: award fails -> 0, no broadcast
+    eff.dwFlag8 = 0b1000; eff.dwFlag10 = 0b1000; dc.bAwardFail = true;
+    assert(tq::DropMagicEffect(att.get(), 11500, 3, dc) == 0);
+    assert(!dc.bBroadcast);
+    dc.bAwardFail = false;
+
+    // D7: null effect record -> 0; no map -> 0
+    dc.pEffRecord = nullptr;
+    assert(tq::DropMagicEffect(att.get(), 11500, 3, dc) == 0);
+    dc.pEffRecord = &eff; dc.bHasMap = false;
+    assert(tq::DropMagicEffect(att.get(), 11500, 3, dc) == 0);
+
     printf("DAMAGE CALC TEST PASSED\n");
     return 0;
 }

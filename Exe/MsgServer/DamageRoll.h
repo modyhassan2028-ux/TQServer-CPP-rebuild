@@ -640,4 +640,71 @@ inline FanResult FanProcess(CUser* pCaster,
     }
     return r;
 }
+
+// ===========================================================================
+// FUN_14048c4c0: CPlayerMagic::DropMagicEffect (name from the original
+// error strings, typos included: "molonoly" is TQ's own). Removes a magic
+// effect from the player, awards the drop item (0x2dd5b6) for the final
+// removed bit, and broadcasts the removal.
+// ===========================================================================
+struct CEffRecord {           // the effect record from FUN_14048b5f0
+    uint32_t dwFlag8 = 0;     // FUN_140418e40(rec, 8)
+    uint32_t dwFlag9 = 0;     // FUN_140418e40(rec, 9)
+    uint32_t dwFlag10 = 0;    // FUN_140418e40(rec, 10)
+    uint32_t dwAttr7 = 0;     // FUN_140418c50(rec, 7)
+};
+struct DropCtx {
+    bool    bHasMap = true;       // caster+0x1c8 != 0
+    uint32_t dwMapObjCount = 0x29; // map 0xc20/0xc28 count; ORIGINAL requires
+                                   // count + 1 >= 0x29 (41) to proceed
+    CEffRecord* pEffRecord = nullptr; // FUN_14048b5f0(caster) result
+    bool    bAwardFail = false;   // FUN_140340e50 returns 0 (log + fail)
+    bool    bBroadcast = false;  // out: packet broadcast (map+0x10 vtable+0x350)
+};
+
+// FUN_140340e50: award item to user - documented stub (item system)
+inline int32_t AwardItem(CUser*, uint32_t /*dwItemType*/, uint8_t /*uFlag*/,
+                         uint8_t /*uCount*/, const DropCtx& c) {
+    return c.bAwardFail ? 0 : 1;
+}
+
+inline uint32_t DropMagicEffect(CUser* pCaster, uint32_t dwType,
+                                uint8_t ucEffectSlot, DropCtx& c)
+{
+    c.bBroadcast = false;
+    // map null -> 0; map object count + 1 < 41 -> 0 (literal)
+    if (!c.bHasMap) return 0;
+    if (c.dwMapObjCount + 1U < 0x29U) return 0;
+    CEffRecord* pRec = c.pEffRecord;        // FUN_14048b5f0(caster)
+    if (!pRec) return 0;
+    const uint32_t uMask = 1u << (ucEffectSlot & 0x1f);
+    uint32_t uFlag8 = pRec->dwFlag8;
+    if ((uMask & uFlag8) == 0) return 0;
+    uint32_t uFlag10 = pRec->dwFlag10;
+    if ((uMask & uFlag10) == 0) return 0;
+    if (uFlag8 < uMask || uFlag10 < uMask) return 0;
+    // attr 7 == effect slot -> clear it (FUN_140418d90)
+    if (pRec->dwAttr7 == ucEffectSlot) pRec->dwAttr7 = 0;
+    pRec->dwFlag8 = uFlag8 - uMask;         // FUN_140418f20(rec, 8, v-uMask)
+    pRec->dwFlag10 = 0;                     // FUN_140418f20(rec, 10): clear all
+    uint32_t uFlag9 = pRec->dwFlag9;
+    uint8_t uAwardFlag;
+    if ((uMask & uFlag9) == 0) {
+        uAwardFlag = 0;   // plain drop item
+    } else {
+        pRec->dwFlag9 = uFlag9 - uMask;
+        uAwardFlag = 1;   // "molonoly" (sic) drop item
+    }
+    // award item 0x2dd5b6; failure -> log_InlineLogERROR + return 0
+    if (AwardItem(pCaster, 0x2dd5b6, uAwardFlag, 1, c) == 0) {
+        printf("[MAGIC] DropMagicEffect: user award item failed\n");
+        return 0;
+    }
+    // FUN_140418450(rec) save - stub passthrough (record already updated)
+    // packet build (FUN_140456f30 ctor, 140457240 writer with fields
+    // (6, type, attr7) + flag8/flag10) + map vtable+0x350 broadcast
+    // - documented stub
+    c.bBroadcast = true;
+    return 1;
+}
 } // namespace tq
