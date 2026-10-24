@@ -3698,6 +3698,306 @@ bool bAll = (llAll == 1);
                pNode->dwId, pUser->GetId());
         return true;
     }
+    case 1006: { // ORIGINAL rank 5 (case 5 @244954): FUN_1401c55b0
+        // (user, +0xf08 int, +0xf0c u16, +0xf0e u16) - the map-position
+        // check (family-B helper). Result 0 -> return 1; result 1 ->
+        // return it; both success paths. 2 live rows.
+        printf("[MAPCHK] cq_action %u: position check for user %u\n",
+               pNode->dwId, pUser->GetId());
+        return true;
+    }
+    case 1031: { // ORIGINAL rank 0x19 (case @245646): FUN_140348580 -> 1
+        printf("[EFFECT] cq_action %u: FUN_140348580 user %u\n",
+               pNode->dwId, pUser->GetId());
+        return true;
+    }
+    case 1032: { // ORIGINAL rank 0x1a (case @245652): FUN_140352770 -> 1
+        printf("[EFFECT] cq_action %u: FUN_140352770 user %u\n",
+               pNode->dwId, pUser->GetId());
+        return true;
+    }
+    case 1033: { // ORIGINAL rank 0x1b (case @245658): sscanf 10 fields
+        // "%s %d %u %d %I64d %d %d %u %d %d" -> team broadcast msg with
+        // x/y; send success path returns 1.
+        int a1=0,a2=0,a3=0,a5=0,a6=0; unsigned u4=0,u8=0; long long l4=0;
+        char f1[64]={0}; int a9=0,a10=0;
+        if (sscanf(pNode->strParam.c_str(),
+                   "%63s %d %u %d %lld %d %d %u %d %d",
+                   f1,&a1,&u4,&a3,&l4,&a5,&a6,&u8,&a9,&a10) != 10)
+            return false;
+        printf("[MSG] cq_action %u: team msg for user %u\n",
+               pNode->dwId, pUser->GetId());
+        return true; // send path
+    }
+    case 1034: { // ORIGINAL rank 0x1c (case @245715): 122-line body -
+        // user lookup + msg build with x/y; ends uVar41 = local (msg
+        // result) / return 1 on success path. 1 live row.
+        printf("[MSG] cq_action %u: FUN chain for user %u\n",
+               pNode->dwId, pUser->GetId());
+        return true;
+    }
+    case 1035: { // ORIGINAL rank 0x1d (case @245837):
+        // uVar41 = FUN_1401731e0(user); 0 -> LOGERR CHECKF -> 0;
+        // else user lookup + FUN_1401c55b0(...) == 0 -> true.
+        // Helper unidentified - conservative false (documented).
+        printf("[CHK] cq_action %u: FUN_1401731e0 for user %u\n",
+               pNode->dwId, pUser->GetId());
+        return false;
+    }
+    case 1036: { // ORIGINAL rank 0x1e (case @245859): FUN_140348840 -> 1
+        printf("[EFFECT] cq_action %u: FUN_140348840 user %u\n",
+               pNode->dwId, pUser->GetId());
+        return true;
+    }
+    case 1037: { // ORIGINAL rank 0x1f (case @245865): FUN_140352aa0 -> 1
+        printf("[EFFECT] cq_action %u: FUN_140352aa0 user %u\n",
+               pNode->dwId, pUser->GetId());
+        return true;
+    }
+    case 1041: { // ORIGINAL rank 0x23 (case @245999):
+        // vcall+0x150(user, 0x839, param) - send system msg 0x839 with
+        // the raw param string; uVar41 = 1. 11 live rows.
+        printf("[MSG] cq_action %u: sys msg 0x839 '%s' for user %u\n",
+               pNode->dwId, pNode->strParam.c_str(), pUser->GetId());
+        return true;
+    }
+    case 1047: { // ORIGINAL rank 0x29 (case @246129): FUN_1401abf00 -> 1
+        printf("[EFFECT] cq_action %u: FUN_1401abf00 user %u\n",
+               pNode->dwId, pUser->GetId());
+        return true;
+    }
+    case 1048: { // ORIGINAL rank 0x2a (case @246133): sscanf "%d %u"
+        // -> FUN_140382c50(user, d, u); the case NEVER sets the result
+        // -> falls out with the default 0. Faithful false. 20 rows.
+        int d = 0; unsigned u = 0;
+        if (sscanf(pNode->strParam.c_str(), "%d %u", &d, &u) != 2)
+            return false;
+        printf("[VAR] cq_action %u: FUN_140382c50 %d %u user %u\n",
+               pNode->dwId, d, u, pUser->GetId());
+        return false; // ORIGINAL: no uVar41 assignment -> 0
+    }
+    case 1052: { // rank 0xbb in the dispatch table: NO HANDLER in the
+        // original server -> the default DBERR branch ("ActionType=%u")
+        // -> 0. 5 live rows.
+        return false;
+    }
+    case 1053: { // ORIGINAL rank 0x2e (case @246163):
+        // uVar41 = *(byte*)(user + 0x51c) - returns a user status
+        // byte. Field not yet identified - conservative false.
+        printf("[CHK] cq_action %u: user+0x51c flag for user %u (unidentified)\n",
+               pNode->dwId, pUser->GetId());
+        return false;
+    }
+    case 1070: { // ORIGINAL rank 0x3c (case @247033): sscanf "%u %d %d"
+        // -> uVar41 = FUN_1401ba200(user, u, d1, d2). Helper not
+        // identified - assumed success (documented). 2 live rows.
+        unsigned u = 0; int d1 = 0, d2 = 0;
+        if (sscanf(pNode->strParam.c_str(), "%u %d %d", &u, &d1, &d2) != 3)
+            return false;
+        printf("[EFFECT] cq_action %u: FUN_1401ba200 %u %d %d user %u\n",
+               pNode->dwId, u, d1, d2, pUser->GetId());
+        return true;
+    }
+    case 1077: { // ORIGINAL rank 0x43 (case @247260): user-row lookup,
+        // +0x40/+0x48 checks (== 1), then FUN_1401645e0(user, data,
+        // &buf) -> uVar41 = 1. 1 live row.
+        printf("[VAR] cq_action %u: FUN_1401645e0 data %u user %u\n",
+               pNode->dwId, pNode->dwData, pUser->GetId());
+        return true;
+    }
+    case 1078: { // ORIGINAL rank 0x44 (case @247289): data col ->
+        // FUN_1401ac210(user, data) -> return 1. 7 live rows.
+        printf("[EFFECT] cq_action %u: FUN_1401ac210 data %u user %u\n",
+               pNode->dwId, pNode->dwData, pUser->GetId());
+        return true;
+    }
+    case 1079: { // ORIGINAL rank 0x45 (case @247297): FUN_1401ac720 -> 1
+        printf("[EFFECT] cq_action %u: FUN_1401ac720 user %u\n",
+               pNode->dwId, pUser->GetId());
+        return true;
+    }
+    case 1094: { // ORIGINAL rank 0x53 (case @247931): rebirth check.
+        // metem = vcall+0x108 (GetMetempsychosis); data==0 || data==
+        // metem -> FUN_140165580/140165570(user) -> ((v/10)*10 == metem);
+        // else 0. FUN_140165580 unidentified - stubbed 0 (documented).
+        uint32_t dwMetem = (uint32_t)pUser->GetMetempsychosis();
+        if (pNode->dwData == 0 || pNode->dwData == dwMetem) {
+            int nV = 0; // FUN_140165580 stub
+            return ((nV / 10) * 10 == (int)dwMetem);
+        }
+        return false;
+    }
+    case 1102: { // ORIGINAL rank 0x5b (case @248170, 338 lines):
+        // sscanf "%s %s %I64d" -> module-synvar ops on the
+        // FUN_140118320 singleton; ends uVar41 = 0. Parse-fail ->
+        // DBERR -> false. 6 live rows.
+        char f1[128] = {0}, f2[128] = {0}; long long v = 0;
+        if (sscanf(pNode->strParam.c_str(), "%127s %127s %lld",
+                   f1, f2, &v) != 3)
+            return false;
+        printf("[SYNVAR] cq_action %u: %s %s %lld user %u\n",
+               pNode->dwId, f1, f2, v, pUser->GetId());
+        return false; // ORIGINAL tail: uVar41 = 0
+    }
+    case 1106: { // ORIGINAL rank 0x5f (case @248659): team-member
+        // iteration + effect per member; final uVar41 = 0. 3 rows.
+        printf("[TEAM] cq_action %u: member effect for user %u\n",
+               pNode->dwId, pUser->GetId());
+        return false; // ORIGINAL tail: uVar41 = 0
+    }
+    case 1107: { // ORIGINAL rank 0x60 (case @248708): sscanf "%u %d
+        // %d" -> FUN_1401a4030(user, u) + FUN_140179040 + team
+        // iteration; tail uVar41 = 1. 9 live rows.
+        unsigned u = 0; int d1 = 0, d2 = 0;
+        if (sscanf(pNode->strParam.c_str(), "%u %d %d", &u, &d1, &d2) != 3)
+            return false;
+        printf("[TEAM] cq_action %u: effect %u for user %u\n",
+               pNode->dwId, u, pUser->GetId());
+        return true;
+    }
+    case 1108: { // ORIGINAL rank 0x61 (case @248785): sscanf
+        // "team_action %u %d" -> team iteration; final uVar41 = 0.
+        unsigned u = 0; int d = 0;
+        if (sscanf(pNode->strParam.c_str(), "team_action %u %d", &u, &d) != 2)
+            return false;
+        printf("[TEAM] cq_action %u: team_action %u %d user %u\n",
+               pNode->dwId, u, d, pUser->GetId());
+        return false; // ORIGINAL tail: uVar41 = 0
+    }
+    case 1109: { // ORIGINAL rank 0x62 (case @248858):
+        // FUN_140118320 singleton, vcall+0x30(...) != 0 -> result.
+        // Module system pending - conservative false. 5 live rows.
+        printf("[SYNVAR] cq_action %u: module check user %u\n",
+               pNode->dwId, pUser->GetId());
+        return false;
+    }
+    case 1110: { // ORIGINAL rank 0x63 (case @248870): sscanf 7 fields
+        // "%d %u %u %u %d %u %u"; any of 4 == 0 -> DBERR -> 0; else
+        // FUN_1402a74b0(mgr, user, b, a294) result (assumed success,
+        // documented). 6 live rows.
+        int a1=0,a5=0; unsigned u2=0,u3=0,u4=0,u6=0,u7=0;
+        if (sscanf(pNode->strParam.c_str(), "%d %u %u %u %d %u %u",
+                   &a1,&u2,&u3,&u4,&a5,&u6,&u7) != 7)
+            return false;
+        if (u2 == 0 || u4 == 0 || u3 == 0 || u6 == 0)
+            return false; // ORIGINAL zero-gate -> DBERR
+        printf("[EFFECT] cq_action %u: FUN_1402a74b0 for user %u\n",
+               pNode->dwId, pUser->GetId());
+        return true;
+    }
+    case 1111: { // ORIGINAL rank 0x64 (case @248922): sscanf "%u" ->
+        // FUN_1402a6aa0(mgr, user, val, 0) result (assumed success,
+        // documented). 1 live row.
+        unsigned u = 0;
+        if (sscanf(pNode->strParam.c_str(), "%u", &u) != 1)
+            return false;
+        printf("[EFFECT] cq_action %u: FUN_1402a6aa0 %u user %u\n",
+               pNode->dwId, u, pUser->GetId());
+        return true;
+    }
+    case 1114: { // ORIGINAL rank 0x67 (case @248983): sscanf "%u %u";
+        // !=2 or zero -> DBERR -> 0; FUN_1402a6090(mgr, user) == 0 ->
+        // 0; else module chain -> uVar41 = 1. 4 live rows.
+        unsigned u1 = 0, u2 = 0;
+        if (sscanf(pNode->strParam.c_str(), "%u %u", &u1, &u2) != 2
+            || u1 == 0 || u2 == 0)
+            return false;
+        printf("[EFFECT] cq_action %u: %u %u for user %u\n",
+               pNode->dwId, u1, u2, pUser->GetId());
+        return true;
+    }
+    case 1115: { // ORIGINAL rank 0x68 (case @249017): identical shape
+        // to 1114 (different error line 0x1980). 4 live rows.
+        unsigned u1 = 0, u2 = 0;
+        if (sscanf(pNode->strParam.c_str(), "%u %u", &u1, &u2) != 2
+            || u1 == 0 || u2 == 0)
+            return false;
+        printf("[EFFECT] cq_action %u: %u %u for user %u\n",
+               pNode->dwId, u1, u2, pUser->GetId());
+        return true;
+    }
+    case 1116: { // ORIGINAL rank 0x69 (case @249051): sscanf "%u %d" ->
+        // module chain; final uVar41 = 0. 1 live row.
+        unsigned u = 0; int d = 0;
+        if (sscanf(pNode->strParam.c_str(), "%u %d", &u, &d) != 2)
+            return false;
+        printf("[SYNVAR] cq_action %u: %u %d user %u\n",
+               pNode->dwId, u, d, pUser->GetId());
+        return false; // ORIGINAL tail: uVar41 = 0
+    }
+    case 1202: { // ORIGINAL rank 0x6e (case @249380): sscanf "%d" ->
+        // FUN_140167070(user); success path FUN_1401787e0(user, u) ->
+        // uVar41 = 1. 6 live rows.
+        int d = 0;
+        if (sscanf(pNode->strParam.c_str(), "%d", &d) != 1)
+            return false;
+        printf("[EFFECT] cq_action %u: FUN_1401787e0 %d user %u\n",
+               pNode->dwId, d, pUser->GetId());
+        return true;
+    }
+    case 1508: { // ORIGINAL rank 0x8a (case @250066): lottery -
+        // pLotteryProvider call result (FUN at puVar30). 13 live rows.
+        printf("[LOTTERY] cq_action %u: lottery for user %u\n",
+               pNode->dwId, pUser->GetId());
+        return true; // provider result assumed success (documented)
+    }
+    case 1509: { // ORIGINAL rank 0x8b (case @250087): sscanf 6 fields
+        // "%u %d %d %d %d %d" -> FUN_1401c7e10(user, f1) gate; then
+        // FUN_1401c7c60(user, f1, f2, f3) result (assumed success,
+        // documented). 9 live rows.
+        unsigned u1 = 0; int d2=0,d3=0,d4=0,d5=0,d6=0;
+        if (sscanf(pNode->strParam.c_str(), "%u %d %d %d %d %d",
+                   &u1,&d2,&d3,&d4,&d5,&d6) != 6)
+            return false;
+        printf("[EFFECT] cq_action %u: FUN_1401c7c60 %u for user %u\n",
+               pNode->dwId, u1, pUser->GetId());
+        return true;
+    }
+    case 1511: { // ORIGINAL rank 0x8d (case @250163): role/npc query
+        // (vcall+0x298 OBJ_NPC) + msg build (type 0xa0) -> uVar41=1.
+        // 13 live rows.
+        printf("[MSG] cq_action %u: npc msg for user %u\n",
+               pNode->dwId, pUser->GetId());
+        return true;
+    }
+    case 1520: { // ORIGINAL rank 0x93 (case @250563): sscanf "%d" ->
+        // FUN_14024aa10(mgr, u, data, v) result (assumed success,
+        // documented). 1 live row.
+        int d = 0;
+        if (sscanf(pNode->strParam.c_str(), "%d", &d) != 1)
+            return false;
+        printf("[EFFECT] cq_action %u: FUN_14024aa10 %d user %u\n",
+               pNode->dwId, d, pUser->GetId());
+        return true;
+    }
+    case 1557: { // ORIGINAL rank 0x9c (case @250939): sscanf "%u" ->
+        // FUN_140165970(user) + FUN_140165960() comparisons, then
+        // FUN_140164520(user, val, data). Helpers unresolved -
+        // conservative false (documented). 1 live row.
+        unsigned u = 0;
+        if (sscanf(pNode->strParam.c_str(), "%u", &u) != 1)
+            return false;
+        printf("[CHK] cq_action %u: FUN_140164520 %u user %u\n",
+               pNode->dwId, u, pUser->GetId());
+        return false;
+    }
+    case 1652: { // ORIGINAL rank 0xa7 (case @251229):
+        // uVar41 = FUN_140165b50(user); if != 0 -> FUN_140165a10 ->
+        // uVar41 = 1; else keeps the (zero) result. Helper gate
+        // unresolved - assumed open (documented). 6 live rows.
+        printf("[EFFECT] cq_action %u: FUN_140165a10 user %u\n",
+               pNode->dwId, pUser->GetId());
+        return true;
+    }
+    case 1654: { // ORIGINAL rank 0xa9 (case @251277): gate on
+        // user+0x12d byte == 3 AND user+0x12e != 0 (both user fields,
+        // no param parse); then mgr lookup + vcall+0x298 (0x1040 NPC
+        // + 0x1002) -> returns. Gate fields not identified in our
+        // model - conservative false (documented). 28 live rows.
+        printf("[CHK] cq_action %u: 0x12d/0x12e gate for user %u (unidentified)\n",
+               pNode->dwId, pUser->GetId());
+        return false;
+    }
     case 1084: { // ORIGINAL family-E block @247734: resolve id into
         // two vars. sscanf "%I64d %u %u" == 3; FUN_140382d20(user,
         // f1, &out1, &out2) resolves the id (helper not yet
