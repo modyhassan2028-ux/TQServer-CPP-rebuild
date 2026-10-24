@@ -806,6 +806,13 @@ public:
             p = q;
         }
     }
+    // cq_action 1005 (ORIGINAL attr 0x1a): the hair/style attribute.
+    // style digits: cur = (cur/100)*100 + style; < 100 -> + 300.
+    // color digits: cur = (color - (cur%1000)/100) * 100 + cur.
+    uint32_t m_dwHairStyle{321};  // ORIGINAL default look cluster
+    uint32_t GetHairStyle() const { return m_dwHairStyle; }
+    void SetHairStyle(uint32_t v) { m_dwHairStyle = v; printf("[USER] %u hair -> %u\n", m_dwId, v); }
+
     void SetTransform(int32_t v) { m_nTransform = v; printf("[USER] %u transform -> %d\n", m_dwId, v); }
     uint32_t GetIteratorVar() const { return m_dwIterator; }
     void SetIteratorVar(uint32_t v) { m_dwIterator = v; }

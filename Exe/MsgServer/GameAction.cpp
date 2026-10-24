@@ -3233,6 +3233,110 @@ bool bAll = (llAll == 1);
     }
     case 1001: // ORIGINAL switch case 0: user data condition ("field op value")
         return ProcessDataCondition(pUser, pNode->strParam);
+    case 1002: { // ORIGINAL family-E block @242244: user attribute by
+        // NAME. sscanf "%s %s %s %s" needs >= 3 tokens, else DBERR
+        // (gameaction.cpp:0x215a) -> false. Named fields in the dead
+        // body: life, mana, mentor, lookface, look, face, sex,
+        // transform, money, e_money_trial - each with ops (+=, ==,
+        // ...) reading/writing user attrs. ALL 78 live rows carry a
+        // single token ("life" 42 / "mana" 36) so every one takes
+        // the literal parse-fail DBERR path -> false -> id_nextfail.
+        char szA[256]={0}, szB[64]={0}, szC[64]={0}, szD[64]={0};
+        int nTok = sscanf(pNode->strParam.c_str(), "%255s %63s %63s %63s",
+                          szA, szB, szC, szD);
+        if (nTok < 3) {
+            printf("[DBERR] cq_action %u type 1002 param (%s) parse %d < 3\n",
+                   pNode->dwId, pNode->strParam.c_str(), nTok);
+            return false;
+        }
+        // named-field body: 0 live rows reach here; document + stub
+        printf("[STUB] cq_action %u type 1002 named field %s op %s\n",
+               pNode->dwId, szA, szB);
+        return false;
+    }
+    case 1005: { // ORIGINAL family-E block @244932: hair style/color.
+        // sscanf "%s %u" (kind, value) == 2 else break->false.
+        // "color": v %= 10; cur = (v - (cur%1000)/100)*100 + cur ->
+        // SetAttrib(0x1a, cur, broadcast 1). "style": v %= 100;
+        // cur = (cur/100)*100 + v; if cur < 100 -> cur += 300;
+        // SetAttrib(0x1a, cur, 1). Unknown kind -> break -> false.
+        char szKind[32]={0}; uint32_t dwVal = 0;
+        if (sscanf(pNode->strParam.c_str(), "%31s %u", szKind, &dwVal) != 2)
+            return false;
+        uint32_t dwCur = pUser->GetHairStyle(); // ORIGINAL vcall+0x38
+        if (!_stricmp(szKind, "color")) {
+            uint32_t v = dwVal % 10;
+            pUser->SetHairStyle((v - (dwCur % 1000) / 100) * 100 + dwCur);
+            return true;
+        }
+        if (!_stricmp(szKind, "style")) { // all 53 live rows
+            uint32_t v = dwVal % 100;
+            uint32_t n = (dwCur / 100) * 100 + v;
+            if (n < 100) n += 300;
+            pUser->SetHairStyle(n);
+            return true;
+        }
+        return false;
+    }
+    case 1075: { // ORIGINAL family-E block @247203: send UI window.
+        // sscanf "%s %d %d" (op, winId, mode) == 3; op "send" ->
+        // FUN_140362560 ctor + FUN_140362620(buf, userId, x, y) then
+        // vcall+0x350 (deliver to the user; any other op -> +0x348
+        // broadcast to the map with flag 1). FUN_140362620 is the
+        // window-open packet builder (not yet identified) - stubbed;
+        // the send call itself succeeds and returns true.
+        char szOp[32]={0}; int nWin = 0, nMode = 0;
+        if (sscanf(pNode->strParam.c_str(), "%31s %d %d",
+                   szOp, &nWin, &nMode) != 3)
+            return false;
+        if (!_stricmp(szOp, "send")) {
+            printf("[UIWIN] cq_action %u send window %d mode %d to user %u\n",
+                   pNode->dwId, nWin, nMode, pUser->GetId());
+            return true;
+        }
+        printf("[UIWIN] cq_action %u broadcast window %d mode %d\n",
+               pNode->dwId, nWin, nMode);
+        return true;
+    }
+    case 1082: { // ORIGINAL family-E block @247426: self/couple/team
+        // statistic ops on the FUN_1401181a0 module. sscanf
+        // "%s %s %u %d %d %d" needs 6 else DBERR 0x20d6 -> false.
+        // "self add f3..f6" -> module vcall+8(userId, packed) - the
+        // case then falls to its end: FALSE (no return) - all 226
+        // live "self add" rows run the side effect and take
+        // id_nextfail. "self del" -> vcall+0x10 - same fall to false.
+        // "self chk" -> user vcall+0x2d8(packed) - 0 live rows,
+        // stubbed false. couple/team branches (partner/team modules
+        // FUN_140087650 / FUN_140118320) - 0 live rows, stubbed.
+        char szWho[32]={0}, szOp[32]={0};
+        uint32_t f3=0; int32_t f4=0,f5=0,f6=0;
+        if (sscanf(pNode->strParam.c_str(), "%31s %31s %u %d %d %d",
+                   szWho, szOp, &f3, &f4, &f5, &f6) < 6) {
+            printf("[DBERR] cq_action %u type 1082 param (%s)\n",
+                   pNode->dwId, pNode->strParam.c_str());
+            return false;
+        }
+        if (!_stricmp(szWho, "self")) {
+            if (!_stricmp(szOp, "add")) { // 226 rows
+                printf("[STATMOD] cq_action %u self add (%u, %d, %d, %d)\n",
+                       pNode->dwId, f3, f4, f5, f6);
+                return false; // ORIGINAL: side effect, falls to false
+            }
+            if (!_stricmp(szOp, "del")) { // 1 row
+                printf("[STATMOD] cq_action %u self del (%u, %d, %d, %d)\n",
+                       pNode->dwId, f3, f4, f5, f6);
+                return false;
+            }
+            if (!_stricmp(szOp, "chk")) { // 0 rows; user vcall+0x2d8
+                printf("[STATMOD] cq_action %u self chk stub false\n",
+                       pNode->dwId);
+                return false;
+            }
+        }
+        printf("[STUB] cq_action %u type 1082 %s %s (couple/team)\n",
+               pNode->dwId, szWho, szOp);
+        return false;
+    }
     case 1003: { // ORIGINAL switch case 2: teleport "mapid x y [force]"
         uint32_t dwMap = 0; int nX = 0, nY = 0, nForce = 0;
         if (sscanf(pNode->strParam.c_str(), "%u %d %d %d", &dwMap, &nX, &nY, &nForce) < 3) {

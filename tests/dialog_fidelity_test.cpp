@@ -1651,6 +1651,47 @@ system("mariadb -u root cq -e \"DELETE FROM cq_item WHERE owner_id=888001 AND ty
     assert(!CGameAction::ProcessActionUser(u5, &nd201));
     u5->m_stDialogCtx.dwId = 4001;
 
+    // --- family E batch 1: 1002 / 1005 / 1075 / 1082 (live rows) ---
+    CDialogEngine::Node ndE; ndE.dwType = 1082;
+
+    // 1002: all 78 live rows are single-token -> literal DBERR false
+    CDialogEngine::Node nd1002; nd1002.dwType = 1002;
+    nd1002.strParam = "life";   // 42 rows like this
+    assert(!CGameAction::ProcessActionUser(u5, &nd1002));
+    nd1002.strParam = "mana";   // 36 rows
+    assert(!CGameAction::ProcessActionUser(u5, &nd1002));
+
+    // 1005: style 13 (live) - style formula on attr 0x1a
+    CDialogEngine::Node nd1005; nd1005.dwType = 1005;
+    nd1005.strParam = "style 13";
+    assert(CGameAction::ProcessActionUser(u5, &nd1005));
+    // default cur 321: (321/100)*100 + 13 = 313; 313 >= 100 stays
+    assert(u5->GetHairStyle() == 313);
+    // style 39: (313/100)*100 + 39 = 339
+    nd1005.strParam = "style 39";
+    assert(CGameAction::ProcessActionUser(u5, &nd1005));
+    assert(u5->GetHairStyle() == 339);
+    // malformed -> false
+    nd1005.strParam = "style";
+    assert(!CGameAction::ProcessActionUser(u5, &nd1005));
+
+    // 1075: send 1000 1 (all 89 live rows) -> window send
+    CDialogEngine::Node nd1075; nd1075.dwType = 1075;
+    nd1075.strParam = "send 1000 1";
+    assert(CGameAction::ProcessActionUser(u5, &nd1075));
+    nd1075.strParam = "send"; // parse < 3 -> false
+    assert(!CGameAction::ProcessActionUser(u5, &nd1075));
+
+    // 1082: self add 2 200 10 0 (live) - side effect then FALSE
+    ndE.strParam = "self add 2 200 10 0";
+    assert(!CGameAction::ProcessActionUser(u5, &ndE));
+    // self del 2 1 (live) - side effect then FALSE
+    ndE.strParam = "self del 2 1 0 0";
+    assert(!CGameAction::ProcessActionUser(u5, &ndE));
+    // parse < 6 -> DBERR false
+    ndE.strParam = "self add 2";
+    assert(!CGameAction::ProcessActionUser(u5, &ndE));
+
     printf("DIALOG FIDELITY TEST PASSED\n");
     return 0;
 }
