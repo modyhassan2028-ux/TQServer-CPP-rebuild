@@ -432,3 +432,18 @@ chk_sum بمعادلة FUN_1400fe140 كاملة + LAST_INSERT_ID)،
   cd vendor/lua && cc -c -O2 -w *.c إلى /tmp/luao). CrossClient
   يستبدل بـ tests/stub_cross_client.cpp (مصدر CrossServer/*.cpp
   winsock-only فلا يدخل في بناء native أبدًا).
+
+## تحديث 2026-10-24 — حالة CQCrossServer
+- منفذ ومختبر بالكامل: النواة (hello/talk/roster/who/
+  disconnect) + رسائل OS (40015/40021/40023/40036/40040) +
+  NotifyOSConnect/DisConnect + BroadcastOtherServers + نظام
+  الليجات والبلاد (40065/40066 مصححة wire) + PlunderWar
+  (40041/40042) + ProcessServerConnectOK (FUN_14001ade0).
+- الاختبارات: cross_kernel / cross_league / cross_os_msg /
+  cross_plunder_war / cross_connect_ok — كلها ALL OK.
+- متبقي في CQCrossServer: FUN_14002c4e0 فقط (13 حالة أوامر
+  نصية 0x7562..0x756e) + تدقيق نهائي.
+- بعدها حسب الخطة المعتمدة: NpcServer.exe (فولدره شبه فارغ،
+  الديكمبايل جاهز في Native-Decompiled) → Loaderhock.exe →
+  الأيقونات/الصور مطابقة للأصل → وحوش الكروس في الريلم +
+  conquer.exe باداة Rea إن نقص شي.

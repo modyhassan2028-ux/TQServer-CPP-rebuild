@@ -2901,3 +2901,22 @@ FUN_140022f40 (تفاصيل كتابة الحقل)، FUN_1400232b0 (مسار
      الحروب)
 2. **tests/cross_connect_ok_test.cpp: ALL OK** + الرجريشن
    الأربعة كلها خضرا.
+
+## جلسة 2026-10-24 18:20 — قفل مراحل CQCrossServer الأساسية
+1. **[تأكيد ✔]** الدالة "الشقيقة" عند 23419 = FUN_14001c990
+   (إشعار الـ brick متعدد الأنماط) — **منفذة أصلاً** في
+   BuildBrickNotify واستخدمت اليوم في ProcessServerConnectOK
+   (mode-1) وسبق mode-3 (plunder publish) وmode-7 (create) —
+   قلب رسائل الليجات مقفول.
+2. **[المتبقي الوحيد في CQCrossServer]** FUN_14002c4e0 @ 14002c4e0:
+   ديسباتش نصوص/أوامر بـ 13 حالة (0x7562..0x756e = 
+   30050..30062): sscanf("%u %u") على payloads نصية مع حاويات
+   فرعية عند +0x18/+0x60/+0xa0/+0xe0/+0x120 — دي نظام
+   أوامر/تكوين جانبي (يُحدد دوره ثم يُنفذ). حجم تقديري ~600
+   سطر.
+3. **الحالة:** نواة CQCrossServer كاملة: hello/register،
+   talk relay، roster/who، silent-drop، disconnect، رسائل OS
+   الخمسة + NotifyOSConnect/DisConnect + BroadcastOtherServers،
+   LeagueInfo/LeagueList/LeagueRank/LeagueBrick (بالمخططات
+   المصححة)، PlunderWar كاملة، ProcessServerConnectOK.
+   الباقي: FUN_14002c4e0 ثم تدقيق مطابقة نهائي ضد البايناري.
