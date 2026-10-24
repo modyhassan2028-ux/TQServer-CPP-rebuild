@@ -125,6 +125,38 @@ int main() {
     assert(MsgNpcLoginB990(d, wb4, true) == 0);
     assert(L.vErr.size() == 1);
 
+    // ===== M3: the CNetMsg base family =====
+    {
+        Log Lg3; MsgNpcLoginData d3;
+        SetupTalk(d3, Lg3);
+        // poison the whole object, then ctor
+        std::memset(d3.m_recTalk.ab, 0xAA,
+                    sizeof(d3.m_recTalk.ab));
+        d3.m_recTalk.At<uint32_t>(8) = 0xdeadbeef;
+        d3.m_recTalk.At<uint32_t>(0xc) = 0xcafebabe;
+        MsgTalkCtor(&d3.m_recTalk);
+        // the base ctor (2ba1c0) + the LITERAL
+        // double clear (2b5600): +8/+0xc zeroed,
+        // the 0x400 msg buffer +0x10..0x410 zeroed
+        assert(d3.m_recTalk.At<uint32_t>(8) == 0);
+        assert(d3.m_recTalk.At<uint32_t>(0xc) == 0);
+        for (int i = 0x10; i < 0x410; i++)
+            if (d3.m_recTalk.ab[i] != 0) {
+                assert(false && "msg buf"); break; }
+        // the tail dwords +0x418..0x424
+        // (0x41c/0x424 sit INSIDE ab, checked)
+        assert(d3.m_recTalk.At<uint32_t>(0x418) == 0);
+        assert(d3.m_recTalk.At<uint32_t>(0x41c) == 0);
+        assert(d3.m_recTalk.At<uint32_t>(0x420) == 0);
+        assert(d3.m_recTalk.At<uint32_t>(0x424) == 0);
+        // +0x428 = this+0x10 (the inner header)
+        assert(d3.m_recTalk.At<void*>(0x428) ==
+               (char*)d3.m_recTalk.ab + 0x10);
+        // the dtor family: CMsgTalk vftable ->
+        // packer dtor -> CNetMsg vftable (2b55f0)
+        MsgTalkDtor(&d3.m_recTalk);
+    }
+
     // ===== M2: the Create gates (verbatim) =====
     Log Lg; MsgNpcLoginData dd;
     SetupTalk(dd, Lg);
@@ -171,11 +203,14 @@ int main() {
            "0xe/0x2720+0x2722/0xea65 handshake, the REAL "
            "CMsgTalk family M2: ctor +0x428=this+0x10 + "
            "SetBuf(+0x2d,0x3e1), Create gates name/to "
-           "len-1<0x10 + from <0x100 + text non-null "
-           "len-1<=0xf, the AddString order name,to,"
+           "len<0x10 + from <0x100 + text non-null "
+           "!(0xf<len), the AddString order name,to,"
            "TEXT,from, header writes +TimeGet/0x3ec/"
            "GetSize+0x1f, the stack-arg rebuild "
            "0xffffff/0x835/0/0/0/1, the 0x9c41 keepalive "
-           "strlen+1 = 21, and ERROR: login refuse!)\n");
+           "strlen+1 = 21, ERROR: login refuse!, and "
+           "M3: the CNetMsg base ctor 2ba1c0 (the "
+           "LITERAL double clear via 2b5600) + the "
+           "dtor chain 2b55f0)\n");
     return 0;
 }

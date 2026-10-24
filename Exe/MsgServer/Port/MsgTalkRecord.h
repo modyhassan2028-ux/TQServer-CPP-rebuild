@@ -53,8 +53,21 @@ struct MsgTalkRecord {
         return *(const T*)((const char*)ab + off); }
 };
 
-// FUN_14015b240: ctor (vftable, packer ctor,
-// +0x428 = this+0x10, SetBuf(this+0x2d,0x3e1,true))
+// FUN_1402ba1c0: the CNetMsg base ctor
+//  (+0 vftable, +8 dword 0, +0xc dword 0,
+//   +0x10..0x410 the 0x400 msg buffer zeroed,
+//   +0x418/+0x41c/+0x420/+0x424 dwords 0)
+void MsgTalkNetCtor(MsgTalkRecord* p);
+// FUN_1402b5600: the base clear (memset +0x10
+//  0x400, +0xc = 0, +8 = 0 - NOTE the LITERAL
+//  DOUBLE CLEAR: 15b240 calls 2ba1c0 first,
+//  then this one re-clears the same fields)
+void MsgTalkBaseClear(MsgTalkRecord* p);
+// FUN_1402b55f0: *this = CNetMsg::vftable
+void MsgTalkBaseDtor(MsgTalkRecord* p);
+// FUN_14015b240: ctor (2ba1c0, CMsgTalk::vftable,
+// packer ctor, 2b5600, +0x428 = this+0x10,
+// SetBuf(this+0x2d,0x3e1,true))
 void MsgTalkCtor(MsgTalkRecord* p);
 // FUN_14015b300: Create
 //  gates (the idiom ~(-len-2) - 1 = len, so these
