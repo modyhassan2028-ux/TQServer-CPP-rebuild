@@ -2765,3 +2765,32 @@ FUN_140022f40 (تفاصيل كتابة الحقل)، FUN_1400232b0 (مسار
    cq_cross_merit، cq_cross_vexillum، cq_item_cross. البحث عن
    وحوش الريلام (spawn الجغرافيا) لسه محتاج تحديد جدول
    الـ spawn/generator + خرائط الريلام.
+
+## جلسة 2026-10-24 24:15 — نظام الليج مكتمل + الأرشيف الأصلي اترفع
+1. **[تم ✔]** نظام الليج كامل ومختبر (commit d6d4154):
+   - CrossProtocol: LeagueInfo(40066)/LeagueStr(40067)/
+     LeagueBrick(40065) + المشفرات الثلاثة (wire من
+     FUN_140023a40/a90/b60 + FUN_140024350/3b0 + FUN_1400240f0/
+     140024170)
+   - CountrySysMgr: OnProduceNewLeague (FUN_140021c90: INSERT
+     cq_league_info + خريطتين + إشعار mode-7 + رد أكشن 2 ببث
+     يستثني المصدر)، OnUpdateLeagueInfo (FUN_14001a0a0: re-key
+     في الذاكرة + كتابة 5/6 — عمود idleague في الداتابيز
+     **بيفضل القديم** زي الأصل بالظبط)، OnLeagueStr
+     (FUN_14001bca0/c600/c030: حقول 5/6/7 + بث، أكشن 2 يستثني
+     المصدر)، BuildBrickNotify (FUN_14001c990: ترويسة mode/
+     league/date + تجزئة عند 0x3ff + flush)
+   - CrossKernel: OnLeagueInfo/OnLeagueStr + ServerIdOfSocket +
+     SetCountryOfServerFn sink
+   - Commit بالسجل المرتبط بالسجل pk (id) زي ORM الأصلي
+     (LAST_INSERT_ID بعد الإنشاء)
+   - **tests/cross_league_test.cpp: ALL OK** (wire + DB حي +
+     بث + تجزئة + kernel e2e مع استثناء المصدر) والاختبارات
+     القديمة عدت كلها
+2. **الأرشيف الأصلي Conquer_Online_Source_v6159.7z اترفع
+   واستخرج:** كل البيناريات الأصلية موجودة دلوقتي في
+   /app/co_repo/orig_binaries (بما فيها patch/Conquer.exe
+   الكلينت) + cq.sql الرسمي 112MB. تحقق: hash CQCrossServer
+   مطابق للديكمبايل → العناوين الموثقة كلها صحيحة. الـ
+   cq.sql الرسمي **ناقص فعلاً** صف 149883 (تأكيد ترقيعنا).
+   أداة REA في /opt/rea (MCP، npm: rea-agents).

@@ -72,13 +72,20 @@
    (المحادثة القديمة اتمسحت) — يُطلب من المالك رفعهما تاني**
    لاستخراج أي packets/assets ناقصة.
 
-**ملاحظة بيئة مهمة:** ساحة المحادثة القديمة
-(/app/conversations/6ad8ed949883f31f1959689c — فيها conquer_src/
-Source بالبيناريات الأصلية وghidra وأداة Rea) **اتمسحت**.
-الناجي: /app/co_repo/Native-Decompiled (كل الديكمبايل) و
-/tmp/orig_src (CQCrossServer.exe + cq.sql + pendtime.sql) و
-/opt/ghidra. البيناريات الأصلية الناقصة لازم تترفع من المالك
-قبل خطوات 3/5/6.
+**ملاحظة بيئة [محسوبة 2026-10-24]:** المالك رفع الأرشيف
+الأصلي Conquer_Online_Source_v6159.7z (829MB) — محفوظ في
+/app/co_repo/Conquer_Online_Source_v6159.7z، والبيناريات
+مستخرجة في /app/co_repo/orig_binaries/:
+Source/{CQCrossServer,MsgServer,NpcServer,RevampedLoader}.exe
++ patch/Conquer.exe (الكلينت) + cq.sql الرسمي الكامل 112MB
+(267 جدول — **مفيهوش** صف cq_config 149883: ترقيعنا
+sql/patches/ هو الصحيح) + ini السيرفرات (crossshell.ini/
+crossconn.ini/config.ini...). **تحقق hash:** CQCrossServer.exe
+بالأرشيف md5 028ce85f91b0703ba873dc5cfe762712 = نفس البيناري
+المفكوك → كل عناوين الدوال الموثقة في PORTING_LOG صحيحة
+للنسخة دي. خطوات 3/5/6 (NpcServer + أيقونات + وحوش
+الريلام) كلها متاحة دلوقتي. أداة REA (Reverse Engineer
+Anything، MCP من github.com/morluto/rea) مستنسخة في /opt/rea.
 
 ## وين وصلنا — CQCrossServer (نظام الكونتري + حرب السلب) ✔ مكتمل (2026-10-24)
 - **CCountrySysMgr:** Init الثلاثي (LoadLeagueInfo + التوزيع
