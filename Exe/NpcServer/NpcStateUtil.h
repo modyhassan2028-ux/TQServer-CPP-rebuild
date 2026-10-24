@@ -143,4 +143,39 @@ bool CNpcAttachAlive(bool bHasAttach);
 // }
 bool CNpcC960(CNpcStateData& rN, uint32_t uFlavor);
 
+// ============================================================
+// ===== ORIGINAL FUN_140058260 (attack dir pick) ====
+// ============================================================
+// DAT_1400c89d0 x-tab {0,-1,-1,-1,0,1,1,1}
+// DAT_1400c89f0 y-tab {1,1,0,-1,-1,-1,0,1}
+// (identical to the FUN_140087d50 wander probe)
+// if (!map(+0x98)) { log; return 0; }
+// +0x2c = 0;
+// gen->vt+0x28(gen, &refX, &refY);   // gen spawn
+// if (+0x84) { t = find(+0x84);
+//   if (t) { refX = t->x; refY = t->y; } }
+// ref = sub->vt+8(sub, refX, refY);  // dist to ref
+// best = -1; r = RandGet(8); uRet = r + 8;
+// for (i = r; i < r + 8; i++) {
+//   dir = i % 8;                     // signed mod
+//   if (dir == curDir) continue;
+//   mapObj = sub->vt+0x80(); if (!mapObj)
+//     { uRet = 0; continue; }
+//   u48 = sub->vt+0x48();
+//   if (!FUN_14004bff0(mapObj, x, y,
+//       dir, u48, 0x1a)) { uRet = 0;
+//       continue; }
+//   cand = (x + XT[dir], y + YT[dir]);
+//   d = chebyshev(cand - ref);
+//   sgn = +0x3c ? 1 : -1;
+//   if (0 < sgn * (ref - d)) {
+//     best = dir; ref = d;
+//   }
+//   uRet = d;          // the VERBATIM low-byte
+// }                    // leak into the return
+// if (best != -1) { +0x40 = best;
+//   +0x2c = 1; return 1; }
+// return (uRet & 0xff) != 0;   // original leak
+bool CNpcAttackDir(CNpcStateData& rN, int nCurDir);
+
 } // namespace npc

@@ -185,4 +185,79 @@ bool CNpcC960(CNpcStateData& rN, uint32_t uFlavor) {
     return bMoved;
 }
 
+// ORIGINAL DAT_1400c89d0 / DAT_1400c89f0 -
+// identical to the FUN_140087d50 wander probe
+// table (verified against the binary .rdata)
+static const int s_nDirX[8] = { 0,-1,-1,-1, 0, 1, 1, 1 };
+static const int s_nDirY[8] = { 1, 1, 0,-1,-1,-1, 0, 1 };
+
+bool CNpcAttackDir(CNpcStateData& rN, int nCurDir) {
+    if (!rN.m_bHasMap) {
+        rN.m_fnLogError();       // DAT_1400be0b0
+        return false;
+    }
+    rN.m_dwField2C = 0;          // +0x2c = 0
+    // ORIGINAL: gen->vt+0x28 spawn as reference
+    int nRefX = 0, nRefY = 0;
+    rN.m_fnGenGetSpawn(nRefX, nRefY);
+    // ORIGINAL: target override if found
+    if (rN.m_nTargetId != 0) {
+        CNpcTargetSeam* pT =
+            rN.m_fnFindTarget(rN.m_nTargetId);
+        if (pT != nullptr) {
+            nRefX = pT->m_nX;
+            nRefY = pT->m_nY;
+        }
+    }
+    // ORIGINAL: ref = sub->vt+8(sub, refX, refY)
+    int nRef = rN.m_fnSubDist(nRefX, nRefY);
+    int nBest = -1;
+    uint32_t uRet;
+    int nRand = (int)rN.m_fnRandGet(8);
+    uRet = (uint32_t)(nRand + 8);
+    for (int i = nRand; i < nRand + 8; i++) {
+        int nDir = i % 8;        // signed mod idiom
+        if (nDir == nCurDir)
+            continue;
+        // ORIGINAL: mapObj = sub->vt+0x80()
+        if (!rN.m_fnSubHasMap80()) {
+            uRet = 0;
+            continue;
+        }
+        uint32_t u48 = rN.m_fnSubVt48NoArgs();
+        int nX = rN.m_fnSubGetX38();
+        int nY = rN.m_fnSubGetY40();
+        // ORIGINAL: FUN_14004bff0(map, x, y,
+        // dir, u48, 0x1a)
+        if (!rN.m_fnMapWalkable(nX, nY, nDir, u48)) {
+            uRet = 0;
+            continue;
+        }
+        // ORIGINAL: the candidate cell + the
+        // DAT_1400c89d0/89f0 tables
+        int nDX = (nX + s_nDirX[nDir]) - nRefX;
+        int nDY = (nY + s_nDirY[nDir]) - nRefY;
+        int nADX = nDX < 0 ? -nDX : nDX;
+        int nADY = nDY < 0 ? -nDY : nDY;
+        int nD = nADY < nADX ? nADX : nADY;
+        // ORIGINAL: sgn = +0x3c ? 1 : -1
+        int nSign = rN.m_nField3C != 0 ? 1 : -1;
+        if (0 < nSign * (nRef - nD)) {
+            nBest = nDir;
+            nRef = nD;          // the greedy ref
+        }
+        uRet = (uint32_t)nD;    // the verbatim leak
+    }
+    if (nBest != -1) {
+        // ORIGINAL: +0x40 = best; +0x2c = 1
+        rN.m_dirQueue[0] = (uint8_t)nBest;
+        rN.m_nField40 = (uint32_t)(uint8_t)nBest;
+        rN.m_dwField2C = 1;
+        return true;
+    }
+    // ORIGINAL: return uVar9 & 0xff00 mask -
+    // the low byte LEAKS the last distance
+    return (uRet & 0xff) != 0;
+}
+
 } // namespace npc

@@ -151,6 +151,9 @@ struct CNpcStateData {
         // FUN_14005b9e0(npc, dir, flavor)
     std::function<bool(int)> m_fnAttack260;
         // FUN_140058260(npc, dir) - attack
+    std::function<bool()> m_fnSubHasMap80;
+        // sub vtable+0x80 (map object getter,
+        // null-check inside FUN_140058260)
 };
 
 // ============================================================
