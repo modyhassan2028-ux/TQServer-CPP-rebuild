@@ -3233,3 +3233,11 @@ FUN_140022f40 (تفاصيل كتابة الحقل)، FUN_1400232b0 (مسار
 3. Exe/NpcServer/NpcStepList.{h,cpp} + tests/
    npc_steplist_test — **NPC_STEPLIST_OK**. رجريشن
    NpcServer الخمسة كلها خضرا.
+
+## جلسة 2026-10-24 23:10 — تحديث التسليم
+- HANDOFF.md اتحدّث بدليل كامل للوكيل التالي: الوحدات
+  الستة المكتملة، ترتيب الشغل الجاي (تيكة vcall+0xe0 →
+  CMsgAiNpcInfo → main.cpp الحقيقي → Loaderhock)،
+  وعناوين كل الفتوات المفتوحة للمنطقة القادمة.
+- البيناري NpcServer.exe متأكد على الريموت (orig_binaries
+  /Source، MD5 أعلاه). كل شغل الجلسة متزامن.
