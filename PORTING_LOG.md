@@ -3139,3 +3139,27 @@ FUN_140022f40 (تفاصيل كتابة الحقل)، FUN_1400232b0 (مسار
    — **NPC_MANAGER_OK** (استهلاك الميزانية وحدّها الأعلى،
    إيقاف مبكر عند النفاد، mod-3، الحارس، MYASSERT/CHECKF).
    ملاحظة: ميزانية كل تيكة بتتجدد زي الأصل.
+
+## جلسة 2026-10-24 22:00 — NpcServer الوحدة 3: CNpcGenerator
+1. **FUN_140061040 = CNpcGenerator::CreateNpc** (كتلة
+   الـ CMsgAiNpcInfo vftable عند 82879 أرشدت للمنطقة):
+   - **فلتر المجموعات:** group = نوع الوحش
+     vcall+0x28→vcall+0x40 ثم FUN_14005f9d0 — رفض = فشل
+   - **وضعان:** علم config 0x12 بت 0: خريطة ثابتة
+     (لوكب DAT_140102d90 عبر vcall+0x20) + نوع GetInt(1)؛
+     وإلا خريطة عشوائية (FUN_14002b2d0) + النوع من
+     الباراميتر (صفر = فشل)
+   - **الإحداثيات:** X = GetInt(7) + tq::RandGet(GetInt(7))
+     @+0x30، ثانية الميلاد TimeGet/1000 @+0x34
+   - **خطوة الشبكة** @+0x1c: GetInt(8)==0 → صفر؛ وإلا
+     h=GetInt(6): (GetInt(5)/h)*(GetInt(4)/h)، لو ≤0 → 1
+   - **مسمار الخريطة:** FUN_14003ca10(14001c790(), النوع):
+     null → vcall+8 Close + اللوج الحرفي "Error: npc
+     generator [%u] got invalid map [%u]!"؛ نجاح →
+     FUN_140060e60 (علم 0x11) + الحقول GetInt(0xf)@+0x48
+     وGetInt(0x10)@+0x4c
+   - **FUN_140061220 = ctor CMsgAiNpcInfo** (vftable +
+     FUN_140034920 الأساس + m_? @+0x83 = this+2)
+2. Exe/NpcServer/NpcGenerator.{h,cpp} + tests/
+   npc_generator_test — **NPC_GENERATOR_OK**. رجريشن
+   NpcServer الثلاثة كلها خضرا (world/manager/generator).

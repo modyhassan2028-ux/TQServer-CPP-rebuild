@@ -1,0 +1,79 @@
+// CNpcGenerator::CreateNpc (FUN_140061040) - test
+#include "../Exe/NpcServer/NpcGenerator.h"
+#include <cassert>
+#include <cstdio>
+#include <string>
+#include <vector>
+using namespace npc;
+
+int main() {
+    CNpcGenerator g;
+    std::vector<std::string> logs;
+    g.m_fnLog = [&](const char* s){ logs.push_back(s); };
+    g.m_fnRand = [](int n){ return n - 1; };  // deterministic
+    g.m_fnTime = []{ return 5000; };          // sec 5
+    int nDummy = 0;
+    g.m_fnGroupFilter = [&](GenConfig*, TypeRecord*,
+                             int64_t){ ++nDummy; return true; };
+    // config table: idx -> value
+    int vals[0x13] = {}; vals[1] = 1111;
+    vals[4] = 100; vals[5] = 100; vals[6] = 10;
+    vals[7] = 50; vals[8] = 1;
+    vals[0xf] = 0x2a; vals[0x10] = 0x1;
+    vals[0x12] = 0;                          // fixed mode
+    g.m_cfg.m_fnGetInt = [&](int i){ return vals[i]; };
+    g.m_fnCurrentMapId = []{ return 700; };
+    g.m_fnRandomMapId = []{ return 800; };
+    g.m_fnFindMap = [&](uint32_t t)->void*{
+        return t == 1111 ? (void*)0x1234 : nullptr; };
+    int nTail = 0;
+    g.m_fnTailInit = [&]{ ++nTail; };
+    TypeRecord rec; rec.m_fnGetGroup = []{ return 42; };
+
+    // fixed mode: map from lookup, type from config 1
+    assert(g.CreateNpc(&rec, 0));
+    assert(g.m_dwMap == 700 && g.m_dwType == 1111);
+    // X = 50 + RandGet(50) = 50 + 49
+    assert(g.m_nX == 99);
+    assert(g.m_dwBornSec == 5);
+    // step = (100/10) * (100/10) = 100
+    assert(g.m_nStep == 100);
+    assert(g.m_dwFieldF == 0x2a && g.m_byField10 == 0x1);
+    assert(nTail == 1 && logs.empty());
+
+    // random mode (0x12 bit0): type from param, map random
+    vals[0x12] = 1; vals[1] = 2222;
+    g.m_fnFindMap = [](uint32_t){ return (void*)0x5678; };
+    assert(g.CreateNpc(&rec, 3333));
+    assert(g.m_dwType == 3333 && g.m_dwMap == 800);
+    // random mode, param 0 -> fail
+    assert(!g.CreateNpc(&rec, 0));
+
+    // group filter reject -> fail, no fields touched
+    g.m_fnGroupFilter = [](GenConfig*, TypeRecord*, int64_t){
+        return false; };
+    assert(!g.CreateNpc(&rec, 1));
+    assert(logs.empty());
+
+    // map not found: Close + verbatim error with type first
+    g.m_fnGroupFilter = [](GenConfig*, TypeRecord*, int64_t){
+        return true; };
+    vals[0x12] = 0; vals[1] = 5555;
+    g.m_fnFindMap = [](uint32_t){ return nullptr; };
+    assert(!g.CreateNpc(&rec, 0));
+    assert(g.m_bClosed);
+    assert(logs.size() == 1 &&
+           logs[0].find("Error: npc generator [5555] got "
+                        "invalid map [700]!") ==
+           std::string::npos ? false : true);
+    // step input 0 -> step 0
+    vals[8] = 0;
+    g.m_fnFindMap = [](uint32_t){ return (void*)1; };
+    assert(g.CreateNpc(&rec, 0));
+    assert(g.m_nStep == 0);
+
+    printf("NPC_GENERATOR_OK: fixed/random modes, group "
+           "filter, geo step, rand X, born sec, invalid-map "
+           "verbatim log\n");
+    return 0;
+}
