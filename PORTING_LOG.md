@@ -1433,3 +1433,89 @@ CUser vtable+0x50 — يلزم تفريغ الـ vtable)، 1023 (0x11 cq_bonus)�
   لازم rebuild كامل للـ 50 object. objs4 = القائمة الرسمية.
 - **التالي**: FUN_1404847d0/140484670 (حساب الضرر) وبعدها
   FUN_1404a1f70 كامل + حلقة المروحة (8 اتجاهات، DAT_140786e20).
+
+## جلسة 2026-10-24 (تاسعة) — تحليل كامل لحساب الضرر FUN_1404847d0 (قراءة، لا كود بعد)
+قرأت الحزمة كلها حرفيًا من الديكومبايل. دي المواصفة الجاهزة للبورت:
+
+### ABI مؤكد (تراكمي)
+- GetAttrib(0x6e)=110 → عمود 10 = **power** (اتأكد في فرع السموم)
+- GetAttrib(0x87)=135 → عمود 35 = **status_data0** (بديل الـ power!)
+- GetAttrib(0x8b)=139 → عمود 39 = **attr_power** (سقف الضرر)
+- GetAttrib(0x90)=144 → عمود 44 = **data**
+- GetAttrib(0x89)=137 → عمود 37 = **status_data2**
+- GetAttrib(0x91/0x92)=145/146 → أعمدة 45/46 **خارج جدول cq_magictype**
+  (أعمدة runtime للكائن المرحلي — ترجع 0 في الفحص، تُحمل لما نعرف مصدرها)
+- GetAttrib(2) = عمود cq_magic رقم 2 = **type** (كل مقارنات 0x305c إلخ)
+
+### توقيع الدالة
+`uint DamageCalc(CUser* caster, CUser* target, uint64 power, int skillPower)`
+- caster+0x90 = CPlayerMagic record (null → log → return 0)
+- target->vtable+0x290() nonzero = ميت → **return 1** (لا ضرر)
+- sort = GetAttrib(0x66)
+
+### mod فارق المستوى (local_res8)
+- target->vtable+0x298(0x1001, &def) — 0x1001 = دفاع؛ def != 0 = الهدف "لديه دفاع"
+- FUN_1400a76d0(FUN_140008520(caster+0x1c0), *(caster+0x1c8)->0xeee/10, target->0xeee/10)
+  = مُعامل مستوى (percent؛ يضرب /10000 في كل المعادلات)
+- 0xeee على الكائنات = مستوى/10 مقرب (باغت الأصلي)
+
+### المعادلات الحرفية
+**فرع السموم (sort 13):** FUN_140481560 → power = GetAttrib(0x6e)؛
+uVar6 = FUN_1403ec0a0(kernel, target, 0, 1, power, 0, 0, power64, 0) —
+الرول الأساسي. لو فيه دفاع:
+`dmg = ((min + RandGet(max-min) + luck*(min+rand)/100 + slot0x200) * res8) / 10000`
+(min/max = kernel slots 0x88/0x90، luck = FUN_140181080). حالة 0x6c على
+المهاجم && الهدف وحش && مش بوس → ×2. النتيجة = max(uVar6, dmg).
+
+**فرع غير السموم:**
+1. FUN_140481400 (weapon_hit==0 = ضربة جسدية): uVar10 =
+   - sort 37 (0x25) && skillPower: FUN_1402f3100(...,skillPower,...)؛
+     بدفاع: `(atkMin + atkMax + luckM*(sum)/100 + slot0x208 + skillPower)*res8/10000`
+     (atkMin/atkMax = FUN_1401805b0/FUN_1401873c0، luckM = FUN_140181280)
+   - غير كده: power = GetAttrib(0x6e)؛ **نوع 0x305c (12380) &&
+     *(char*)(caster+300)==1 → power = status_data0**؛ uVar10 =
+     FUN_1402f3100(...,power,...)؛ بدفاع:
+     `(sum + luckM*sum/100 + slot0x208 + power + atkMin + atkMax)*res8/10000`
+2. FUN_140481560 (weapon_hit==1 = سحري): power يُحدد بالسورت/النوع:
+   - sort 57 (0x39) أو نوع 0x2d5a (11610): بوس (target->0x288) →
+     power=0x7594 (30100)؛ وإلا max(0x753a (30010), status_data0)
+   - نوع 0x2f30 (12080): مسافة kernel->vtable+0x158 < 4 →
+     power = GetAttrib(0x90) + 30000
+   - نوع 0x3002 (12290): نفس منطق 0x39
+   - نوع 0x2f26 (12070): power = FUN_140483100(caster, *(caster+0xf8))
+     — المُحدد 1→status_data2، 2→عمود 45، 3→عمود 46
+   - أنواع 0x2ed6/0x2f4e/0x2fd0 بدون دفاع: sendFlag=0، power=status_data0
+   - أنواع 0x3020/0x302a/0x3034 بدون دفاع: power=status_data0
+   - FUN_1404831a0 (أنواع شفاء 0x2f58/0x2f62/0x2f6c) && بدون دفاع:
+     power=status_data0
+   - uVar10 += FUN_1403ec0a0(kernel, target, type==0x1f41 (8001),
+     sendFlag, power, 0,0, power64, 0) — **الجسدي والسحري يتجمعان!**
+   - بدفاع: نفس معادلة min/max الجسدية (slots 0x88/0x90) كنسخة احتياطية uVar17
+3. حالة 0x6c && وحش مش بوس → ×2؛ حالة 0x78 على المهاجم && وحش (target->0x240) → ×2
+4. النهائي = max(uVar10, uVar17)
+5. نوع 0x3070 (12400) && بدفاع && حياة الهدف (target->vtable+0x78) <=
+   النتيجة → النتيجة = حياة الهدف - 1 (مش قاتل — بيفضل 1 HP!)
+6. نوع 0x305c && بدفاع && attr_power <= النتيجة → النتيجة = attr_power (سقف)
+
+### الهيلبرات (مبينة الصورة كاملة)
+- FUN_140481400 = IsPhysicalHit (weapon_hit==0 → true؛ غير كده فحص
+  السلاح FUN_140178c40 + FUN_14032b4b0(item,5) — سلاح مطلوب)
+- FUN_140481560 = IsMagicHit (weapon_hit==1 → true؛ نفس فحص السلاح معكوس)
+- FUN_1404831a0 = أنواع الشفاء الثلاثة 12120/12130/12140
+- FUN_140483100 = محدد status_data2/عمود45/عمود46 بالمُحدد *(caster+0xf8)
+- **FUN_1403ec0a0 = رول الضرر الأساسي (9 معاملات) — التالي في القراءة**
+- FUN_1402f3100 = رول بديل في فرع الجسدي
+- target vtable: 0x290=IsDie، 0x298=GetPoint(0x1001 دفاع)،
+  0x240=IsMonster، 0x288=IsBoss، 0x78=GetLife، 0x48/0x40=Y/X
+
+### خطة البورت للجلسة القادمة (بالترتيب)
+1. اقرأ FUN_1403ec0a0 وFUN_1402f3100 (رولات الضرر) — دي أصعب خطوة
+2. بورت kernel slots 0x88/0x90 (min/max ضربة) و0x200/0x208 (بركة؟) +
+   FUN_140181080/FUN_140181280 (حظ) وFUN_1401805b0/FUN_1401873c0
+   (min/max سحري) كواجهات على موديل المستخدم
+3. بورت FUN_1404847d0 حرفيًا بالمعادلات فوق + معامل فارق المستوى
+   (موديل: FUN_1400a76d0 = 10000 ثابت مؤقتًا حتى ييجي الـ kernel)
+4. ثم FUN_1404a1f70 كامل + حلقة المروحة + FUN_140499830 + FUN_14048c4c0
+
+**درس متكرر**: أي توسيع لأعضاء الكلاسات = rebuild كامل (objs4) وإلا
+segfault عشوائي بـ ABI mismatch.
