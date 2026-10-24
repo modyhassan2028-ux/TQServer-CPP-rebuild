@@ -4,6 +4,7 @@
 //   1501(101 text) -> 1502(102 opt ->1510) -> 1503(102 opt ->3060)
 //   -> 3050(102 opt "No~thanks." ->0) -> 10004(104 listbox) -> 10005(120)
 #include "Account.h"
+#include "Team.h"
 #include "Npc.h"
 #include "Dialog.h"
 #include "GameAction.h"
@@ -1885,7 +1886,8 @@ system("mariadb -u root cq -e \"DELETE FROM cq_item WHERE owner_id=888001 AND ty
     { auto n = mkE(1108, "team_action 1");    assert(!CGameAction::ProcessActionUser(u5,&n)); }
     { auto n = mkE(1116, "5 6");   assert(!CGameAction::ProcessActionUser(u5,&n)); }
     // 1107: "%u %d %d" ok -> true; short -> false
-    { auto n = mkE(1107, "1 2 3"); assert( CGameAction::ProcessActionUser(u5,&n)); }
+    // 1107 now requires a real team (no team -> false); parse-fail -> false
+    { auto n = mkE(1107, "1 2 3"); assert(!CGameAction::ProcessActionUser(u5,&n)); }
     { auto n = mkE(1107, "1 2");   assert(!CGameAction::ProcessActionUser(u5,&n)); }
     // 1110: 7 fields + zero gate
     { auto n = mkE(1110, "1 2 3 4 5 6 7");  assert( CGameAction::ProcessActionUser(u5,&n)); }
@@ -1971,6 +1973,36 @@ system("mariadb -u root cq -e \"DELETE FROM cq_item WHERE owner_id=888001 AND ty
         auto fired = u5->ProcessActionTimers(now + 60);
         assert(fired.size() == 1 && fired[0] == 9018985);
         assert(u5->m_deqTimers.empty());
+    }
+
+    // --- team system (FUN_140118860 model): 1107 team teleport ---
+    {
+        u5->SetMapId(1002); // ensure same-map path (MapManager-free)
+        auto& tm = CTeamManager::Instance();
+        auto pTeam = std::make_shared<CTeam>(u5->GetId());
+        auto uMate = std::make_shared<CUser>(88002);
+        uMate->SetAlive(true); uMate->SetMapId(1002);
+        CUserManager::Instance().AddUser(uMate);
+        assert(pTeam->AddMember(uMate->GetId()));
+        tm.InsertTeamForTest(pTeam);
+        CDialogEngine::Node nd; nd.dwType = 1107; nd.strParam = "1002 100 100";
+        // team exists: no-team path for a stranger
+        {
+            auto uLonely = std::make_shared<CUser>(88003);
+            CDialogEngine::Node nd2 = nd;
+            assert(!CGameAction::ProcessActionUser(uLonely, &nd2));
+        }
+        // parse gate
+        nd.strParam = "1000 50";
+        assert(!CGameAction::ProcessActionUser(u5, &nd));
+        // full path: self + member both land on map 1000
+        nd.strParam = "1002 100 100";
+        assert(CGameAction::ProcessActionUser(u5, &nd));
+        assert(u5->GetMapId() == 1002);
+        assert(uMate->GetMapId() == 1002);
+        // leave-team restores the false path
+        pTeam->RemoveMember(uMate->GetId());
+        CUserManager::Instance().RemoveUser(uMate->GetId());
     }
 
     // 1084: "13901336 6 7" (live) - id resolved into vars 6,7

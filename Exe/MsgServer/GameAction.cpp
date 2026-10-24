@@ -10,6 +10,7 @@
 #include "Dialog.h"
 #include "MsgAction.h"
 #include "UserManager.h"
+#include "Team.h"  // existing CTeamManager (v1 team system)
 #include "GroundItems.h"
 #include "MonsterManager.h"
 #include "Npc.h"
@@ -3841,8 +3842,17 @@ bool bAll = (llAll == 1);
     }
     case 1106: { // ORIGINAL rank 0x5f (case @248659): team-member
         // iteration + effect per member; final uVar41 = 0. 3 rows.
-        printf("[TEAM] cq_action %u: member effect for user %u\n",
-               pNode->dwId, pUser->GetId());
+        auto pTeam = CTeamManager::Instance().GetTeamOf(pUser->GetId());
+        if (!pTeam) return false; // FUN_140118860 -> 0
+        for (uint32_t dwMember : pTeam->GetMembers()) {
+            if (dwMember == pUser->GetId()) continue;
+            auto pMember = CUserManager::Instance().GetUser(dwMember);
+            if (!pMember) continue;
+            // ORIGINAL per-member op: FUN_14032f080(member, data) -
+            // helper not identified - documented stub
+            printf("[TEAM] cq_action %u: member %u effect\n",
+                   pNode->dwId, dwMember);
+        }
         return false; // ORIGINAL tail: uVar41 = 0
     }
     case 1107: { // ORIGINAL rank 0x60 (case @248708): sscanf "%u %d
@@ -3850,18 +3860,33 @@ bool bAll = (llAll == 1);
         // iteration; tail uVar41 = 1. 9 live rows.
         unsigned u = 0; int d1 = 0, d2 = 0;
         if (sscanf(pNode->strParam.c_str(), "%u %d %d", &u, &d1, &d2) != 3)
-            return false;
-        printf("[TEAM] cq_action %u: effect %u for user %u\n",
-               pNode->dwId, u, pUser->GetId());
-        return true;
+            return false; // DBERR line 0x2a6b
+        auto pTeam = CTeamManager::Instance().GetTeamOf(pUser->GetId());
+        if (!pTeam) return false; // FUN_140118860 -> 0
+        for (uint32_t dwMember : pTeam->GetMembers()) {
+            if (dwMember == pUser->GetId()) continue; // iVar14 != iVar24
+            auto pMember = CUserManager::Instance().GetUser(dwMember);
+            if (!pMember) continue;   // lookup vcall+0x28 -> 0
+            if (!pMember->IsAlive()) continue; // vcall+0x220 gate
+            // FUN_1401c55b0(member, map, x, y) == FLYMAP_NORMAL ->
+            // FUN_1401734d0 (post-move processing, covered by FlyMap)
+            pMember->FlyMap(u, (uint32_t)d1, (uint32_t)d2, false);
+        }
+        // MYASSERT: self must land FLYMAP_NORMAL or the action fails
+        return pUser->FlyMap(u, (uint32_t)d1, (uint32_t)d2, false) == 0;
     }
     case 1108: { // ORIGINAL rank 0x61 (case @248785): sscanf
         // "team_action %u %d" -> team iteration; final uVar41 = 0.
         unsigned u = 0; int d = 0;
         if (sscanf(pNode->strParam.c_str(), "team_action %u %d", &u, &d) != 2)
             return false;
-        printf("[TEAM] cq_action %u: team_action %u %d user %u\n",
-               pNode->dwId, u, d, pUser->GetId());
+        auto pTeam = CTeamManager::Instance().GetTeamOf(pUser->GetId());
+        if (!pTeam) return false;
+        for (uint32_t dwMember : pTeam->GetMembers()) {
+            if (dwMember == pUser->GetId()) continue;
+            printf("[TEAM] cq_action %u: team_action %u %d -> member %u\n",
+                   pNode->dwId, u, d, dwMember);
+        }
         return false; // ORIGINAL tail: uVar41 = 0
     }
     case 1109: { // ORIGINAL rank 0x62 (case @248858):

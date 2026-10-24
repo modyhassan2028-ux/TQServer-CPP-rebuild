@@ -41,6 +41,11 @@ public:
     std::string Quit(const std::shared_ptr<CUser>& pPlayer);
     std::string RosterText(const std::shared_ptr<CUser>& pPlayer);
     std::shared_ptr<CTeam> GetTeamOf(uint32_t dwUserId);
+    // test seam: inject a prebuilt team (used by cq_action 1107 tests)
+    void InsertTeamForTest(std::shared_ptr<CTeam> p) {
+        std::lock_guard<std::mutex> lk(m_mutex);
+        m_teams[NextTeamId()] = p;
+    }
     // split a kill reward: members on the same map each get share of money/cp
     void ShareKillReward(const std::shared_ptr<CUser>& pKiller, uint32_t dwMoney, uint32_t dwCp);
     // teammates on the same map get half the killer's XP each
