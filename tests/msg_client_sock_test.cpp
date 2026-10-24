@@ -65,6 +65,21 @@ int main() {
     assert(s2.At<void*>(0) == (void*)0x1);
     assert(s2.At<uint32_t>(0x1054) == 1);
 
+    // M9: the three sibling ctors - identical base,
+    // distinct vftables (the M6 +0xe0/+0xe8/+0xf0)
+    MsgClientSock s3, s4, s5;
+    std::memset(s3.ab, 0xAA, sizeof(s3.ab));
+    std::memset(s4.ab, 0xAA, sizeof(s4.ab));
+    std::memset(s5.ab, 0xAA, sizeof(s5.ab));
+    MsgChangeSvrClientCtor(&s3, []{ return 5000u; });
+    MsgIpadSvrClientCtor(&s4, []{ return 5000u; });
+    MsgCrossSvrClientCtor(&s5, []{ return 5000u; });
+    assert(s3.At<void*>(0) == (void*)0x3);
+    assert(s4.At<void*>(0) == (void*)0x4);
+    assert(s5.At<void*>(0) == (void*)0x5);
+    assert(s3.At<uint32_t>(0x1054) == 5);   // base ran
+    assert(s5.At<uint32_t>(0x1038) == 0xffffffff);
+
     printf("MSG_CLIENT_SOCK_OK: FUN_140503610 "
            "(CAccountClient ctor, vftable chain) + "
            "FUN_140506e80 (the 0x1468 CClientSocket "

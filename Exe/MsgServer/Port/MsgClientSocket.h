@@ -60,4 +60,19 @@ void MsgClientSockCtorBase(MsgClientSock* p,
 void MsgAccountClientCtor(MsgClientSock* p,
     std::function<uint32_t()> fnTimeGet);
 
+// ===== ORIGINAL FUN_140503280 @ 140503280 =====
+// the ChangeServer client ctor (M6 +0xe0)
+void MsgChangeSvrClientCtor(MsgClientSock* p,
+    std::function<uint32_t()> fnTimeGet);
+
+// ===== ORIGINAL FUN_140502ef0 @ 140502ef0 =====
+// the IPAD payments client ctor (M6 +0xe8)
+void MsgIpadSvrClientCtor(MsgClientSock* p,
+    std::function<uint32_t()> fnTimeGet);
+
+// ===== ORIGINAL FUN_140502b40 @ 140502b40 =====
+// the CrossServer client ctor (M6 +0xf0)
+void MsgCrossSvrClientCtor(MsgClientSock* p,
+    std::function<uint32_t()> fnTimeGet);
+
 } // namespace msg

@@ -59,4 +59,25 @@ void MsgAccountClientCtor(MsgClientSock* p,
     p->At<void*>(0) = (void*)0x2;   // CAccountClient::vftable
 }
 
+// ===== ORIGINAL FUN_140503280 @ 140503280 =====
+void MsgChangeSvrClientCtor(MsgClientSock* p,
+                           std::function<uint32_t()> fnTimeGet) {
+    MsgClientSockCtorBase(p, fnTimeGet);
+    p->At<void*>(0) = (void*)0x3;   // CChangeSvrClient::vftable
+}
+
+// ===== ORIGINAL FUN_140502ef0 @ 140502ef0 =====
+void MsgIpadSvrClientCtor(MsgClientSock* p,
+                         std::function<uint32_t()> fnTimeGet) {
+    MsgClientSockCtorBase(p, fnTimeGet);
+    p->At<void*>(0) = (void*)0x4;   // CIpadSvrClient::vftable
+}
+
+// ===== ORIGINAL FUN_140502b40 @ 140502b40 =====
+void MsgCrossSvrClientCtor(MsgClientSock* p,
+                           std::function<uint32_t()> fnTimeGet) {
+    MsgClientSockCtorBase(p, fnTimeGet);
+    p->At<void*>(0) = (void*)0x5;   // CCrossSvrClient::vftable
+}
+
 } // namespace msg
