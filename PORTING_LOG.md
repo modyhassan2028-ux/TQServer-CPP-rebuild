@@ -4634,3 +4634,53 @@ M5: إعادة هيكلة عيلة اللوجين على النموذج
   الموزّع/الرفض/null-sender/البوابات/العيلة
   الأساسية — كلها على النموذج الجديد.
 - **الرجريجن 47/47 أخضر.**
+
+## جلسة 2026-10-26 04:45 — MsgServer الوحدة
+M6: CSocketKernel::Create (FUN_1404fc940) البوت
+الحرفي الكامل
+
+### الوحدة M6 (Exe/MsgServer/Port/MsgSocketKernel)
+- **السلسلة الحرفية الكاملة:** +0x88/+0x90 =
+  param_2/param_3 → نداءين افتراضيين (vt+0x38،
+  vt+0x40 بوسيط **0x898**) → مسح +0xc8/+0xd0 →
+  تهيئة الشبكة (1404f7160) → event_config_new →
+  **avoid(4)** → عدد المعالجات (GetSystemInfo)
+  → cpu hint → event_base_new_with_config →
+  **+0x178** → تحرير الـ config → سجل
+  "libevent method: %s".
+- **shell.ini/System:** SERVE_PORT (الافتراضي
+  **0x16b8 = 5816**)، MSGCOUNT_OUT (أقل من 1 →
+  **0x84 = 132**) مع سجل "MSGCOUNT_OUT=%d"،
+  +0xc = 10، +0x10 = TimeGet(0)/1000.
+- **قائمة GM IPs (1404fbe90):** الفشل = تحذير
+  بس فقط "cannot load GM IP list file".
+- **المستمعون الثلاثة (vt+8) بالترتيب الحرفي:**
+  GM عند SERVE_PORT+2 (بدون flags)، NPC عند
+  +4 بـ 0x20000، الرئيسي عند SERVE_PORT بـ
+  0x10000 — **المستمع الرئيسي (+0x98) فاشله
+  بيسكت تمامًا بدون لوج خطأ** (حرفي).
+- **العملاء الأربعة (new 0x1468):**
+  AccountServer (+0xd8، id 3) إجباري،
+  ChangeServer (+0xe0، id 4) بـ ini
+  IsConnectChangeServer==1، IPAD (+0xe8، id 5)
+  بـ IsSupportIPADPayments==1، Cross (+0xf0،
+  id 6) بـ CrossClient/Enable==1 — كل فشل =
+  لوجه الحرفي + vt+0x10 تحرير + صفر المؤشر.
+- **خيط العمل:** _beginthreadex(FUN_1404f8110)
+  → +0x200، وسجل "thread %u created libevent
+  worker thread %u".
+- **QueryConfig (140006ad0(50000,1)):** فشل
+  الاستعلام = اللوج الحرفي بمسار الـ PDB
+  **"f:\version\cqserver-78.0.11-1204\
+  msgserver\evnet\socketkernel.cpp"** (خطأ
+  إملائي "evnet" حرفي من البيناري) عند
+  **0x20b**، وفشل الفحص (vt+0x40) عند **0x210**
+  مع تحرير الكائن.
+- **كتابات الذيل:** +0x208 = 1، +0x214 = 0x2760،
+  +0x20c = 0x3c، +0x210 = TimeGet(0)/1000.
+- **الاختبار:** المسار السعيد (القيم الافتراضية
+  وترتيب اللوجات الثلاثة)، MSGCOUNT_OUT
+  محترم، وشلال الفشل الكامل (كل لوج حرفي
+  بنصه)، والعملاء المعطّلون بالـ ini مش
+  بيتعملهم create.
+- **الرجريجن 48/48 أخضر.**
