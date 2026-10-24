@@ -45,6 +45,36 @@ chk_sum بمعادلة FUN_1400fe140 كاملة + LAST_INSERT_ID)،
 **النتيجة: كل الأنواع الصغيرة الشائعة في السويتش خلصت.**
 
 ## المتبقي بالترتيب (ابدأ من 1 — المهم دلوقتي: مهارة 3 Skills)
+
+### خطة نظام المهارات (تم تحديده بالفعل — ابدأ من هنا)
+**مبورت خلاص (متلمم ومختبر جزئيًا)**:
+- CMagicTypePool::LoadFromDB (cq_magictype، 1,266 صف في القاعدة) +
+  CPlayerMagic record (cq_magic، 680 صف) + Save/Erase/SetAttrib.
+- CUser::LearnMagic (FUN_1404939c0 حرفي: بوابة النوع/المستوى، re-learn
+  يمسح unlearn بس، id من الـ pool) — User.cpp.
+- WeaponSkill: LoadFromDB/Find/GetMaxLevel/AwardWeaponSkill
+  (FUN_140170ae0)/AddWeaponSkillExp/AwardWeaponSkillTime — User.h/cpp.
+- بوابات التست الحالية (gates 10/30، stamina 20/30، ضرر 2.5x/1.5x)
+  في tests/skills_test.cpp.
+
+**الناقص (محرك الإطلاق الفعلي — نقطة البداية المحددة في الدمب)**:
+- عائلة CMsgMagicEffect (المدخل): FUN_140386720 (ctor)،
+  FUN_1403867d0 (dtor)، FUN_1403872c0 (الرسالة invalid log)،
+  FUN_1403872d0 (العملية الرئيسية للباكِت عند 711356).
+- عائلة CMsgMagicInfo: FUN_140456ea0 / FUN_140456f80 (869377+).
+- المرسلات/التأثير: FUN_1404851b0، FUN_140486fb0،
+  FUN_14048c4c0 (2 إشارة MagicEffect — ده غالبًا Launch/Apply).
+- الحلقة المفقودة: Intone (شحن السحر) → Launch (إطلاق) → التحقق
+  من الهدف/المسافة/crime → حساب الضرر من cq_magictype (power/
+  percent/level) → تطبيق التأثير على الأهداف → بث MsgMagicEffect
+  للخريطة → خصم MP/stamina → exp uplevel (بوابة need_exp/
+  need_level من cq_magictype).
+- ملاحظة قاعدة: المهارات الحية في cq_magictype نوعها sort=1 (سحر)
+  وسلاح XP في جدول أسطح: تحقق من عمود weapon_subtype.
+- طريقة العمل المعتادة: objdump على الباينري الأصلي عند كل شك،
+  بورت حرفي، تست بصفوف حقيقية (تعلم/شحن/إطلاق/ضرر/uplevel)،
+  ريجريشن، commit+push فورًا.
+
 1. ~~FUN_140145f60 — تم اكتشاف أنه مبورت خلاص (هو ProcessAction
    الرئيسي نفسه، سويتش العائلات الـ22 + العمق + البروفايلنغ)، ومطالبة
    1023 موصولة بيه ومختبرة حية (جلسة 2026-10-24): اختبار
