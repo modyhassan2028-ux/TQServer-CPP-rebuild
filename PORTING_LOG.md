@@ -1279,3 +1279,33 @@ CUser vtable+0x50 — يلزم تفريغ الـ vtable)، 1023 (0x11 cq_bonus)�
   معالج مبورت حرفيًا — السويتش الوظيفي مكتمل 100% من ناحية الصفوف
   الحية. المتبقي الكبير: نظام المهارات (Skills) لم يبدأ، ثم بقية
   دوال السيرفر (تقدير 30-40% معمول).
+
+## 24 أكتوبر — بورت باكيه السحر 1105/1103 + دوال الأثر (اتكوميت 07d137f)
+
+- **CMsgMagicEffect (0x419 = 1105)**: البورت الحرفي للأربع صيغ —
+  Create (FUN_140386800)، CreateWithTarget (FUN_1403868f0)،
+  AppendTarget (FUN_140386d00 بسقف الحجم < 0x400 وعدّاد مركزي)،
+  CreateFull (FUN_140386e00 مع الغرابة الحرفية: param_9 يُكتب على
+  قاعدة الإدخال التالي stride 0x20). الأوفستات بايت-مطابقة:
+  attacker@0 target@4 type@8 level@0xa dir@0xe count@0xf flag@0x10،
+  الإدخالات@0x14 بخطوة 0x20 وكل إدخال ينتهي بفاصل u32.
+- **CMsgMagicInfo (0x44f = 1103)**: Create (FUN_140457240) — time@0
+  magicType@8 mode@0xe effect@0x10 data5@0x14 data6@0x18 حجم 0x1c؛
+  type=0 يرفض مع سطر اللوج الأصلي. الوضعان المرصودان: 4 (attach)
+  و6 (drop).
+- **دوال الأثر على CUser**: AllowLaunchEffect (FUN_14048c770) — قناع
+  available (attr 8) لازم يحمل البت وإلا رفض؛ AttachEffectType
+  (FUN_14048c7e0) — يرفض بت موجود، يضيف لقناعي monopoly (9) /
+  exorbitant (10) عند الطلب + Save + MsgMagicInfo mode 4؛
+  DropMagicEffect (FUN_14048c4c0) — سقف 40 سجل، قناعي available +
+  exorbitant معًا + حارس الفيض u32، بت monopoly يفرّغ القناع ويدفع
+  صنف التحول الاحتكاري (0x2dd5b6 = 3000694) وإلا الصنف العادي،
+  MsgMagicInfo mode 6.
+- **ملاحظة دقيقة**: العمود available_effect_type في cq_magictype
+  الافتراضي بتاعه = 1 (بت 0 شغال من البداية) — التست يحسبه.
+- **اختبار جديد**: tests/magic_effect_packets_test.cpp — تخطيطات
+  1105 الأربعة بايت-مطابقة + تخطيط 1103 + تدفقات attach/launch/drop
+  على البتولات الحقيقية (cq_magictype 1,265 صف + cq_itemtype
+  25,143 صنف). PASS.
+- **ريجريشن**: skills_test + action_final_families_test (33 سيناريو)
+  PASS على البناء الجديد. بيلد كامل 8/8 بينaries بـ zig نضيف.
