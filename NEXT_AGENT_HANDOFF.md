@@ -8,11 +8,21 @@
 
 **الهدف:** نقل `NpcServer.exe` (Conquer Online v6159) إلى C++ بنسبة 100% مطابقة للأصل.
 
-**المسارات الأساسية:**
-- الريبو: `/app/co_repo` (git remote: `origin` → GitHub، branch `main`)
-- الـ decompile المرجعي: `/app/co_decomp/Native-Decompiled/NpcServer.exe.decompiled.c`
-- الـ binary الأصلي (لاستخراج الجداول): `/app/co_decomp/orig_binaries/Source/NpcServer.exe`
-- ملفات الـ NpcServer: `Exe/NpcServer/` — الاختبارات: `tests/`
+**المسارات والروابط الأساسية:**
+- **الريبو اللي شغالين عليه:** محلياً `/app/co_repo` — وعلى GitHub:
+  `https://github.com/modyhassan2028-ux/TQServer-CPP-rebuild`
+  (branch `main`، remote `origin` مظبوط بالفعل للـ push)
+- **الريبو المفكوك (الـ decompile المرجعي):**
+  `/app/co_decomp/Native-Decompiled/NpcServer.exe.decompiled.c`
+  (ونفس المجلد فيه كل الـ DLLs المفكوكة + ملفات `.index.tsv` للفهرسة:
+  `/app/co_decomp/Native-Decompiled/`)
+- **الـ binary الأصلي (الملفات الأساسية اللي اتنقلت من المصدر):**
+  `/app/co_decomp/orig_binaries/Source/NpcServer.exe`
+  (نفس المجلد فيه MsgServer.exe و CQCrossServer.exe و RevampedLoader.exe
+  وكل ملفات الـ config: `/app/co_decomp/orig_binaries/Source/`)
+  (وفوق فيه `/app/co_decomp/orig_binaries/cq.sql.gz` و `/app/co_decomp/orig_binaries/patch/`)
+- الـ binary بيستخدم لاستخراج الجداول الثابتة (راجع الوحدة 30 في PORTING_LOG لطريقة الاستخراج بـ python struct + PE sections)
+- ملفات الـ NpcServer المنقولة: `Exe/NpcServer/` — الاختبارات: `tests/`
 
 **قواعد غير قابلة للنقاش (standing instructions من مالك المشروع):**
 1. **ممنوع كود متخمَّل (guessed code)** — كل سطر من `NpcServer.exe.decompiled.c` حرفياً.
