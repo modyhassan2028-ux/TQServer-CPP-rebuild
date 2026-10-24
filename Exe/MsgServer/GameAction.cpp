@@ -3644,28 +3644,28 @@ bool bAll = (llAll == 1);
         // >= <= == > < vs the parsed value; "set"/"+=" -> vcall+0x40
         // (write) -> return its result. f1=="interval(0)": ops vs
         // (uint)(now - val). f1=="interval(1)": same with a second
-        // var (some ops return 0 in the original). Port: the module
-        // singleton is stubbed by CUser::m_mapVarM7 (documented;
-        // kernel module port pending).
+        // var (some ops return 0 in the original). Port: bound to
+        // the real module 0xd = CUserTaskManager - "time" reads and
+        // writes the task's data7 column (vcall+0x38 idx 7 /
+        // +0x40), gated by HasTask (vcall+0x20) like the original.
         char f1[128] = {0}, f2[128] = {0}; int32_t v = 0;
         if (sscanf(pNode->strParam.c_str(), "%127s %127s %d",
                    f1, f2, &v) != 3)
             return false;
-        const int32_t nVal = pUser->GetVarM7(pNode->dwData);
+        auto& mgr = CUserTaskManager::Instance();
+        if (!mgr.HasTask(pUser, pNode->dwData))
+            return false; // ORIGINAL gate: vcall+0x20 -> false
+        const int32_t nVal = mgr.GetData(pUser, pNode->dwData, 7);
         if (!_stricmp(f1, "time")) {
             if (!_stricmp(f2, ">=")) return v <= nVal;
             if (!_stricmp(f2, "<=")) return nVal <= v;
             if (!_stricmp(f2, "==")) return nVal == v;
             if (!_stricmp(f2, ">"))  return v < nVal;
             if (!_stricmp(f2, "<"))  return nVal < v;
-            if (!_stricmp(f2, "set")) {
-                pUser->SetVarM7(pNode->dwData, v);
-                return true; // vcall+0x40 result stubbed true
-            }
-            if (!_stricmp(f2, "+=")) {
-                pUser->SetVarM7(pNode->dwData, nVal + v);
-                return true;
-            }
+            if (!_stricmp(f2, "set"))
+                return mgr.SetData(pUser, pNode->dwData, 7, v);
+            if (!_stricmp(f2, "+="))
+                return mgr.SetData(pUser, pNode->dwData, 7, nVal + v);
             return false;
         }
         if (!_stricmp(f1, "interval(0)")) {

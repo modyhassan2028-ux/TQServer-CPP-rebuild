@@ -1837,13 +1837,27 @@ system("mariadb -u root cq -e \"DELETE FROM cq_item WHERE owner_id=888001 AND ty
     assert(!CGameAction::ProcessActionUser(u5, &nd1650));
 
     // 1058 (rank 0x32): module-7 var ops ("time set 0" = 228 live rows)
+    // ORIGINAL gate: 1058 fails unless the task var exists (vcall+0x20)
     CDialogEngine::Node nd1058; nd1058.dwType = 1058; nd1058.dwData = 77;
     nd1058.strParam = "time set 0";
+    assert(!CGameAction::ProcessActionUser(u5, &nd1058));
+    CDialogEngine::Node ndNew; ndNew.dwType = 1056; ndNew.dwId = 9576121;
+    ndNew.dwData = 77; ndNew.strParam = "new";
+    assert(CGameAction::ProcessActionUser(u5, &ndNew)); // create task 77
     assert(CGameAction::ProcessActionUser(u5, &nd1058));
     nd1058.strParam = "time set 500";
     assert(CGameAction::ProcessActionUser(u5, &nd1058));
     nd1058.strParam = "time == 500";
     assert(CGameAction::ProcessActionUser(u5, &nd1058));
+    // the value lives in the task_detail.data7 column (vcall+0x38 idx 7)
+    {
+        char q[128]; snprintf(q, sizeof q,
+            "SELECT data7 FROM task_detail WHERE user_id=%u AND task_id=77",
+            u5->GetId());
+        pDB->Query(q);
+        assert(!pDB->GetRows().empty());
+        assert(atoi(pDB->GetRows()[0][0].c_str()) == 500);
+    }
     nd1058.strParam = "time > 499";
     assert(CGameAction::ProcessActionUser(u5, &nd1058));
     nd1058.strParam = "time < 500";
