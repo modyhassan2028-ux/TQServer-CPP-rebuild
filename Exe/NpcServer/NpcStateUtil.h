@@ -218,4 +218,41 @@ bool CNpcAttackDirNear(CNpcStateData& rN,
 bool CNpcAttachRes(CNpcStateData& rN,
                    int& rnResLo, int& rnResHi);
 
+// ============================================================
+// ===== ORIGINAL FUN_14005b9e0 (step attack) =======
+// ============================================================
+// if (map(+0x98) == 0) { log; return 0; }
+// dirN = dir % 8 (signed mod);
+// +0x24 = dirN;
+// x' = sub x + XT[dirN]; y' = sub y + YT[dirN];
+// if (x' >= 0 && x' < FUN_140049480(map) &&
+//     y' >= 0 && y' < FUN_140049430(map)) {
+//   u48 = sub->vt+0x48();
+//   d   = sub->vt+0x18();   // the sub's OWN
+//                            // dir, not dirN!
+//   walk = FUN_14004bff0(map, sub x, sub y,
+//                        d, u48, 0);  // 0, not
+//                                      // 0x1a!
+//   if (!walk && (!attach ||
+//       !FUN_140049310(map, x', y'))) {
+//     FUN_14005b2d0(npc);  // fail path
+//     return 0;
+//   }
+//   FUN_140062030(msg);
+//   if (!FUN_1400620c0(msg, id, dir,
+//                      flavor)) {
+//     log; FUN_140062080(msg); return 0; }
+//   FUN_14001c5f0(FUN_14001c200(),
+//                 id, msg);      // send
+//   FUN_140058610(npc,
+//     XT[dirN] + +0x34,           // jump
+//     YT[dirN] + +0x38);
+//   FUN_140062080(msg);  // dtor
+//   return 1;
+// }
+// log; return 0;
+bool CNpcStepAttack(CNpcStateData& rN,
+                    int nDir,
+                    uint32_t uFlavor);
+
 } // namespace npc

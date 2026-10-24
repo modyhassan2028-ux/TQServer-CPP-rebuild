@@ -360,4 +360,68 @@ bool CNpcAttachRes(CNpcStateData& rN,
     return true;
 }
 
+bool CNpcStepAttack(CNpcStateData& rN,
+                    int nDir,
+                    uint32_t uFlavor) {
+    // ORIGINAL FUN_14005b9e0
+    if (!rN.m_bHasMap) {        // +0x98 == 0
+        rN.m_fnLogError();      // DAT_1400be0b0
+        return false;
+    }
+    // ORIGINAL: the signed-mod idiom
+    int nAdj = nDir >> 0x1f & 7;
+    int nDirN = (nDir + nAdj & 7) - nAdj;
+    rN.m_nField24 = (uint32_t)nDirN;  // +0x24
+    // ORIGINAL: candidate = pos + the
+    // DAT_1400c89d0/89f0 offsets
+    int nNewX = rN.m_fnSubGetX38() +
+                s_nDirX[nDirN];
+    int nNewY = rN.m_fnSubGetY40() +
+                s_nDirY[nDirN];
+    // ORIGINAL: the map bounds gate
+    if (nNewX >= 0 &&
+        nNewX < rN.m_fn49480Width() &&
+        nNewY >= 0 &&
+        nNewY < rN.m_fn49430Height()) {
+        // ORIGINAL: u48 + the sub's OWN dir
+        uint32_t u48 = rN.m_fnSubVt48NoArgs();
+        int nSubDir = rN.m_fnSubDir18();
+        int nX = rN.m_fnSubGetX38();
+        int nY = rN.m_fnSubGetY40();
+        // ORIGINAL: FUN_14004bff0(map, x, y,
+        // d, u48, 0) - NOTE the 0 (not 0x1a)
+        bool bWalk = rN.m_fnMapWalkable(
+            nX, nY, nSubDir, u48);
+        // ORIGINAL: !walk && (!attach ||
+        //   !FUN_140049310(map, x', y'))
+        if (!bWalk && (!rN.m_bHasAttach ||
+            !rN.m_fn49310(nNewX, nNewY))) {
+            // FUN_14005b2d0 fail path
+            rN.m_fnB2d0();
+            return false;
+        }
+        // ORIGINAL: FUN_140062030(msg) ctor
+        // FUN_1400620c0(msg, id, dir, flavor)
+        uint32_t uId = rN.m_fnNpcId8();
+        if (!rN.m_fn620c0(uId, nDir,
+                          uFlavor)) {
+            rN.m_fnLogError();
+            // FUN_140062080(msg) dtor
+            return false;
+        }
+        // ORIGINAL: FUN_14001c5f0(
+        //   FUN_14001c200(), id, msg) send
+        rN.m_fn1c5f0Send(uId);
+        // ORIGINAL: FUN_140058610(npc,
+        //   dx + +0x34, dy + +0x38) jump
+        rN.m_fn58610(
+            s_nDirX[nDirN] + rN.m_nField34,
+            s_nDirY[nDirN] + rN.m_nField38);
+        // ORIGINAL: FUN_140062080 dtor
+        return true;
+    }
+    rN.m_fnLogError();          // DAT_1400be0b0
+    return false;
+}
+
 } // namespace npc

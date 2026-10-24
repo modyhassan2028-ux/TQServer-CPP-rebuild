@@ -175,6 +175,32 @@ struct CNpcStateData {
         // FUN_1400657c0(holder, &res)
     std::function<void(int&, int&)> m_fn65510;
         // FUN_140065510(holder, &res)
+    // ===== b9e0 (unit 25) =====
+    uint32_t m_nField24 = 0;
+        // +0x24 the dir write in b9e0
+    int32_t m_nField34 = 0, m_nField38 = 0;
+        // +0x34/+0x38 the npc current pos
+        // (b9e0 jump anchor)
+    std::function<uint32_t()> m_fnNpcId8;
+        // npc vtable+0x8 (this id)
+    std::function<int()> m_fn49480Width;
+        // FUN_140049480(map) - map width
+    std::function<int()> m_fn49430Height;
+        // FUN_140049430(map) - map height
+    std::function<int()> m_fnSubDir18;
+        // sub vtable+0x18 (the sub's OWN dir
+        // used by the b9e0 walk check)
+    std::function<void()> m_fnB2d0;
+        // FUN_14005b2d0(npc) - the fail path
+        // (its return is masked off in b9e0)
+    std::function<bool(uint32_t, int, uint32_t)>
+        m_fn620c0;
+        // FUN_1400620c0(msg, id, dir, flavor)
+    std::function<void(uint32_t)> m_fn1c5f0Send;
+        // FUN_14001c200 -> FUN_14001c5f0(
+        //     kernel, id, msg) send
+    std::function<void(int, int)> m_fn58610;
+        // FUN_140058610(npc, nx, ny) jump
 };
 
 // ============================================================
