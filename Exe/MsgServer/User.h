@@ -339,6 +339,24 @@ public:
     // CWeaponSkillUp::CalcTimeToExp (FUN_1402f1340) then AddMagicExp.
     bool AwardMgcTime(uint32_t dwType, int nMs);
     uint32_t GetMagicCount() const { return (uint32_t)m_oMagics.size(); }
+    // ---- ORIGINAL magic EFFECT-mask API (CPlayerMagic, ported) ----
+    // attribs on the record: 7 = current effect, 8 = available mask,
+    // 9 = effect_monopoly mask, 10 = effect_exorbitant mask (cq_magic cols).
+    // FUN_14048c770 AllowLaunchEffect(type, effect): the available mask
+    // must hold the effect bit; then current = effect + record save.
+    bool AllowLaunchEffect(uint32_t dwMagicType, uint8_t byEffect);
+    // FUN_14048c7e0 AttachEffectType(type, effect, bMonopoly, bExorbitant):
+    // refuses an already-available effect; sets current+available (+the
+    // monopoly/exorbitant masks when asked), saves, and pushes a
+    // MsgMagicInfo (mode 4) with available + exorbitant to the client.
+    bool AttachEffectType(uint32_t dwMagicType, uint8_t byEffect,
+                          bool bMonopoly, bool bExorbitant);
+    // FUN_14048c4c0 DropMagicEffect(type, effect): clears the effect bits
+    // from available/exorbitant (and current when it matched); a monopoly
+    // bit pays out the converted effect item (type 3000694), else the
+    // monopoly mask bit is also cleared and the monopoly item is paid;
+    // pushes MsgMagicInfo (mode 6). Magic-count gate: 40 records max.
+    bool DropMagicEffect(uint32_t dwMagicType, uint8_t byEffect);
     // attr-0 counter (original CUser+0x88) for newly created records
     uint32_t m_dwMagicCounter{0};
     // returns an error message, or "" on success

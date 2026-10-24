@@ -8,6 +8,7 @@
 #include "MsgNpcInfo.h"
 #include "Account.h"
 #include "MySQLClient.h"
+#include "MsgMagicInfo.h"
 
 CUser::CUser(uint32_t dwId) : m_dwId(dwId) {}
 CUser::~CUser() = default;
@@ -472,6 +473,117 @@ bool CUser::AddMagicExp(uint32_t dwType, int nAmount) {
     } while (true);
     pRec->SetAttrib(4, nExp);                             // FUN_140418d90(rec, 4, exp)
     pRec->Save(CAccountManager::Instance().GetDB());      // FUN_140418450(rec)
+    return true;
+}
+
+// ===========================================================================
+// ORIGINAL magic EFFECT-mask methods (CPlayerMagic family, objdump-verified)
+//   FUN_14048c770 AllowLaunchEffect  - FUN_14048c7e0 AttachEffectType
+//   FUN_14048c4c0 DropMagicEffect     - MsgMagicInfo (1103) pushes
+// Record attribs (SetAttrib indices, cq_magic columns): 7 current effect,
+// 8 available mask, 9 effect_monopoly mask, 10 effect_exorbitant mask.
+// ===========================================================================
+bool CUser::AllowLaunchEffect(uint32_t dwMagicType, uint8_t byEffect) {
+    // ORIGINAL FUN_14048c770: no record or bit not in the available mask -> 0
+    CPlayerMagic* pRec = FindMagic(dwMagicType);
+    if (!pRec) return false;
+    uint32_t uBit = 1u << (byEffect & 0x1f);
+    uint32_t uAvail = (uint32_t)pRec->GetAttrib(8);
+    if ((uAvail & uBit) == 0) return false;
+    pRec->SetAttrib(7, (int32_t)byEffect);                // FUN_140418d90(rec,7,val)
+    pRec->Save(CAccountManager::Instance().GetDB());      // FUN_140418450
+    return true;
+}
+
+bool CUser::AttachEffectType(uint32_t dwMagicType, uint8_t byEffect,
+                             bool bMonopoly, bool bExorbitant) {
+    // ORIGINAL FUN_14048c7e0: refuses an effect already in the available
+    // mask; otherwise current = effect, available |= bit, and the
+    // monopoly (9) / exorbitant (10) masks gain the bit on request.
+    CPlayerMagic* pRec = FindMagic(dwMagicType);
+    if (!pRec) return false;
+    uint32_t uBit = 1u << (byEffect & 0x1f);
+    uint32_t uAvail = (uint32_t)pRec->GetAttrib(8);
+    if (uAvail & uBit) return false;                      // already attached
+    pRec->SetAttrib(7, (int32_t)byEffect);
+    pRec->SetAttrib(8, (int32_t)(uAvail + uBit));        // ORIGINAL: + (1<<n)
+    if (bMonopoly)
+        pRec->SetAttrib(9, (int32_t)((uint32_t)pRec->GetAttrib(9) + uBit));
+    if (bExorbitant)
+        pRec->SetAttrib(10, (int32_t)((uint32_t)pRec->GetAttrib(10) + uBit));
+    pRec->Save(CAccountManager::Instance().GetDB());      // FUN_140418450
+    // ORIGINAL FUN_140457240(msg, 4, magicType, effect, available, exorbitant)
+    CMsgMagicInfo info;
+    if (info.Create(4, dwMagicType, byEffect,
+                    (uint32_t)pRec->GetAttrib(8), (uint32_t)pRec->GetAttrib(10)))
+        SendMsg(info.GetBuf(), info.GetSize());          // user+0x10 vcall+0x350
+    return true;
+}
+
+namespace {
+    // effect-conversion award: ORIGINAL FUN_140340e50(user, 0x2dd5b6, mode, 1)
+    // with the same factory chain as the 501 award (validate + init + add).
+    uint32_t g_dwEffectItemSeq = 900000;
+    const uint32_t EFFECT_ITEM_TYPE = 0x2dd5b6;          // 3000694
+    bool AwardEffectItem(CUser* pUser, uint32_t dwMode) {
+        const ItemTypeDef* pDef = CItemLibrary::Instance().Lookup(EFFECT_ITEM_TYPE);
+        if (!pDef) return false;
+        ItemInfo item;
+        item.dwId = MakeItemId(g_dwEffectItemSeq++);
+        item.dwType = EFFECT_ITEM_TYPE;
+        CItemLibrary::Instance().Apply(item);
+        item.dwPosition = 255;                            // bag
+        item.dwAmount = 1;
+        item.dwData = dwMode;                             // ORIGINAL mode arg
+        pUser->AddItem(item);
+        return true;
+    }
+}
+
+bool CUser::DropMagicEffect(uint32_t dwMagicType, uint8_t byEffect) {
+    // ORIGINAL FUN_14048c4c0. Gate order (objdump):
+    //   1. user/mapgroup pointer at +0x1c8 must exist
+    //   2. record-count gate: (count+1 < 0x29) i.e. count < 40
+    //   3. record found; available (8) AND exorbitant (10) must both hold
+    //      the bit, and both masks must be >= the bit (overflow guard)
+    CPlayerMagic* pRec = FindMagic(dwMagicType);
+    if (!pRec) return false;
+    if (GetMagicCount() + 1 >= 0x29) return false;        // 40-record cap
+    uint32_t uBit = 1u << (byEffect & 0x1f);
+    uint32_t uAvail = (uint32_t)pRec->GetAttrib(8);
+    if ((uAvail & uBit) == 0) return false;
+    uint32_t uExor = (uint32_t)pRec->GetAttrib(10);
+    if ((uExor & uBit) == 0) return false;
+    if (uAvail < uBit || uExor < uBit) return false;      // ORIGINAL guard
+    if ((uint8_t)pRec->GetAttrib(7) == byEffect)
+        pRec->SetAttrib(7, 0);                           // FUN_140418d90(rec,7)
+    pRec->SetAttrib(8, (int32_t)(uAvail - uBit));
+    pRec->SetAttrib(10, (int32_t)(uExor - uBit));
+    uint32_t uMono = (uint32_t)pRec->GetAttrib(9);
+    CMySQLClient* pDB = CAccountManager::Instance().GetDB();
+    if ((uMono & uBit) == 0) {
+        // not monopoly: pay the plain effect item
+        if (!AwardEffectItem(this, 0)) {
+            printf("[MAGIC] CPlayerMagic::DropMagicEffect(), user:%u, magictype:%d, effecttype:%u award item failed.\n",
+                   m_dwId, (int)dwMagicType, (unsigned)byEffect);
+            pRec->Save(pDB);
+            return false;
+        }
+    } else {
+        pRec->SetAttrib(9, (int32_t)(uMono - uBit));
+        if (!AwardEffectItem(this, 1)) {
+            printf("[MAGIC] CPlayerMagic::DropMagicEffect(), user:%u, magictype:%d, effecttype:%u award molonoly item failed.\n",
+                   m_dwId, (int)dwMagicType, (unsigned)byEffect);
+            pRec->Save(pDB);
+            return false;
+        }
+    }
+    pRec->Save(pDB);                                      // FUN_140418450
+    // ORIGINAL FUN_140457240(msg, 6, magicType, current, available, exorbitant)
+    CMsgMagicInfo info;
+    if (info.Create(6, dwMagicType, (uint8_t)pRec->GetAttrib(7),
+                    (uint32_t)pRec->GetAttrib(8), (uint32_t)pRec->GetAttrib(10)))
+        SendMsg(info.GetBuf(), info.GetSize());
     return true;
 }
 
