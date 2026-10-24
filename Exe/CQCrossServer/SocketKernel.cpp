@@ -18,6 +18,9 @@ static const char* SZ_SOCKETKERNEL_SRC =
 void CCrossServerSocketKernel::CleanupSocketRefs(uint32_t dwIdx) {
     // ORIGINAL FUN_14002b380(kernel, idx): drop the bimap and
     // accept-map entries that point at this socket slot
+    CCrossSocket* pClosed =
+        dwIdx < m_vecSockets.size() ? m_vecSockets[dwIdx]
+                                     : nullptr;
     for (auto it = m_mapServerToSocket.begin();
          it != m_mapServerToSocket.end();) {
         if (it->second == dwIdx) {
@@ -26,11 +29,45 @@ void CCrossServerSocketKernel::CleanupSocketRefs(uint32_t dwIdx) {
         } else ++it;
     }
     for (auto it = m_mapAccept.begin(); it != m_mapAccept.end();)
-        it = (it->second == dwIdx)
+        it = (it->second == pClosed)
             ? m_mapAccept.erase(it) : std::next(it);
     // TBD: the original also purges the route map (+0x120);
     // its key/value layout there is derived by FUN_14002b380's
     // walk, unrecovered at port time
+}
+
+
+// ===== CServerSocket::ProcessIncomingPacket (FUN_1400301d0) ==
+void CServerSocket::ProcessIncomingPacket() {
+    // ORIGINAL gates: no handle -> nothing; buffered > 0x7ff ->
+    // flush frames first (the kernel walk)
+    if (!m_ullOsHandle) return;
+    if (0x7ff < m_nBufBytes) m_fnDrain(this);
+    // FUN_1400379c0(handle) + FUN_14003f5c0 = OS bytes available
+    // (the test seam exposes it as the RecvFn's internal state);
+    // the drain loop: read min(available, 0x800 - buffered)
+    int nAvail = m_fnRecv(nullptr, 0);
+    while (nAvail > 0) {
+        int nRoom = 0x800 - m_nBufBytes;
+        int nRead = nAvail < nRoom ? nAvail : nRoom;
+        int nGot = m_fnRecv(m_byBuf + m_nBufBytes, nRead);
+        if (nGot < 1) {
+            // ORIGINAL: FUN_14003a790(+0x203) then
+            // "CServerSocket::ProcessIncomingPacket can not
+            // drain the buffer for socket[%u], err:%d."
+            m_nLastErr = -1;
+            printf("[SOCKETKERNEL] CServerSocket::"
+                   "ProcessIncomingPacket can not drain the "
+                   "buffer for socket[%u], err:%d.\n",
+                   (unsigned)m_ullOsHandle, m_nLastErr);
+            return;
+        }
+        m_nBufBytes += nGot;
+        nAvail -= nGot;
+        // process complete frames after every read
+        m_fnDrain(this);
+        if (nAvail < 1) return;
+    }
 }
 
 bool CCrossServerSocketKernel::Process(uint32_t dwCmd, void* pCmd) {
@@ -242,16 +279,18 @@ bool CCrossServerSocketKernel::Process(uint32_t dwCmd, void* pCmd) {
         break;
     }
     case SockCmd_Recv: { // --------------- ORIGINAL case 0x756d
-        // FUN_14002bad0(kernel, handle) -> socket, then
-        // FUN_1400301d0(socket) processes received data.
-        // TBD: FUN_1400301d0 is the inbound frame parser; the
-        // rebuild's inbound path is CrossKernel::OnPacket.
+        // FUN_14002bad0(kernel, handle) -> FUN_1400301d0(sock):
+        // the recv drain loop on the socket's OS handle
+        CServerSocket* pSock =
+            FindByHandle(*(uint64_t*)pCmd);
+        if (pSock) pSock->ProcessIncomingPacket();
         break;
     }
     case SockCmd_OnClose: { // ------------ ORIGINAL case 0x756e
         // FUN_14002bad0(kernel, handle) -> vcall +0x48 OnClose
-        if (CCrossSocket** ppSlot = Slot(p[0]))
-            if (*ppSlot) (*ppSlot)->OnClose();
+        CServerSocket* pSock =
+            FindByHandle(*(uint64_t*)pCmd);
+        if (pSock) pSock->OnClose();
         break;
     }
     }

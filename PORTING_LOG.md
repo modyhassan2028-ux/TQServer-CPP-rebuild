@@ -2949,3 +2949,23 @@ FUN_140022f40 (تفاصيل كتابة الحقل)، FUN_1400232b0 (مسار
    2. ملفات جديدة: Exe/CQCrossServer/SocketKernel.{h,cpp} +
    اختبار tests/cross_socketkernel_test.cpp: **ALL OK**
    3. الرجريشن الستة كلها خضرا.
+
+## جلسة 2026-10-24 19:00 — طبقة السوكت: Recv drain + البحث بالمقبض
+1. **FUN_1400301d0 = CServerSocket::ProcessIncomingPacket**
+   منفذة حرفياً: بوابة >0x7ff (فلشة الفريمات)، حلقة القراءة
+   min(available, 0x800 - buffered) لحد exhausted، فلشة
+   الفريمات بعد كل قراءة، ولوج الفشل الحرفي "CServerSocket::
+   ProcessIncomingPacket can not drain the buffer for
+   socket[%u], err:%d." مع FUN_14003a790. أوفستات كائن
+   السوكت موثقة (+0x8 بافر 0x800، +0x808 العدّاد، +0x1018
+   الخطأ، +0x1020 الهَب، +0x1028 مقبض OS).
+2. **FUN_14002bad0** = البحث بالمقبض في خريطة +0x60 (دلوقتي
+   Handle → CServerSocket*) و CASES 0x756d Recv و0x756e
+   OnClose بقتا حقيقيتين في الديسباتش.
+3. **TBD (الوحدة الجاية):** FUN_14002e6d0 — مشّاء الفريمات
+   الكاملة من البافر (699 سطر) ومكمل معاه حالة 0x756c
+   Accept (FUN_140030390 + المصافحة). seam جاهز:
+   CServerSocket::m_fnDrain.
+4. cross_socketkernel_test اتوسع (drain loop بحسابين
+   فريمات + unknown handle) — **ALL OK**، والرجريشن الستة
+   كلها خضرا.

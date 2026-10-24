@@ -137,6 +137,32 @@ int main() {
         assert(p1->nClosed == 1);
         k.Process(SockCmd_OnClose, &cmd);
     }
+
+// ---- 0x756d Recv: the FUN_1400301d0 drain loop ----
+{
+    static std::string s_strFeed;   // the OS recv source
+    static int nDrains = 0;
+    s_strFeed.assign("\x10\x00\x00\x00ABCD" "\x10\x00\x00\x00EFGH", 16);
+    CCrossServerSocketKernel k2(4);
+    CServerSocket* ps = new CServerSocket(&k2, 777,
+        [](void* p, int n) -> int {
+            if (n == 0) return (int)s_strFeed.size();
+            int nGot = n < (int)s_strFeed.size() ? n
+                                                : (int)s_strFeed.size();
+            std::memcpy(p, s_strFeed.data(), nGot);
+            s_strFeed.erase(0, nGot);
+            return nGot; },
+        [&](CServerSocket*) { ++nDrains; });
+    k2.AddSocket(std::unique_ptr<CCrossSocket>(ps));
+    k2.RegisterByHandle(777, ps);
+    uint64_t ullHandle = 777;
+    k2.Process(SockCmd_Recv, &ullHandle);
+    assert(ps->m_nBufBytes == 16); // both frames buffered
+    assert(nDrains >= 1);          // frame walk ran
+    // unknown handle -> FindByHandle null, no crash
+    uint64_t ullBad = 888;
+    k2.Process(SockCmd_Recv, &ullBad);
+}
     puts("cross_socketkernel_test: ALL OK");
     return 0;
 }

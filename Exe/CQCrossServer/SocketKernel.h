@@ -33,6 +33,7 @@
 #include <map>
 #include <vector>
 #include <memory>
+#include <functional>
 
 namespace cross {
 
@@ -68,6 +69,55 @@ enum SocketCmd {
     SockCmd_OnClose  = 0x756e,
 };
 
+// ---------------------------------------------------------------------
+// CServerSocket — ORIGINAL socket object of the socketkernel layer.
+// From FUN_1400301d0 (CServerSocket::ProcessIncomingPacket):
+//   +0x8                recv buffer (0x800 bytes)
+//   +0x101 (0x808)      buffered byte count
+//   +0x203 (0x1018)     last error slot (FUN_14003a790)
+//   +0x204 (0x1020)     parent kernel backlink
+//   +0x205 (0x1028)     OS socket handle
+// ---------------------------------------------------------------------
+class CCrossServerSocketKernel;
+
+class CServerSocket : public CCrossSocket {
+public:
+    static constexpr size_t SOCKET_BUF = 0x800;
+
+    // ORIGINAL FUN_140037a80 (OS recv) - test seam
+    using RecvFn = std::function<int(void*, int)>;
+    // ORIGINAL FUN_14002e6d0 (the frame dispatcher walk) - TBD:
+    // its 699-line body is the next porting unit; the drain
+    // loop calls it after every read
+    using DrainFn = std::function<void(CServerSocket*)>;
+
+    CServerSocket(CCrossServerSocketKernel* pKernel,
+                  uint64_t ullOsHandle, RecvFn fnRecv,
+                  DrainFn fnDrain)
+        : m_pKernel(pKernel), m_ullOsHandle(ullOsHandle),
+          m_fnRecv(std::move(fnRecv)),
+          m_fnDrain(std::move(fnDrain)) {}
+
+    bool Send(const void*, uint32_t) override { return true; }
+    bool IsConnected() const override { return m_ullOsHandle != 0; }
+    void Close() override { m_ullOsHandle = 0; }
+    uint32_t GetId() const override { return m_dwId; }
+    void BindId(uint32_t dw) override { m_dwId = dw; }
+    void OnClose() override {}
+
+    // ---- ORIGINAL FUN_1400301d0: recv drain loop ----
+    void ProcessIncomingPacket();
+
+    uint32_t m_dwId = 0;
+    uint8_t  m_byBuf[SOCKET_BUF] = {0};   // +0x8
+    int      m_nBufBytes = 0;             // +0x101 (0x808)
+    CCrossServerSocketKernel* m_pKernel; // +0x204
+    uint64_t m_ullOsHandle;               // +0x205 (0x1028)
+    RecvFn   m_fnRecv;
+    DrainFn  m_fnDrain;
+    int      m_nLastErr = 0;              // +0x203 (0x1018)
+};
+
 class CCrossServerSocketKernel {
 public:
     explicit CCrossServerSocketKernel(size_t nCapacity = 64)
@@ -77,6 +127,16 @@ public:
     // returns true when the command produced a send (ORIGINAL
     // `return 1` in the send paths, fallthrough break = false)
     bool Process(uint32_t dwCmd, void* pCmd);
+
+    // ---- ORIGINAL FUN_14002bad0: socket by OS handle ----
+    CServerSocket* FindByHandle(uint64_t ullHandle) {
+        if (ullHandle == (uint64_t)-1) return nullptr;
+        auto it = m_mapAccept.find(ullHandle);
+        return it == m_mapAccept.end() ? nullptr : it->second;
+    }
+    void RegisterByHandle(uint64_t ullHandle, CServerSocket* p) {
+        m_mapAccept[ullHandle] = p;
+    }
 
     // ---- test seams / rebuild wiring ----
     void SetSocket(uint32_t dwIdx, CCrossSocket* p) {
@@ -125,8 +185,9 @@ private:
     std::map<uint32_t, uint32_t> m_mapServerToSocket; // +0xa0
     std::map<uint32_t, uint32_t> m_mapSocketToServer; // +0xe0
     std::map<uint64_t, uint64_t> m_mapRoute; // +0x120
-    // +0x60 accept map: id -> socket idx (the accept path)
-    std::map<uint32_t, uint32_t> m_mapAccept;
+    // +0x60 accept map: OS handle -> socket object
+    // (ORIGINAL FUN_140029e60 lookups, FUN_14002bad0 reader)
+    std::map<uint64_t, CServerSocket*> m_mapAccept;
 };
 
 } // namespace cross
