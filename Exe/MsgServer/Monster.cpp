@@ -2,6 +2,8 @@
 #include "MapManager.h"
 #include "GroundItems.h"
 #include "Item.h"
+#include "MsgMonster.h"
+#include "Log.h"
 
 CMonster::CMonster(uint32_t dwId, uint32_t dwTypeId, const std::string& name)
     : m_dwId(dwId), m_dwTypeId(dwTypeId), m_name(name) {}
@@ -87,4 +89,23 @@ bool CMonster::SpawnMoneyPile(uint64_t qwAmount, uint8_t cFlag)
     CGroundItemManager::Instance().AddMoneyDrop(m_dwMapId, (uint16_t)nX,
                                                 (uint16_t)nY, (uint32_t)qwAmount, 0);
     return true;
+}
+
+void CMonster::JumpPos(uint16_t usX, uint16_t usY) {
+    // ORIGINAL FUN_140388a40: GetX()/GetY() match -> return (no packet)
+    if (m_usX == usX && m_usY == usY) return;
+    // ORIGINAL FUN_1402c3cc0 cellmap passability; failure -> error log only
+    auto pMap = CMapManager::Instance().GetMap(m_dwMapId);
+    if (pMap && !pMap->IsPassable(usX, usY)) {
+        tq::MyLogSave("gmlog/all",
+                      "CMonster::JumpPos map%%u(%%d, %%d) at %%s, %%d",
+                      m_dwMapId, (int)usX, (int)usY, "ainpc.cpp", 0x1046);
+        return;
+    }
+    // ORIGINAL FUN_14044f5d0/14044f680: CMsgMonsterJump(id, x, y) then the
+    // vtable+0x350 map send; data word carries 0 in the original call
+    CMsgMonsterJump jump;
+    if (jump.Create(m_dwId, usX, usY, 0))
+        CMapManager::Instance().Broadcast(m_dwMapId, jump.GetBuf(), jump.GetSize());
+    SetPos(usX, usY);
 }

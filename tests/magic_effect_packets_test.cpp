@@ -14,6 +14,7 @@
 #include "MsgMagicInfo.h"
 #include "User.h"
 #include "UserManager.h"
+#include "Monster.h"
 #include "MapManager.h"
 #include "Account.h"
 #include "Dialog.h"
@@ -178,8 +179,83 @@ int main() {
     assert(upFx->SendMagicEffectAfterProcess(1000, 0xAABB, 0xCC, 0xDD, 150, 0x2002));
     assert(nSeen == 1);                                // observer got the 1105
 
+    // ---------- CreateGroup (FUN_140386a50) / AppendGroup (FUN_140387150) ----
+    CMsgMagicEffect grp;
+    assert(!grp.CreateGroup(0, 1000, 3, 0, 0, 0, 0, 0, 0, 3));   // zero attacker
+    assert(grp.CreateGroup(777001, 1000, 3, 2, 0, 0, 0, 0, 0, 3)); // header only
+    {
+        const char* b = (const char*)grp.GetBuf();
+        assert(grp.GetSize() == 0x34);
+        assert(rd32(b, 0x00) == 777001);   // attacker
+        assert(rd32(b, 0x04) == 0);        // split u16 target halves = 0
+        assert(rd16(b, 0x08) == 1000);     // type
+        assert(rd16(b, 0x0a) == 3);        // level
+        assert(rd8(b, 0x0e) == 2);         // dir
+        assert(rd8(b, 0x0f) == 0);        // count zeroed
+        assert(rd8(b, 0x10) == 3);        // flag
+    }
+    // one append: entry + the param_5 quirk write at the NEXT entry base
+    assert(grp.AppendGroup(0x2002, 150, 0xDD, 0xCC, 0x1111, 0x2222, 0x3333, 0x4444));
+    {
+        const char* b = (const char*)grp.GetBuf();
+        assert(grp.GetSize() == 0x54);
+        assert(rd8(b, 0x0f) == 1);
+        assert(rd32(b, 0x14) == 0x2002);   // id
+        assert(rd32(b, 0x18) == 150);      // damage
+        assert(rd32(b, 0x1c) == 0xDD);     // data2
+        assert(rd32(b, 0x34) == 0xCC);     // dwNext at the NEXT entry base (quirk)
+        assert(rd32(b, 0x24) == 0x1111);   // data4 @entry+0x10
+        assert(rd32(b, 0x28) == 0x2222);   // data5 @entry+0x14
+        assert(rd32(b, 0x2c) == 0x3333);   // data6 @entry+0x18
+        assert(rd32(b, 0x30) == 0x4444);   // data7 @entry+0x1c
+    }
+    // id == 0 still appends (original logs only, no early return)
+    assert(grp.AppendGroup(0, 5, 6, 7, 8, 9, 10, 11));
+    assert(rd8((const char*)grp.GetBuf(), 0x0f) == 2);
+    // first-entry variant: CreateGroup with a non-zero entry id
+    CMsgMagicEffect grp2;
+    assert(grp2.CreateGroup(777001, 1000, 3, 2, 0, 0, 0x2002, 150, 0xDD, 3));
+    {
+        const char* b = (const char*)grp2.GetBuf();
+        assert(grp2.GetSize() == 0x54);
+        assert(rd8(b, 0x0f) == 1);
+        assert(rd32(b, 0x14) == 0x2002);
+        assert(rd32(b, 0x18) == 150);
+        assert(rd32(b, 0x1c) == 0xDD);
+        assert(rd32(b, 0x34) == 0);       // next entry base terminator
+    }
+    // size cap: append until the 0x400 gate refuses
+    CMsgMagicEffect big;
+    assert(big.CreateGroup(777001, 1000, 3, 2, 0, 0, 0, 0, 0, 3));
+    int nApp = 0;
+    while (big.AppendGroup(0x2002 + nApp, 1, 2, 3, 4, 5, 6, 7)) nApp++;
+    assert(big.GetSize() + 0x20 >= 0x400); // ORIGINAL strict gate held
+    // ---------- CMonster::JumpPos (FUN_140388a40) ----
+    CMonster mon(555001, 1, "JumpMon");
+    mon.SetMapId(777000);
+    mon.SetPos(50, 60);
+    int nJump = 0;
+    upObs->SetPacketSink([&](const void* pv, uint16_t sz) {
+        nJump++;
+        const char* b = (const char*)pv;
+        assert(sz == 14);                     // 4-byte head + MonsterJumpData(10)
+        assert(rd16(b, 2) == 20002);          // opcode 0x4e22 in the head
+        assert(rd32(b, 4) == 555001);         // id
+        assert(rd16(b, 8) == 55);             // x (MonsterJumpData +4)
+        assert(rd16(b, 10) == 62);            // y
+        assert(rd16(b, 12) == 0);             // data word 0 in the original call
+    });
+    mon.JumpPos(50, 60);                      // same position: no packet
+    assert(nJump == 0);
+    mon.JumpPos(55, 62);
+    assert(nJump == 1 && mon.GetX() == 55 && mon.GetY() == 62);
+    // ---------- CGameMap::IsValidPos (FUN_14015f9d0) ----
+    assert(pFxMap->IsValidPos(0, 0) && pFxMap->IsValidPos(500, 500));
+    assert(!pFxMap->IsValidPos(-1, 100) && !pFxMap->IsValidPos(100, -1));
+
     printf("MAGIC_EFFECT_OK: 1105 base/append/withtarget/full layouts byte-exact, "
            "1103 layout byte-exact, effect masks attach/launch/drop verified, "
-           "SendMagicEffectAfterProcess broadcast byte-exact\n");
+           "SendMagicEffectAfterProcess broadcast byte-exact, "
+           "CreateGroup/AppendGroup/JumpPos/IsValidPos verified\n");
     return 0;
 }

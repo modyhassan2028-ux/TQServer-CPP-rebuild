@@ -118,6 +118,76 @@ bool CMsgMagicEffect::CreateFull(uint32_t dwAttacker, uint32_t dwTarget, uint16_
     return true;
 }
 
+bool CMsgMagicEffect::CreateGroup(uint32_t dwAttacker, uint16_t usType, uint16_t usLevel,
+                                  uint8_t byDir, uint16_t usTargetLo, uint16_t usTargetHi,
+                                  uint32_t dwEntryId, uint32_t dwEntryDamage,
+                                  uint32_t dwEntryData2, uint8_t byFlag) {
+    // ORIGINAL FUN_140386a50: attacker == 0 -> log + 0
+    if (dwAttacker == 0) {
+        tq::MyLogSave("gmlog/all", "%s", szEffectErr);
+        return false;
+    }
+    // ORIGINAL: *(this+0xc) = 0x34; *(this+8) = 0x451; header writes
+    m_dwSizeField = BASE_SIZE;
+    m_nType = OPCODE;
+    m_buffer.assign(BASE_SIZE, 0);
+    auto w32 = [&](uint32_t off, uint32_t v) { std::memcpy(m_buffer.data() + off, &v, 4); };
+    auto w16 = [&](uint32_t off, uint16_t v) { std::memcpy(m_buffer.data() + off, &v, 2); };
+    w32(0x00, dwAttacker);      // ORIGINAL buf[0] = param_2
+    w16(0x04, usTargetLo);      // ORIGINAL buf[4] = param_6 (u16)
+    w16(0x06, usTargetHi);      // ORIGINAL buf[6] = param_7 (u16)
+    w16(0x08, usType);          // buf[8] = param_3
+    w16(0x0a, usLevel);         // buf[10] = param_4
+    m_buffer.data()[0x0e] = (char)byDir;   // buf[0xe] = param_5
+    m_buffer.data()[0x0f] = 0;             // ORIGINAL: count field zeroed
+    m_buffer.data()[0x10] = (char)byFlag;  // buf[0x10] = param_11
+    m_byCount = 0;
+    // ORIGINAL: if (param_8 != 0) { size += 0x20; entry indexed by the count
+    // byte (0 here): id/dmg/d2, next entry base zeroed, count++ }
+    if (dwEntryId != 0) {
+        uint32_t base = 0x14 + (uint32_t)m_byCount * TARGET_STRIDE;
+        m_dwSizeField += TARGET_STRIDE;
+        m_buffer.resize(m_dwSizeField, 0);
+        w32(base + 0x00, dwEntryId);
+        w32(base + 0x04, dwEntryDamage);
+        w32(base + 0x08, dwEntryData2);
+        w32(base + TARGET_STRIDE, 0); // ORIGINAL: next entry base = 0
+        m_byCount++;
+        m_buffer.data()[0x0f] = (char)m_byCount;
+    }
+    m_nSize = (uint16_t)m_dwSizeField;
+    return true;
+}
+
+bool CMsgMagicEffect::AppendGroup(uint32_t dwId, uint32_t dwDamage, uint32_t dwData2,
+                                  uint32_t dwNext, uint32_t dwData4, uint32_t dwData5,
+                                  uint32_t dwData6, uint32_t dwData7) {
+    // ORIGINAL FUN_140387150: id == 0 -> log only, the entry is still
+    // appended (no early return)
+    if (dwId == 0) {
+        tq::MyLogSave("gmlog/all", "%s", szEffectErr);
+    }
+    // ORIGINAL gate: size + 0x20 < 0x400 (strict)
+    if (m_dwSizeField + TARGET_STRIDE >= MAX_SIZE) return false;
+    uint32_t base = 0x14 + (uint32_t)m_byCount * TARGET_STRIDE;
+    m_dwSizeField += TARGET_STRIDE;
+    m_buffer.resize(m_dwSizeField, 0);
+    auto w32 = [&](uint32_t off, uint32_t v) { std::memcpy(m_buffer.data() + off, &v, 4); };
+    w32(base + 0x00, dwId);            // entry +0 (param_2)
+    w32(base + 0x04, dwDamage);        // entry +4 (param_3)
+    w32(base + 0x08, dwData2);         // entry +8 (param_4)
+    w32(base + TARGET_STRIDE, dwNext); // ORIGINAL QUIRK: param_5 writes at
+                                       // the NEXT entry base (0x34-family)
+    w32(base + 0x10, dwData4);         // entry +0x10 (param_6)
+    w32(base + 0x14, dwData5);         // entry +0x14 (param_7)
+    w32(base + 0x18, dwData6);         // entry +0x18 (param_8)
+    w32(base + 0x1c, dwData7);         // entry +0x1c (param_9)
+    m_byCount++;
+    m_buffer.data()[0x0f] = (char)m_byCount;
+    m_nSize = (uint16_t)m_dwSizeField;
+    return true;
+}
+
 void CMsgMagicEffect::Process(uint32_t) {
     // ORIGINAL CMsgMagicEffect is server->client only; the receive path
     // logs "invalid msg CMsgMagicEffect." and drops it (FUN_1403872c0,

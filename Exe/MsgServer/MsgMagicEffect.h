@@ -66,6 +66,29 @@ public:
                     uint32_t dwData2, uint32_t dwData3, uint32_t dwData4,
                     uint32_t dwData5, uint32_t dwData6, uint8_t byFlag);
 
+    // ORIGINAL FUN_140386a50 (group-broadcast create, used by
+    // FUN_140486fb0 SendMagicEffectAfterProcessGroupByPos): attacker u32 at
+    // +0 with the target id SPLIT as two u16 halves at +4/+6 (the caller
+    // passes 0,0), type/level/dir header, count field zeroed, flag at +0x10.
+    // If dwEntryId != 0 one first entry (id/dmg/d2) is written and the next
+    // entry base is zero-terminated. Zero attacker -> error log + false.
+    bool CreateGroup(uint32_t dwAttacker, uint16_t usType, uint16_t usLevel,
+                     uint8_t byDir, uint16_t usTargetLo, uint16_t usTargetHi,
+                     uint32_t dwEntryId, uint32_t dwEntryDamage,
+                     uint32_t dwEntryData2, uint8_t byFlag);
+
+    // ORIGINAL FUN_140387150 (group append): id == 0 -> error log but the
+    // entry is STILL appended (no early return in the original); gate is
+    // size + 0x20 < 0x400 else false with nothing written. Entry layout:
+    // id +0, damage +4, data2 +8, dwNext +0x10-slot-of-the-NEXT-entry-base
+    // (literal quirk: param_5 writes at (count+1)*0x20 + 0x14), then
+    // dwData4 +0x10, dwData5 +0x14, dwData6 +0x18, dwData7 +0x1c of the
+    // entry; count byte incremented. No separate terminator: the dwNext
+    // write IS the next-base slot.
+    bool AppendGroup(uint32_t dwId, uint32_t dwDamage, uint32_t dwData2,
+                     uint32_t dwNext, uint32_t dwData4, uint32_t dwData5,
+                     uint32_t dwData6, uint32_t dwData7);
+
     void Process(uint32_t dwSender) override;
 
     uint8_t GetTargetCount() const { return m_byCount; }

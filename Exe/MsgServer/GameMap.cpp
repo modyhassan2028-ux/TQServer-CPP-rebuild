@@ -34,6 +34,15 @@ bool CGameMap::IsPassable(uint16_t usX, uint16_t usY) const {
     return true; // no dmap on disk: free movement (synthetic v1)
 }
 
+bool CGameMap::IsValidPos(int nX, int nY) const {
+    // ORIGINAL FUN_14015f9d0: -1 < x && x < width && -1 < y && y < height
+    if (nX < 0 || nY < 0) return false;   // ORIGINAL: -1 < x, -1 < y always
+    if (m_dmap.IsLoaded())
+        return (uint32_t)nX < m_dmap.GetWidth() &&
+               (uint32_t)nY < m_dmap.GetHeight();
+    return true; // synthetic v1: no dmap on disk, free movement
+}
+
 std::vector<uint32_t> CGameMap::GetUserIds() const {
     std::vector<uint32_t> ids;
     ids.reserve(m_users.size());

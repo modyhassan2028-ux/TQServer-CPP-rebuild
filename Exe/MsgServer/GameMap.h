@@ -41,6 +41,10 @@ public:
     bool AddUser(std::shared_ptr<CUser> user);
     bool RemoveUser(uint32_t dwUserId);
     bool IsPassable(uint16_t usX, uint16_t usY) const;
+    // ORIGINAL FUN_14015f9d0: cellmap bounds gate — x in [0, width)
+    // (vtable+0x28) and y in [0, height) (vtable+0x20). Without a .DMap
+    // the port stays with the synthetic free-movement convention (true).
+    bool IsValidPos(int nX, int nY) const;
     std::vector<uint32_t> GetUserIds() const;
 
     // load real collision data from a .DMap file (original client maps)

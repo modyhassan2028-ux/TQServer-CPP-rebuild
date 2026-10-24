@@ -53,6 +53,11 @@ public:
     // FUN_14038a560 — literal 801 dropmoney gate + equations + floor drop
     bool ActionDropMoney(uint32_t dwMoney, uint32_t dwOwnerId);
     // FUN_14038a790 — literal 801 dropitem floor drop
+    // ORIGINAL FUN_140388a40 CMonster::JumpPos: same-position early out,
+    // cellmap passability check (fail -> "CMonster::JumpPos map%u(%d, %d)
+    // at %s, %d" error log, ainpc.cpp line 0x1046, no move), then a
+    // CMsgMonsterJump broadcast (opcode 0x4e22 = 20002) and the move.
+    void JumpPos(uint16_t usX, uint16_t usY);
     bool ActionDropItem(uint32_t dwItemType, uint32_t dwOwnerId);
     // FUN_1401669f0 — 802 fixed-amount money pile near the monster
     bool SpawnMoneyPile(uint64_t qwAmount, uint8_t cFlag);
