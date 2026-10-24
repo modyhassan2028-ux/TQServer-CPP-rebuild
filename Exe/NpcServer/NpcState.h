@@ -132,9 +132,11 @@ struct CNpcStateData {
         m_fnMapWalkable;
         // FUN_14004bff0(map, x, y, dir, u48, 0x1a)
     // ===== c960 (unit 21) members =====
-    uint8_t m_dirQueue[16] = {0};
-        // +0x40 the 8-dir walk queue
-        // (+0x2c = its length, m_dwField2C)
+    uint8_t m_dirQueue[76] = {0};
+        // +0x40 the 8-dir walk queue / path
+        // area (up to 76 bytes per 580e0's
+        // local_94[76]; +0x2c = its length,
+        // m_dwField2C)
     int32_t m_nA8f0Stamp = 0;
         // +0xbc (npc + 0xb8 + 4) rate stamp
     std::function<uint32_t()> m_fnTimeGet;
@@ -238,6 +240,21 @@ struct CNpcStateData {
         // yShort, dirShort, 0x89, x, y, 0)
         // - the msg fill (SHORT-truncated
         // args verbatim)
+    // ===== 580e0 (unit 29) =====
+    bool m_bHasPathfinder = false;
+        // map(+0x98)->+0x10 != 0 - NOTE the
+        // ORIGINAL logs when null but STILL
+        // calls it (verbatim, no else)
+    uint64_t m_qField90 = 0;
+        // +0x90 the 8-byte path header
+    std::function<uint32_t(int, int, int, int,
+        uint32_t, uint64_t&, uint8_t*)>
+        m_fnFindPath;
+        // pf->vt+0x58(pf, out, 0x58,
+        // &start): (startX, startY, endX,
+        // endY, flag) -> writes the +0x90
+        // qword and up to 76 dir bytes,
+        // returns the BYTE count
 };
 
 // ============================================================

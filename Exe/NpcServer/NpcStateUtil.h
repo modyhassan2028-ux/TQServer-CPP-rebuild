@@ -331,4 +331,25 @@ void CNpcWalkMsg(CNpcStateData& rN,
                  int nX, int nY,
                  uint32_t uDir);
 
+// ============================================================
+// ===== ORIGINAL FUN_1400580e0 (move to path) ======
+// ============================================================
+// if (map(+0x98) == 0) { 0x533; log;
+//                         return false; }
+// +0x2c = 0;
+// if (x == sub x && y == sub y)
+//     return false;   // already there
+// start = (sub x, sub y);
+// if (map->+0x10 == 0) { 0x2c; log;
+//   // NO else: the ORIGINAL logs and calls
+//   // the pathfinder anyway (verbatim) }
+// pf->vt+0x58(pf, out, 0x58, &start);
+// +0x90 = out[8..16];
+// memcpy(+0x40, out+..., count);
+// +0x2c = count;
+// return 0 < count;
+bool CNpcMoveTo(CNpcStateData& rN,
+                int nX, int nY,
+                uint32_t uFlag);
+
 } // namespace npc

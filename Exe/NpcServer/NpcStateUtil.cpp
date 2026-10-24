@@ -561,4 +561,47 @@ void CNpcWalkMsg(CNpcStateData& rN,
     rN.m_fnLogError();         // DAT_1400be0b0
 }
 
+bool CNpcMoveTo(CNpcStateData& rN,
+                int nX, int nY,
+                uint32_t uFlag) {
+    // ORIGINAL FUN_1400580e0
+    if (!rN.m_bHasMap) {       // +0x98 == 0
+        // ORIGINAL: local_c8 = 0x533
+        rN.m_fnLogError();     // DAT_1400be0b0
+        return false;
+    }
+    rN.m_dwField2C = 0;        // +0x2c = 0
+    if (nX == rN.m_fnSubGetX38() &&
+        nY == rN.m_fnSubGetY40())
+        return false;          // already there
+    // ORIGINAL: the start cell
+    int nSX = rN.m_fnSubGetX38();
+    int nSY = rN.m_fnSubGetY40();
+    // ORIGINAL: map->+0x10 == 0 -> 0x2c
+    // code + log, then the call RUNS ANYWAY
+    if (!rN.m_bHasPathfinder) {
+        // ORIGINAL: local_c8 = 0x2c
+        rN.m_fnLogError();     // DAT_1400be0b0
+    }
+    // ORIGINAL: pf->vt+0x58(pf, local_a8,
+    // 0x58, &local_b8) with the request
+    // { startX, startY, endX, endY, flag }
+    uint8_t abySteps[76] = {0};
+    uint64_t qA0 = 0;
+    uint32_t uCount = rN.m_fnFindPath(
+        nSX, nSY, nX, nY, uFlag,
+        qA0, abySteps);
+    // ORIGINAL: npc+0x90 = local_a0
+    rN.m_qField90 = qA0;       // +0x90
+    // ORIGINAL: memcpy(npc+0x40,
+    // local_94, local_98)
+    for (uint32_t i = 0; i < uCount && i < 76;
+         i++)
+        rN.m_dirQueue[i] = abySteps[i];
+    // ORIGINAL: +0x2c = local_98
+    rN.m_dwField2C = uCount;
+    // ORIGINAL: 0 < (int)local_98
+    return 0 < (int)uCount;
+}
+
 } // namespace npc
