@@ -4759,3 +4759,43 @@ M9: بقية عملاء M6 (140503280/140502ef0/140502b40)
   اشتغل.
 - **الرجريجن 50/50 أخضر.** (كل ctors عملاء
   M6 الخمسة بقت كاملة: base + 4 فئات)
+
+## جلسة 2026-10-26 08:15 — MsgServer الوحدة
+M10: InitInstance (FUN_14001dbd0) بوت المفرد
+
+### الوحدة M10 (Exe/MsgServer/Port/MsgAppInit)
+- **المعالجات:** _set_invalid_parameter_handler
+  (FUN_14001d8e0) و_set_purecall_handler
+  (FUN_14001d910).
+- **اسم الميوتكس الحرفي:** CIniFile
+  ("shell.ini","AccountServer") → GetString
+  ("SERVERNAME", 0x10) → CStringT::Format
+  **"%s - %s"** بوسيط **"Conquer Online
+  Server"** — CreateMutexA(null, 1, name)
+  → app+0x140.
+- **فشل الميوتكس:** MessageBoxA بسطر
+  **"Create mutex failed."** (0x30) وعنوانه
+  اسم الميوتكس.
+- **المسار 0xb7 (ERROR_ALREADY_EXISTS):**
+  CloseHandle(+0x140) وتصفيره → GetDesktopWindow
+  → GetWindow(GW_CHILD=5) → مشي النوافذ
+  (IsWindow): GetPropA(hwnd, الاسم) — لما
+  يتلاقى: IsIconic → ShowWindow(9)،
+  SetForegroundWindow، وإرجاع 0؛ وإلا
+  GetWindow(GW_HWNDNEXT=2). لو ولا نافذة:
+  **"MsgServer is running, but I can't find
+  its window."**
+- **البوت النظيف:** CreateDirectoryA("log")
+  ثم CreateDirectoryA("crimelog") → بناء
+  الدايلوج الرئيسي (FUN_1400238a0 — قالب
+  102 من الوحدة 45) → app+0x40 →
+  CDialog::DoModal → FUN_14001db10.
+- **الاختبار:** الخمس مسارات (نظيف/فشل
+  ميوتكس/تشغيل موجود + نافذة مصغّرة أو
+  لا/تشغيل موجود بلا نافذة) بنصوص
+  اللوجات والبوكسات حرفيًا والثوابت
+  (5/2/9/0x30/0xb7).
+- **ملاحظة:** عثرة الاختبار كانت في printf
+  الختامية (نص '%s - %s' جوا الـ format
+  string) — البورت نفسه سليم.
+- **الرجريجن 51/51 أخضر.**
