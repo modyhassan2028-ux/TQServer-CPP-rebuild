@@ -1772,3 +1772,24 @@ invalid_parameter الأصلي لا يرجع أبدًا؛ مع سِم غير م�
 **peerage_d25_test**: 8 أقسام. **رجريشن 25/25 × 6 أخضر.**
 **Peerage.dll مقفول بالكامل** (كل دواله الفريدة منقولة حرفيًا أو موثقة
 كـ CRT/STL). التالي حسب REMAINING_ROADMAP: Syndicate.dll (9,862 دالة).
+
+## D26 — Syndicate.dll بدأت: هيكل الموديول (مقفولة)
+**SyndicateModule.{h,cpp}** (Exe/Dll/Syndicate/Port/) — أول وحدة من 4,547 دالة، 22 دالة حرفية:
+- **14177e290/300** tq CMsg ctor/scalar + **14177e2d0/2e0/2f0** مسجلات أخطاء Process الثلاثة
+- **14177e330/380** gs::IModule dtor/scalar + **14177e340/350/360/370** stubs الصفرية + **14177eac0** (return 1)
+- **14177e3b0/3e0 / 14177e430/460** CMsgLog وCMsgSynChgDomName (أزواج vft)
+- **14177e4c0** مدمّر الموديول: base + 14 مدمّر رسائل بترتيبها الحرفي + زوجا vft المضمّنان
+  (SynChgDomName @+0x1498 بعد المدمّر 9، CMsgLog @+0x10 بعد 13) — **والرسالة @+0x18a8 لا
+  يُدمَّر في الأصل (حرفي)** + IModule vft أخيرًا
+- **14177e600** deleting dtor بقناع RAX & ~0xffff
+- **14177e620** Startup: kernel@+0x420 vt+0x30(0x16) → singleton (1417b6210) → svcStartup (1417a96f0)
+- **14177e6c0** GetMsg: شجرة التوزيع الـ17 (عائلة 0x3ea..0x3eb تتشارك +0x10) + كتابة النوع
+  u16@+10 + Create عبر vt+8
+- **14177e890** Init: 18 تسجيل vt+8 بترتيبها الحرفي + 4 vt+0x10 + vt+0x18(0x16, inst)
+- **14177ead0** ctor-init: IModule ثم CModule vft، id@+8، kernel@+0x420 بين المُنشئ 0 والباقي،
+  17 مُنشئ رسائل بإزاحاتها الدقيقة (سِمات مصفوفية)
+- **14177ec00/14177ec30/14177ec90** scalar dtor + ProcessMsg (vt+0x18 + msg[1]) + ModuleCreate
+  (op_new(0x4608) → init → Init → تدمير عبر vt[0] عند الفشل)
+
+**syndicate_d26_test**: 10 أقسام (mock vtables لـ Create/Process). **رجريشن 26/26 × 6 أخضر.**
+التالي في Syndicate: عائلات CCrossMeritMgr (14172xxxx) / CLeague (1417xxxxx) / CLeagueMgr.
