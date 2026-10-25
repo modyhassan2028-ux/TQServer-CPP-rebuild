@@ -5809,3 +5809,29 @@ FUN_140024860 كاملة
   من أول تشغيلة (وحدة إضافة صافية: صفر تعديلات على
   ملفات موجودة، فرجريجن 82/82 + msg_cheat_monitor
   القديم في أمان — اتحقق ب rerun العيلة).
+
+## وحدة M44 — مُعالِج القبض بتاع المونيتور (mapgroupkernel.cpp)
+- **[منفذ ✔]** الدالة عند سطري 198639/198797 (سياق
+  استهلاك M43): المسار الكامل للقبض على الغشاش:
+  - الحارسان 0x2e0/0x2e7 + رسالة القبض 0x2ec
+  - **quirk حرفي:** فشل ExtractLocalTime (0x2f9)
+    **مش بيرجّع** — بيكمل المسار
+  - توزيع الساعات: 0-5/6-11/12-17/18-23 →
+    STR_USE_NONLICET_TOOLS1..4 (خارج المدى → TOOLS1
+    بمقارنات signed)
+  - **MyLogSave الحرفي:** "gmlog/cheater" + "Cheater
+    found.  UserID:[%u], cheat type:[%s], subtype:[%s]"
+    مع "_TYPE_CHEATING_SYSTEM"
+  - المسار الأونلاين: vcall+0x98 → خريطة vcall+0x168،
+    لو != **6002 (السجن)** → إرسال نص القبض + التيليبورت
+    FUN_1401ca920(obj, 0x1772, STR_GOTO_CHEATJAIL, 1)
+  - المسار الأوفلاين: **SQL الحرفي** "SELECT  id,
+    recordmap_id FROM cq_user WHERE id = %u LIMIT 1"؛
+    فشل → 0x339؛ صفر صفوف → WARNING 0x33f؛ recordmap
+    والماب 6002 → 0x350 "already in the map"؛ ماب
+    مفقود → 0x358 "cant find map(%u)"
+  - **TBD:** ذيل إحداثيات البوابة (map+0x58
+    vcall+0x10(0xb)) بعد جلب ماب 6002 — جزئي الاستخراج
+- الملفات: Exe/MsgServer/Port/MsgArrestHandler.{h,cpp}
+  + tests/msg_arrest_test — **MSG_ARREST_OK** (8 حالات)
+  وحدة إضافة صافية + rerun عيلة المونيتور أخضر.
