@@ -121,7 +121,7 @@ SSetNode* SetInsert(SObjSet* pSet, SSetNode* pHint,
 }
 
 // ===== M49: ORIGINAL FUN_14000ab40 (erase) =====
-void SetErase(SObjSet* pSet, SSetNode* pIt) {
+SSetNode* SetErase(SObjSet* pSet, SSetNode* pIt) {
     // the end() check VERBATIM: the sentinel is flagged
     if (pIt->m_byFlag != 0) {
         throw std::out_of_range(
@@ -259,8 +259,14 @@ void SetErase(SObjSet* pSet, SSetNode* pIt) {
         }
         p12->m_byColor = 1;      // final: root color VERBATIM
     }
-    pSet->m_qCount--;               // [7]-1 VERBATIM
-    delete pIt;
+    // the ORIGINAL tail VERBATIM:
+    // if (param_1[7] != 0) param_1[7] -= 1;
+    if (pSet->m_qCount != 0)
+        pSet->m_qCount--;
+    delete pIt;                        // operator_delete(plVar5)
+    // the return: uVar8 = *(param_3+8); ret[1] = uVar8
+    // = the iterator node after the prev-walk (pPred)
+    return pPred;
 }
 
 } // namespace msg

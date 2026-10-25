@@ -84,8 +84,11 @@ SSetNode* SetInsert(SObjSet* pSet, SSetNode* pHint,
 
 // erase: throws the VERBATIM std::out_of_range
 // ("invalid map/set<T> iterator") when pIt is the
-// sentinel (end()).
-void SetErase(SObjSet* pSet, SSetNode* pIt);
+// sentinel (end()). RETURNS the updated iterator node
+// (the ORIGINAL tail: uVar8=*(it+8); *ret=*set;
+// ret[1]=uVar8) and decrements the count ONLY when
+// nonzero (VERBATIM `if (param_1[7] != 0)`).
+SSetNode* SetErase(SObjSet* pSet, SSetNode* pIt);
 
 // ===== M50: the real tree internals (closing the M49 seams)
 // ORIGINAL FUN_140009ab0 @ 140009ab0 - the tree NODE

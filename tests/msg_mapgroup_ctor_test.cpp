@@ -90,10 +90,16 @@ int main() {
         assert(!std::strcmp(e.what(),
             "invalid map/set<T> iterator")); }
     assert(bThrew);
-    msg::SetErase(&s, n1);
+    SSetNode* pRet1 = msg::SetErase(&s, n1);
     assert(s.m_qCount == 1);
-    msg::SetErase(&s, n2);
+    // the RETURN contract: the updated iterator node
+    assert(pRet1 != nullptr);
+    SSetNode* pRet2 = msg::SetErase(&s, n2);
     assert(s.m_qCount == 0);
+    assert(pRet2 != nullptr);
+    // the guarded count (param_1[7] != 0): erasing an
+    // EMPTY set sentinel throws, so count never goes
+    // negative by construction
     // M50: the real tree internals
     // node alloc: left=right=parent fields + u32 key +
     // color@+0x1c + end-flag@+0x1d = 0 (new 0x20)
