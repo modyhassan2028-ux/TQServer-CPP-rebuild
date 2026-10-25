@@ -5406,3 +5406,43 @@ M18: مستقبِل تبادل المفاتيح المشفّر
   الأولي في الاختبار كان غلط
   (12) — البورت صح.
 - **الرجريجن 73/73 أخضر.**
+
+## جلسة 2026-10-27 00:55 — MsgServer
+الوحدة M33: شلال "Kernel closing"
+(FUN_140024860 state 3، سطور
+~30057-30404)
+
+### الوحدة M33 (Exe/MsgServer/Port/MsgKernelClose)
+- **الموجة الأولى (CloseThread
+  فقط بدون رسائل):** 228(2000)→
+  230(3000)→238(4000)→1b8(10000)→
+  1c8(120000)→1e0(3000)→خيوط
+  الخرائط (60000 لكل)→1d8(8000)→
+  1c0(4000).
+- **الموجة الثانية (إغلاق + تدمير
+  بـ vt+0(this,1) + تصفير + تحديث):**
+  228/230/238/1b8/1c8 (60000،
+  حرفيات الـ ok/fail محذوفة في
+  Ghidra)، لوب الخرائط (300000،
+  "Close map group thread[%d]
+  OK\xa1\xa3"/failed)، 1d8 ("Close
+  cross client OK\xa1\xa3"/
+  "Close cross client failed!")،
+  1c0 ("Close world thread
+  OK\xa1\xa3"/"failed!")، 1e8
+  ("Close Chat Thread OK./
+  Failed.")، 1e0 ("Close Auction
+  Search Thread OK./Failed.")،
+  180 ("Close async DB thread OK./
+  failed." — والتحديث بدون arg!)،
+  SetLogThreadStatus(0)، 178
+  ("Close Log thread OK./failed.").
+- **الذيل:** لوج + تحديث + نداء
+  vt+0x30 للستاتس + FUN_14050e8c0
+  + FUN_14002d220 + تصفير الستاتس
+  + DatabaseUnInit + FUN_140021f60
+  → state = 4.
+- ملاحظة: الحرفيات فيها \xa1\xa3
+  (؛ ء) في نهايات بعض الرسائل —
+  مستخرجة من البيناري حرفيًا.
+- **الرجريجن 74/74 أخضر.**
