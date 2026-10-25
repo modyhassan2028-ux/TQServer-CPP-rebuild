@@ -6857,3 +6857,30 @@ FUN_140024860 كاملة
 4. مسار المطالبة السعيد يتطلب vt28(id) >= الخبرة المحسوبة؛ الصيغة (lExp = count×dVar7/iVar3c) تتجاوز vt28 غالباً — الاختبار يضبط vt30=0/vt28=2000 لإرضاء الشرط الحرفي.
 
 ### الاختبار: TRAINING-D16-OK — **16/16 وحدة × 6/6 تشغيلات** (6 أقسام: كل بوابات CalcExpPct والجدول والحصر، القيم المرجعية للفتل الحسابي bit-exact لـ CalcSessionTimes بمساراتها الثلاثة، صيغة CalcExpValues العائمة والحلقة والحارس، مسارات MgrEnterTraining الخمسة (إرسال 2/ختم/جسم 0x98/سكوت/سجل الخطأ)، مسارا MgrQueryTraining وقيم الرجوع، مسارات MgrClaimTraining الأربعة (البوابة/السعيد/سلسلة العناصر بالحزم 64-بت/المسار الفاشل) — توازن تخصيصات صفري).
+
+## الوحدة D17 (Peerage T1) — Peerage.dll: هيكل الموديول + مفرد CPeerageService + غرَض الرسائل
+**التاريخ:** 2026-10-25 — **الحالة:** مكتملة ومختبرة (17/17 × 6/6)
+**الملفات:** `Exe/Dll/Peerage/Port/PeerageModule.{h,cpp}` + `tests/peerage_d17_test.cpp` + `Exe/Dll/Peerage/Peerage.vcxproj`
+
+### البنية:
+- **peerage::CModule (0x858):** +0x00 vftable، +0x08 النواة (param_1)، +0x10 dword المعرّف، +0x18 مؤشر CPeerageService، +0x20 CMsgLogin (0x410)، +0x430 CMsgPeerage (0x410 + packer عند +0x840 حجمه 0x18). 
+- **peerage::CPeerageService (0x18):** +0x00 vftable، +0x08 النواة (Attach)، +0x10 الكائن الفرعي (FUN_141555690).
+- **غرَض الرسائل:** FUN_141557130 (CMsgLogin: CMsg::Init ×2، +0x408 = this+0x40)، FUN_141557290 (CMsgPeerage: + packer عند msg+0x410 وSetBuf(packer, msg+0x80, 0x359, true))، والمدمّران 141557180/141557310 (الpacker يُدمَّر في الأخير).
+
+### الوظائف المنقولة (verbatim):
+- **ModuleCreate 141551430:** new(0x858) → IModule/CModule vftables → الحقول → المُنشئان → FUN_141551210 (Init)؛ عند الفشل: log + المدمّر المدمج + null.
+- **InitModule 141551210:** المفرد FUN_141551ff0 → تسجيل 0x810 ثم 0x3ea عبر vt+0x08 → إرجاع vt+0x18(0xb, svc).
+- **StartupModule 141551170:** kernel vt+0x30(0xb) → الصفر: log + رجوع `|1`؛ svc-null: log + رجوع القمامة (&~0xff = 0)؛ وإلا Attach 1415516a0: النجاح `(ret & ~0xff)|1` والفشل `ret & ~0xff`.
+- **GetModuleMsg 1415512a0:** بوابة الطول (`*hdr > len`) → id 0x3ea → +0x20 / 0x810 → +0x430 / غيرهما → null؛ بوابة تحميل msg vt+0x08 (seam `g_fnMsgLoad`).
+- **المدمّرات:** 1415510e0 (المدمّر: svc عبر vt+0x48 بعقد -2/+1، msgPeerage، msgLogin، ثم IModule)، 141551150 (المدمج: vt[0] ثم `& 0xffff0000`)، 1415510a0 (IModule: vftable + delete-if-odd).
+- **الخدمة:** 141551ff0 (new 0x18: vftable + nullان)، 141551640 (المدمّر: إسقاط obj عبر vt[0] بعقد -2/+1 والتصفير المزدوج)، 1415516a0 (Attach: النواة==0 → log + `&~0xff`؛ تخزين النواة +0x08، الكائن FUN_141555690 عند +0x10، ثم FUN_1415569f0 — كلاهما seam موثق بانتظار وحدة عائلة الكائن).
+- **FUN_141551520/141551550:** kernel vt+0x10(2/3) ثم obj vt+0x58/0x40 (seams).
+
+### الـ Seams الموثقة: kernel vt+0x08/+0x10/+0x18/+0x30، obj vt+0x40/+0x58، عائلة packer (ctor/dtor/SetBuf)، msg vt+0x08، الكائن الفرعي 55690/569f0، والسجل الحرفي DAT_14155a358.
+### الأخطاء الحقيقية المصحّحة أثناء الوحدة:
+1. **حجم CMsgBase:** البادئة 0x3c8 كانت خطأ (أعطت 0x418) — الصحيح 0x3c0 (كما في Training/Title).
+2. **حجم SPacker:** البادئة 0x10 → 0x18 المطلوب يحتاج 0x8.
+3. **فخ أسبقية في الاختبار نفسه:** `assert(uR == 0x200 & ~0xff)` تُفكك `(uR==0x200) & (~0xff)` — دائماً صفر! القوسان لازمان.
+4. عقد -2/+1 للمدمّر المدمج للكائنات الفرعية: النمذجة تستدعي g_fnFree على الكائن — الاختبار يستخدم مخازن حقيقية.
+
+### الاختبار: PEERAGE-D17-OK — 9 أقسام: الأحجام (0x410/0x18/0x18/0x858)، الغرَض الرسائلية (+0x408=this+0x40، SetBuf msg+0x80 cap 0x359 owns، ترتيب الدمارات)، ModuleCreate (الحقول، ترتيب التسجيل 0x810→0x3ea، set(0xb,svc))، GetModuleMsg بكل مساراته الخمسة، StartupModule بفروعه الأربعة وعقود الرجوع (|1 / &~0xff)، Attach، المدمّرات والمسارات الحرة، الاستعلامان، مسارا فشل Init والتخصيص، وتوازن تخصيصات صفري.

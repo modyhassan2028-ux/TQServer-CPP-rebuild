@@ -42,9 +42,27 @@
 > 1ae0/23d0/1b70 خلف فتحات الموزّع، مع واجهة
 > النواة 27 Seam وكل الفتلات السحرية الموقعة
 > bit-exact) مقفولة** — الباقي في الملف: دوال
-> التمشية الصغيرة غير المرتبطة، ثم Peerage.dll.
+> التمشية الصغيرة غير المرتبطة، ثم Peerage.dll
+> (بدئت 25/10).
 > الجرد الكامل + بروتوكول الوكيل-لكل-ملف في
 > DLL_WAVE_INVENTORY.md.
+
+### Peerage.dll — الجلسة الحالية
+- **D17 (T1) مقفولة:** هيكل `peerage::CModule`
+  (0x858: kernel+id+svc+msgLogin+msgPeerage+packer)
+  والمفرد `CPeerageService` (0x18) وغرَض الرسائل
+  (141557130/141557290/141557180/141557310) و
+  ModuleCreate 141551430 وInit 141551210 وStartup
+  141551170 وGetMsg 1415512a0 والمدمّرات
+  (1415510e0/141551150/1415510a0) والخدمة
+  (141551ff0/141551640/1415516a0) والاستعلامان
+  (141551520/141551550) — كلها في
+  `Exe/Dll/Peerage/Port/PeerageModule.{h,cpp}`.
+- **الباقي:** عائلة الكائن الفرعي (FUN_141555690
+  البنّاء وFUN_1415569f0 التهيئة — حالياً seams
+  `g_fnMakePeerageObj`/`g_fnPeerageObjInit`)، ثم
+  أجسام vt الخدمة والرسائل (المعالجات الفعلية
+  لـ 0x3ea/0x810) وفق ظهورها في الديكمبايل.
 الأضخم أولاً — كل DLL وحدة استيراد مستقلة بنفس قواعد الحرفية:
 - **Syndicate.dll** 9,862 • **CQBase.dll** 3,095 • **ElitePKArenic.dll** 2,226 • **ClanPKArenic.dll** 2,315 • **PopPKArenic.dll** 2,311 • **DB.dll** 2,736 • **TeamArenic.dll** 2,039 • **Family.dll** 2,039 • **LeaveWord.dll** 1,803 • **FamilyArenic.dll** 1,756 • ثم الباقي (~25 ملف أصغر).
 
