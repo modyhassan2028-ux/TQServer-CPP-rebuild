@@ -3,6 +3,7 @@
 #include <cassert>
 #include <cstdio>
 #include <cstring>
+#include <utility>
 #include <vector>
 #include <stdexcept>
 using namespace msg;
@@ -312,6 +313,37 @@ int main() {
         assert(msg::SetFind(&st, 5) != nullptr);
         assert(msg::SetEraseKeyed(&st, 99) == 0);
         std::puts("M58-FIND-ERASE-OK");
+    }
+    // M59: the percent-config block
+    {
+        msg::SPercentCfg pc;
+        std::vector<std::pair<uint32_t,uint32_t>> a, b;
+        pc.m_fnSinkA = [&](uint32_t i, uint32_t v){
+            a.push_back({i,v}); };
+        pc.m_fnSinkB = [&](uint32_t i, uint32_t v){
+            b.push_back({i,v}); };
+        // normal parse: 3 values
+        assert(pc.LoadPercentConfig(0x177a, 7,
+            "50 30 20") == 3);
+        assert(a.size() == 3 &&
+               a[0].second == 50 && a[2].second == 20);
+        assert(b.empty());          // 0x177a -> sink A
+        // over-100 zeroing + verbatim log
+        assert(pc.LoadPercentConfig(0x100, 7,
+            "150 20") == 2);
+        assert(b.size() == 2);
+        assert(b[0].second == 0);   // zeroed
+        assert(pc.m_vecErrs.size() == 1);
+        assert(pc.m_vecErrs[0].find(
+            "table:cq_config ID[256] Type[7]"
+            " precent config over 100!") == 0);
+        // empty string: sscanf EOF -> the gate rejects
+        assert(pc.LoadPercentConfig(0x177a, 7, "")
+               == 0);
+        // 14 values: capped at 13 (sscanf VERBATIM)
+        assert(pc.LoadPercentConfig(0x177a, 7,
+            "1 2 3 4 5 6 7 8 9 10 11 12 13 14") == 13);
+        std::puts("M59-PERCENT-CFG-OK");
     }
     std::puts("MSG_SETOPS_OK: insert first/tail branches,"
               " erase unlink + end() out_of_range"

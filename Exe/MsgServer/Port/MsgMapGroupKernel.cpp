@@ -561,4 +561,41 @@ uint32_t SetEraseKeyed(SObjSet* pSet, uint32_t dwKey) {
     return n;
 }
 
+// ===== M59: the percent-config block VERBATIM =====
+uint32_t SPercentCfg::LoadPercentConfig(
+        uint32_t dwId, uint32_t dwType,
+        const char* szDescrib) {
+    // local_578[0] = 0; memset(+1, 0, 0x30)
+    uint32_t v[13] = {0};
+    // sscanf VERBATIM (13 x "%u", gaps counted):
+    int n = std::sscanf(szDescrib,
+        "%u %u %u %u %u %u %u %u %u %u %u %u %u",
+        &v[0], &v[1], &v[2], &v[3], &v[4], &v[5],
+        &v[6], &v[7], &v[8], &v[9], &v[10], &v[11],
+        &v[12]);
+    // ORIGINAL gate: iVar9 - 1U < 0xd (n in 1..13)
+    if ((uint32_t)(n - 1U) >= 0xdU)
+        return 0;
+    for (int i = 0; i < n; i++) {
+        // the over-100 zeroing + the VERBATIM log:
+        if (v[i] > 100) {
+            v[i] = 0;
+            char sz[128];
+            std::snprintf(sz, sizeof sz,
+                "table:cq_config ID[%u] Type[%u]"
+                " precent config over 100!",
+                dwId, dwType);
+            m_vecErrs.push_back(sz);
+        }
+        // the dispatch: id 0x177a -> target +0xe0
+        // (FUN_14000d860(param_1+0xe0,...)), else +0x128
+        if (dwId == 0x177a) {
+            if (m_fnSinkA) m_fnSinkA((uint32_t)i, v[i]);
+        } else {
+            if (m_fnSinkB) m_fnSinkB((uint32_t)i, v[i]);
+        }
+    }
+    return (uint32_t)n;
+}
+
 } // namespace msg

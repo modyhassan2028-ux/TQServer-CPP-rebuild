@@ -20,6 +20,8 @@
 #pragma once
 #include <cstdint>
 #include <functional>
+#include <string>
+#include <vector>
 namespace msg {
 struct SInnerObj {                 // the allocated sentinel
     uint64_t m_q[16];              // sized: 0x80 for jail
@@ -161,5 +163,21 @@ SSetNode* SetFind(SObjSet* pSet, uint32_t dwKey);
 // erase-by-key: find + erase loop; returns the erased
 // count (the ORIGINAL counts duplicates - multiset).
 uint32_t SetEraseKeyed(SObjSet* pSet, uint32_t dwKey);
+
+// ===== M59: ORIGINAL FUN_140011620 percent-config block
+// (decompile 14547-14605): sscanf "%u" x13, the
+// over-100 zeroing + the VERBATIM error log, and the
+// per-value sink dispatch (target +0xe0 when the
+// config ID == 0x177a, else +0x128).
+struct SPercentCfg {
+    std::function<void(uint32_t, uint32_t)> m_fnSinkA;
+    std::function<void(uint32_t, uint32_t)> m_fnSinkB;
+    std::vector<std::string> m_vecErrs;
+    // returns the parsed count (0 when out of the
+    // ORIGINAL range check iVar9-1U < 0xd)
+    uint32_t LoadPercentConfig(uint32_t dwId,
+                               uint32_t dwType,
+                               const char* szDescrib);
+};
 
 } // namespace msg
