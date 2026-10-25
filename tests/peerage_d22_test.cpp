@@ -12,6 +12,7 @@
 #include <vector>
 #include "../Exe/Dll/Peerage/Port/PeerageMsgWire.h"
 #include "../Exe/Dll/Peerage/Port/PeerageModule.h"
+#include "../Exe/Dll/Peerage/Port/PeeragePromote.h"
 
 using namespace peerage;
 
@@ -136,8 +137,16 @@ int main() {
         m->m_pVt = vt;
         g_fnBuild1Arg4 = []() -> uint64_t {
             return 555; };
-        BuildMsgType1((CMsgBase*)m, 42u, 7u, 9ull, 123456789ull,
-                      -3);
+        // the unified D20 seam (the append result returns)
+        g_fnMsgAppend = [](void* pMsg, char* pStr) -> bool {
+            return ((bool (*)(void*, char*))
+                        (*(void***)pMsg)[0x48 / 8])(
+                pMsg, pStr);
+        };
+        char cOk = BuildMsgType1(
+            (CMsgBase*)m, 42u, 7u, 9ull, 123456789ull,
+            -3);
+        assert(cOk == 1);
         assert(*(uint16_t*)m->m_pBuf == 0xa8);
         assert(*(uint16_t*)(m->m_pBuf + 2) == 0x810);
         assert(*(uint16_t*)(m->m_pBuf + 4) == 1);

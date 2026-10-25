@@ -9,6 +9,7 @@
 // as in D20).
 // ============================================================
 #include "PeerageMsgWire.h"
+#include "PeeragePromote.h"
 #include "PeerageModule.h"
 #include <cstring>
 #include <cstdio>
@@ -77,7 +78,7 @@ CMsgBase* MsgLoginDeletingDtor(CMsgBase* p,
 // local_250=param_4 (%u), local_248=param_5 (%I64u),
 // local_240=param_6 (%d) — the 4th spec's arg was
 // DROPPED by Ghidra (the g_fnBuild1Arg4 seam).
-void BuildMsgType1(CMsgBase* p, uint32_t uId,
+char BuildMsgType1(CMsgBase* p, uint32_t uId,
                   uint32_t uA3, uint64_t uA4,
                   uint64_t uA5, int32_t nA6) {
     unsigned char* pBuf = MsgBuf(p);
@@ -96,11 +97,9 @@ void BuildMsgType1(CMsgBase* p, uint32_t uId,
              uA3, (uint32_t)uA4, uA5,
              (unsigned long long)g_fnBuild1Arg4(),
              nA6);
-    // the msg vt+0x48 append
-    void* pVt = *(void**)p;
-    auto fn = (bool (*)(void*, char*))*(void**)
-        ((char*)pVt + 0x48);
-    fn(p, local_238);
+    // the msg vt+0x48 append — unified on the D20 seam
+    // g_fnMsgAppend (returns the append result)
+    return g_fnMsgAppend(p, local_238) ? 1 : 0;
 }
 
 // ---- FUN_141557440 ----

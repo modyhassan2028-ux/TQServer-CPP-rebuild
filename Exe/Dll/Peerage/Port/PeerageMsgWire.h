@@ -45,7 +45,7 @@ CMsgBase* MsgLoginDeletingDtor(CMsgBase* p,
 // FUN_141557350: the type-1 build (the header
 // {0xa8,0x810,1,id} + the "%u %u %I64u %I64u %d"
 // append via the msg vt+0x48)
-void BuildMsgType1(CMsgBase* p, uint32_t uId,
+char BuildMsgType1(CMsgBase* p, uint32_t uId,
                   uint32_t uA3, uint64_t uA4,
                   uint64_t uA5, int32_t nA6);
 // FUN_141557440: the type-2 build — {0xa8, 0x810,

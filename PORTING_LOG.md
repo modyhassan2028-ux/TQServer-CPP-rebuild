@@ -1673,3 +1673,51 @@ segfault عشوائي ABI.
   توثيق → رفع
 - **فخ موثق عنده (D22)**: فiasco تهيئة std::function الساكنة في
   الاختبارات — مذكور في HANDOFF بتاعه
+
+## D23 — عائلة التبرّع Peerage (مقفولة)
+**PeerageDonate.{h,cpp}** (Exe/Dll/Peerage/Port/) — 10 دوال حرفية:
+- **141551750/60/70**: أغلفة الخدمة (GetRank/SweepDelete/
+  SendState → svc+0x10)
+- **141551780 ServiceDonate**: بوابة المستوى 0x46 (70)، بوابة
+  الحد الأدنى 3,000,000، بوابة التجاوز 1,000,000,000، سويتش
+  نوع الفلوس (0→vt+0x10 بالمبلغ الكامل، 1→gate ثم vt+0x18
+  بالمبلغ/50000، 2→gate ثم vt+0x20، غير كده→vt+0x88 بـ 0x3c
+  و return)، نجاح→DonateCore، فشل→STR_PEERAGE_DONATE_ERR_
+  NO_ENOUGH_MONEY، وكل مسارات الخطأ بتتبعت بالـ vt+0x30 بلون
+  0xff0000 وقناة 0x7d5
+- **141554c40 GetPeerageRank**: elem+0x10 أو عتبات الإجمالي
+  (30M/100M/200M → 1/3/5)
+- **141554b10 SendPeerageState**: elem بمستوى <1→مسار الـ db
+  (state=العتبة، rank=-1، value=الإجمالي)، وإلا حقول elem
+  (rank10/state14) + قيمة السجل vt+0x58
+- **1415558a0 SweepDeleteById**: مسح المتجه بحلقة MSVC debug
+  كاملة (فحوصات الـ proxy)، مطابقة id عبر row vt+0x10(3)→
+  vt+0x40، تنظيف 141552110 + dtor العنصر + memmove_s للانكماش
+- **141555dc0 GetOrCreateSort**: استعلام dyna_rank_rec بثابت
+  0x2dc6c3 على الحقل 1 والحقل 3=id، فشل exec→dtor الاستعلام،
+  نجاح→ctor 141552340 (الصف=كائن الاستعلام) + underline عبر
+  vt+0x80→141552170 (obj+0x18) + push_back
+- **1415520c0 SetNamePair**: الثنائي 16 بايت عند +0x1c/+0x24
+  والـ bool عند +0x2b
+- **141556db0 DonateCore**: get/set الإجمالي (vt+0x58/0x60)،
+  البوابة (mgr+0x38 والـ rankNum مقابل حجم المتجه)، المسار
+  العادي: مقارنة الرتب القديم/الجديد + إعلان 141552a60 عند
+  التغيير + بناء type-1 (141557350) والإرسال؛ المسار العُلوي:
+  strcmp مضمّن على الاسم عند elem+0x1c مع تحديث 1415520c0
+  عند الاختلاف + rec vt+0xa0 (set ثم get) + row vt+0x38 +
+  مسار الترقية 141555f80 + الذيل (بناء type-1 بحقول elem
+  rank10/state14) + سجل gmlog/peerage_donate
+- **توحيد BuildMsgType1** على سِم g_fnMsgAppend (كما D20)
+  وإرجاع نتيجة الإلحاق (char) — D22 أعيد اختبارها 10/10
+- **سِمات TBD موثقة** (الباينري الأصلي للـ Peerage.dll غير
+  متوفر): TBD-1780-ARG1 (vt[0] للمستوى بدون وسطاء ظاهرة)،
+  TBD-6DB0-ARG (id في نداء get الإجمالي مُسقط)، TBD-A0-ARG/
+  TBD-38-ARG (نداءات get العارية)، TBD-6DB0-ARG3 (وسيط
+  "type %d" في السجل)
+- **اختبار peerage_d23_test**: 14 قسمًا، SElem خام بمقاس
+  CPeerageSort الحقيقي (row عند +8 — فخ تخطيط البيئة الموازية
+  متجنب)، mock كامل للـ kernel/db/query/rows/fields. النتائج:
+  D23 أخضر + D22 10/10 + **رجريشن 23/23 × 6**
+- **إصلاح رجريشن**: OBJ=/tmp/objs كان به بقايا بناء قديمة
+  (MsgServer objects) تكسر الربط — بقت /tmp/objs_wave نظيفة
+  كل تشغيل
