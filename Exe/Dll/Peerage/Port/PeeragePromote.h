@@ -93,6 +93,17 @@ void SendPeerageAnnounce(CPeerageSortMgr* mgr,
 void PeerageElemCleanup(void* elem, uint64_t id,
                         void* dbVt, void* pStr);
 
+// the msg buffer = 0x430 on the caller stack
+// (the object is 0x410 + the packer 0x18, rounded)
+struct SMsgBuf {
+    uint8_t m_ab[0x430];
+};
+
+// ---- FUN_141552980: the state-from-value thresholds
+// (verbatim: 199999999 < x -> 5; 99999999 < x -> 3;
+// else (uint)(29999999 < x))
+uint32_t StateFromValue(int64_t v);
+
 // ---- FUN_141555f80: the promotion walk ----
 // (mgr, bNoSend param_2, id param_3) — FindById
 // gate + the D19 sort + the rank/state families + the

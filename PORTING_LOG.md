@@ -1721,3 +1721,30 @@ segfault عشوائي ABI.
 - **إصلاح رجريشن**: OBJ=/tmp/objs كان به بقايا بناء قديمة
   (MsgServer objects) تكسر الربط — بقت /tmp/objs_wave نظيفة
   كل تشغيل
+
+## D24 — دوال الخدمة الإدارية Peerage (مقفولة)
+**PeerageService.{h,cpp}** (Exe/Dll/Peerage/Port/) — 9 دوال حرفية:
+- **141551920** ServiceQueryRank: elem null → kernel vt+0x58 total →
+  StateFromValue؛ elem → +0x10/+0x14 + rec vt+0x58 → BuildMsgPeerage →
+  kernel vt+0x38
+- **141551a00** ServiceDonateInfo: بوابة rank<0xd && elem-rank<requested؛
+  out=-1، عتبات {1:30M، 3:100M، 5:200M} لـ rank<7 عبر CountBelowThreshold؛
+  FindSortByRank hit → value-total+1 بأرضية 3M
+- **141551b00** ServiceSendState: BuildMsgPeerage(id, state, 0, 0) → kernel send
+- **141551b90** VecSlotAt: فحص حدود + &slot[i]
+- **141551bf0** scalar deleting dtor: DtorPeerageService + delete-if-odd
+- **141551c20** ServiceSendTopList: mgr+8 (141552a50)، count+9 بحد 0x32،
+  BuildMsgType2(page, count/10)، حلقة 10-للصفحة مع بوابة page*10+10،
+  vt+0x70 visible + vt+0x78، AppendPeerageRecord ×10، الإرسال **غير مشروط**
+- **141551eb0** ServiceQueryAllRanks: 6 رتب {1,3,5,7,9,0xc} عبر فتحة
+  vtable الخدمة +0x28 (= 1a00 نفسها)، مصفوفة 6×16 {value, out, rank}
+  → BuildMsgType4 (memcpy 0x60) → kernel send
+- **1415549d0** FindSortByRank: مشي عكسي مع فحوصات MSVC-debug (اتجاهات
+  المقارنات اتصححت: it<=begin / end<=it-1) — لا تطابق → 0
+- **141555070** CountBelowThreshold: أول elem قيمته < العتبة → +0x14؛
+  لا شيء → 0xffffffff
+
+**إصلاحات جوهرية:** StateFromValue/SMsgBuf اتصدروا من PeeragePromote
+للهيدر (مشتركان). **فخ حرفي موثق:** حجم هيدر 141557740 يُكتب قبل زيادة
+العداد — يتأخر سجلًا واحدًا (سلوك أصلي، الاختبار يثبته).
+**peerage_d24_test**: 10 أقسام. **رجريشن 24/24 × 6 أخضر.**

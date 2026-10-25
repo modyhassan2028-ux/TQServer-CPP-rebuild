@@ -36,12 +36,6 @@ void (*g_fnRowVt40Release)(void*, int, void*,
 void (*g_fnRowDelete)(void*, uint64_t) = nullptr;
 void (*g_fnElemDelete)(void*, uint64_t) = nullptr;
 
-// the msg buffer = 0x430 on the caller stack
-// (the object is 0x410 + the packer 0x18, rounded)
-struct SMsgBuf {
-    uint8_t m_ab[0x430];
-};
-
 // ---- FUN_1415574a0: the 0x810 msg build ----
 // param_1[0x81] = *(msg+0x408) = the stream ptr
 // (msg+8): {0xa8 u16@+0, 0x810 u16@+2, 3 u16@+4,
@@ -93,7 +87,7 @@ void SendRankChange(CPeerageSortMgr* mgr,
 // ---- the state-from-value thresholds (verbatim:
 // lVar9 < 200000000: < 100000000 ->
 // (uint)(29999999 < lVar9); else 3; >= 200000000 -> 5)
-static uint32_t StateFromValue(int64_t v) {
+uint32_t StateFromValue(int64_t v) {
     if (v < 200000000) {
         if (v < 100000000)
             return (uint32_t)(29999999 < v);
