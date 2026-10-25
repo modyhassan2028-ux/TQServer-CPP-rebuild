@@ -6773,3 +6773,25 @@ FUN_140024860 كاملة
 
 ### إزاحات Training المميزة (مقارنة بـ Title): عقدة 0x38 (color@+0x30/isnil@+0x31)، النواة قاعدة mgr+0x18 (الرأس@+0x30، الحجم@+0x38)، المفرد ساكن في .data.
 ### نتيجة الاختبار: TRAINING-D13-OK — **11/11 وحدة × 6/6 تشغيلات** (المسارات: الساكن + الباني + Init بمُعرّفاته + فشل Init + فشل التسجيل + Teardown بتوازن تخصيصات صفري).
+
+## الوحدة D14 (Training T2) — Training.dll: آلية std::map الكاملة (الشجرة الحمراء-السوداء)
+**التاريخ:** 2026-10-25 — **الحالة:** مكتملة ومختبرة (14/14 × 6/6)
+**الملفات:** `Exe/Dll/Training/Port/TrainingMap.{h,cpp}` + `tests/training_d14_test.cpp`
+
+### الوظائف المنقولة (verbatim):
+- **FUN_1419e2ac0** `MakeNode` — new(0x38): left=الرأس، parent=الأصل، right=الرأس، نسخ **ثلاثة qwords** من السجل (key@+0x18، val@+0x20، **val2@+0x28** — الحقل الثالث يفصل Training عن Title)، color، isnil=0. توسيع `STreeNode::m_abPad28` إلى `m_nVal28` حرفياً.
+- **FUN_1419e3320** `InitMapHead` — إعادة إنشاء الرأس: NewHeadNode + isnil=1 + الوصلات الدائرية + size=0 (لا يكتب proxy — مسؤولية المستدعي).
+- **FUN_1419e3240** `LowerBound` — **المسار الحرفي بمرحلتين**: النزول من الجذر (قارن uint على +0x18: `*(uint*)(node+0x18)`) مع مرشح puVar4 = أول عقدة key<node->key فقط (بوابة `pFound->isnil`)، ثم **النزول الثاني** من النتيجة يحدّث puVar4 فقط (puVar5 لا يُمس). الخرج: `{proxy, pLoc, proxy, pFound}`.
+- **FUN_1419e3360** `InsertNode` — بوابة `"map/set<T> too long"` (size > 0xaaaaaaaaaaaaaa8) موثّقة (CRT خارج النطاق)، MakeNode أحمر، size+=1، الوصل (الجذر الفارغ / يمين الأصل / يسار الأصل مع صيانة Rmost/Lmost)، **fixup الـ RB مضمّن حرفياً** (recolor الأعمى الأسود، حالة LR/RL الداخلية بترتيب MSVC: `_Pnode = parent; rotate-left; ثم الجديد الأب + الجد أحمر + rotate-right` ثم الجذر أسود).
+- **FUN_1419e2d50** `EraseAt` (945 بايت) — بوابة `"invalid map/set<T> iterator"` (out_of_range CRT موثّقة)، `IteratorNext` تقدّم المكرر في مكانه، **وصل الوريث** (طفلان: نقل الـ successor بترتيب plVar7/plVar8/plVar9 الحرفي + تبديل الألوان عند +0x30)، مسار الوصل 0/1-طفل + صيانة Lmost/Rmost **(النزول يبدأ من pFix نفسه وليس الأب — plVar7 = plVar9)**، الـ rebalance المضمّن بالدورانات المدوّرة (1419e2000/1419e26a0)، delete + size--، الخرج {proxy, المتقدم}.
+- **FUN_1419e2000** `RotateRight` — ارتفاع الابن الأيسر (بوابة isnil لابنه الأيمن + الجذر/الأب).
+- **FUN_1419e26a0** `RotateLeft` — المرآة.
+- **FUN_1419e2100** `IteratorNext` — بوابة proxy==0 (البوابة لا تعود في الأصل — Seam)، حد أدنى الشجرة اليمنى / التسلق بشرط `node == parent->right` مع فحص isnil في رأس الحلقة، حد بوابة الجسر غير المسترد عند ++end (jumptable too many branches → `_invalid_parameter_noinfo`) — Seam `g_fnInvalidParameter`.
+
+### الأخطاء الحقيقية المصحّحة أثناء الوحدة:
+1. **صيانة Lmost/Rmost بعد المحو** كانت تبدأ النزول من الأب — الأصل (plVar7 = plVar9 = pFix ثم النزول)؛ ظهرت كتلف مؤشرات الرأس بعد محو الأطراف.
+2. **حمل الأب في الـ rebalance** (`plVar8` عند LAB_1419e2f3c): مسار الوصل يحمل **أب المحذوف** وليس `pFix->parent` — عند محو ورقة سوداء يكون pFix = الرأس وأبوه = الجذر (خطأ)، فالصح من مسار الوصل/الوصل بالوريث حرفياً. ظهر كخلط ارتفاع أسود عند محو 65.
+3. **تلوين fixup الإدراج LR/RL** حسب MSVC: الأب الجديد (العقدة المرتفعة) هو الأسود، الجد الأحمر، ثم الدوران — وليس الأب القديم.
+4. بوابات IteratorNext/EraseAt أصبحت لا تعود (المعالج الأصلي `_invalid_parameter_noinfo` لا يعود).
+
+### الاختبار: TRAINING-D14-OK — **14/14 وحدة × 6/6 تشغيلات** (13 مفتاحاً بكل حالات الإدراج/المحو: ورقة حمراء، جذر بطفلين، Lmost/Rmost، ورقة سوداء، حذف كامل — مع فحوص RB (مرتبة/ارتفاع أسود/لا أحمر-أحمر/Lmost/Rmost) **بعد كل عملية**، توازن تخصيصات صفري، بوابات end()).

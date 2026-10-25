@@ -2,10 +2,12 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="Port\TrainingMgr.cpp" />
+    <ClCompile Include="Port\TrainingMap.cpp" />
     <ClCompile Include="Port\TrainingModule.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Port\TrainingMgr.h" />
+    <ClInclude Include="Port\TrainingMap.h" />
     <ClInclude Include="Port\TrainingModule.h" />
   </ItemGroup>
 </Project>

@@ -22,9 +22,11 @@ struct STreeNode {
     STreeNode* m_pLeft00;       // +0x00
     STreeNode* m_pParent08;     // +0x08
     STreeNode* m_pRight10;      // +0x10
-    uint64_t m_nKey18;          // +0x18
+    uint64_t m_nKey18;          // +0x18 (key: LOW uint,
+                                //  the compare in 1419e3240)
     void* m_pValue20;           // +0x20
-    uint8_t m_abPad28[8];       // +0x28..0x30
+    uint64_t m_nVal28;          // +0x28 (the THIRD qword
+                                //  copied by 1419e2ac0)
     uint8_t m_bColor30;         // +0x30 (1 = black)
     uint8_t m_bIsnil31;         // +0x31 (1 = sentinel)
 };
