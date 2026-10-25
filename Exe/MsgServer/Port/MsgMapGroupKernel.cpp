@@ -645,8 +645,11 @@ uint32_t* MapOperatorAt(SObjMap* pMap, uint32_t dwKey) {
         // the default record VERBATIM: local_c0 =
         // {key, 0,0,0,0,0,0}
         uint32_t aRec[7] = {dwKey, 0, 0, 0, 0, 0, 0};
+        // the ORIGINAL passes its freshly-built local
+        // default record (its set is default-EMPTY) -
+        // nullptr = construct an empty subset
         SMapNode* pNew = MapNodeNew(pSent, pHint, pSent,
-                                    aRec, 0);
+                                    aRec, 0, nullptr);
         MapInsertLink(pMap, pHint, bAfter, pNew);
         return &pNew->m_aRecord[0];   // node + 0x1c
     }
@@ -693,7 +696,8 @@ void MapInsertLink(SObjMap* pMap, SMapNode* pHint,
 SMapNode* MapNodeNew(SMapNode* pLeft, SMapNode* pParent,
                      SMapNode* pRight,
                      const uint32_t aRec[7],
-                     uint8_t byColor) {
+                     uint8_t byColor,
+                     const SObjSet* pSrcSet) {
     // operator new(0x78) - via the SMapNode type
     SMapNode* p = new SMapNode();
     // the ctor VERBATIM:
@@ -707,9 +711,21 @@ SMapNode* MapNodeNew(SMapNode* pLeft, SMapNode* pParent,
     p->m_aRecord[3] = aRec[4]; // +0x28
     p->m_aRecord[4] = aRec[5]; // +0x2c
     p->m_aRecord[5] = aRec[6]; // +0x30
-    // sub-set at +0x34: the ORIGINAL calls
-    // FUN_14000e970 (the deep container copy) - TBD
-    // seam: the region stays zero-initialized
+    // ===== M64: the sub-set at +0x34 VERBATIM via
+    // FUN_14000e970: construct (the new(8) head + the
+    // 0x20 sentinel + count=0) then FUN_14000bf20
+    // (SetCopy) from the source record's set =====
+    SInnerObj* pInner = new SInnerObj();
+    std::memset(pInner, 0, sizeof *pInner);
+    SSetNode* pIS = (SSetNode*)pInner;
+    pIS->m_byFlag = 1;                    // +0x1d = 1
+    pIS->m_pPrev = pIS->m_pNext = pIS->m_pParent = pIS;
+    SObjSet* pSub = MapNodeSubSet(p);
+    pSub->m_pHead  = p;   // *head = owner (new(8))
+    pSub->m_pInner = pInner;      // param_1[6]
+    pSub->m_qCount = 0;           // param_1[7] = 0
+    if (pSrcSet)
+        SetCopy(pSub, (SObjSet*)pSrcSet);
     p->m_byColor = byColor;    // +0x74 = param_6
     p->m_byFlag  = 0;          // +0x75 = 0
     return p;

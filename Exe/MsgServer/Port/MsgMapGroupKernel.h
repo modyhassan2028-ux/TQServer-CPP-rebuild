@@ -193,14 +193,20 @@ struct SMapNode {
     SMapNode* m_pRight;    // +0x10
     uint32_t  m_dwKey;     // +0x18
     uint32_t  m_aRecord[6];// +0x1c..+0x30 (6 ints)
-    uint8_t   m_pad[0x40]; // +0x34..0x74 sub-set region
+    // +0x34..0x74: the record's INLINE SET - the ctor
+    // calls FUN_14000e970(node+0x34, record+0x1c) =
+    // construct + deep-copy from the source record's
+    // set. RAW BYTES: the binary places the set object
+    // at an UNALIGNED +0x34 (not a member), so the
+    // accessor reinterprets - x64 tolerates it.
+    uint8_t   m_abSubSet[0x40];
     uint8_t   m_byColor;   // +0x74 (0=red, 1=black)
     uint8_t   m_byFlag;    // +0x75 (0=node, 1=sentinel)
     SMapNode() : m_pLeft(nullptr), m_pParent(nullptr),
                  m_pRight(nullptr), m_dwKey(0),
                  m_byFlag(0) {
         std::memset(m_aRecord, 0, sizeof m_aRecord);
-        std::memset(m_pad, 0, sizeof m_pad);
+        std::memset(m_abSubSet, 0, sizeof m_abSubSet);
     }
 };
 struct SObjMap {
@@ -237,10 +243,13 @@ void MapInsertLink(SObjMap* pMap, SMapNode* pHint,
 // 6 record ints@+0x1c..+0x30, the sub-set@+0x34
 // (deep copy FUN_14000e970 = TBD seam, zero-init),
 // color@+0x74, end-flag@+0x75 = 0
+// M64: pSrcSet = the source record's set (ctor
+// param_5+7); null = construct an empty subset.
 SMapNode* MapNodeNew(SMapNode* pLeft, SMapNode* pParent,
                      SMapNode* pRight,
                      const uint32_t aRec[7],
-                     uint8_t byColor);
+                     uint8_t byColor,
+                     const SObjSet* pSrcSet);
 
 // ===== M63: ORIGINAL FUN_14000af60 (the recursive
 // clone) + FUN_14000bf20 (the set COPY) =====
@@ -254,5 +263,11 @@ SMapNode* MapNodeNew(SMapNode* pLeft, SMapNode* pParent,
 SSetNode* CloneTree(SObjSet* pSet, SSetNode* pSrc,
                     SSetNode* pParent);
 void SetCopy(SObjSet* pDst, SObjSet* pSrc);
+
+// the inline-set accessor (the binary's raw +0x34
+// placement):
+inline SObjSet* MapNodeSubSet(SMapNode* p) {
+    return reinterpret_cast<SObjSet*>(p->m_abSubSet);
+}
 
 } // namespace msg

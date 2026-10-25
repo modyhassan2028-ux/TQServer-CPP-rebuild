@@ -427,6 +427,46 @@ int main() {
         assert(pr->m_byColor == 1 || pr->m_byColor == 0);
         std::puts("M63-SET-COPY-OK");
     }
+    // M64: the inline sub-set copy in the map node
+    {
+        // build a source set with 3 keys
+        SObjSet src; SInnerObj si;
+        std::memset(&src,0,sizeof src);
+        std::memset(&si,0,sizeof si);
+        auto* qs = (msg::SSetNode*)&si;
+        qs->m_byFlag = 1;
+        qs->m_pPrev = qs->m_pNext = qs->m_pParent = qs;
+        src.m_pInner = &si;
+        bool bDup = false;
+        msg::SetInsertKeyed(&src, 11, &bDup);
+        msg::SetInsertKeyed(&src, 22, &bDup);
+        msg::SetInsertKeyed(&src, 33, &bDup);
+        // allocate a map node with this record-set
+        uint32_t aRec[7] = {77, 1,2,3,4,5,6};
+        msg::SMapNode* pN = msg::MapNodeNew(
+            nullptr, nullptr, nullptr, aRec, 0, &src);
+        assert(pN->m_dwKey == 77);
+        assert(pN->m_aRecord[0] == 1 && pN->m_aRecord[5]==6);
+        auto* pSub = msg::MapNodeSubSet(pN);
+        assert(pSub->m_qCount == 3);   // deep copy
+        assert(msg::SetFind(pSub, 11) != nullptr);
+        assert(msg::SetFind(pSub, 22) != nullptr);
+        assert(msg::SetFind(pSub, 33) != nullptr);
+        assert(msg::SetFind(pSub, 99) == nullptr);
+        // default (null src) -> empty constructed subset
+        uint32_t aRec2[7] = {88, 0,0,0,0,0,0};
+        msg::SMapNode* pE = msg::MapNodeNew(
+            nullptr, nullptr, nullptr, aRec2, 0, nullptr);
+        auto* pSubE = msg::MapNodeSubSet(pE);
+        assert(pSubE->m_qCount == 0);
+        assert(msg::SetFind(pSubE, 11) == nullptr);
+        // offsets STILL binary-true after the change:
+        static_assert(offsetof(msg::SMapNode,
+            m_byColor) == 0x74, "color still @0x74");
+        static_assert(sizeof(msg::SMapNode) == 0x78,
+            "still new(0x78)");
+        std::puts("M64-SUBSET-COPY-OK");
+    }
     std::puts("MSG_SETOPS_OK: insert first/tail branches,"
               " erase unlink + end() out_of_range"
               " verbatim | MSG_MAPGROUP_CTOR_OK: ctor order, 0x40 set "
