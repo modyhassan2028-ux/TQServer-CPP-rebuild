@@ -202,4 +202,240 @@ void* MeritCtor(void* pOuter) {
     return pOuter;
 }
 
+
+// ---- the D28 seams ----
+static void* DefOpNew2(size_t n) {
+    return operator new(n); }
+static void* DefListAnchor() { return nullptr; }
+static void DefStrMove(void*, void*) {}
+static void DefStrDtor(void*) {}
+static void* DefInsF0C0(void*, void*, void*,
+                        uint32_t*) {
+    return nullptr; }
+static void DefOrphan(void*, void*, void*, void*) {}
+static void DefSplice(void*, void*) {}
+static void* DefLowerD1E0(void*, void*, uint32_t*) {
+    return nullptr; }
+static void* DefGetMgr() { return nullptr; }
+static char DefValid(void*, uint32_t) { return 0; }
+static void DefLogErr() {}
+
+void* (*g_fnMeritOpNew2)(size_t) = DefOpNew2;
+void* (*g_fnListAnchorAlloc)() = DefListAnchor;
+void (*g_fnStrMoveDE50)(void*, void*) = DefStrMove;
+void (*g_fnStrDtorCE30)(void*) = DefStrDtor;
+void* (*g_fnTreeInsertF0C0)(void*, void*, void*,
+    uint32_t*) = DefInsF0C0;
+void (*g_fnOrphanCB90)(void*, void*, void*, void*) =
+    DefOrphan;
+void (*g_fnSpliceCD80)(void*, void*) = DefSplice;
+void* (*g_fnLowerBoundD1E0)(void*, void*,
+    uint32_t*) = DefLowerD1E0;
+void* (*g_fnGetGameMgr)() = DefGetMgr;
+char (*g_fnMeritValid)(void*, uint32_t) = DefValid;
+void (*g_fnMeritLogError)() = DefLogErr;
+
+// ---- FUN_14173f680 ----
+// the keyed fetch: lower_bound descent, insert if
+// missing, the end deref check, value @+0x20
+void* MeritValueFetch(void* pMap, uint32_t* pKey) {
+    char* pc = (char*)pMap;
+    // puVar4 = head; the root at head+8
+    char* puVar4 = *(char**)(pc + 0x30);
+    if (*(char*)(*(char**)(puVar4 + 8) + 0x61)
+        == '\0') {
+        char* puVar1 = *(char**)(puVar4 + 8);
+        char* puVar2;
+        do {
+            if (*(uint32_t*)(puVar1 + 0x18)
+                < *pKey) {
+                puVar2 = *(char**)(puVar1 + 0x10);
+            } else {
+                puVar2 = *(char**)puVar1;
+                puVar4 = puVar1;
+            }
+            puVar1 = puVar2;
+        } while (*(char*)(puVar2 + 0x61) == '\0');
+    }
+    char* plVar3 = *(char**)pc;   // the anchor
+    char* puVar1 = *(char**)(pc + 0x30);  // head
+    char* plVar5;
+    if (plVar3 == nullptr) {
+        g_fnMeritInvalid();
+    }
+    if ((puVar4 == puVar1)
+        || (*pKey < *(uint32_t*)(puVar4 + 0x18))) {
+        // the insert-if-missing path: the owner
+        // node chain + the list anchor + the
+        // string move + the tree insert
+        void* local_d8[1] = { nullptr };
+        char* plVar4 =
+            (char*)g_fnMeritOpNew2(8);
+        if (plVar4 != nullptr) {
+            *(void**)plVar4 = local_d8;
+            local_d8[0] = plVar4;
+        }
+        char* local_a8 = (char*)g_fnListAnchorAlloc();
+        *(char*)(local_a8 + 0x21) = 1;
+        *(char**)(local_a8 + 8) = local_a8;
+        *(char**)local_a8 = local_a8;
+        *(char**)(local_a8 + 0x10) = local_a8;
+        uint32_t local_90[2];
+        local_90[0] = *pKey;
+        // the pair {anchor, lower_bound node}
+        void* local_108[2];
+        local_108[0] = plVar3;
+        local_108[1] = puVar4;
+        char local_88[0x48];   // the string dst
+        g_fnStrMoveDE50(local_88, local_d8);
+        char* local_48[2];
+        char* plVar6 = (char*)g_fnTreeInsertF0C0(
+            pc, local_48, local_108, local_90);
+        plVar3 = *(char**)plVar6;  // local_f8
+        puVar4 = ((char**)plVar6)[1];  // the new node
+        g_fnStrDtorCE30(local_88);
+        g_fnMeritOpDelete(*(void**)local_88);
+        // the anchor unwind
+        void* local_e8[2];
+        local_e8[0] = local_d8[0];
+        local_e8[1] = local_a8;
+        void* local_108b[2];
+        local_108b[0] = local_d8[0];
+        g_fnOrphanCB90((void*)local_d8, nullptr,
+            local_108b, local_e8);
+        g_fnMeritOpDelete(local_a8);
+        local_a8 = nullptr;
+        g_fnMeritOpDelete(local_d8[0]);
+    }
+    if (plVar3 == nullptr) {
+        g_fnMeritInvalid();
+    } else {
+        plVar5 = *(char**)plVar3;
+    }
+    if (puVar4 == *(char**)(plVar5 + 0x30)) {
+        g_fnMeritInvalid();
+    }
+    return puVar4 + 0x20;
+}
+
+// ---- FUN_14173f8e0 ----
+// vft + the ctor(map@+8) + the defensive clear
+void* MeritCtorVft(void* pOuter) {
+    char* pc = (char*)pOuter;
+    *(void**)pc = g_pCrossMeritVft;
+    MeritCtor(pc + 8);
+    // head = *(outer+0x38) (the map@+8's head)
+    char* head = *(char**)(pc + 0x38);
+    g_fnTreeClearNodes(pc + 8, *(char**)(head + 8));
+    *(char**)(head + 8) = head;
+    *(void**)(pc + 0x40) = 0;
+    *(char**)head = head;
+    *(char**)(head + 0x10) = head;
+    return pOuter;
+}
+
+// ---- FUN_14173f950 ----
+void* MeritDtorVftScalar(void* pOuter, uint32_t uF) {
+    char* pc = (char*)pOuter;
+    *(void**)pc = g_pCrossMeritVft;
+    g_fnTreeDtor(pc + 8);
+    g_fnMeritOpDelete(*(void**)(pc + 8));
+    if ((uF & 1) != 0) {
+        g_fnMeritOpDelete(pOuter);
+    }
+    return pOuter;
+}
+
+// ---- FUN_14173f9c0 ----
+void* MeritSingleton() {
+    void* puVar1;
+    if (g_pMeritDatInstance == nullptr) {
+        puVar1 = g_fnMeritOpNew2(0x48);
+        if (puVar1 == nullptr) {
+            g_pMeritDatInstance = nullptr;
+        } else {
+            g_pMeritDatInstance =
+                MeritCtorVft(puVar1);
+        }
+        if (g_pMeritDatInstance == nullptr) {
+            g_fnMeritLogError();
+        }
+    }
+    return g_pMeritDatInstance;
+}
+
+// ---- FUN_14173fa40 ----
+// grant a merit: the key gate + the mgr validity
+// check + the lower_bound + the insert-if-missing
+uint8_t MeritGrant(void* pOuter, uint32_t uKey) {
+    char* pc = (char*)pOuter;
+    uint32_t local_res10[2];
+    local_res10[0] = uKey;
+    if (uKey == 0) {
+        g_fnMeritLogError();
+        return 0;
+    }
+    char* plVar4 = (char*)g_fnGetGameMgr();
+    char cVar3 = g_fnMeritValid(plVar4, uKey);
+    if (cVar3 == '\0') {
+        return 0;
+    }
+    // map = outer+8; the lower_bound
+    char* map = pc + 8;
+    void* out[2] = { nullptr, nullptr };
+    g_fnLowerBoundD1E0(map, out, local_res10);
+    char* lVar1 = *(char**)(pc + 0x38);   // head
+    if ((*(char**)out == nullptr)
+        || (*(char**)out != *(char**)map)) {
+        g_fnMeritInvalid();
+    }
+    if (((char**)out)[1] == lVar1) {
+        // end — insert via the keyed fetch
+        void* local_48[1] = { nullptr };
+        char* local_res18 =
+            (char*)g_fnMeritOpNew2(8);
+        if (local_res18 != nullptr) {
+            *(void**)local_res18 = local_48;
+            local_48[0] = local_res18;
+        }
+        char* local_18 =
+            (char*)g_fnListAnchorAlloc();
+        *(char*)(local_18 + 0x21) = 1;
+        *(char**)(local_18 + 8) = local_18;
+        *(char**)local_18 = local_18;
+        *(char**)(local_18 + 0x10) = local_18;
+        void* pplVar5[2];
+        pplVar5[0] = MeritValueFetch(
+            map, local_res10);
+        // (the verbatim iterator-registration
+        // chain: the seam calls absorb the
+        // decompiler's node/owner pairing)
+        if ((void*)pplVar5 != (void*)local_48) {
+            // plStack_70 = pplVar5[6]; local_78 =
+            // *pplVar5; puStack_60 = *plStack_70
+            char* plStack_70 =
+                ((char**)pplVar5)[6];
+            char* local_78 = *(char**)pplVar5;
+            char* puStack_60 = *(char**)plStack_70;
+            g_fnOrphanCB90(pplVar5, nullptr,
+                &puStack_60, &local_78);
+            g_fnSpliceCD80(pplVar5, local_48);
+        }
+        char* plStack_70 = *(char**)local_18;
+        char* local_68 = *(char**)local_48;
+        g_fnOrphanCB90(local_48, nullptr,
+            &local_68, &plStack_70);
+        g_fnMeritOpDelete(local_18);
+        local_18 = nullptr;
+        g_fnMeritOpDelete(local_48[0]);
+    }
+    return 1;
+}
+
+// ---- FUN_14173fc80 ----
+void MeritDeleteAnchor(void* pMap) {
+    char* pc = (char*)pMap;
+    g_fnMeritOpDelete(*(void**)pc);
+}
+
 } // namespace syndicate

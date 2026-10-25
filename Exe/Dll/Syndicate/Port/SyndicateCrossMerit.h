@@ -73,4 +73,53 @@ void MeritWalkAndClear(void* pOuter);
 // ---- FUN_14173f600 ----
 void* MeritCtor(void* pOuter);
 
+
+// ---- D28: the rest of the family ----
+// 14173f680 — the keyed value fetch (the
+// lower_bound descent + the insert-if-missing
+// owner chain + the end deref check), returns
+// the node value slot at +0x20
+extern void* (*g_fnMeritOpNew2)(size_t);
+// 14173bcb0 — the list anchor alloc (+0x21 = 1)
+extern void* (*g_fnListAnchorAlloc)();
+// 14173de50 — the string move
+extern void (*g_fnStrMoveDE50)(void* pDst,
+                              void* pSrc);
+// 14173ce30 — the string dtor
+extern void (*g_fnStrDtorCE30)(void* pStr);
+// 14173f0c0 — the tree insert (map, out_iter,
+// the {anchor, node} pair, the key)
+extern void* (*g_fnTreeInsertF0C0)(void* pMap,
+    void* pOut, void* pPair, uint32_t* pKey);
+// 14173cb90 — the orphan unwind (owner, out, a, b)
+extern void (*g_fnOrphanCB90)(void* pOwner,
+    void* pOut, void* a, void* b);
+// 14173cd80 — the splice (iter, owner)
+extern void (*g_fnSpliceCD80)(void* pIter,
+                              void* pOwner);
+// 14173d1e0 — the lower_bound (map, out_pair, key)
+extern void* (*g_fnLowerBoundD1E0)(void* pMap,
+    void* pOut, uint32_t* pKey);
+// 1417b6210 — the game mgr singleton
+extern void* (*g_fnGetGameMgr)();
+// the mgr vft+0x2a8 validity check (mgr, key)
+extern char (*g_fnMeritValid)(void* pMgr,
+                              uint32_t uKey);
+// log_InlineLogERROR(&DAT_141824ca8)
+extern void (*g_fnMeritLogError)();
+
+// ---- FUN_14173f680 ----
+void* MeritValueFetch(void* pMap, uint32_t* pKey);
+// ---- FUN_14173f8e0 ----
+void* MeritCtorVft(void* pOuter);
+// ---- FUN_14173f950 ----
+void* MeritDtorVftScalar(void* pOuter,
+                         uint32_t uFlags);
+// ---- FUN_14173f9c0 ----
+void* MeritSingleton();
+// ---- FUN_14173fa40 ----
+uint8_t MeritGrant(void* pOuter, uint32_t uKey);
+// ---- FUN_14173fc80 ----
+void MeritDeleteAnchor(void* pMap);
+
 } // namespace syndicate
