@@ -5835,3 +5835,31 @@ FUN_140024860 كاملة
 - الملفات: Exe/MsgServer/Port/MsgArrestHandler.{h,cpp}
   + tests/msg_arrest_test — **MSG_ARREST_OK** (8 حالات)
   وحدة إضافة صافية + rerun عيلة المونيتور أخضر.
+
+## وحدة M45 — OfflineCheatingGotoJail (FUN_1400e36a0)
+- **[منفذ ✔]** ذيل TBD بتاع M44 اكتمل استخراجه وتنفيذه:
+  - **SQL الحرفي:** "SELECT  id, recordmap_id FROM
+    cq_user WHERE account_id = %u LIMIT 1" (بدل id =
+    في M44 — هنا بالمعرّف وليس بالحساب)
+  - كل مسارات الفشل بلوجات **gmlog/cheater** الحرفية:
+    0x669 (فشل الاتصال)، **0x66e بالغلط الإملائي الحرفي
+    "palyer"**، 0x679 (ID_NONE)، 0x67e (already in
+    prison)، 0x685 (prison map مفقود)، 0x68f (update
+    sql error — وبيرسل الإيميل برضه بعده)
+  - **التحديث الحرفي:** "UPDATE cq_user SET recordmap_id
+    = %u, recordx = %d, recordy = %d WHERE account_id =
+    %u LIMIT 1" — السجن بيتكتب في سجل الدخول (6002) من
+    إحداثيات بوابة الخريطة (map+0x58 vcall+0x10(0xb)/())
+    فالغشاش بيقع في السجن عند أولوجن
+  - **الإيميل:** vcall+8("SYSTEM", idCheater,
+    STR_OFFLINE_CHEATING_GOTO_JAIL)
+  - **wrapper GameJailEx:** التوزيع الثاني للساعات
+    (TOOLS1..4 بمقارنات signed) + **quirk:** خارج المدى
+    → TOOLS1 **ولوج "GameJailEx time(%s) is error."** +
+    MyLogSave بصيغة "AccountID" المختلفة عن "UserID"
+    في M44
+  - **TBD:** فرع الأونلاين-بالحساب (الـ else الأخير عند
+    ~198918+) — جزئي
+- الملفات: Exe/MsgServer/Port/MsgJailEx.{h,cpp} +
+  tests/msg_jail_ex_test — **MSG_JAIL_EX_OK** + rerun
+  عيلة القبض أخضر (M43/M44)
