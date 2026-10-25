@@ -7,9 +7,7 @@
 
 namespace title {
 
-std::function<bool(CMsgBase*, const char*, uint16_t)>
-    g_fnCMsgCreate = [](CMsgBase*, const char*, uint16_t) {
-        return false; };
+// (g_fnCMsgCreate defined once in TitleModule.cpp — D9)
 
 // ORIGINAL FUN_141974c30 — Create + the 0x3ea check
 bool CMsgLoginCreate(CMsgBase* pMsg, const char* pBuf, uint16_t uLen) {
@@ -39,7 +37,7 @@ void CMsgLoginProcess(CMsgBase* pMsg, int nUserId) {
     }
     // mgr vt+0x28(id) -> the record
     STitleMaskRec* pRec =
-        (STitleMaskRec*)g_fnMgrGetRecord(pMgr);
+        (STitleMaskRec*)g_fnMgrGetRecord(pMgr, nUserId);
     if (pRec == nullptr) {
         g_fnLogError("DAT_141978310");
         return;

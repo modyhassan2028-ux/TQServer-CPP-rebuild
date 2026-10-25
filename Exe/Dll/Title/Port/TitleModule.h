@@ -45,7 +45,7 @@ struct SListHead {              // the 0x30 node (141972cf0)
     void* m_pFront;             // +0x00 (self)
     void* m_pBack;              // +0x08 (self)
     void* m_pAnchor;            // +0x10 (self)
-    uint8_t m_abPad[0x14];
+    uint8_t m_abPad[0x10];   // +0x18..0x28
     uint8_t m_bFlag28;          // +0x28 = 1
     uint8_t m_bFlag29;          // +0x29 = 0 then 1
 };

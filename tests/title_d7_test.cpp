@@ -21,7 +21,7 @@ int main() {
     uint32_t uMask = 0;
     g_fnGetTitleMask = [&](void*, int){ return uMask; };
     g_fnSetTitleMask = [&](void*, int, uint32_t m){ uMask = m; };
-    g_fnMgrGetRecord = [&](void*) -> void*{ return &rec; };
+    g_fnMgrGetRecord = [&](void*, int) -> void*{ return &rec; };
 
     // ===== 1. the bit test =====================
     uMask = 0x10;   // bit idx 5
@@ -57,7 +57,7 @@ int main() {
     assert(vecLogs.size() == 1);
     assert(MgrCountTitles(nullptr, 0x4d2) == 1);
     assert(MgrCountTitles(nullptr, 0) == 0);
-    g_fnMgrGetRecord = [&](void*) -> void*{ return nullptr; };
+    g_fnMgrGetRecord = [&](void*, int) -> void*{ return nullptr; };
     assert(!MgrHasTitle(nullptr, 1, 5));
     assert(MgrCountTitles(nullptr, 1) == 0);
 

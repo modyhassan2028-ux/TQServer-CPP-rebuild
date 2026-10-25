@@ -96,12 +96,12 @@ int main() {
         assert(!GrantTitle(&mgr, 0, 1));
         assert(vecLogs.size() == 1);
         // record null -> false
-        g_fnMgrGetRecord = [](void*){ return nullptr; };
+        g_fnMgrGetRecord = [](void*, int){ return nullptr; };
         assert(!GrantTitle(&mgr, 5, 1));
         STitleMaskRec rec; memset(&rec, 0, sizeof(rec));
         rec.m_pHolder08 = pFakeHolder;
         rec.m_nId10 = 9;
-        g_fnMgrGetRecord = [&](void*){ return &rec; };
+        g_fnMgrGetRecord = [&](void*, int){ return &rec; };
         uMask = 0;
         g_fnSendTitleMsg = [&](void* l, int id, CMsgBase*){
             assert(l == (void*)0x77);

@@ -22,25 +22,29 @@ int main() {
     // ===== 1. Create gates ====================
     CMsgBase msg; memset(&msg, 0, sizeof(msg));
     // Create thunk fails -> false
-    g_fnCMsgCreate = [](CMsgBase*, const char*, uint16_t){
+    g_fnCMsgCreate = [](void*, const char*, uint16_t){
         return false; };
     assert(!CMsgLoginCreate(&msg, "x", 1));
     // Create ok but id != 0x3ea
-    g_fnCMsgCreate = [&](CMsgBase* p, const char*, uint16_t){
+    g_fnCMsgCreate = [&](void* pv, const char*, uint16_t){
+        CMsgBase* p = (CMsgBase*)pv;
         *(int16_t*)((uint8_t*)p + 0x50) = 0x3eb;
         return true; };
     assert(!CMsgLoginCreate(&msg, "x", 1));
     // id == 0x3ea -> true
-    g_fnCMsgCreate = [&](CMsgBase* p, const char*, uint16_t){
+    g_fnCMsgCreate = [&](void* pv, const char*, uint16_t){
+        CMsgBase* p = (CMsgBase*)pv;
         *(int16_t*)((uint8_t*)p + 0x50) = 0x3ea;
         return true; };
     assert(CMsgLoginCreate(&msg, "x", 1));
     // logout: 0x3eb
-    g_fnCMsgCreate = [&](CMsgBase* p, const char*, uint16_t){
+    g_fnCMsgCreate = [&](void* pv, const char*, uint16_t){
+        CMsgBase* p = (CMsgBase*)pv;
         *(int16_t*)((uint8_t*)p + 0x50) = 0x3eb;
         return true; };
     assert(CMsgLogoutCreate(&msg, "x", 1));
-    g_fnCMsgCreate = [&](CMsgBase* p, const char*, uint16_t){
+    g_fnCMsgCreate = [&](void* pv, const char*, uint16_t){
+        CMsgBase* p = (CMsgBase*)pv;
         *(int16_t*)((uint8_t*)p + 0x50) = 0x3ea;
         return true; };
     assert(!CMsgLogoutCreate(&msg, "x", 1));
@@ -49,7 +53,7 @@ int main() {
     STitleMaskRec rec; memset(&rec, 0, sizeof(rec));
     int nH = 1;
     rec.m_pHolder08 = &nH; rec.m_nId10 = 55;
-    g_fnMgrGetRecord = [&](void*) -> void*{ return &rec; };
+    g_fnMgrGetRecord = [&](void*, int) -> void*{ return &rec; };
     uint32_t uMask = 0;
     g_fnGetTitleMask = [&](void*, int){ return uMask; };
     g_fnSetTitleMask = [&](void*, int, uint32_t m){ uMask = m; };

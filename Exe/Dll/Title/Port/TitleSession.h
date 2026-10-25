@@ -14,10 +14,7 @@
 namespace title {
 
 struct CMsgBase;   // from TitleModule.h
-
-// tq::CMsg::Create (the unrecovered jumptable thunk)
-extern std::function<bool(CMsgBase*, const char*, uint16_t)>
-    g_fnCMsgCreate;
+// (g_fnCMsgCreate lives in TitleModule.h — D9)
 
 // ORIGINAL FUN_141974c30
 bool CMsgLoginCreate(CMsgBase* pMsg, const char* pBuf, uint16_t uLen);

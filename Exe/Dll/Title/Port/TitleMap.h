@@ -32,7 +32,7 @@ struct STreeNode {          // 0x30
     int32_t    m_nKey18;
     uint8_t    m_abPad1c[4];
     void*      m_pValue20;
-    uint8_t    m_abPad28[1];
+    uint8_t    m_bColor28;   // 0 = red, 1 = black
     uint8_t    m_bIsnil29;
     uint8_t    m_abPad2a[6];
 };
@@ -63,6 +63,28 @@ struct SMapKernel {        // mgr+0x08
     STreeNode* NewNode();     // FUN_141972ae0 (0x30)
     static void FreeNode(STreeNode* p); // 141972990
     bool IsHead(STreeNode* p) const { return p == m_pHead38; }
+
+    // ============ D11: the full map machinery ============
+    // FUN_141974580: the map ctor (proxy + head + size 0)
+    void Ctor();
+    // FUN_141974550: the map dtor (clear + head free +
+    // the proxy delete)
+    void FullDtor();
+    // FUN_141972d50: node make (left/parent/right/head,
+    // value, color; isnil=0)
+    STreeNode* MakeNode(STreeNode* pParent, uint32_t uKey,
+                        void* pValue, uint8_t uColor);
+    // FUN_141972f30: the RB insert (the literal
+    // "map/set<T> too long" gate at size 0xffffffffffffffd)
+    // bAddLeft: 1 = the hint's left, 0 = the hint's right
+    STreeNode* InsertRB(STreeNode* pHint, bool bAddLeft,
+                        uint32_t uKey, void* pValue);
+    // FUN_141974260: operator-at — lower_bound,
+    // insert-if-missing, returns &node+0x20 (the value)
+    void** OperatorAt(uint32_t uKey);
+    // FUN_1419736b0: erase the node (unlink + Lmost/Rmost
+    // + the RB delete-rebalance + free)
+    void EraseNode(STreeNode* p);
 };
 
 } // namespace

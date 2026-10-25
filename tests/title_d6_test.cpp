@@ -61,7 +61,7 @@ int main() {
         g_fnGetTitleMask = [&](void*, int){ return uMask; };
         g_fnSetTitleMask = [&](void*, int, uint32_t m){
             uMask = m; };
-        g_fnMgrGetRecord = [&](void*) -> void*{
+        g_fnMgrGetRecord = [&](void*, int) -> void*{
             return &rec; };
         g_fnLinkSendTitle = [&](void* l, int nId, CMsgBase* p)
             -> uint32_t {
@@ -133,14 +133,14 @@ int main() {
         assert(!RemoveTitle(abMgr, 0, 5));
         assert(vecLogs.size() == 1);
         // no record -> false
-        g_fnMgrGetRecord = [&](void*) -> void*{
+        g_fnMgrGetRecord = [&](void*, int) -> void*{
             return nullptr; };
         assert(!RemoveTitle(abMgr, 1, 5));
         // bit clear -> false
         STitleMaskRec rec; memset(&rec, 0, sizeof(rec));
         int nH = 1;
         rec.m_pHolder08 = &nH; rec.m_nId10 = 55;
-        g_fnMgrGetRecord = [&](void*) -> void*{
+        g_fnMgrGetRecord = [&](void*, int) -> void*{
             return &rec; };
         g_fnGetTitleMask = [&](void*, int){ return 0; };
         g_fnSetTitleMask = [&](void*, int, uint32_t){};
