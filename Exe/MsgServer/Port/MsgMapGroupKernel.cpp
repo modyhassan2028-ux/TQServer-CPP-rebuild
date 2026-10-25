@@ -190,8 +190,75 @@ void SetErase(SObjSet* pSet, SSetNode* pIt) {
         SSetNode* pWalk = bTwo ? pPred : pParPred;
         pSent->m_pParent = pWalk;
     }
-    // LAB_14000ad2c: the RB recolor/rotate fix-up loop
-    // (FUN_140008940 = rotate) - seam TBD
+    // ===== M53: LAB_14000ad2c - the RB fix-up VERBATIM
+    // colors: +0x1c (1 = needs the fix-up); sentinel @+0x30
+    SSetNode* p10 = pPred;           // plVar10
+    SSetNode* p11 = bTwo ? pPred : pL; // plVar11 entry
+    SSetNode* p12 = pPar;            // plVar12 (parent)
+    if (pIt->m_byColor == 1) {
+        if (p12 != pSent->m_pNext) { // != *(sent+8)
+            do {
+                p10 = p11;
+                if (p12->m_byColor != 1) break;
+                p11 = p10->m_pPrev;              // *p10
+                if (p12 == p11) {
+                    // the left half VERBATIM:
+                    p11 = p10->m_pParent;         // p10[2]
+                    if (p11->m_byColor == 0) {
+                        p11->m_byColor = 1;
+                        p10->m_byColor = 0;
+                        TreeRotateAtParent(pSet, p10);
+                        p11 = p10->m_pParent;
+                    }
+                    if (p11->m_byFlag == 0) {
+                        if (p11->m_pPrev->m_byColor != 1 ||
+                            p11->m_pParent->m_byColor != 1) {
+                            if (p11->m_pParent->m_byColor == 1) {
+                                p11->m_pPrev->m_byColor = 1;
+                                p11->m_byColor = 0;
+                                TreeRotateAtParent(pSet, p11);
+                                p11 = p10->m_pParent;
+                            }
+                            p11->m_byColor = p10->m_byColor;
+                            p10->m_byColor = 1;
+                            p11->m_pParent->m_byColor = 1;
+                            TreeRotateAtParent(pSet, p10);
+                            break;
+                        }
+                        p11->m_byColor = 0;
+                    }
+                } else {
+                    // the right/mirror half VERBATIM:
+                    if (p11->m_byColor == 0) {
+                        p11->m_byColor = 1;
+                        p10->m_byColor = 0;
+                        TreeRotateMirror(pSet, p10);
+                        p11 = p10->m_pPrev;       // *p10
+                    }
+                    if (p11->m_byFlag == 0) {
+                        if (p11->m_pParent->m_byColor != 1 ||
+                            p11->m_pPrev->m_byColor != 1) {
+                            if (p11->m_pPrev->m_byColor == 1) {
+                                p11->m_pParent->m_byColor = 1;
+                                p11->m_byColor = 0;
+                                TreeRotateAtParent(pSet, p11);
+                                p11 = p10->m_pPrev;
+                            }
+                            p11->m_byColor = p10->m_byColor;
+                            p10->m_byColor = 1;
+                            p11->m_pPrev->m_byColor = 1;
+                            TreeRotateMirror(pSet, p10);
+                            break;
+                        }
+                        p11->m_byColor = 0;
+                    }
+                }
+                p11 = p10->m_pNext;               // p10[1]
+                p12 = p10;                         // climb
+            } while (p10 != pSent->m_pNext);
+        }
+        p12->m_byColor = 1;      // final: root color VERBATIM
+    }
     pSet->m_qCount--;               // [7]-1 VERBATIM
     delete pIt;
 }

@@ -177,6 +177,32 @@ int main() {
         // handled -> links must be consistent either way
         assert(p2.m_pPrev != 0 || y2.m_pParent == &p2);
     }
+    // M53: the RB fix-up loop smoke - erase a color=1
+    // node in a wired mini-tree; the loop must terminate
+    {
+        SObjSet st; std::memset(&st, 0, sizeof st);
+        SSetNode h;                        // sentinel: stack
+        SSetNode* r = new SSetNode{};       // heap: the
+        SSetNode* l = new SSetNode{};       // ORIGINAL
+        SSetNode* c = new SSetNode{};       // deletes the
+        std::memset(&h,0,sizeof h);         // erased node
+        (void)0;
+        h.m_byFlag = 1;
+        h.m_pPrev = h.m_pNext = h.m_pParent = &h;
+        st.m_pInner = (SInnerObj*)&h;
+        st.m_qCount = 2;
+        // root r (color 1) with left l and right c
+        r->m_byColor = 1;
+        r->m_pParent = &h; h.m_pParent = r;
+        r->m_pPrev = l; r->m_pNext = c;
+        l->m_pParent = r; c->m_pParent = r;
+        l->m_pPrev = l->m_pNext = &h;
+        c->m_pPrev = c->m_pNext = &h;
+        h.m_pNext = r;     // head child
+        msg::SetErase(&st, r);        // deletes r (heap)
+        assert(st.m_qCount == 1);   // decremented + done
+        delete l; delete c;          // test cleanup
+    }
     std::puts("MSG_SETOPS_OK: insert first/tail branches,"
               " erase unlink + end() out_of_range"
               " verbatim | MSG_MAPGROUP_CTOR_OK: ctor order, 0x40 set "
