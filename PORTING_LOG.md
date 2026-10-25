@@ -6502,3 +6502,40 @@ FUN_140024860 كاملة
   محفز إعادة التجزئة (قناع 63/عدد 64 وكل المفاتيح
   تُجد بعد fd50) + op[] قراءة/كتابة. **خريطة أنشطة
   الهاش مغلقة بالكامل** (M60+M67+M68+M70+M71a/b/M71)
+
+## الوحدة D1 — Analyst.dll: عائلة CTickAnalyst + IAnalyst + مفردة Analyst() (بداية موجة الـ DLLs)
+
+**التاريخ:** الأحد 25-10-2026 — أول وحدة في الـ DLL wave (الملف #1 في الجرد: 1,923 سطر / 85 دالة).
+
+### المنفّذ حرفياً (Analyst.dll → Exe/Dll/Analyst/Port/TickAnalyst.{h,cpp})
+| العنوان | الدالة | ملاحظات |
+|---|---|---|
+| 140a41000 | `CTickAnalyst::operator=` | نسخ ثلاثة qwords حرفياً (0x00/0x08/0x10) |
+| 140a41020 | `IAnalyst::IAnalyst()` | كتابة الـ vftable فقط |
+| 140a41030 | `IAnalyst::IAnalyst(const&)` | كتابة الـ vftable فقط — **لا نسخ أعضاء** |
+| 140a41040 | `IAnalyst::operator=` | يرجّع this فقط — **لا نسخ أي شيء** |
+| 140a41650 | ضبط صفر التيك `DAT_140a490a4 = TimeGet(0)` | **الإرجاع الحرفي `& 0xffffff00`** (نمط الـ low-byte-cleared FALSE) |
+| 140a41670 | `TimeGet(0) - DAT_140a490a4` | الإرجاع longlong (موسّع بلا إشارة) |
+| 140a41690 | تمرير هوية (identity) | بارامتر واحد يرجّع نفسه |
+| 140a416a0 | نفس 41670 لكن بفرق **int** | يطابق GetUsedMS |
+| 140a41730 | `CTickAnalyst::CTickAnalyst(int)` | +0x00=id, +0x10 = now−zero |
+| 140a41700 | `CTickAnalyst::Start` | +0x10 = now−zero |
+| 140a416c0 | `CTickAnalyst::Finish` | +0x08 = now−zero |
+| 140a416f0 | `GetUsedTicks` | `(+0x08) − (+0x10)` int64 |
+| 140a417b0 | `GetUsedMS` | **قراءة النصفين كـ int حرفياً** |
+| 140a41760 | `~CTickAnalyst` | Finish مضمّن ثم **نداء مفردة عبر vtable+0x20 بـ (id, usedTicks)** |
+| 140a41640 | مفردة `Analyst()` | علم DAT_140a490a0 bit0، كتابة vftable في DAT_140a45090، تصفير العد DAT_140a45098، eh_vector ctor لمصفوفة 0x100 سجل × 0x40 عند DAT_140a450a0 |
+| 140a41150 | مُنشئ السجل | تصفير أول 0x18 بايت + بناء std::string عند +0x18 (سجل 0x40 = 0x18 + سترنج MSVC 0x28) |
+| 140a41190 | مُدمّر السجل | هدم السترنج عند +0x18 |
+
+### السلاسل الحرفية الموثقة (موجودة في الملف، نطاق D2+)
+- `"f:\version\cqserver-78.0.11-1204\analyst\analyst.cpp"` (في FUN_140a412f0 → نداء 41050).
+- 41050: دالة اللوج `_vsnprintf` (بافر 0x740) + فحص `basic_string::find('/', 0, 1) != npos` قبل `tq::log_Save(path, buf, 1)`.
+
+### TBD (موثق في الكود والاختبار)
+- **هدف خانة vtable+0x20** المستدعى من `~CTickAnalyst` لم يُحدَّد بعد من الباينري (لم يظهر في الديكمبايل أي دالة بهذه التوقيع (this, int, int64) تُسجَّل في الـ vftable) — جسم افتراضي مؤقت `IAnalyst::TickRecord` + الاختبار يمرّر عبر مشتق probe. يُقفل بالتحقق من بايتات vtable الـ CAnalyst في الباينري (البحث عن مؤشر 41310-نطاق في .rdata).
+- سجلات المصفوفة (41200 Add / 41280 Get / 1310 التقرير `%s, cnt=%ld, tot=%dms, avg=%.2fms, max=%dms` / 1460 التصفير) — **نطاق D2**، مع سؤال مفتوح: 41200 يكتب السترنج عند rec+0x28 بينما مُنشئ/مدمر السجل عند +0x18 (يُحلّ من بايتات الباينري).
+- atexit(FUN_140a426e0) — مهمل حرفياً (CRT exit) وفق قاعدة CRT المضمّنة.
+
+### الاختبار
+`tests/analyst_d1_test.cpp` → يطبع `ANALYST-D1-OK` — **6/6 مرات** خضراً (48 فحص: العنونة الثلاثية للـ op=، ختم TimeGet، فرق int في GetUsedMS، دلالات IAnalyst بدون نسخ، النداء عبر vtable+0x20 في المدمر، ومصفوفة 0x100×0x40 بسترنجات فارغة).
