@@ -56,6 +56,7 @@ public:
 };
 
 
+
 } // namespace msg
 
 namespace msg {
@@ -150,5 +151,15 @@ struct SPrisonMaps {
     bool Has(uint32_t dwMapId);  // walk probe (test)
     size_t Size() const { return m_set.m_qCount; }
 };
+// ===== M58: ORIGINAL FUN_14000aff0 (find) +
+// FUN_14000d630 (erase-by-key) =====
+// find: the two-tracker walk from the root
+// (key<nodekey -> +0x10 RIGHT, else track cand -> +0
+// LEFT). Returns the EXACT-match node or nullptr.
+SSetNode* SetFind(SObjSet* pSet, uint32_t dwKey);
+
+// erase-by-key: find + erase loop; returns the erased
+// count (the ORIGINAL counts duplicates - multiset).
+uint32_t SetEraseKeyed(SObjSet* pSet, uint32_t dwKey);
 
 } // namespace msg

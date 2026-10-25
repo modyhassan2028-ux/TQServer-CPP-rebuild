@@ -521,3 +521,44 @@ bool SPrisonMaps::Has(uint32_t dwMapId) {
 }
 
 } // namespace msg
+
+namespace msg {
+
+// ===== M58: ORIGINAL FUN_14000aff0 @ 14000aff0 =====
+SSetNode* SetFind(SObjSet* pSet, uint32_t dwKey) {
+    SSetNode* pSent = (SSetNode*)pSet->m_pInner;
+    SSetNode* pCand = pSent;         // puVar4 (lower track)
+    SSetNode* pLast = pSent;         // puVar5
+    SSetNode* pCur  = pSent->m_pNext;  // root (sent+8)
+    while (pCur->m_byFlag == 0) {
+        if (pCur->m_dwKey < dwKey) {
+            pCur = pCur->m_pParent;  // +0x10 RIGHT
+        } else {
+            if (pCand->m_byFlag != 0 &&
+                dwKey < pCur->m_dwKey) {
+                pCand = pCur;
+            }
+            pLast = pCur;
+            pCur = pCur->m_pPrev;    // +0 LEFT
+        }
+    }
+    // the exact-match resolution (cand/lower trackers):
+    if (pLast->m_byFlag == 0 && pLast->m_dwKey == dwKey)
+        return pLast;
+    if (pCand->m_byFlag == 0 && pCand->m_dwKey == dwKey)
+        return pCand;
+    return nullptr;
+}
+
+// ===== M58: ORIGINAL FUN_14000d630 @ 14000d630 =====
+uint32_t SetEraseKeyed(SObjSet* pSet, uint32_t dwKey) {
+    uint32_t n = 0;
+    SSetNode* p;
+    while ((p = SetFind(pSet, dwKey)) != nullptr) {
+        SetErase(pSet, p);
+        n++;
+    }
+    return n;
+}
+
+} // namespace msg

@@ -289,6 +289,30 @@ int main() {
                pm.Has(0x1780) && pm.Has(0x1781));
         std::puts("M57-PRISON-MAPS-OK");
     }
+    // M58: find + erase-by-key on the real tree
+    {
+        SObjSet st; std::memset(&st, 0, sizeof st);
+        SInnerObj sent; std::memset(&sent, 0, sizeof sent);
+        auto* pS = (msg::SSetNode*)&sent;
+        pS->m_byFlag = 1;
+        pS->m_pPrev = pS->m_pNext = pS->m_pParent = pS;
+        st.m_pInner = &sent;
+        bool bDup = false;
+        msg::SetInsertKeyed(&st, 5, &bDup);
+        msg::SetInsertKeyed(&st, 3, &bDup);
+        msg::SetInsertKeyed(&st, 8, &bDup);
+        assert(!bDup);
+        assert(msg::SetFind(&st, 3) != nullptr);
+        assert(msg::SetFind(&st, 5) != nullptr);
+        assert(msg::SetFind(&st, 8) != nullptr);
+        assert(msg::SetFind(&st, 4) == nullptr);
+        assert(msg::SetFind(&st, 9) == nullptr);
+        assert(msg::SetEraseKeyed(&st, 3) == 1);
+        assert(msg::SetFind(&st, 3) == nullptr);
+        assert(msg::SetFind(&st, 5) != nullptr);
+        assert(msg::SetEraseKeyed(&st, 99) == 0);
+        std::puts("M58-FIND-ERASE-OK");
+    }
     std::puts("MSG_SETOPS_OK: insert first/tail branches,"
               " erase unlink + end() out_of_range"
               " verbatim | MSG_MAPGROUP_CTOR_OK: ctor order, 0x40 set "
