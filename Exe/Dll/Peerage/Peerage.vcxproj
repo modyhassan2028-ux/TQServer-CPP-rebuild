@@ -3,9 +3,11 @@
   <ItemGroup>
     <ClCompile Include="Port\PeerageModule.cpp" />
     <ClCompile Include="Port\PeerageSortMgr.cpp" />
+    <ClCompile Include="Port\PeerageSort.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Port\PeerageModule.h" />
     <ClInclude Include="Port\PeerageSortMgr.h" />
+    <ClInclude Include="Port\PeerageSort.h" />
   </ItemGroup>
 </Project>
