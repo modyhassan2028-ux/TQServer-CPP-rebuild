@@ -345,6 +345,17 @@ int main() {
             "1 2 3 4 5 6 7 8 9 10 11 12 13 14") == 13);
         std::puts("M59-PERCENT-CFG-OK");
     }
+    // M62: the VERBATIM node layout guard
+    static_assert(offsetof(msg::SMapNode, m_dwKey)
+                  == 0x18, "key@+0x18");
+    static_assert(offsetof(msg::SMapNode, m_aRecord)
+                  == 0x1c, "record@+0x1c");
+    static_assert(offsetof(msg::SMapNode, m_byColor)
+                  == 0x74, "color@+0x74");
+    static_assert(offsetof(msg::SMapNode, m_byFlag)
+                  == 0x75, "flag@+0x75");
+    static_assert(sizeof(msg::SMapNode) == 0x78,
+                  "the operator new(0x78) size");
     // M60: the activity-map operator[]
     {
         msg::SMapNode sent; sent.m_byFlag = 1;

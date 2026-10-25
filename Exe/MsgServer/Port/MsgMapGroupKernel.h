@@ -192,9 +192,10 @@ struct SMapNode {
     SMapNode* m_pParent;   // +8 (M57 map: parent)
     SMapNode* m_pRight;    // +0x10
     uint32_t  m_dwKey;     // +0x18
-    uint32_t  m_aRecord[6];// +0x1c (value record)
-    uint8_t   m_pad[0x54]; // record tail (sub-set etc.)
-    uint8_t   m_byFlag;    // +0x75 (sentinel=1)
+    uint32_t  m_aRecord[6];// +0x1c..+0x30 (6 ints)
+    uint8_t   m_pad[0x40]; // +0x34..0x74 sub-set region
+    uint8_t   m_byColor;   // +0x74 (0=red, 1=black)
+    uint8_t   m_byFlag;    // +0x75 (0=node, 1=sentinel)
     SMapNode() : m_pLeft(nullptr), m_pParent(nullptr),
                  m_pRight(nullptr), m_dwKey(0),
                  m_byFlag(0) {
@@ -229,5 +230,16 @@ uint32_t* MapOperatorAt(SObjMap* pMap, uint32_t dwKey);
 // chain after the links) are the NEXT TBDs.
 void MapInsertLink(SObjMap* pMap, SMapNode* pHint,
                    bool bAfter, SMapNode* pNew);
+
+// ===== M62: ORIGINAL FUN_140010280 (new 0x78) +
+// FUN_14000f740 (the node ctor) =====
+// VERBATIM layout: left/parent/right links, key@+0x18,
+// 6 record ints@+0x1c..+0x30, the sub-set@+0x34
+// (deep copy FUN_14000e970 = TBD seam, zero-init),
+// color@+0x74, end-flag@+0x75 = 0
+SMapNode* MapNodeNew(SMapNode* pLeft, SMapNode* pParent,
+                     SMapNode* pRight,
+                     const uint32_t aRec[7],
+                     uint8_t byColor);
 
 } // namespace msg

@@ -615,42 +615,39 @@ uint32_t* MapOperatorAt(SObjMap* pMap, uint32_t dwKey) {
     // the ORIGINAL exact check: candidate == sentinel
     // || key < candidate->key -> MISS
     if (pCand == pSent || dwKey < pCand->m_dwKey) {
-        // default record VERBATIM: local_c0 =
-        // {key, 0,0,0,0,0,0}
-        SMapNode* pNew = new SMapNode();
-        pNew->m_dwKey = dwKey;
-        // (the two local container ctors + the copy
-        // FUN_14000e970/cleanup FUN_14000c310 = the
-        // record sub-set - seam: zero-initialized here)
-        // the new node's NIL links (the ORIGINAL
-        // allocator FUN_140010280 gives NIL/parent/NIL):
-        pNew->m_pLeft = pNew->m_pRight = pSent;
-        pNew->m_pParent = pSent;
-        // ===== M61: the FUN_140010ec0 head branches
-        // VERBATIM =====
+        // ===== M62 + M61: the ec0 head branches, the
+        // hint computed FIRST then the VERBATIM
+        // allocator (FUN_140010280: NIL / hint=parent
+        // / NIL / record / color 0) =====
         SMapNode* pLeftM = pSent->m_pLeft;   // *(sent+0)
         SMapNode* pRightM = pSent->m_pRight; // sent+0x10
+        SMapNode* pHint; bool bAfter;
         if (pMap->m_qCount == 0) {
             // ORIGINAL: count==0 -> 600(map, ret, 1,
             // SENTINEL, key) - the root branch
-            MapInsertLink(pMap, pSent, true, pNew);
+            pHint = pSent; bAfter = true;
         } else if (pCand == pLeftM &&
                    dwKey < pLeftM->m_dwKey) {
-            // ORIGINAL ec0: if (pCand == leftmost &&
-            // key < leftmost->key) -> 600(1, leftmost)
-            MapInsertLink(pMap, pLeftM, true, pNew);
+            // ORIGINAL ec0: pCand == leftmost &&
+            // key < leftmost->key -> 600(1, leftmost)
+            pHint = pLeftM; bAfter = true;
         } else if (pCand == pSent &&
                    pRightM->m_dwKey < dwKey) {
-            // ORIGINAL ec0 else: if (pCand == SENTINEL &&
-            // rightmost->key < key) -> 600(0, rightmost)
-            MapInsertLink(pMap, pRightM, false, pNew);
+            // ORIGINAL ec0 else: pCand == SENTINEL &&
+            // rightmost->key < key -> 600(0, rightmost)
+            pHint = pRightM; bAfter = false;
         } else {
             // the ec0 INTERIOR hint-validation walk is
-            // TBD; provisional route: link left/right of
-            // the lower-bound candidate
-            MapInsertLink(pMap, pCand,
-                          dwKey < pCand->m_dwKey, pNew);
+            // TBD; provisional: the lower-bound candidate
+            pHint = pCand;
+            bAfter = dwKey < pCand->m_dwKey;
         }
+        // the default record VERBATIM: local_c0 =
+        // {key, 0,0,0,0,0,0}
+        uint32_t aRec[7] = {dwKey, 0, 0, 0, 0, 0, 0};
+        SMapNode* pNew = MapNodeNew(pSent, pHint, pSent,
+                                    aRec, 0);
+        MapInsertLink(pMap, pHint, bAfter, pNew);
         return &pNew->m_aRecord[0];   // node + 0x1c
     }
     // HIT: return node + 0x1c
@@ -689,6 +686,33 @@ void MapInsertLink(SObjMap* pMap, SMapNode* pHint,
     // the ORIGINAL RB-fixup walk (the +0x74 flag chain
     // with rotations) - TBD: the set rotations are at
     // +0x1d; the map node variant is not yet ported
+}
+
+// ===== M62: ORIGINAL FUN_140010280 @ 140010280 +
+// FUN_14000f740 @ 14000f740 (the ctor, VERBATIM) =====
+SMapNode* MapNodeNew(SMapNode* pLeft, SMapNode* pParent,
+                     SMapNode* pRight,
+                     const uint32_t aRec[7],
+                     uint8_t byColor) {
+    // operator new(0x78) - via the SMapNode type
+    SMapNode* p = new SMapNode();
+    // the ctor VERBATIM:
+    p->m_pLeft   = pLeft;      // *param_1 = param_2
+    p->m_pParent = pParent;    // param_1[1] = param_3
+    p->m_pRight  = pRight;     // param_1[2] = param_4
+    p->m_dwKey   = aRec[0];    // +0x18 = param_5[0]
+    p->m_aRecord[0] = aRec[1]; // +0x1c
+    p->m_aRecord[1] = aRec[2]; // +0x20
+    p->m_aRecord[2] = aRec[3]; // +0x24
+    p->m_aRecord[3] = aRec[4]; // +0x28
+    p->m_aRecord[4] = aRec[5]; // +0x2c
+    p->m_aRecord[5] = aRec[6]; // +0x30
+    // sub-set at +0x34: the ORIGINAL calls
+    // FUN_14000e970 (the deep container copy) - TBD
+    // seam: the region stays zero-initialized
+    p->m_byColor = byColor;    // +0x74 = param_6
+    p->m_byFlag  = 0;          // +0x75 = 0
+    return p;
 }
 
 } // namespace msg
