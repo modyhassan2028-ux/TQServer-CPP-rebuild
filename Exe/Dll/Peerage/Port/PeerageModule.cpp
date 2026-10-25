@@ -52,8 +52,11 @@ CMsgBase* CtorMsgLogin(CMsgBase* p) {
     // *p = peerage::CMsgLogin::vftable; Init again
     p->m_pVftable = (void*)2;   // CMsgLogin::vftable
     p->m_pListHead40 = nullptr;
-    // *(void**)(p+0x408) = p + 0x40
-    p->m_ppTail408 = (void**)&p->m_pListHead40;
+    // *(void**)(p+0x408) = p + 8 (a BYTE offset —
+    // the same 1-byte-CMsg proof as CtorMsgPeerage;
+    // the D17 "+0x40" reading was a bug, fixed
+    // with the D20 build writer)
+    p->m_ppTail408 = (void**)((char*)p + 8);
     return p;
 }
 
@@ -71,7 +74,12 @@ CMsgBase* CtorMsgPeerage(CMsgBase* p) {
     // tq::CStringPacker::CStringPacker(packer@+0x410)
     g_fnPackerCtor(&p[1]);      // SPacker at +0x410
     p->m_pListHead40 = nullptr;
-    p->m_ppTail408 = (void**)&p->m_pListHead40;
+    // (the decompile's "param_1 + 8" is a BYTE
+    // offset — Ghidra's CMsg type is 1-byte, proven
+    // by the +0x410 packer offset — so the tail
+    // points at msg+8, NOT &m_pListHead40 (+0x40).
+    // D17 bug found by the D20 build writer.)
+    p->m_ppTail408 = (void**)((char*)p + 8);
     // SetBuf(packer, (char*)(msg+0x80), 0x359, true)
     g_fnPackerSetBuf(&p[1],
                      (char*)p + 0x80, 0x359, true);

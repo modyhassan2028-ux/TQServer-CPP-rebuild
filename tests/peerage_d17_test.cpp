@@ -41,9 +41,10 @@ int main() {
         pSetBuf = b; uCap = c; bOwns = o;
     };
     CtorMsgLogin(&msg);
-    // +0x408 = this + 0x40
+    // +0x408 = this + 8 (a BYTE offset — the Ghidra
+    // 1-byte CMsg unit; see the D17 fix note)
     assert(msg.m_ppTail408
-        == (void**)((char*)&msg + 0x40));
+        == (void**)((char*)&msg + 8));
     assert((uintptr_t)msg.m_pVftable == 2);  // CMsgLogin
     DtorMsgLogin(&msg);
     assert((uintptr_t)msg.m_pVftable == 1);  // CMsg
@@ -52,7 +53,7 @@ int main() {
     CtorMsgPeerage(&msg);
     assert((uintptr_t)msg.m_pVftable == 3); // CMsgPeerage
     assert(msg.m_ppTail408
-        == (void**)((char*)&msg + 0x40));
+        == (void**)((char*)&msg + 8));
     // SetBuf(packer, msg+0x80, 0x359, true)
     assert(pSetBuf == (char*)&msg + 0x80);
     assert(uCap == 0x359 && bOwns == true);
@@ -90,9 +91,9 @@ int main() {
     assert(uSetId == 0xb && pSetObj == pMod->m_pSvc18);
     // the msg ctors ran (the link field set)
     assert(pMod->m_msgLogin.m_ppTail408
-        == (void**)((char*)&pMod->m_msgLogin + 0x40));
+        == (void**)((char*)&pMod->m_msgLogin + 8));
     assert(pMod->m_msgPeerage.m_ppTail408
-        == (void**)((char*)&pMod->m_msgPeerage + 0x40));
+        == (void**)((char*)&pMod->m_msgPeerage + 8));
     assert(pMod->m_msgPeerage.m_pVftable
         == (void*)3);
     // the packer buf = the msg + 0x80
