@@ -6576,3 +6576,26 @@ FUN_140024860 كاملة
 
 ### الاختبار
 `tests/analyst_d2_test.cpp` → `ANALYST-D2-OK` — **6/6 مرات** خضراً (60+ فحص) + اختبار D1 لسه أخضر 6/6. **الملف مقفول — التالي: Title.dll (D3).**
+
+## الوحدة D3 — Title.dll: هيكل الموديول الكامل (ModuleCreate + CModule + Init + مفردة CTitleMgr)
+
+**التاريخ:** الأحد 25-10-2026 — ثالث وحدة في موجة الـ DLLs (الملف #2: Title.dll، 6,903 سطر / 330 دالة).
+
+### المنفّذ حرفياً (Title.dll.decompiled.c):
+| الدالة الأصلية | المنفّذ |
+|---|---|
+| `ModuleCreate @ 1419714b0` | `ModuleCreate()`: تخصيص 0xc48 → الـ ctor → عند فشله اللوج الحرفي DAT_141978310 → `Init` → عند فشله نداء vtable+8 (المُدمِّر المُحذِّف) وإرجاع null |
+| `CModule ctor @ 141971330` | `CtorModule()`: vtable كـ gs::IModule ثم title::CModule، +0x08 = المعرّف، ثلاثة CMsg عند **+0x10 / +0x420 / +0x830** (كل واحد 0x410)، +0xc40 = النواة |
+| `Init @ 141971290` | `InitModule()`: بوابة المفردة، تسجيلات الرسائل النصية **0x46a / 0x3ea / 0x3eb** (كلها بالموديول نفسه كـ handler) عبر kernel vt+0x8، ثم **kernel vt+0x18 (0xe, mgr)** كإرجاع bool |
+| `CTitleMgr singleton @ 1419749f0` | `GetTitleMgr()`: علم التهيئة (DAT_14197d2b0)، **CMyHeap::Alloc(0x50)** بعلامة الحرفي **"CTitleMgr"**، atexit(&LAB_141977570)، الكاش (DAT_14197d2a0)، واللوج الحرفي عند الفشل: **"IF_NOT","m_pInstance", "f:\version\cqserver-78.0.11-1204\modules\title\src\titlemgr.cpp", 0x16** |
+| `core ctor @ 141974900` | `CtorTitleMgrCore()`: عقدة self بمقاس 8 تحمل مؤشر الـ mgr+0x08، رأس قائمة 0x30 (141972cf0) عند +0x38 بروابط دائرية (+0/+8/+0x10 = self) والعلمين الحرفيين +0x28=1 و+0x29 (0 ثم 1 من نداء المُنشئ)، +0x40 = 0، +0x48 = 0 |
+| `list head ctor @ 1419712cf0` (141972cf0) | `NewListHead()`: تخصيص 0x30، تصفير 3 qwords، +0x28 = 1، +0x29 = 0 (فحوصات null الدائماً-صحيحة في الأصل موثقة كأثر) |
+| `CMsg ctors @ 141974b70/141975030/141974e50` | `CtorMsgLogin/Title/Logout()`: تتابع الـ vtable الحرفي (tq::CMsg ثم الفئة المشتقة) مع **Init مرة بعد كل كتابة**، ثم **+0x408 = this + 0x40** (مؤشر الذيل لرأس الطابور) |
+
+### الـ seams (لاختلاف البيئة):
+- `g_fnAlloc/g_fnFree` (operator_new/CMyHeap::Alloc/operator_delete)
+- `g_fnCMsgInit` — **TBD: الـ Init الأصلي thunk غير مسترد (jumptable)**
+- `g_fnKernelRegisterMsg/g_fnKernelSet` (نداءات vt+0x8/vt+0x18 على النواة)
+- `g_fnAtexit` + `g_fnLogError` (اللوجات الحرفية كاملة تمر عبرها)
+
+### نتيجة الاختبار: TITLE-D3-OK — 6 حالات (الـ ctor بمقاسات offsets مطابقة، المفردة بعقدة self والقائمة الدائرية والعلمين، مسار السعادة بترتيب التخصيصات 0xc48→0x50→8→0x30 والتسجيلات الثلاثة والـ 0xe، فشل تخصيص الموديول → اللوج الحرفي فقط، فشل تخصيص المدير → تدمير vtable+8 + لوج titlemgr.cpp:0x16، رفض النواة → تدمير) — **6/6 مرات أخضر**.
