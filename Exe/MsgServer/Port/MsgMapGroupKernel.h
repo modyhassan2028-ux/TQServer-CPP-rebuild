@@ -110,3 +110,20 @@ void TreeRotateAtParent(SObjSet* pSet, SSetNode* p);
 // (the given node's LEFT rises; the node goes down).
 void TreeRotateMirror(SObjSet* pSet, SSetNode* p);
 } // namespace msg
+
+namespace msg {
+
+// ===== M55: ORIGINAL FUN_14000d480 @ 14000d480 =====
+// the KEYED sorted insert (std::_Tree::insert): walk the
+// tree from inner->right (the root) comparing the u32
+// keys @+0x18 (less -> +0 left, else -> +0x10), reject
+// duplicates (<= leaf key on the right path / predecessor
+// equality on the left path -> ret flag 0 + the existing
+// head node), else insert via FUN_14000bfd0 with
+// (set, iter, bAfter=bLess, hint=leaf, key).
+// returns the NEW node (or nullptr when the key exists -
+// in the ORIGINAL the ret pair carries the flag).
+SSetNode* SetInsertKeyed(SObjSet* pSet, uint32_t dwKey,
+                         bool* pbExists);
+
+} // namespace msg

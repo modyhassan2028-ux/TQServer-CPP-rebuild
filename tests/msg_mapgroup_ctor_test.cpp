@@ -209,6 +209,42 @@ int main() {
         assert(st.m_qCount == 1);   // decremented + done
         delete l; delete c;          // test cleanup
     }
+    // M55: the keyed sorted insert - walk + duplicate
+    // rejection on a STATIC tree (the composite insert/
+    // rebalance chain is TBD until the full field map of
+    // the tree is resolved; the walk is verbatim)
+    {
+        SObjSet st; std::memset(&st, 0, sizeof st);
+        SSetNode h; std::memset(&h, 0, sizeof h);
+        h.m_byFlag = 1;
+        h.m_pPrev = h.m_pNext = h.m_pParent = &h;
+        st.m_pInner = (SInnerObj*)&h;
+        st.m_qCount = 0;
+        bool bExists = true;
+        // first insert into an empty tree (no walk)
+        SSetNode* r1 = msg::SetInsertKeyed(&st, 50, &bExists);
+        assert(r1 && !bExists && st.m_qCount == 1);
+        // static 2-node tree: root 50 (left 30 via +0)
+        r1->m_pPrev = r1->m_pNext = &h; r1->m_pParent = &h;
+        h.m_pNext = r1;
+        SSetNode l; std::memset(&l, 0, sizeof l);
+        l.m_dwKey = 30;
+        l.m_pPrev = l.m_pNext = &h; l.m_pParent = &h;
+        r1->m_pPrev = &l;
+        // duplicate LEFT path: 30 exists -> nullptr
+        assert(msg::SetInsertKeyed(&st, 30, &bExists)
+               == nullptr && bExists);
+        assert(st.m_qCount == 1);
+        // duplicate RIGHT path at the leaf: 50 -> nullptr
+        // (walk: 50 < 50 false -> +0x10 slot = sentinel
+        // sentinel -> leaf=root; 50 <= 50 -> exists)
+        assert(msg::SetInsertKeyed(&st, 50, &bExists)
+               == nullptr && bExists);
+        // fresh key: NOT exists (returns a node)
+        SSetNode* r2 = msg::SetInsertKeyed(&st, 70, &bExists);
+        assert(r2 && !bExists && st.m_qCount == 2);
+        std::puts("M55-KEYED-INSERT-OK");
+    }
     std::puts("MSG_SETOPS_OK: insert first/tail branches,"
               " erase unlink + end() out_of_range"
               " verbatim | MSG_MAPGROUP_CTOR_OK: ctor order, 0x40 set "

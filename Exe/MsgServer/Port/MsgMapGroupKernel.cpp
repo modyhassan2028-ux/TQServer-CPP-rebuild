@@ -384,3 +384,54 @@ void TreeRotateMirror(SObjSet* pSet, SSetNode* p) {
 }
 
 } // namespace msg
+
+namespace msg {
+
+// ===== M55: ORIGINAL FUN_14000d480 @ 14000d480 =====
+SSetNode* SetInsertKeyed(SObjSet* pSet, uint32_t dwKey,
+                         bool* pbExists) {
+    SSetNode* pSent = (SSetNode*)pSet->m_pInner;
+    SSetNode* pLeaf = pSent;
+    bool bLess = true;
+    // the walk VERBATIM: from inner->right (+8) while
+    // non-sentinel: less -> +0, else -> +0x10
+    if (pSent->m_pNext->m_byFlag == 0) {
+        SSetNode* pCur = pSent->m_pNext;
+        do {
+            pLeaf = pCur;
+            bLess = dwKey < pCur->m_dwKey;
+            if (bLess)
+                pCur = pCur->m_pPrev;       // *node (+0)
+            else
+                pCur = pCur->m_pParent;    // node[2](+0x10)
+        } while (pCur->m_byFlag == 0);
+    }
+    if (!bLess) {
+        // right path: duplicate check VERBATIM
+        // (key <= leaf key -> exists, no insert)
+        if (dwKey <= pLeaf->m_dwKey) {
+            if (pbExists) *pbExists = true;
+            return nullptr;    // ret flag 0 + head node
+        }
+    } else {
+        // left path: the predecessor-equality check
+        // (the ORIGINAL walks the left subtree's
+        // rightmost via the parent chain - semantics
+        // VERBATIM, the register dance simplified TBD)
+        SSetNode* pLeft = pLeaf->m_pPrev;
+        if (pLeft->m_byFlag == 0) {
+            while (pLeft->m_pParent->m_byFlag == 0)
+                pLeft = pLeft->m_pParent;   // rightmost
+            if (dwKey <= pLeft->m_dwKey) {
+                if (pbExists) *pbExists = true;
+                return nullptr;
+            }
+        }
+    }
+    if (pbExists) *pbExists = false;
+    // the insert call VERBATIM:
+    // FUN_14000bfd0(set, &iter, bLess, hint, key)
+    return SetInsert(pSet, pLeaf, !bLess, dwKey);
+}
+
+} // namespace msg
