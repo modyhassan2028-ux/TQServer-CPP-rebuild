@@ -395,6 +395,38 @@ int main() {
         assert(mp.m_qCount == 3);   // no dup inserts
         std::puts("M60-MAP-OPAT-OK");
     }
+    // M63: the set COPY (FUN_14000bf20 + af60)
+    {
+        SObjSet src, dst;
+        SInnerObj s1, s2;
+        std::memset(&s1,0,sizeof s1); std::memset(&s2,0,sizeof s2);
+        auto* q1 = (msg::SSetNode*)&s1;
+        auto* q2 = (msg::SSetNode*)&s2;
+        q1->m_byFlag = 1; q2->m_byFlag = 1;
+        q1->m_pPrev = q1->m_pNext = q1->m_pParent = q1;
+        q2->m_pPrev = q2->m_pNext = q2->m_pParent = q2;
+        src.m_pInner = &s1; dst.m_pInner = &s2;
+        bool bDup = false;
+        msg::SetInsertKeyed(&src, 50, &bDup);
+        msg::SetInsertKeyed(&src, 30, &bDup);
+        msg::SetInsertKeyed(&src, 70, &bDup);
+        assert(src.m_qCount == 3);
+        msg::SetCopy(&dst, &src);
+        assert(dst.m_qCount == 3);   // VERBATIM count copy
+        // leftmost/rightmost preserved by the walks:
+        assert(q2->m_pPrev->m_dwKey == 30);
+        assert(q2->m_pParent->m_dwKey == 70);
+        assert(q2->m_pNext->m_dwKey == 50); // root
+        // full-content probe on the copy:
+        assert(msg::SetFind(&dst, 30) != nullptr);
+        assert(msg::SetFind(&dst, 50) != nullptr);
+        assert(msg::SetFind(&dst, 70) != nullptr);
+        assert(msg::SetFind(&dst, 99) == nullptr);
+        // colors copied (no rebalance):
+        auto* pr = q2->m_pNext;
+        assert(pr->m_byColor == 1 || pr->m_byColor == 0);
+        std::puts("M63-SET-COPY-OK");
+    }
     std::puts("MSG_SETOPS_OK: insert first/tail branches,"
               " erase unlink + end() out_of_range"
               " verbatim | MSG_MAPGROUP_CTOR_OK: ctor order, 0x40 set "

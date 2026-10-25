@@ -715,4 +715,56 @@ SMapNode* MapNodeNew(SMapNode* pLeft, SMapNode* pParent,
     return p;
 }
 
+// ===== M63: ORIGINAL FUN_14000af60 @ 14000af60 =====
+SSetNode* CloneTree(SObjSet* pSet, SSetNode* pSrc,
+                    SSetNode* pParent) {
+    SSetNode* pSent = (SSetNode*)pSet->m_pInner;
+    if (pSrc->m_byFlag == 0) {
+        // the VERBATIM clone alloc: FUN_140009ab0(
+        // set, sent, parent, sent, src+0x18 key,
+        // src+0x1c color)
+        SSetNode* pNew = TreeNodeAlloc(
+            pSent, pSent, pParent,
+            pSrc->m_dwKey, pSrc->m_byColor);
+        // recurse LEFT (+0) then RIGHT (+0x10):
+        pNew->m_pPrev = CloneTree(pSet, pSrc->m_pPrev,
+                                  pNew);
+        pNew->m_pParent = CloneTree(pSet,
+                                    pSrc->m_pParent,
+                                    pNew);
+        return pNew;
+    }
+    return pSent;   // sentinel src -> sentinel clone
+}
+
+// ===== M63: ORIGINAL FUN_14000bf20 @ 14000bf20 =====
+void SetCopy(SObjSet* pDst, SObjSet* pSrc) {
+    SSetNode* pSent = (SSetNode*)pDst->m_pInner;
+    SSetNode* pSrcSent = (SSetNode*)pSrc->m_pInner;
+    // clone the source ROOT (src sent+8):
+    SSetNode* pRoot = CloneTree(pDst, pSrcSent->m_pNext,
+                                pSent);
+    pSent->m_pNext = pRoot;          // sent+8 = root
+    // the VERBATIM count copy (dest[7] = src[7]):
+    pDst->m_qCount = pSrc->m_qCount;
+    // the leftmost walk (the +0 chain from the root):
+    SSetNode* pCur = pSent->m_pNext;  // the root
+    if (pCur->m_byFlag != 0) {
+        // empty: leftmost = rightmost = sentinel
+        pSent->m_pPrev = pSent;
+        pSent->m_pParent = pSent;
+        return;
+    }
+    while (pCur->m_pPrev->m_byFlag == 0)
+        pCur = pCur->m_pPrev;         // *plVar4 chain
+    pSent->m_pPrev = pCur;            // leftmost
+    // the rightmost walk (the +0x10 chain, VERBATIM
+    // shape from bf20: probe until the +0x10 link is
+    // the sentinel; the last REAL node is rightmost):
+    SSetNode* pR = pSent->m_pNext;   // the root
+    while (pR->m_pParent->m_byFlag == 0)
+        pR = pR->m_pParent;
+    pSent->m_pParent = pR;           // rightmost
+}
+
 } // namespace msg

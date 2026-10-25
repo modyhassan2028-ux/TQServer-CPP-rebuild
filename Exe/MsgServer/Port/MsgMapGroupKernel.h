@@ -242,4 +242,17 @@ SMapNode* MapNodeNew(SMapNode* pLeft, SMapNode* pParent,
                      const uint32_t aRec[7],
                      uint8_t byColor);
 
+// ===== M63: ORIGINAL FUN_14000af60 (the recursive
+// clone) + FUN_14000bf20 (the set COPY) =====
+// VERBATIM: clone each node via the M50 allocator
+// (color copied from src+0x1c - no rebalance needed),
+// recurse left/right with the new node as parent;
+// dest root = the clone of the src root (sent+8);
+// count copied VERBATIM from src; then the two
+// boundary walks (leftmost via +0 chain, rightmost
+// via +0x10 chain) from the dest root.
+SSetNode* CloneTree(SObjSet* pSet, SSetNode* pSrc,
+                    SSetNode* pParent);
+void SetCopy(SObjSet* pDst, SObjSet* pSrc);
+
 } // namespace msg
