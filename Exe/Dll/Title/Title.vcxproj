@@ -6,5 +6,6 @@
     <ClCompile Include="Port\TitleGrant.cpp" />
     <ClCompile Include="Port\TitleRemove.cpp" />
     <ClCompile Include="Port\TitleQuery.cpp" />
+    <ClCompile Include="Port\TitleSession.cpp" />
   </ItemGroup>
 </Project>
