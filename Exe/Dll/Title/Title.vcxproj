@@ -8,5 +8,6 @@
     <ClCompile Include="Port\TitleQuery.cpp" />
     <ClCompile Include="Port\TitleSession.cpp" />
     <ClCompile Include="Port\TitleIncoming.cpp" />
+    <ClCompile Include="Port\TitleMap.cpp" />
   </ItemGroup>
 </Project>
