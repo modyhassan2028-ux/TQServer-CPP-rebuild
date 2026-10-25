@@ -31,7 +31,8 @@ struct SMsgJailReport {          // the GameJailEx report msg
 struct SJailDbRow { uint32_t m_dwId; uint32_t m_dwRecordMap; };
 
 struct SJailExSeams {
-    std::function<void*(uint32_t)> m_fnFindOnlineByAccount;
+    // ONLINE lookup is vcall+0x98(param_2) = BY idUser
+    std::function<void*(uint32_t)> m_fnFindOnline;
     std::function<bool(const char*, SJailDbRow&)> m_fnQueryRow;
     std::function<void*(uint32_t)> m_fnFindMap;      // (0x1772)
     std::function<int()>  m_fnPortalX;               // map+0x58 vcall+0x10(0xb)
@@ -40,6 +41,14 @@ struct SJailExSeams {
     std::function<void(const char*, uint32_t,
                        const char*)> m_fnSendMail;   // ("SYSTEM",id,STR_...)
     std::function<const char*(const char*)> m_fnStr;  // theInstance()
+    // ONLINE branch (M46): map check vcall+0x168, the
+    // arrest msg send (FUN_14035cda0), the jail teleport
+    // FUN_1401ca920(user, 0x1772, str, 3)
+    std::function<uint32_t(void*)> m_fnCurMap;
+    std::function<int(void*, uint32_t,
+                       const char*)> m_fnSendArrest;
+    std::function<void(void*, uint32_t,
+        const char*, int)> m_fnTeleportOnline;
 };
 
 class CMsgJailEx {
@@ -49,11 +58,19 @@ public:
     std::vector<std::string> m_vecErrs;   // InlineLogERROR
     std::vector<std::string> m_vecSqls;   // executed SQLs
     std::vector<std::string> m_vecMails;
+    std::vector<std::string> m_vecSent;  // online arrest pkts
+    struct SJailTp { uint32_t m_dwMap; const char* m_sz;
+                     int m_nFlag; };
+    std::vector<SJailTp>   m_vecJailTp;
+    std::string m_szLastMsg;      // the formatted arrest msg
 
-    // ===== ORIGINAL FUN_1400e36a0 (offline branch;
-    // the ONLINE-by-account branch tail is TBD at the
-    // final else, decompile ~line 198918+)
-    void OfflineCheatingGotoJail(uint32_t dwAccount);
+    // ===== ORIGINAL FUN_1400e36a0 COMPLETE (M45 offline
+    // branch + M46 the online else tail, decompile
+    // ~198918): param_2 = idUser (report[0]), param_3 =
+    // idAccount (report[1]), param_4 = the arrest msg
+    void OfflineCheatingGotoJail(uint32_t dwUser,
+                                 uint32_t dwAccount,
+                                 const char* szMsg);
 
     // ===== the arrest-handler tail: GameJailEx wrapper
     // (second normalize + hour dispatch + the executor)

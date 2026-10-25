@@ -26,12 +26,12 @@ int main() {
         != std::string::npos);
 
     // ---- offline path: db fail ----
-    j.m_seams.m_fnFindOnlineByAccount =
+    j.m_seams.m_fnFindOnline =
         [](uint32_t){ return (void*)nullptr; };
     j.m_seams.m_fnQueryRow =
         [](const char* s, SJailDbRow& r){ (void)s; (void)r;
             return false; };
-    j.OfflineCheatingGotoJail(7);
+    j.OfflineCheatingGotoJail(0, 7, "");
     assert(j.m_vecLogs.size() == 1);
     assert(j.m_vecLogs[0].find(
         "connect to db failed") != std::string::npos);
@@ -43,7 +43,7 @@ int main() {
     j.m_vecSqls.clear();
     j.m_seams.m_fnQueryRow = [](const char*, SJailDbRow& r){
         r = {0, 1001}; return true; };
-    j.OfflineCheatingGotoJail(7);
+    j.OfflineCheatingGotoJail(0, 7, "");
     assert(j.m_vecLogs.back().find(
         "db can not find the palyer")      // the typo
         != std::string::npos);
@@ -51,7 +51,7 @@ int main() {
     // ---- already in prison (0x67e) ----
     j.m_seams.m_fnQueryRow = [](const char*, SJailDbRow& r){
         r = {55, 0x1772}; return true; };
-    j.OfflineCheatingGotoJail(7);
+    j.OfflineCheatingGotoJail(0, 7, "");
     assert(j.m_vecLogs.back().find(
         "have been in prison") != std::string::npos);
 
@@ -60,7 +60,7 @@ int main() {
         r = {55, 1001}; return true; };
     j.m_seams.m_fnFindMap = [](uint32_t m){
         return m == 0x1772 ? nullptr : (void*)nullptr; };
-    j.OfflineCheatingGotoJail(7);
+    j.OfflineCheatingGotoJail(0, 7, "");
     assert(j.m_vecLogs.back().find(
         "can not find cheat prison map")
         != std::string::npos);
@@ -80,7 +80,7 @@ int main() {
             sMail = std::string(from) + "|" +
                     std::to_string(id) + "|" + t; };
     size_t nLogsBefore = j.m_vecLogs.size();
-    j.OfflineCheatingGotoJail(7);
+    j.OfflineCheatingGotoJail(0, 7, "");
     assert(j.m_vecLogs.size() == nLogsBefore);  // no error
     assert(sUpd ==
         "UPDATE cq_user SET recordmap_id = 6002, recordx"
@@ -93,7 +93,7 @@ int main() {
     // ---- update sql error (0x68f) still mails ----
     j.m_seams.m_fnExecUpdate =
         [](const char*){ return false; };
-    j.OfflineCheatingGotoJail(7);
+    j.OfflineCheatingGotoJail(0, 7, "");
     assert(j.m_vecLogs.back().find(
         "update sql error") != std::string::npos);
 
@@ -117,5 +117,42 @@ int main() {
          "in-prison/map-miss, UPDATE recordmap_id 6002 "
          "verbatim, SYSTEM mail, palyer typo verbatim, "
          "AccountID MyLogSave form");
+    // ===== M46: the ONLINE branch =====
+    CMsgJailEx k;
+    k.m_seams.m_fnStr = [](const char* s){ return s; };
+    int fake = 0;
+    k.m_seams.m_fnFindOnline = [&](uint32_t u){
+        return u == 9 ? (void*)&fake : nullptr; };
+    // already in prison (0x65c): idUser AND idAccount
+    k.m_seams.m_fnCurMap = [](void*){ return 0x1772u; };
+    k.OfflineCheatingGotoJail(9, 77, "msg");
+    assert(k.m_vecLogs.size() == 1);
+    assert(k.m_vecLogs[0].find(
+        "Player(idUser:9, idAccount:77), have been in"
+        " prison") != std::string::npos);
+    assert(k.m_vecSent.empty() && k.m_vecJailTp.empty());
+    // normal: send + teleport flag 3
+    k.m_seams.m_fnCurMap = [](void*){ return 1001u; };
+    k.m_seams.m_fnSendArrest = [](void*, uint32_t u,
+            const char* m){ return u == 9 && m[0] ? 1 : 0; };
+    k.m_seams.m_fnTeleportOnline = [&](void*, uint32_t mp,
+            const char* s, int f){
+        assert(mp == 0x1772 && f == 3 &&
+               !std::strcmp(s,
+                   "STR_OFFLINE_CHEATING_GOTO_JAIL")); };
+    k.OfflineCheatingGotoJail(9, 77, "you cheat!");
+    assert(k.m_vecSent.size() == 1 &&
+           k.m_vecSent[0] == "you cheat!");
+    assert(k.m_vecJailTp.size() == 1 &&
+           k.m_vecJailTp[0].m_nFlag == 3 &&
+           k.m_vecJailTp[0].m_dwMap == 0x1772);
+    // EMPTY msg quirk: send skipped, teleport still runs
+    k.m_vecSent.clear(); k.m_vecJailTp.clear();
+    k.OfflineCheatingGotoJail(9, 77, "");
+    assert(k.m_vecSent.empty());
+    assert(k.m_vecJailTp.size() == 1);
+    std::puts("M46-ONLINE-OK");
+
+    std::puts("MSG_JAIL_EX_OK: + M46 online branch");
     return 0;
 }

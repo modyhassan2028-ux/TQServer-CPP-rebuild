@@ -57,22 +57,53 @@ void CMsgJailEx::ProcessGameJailEx(
     // message build: snprintf(0x400, reason, hourBuf)
     char szMsg[0x400] = {0};
     std::snprintf(szMsg, sizeof szMsg, "%s", pszReason);
+    m_szLastMsg = szMsg;
     (void)hour; (void)day; (void)mon; (void)year;
-    // the executor:
-    OfflineCheatingGotoJail(r.m_dwAccount);
+    // the executor VERBATIM caller:
+    // FUN_1400e36a0(kernel, *param_3, param_3[1], &msg)
+    // = (idUser=[0], idAccount=[1], formatted msg)
+    OfflineCheatingGotoJail(r.m_dwAccount, r.m_dwParam1,
+                            m_szLastMsg.c_str());
 }
 
 void CMsgJailEx::OfflineCheatingGotoJail(
-        uint32_t dwAccount) {
+        uint32_t dwUser, uint32_t dwAccount,
+        const char* szMsg) {
     // CHECKF the +0x90 manager (0x130) is the caller's
-    // duty (kernel wired); modeled by m_fnFindOnlineByAccount
-    void* pOnline = m_seams.m_fnFindOnlineByAccount
-        ? m_seams.m_fnFindOnlineByAccount(dwAccount)
+    // duty (kernel wired); the ONLINE lookup is
+    // vcall+0x98(param_2) = BY idUser (VERBATIM)
+    void* pOnline = m_seams.m_fnFindOnline
+        ? m_seams.m_fnFindOnline(dwUser)
         : nullptr;
     if (pOnline) {
-        // ORIGINAL online-by-account branch: map check
-        // vcall+0x168 then the same send/teleport as M44
-        // - tail TBD (decompile ~198918+)
+        // ===== the ONLINE branch (M46, decompile ~198918)
+        uint32_t dwMap = m_seams.m_fnCurMap
+            ? m_seams.m_fnCurMap(pOnline) : 0;
+        if (dwMap == 0x1772) {
+            // MyLogSave 0x65c VERBATIM (idUser AND idAccount)
+            m_vecLogs.push_back(
+                "OfflineCheatingGotoJail failed, arrest"
+                " Player(idUser:" + std::to_string(dwUser) +
+                ", idAccount:" + std::to_string(dwAccount) +
+                "), have been in prison");
+            return;
+        }
+        // the msg non-empty gate VERBATIM (the -1/-2
+        // strlen sentinel loop; EMPTY msg -> send skipped)
+        if (szMsg && szMsg[0] != 0) {
+            int nRc = m_seams.m_fnSendArrest
+                ? m_seams.m_fnSendArrest(pOnline, dwUser,
+                                        szMsg) : 0;
+            if (nRc != 0) m_vecSent.push_back(szMsg);
+        }
+        // teleport flag 3 (vs flag 1 in the M44 online
+        // arrest - a VERBATIM difference)
+        const char* psz = Str("STR_OFFLINE_CHEATING_"
+                              "GOTO_JAIL");
+        if (m_seams.m_fnTeleportOnline)
+            m_seams.m_fnTeleportOnline(pOnline, 0x1772,
+                                       psz, 3);
+        m_vecJailTp.push_back({0x1772, psz, 3});
         return;
     }
     // SQL VERBATIM:
