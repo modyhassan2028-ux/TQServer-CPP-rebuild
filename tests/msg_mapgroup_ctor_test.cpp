@@ -94,6 +94,53 @@ int main() {
     assert(s.m_qCount == 1);
     msg::SetErase(&s, n2);
     assert(s.m_qCount == 0);
+    // M50: the real tree internals
+    // node alloc: left=right=parent fields + u32 key +
+    // color@+0x1c + end-flag@+0x1d = 0 (new 0x20)
+    {
+        SSetNode* pN = msg::TreeNodeAlloc(
+            (SSetNode*)0, (SSetNode*)0, (SSetNode*)0,
+            0xABCD, 0);
+        assert(pN->m_pPrev == 0 && pN->m_pNext == 0 &&
+               pN->m_pParent == 0);
+        assert(*(uint32_t*)((uint8_t*)pN+0x18) == 0xABCD);
+        assert(*(uint8_t*)((uint8_t*)pN+0x1c) == 0);
+        assert(*(uint8_t*)((uint8_t*)pN+0x1d) == 0);
+        std::free(pN);
+    }
+    // iterator prev: parent-is-sentinel path (descend
+    // right), parent path (descend left), sentinel no-op
+    {
+        SObjSet st; std::memset(&st, 0, sizeof st);
+        SSetNode h; SSetNode a, b, c;
+        std::memset(&h,0,sizeof h); std::memset(&a,0,sizeof a);
+        std::memset(&b,0,sizeof b); std::memset(&c,0,sizeof c);
+        h.m_byFlag = 1;              // sentinel
+        // chain: root a (parent=head), right b, b.right c,
+        // c.right = head (sentinel-terminated, as in the
+        // real tree: rightmost's right = head)
+        a.m_pParent = &h; a.m_pNext = &b;
+        b.m_pParent = &a; b.m_pNext = &c;
+        c.m_pParent = &b; c.m_pNext = &h;
+        SSetNode* pIt = &a;
+        msg::IteratorPrev(&pIt);
+        // the VERBATIM walk ends at the terminating node
+        // (the sentinel head) - quirk kept as decompiled
+        assert(pIt == &h);
+        // parent NOT sentinel: descend parent's LEFT chain
+        SSetNode n1; SSetNode par; SSetNode l1;
+        std::memset(&n1,0,sizeof n1);
+        std::memset(&par,0,sizeof par);
+        std::memset(&l1,0,sizeof l1);
+        n1.m_pParent = &par;         // par NOT sentinel
+        par.m_pPrev = &l1;           // parent's left
+        l1.m_pPrev = &h;             // left chain -> head
+        pIt = &n1; msg::IteratorPrev(&pIt);
+        assert(pIt == &l1);          // last non-sentinel
+        // sentinel input: no walk
+        pIt = &h; msg::IteratorPrev(&pIt);
+        assert(pIt == &h);
+    }
     std::puts("MSG_SETOPS_OK: insert first/tail branches,"
               " erase unlink + end() out_of_range"
               " verbatim | MSG_MAPGROUP_CTOR_OK: ctor order, 0x40 set "

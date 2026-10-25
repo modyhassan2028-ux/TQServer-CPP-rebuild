@@ -144,3 +144,59 @@ void SetErase(SObjSet* pSet, SSetNode* pIt) {
 }
 
 } // namespace msg
+
+namespace msg {
+
+// ===== M50: ORIGINAL FUN_140009ab0 @ 140009ab0 =====
+// The ORIGINAL insert called it as:
+//   FUN_140009ab0(set, set.inner, hint, set.inner, key, 0)
+// i.e. left = sentinel, right = hint, parent = sentinel.
+SSetNode* TreeNodeAlloc(SSetNode* pLeft, SSetNode* pRight,
+                        SSetNode* pParent, uint32_t dwKey,
+                        uint8_t byColor) {
+    SSetNode* p = (SSetNode*)std::calloc(1, 0x20);
+    if (p) {
+        p->m_pPrev   = pLeft;     // +0
+        p->m_pNext   = pRight;    // +8
+        p->m_pParent = pParent;   // +0x10
+        *(uint32_t*)((uint8_t*)p + 0x18) = dwKey;
+        *(uint8_t*)((uint8_t*)p + 0x1c)   = byColor;
+        *(uint8_t*)((uint8_t*)p + 0x1d)   = 0;  // end-flag
+    }
+    return p;
+}
+
+// ===== M50: ORIGINAL FUN_1400075f0 @ 1400075f0 =====
+// VERBATIM walk (the if(it[0]==0) empty branch is a
+// Ghidra artifact, kept as a comment):
+void IteratorPrev(SSetNode** ppNode) {
+    SSetNode* pCur = *ppNode;
+    if (pCur->m_byFlag /* +0x1d */)
+        return;               // the sentinel: no walk
+    SSetNode* pParent = pCur->m_pParent;        // +0x10
+    if (pParent->m_byFlag /* +0x1d */) {
+        // parent IS the sentinel: descend RIGHT while
+        // (child non-sentinel && *ppNode == child->parent)
+        SSetNode* pR = pCur->m_pNext;           // +8 right
+        uint8_t byR = pR->m_byFlag;
+        while (byR == 0 &&
+               *ppNode == pR->m_pParent) {
+            *ppNode = pR;
+            pR = pR->m_pNext;
+            byR = pR->m_byFlag;
+        }
+        *ppNode = pR;
+        return;
+    }
+    // parent NOT sentinel: descend parent's LEFT to the
+    // bottom (VERBATIM - direction kept as decompiled)
+    SSetNode* pL = pParent->m_pPrev;            // parent's left
+    SSetNode* pB = pL;
+    while (pL->m_byFlag == 0) {
+        pB = pL;
+        pL = pL->m_pPrev;                      // descend left
+    }
+    *ppNode = pB;
+}
+
+} // namespace msg

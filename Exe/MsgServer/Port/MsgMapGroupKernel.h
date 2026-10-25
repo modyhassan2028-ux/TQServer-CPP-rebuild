@@ -54,6 +54,7 @@ public:
     // A,B,JAIL = 0x20,0x30,...,0x80)
     std::vector<size_t> m_vecAllocSizes;
 };
+
 } // namespace msg
 
 namespace msg {
@@ -82,4 +83,16 @@ SSetNode* SetInsert(SObjSet* pSet, SSetNode* pHint,
 // sentinel (end()).
 void SetErase(SObjSet* pSet, SSetNode* pIt);
 
+// ===== M50: the real tree internals (closing the M49 seams)
+// ORIGINAL FUN_140009ab0 @ 140009ab0 - the tree NODE
+// allocator: new(0x20) = { left, right, parent, u32 key,
+// color @+0x1c, end-flag @+0x1d = 0 }.
+SSetNode* TreeNodeAlloc(SSetNode* pLeft, SSetNode* pRight,
+                        SSetNode* pParent, uint32_t dwKey,
+                        uint8_t byColor);
+
+// ORIGINAL FUN_1400075f0 @ 1400075f0 - the iterator
+// PREVIOUS walk (operator--): three verbatim paths on the
+// +0x1d sentinel flag.
+void IteratorPrev(SSetNode** ppNode);
 } // namespace msg
