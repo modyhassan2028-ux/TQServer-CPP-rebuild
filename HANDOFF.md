@@ -8,7 +8,7 @@
 ## 0أ) حالة موجة الـ DLL (الأولوية الحالية)
 - **Analyst.dll مقفول** (D1+D2) — **Title.dll مقفول** (D3–D12، حتى
   المدمّر الحذفي 141974630) — كلها في `Exe/Dll/{Analyst,Title}/Port/`.
-- **Training.dll: D13+D14 مقفولة (جلسة 25/10):**
+- **Training.dll: D13+D14+D15 مقفولة (جلسة 25/10):**
   - **D13 (T1):** الهيكل (ModuleCreate/ctor/Init بمُعرّفات
     0x7fc/0x3ea/0x3eb، المفرد FUN_1419e5020، نواة الخريطة،
     Clear/Teardown) — `TrainingMgr.{h,cpp}`.
@@ -26,12 +26,28 @@
     حسب MSVC (الأب الجديد أسود)، (4) البوابات لا تعود.
   - **رجريشن: 14/14 وحدة × 6/6** (analyst_d1/d2 + title_d3..d12 +
     training_d13/d14).
-- **التالي في Training.dll (D15):** CRUD المدير — مستدعوو
-  vtable الظاهرون في الغرَض: FUN_1419e5200 (vt+0x18)،
-  FUN_1419e5340 (vt+0x20)، FUN_1419e54c0 (vt+0x30/0x40 بفروع
-  sVar1 0/1) — دوال المدير الحقيقية وراء الجسر غير المسترد؛
-  استخرجها من الديكمبايل + الربط مع TrainingMap (نمط D11 في
-  Title). ثم عائلات الرسائل 0x7fc/0x3ea/0x3eb.
+- **D15 (T3) مقفولة (جلسة 25/10):** طبقة API العامة للخريطة
+  `TrainingMapApi.{h,cpp}` (Distance 1419e3750 **بترتيب
+  بارامتراته الحرفي: الأول/الأخير/&العدد**، EraseRange 1419e3860
+  بمسار begin/end→Clear، TryEmplace 1419e3aa0 بمساري اليمين
+  والسلف بخرائط plVar4/plVar5 الحرفية، EraseKeyCount 1419e3ca0،
+  EmplaceHint 1419e3e0 بشلال MSVC الكامل، KernelDtorProxy
+  1419e42a0/4320، MgrDtorProxy 1419e4350، **المُفهرس MgrOpIndex
+  1419e4170: مشي lower-bound مضمّن + إدراج عند الفقد بسجل
+  {key, pad-noise, _time64(0)} والرجوع node+0x20**) + عائلة
+  غرَض الرسائل `TrainingMsgGlue.{h,cpp}` (CMsgLogin/Logout/
+  Training/TrainingInfo: ctors/dtors/**Make 0x7fc/طول 0xc و
+  0x7fb/طول 0x10 على بايتات السلك**، TryCreate ببوابة +0x50،
+  **الموزّع 1419e54c0: الفعل من buf+4 → 0→vt+0x30، 1→vt+0x40،
+  3→vt+0x28، 4→vt+0x38** عبر Seams `g_fnMgrvt28/30/38/40`).
+- **رجريشن: 15/15 وحدة × 6/6** (analyst_d1/d2 + title_d3..d12 +
+  training_d13/d14/d15) — توازن تخصيصات صفري في كل الأقسام.
+- **التالي في Training.dll (D16):** أجسام CRUD المدير الحقيقية
+  وراء الفتحات: FUN_1419e4390 (vt+0x18: MgrOpIndex + كتابة
+  الوقت puVar4[1])، FUN_1419e44e0 (vt+0x20)، FUN_1419e4730 —
+  أجسام ملموسة (نمط D11 في Title) ثم ربطها بفتحات الموزّع
+  بدل الـ Seams. بعد اكتمالها يُقفل Training.dll وينتقل
+  الجرد إلى Peerage.dll (7,929 سطراً).
 
 ## 0ب) حالة NpcServer لحظياً (جلسة 24/10)
 - **جديد (موجة الـ DLLs — Title.dll D3-D10):** هيكل الموديول +

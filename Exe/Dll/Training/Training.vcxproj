@@ -3,11 +3,15 @@
   <ItemGroup>
     <ClCompile Include="Port\TrainingMgr.cpp" />
     <ClCompile Include="Port\TrainingMap.cpp" />
+    <ClCompile Include="Port\TrainingMapApi.cpp" />
+    <ClCompile Include="Port\TrainingMsgGlue.cpp" />
     <ClCompile Include="Port\TrainingModule.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Port\TrainingMgr.h" />
     <ClInclude Include="Port\TrainingMap.h" />
+    <ClInclude Include="Port\TrainingMapApi.h" />
+    <ClInclude Include="Port\TrainingMsgGlue.h" />
     <ClInclude Include="Port\TrainingModule.h" />
   </ItemGroup>
 </Project>

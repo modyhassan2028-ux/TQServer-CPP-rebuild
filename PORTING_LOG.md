@@ -6795,3 +6795,39 @@ FUN_140024860 كاملة
 4. بوابات IteratorNext/EraseAt أصبحت لا تعود (المعالج الأصلي `_invalid_parameter_noinfo` لا يعود).
 
 ### الاختبار: TRAINING-D14-OK — **14/14 وحدة × 6/6 تشغيلات** (13 مفتاحاً بكل حالات الإدراج/المحو: ورقة حمراء، جذر بطفلين، Lmost/Rmost، ورقة سوداء، حذف كامل — مع فحوص RB (مرتبة/ارتفاع أسود/لا أحمر-أحمر/Lmost/Rmost) **بعد كل عملية**، توازن تخصيصات صفري، بوابات end()).
+
+## الوحدة D15 (Training T3) — Training.dll: طبقة API العامة لـ std::map + مُفهرس المدير + عائلة غرَض الرسائل
+**التاريخ:** 2026-10-25 — **الحالة:** مكتملة ومختبرة (15/15 × 6/6)
+**الملفات:** `Exe/Dll/Training/Port/TrainingMapApi.{h,cpp}` + `Exe/Dll/Training/Port/TrainingMsgGlue.{h,cpp}` + `tests/training_d15_test.cpp`
+
+### الوظائف المنقولة (verbatim):
+
+**أ) طبقة API العامة للخريطة (`TrainingMapApi.cpp`):**
+- **FUN_1419e3750** `Distance` — **ترتيب البارامترات الحرفي: (الزوج الأول، الزوج الأخير، &العدد)** — البوابة تقارن proxy الأول مع الأخير والمشي يقدّم عقدة الأول (plVar7) حتى عقدة الأخير (plVar3 ثابتة). تصحيح مهم عن القراءة الأولى: param_1 ليس النواة بل زوج الأول.
+- **FUN_1419e3840 / FUN_1419e3de0** `DeletePtr/2` — جسمان متطابقان: `operator_delete(*pp)` (القيمة تُحرر والمؤشر لا يُصفّر — مسؤولية المستدعي).
+- **FUN_1419e3860** `EraseRange` — مسار التسريع: first==begin (بوابة `first->node == head->left`) وlast==end (`last->node == head`) → `Clear` والخارج = {proxy, `*(head)` = left (== الرأس بعد التصفية)}؛ وإلا الحلقة: البوابة `first->proxy == last->proxy`، **التقدم المضمّن قبل المحو** (يُحفظ القديم في local_28/lStack_20 ثم `EraseAt`)، الخرج = الزوج الأخير.
+- **FUN_1419e3a10** `LowerBoundRef` — الغلاف الرقيق يرجع الخرج.
+- **FUN_1419e3aa0** `TryEmplace` — المشي المضمّن من الجذر مع تتبّع bAddLeft (bVar7)؛ **مسار اليمين**: فحص التكرار `key <= walked->key` مباشرة؛ **مسار اليسار**: بوابة walked==Lmost (إدراج يساراً) وإلا **فحص السلف**: rightmost-of-left-subtree أو تسلق `node == parent->left` مع خرائط plVar4/plVar5/local_30 الحرفية، ثم فحص `key <= pred->key` (LAB_1419e3bfd مشترك). فحوص isnil غير المستردة (climb-past-the-head / walked-is-head) عبر Seam `g_fnInvalidParameter`. الإدراج عبر 1419e3360 عند **العقدة الممشوّة** بالاتجاه الحالي. الخرج `{proxy, node, bool@+0x10}`.
+- **FUN_1419e3c50 / 1419e4120 / 1419e42d0** `ProxyChainPush ×3` — أجسام متطابقة: `node = new(8); node->q0 = *pp; *pp = node`.
+- **FUN_1419e3ca0** `EraseKeyCount` — LowerBound ثم عدّ المشي المضمّن من pLoc إلى pFound (بوابات proxy المزدوجة)، ثم **نسخ الزوجين** وإعادة `EraseRange({proxy,pLoc}, {proxy2,pFound})` = MSVC `erase(key)`: يساوي distance(lb, ub) ثم erase(first, second).
+- **FUN_1419e3e00** `EmplaceHint` — الشلال الكامل: الشجرة الفارغة → إدراج يسار الرأس؛ hint==begin → `key < hint->key` إدراج يسار؛ hint==end → `Rmost->key < key` (**head+0x10 = Rmost** وليس Lmost) إدراج يمين؛ الوسط: `key < hint->key` → **مشي السلف** (rightmost / تسلق parent->left) ثم `pred->key < key` → يمين السلف إذا `pred->right->isnil` وإلا يسار الـ hint؛ وإلا `hint->key < key` → **مشي الخلف** (leftmost / تسلق parent->left، البوابة `next == head || key < next->key`) → يمين hint إذا `hint->right->isnil` وإلا يسار الخلف؛ لا شيء ينطبق → `TryEmplace` والخارج من زوجه.
+- **FUN_1419e42a0 / 1419e4320** `KernelDtorProxy ×2` — `DtorKernelCore` + **تحرير الوكيل** (`operator_delete(*param_1)`).
+- **FUN_1419e4350** `MgrDtorProxy` — كتابة vftable على المدير، `DtorKernelCore(mgr+0x18)` (param_1+3 qwords)، تحرير وكيل النواة (param_1[3]).
+- **FUN_1419e4170** `MgrOpIndex` — مشي lower-bound مضمّن (المرشح puVar4 يُحدّث عند `node->key >= key`)، عند الفقد: **سجل {key, ضوضاء-ال-pad (غير مهيأ في الأصل — uStack_64<<0x20), _time64(0)}** عبر EmplaceHint بتلميح {proxy, cand}، **بوابة العقدة-ضد-الرأس** (`pProxy` يحمل قاعدة النواة، `cand == base->head` → invalid)، والرجوع **node+0x20** (`puVar4 + 4` qwords) — المستدعي يكتب القيمة/الوقت عبر الخرج (مثل puVar4[1] = +0x28).
+
+**ب) عائلة غرَض الرسائل (`TrainingMsgGlue.cpp`):**
+- **FUN_1419e50b0** `CtorCMsgBase` — vftable + `tq::CMsg::Init` (نموذج D13: وصلة عقدة قائمة +0x40).
+- **CMsgLogin (0x3ea):** dtor 1419e51a0 (vftable المشتق ثم CMsg)، TryCreate 1419e51d0 (البوابة `*(short*)(msg+0x50) == 0x3ea` — نفس نمط Title D3)، deleting dtor 1419e5240 (dtor + `operator_delete` عند flags&1).
+- **CMsgLogout (0x3eb):** 1419e52e0 / 1419e5310 / 1419e5380 (نفس النمط، 0x3eb).
+- **CMsgTraining (0x7fc, طول 0xc):** dtor 1419e5420، **Make 1419e5450** — الكتابة الحرفية بالترتيب: buf+4=action، buf+8=param، buf+2=0x7fc، **buf+0=0xc الطول**، رجوع true؛ TryCreate 1419e5490 (0x7fc)؛ deleting dtor 1419e5560.
+- **FUN_1419e54c0** `DispatchMsgTraining` — قراءة الفعل من **buf+4** (عبر tail+0x408) ثم التوزيع: **0 → vt+0x30، 1 → vt+0x40، 3 → vt+0x28، 4 → vt+0x38** (الجداول غير المستردة 1419e5538/5522/550c = الفتحات الحرفية — Seams `g_fnMgrvt28/30/38/40` على المفرد) — الأفعال الأخرى لا تفعل شيئاً (سقوط حرفي).
+- **CMsgTrainingInfo (0x7fb, طول 0x10):** ctor 1419e55b0 (نموذج D13: vftable+Init مرتين + +0x408 = عقدة +0x40)، dtor 1419e5600، **Make 1419e5630** — الكتابة: buf+0=0x10، buf+2=0x7fb، buf+4/+6/+8 = ثلاث u16، buf+0xc = u32 (CONCAT71 حرفي)، TryCreate 1419e5690 (0x7fb)، deleting dtor 1419e56c0.
+
+### الأخطاء المصحّحة أثناء الوحدة:
+1. **ترتيب Distance** — القراءة الأولى ظنّت param_1 النواة؛ الأصل: (الأول، الأخير، &العدد) — المشي يقدّم عقدة الأول.
+2. **حلقة السلف في TryEmplace** — خرائط plVar4 (dup-out) تُحدّث في **رأس كل اختبار** للحلقة وليس داخل الجسم؛ التصحيح: pDup = pCmp قبل الحلقة وفي نهاية كل جسم.
+3. **تسلق السلف**: local_30 = plVar5 = الأب القديم (وليس الجد الجديد) — كانت تكتب الأب الجديد.
+4. **EraseKeyCount** ينسخ الزوجين الأصليين (lower-bound) للعدّ والمحي — المشي نفسه في سجلات لا يمس الزوجين.
+5. اختبارياً: تحرير مزدوج في سلسلة الوكيل (DeletePtr يحرر القيمة فقط) وأجسام stack مع dtors حذفية عدّاد التخصيص.
+
+### الاختبار: TRAINING-D15-OK — **15/15 وحدة × 6/6 تشغيلات** (أقسام: TryEmplace الإدراج/التكرار/السلف/Lmost مع ثوابت RB بعد كل عملية، Distance بوابات proxy وحدود، EraseRange مسار Clear والمدى الأوسط، EraseKeyCount بمفاتيح موجودة/غائبة، EmplaceHint كل فروع الشلال (فارغ/begin/end/وسط سلف/خلف/fallback)، ProxyChainPush ×3 وDeletePtr، MgrOpIndex إنشاء-عند-فقد + قيمة node+0x20 + _time64 عبر Seam + hit-بلا-إدراج، عائلة CMsg كاملة: Make bytes على السلك (0x7fc/0xc و0x7fb/0x10)، TryCreate الأنواع 0x3ea/0x3eb/0x7fc/0x7fb عبر +0x50، الموزّع بأفعال 0/1/3/4، dtors/إزالة مع uDel، MgrDtorProxy وAtexitTeardown — **توازن تخصيصات صفري**).
