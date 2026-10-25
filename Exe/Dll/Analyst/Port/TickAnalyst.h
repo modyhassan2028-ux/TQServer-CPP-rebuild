@@ -50,9 +50,16 @@ public:
     IAnalyst(const IAnalyst&);     // 140a41030
     IAnalyst& operator=(const IAnalyst&);  // 140a41040
     virtual ~IAnalyst() = default;
-    // vtable slot +0x20 — called by ~CTickAnalyst as
-    // (id, usedTicks). Slot target not yet identified
-    // in the binary: documented TBD in PORTING_LOG.
+    // vtable slots (resolved D2):
+    //   +0x10 -> FUN_140a412e0 (this, id) — identity echo
+    //   +0x18 -> FUN_140a412f0 (this, path, ...) — the
+    //            literal analyst.cpp log + tick-zero reset
+    //   +0x20 -> FUN_140a41490 TicksAdd (this, id, ticks)
+    //            — THE slot ~CTickAnalyst dispatches
+    virtual void TickEcho(int nId);
+    virtual void TickLog(const char* pszPath,
+                        const void* p1 = nullptr,
+                        const void* p2 = nullptr);
     virtual void TickRecord(int nId, int64_t nUsedTicks);
 };
 
@@ -91,15 +98,21 @@ public:
 };
 
 // ------------------------------------------------------------
-// FUN_140a41150 / FUN_140a41190 — the 0x40 record ctor/dtor
-// used by the eh_vector iterator on the singleton's array:
-//   ctor: zero the first 0x18 bytes, then construct a
-//         std::string at +0x18
-//   dtor: destroy the string at +0x18
+// FUN_140a41150 / FUN_140a41190 — the 0x40 record ctor/dtor.
+// Layout CONFIRMED (D2) by crossing 41200/41280/41490/1310/
+// 1460 (all analyst-relative; the array base is analyst+0x10):
+//   +0x00 int32 type    (Add 41200; the report gate)
+//   +0x04 int32 count   (TicksAdd ++, report cnt)
+//   +0x08 int64 max     (TicksAdd)
+//   +0x10 int64 total   (TicksAdd)
+//   +0x18 std::string name (MSVC 0x20 -> record total 0x40)
 // ------------------------------------------------------------
 struct SAnalystRecord {              // 0x40
-    uint8_t  abyZero18[0x18];        // +0x00 (type at +0x10, u32 at +0x14)
-    std::string strName;             // +0x18 (MSVC layout 0x28 -> 0x40 total)
+    int32_t  nType;      // +0x00
+    int32_t  nCount;     // +0x04
+    int64_t  llMax;      // +0x08
+    int64_t  llTotal;    // +0x10
+    std::string strName; // +0x18
 };
 void AnalystRecordCtor(SAnalystRecord* p);   // 140a41150
 void AnalystRecordDtor(SAnalystRecord* p);   // 140a41190
@@ -113,10 +126,58 @@ void AnalystRecordDtor(SAnalystRecord* p);   // 140a41190
 // Returns (IAnalyst*)&DAT_140a45090.
 // ------------------------------------------------------------
 IAnalyst* AnalystSingleton();
+// ===== CAnalyst (D2) — the concrete singleton =====
+class CAnalyst : public IAnalyst {
+public:
+    CAnalyst();                       // 140a414d0
+    ~CAnalyst() override;             // 140a411c0 / 41530
+    // 140a412e0 (this, id) -> FUN_140a41690 identity
+    void TickEcho(int nId) override;
+    // 140a412f0 (this, path, ...) -> 41050 with the
+    // literal "f:\version\cqserver-78.0.11-1204\
+    // analyst\analyst.cpp" + the 41650 tick reset
+    void TickLog(const char* pszPath,
+                 const void* p1, const void* p2) override;
+    // 140a41490 — TicksAdd; bounds -> the literal log
+    // "TicksAdd failed for index %d"
+    void TickRecord(int nId, int64_t nUsedTicks) override;
+
+    // 140a41200 — Add(id, type, name):
+    // id < 0x100, name non-null and non-empty; writes
+    // rec+0x00 type, rec+0x18 name, count = max(count,
+    // id+1); returns the masked TRUE.
+    bool Add(uint32_t uId, int32_t nType,
+             const char* pszName);
+    // 140a41280 — Get(id, &total, &max, &count)
+    bool Get(uint32_t uId, int64_t* pTotal,
+             int64_t* pMax, int32_t* pCount);
+    // 140a41310 — Report(path): per record with type!=0
+    // the literal "%s, cnt=%ld, tot=%dms, avg=%.2fms,
+    // max=%dms" line via the 41050 log
+    void Report(const char* pszPath);
+    // 140a41460 — ResetStats: clears rec+0x04/+0x08/
+    // +0x10 only (type + name kept)
+    void ResetStats();
+
+    int32_t Count() const { return m_nCount; }
+    SAnalystRecord m_arr[0x100];  // +0x10 (public: test)
+private:
+    friend IAnalyst* AnalystSingleton();
+    int32_t  m_nCount;      // +0x08
+};
+
+// 140a41050 — the log fn: _vsnprintf(0x740 buffer),
+// basic_string(path), find('/',0,1); if FOUND ->
+// tq::log_Save(path, buf, 1)  (VERBATIM: npos skips)
+void AnalystLog(const char* pszPath, const char* pszFmt,
+                ...);
 // test hooks
 bool AnalystSingletonInited();
 uint32_t AnalystRecordCount();
 void AnalystRecordAt(uint32_t i, SAnalystRecord& out);
 void AnalystTestResetSingleton();
+CAnalyst* AnalystConcrete();   // test hook
+void SetLogSave(std::function<
+    void(const char*, const char*)> fn);
 
 } // namespace analyst

@@ -6539,3 +6539,40 @@ FUN_140024860 كاملة
 
 ### الاختبار
 `tests/analyst_d1_test.cpp` → يطبع `ANALYST-D1-OK` — **6/6 مرات** خضراً (48 فحص: العنونة الثلاثية للـ op=، ختم TimeGet، فرق int في GetUsedMS، دلالات IAnalyst بدون نسخ، النداء عبر vtable+0x20 في المدمر، ومصفوفة 0x100×0x40 بسترنجات فارغة).
+
+## الوحدة D2 — Analyst.dll: عمليات سجلات CAnalyst + إقفال الملف بالكامل
+
+**التاريخ:** الأحد 25-10-2026 — **النتيجة: Analyst.dll (الملف #1 في الموجة 1) مقفول** — كل الدوال غير الـ CRT (29 دالة) منفذة حرفياً.
+
+### حل تخطيط السجل (أهم إنجاز الوحدة — بالتقاطع بين 6 دوال)
+كل دوال السجلات analyst-relative (الأساس: الكائن، والمصفوفة عند analyst+0x10):
+- **rec+0x00 int32 type** (بوابة Add والتقرير)
+- **rec+0x04 int32 count** (زد في TicksAdd + قراءة التقرير cnt)
+- **rec+0x08 int64 max** (TicksAdd)
+- **rec+0x10 int64 total** (TicksAdd: total+=ticks)
+- **rec+0x18 std::string** (0x20 بايت MSVC → السجل 0x40 كامل)
+الدليل: 41150 (تصفير +0x00..0x18 + بناء السترنج) / 41190 (هدم +0x18) / 41200 (type عند +0x10-analyst=rec+0x00، السترنج عند +0x28-analyst=rec+0x18، العد عند analyst+0x08) / 41280 (قراءات +0x14/+0x18/+0x20 = rec+0x04/08/10) / 41490 (زد/جمع/مقارنة) / 1460 (تصفير +0x04/08/10 فقط) / 1310 (القراءات + النص المنسق).
+
+### المنفّذ حرفياً
+| العنوان | الدالة | ملاحظات |
+|---|---|---|
+| 140a41200 | `CAnalyst::Add` | البوابات: id<0x100، الاسم غير فارغ، rec+0x00==0 (لا إضافة لسجل مُعرّف)؛ العد = max(العد، id+1) |
+| 140a41280 | `CAnalyst::Get` | المدى [0، العد)؛ خارجياً: total/max/count |
+| 140a41490 | `CAnalyst::TicksAdd` | **خانة vtable+0x20** (حل الـ TBD بتاع D1)؛ اللوج الحرفي `"TicksAdd failed for index %d"` |
+| 140a41310 | `CAnalyst::Report` | الصيغة الحرفية `"%s, cnt=%ld, tot=%dms, avg=%.2fms, max=%dms"` (avg=جمع/عدد كـ float ثم double)؛ **ملاحظة ديكومبايل**: قراءة السترنج في 1310 ظاهرة بإزاحة +8 عن باقي الدوال (artifact من Ghidra في puVar4[3]/*puVar4) — اتوثقت |
+| 140a41460 | `CAnalyst::ResetStats` | يمسح +0x04/+0x08/+0x10 **فقط** (النوع والاسم محفوظان) |
+| 140a41050 | `AnalystLog` | _vsnprintf لبافر 0x740 (memset 0x73f) + `basic_string::find('/',0,1)`: **npos يتخطى اللوج** (اللوج يحدث فقط لو المسار فيه '/') — حرفي، عبر tq::log_Save(path, buf, 1) |
+| 140a412e0 | `CAnalyst::TickEcho` | خانة vtable+0x10 — نداء 41690 هوية مهمل النتيجة |
+| 140a412f0 | `CAnalyst::TickLog` | خانة vtable+0x18 — نداء 41050 بالسلسلة الحرفية `"f:\version\cqserver-78.0.11-1204\analyst\analyst.cpp"` **ثم** ضبط صفر التيك 41650 (الاتنين بيتنفذوا دايماً) |
+| 140a414d0 | `CAnalyst::CAnalyst` | كتابة vftable + تصفير العد + eh_vector ctor للمصفوفة |
+| 140a411c0/41530 | `~CAnalyst` | الهدم الكامل + الـ deleting dtor |
+| 140a415a0 | مكرر المفردة | نفس منطق 41640 (نسخة وصول أخرى) |
+
+### الـ vtable النهائي الموثق (CAnalyst::vftable)
+`[0]=deleting dtor 41530 / [1]=complete dtor 411c0 / +0x10=412e0 / +0x18=412f0 / +0x20=41490 TicksAdd` — باقي الخانات إن وُجدت: TBD (لا مستدعيات ظاهرة في الديكمبايل).
+
+### غير المنقول (قاعدة CRT المضمّنة — موثق)
+من 140a417f8 فصاعداً: `vector_deleting_destructor`, `_purecall`, `__GSHandlerCheck(41870)`, `memset`, `__CxxFrameHandler3`, `__ArrayUnwind`, `eh_vector_(destructor|constructor)_iterator`, `__GSHandlerCheck(Common)`, `operator_delete`, `_onexit/atexit`, `__dllonexit/_lock/_unlock`, `_ValidateImageBase/_FindPESection/_IsNonwritableInCurrentImage/_initterm(_e)`, `__report_gsfailure`, `terminate`, و`atexit(140a426e0)` للمفردة (سلوك نهاية العملية).
+
+### الاختبار
+`tests/analyst_d2_test.cpp` → `ANALYST-D2-OK` — **6/6 مرات** خضراً (60+ فحص) + اختبار D1 لسه أخضر 6/6. **الملف مقفول — التالي: Title.dll (D3).**

@@ -112,9 +112,9 @@ int main() {
         AnalystSingleton();
         SAnalystRecord r0;
         AnalystRecordAt(0, r0);
-        // 41150: first 0x18 zeroed, empty string
-        for (int i = 0; i < 0x18; ++i)
-            assert(r0.abyZero18[i] == 0);
+        // 41150: the four data fields zeroed
+        assert(r0.nType == 0 && r0.nCount == 0);
+        assert(r0.llMax == 0 && r0.llTotal == 0);
         assert(r0.strName.empty());
         SAnalystRecord r255;
         AnalystRecordAt(255, r255);

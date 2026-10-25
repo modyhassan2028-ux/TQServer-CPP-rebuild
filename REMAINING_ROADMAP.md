@@ -10,7 +10,7 @@
 | CQCrossServer.exe | 3,127 | **مقفول** — كل الوحدات + 7 اختبارات انحدار |
 | NpcServer.exe | 7,239 | الوحدات 1-47: world/manager/generator/AI/حركة + القبض والسجن + الحاويات (A/B/Jail RB كاملة) |
 | MsgServer.exe | 59,977 | M1-M66: مصادقة/تشفير (DES/MD5/DH/Md5Checksum)، سوكتات، WM_TIMER، 14 خيط، مراقبة الغش، cq_config، خريطة الأنشطة، **الشجرة الحمراء-السوداء للخريطة والست 100% حرفية** (insert/erase/copy/rebalance/interior-hint — صفر TBD) |
-| 43 DLL (أنظمة اللعب) | ~58,391 | **لم تبدأ** |
+| 43 DLL (أنظمة اللعب) | ~58,391 | **بدأت: Analyst.dll مقفول (D1+D2) — التالي Title.dll** |
 
 ## 2) المتبقي — بالأولوية (مسارات التنفيذ الفعلية)
 
