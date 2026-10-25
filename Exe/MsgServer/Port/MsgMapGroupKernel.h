@@ -64,12 +64,15 @@ namespace msg {
 //   FUN_14000bfd0 @ 14000bfd0 - insert
 //   FUN_14000ab40 @ 14000ab40 - erase
 // The sentinel flag byte (+0x1d) IS the "end()" marker.
-struct SSetNode {
-    SSetNode* m_pPrev;    // +0
-    SSetNode* m_pNext;    // +8
-    SSetNode* m_pParent;  // +0x10
-    uint8_t   m_byFlag;   // node: 0; sentinel: 1
-    uint8_t   m_bySentinelReady; // (size-3) pre-flag
+struct SSetNode {          // ORIGINAL 0x20 node layout
+    SSetNode* m_pPrev;    // +0x00 left
+    SSetNode* m_pNext;    // +0x08 right
+    SSetNode* m_pParent;  // +0x10 parent
+    uint32_t  m_dwKey;    // +0x18 (param_5 of FUN_140009ab0)
+    uint8_t   m_byColor;  // +0x1c color
+    uint8_t   m_byFlag;   // +0x1d: node 0 / sentinel 1
+    uint8_t   m_byReady;  // +0x1e pad (sentinel pre-flag
+                          // pattern lives at size-4/-3 raw)
 };
 
 // insert: returns the new node; throws the VERBATIM

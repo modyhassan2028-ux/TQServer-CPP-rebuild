@@ -73,7 +73,7 @@ int main() {
     SObjSet s; std::memset(&s, 0, sizeof s);
     // sentinel: raised flag byte (+0x1d) + tri-self-link
     SSetNode sent; std::memset(&sent, 0, sizeof sent);
-    sent.m_byFlag = 1; sent.m_bySentinelReady = 1;
+    sent.m_byFlag = 1; sent.m_byReady = 1;
     sent.m_pPrev = sent.m_pNext = sent.m_pParent = &sent;
     s.m_pInner = (SInnerObj*)&sent; s.m_qCount = 0;
     SSetNode* n1 = msg::SetInsert(&s, &sent, false, 1);
@@ -103,9 +103,9 @@ int main() {
             0xABCD, 0);
         assert(pN->m_pPrev == 0 && pN->m_pNext == 0 &&
                pN->m_pParent == 0);
-        assert(*(uint32_t*)((uint8_t*)pN+0x18) == 0xABCD);
-        assert(*(uint8_t*)((uint8_t*)pN+0x1c) == 0);
-        assert(*(uint8_t*)((uint8_t*)pN+0x1d) == 0);
+        assert(pN->m_dwKey == 0xABCD);
+        assert(pN->m_byColor == 0);
+        assert(pN->m_byFlag == 0);
         std::free(pN);
     }
     // iterator prev: parent-is-sentinel path (descend

@@ -89,11 +89,11 @@ SSetNode* SetInsert(SObjSet* pSet, SSetNode* pHint,
         throw std::length_error(
             "map/set<T> too long");
     }
-    // ORIGINAL: FUN_140009ab0 allocates + links the node
-    // into the tree (the red-black rebalance) - seam:
-    SSetNode* pNew = new SSetNode{nullptr, nullptr,
-                                  nullptr, 0, 0};
-    pNew->m_pParent = (SSetNode*)(uintptr_t)qKey;
+    // ORIGINAL: FUN_140009ab0(set, set.inner, hint,
+    // set.inner, key, 0) - now the REAL allocator (M50):
+    SSetNode* pSent0 = (SSetNode*)pSet->m_pInner;
+    SSetNode* pNew = TreeNodeAlloc(pSent0, pHint, pSent0,
+                                   (uint32_t)qKey, 0);
     pSet->m_qCount++;               // [7]+1 VERBATIM
     SSetNode* pSent = (SSetNode*)pSet->m_pInner;
     if (pHint == pSent) {
@@ -127,18 +127,71 @@ void SetErase(SObjSet* pSet, SSetNode* pIt) {
         throw std::out_of_range(
             "invalid map/set<T> iterator");
     }
-    // ORIGINAL FUN_1400075f0: the tree erase-rebalance -
-    // seam (TBD); the unlink relink VERBATIM:
+    // ===== M51: the VERBATIM splice of FUN_14000ab40
+    // layout: +0 left, +8 right, +0x10 parent, +0x1c color
     SSetNode* pSent = (SSetNode*)pSet->m_pInner;
-    SSetNode* pPrev = pIt->m_pPrev;
-    SSetNode* pNext = pIt->m_pNext;
-    if (pPrev && pPrev->m_byFlag == 0)
-        pPrev->m_pNext = pNext;
-    if (pNext && pNext->m_byFlag == 0)
-        pNext->m_pPrev = pPrev;
-    // head/tail fixups on the sentinel:
-    if (pSent->m_pNext == pIt) pSent->m_pNext = pNext;
-    if (pSent->m_pPrev == pIt) pSent->m_pPrev = pPrev;
+    uint8_t* pbyE = (uint8_t*)pIt;
+    SSetNode* pL = pIt->m_pPrev;        // *plVar5
+    SSetNode* pR = pIt->m_pNext;        // plVar5[1]
+    SSetNode* pPar = pIt->m_pParent;    // plVar5[2]
+    // the predecessor walk (the ORIGINAL ran
+    // FUN_1400075f0 on the iterator first):
+    SSetNode* pPred = pIt;
+    IteratorPrev(&pPred);                // replacement node
+    SSetNode* pParPred = pPred->m_pParent;  // plVar10[2]
+    bool bTwo = (pL->m_byFlag == 0) && (pR->m_byFlag == 0)
+              && (pPred != pIt);
+    if (bTwo) {
+        // plVar11[1] = plVar10; *plVar10 = *plVar5
+        pL->m_pNext = pPred;
+        pPred->m_pPrev = pL;
+        if (pPred != pPar) {
+            SSetNode* pRPred = pPred->m_pNext;
+            if (pParPred->m_byFlag == 0)
+                pParPred->m_pNext = pRPred;
+            pRPred->m_pPrev = pParPred;
+            pPred->m_pParent = pPar;
+            pPar->m_pNext = pPred;      // *(plVar5[2]+8)
+        }
+        // head fixup / sibling fixup VERBATIM:
+        if (pSent->m_pNext == pIt) {
+            pSent->m_pNext = pPred;      // *(param_1[6]+8)
+        } else {
+            SSetNode* pSib = pIt->m_pNext;
+            if (pSib->m_pPrev == pIt)
+                pSib->m_pPrev = pPred;
+            else
+                pSib->m_pParent = pPred; // puVar7[2]
+        }
+        pPred->m_pNext = pR;             // plVar10[1]
+        // the COLOR transplant @+0x1c VERBATIM (swap):
+        if (pPred != pIt) {
+            uint8_t t = pPred->m_byColor;
+            pPred->m_byColor = pIt->m_byColor;
+            pIt->m_byColor = t;
+        }
+        // leftmost fixup: *(longlong**)param_1[6] = pred
+        pSent->m_pPrev = pPred;          // [in this port:
+        //  +0 slot == m_pPrev/leftmost] VERBATIM slot 0
+    } else {
+        // single/no-child relink (simplified, tail of
+        // the ORIGINAL else branch - TBD full splice)
+        if (pL->m_byFlag == 0)
+            pL->m_pParent = pPar;
+        if (pR->m_byFlag == 0)
+            pR->m_pParent = pPar;
+        if (pSent->m_pNext == pIt)
+            pSent->m_pNext = (pR->m_byFlag==0)?pR:pL;
+        if (pSent->m_pPrev == pIt)
+            pSent->m_pPrev = (pL->m_byFlag==0)?pL:pR;
+    }
+    // rightmost fixup on the sentinel (+0x10):
+    if (pSent->m_pParent == pIt) {
+        SSetNode* pWalk = bTwo ? pPred : pParPred;
+        pSent->m_pParent = pWalk;
+    }
+    // LAB_14000ad2c: the RB recolor/rotate fix-up loop
+    // (FUN_140008940 = rotate) - seam TBD
     pSet->m_qCount--;               // [7]-1 VERBATIM
     delete pIt;
 }
@@ -159,9 +212,9 @@ SSetNode* TreeNodeAlloc(SSetNode* pLeft, SSetNode* pRight,
         p->m_pPrev   = pLeft;     // +0
         p->m_pNext   = pRight;    // +8
         p->m_pParent = pParent;   // +0x10
-        *(uint32_t*)((uint8_t*)p + 0x18) = dwKey;
-        *(uint8_t*)((uint8_t*)p + 0x1c)   = byColor;
-        *(uint8_t*)((uint8_t*)p + 0x1d)   = 0;  // end-flag
+        p->m_dwKey   = dwKey;     // +0x18
+        p->m_byColor = byColor;   // +0x1c
+        p->m_byFlag  = 0;         // +0x1d end-flag
     }
     return p;
 }
