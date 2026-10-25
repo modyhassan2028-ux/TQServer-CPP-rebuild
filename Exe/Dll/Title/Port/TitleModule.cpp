@@ -184,6 +184,12 @@ void* ModuleCreate(void* pKernel, uint32_t uId) {
     return p;
 }
 
+// DAT_14197d2a0 raw ref for the atexit destroy path
+// (141971ed0's vtable+0x20 call)
+CTitleMgr* GetTitleMgrRefForDestroy() {
+    return s_pMgrInstance;
+}
+
 // TEST-ONLY reset of the singleton globals
 void ResetTitleMgrForTest() {
     s_pMgrInstance = nullptr;
