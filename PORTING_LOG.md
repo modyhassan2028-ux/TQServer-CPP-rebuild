@@ -4930,3 +4930,52 @@ M14: بنّاء توكن CAST (FUN_140503c00)
   في النداء الأول أو الثاني → 0
   وout ما اتلمستش).
 - **الرجريجن 55/55 أخضر.**
+
+## جلسة 2026-10-26 14:00 — MsgServer الوحدات
+M15+M16+M17 (دفعة متصلة)
+
+### الوحدة M15 (Exe/MsgServer/Port/MsgDhInit)
+- **FUN_140505380 (مُحمّل الـ DH):** الحارس
+  DAT_140976588 → CIniFile("shell.ini",
+  "DHParam") → **RAND_seed الحرفي**
+  `"AFX_SECURITY_H__13DFAA41_0437_4D50_
+  8A40_CC7412122F69__INCLUDED_%d" % time32()`
+  → قراءة DHFile (افتراضي **"dh.pem"**
+  بـ strncpy 0x103) → BIO_new(BIO_s_file)
+  → BIO_ctrl(bio, **0x6c**, 3, name) →
+  PEM_read_bio_DHparams → DAT_140976590/598
+  → **DH_check** ببوابة `codes & 1|2|4|8
+  == 0` → DH_generate_key → رفع الحارس.
+  حرس الـ RAII منمذج كـ seams بنفس
+  المواضع. فشل ini مش فشلة — الافتراضي
+  يكمل.
+- **الاختبار:** السعيد + العلم مرة واحدة +
+  7 فروع فشل.
+
+### الوحدة M16 (Exe/MsgServer/Port/MsgDateParse)
+- **FUN_140508070:** محلل تاريخ نصّي إلى
+  **struct tm** (mday=3، mon=4،
+  year-1900=5). جدول الشهور مستخرج من
+  **PTR_DAT_140970280 في البيناري**
+  (Jan..Dec). الـ sprintf = نسخة
+  C-string حتى NUL المصدر (مختلفة عن
+  strncpy للنصوص القصيرة) + strncpy
+  راجع + [len-1]=0.
+- **اكتشاف بالديباج:** أي توكن **≥ 0x20
+  حرف بيتساقط كله** (العدّاد بيقف عند
+  0x20 والفحص ==0x20 بيفضّي التوكن).
+  الفواصل أي حرف < '!' (0x21). السنة =
+  atoi - **0x76c**.
+- **الاختبار:** 26 حالة.
+
+### الوحدة M17 (Exe/MsgServer/Port/MsgServerStamp)
+- **FUN_140508740:** مُهيّئ ختم السيرفر
+  على DAT_1409766d0 (0x54 بايت، تخطيط
+  static_assert): sDate@+0x00، tm@+0x0c،
+  uTimeGet@+0x40 (tq::TimeGet(1))،
+  uA@+0x4c/uB@+0x4e، uSeed@+0x50
+  (FUN_1405082d0). التحليل بيشتغل على
+  النص المصفّر للتو (حرفي).
+- **FUN_1405086f0:** stub يرجع 1.
+- **الرجريجن 58/58 أخضر** (typerecord
+  يحتاج MariaDB شغالة).
