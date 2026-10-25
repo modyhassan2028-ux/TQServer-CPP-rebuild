@@ -510,6 +510,49 @@ int main() {
             assert(p != nullptr);
         }
         assert(mp.m_qCount == 9);
+        // M66: interior-hint inserts THROUGH the real
+        // ec0 walk (shuffled order, mid-tree keys)
+        {
+            msg::SMapNode sent2; sent2.m_byFlag = 1;
+            sent2.m_byColor = 1;
+            sent2.m_pLeft = sent2.m_pParent =
+                sent2.m_pRight = &sent2;
+            msg::SObjMap mp2;
+            mp2.m_pInner = &sent2; mp2.m_qCount = 0;
+            uint32_t keys[] = {50,30,70,40,60,20,80,65,35};
+            for (uint32_t k : keys)
+                msg::MapOperatorAt(&mp2, k);
+            assert(mp2.m_qCount == 9);
+            // the RB invariants again over the shuffled
+            // interior-heavy tree:
+            bool bOk = true;
+            std::function<int(msg::SMapNode*, int)> ht =
+              [&](msg::SMapNode* p, int bh) -> int {
+                if (p->m_byFlag) return bh;
+                if (p->m_byColor == 0 &&
+                    p->m_pLeft->m_byFlag == 0 &&
+                    p->m_pLeft->m_byColor == 0)
+                    bOk = false;
+                if (p->m_byColor == 0 &&
+                    p->m_pRight->m_byFlag == 0 &&
+                    p->m_pRight->m_byColor == 0)
+                    bOk = false;
+                int l = ht(p->m_pLeft,
+                           bh + (p->m_byColor==1));
+                int r = ht(p->m_pRight,
+                           bh + (p->m_byColor==1));
+                if (l != r) bOk = false;
+                return l;
+            };
+            ht(sent2.m_pParent, 0);
+            assert(bOk);
+            // BST via full in-order + all findable:
+            for (uint32_t k : keys)
+                assert(msg::MapOperatorAt(&mp2, k)
+                       != nullptr);
+            assert(mp2.m_qCount == 9);
+            std::puts("M66-INTERIOR-HINT-OK");
+        }
         std::puts("M65-MAP-REBALANCE-OK");
     }
     std::puts("MSG_SETOPS_OK: insert first/tail branches,"

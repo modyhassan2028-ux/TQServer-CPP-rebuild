@@ -636,11 +636,61 @@ uint32_t* MapOperatorAt(SObjMap* pMap, uint32_t dwKey) {
             // ORIGINAL ec0 else: pCand == SENTINEL &&
             // rightmost->key < key -> 600(0, rightmost)
             pHint = pRightM; bAfter = false;
+        } else if (dwKey < pCand->m_dwKey) {
+            // ===== M66: the ec0 interior walk VERBATIM
+            // (key < hint->key): find the PREDECESSOR of
+            // the candidate, validate pred->key < key,
+            // then link right of pred (no right child)
+            // or LEFT of the candidate =====
+            SMapNode* pPred;
+            if (pCand->m_pLeft->m_byFlag == 0) {
+                // descend left, then the +0x10 chain:
+                pPred = pCand->m_pLeft;
+                while (pPred->m_pRight->m_byFlag == 0)
+                    pPred = pPred->m_pRight;
+            } else {
+                // climb while the current is the
+                // parent's LEFT child:
+                SMapNode* pN = pCand;
+                SMapNode* pP = pCand->m_pParent;
+                while (pP->m_byFlag == 0 &&
+                       pN == pP->m_pLeft) {
+                    pN = pP; pP = pP->m_pParent;
+                }
+                pPred = pP;
+                // guard: the sentinel means the candidate
+                // IS the leftmost - the leftmost branch
+                // (already handled) is the safe route
+                if (pPred->m_byFlag != 0) {
+                    pHint = pLeftM; bAfter = true;
+                }
+            }
+            if (pPred->m_byFlag == 0 &&
+                pPred->m_dwKey < dwKey) {
+                // the ORIGINAL checks: pred->right is the
+                // sentinel -> 600(0, pred) insert RIGHT;
+                // else 600(1, candidate) insert LEFT
+                if (pPred->m_pRight->m_byFlag != 0) {
+                    pHint = pPred; bAfter = false;
+                } else {
+                    pHint = pCand; bAfter = true;
+                }
+            } else if (pPred->m_byFlag != 0) {
+                ; // already routed to leftmost above
+            } else {
+                // pred->key >= key: an INVALID hint - the
+                // ORIGINAL falls back to the general
+                // search (unreachable from operator[]'s
+                // own lower-bound walk); route LEFT of the
+                // candidate as the safe equivalent
+                pHint = pCand; bAfter = true;
+            }
         } else {
-            // the ec0 INTERIOR hint-validation walk is
-            // TBD; provisional: the lower-bound candidate
-            pHint = pCand;
-            bAfter = dwKey < pCand->m_dwKey;
+            // (hint->key < key): the mirror interior walk
+            // - for operator[] the walk never produces a
+            // candidate smaller than the key, so this is
+            // unreachable; rightmost was handled above
+            pHint = pRightM; bAfter = false;
         }
         // the default record VERBATIM: local_c0 =
         // {key, 0,0,0,0,0,0}
