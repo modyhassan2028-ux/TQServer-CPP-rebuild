@@ -3,5 +3,6 @@
   <ItemGroup>
     <ClCompile Include="Port\TitleModule.cpp" />
     <ClCompile Include="Port\TitleRecord.cpp" />
+    <ClCompile Include="Port\TitleGrant.cpp" />
   </ItemGroup>
 </Project>
