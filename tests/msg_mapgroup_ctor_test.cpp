@@ -1,5 +1,6 @@
 // M47: FUN_1400f0000 CMapGroupKernel ctor + container family
 #include "../Exe/MsgServer/Port/MsgMapGroupKernel.h"
+#include "../Exe/MsgServer/Port/MsgHashProbe.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>
@@ -553,7 +554,57 @@ int main() {
             assert(mp2.m_qCount == 9);
             std::puts("M66-INTERIOR-HINT-OK");
         }
-        std::puts("M65-MAP-REBALANCE-OK");
+        // M67: the hash-map probe (FUN_14000db40)
+    {
+        // hand-built container VERBATIM layout:
+        // mask = 1 (2 buckets), END marker = nodeE
+        uint8_t abC[0x88]; std::memset(abC,0,sizeof abC);
+        struct HNode { void* pNext; void* pPad[1];
+                       int32_t dwKey; };
+        HNode nodeE; nodeE.pNext=&nodeE;
+        nodeE.pPad[0]=nullptr; nodeE.dwKey=-1;
+        // 5679 = odd: 5679*0x41a7 & 1 = 1 -> bucket 1
+        HNode node1; node1.pNext=&nodeE;
+        node1.pPad[0]=nullptr; node1.dwKey=5679;
+        HNode node0; node0.pNext=&node1;
+        node0.pPad[0]=nullptr; node0.dwKey=1234;
+        // MSVC-style interval buckets VERBATIM: the
+        // chain of bucket i = [bucket[i], bucket[i+1])
+        // - one list, slot per bucket + one-past=END
+        uint64_t aBuck[8] =
+          {0,(uint64_t)&node0,0,(uint64_t)&node1,
+           0,(uint64_t)&nodeE,0,(uint64_t)&nodeE};
+        *(void**)(abC+0x10) = &node0;   // list first
+        *(void**)(abC+0x38) = &nodeE;   // END marker
+        *(uint64_t*)(abC+0x60) = (uint64_t)aBuck;
+        *(uint64_t*)(abC+0x68) =
+            (uint64_t)((char*)aBuck + 4*0x10);
+        *(uint64_t*)(abC+0x78) = 1;     // mask
+        *(uint64_t*)(abC+0x80) = 2;     // count
+        void* it[2] = {nullptr, nullptr};
+        // HIT: key 1234 lives in bucket 0's chain
+        int32_t k0 = 1234;
+        msg::HashProbeFind(abC, it, &k0);
+        assert(it[1] == &node0);        // the found node
+        // HIT: key 5679 (bucket 1's interval)
+        int32_t k1 = 5679;
+        msg::HashProbeFind(abC, it, &k1);
+        assert(it[1] == &node1);
+        // the list-first element VERBATIM
+        assert(it[0] == &node0);
+        // MISS: a key absent from every chain - the
+        // probe must terminate at the END marker
+        int32_t kM = 9999;
+        msg::HashProbeFind(abC, it, &kM);
+        assert(it[1] == &nodeE);        // END marker
+        // MISS from bucket 0 (even hash): the chain
+        // interval ends AT node1 = bucket[1]'s head
+        int32_t kM2 = 4242;
+        msg::HashProbeFind(abC, it, &kM2);
+        assert(it[1] == &nodeE);
+        std::puts("M67-HASH-PROBE-OK");
+    }
+    std::puts("M65-MAP-REBALANCE-OK");
     }
     std::puts("MSG_SETOPS_OK: insert first/tail branches,"
               " erase unlink + end() out_of_range"
