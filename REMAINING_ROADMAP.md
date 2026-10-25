@@ -74,13 +74,16 @@
   مفتاح تنازلي → معرّف تصاعدي) + المفتاح
   141552180 + غلاف نداء الفرز من f80، في
   `PeerageSort.{h,cpp}`.
-- **الباقي:** **(D21)** تحميل DB
-  FUN_1415569f0 (SELECT rank_num /
-  dyna_rank_rec_... عبر InstanceGet + عائلة
-  الصفوف) — عندها تُربط الـ seams
-  `g_fnMakePeerageObj`/`g_fnPeerageObjInit` في D17
-  بالأجسام الحقيقية، ثم أجسام vt الخدمة
-  والرسائل (معالجات 0x3ea/0x810).
+- **D21 (T5) مقفولة (25/10):** تحميل DB
+  FUN_1415569f0 (rank_num → mgr+0x48، مسح
+  dyna_rank_rec: تخطي الاسم الفارغ، بناء
+  CPeerageSort، ترجمة vt+0x80، push_back، ثم
+  المسح f80(mgr,1,0))؛ سِم g_fnPeerageObjInit في
+  D17 مربوط بالجسم الحقيقي (AttachPeerageService
+  مختبر).
+- **الباقي:** معالجات الرسائل الفعلية (0x3ea دخول
+  141557130-family / 0x810) وأجسام vt الخدمة
+  المتبقية.
 الأضخم أولاً — كل DLL وحدة استيراد مستقلة بنفس قواعد الحرفية:
 - **Syndicate.dll** 9,862 • **CQBase.dll** 3,095 • **ElitePKArenic.dll** 2,226 • **ClanPKArenic.dll** 2,315 • **PopPKArenic.dll** 2,311 • **DB.dll** 2,736 • **TeamArenic.dll** 2,039 • **Family.dll** 2,039 • **LeaveWord.dll** 1,803 • **FamilyArenic.dll** 1,756 • ثم الباقي (~25 ملف أصغر).
 
