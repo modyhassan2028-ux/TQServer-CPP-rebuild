@@ -50,6 +50,24 @@ int main() {
            true);  // (self-link overwrote q0)
     // FUN_1400e50b0 sets +0x78=1 BEFORE ef850 links it:
     assert(*((uint8_t*)k.m_setJail.m_pInner + 0x78) == 1);
+    // M48: the verbatim sentinel allocators - sizes in ctor
+    // order and the PRE-flags (before the container raises
+    // its own flag byte):
+    assert(k.m_vecAllocSizes.size() == 7);
+    assert(k.m_vecAllocSizes[0] == 0x20);  // FUN_140009e80
+    assert(k.m_vecAllocSizes[1] == 0x30);  // FUN_1400e4f40
+    assert(k.m_vecAllocSizes[2] == 0x20);
+    assert(k.m_vecAllocSizes[3] == 0x30);
+    assert(k.m_vecAllocSizes[4] == 0x20);
+    assert(k.m_vecAllocSizes[5] == 0x30);
+    assert(k.m_vecAllocSizes[6] == 0x80);  // FUN_1400e50b0
+    assert(*((uint8_t*)k.m_setA1.m_pInner + 0x1c) == 1);
+    assert(*((uint8_t*)k.m_setA1.m_pInner + 0x1d) == 1);
+    assert(*((uint8_t*)k.m_setB1.m_pInner + 0x28) == 1);
+    assert(*((uint8_t*)k.m_setB1.m_pInner + 0x29) == 1);
+    assert(*((uint8_t*)k.m_setJail.m_pInner + 0x78) == 1);
+    assert(*((uint8_t*)k.m_setJail.m_pInner + 0x79) == 1);
+
     std::puts("MSG_MAPGROUP_CTOR_OK: ctor order, 0x40 set "
               "layout, tri-self-link, flag bytes 0x1d/0x29/"
               "0x79, jail alloc 0x80/0x78=1");

@@ -50,5 +50,8 @@ public:
     std::function<SInnerObj*()> m_fnAllocA;  // FUN_140009e80
     std::function<SInnerObj*()> m_fnAllocB;  // FUN_1400e4f40
     std::function<SInnerObj*()> m_fnAllocJail; // FUN_1400e50b0
+    // test observation: sizes in ctor call order (A,B,A,B,
+    // A,B,JAIL = 0x20,0x30,...,0x80)
+    std::vector<size_t> m_vecAllocSizes;
 };
 } // namespace msg

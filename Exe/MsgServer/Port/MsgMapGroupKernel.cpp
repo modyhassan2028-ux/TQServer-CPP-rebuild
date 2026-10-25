@@ -30,13 +30,37 @@ static void InitObjSet(SObjSet* pSet,
 // ===== ORIGINAL FUN_1400f0000 @ 1400f0000 =====
 CMapGroupKernel::CMapGroupKernel() {
     // +0x44 dword = 0 (implicit: zero-init members)
+    // FUN_140009e80 (A sentinel): new(0x20), 3 qwords
+    // zeroed, +0x1c = 1, +0x1d = 0 (ef40 raises 0x1d later)
+    if (!m_fnAllocA)
+        m_fnAllocA = [this]{
+            m_vecAllocSizes.push_back(0x20);
+            auto* p = (SInnerObj*)operator new(0x20);
+            if (p) {
+                p->m_q[0] = p->m_q[1] = p->m_q[2] = 0;
+                *((uint8_t*)p + 0x1c) = 1;
+                *((uint8_t*)p + 0x1d) = 0;
+            }
+            return p; };
+    // FUN_1400e4f40 (B sentinel): new(0x30), +0x28 = 1,
+    // +0x29 = 0 (ec260 raises 0x29 later)
+    if (!m_fnAllocB)
+        m_fnAllocB = [this]{
+            m_vecAllocSizes.push_back(0x30);
+            auto* p = (SInnerObj*)operator new(0x30);
+            if (p) {
+                p->m_q[0] = p->m_q[1] = p->m_q[2] = 0;
+                *((uint8_t*)p + 0x28) = 1;
+                *((uint8_t*)p + 0x29) = 0;
+            }
+            return p; };
     // FUN_1400e50b0 default (when no seam injected):
     // new(0x80), first 3 qwords zeroed, @+0x78 = 1,
     // @+0x79 = 0 (before ef850 sets the 0x79 flag itself)
     if (!m_fnAllocJail)
-        m_fnAllocJail = []{
-            auto* p = (SInnerObj*)std::calloc(
-                sizeof(SInnerObj), 1);
+        m_fnAllocJail = [this]{
+            m_vecAllocSizes.push_back(0x80);
+            auto* p = (SInnerObj*)operator new(0x80);
             if (p) {
                 p->m_q[0] = p->m_q[1] = p->m_q[2] = 0;
                 *((uint8_t*)p + 0x78) = 1;
