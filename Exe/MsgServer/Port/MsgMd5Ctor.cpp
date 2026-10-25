@@ -2,10 +2,12 @@
 
 namespace msg {
 
-// MD5::CMD5Checksum::vftable (an image
-// address marker in the port)
+// MD5::CMD5Checksum::vftable - the REAL
+// image address (extracted from the
+// binary at file 0x799eb8; updated from
+// the M25 placeholder marker)
 const void* g_pMd5ChecksumVt =
-    (const void*)0x1407B0000ULL;
+    (const void*)0x14079b8b8ULL;
 
 // ===== ORIGINAL FUN_14050a570 @ 14050a570
 void* MsgMd5ChecksumCtor(void* pObj) {
