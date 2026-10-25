@@ -415,3 +415,10 @@ D24 — راجع REMAINING_ROADMAP.md أو دوال Peerage.dll المتبقية
 - **D26 مقفولة ومرفوعة:** SyndicateModule.{h,cpp} — هيكل الموديول 0x4608 كامل (22 دالة). رجريشن 26/26 × 6.
 - **التالي (D27):** عائلة CCrossMeritMgr في co_repo/Native-Decompiled/Syndicate.dll.decompiled.c (سطر ~25507 فأعلى: vftable ثم المُنشئات) أو عائلة CLeague (سطر ~37149). نفس المنهج.
 - `bash tools/run_dwave_regression.sh` يجب أن تطبع ALL-6X-GREEN: 26/26.
+
+## نقطة البداية للجلسة الجاية (بعد D27)
+
+- **D27 مقفولة ومرفوعة:** SyndicateCrossMerit.{h,cpp} — قشرة CCrossMeritMgr (7 دوال). رجريشن 27/27 × 6.
+- **التالي (D28):** استعلامات CCrossMeritMgr: FUN_14173f680 (الجولة على المفاتيح)، f8e0/f950/f9c0 (سطر 25769+ في الديكومبايل)، أو عائلة الخريطة الداخلية (eb10/cb90/c470 في 25089+).
+- `bash tools/run_dwave_regression.sh` يجب أن تطبع ALL-6X-GREEN: 27/27.
+- تخطيط العقدة: left@+0, parent@+8, right@+0x10, key@+0x18, _Isnil@+0x61 (الأوراق تشير للرأس sentinel).
