@@ -1,6 +1,7 @@
 #include "MsgMapGroupKernel.h"
 #include <stdexcept>
 #include <cstdlib>
+#include <cstring>
 namespace msg {
 // the VERBATIM container init pattern (FUN_14000ef40 /
 // FUN_1400ec260 / FUN_1400ef850 - identical except the inner
@@ -105,16 +106,17 @@ SSetNode* SetInsert(SObjSet* pSet, SSetNode* pHint,
     } else if (!bAfter) {
         // link AFTER the hint: hint[2] = node
         pHint->m_pParent = pNew;
-        if (pHint == pSent->m_pPrev) {
-            // hint == tail: sentinel+0x10 = node
-            pSent->m_pPrev = pNew;
+        if (pHint == pSent->m_pParent) {
+            // hint == RIGHTMOST (sent+0x10): fixup
+            pSent->m_pParent = pNew;
         }
     } else {
-        // link BEFORE the hint: *hint = node; head fixup
+        // link BEFORE the hint: *hint = node (ORIGINAL
+        // else branch: if (hint == sent+0) sent+0 = node
+        // - the LEFTMOST fixup, NOT the head slot)
         pHint->m_pPrev = pNew;
-        if (pHint == pSent->m_pNext) {
-            // hint == head: sentinel+8 = node
-            pSent->m_pNext = pNew;
+        if (pHint == pSent->m_pPrev) {
+            pSent->m_pPrev = pNew;
         }
     }
     return pNew;
@@ -456,8 +458,66 @@ SSetNode* SetInsertKeyed(SObjSet* pSet, uint32_t dwKey,
     }
     if (pbExists) *pbExists = false;
     // the insert call VERBATIM:
-    // FUN_14000bfd0(set, &iter, bLess, hint, key)
-    return SetInsert(pSet, pLeaf, !bLess, dwKey);
+    // FUN_14000bfd0(set, &iter, bLess, hint, key) -
+    // param_3 == bLess (0 -> the +0x10 RIGHT branch)
+    return SetInsert(pSet, pLeaf, bLess, dwKey);
+}
+
+} // namespace msg
+
+namespace msg {
+
+// ===== M57: the prison-map list segment VERBATIM =====
+SPrisonMaps::SPrisonMaps() {
+    // the local sentinel (the 0x20 A-type node):
+    std::memset(&m_inner, 0, sizeof m_inner);
+    SSetNode* pSent = (SSetNode*)&m_inner;
+    pSent->m_byFlag = 1;               // +0x1d raised
+    pSent->m_pPrev = pSent; pSent->m_pNext = pSent;
+    pSent->m_pParent = pSent;          // the 3 self-links
+    m_set.m_pHead = nullptr;
+    m_set.m_pInner = &m_inner;
+    m_set.m_qCount = 0;
+}
+
+void SPrisonMaps::Build() {
+    // the CLEAR walk VERBATIM (14470-14485): delete every
+    // non-sentinel node front-to-back with the callback
+    SSetNode* pSent = (SSetNode*)m_set.m_pInner;
+    SSetNode* pCur = pSent->m_pNext;    // local_508[1]
+    while (pCur->m_byFlag == 0) {
+        if (m_fnOnClearNode)
+            m_fnOnClearNode(pCur->m_dwKey);  // 1400098c0
+        SSetNode* pNext = pCur->m_pPrev;    // *plVar13
+        delete pCur;                        // operator_delete
+        pCur = pNext;
+    }
+    pSent->m_pNext = pSent;     // re-self-link VERBATIM
+    m_set.m_qCount = 0;
+    pSent->m_pPrev = pSent;
+    pSent->m_pParent = pSent;
+    // the VERBATIM literal inserts:
+    SetInsertKeyed(&m_set, 0x177a, nullptr);
+    SetInsertKeyed(&m_set, 0x177b, nullptr);
+    SetInsertKeyed(&m_set, 0x177e, nullptr);
+    // the FUN_14008ac00 gate:
+    if (m_fnGate && m_fnGate()) {
+        SetInsertKeyed(&m_set, 0x177f, nullptr);
+        SetInsertKeyed(&m_set, 0x1780, nullptr);
+        SetInsertKeyed(&m_set, 0x1781, nullptr);
+    }
+}
+
+bool SPrisonMaps::Has(uint32_t dwMapId) {
+    // walk probe (for tests; mirrors the M55 walk)
+    SSetNode* pSent = (SSetNode*)m_set.m_pInner;
+    SSetNode* pCur = pSent->m_pNext;
+    while (pCur->m_byFlag == 0) {
+        if (pCur->m_dwKey == dwMapId) return true;
+        pCur = dwMapId < pCur->m_dwKey ? pCur->m_pPrev
+                                       : pCur->m_pParent;
+    }
+    return false;
 }
 
 } // namespace msg

@@ -127,3 +127,28 @@ SSetNode* SetInsertKeyed(SObjSet* pSet, uint32_t dwKey,
                          bool* pbExists);
 
 } // namespace msg
+
+namespace msg {
+
+// ===== M57: ORIGINAL FUN_140011620 (the prison-map list
+// segment, decompile 14470-14504) =====
+// Builds the LOCAL set of jail/prison map ids:
+//  - local sentinel init (the 3 self-links) + a CLEAR
+//    walk deleting any previous nodes (FUN_1400098c0
+//    callback per node - seam)
+//  - VERBATIM literal inserts: 0x177a, 0x177b, 0x177e
+//    (unconditional) then, GATED by FUN_14008ac00:
+//    0x177f, 0x1780, 0x1781
+//  - then the ORIGINAL walks cq_config (separate unit)
+struct SPrisonMaps {
+    SObjSet  m_set;             // the local set (0x40)
+    SInnerObj m_inner;          // its sentinel (0x20 node)
+    std::function<void(uint32_t)> m_fnOnClearNode;
+    std::function<bool()> m_fnGate;    // FUN_14008ac00
+    SPrisonMaps();
+    void Build();
+    bool Has(uint32_t dwMapId);  // walk probe (test)
+    size_t Size() const { return m_set.m_qCount; }
+};
+
+} // namespace msg

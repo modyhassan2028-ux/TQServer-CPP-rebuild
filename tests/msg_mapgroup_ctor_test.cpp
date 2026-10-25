@@ -3,6 +3,7 @@
 #include <cassert>
 #include <cstdio>
 #include <cstring>
+#include <vector>
 #include <stdexcept>
 using namespace msg;
 
@@ -264,6 +265,29 @@ int main() {
         // sentinel reverts to self-links (both fixups ran)
         assert(h.m_pNext == &h && h.m_pPrev == &h);
         delete c;
+    }
+    // M57: the prison map list
+    {
+        msg::SPrisonMaps pm;
+        std::vector<uint32_t> cleared;
+        pm.m_fnOnClearNode = [&](uint32_t k){
+            cleared.push_back(k); };
+        pm.m_fnGate = []{ return false; };
+        pm.Build();
+        assert(pm.Size() == 3);
+        assert(pm.Has(0x177a) && pm.Has(0x177b) &&
+               pm.Has(0x177e));
+        assert(!pm.Has(0x177f) && !pm.Has(0x1772));
+        // rebuild: the clear walk fires for the old nodes
+        pm.m_fnGate = []{ return true; };
+        pm.Build();
+        // the clear walk follows the +0 chain VERBATIM
+        // (ascending keys went right -> only the head)
+        assert(cleared.size() == 1 && cleared[0] == 0x177a);
+        assert(pm.Size() == 6);         // 6 with the gate
+        assert(pm.Has(0x177f) &&
+               pm.Has(0x1780) && pm.Has(0x1781));
+        std::puts("M57-PRISON-MAPS-OK");
     }
     std::puts("MSG_SETOPS_OK: insert first/tail branches,"
               " erase unlink + end() out_of_range"
