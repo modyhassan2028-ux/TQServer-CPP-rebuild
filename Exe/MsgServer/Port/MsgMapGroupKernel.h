@@ -204,7 +204,7 @@ struct SMapNode {
     uint8_t   m_byFlag;    // +0x75 (0=node, 1=sentinel)
     SMapNode() : m_pLeft(nullptr), m_pParent(nullptr),
                  m_pRight(nullptr), m_dwKey(0),
-                 m_byFlag(0) {
+                 m_byColor(1), m_byFlag(0) {
         std::memset(m_aRecord, 0, sizeof m_aRecord);
         std::memset(m_abSubSet, 0, sizeof m_abSubSet);
     }
@@ -269,5 +269,15 @@ void SetCopy(SObjSet* pDst, SObjSet* pSrc);
 inline SObjSet* MapNodeSubSet(SMapNode* p) {
     return reinterpret_cast<SObjSet*>(p->m_abSubSet);
 }
+
+// ===== M65: ORIGINAL the FUN_140010600 tail - the
+// map INSERT RB-fixup (colors @+0x74, flags @+0x75,
+// root @ sent+8). The standard MSVC _Tree rebalance:
+// red-parent loop, red-uncle recolor, LR/LL + RL/RR
+// rotations with the root/sentinel fixups, final root
+// BLACK. One aliasing line in the decompile's rotate
+// operands was ambiguous; resolved to the canonical
+// MSVC form (riser->parent = pivot->parent).
+void MapInsertRebalance(SObjMap* pMap, SMapNode* pNew);
 
 } // namespace msg

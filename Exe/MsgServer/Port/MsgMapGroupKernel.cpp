@@ -686,9 +686,109 @@ void MapInsertLink(SObjMap* pMap, SMapNode* pHint,
         if (pHint == pSent->m_pLeft)
             pSent->m_pLeft = pNew;   // leftmost fixup
     }
-    // the ORIGINAL RB-fixup walk (the +0x74 flag chain
-    // with rotations) - TBD: the set rotations are at
-    // +0x1d; the map node variant is not yet ported
+    // ===== M65: the RB-fixup walk VERBATIM (the
+    // FUN_140010600 tail) =====
+    MapInsertRebalance(pMap, pNew);
+}
+
+void MapInsertRebalance(SObjMap* pMap, SMapNode* pNew) {
+    SMapNode* pSent = (SMapNode*)pMap->m_pInner;
+    SMapNode* pCur = pNew;                  // plVar6
+    // plVar7 = &node->parent-slot:
+    SMapNode** pplSlot = &pNew->m_pParent;
+    while ((*pplSlot)->m_byColor == 0) {    // red parent
+        SMapNode* pParent = *pplSlot;      // plVar2
+        SMapNode* pGp = pParent->m_pParent;// plVar3
+        if (pParent == pGp->m_pLeft) {
+            SMapNode* pUncle = pGp->m_pRight;
+            if (pUncle->m_byColor == 0) {  // red uncle
+                pParent->m_byColor = 1;    // black
+                pUncle->m_byColor  = 1;    // black
+                pGp->m_byColor     = 0;    // red
+                pCur = pGp;                // climb
+            } else {
+                if (pCur == pParent->m_pRight) {
+                    // LR: rotate LEFT at the parent:
+                    SMapNode* pC = pParent->m_pRight;
+                    pParent->m_pRight = pC->m_pLeft;
+                    if (pC->m_pLeft->m_byFlag == 0)
+                        pC->m_pLeft->m_pParent = pParent;
+                    pC->m_pParent = pGp;
+                    if (pParent == pSent->m_pParent)
+                        pSent->m_pParent = pC; // root
+                    else if (pParent == pGp->m_pLeft)
+                        pGp->m_pLeft = pC;
+                    else
+                        pGp->m_pRight = pC;
+                    pC->m_pLeft = pParent;
+                    pParent->m_pParent = pC;
+                    pCur = pParent;
+                }
+                pParent->m_byColor = 1;     // black
+                pGp->m_byColor = 0;          // red
+                // LL: rotate RIGHT at the grandparent:
+                SMapNode* pX = pGp->m_pLeft; // riser
+                pGp->m_pLeft = pX->m_pRight;
+                if (pX->m_pRight->m_byFlag == 0)
+                    pX->m_pRight->m_pParent = pGp;
+                pX->m_pParent = pGp->m_pParent;
+                if (pGp == pSent->m_pParent)
+                    pSent->m_pParent = pX;   // root
+                else if (pGp == pX->m_pParent->m_pLeft)
+                    pX->m_pParent->m_pLeft = pX;
+                else
+                    pX->m_pParent->m_pRight = pX;
+                pX->m_pRight = pGp;
+                pGp->m_pParent = pX;
+            }
+        } else {
+            // the MIRROR half (parent is Gp->RIGHT):
+            SMapNode* pUncle = pGp->m_pLeft;
+            if (pUncle->m_byColor == 0) {
+                pParent->m_byColor = 1;
+                pUncle->m_byColor  = 1;
+                pGp->m_byColor     = 0;
+                pCur = pGp;
+            } else {
+                if (pCur == pParent->m_pLeft) {
+                    // RL: rotate RIGHT at the parent:
+                    SMapNode* pC = pParent->m_pLeft;
+                    pParent->m_pLeft = pC->m_pRight;
+                    if (pC->m_pRight->m_byFlag == 0)
+                        pC->m_pRight->m_pParent = pParent;
+                    pC->m_pParent = pGp;
+                    if (pParent == pSent->m_pParent)
+                        pSent->m_pParent = pC;
+                    else if (pParent == pGp->m_pRight)
+                        pGp->m_pRight = pC;
+                    else
+                        pGp->m_pLeft = pC;
+                    pC->m_pRight = pParent;
+                    pParent->m_pParent = pC;
+                    pCur = pParent;
+                }
+                pParent->m_byColor = 1;
+                pGp->m_byColor = 0;
+                // RR: rotate LEFT at the grandparent:
+                SMapNode* pX = pGp->m_pRight;
+                pGp->m_pRight = pX->m_pLeft;
+                if (pX->m_pLeft->m_byFlag == 0)
+                    pX->m_pLeft->m_pParent = pGp;
+                pX->m_pParent = pGp->m_pParent;
+                if (pGp == pSent->m_pParent)
+                    pSent->m_pParent = pX;
+                else if (pGp == pX->m_pParent->m_pRight)
+                    pX->m_pParent->m_pRight = pX;
+                else
+                    pX->m_pParent->m_pLeft = pX;
+                pX->m_pLeft = pGp;
+                pGp->m_pParent = pX;
+            }
+        }
+        pplSlot = &pCur->m_pParent;   // plVar7 = plVar6+1
+    }
+    // the VERBATIM tail: the root goes BLACK
+    pSent->m_pParent->m_byColor = 1;
 }
 
 // ===== M62: ORIGINAL FUN_140010280 @ 140010280 +
@@ -718,6 +818,7 @@ SMapNode* MapNodeNew(SMapNode* pLeft, SMapNode* pParent,
     SInnerObj* pInner = new SInnerObj();
     std::memset(pInner, 0, sizeof *pInner);
     SSetNode* pIS = (SSetNode*)pInner;
+    pIS->m_byColor = 1;   // the sentinel is BLACK
     pIS->m_byFlag = 1;                    // +0x1d = 1
     pIS->m_pPrev = pIS->m_pNext = pIS->m_pParent = pIS;
     SObjSet* pSub = MapNodeSubSet(p);

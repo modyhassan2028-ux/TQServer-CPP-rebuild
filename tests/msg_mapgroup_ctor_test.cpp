@@ -3,6 +3,7 @@
 #include <cassert>
 #include <cstdio>
 #include <cstring>
+#include <functional>
 #include <utility>
 #include <vector>
 #include <stdexcept>
@@ -75,7 +76,7 @@ int main() {
     SObjSet s; std::memset(&s, 0, sizeof s);
     // sentinel: raised flag byte (+0x1d) + tri-self-link
     SSetNode sent; std::memset(&sent, 0, sizeof sent);
-    sent.m_byFlag = 1; sent.m_byReady = 1;
+    sent.m_byFlag = 1; sent.m_byColor = 1; sent.m_byReady = 1;
     sent.m_pPrev = sent.m_pNext = sent.m_pParent = &sent;
     s.m_pInner = (SInnerObj*)&sent; s.m_qCount = 0;
     SSetNode* n1 = msg::SetInsert(&s, &sent, false, 1);
@@ -358,7 +359,7 @@ int main() {
                   "the operator new(0x78) size");
     // M60: the activity-map operator[]
     {
-        msg::SMapNode sent; sent.m_byFlag = 1;
+        msg::SMapNode sent; sent.m_byFlag = 1; sent.m_byColor = 1;
         sent.m_pLeft = sent.m_pParent = sent.m_pRight =
             &sent;
         msg::SObjMap mp;
@@ -398,6 +399,8 @@ int main() {
     // M63: the set COPY (FUN_14000bf20 + af60)
     {
         SObjSet src, dst;
+        std::memset(&src,0,sizeof src);
+        std::memset(&dst,0,sizeof dst);
         SInnerObj s1, s2;
         std::memset(&s1,0,sizeof s1); std::memset(&s2,0,sizeof s2);
         auto* q1 = (msg::SSetNode*)&s1;
@@ -466,6 +469,48 @@ int main() {
         static_assert(sizeof(msg::SMapNode) == 0x78,
             "still new(0x78)");
         std::puts("M64-SUBSET-COPY-OK");
+    }
+    // M65: the map insert RB-fixup
+    {
+        msg::SMapNode sent; sent.m_byFlag = 1; sent.m_byColor = 1;
+        sent.m_pLeft = sent.m_pParent = sent.m_pRight = &sent;
+        msg::SObjMap mp;
+        mp.m_pInner = &sent; mp.m_qCount = 0;
+        // 9 sequential keys = the worst case for a
+        // naive unbalanced insert (a red-red chain)
+        for (uint32_t k = 10; k <= 90; k += 10)
+            msg::MapOperatorAt(&mp, k);
+        assert(mp.m_qCount == 9);
+        // RB invariants over the WHOLE tree:
+        int nBlack = -1; bool bOk = true;
+        // recursive lambda: returns black-height
+        std::function<int(msg::SMapNode*, int)> ht =
+          [&](msg::SMapNode* p, int bh) -> int {
+            if (p->m_byFlag) return bh;     // sentinel
+            // no red-red:
+            if (p->m_byColor == 0 &&
+                p->m_pLeft->m_byFlag == 0 &&
+                p->m_pLeft->m_byColor == 0)
+                bOk = false;
+            if (p->m_byColor == 0 &&
+                p->m_pRight->m_byFlag == 0 &&
+                p->m_pRight->m_byColor == 0)
+                bOk = false;
+            int l = ht(p->m_pLeft, bh + (p->m_byColor==1));
+            int r = ht(p->m_pRight, bh + (p->m_byColor==1));
+            if (l != r) bOk = false;       // uniform BH
+            return l;
+        };
+        ht(sent.m_pParent, 0);
+        assert(bOk);
+        assert(sent.m_pParent->m_byColor == 1); // root black
+        // BST order intact + all findable:
+        for (uint32_t k = 10; k <= 90; k += 10) {
+            auto* p = msg::MapOperatorAt(&mp, k);
+            assert(p != nullptr);
+        }
+        assert(mp.m_qCount == 9);
+        std::puts("M65-MAP-REBALANCE-OK");
     }
     std::puts("MSG_SETOPS_OK: insert first/tail branches,"
               " erase unlink + end() out_of_range"
