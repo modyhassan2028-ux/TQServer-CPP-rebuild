@@ -6884,3 +6884,27 @@ FUN_140024860 كاملة
 4. عقد -2/+1 للمدمّر المدمج للكائنات الفرعية: النمذجة تستدعي g_fnFree على الكائن — الاختبار يستخدم مخازن حقيقية.
 
 ### الاختبار: PEERAGE-D17-OK — 9 أقسام: الأحجام (0x410/0x18/0x18/0x858)، الغرَض الرسائلية (+0x408=this+0x40، SetBuf msg+0x80 cap 0x359 owns، ترتيب الدمارات)، ModuleCreate (الحقول، ترتيب التسجيل 0x810→0x3ea، set(0xb,svc))، GetModuleMsg بكل مساراته الخمسة، StartupModule بفروعه الأربعة وعقود الرجوع (|1 / &~0xff)، Attach، المدمّرات والمسارات الحرة، الاستعلامان، مسارا فشل Init والتخصيص، وتوازن تخصيصات صفري.
+
+## الوحدة D18 (Peerage T2) — CPeerageSort/CPeerageSortMgr + عائلة std::vector<void*> بنمط MSVC-debug
+**التاريخ:** 2026-10-25 — **الحالة:** مكتملة ومختبرة (18/18 × 6/6)
+**الملفات:** `Exe/Dll/Peerage/Port/PeerageSortMgr.{h,cpp}` + `tests/peerage_d18_test.cpp`
+
+### البنى (من 141554ff0/141552340):
+- **CPeerageSort (0x30):** +0x00 vftable، +0x08 كائن الصف، +0x14/+0x18 dwords، +0x1c qword = pair[0]، **+0x24 qword = pair[1] ثم البايت +0x2b (البايت الأعلى لنفس الـ qword!) يُصفَّر** — لذا بنية التخزين بايت خام مع موصّلات (المحاذاة لا تحترم 0x1c).
+- **CPeerageSortMgr (0x50):** +0x00 vftable، +0x08 المتجه (0x30: proxy عند +0x08، begin عند +0x20، end عند +0x28، cap عند +0x30)، +0x38 حقل صفري، +0x40 كائن DB/النواة (من 1415569f0)، +0x48 dword عدد الرتب.
+- **الـ proxy (المُنشئ):** operator_new(8) و*proxy = &vec (رجوع الحاوية في نمط MSVC debug-iterator)؛ عند فشل التخصيص يبقى +0x08 = null دون انهيار.
+
+### الوظائف المنقولة (verbatim):
+- **FUN_141552340** CtorPeerageSort (بوابتا null، الحقول، تصفير +0x2b)، **FUN_141552170** SetSortField18.
+- **FUN_141554ff0** المُنشئ، **FUN_141555690** البنّاء (alloc→ctor؛ null→log+null).
+- **FUN_141555cb0** push_back: حساب الحجم عبر (cap-begin)>>3، الفرع السريع (اكتب عند end)، وإلا بوابة invalid ثم **FUN_141555a30** (حساب lIdx + زوج الـ proxy-iterator + نداء _Insert_n + فحوصات debug عبر قراءة *proxy).
+- **FUN_1415553d0** _Insert_n كاملة بفروعها الثلاثة: (1) إعادة التخصيص بمعامل النمو `size + size/2` (حد 0x1fffffffffffffff وthrow length_error عند التجاوز)، نقل [begin,it) بmemmove ثم [it,end) بعد الفجوة، تحرير القديم وتثبيت begin/end/cap؛ (2) فرع إزاحة الذيل عند `end-it < count` (MoveFwd ثم الملء المزدوج)؛ (3) الفرع العادي (MoveFwd + **FUN_141553ef0** MoveBack ثم الملء).
+- **FUN_141553850** تخصيص المخزن: `(-1ULL)/count < 8` → throw bad_alloc؛ وإلا operator_new(count*8).
+- **FUN_1415548b0** FindSortById: حلقة debug كاملة (فحص end≥begin، ثبات الـ proxy، فحص النطاق عبر *proxy قبل وبعد) + الفرع null→log، والمطابقة عبر elem+8 → vt+0x10(3) → vt+0x40 == n.
+
+### الأخطاء الحقيقية المصحّحة أثناء الوحدة:
+1. **حجم المتجه 0x30 لا 0x28** (البادئة بعد الـ proxy = 0x10) — اكتُشف بstatic_assert بعد ملاحظة أن حقول [7]/[8]/[9] عند 0x38/0x40/0x48.
+2. **قيمة push_back هي *ppObj** (المؤشر المخزن) — الاختبار مرّر عنوان البنية نفسه فخزّن null؛ الصحيح تمرير متغير يحمل مؤشر الكائن.
+3. بنية CPeerageSort بموصلات بايت خام — حقول +0x1c/+0x24 غير محاذاة في C++.
+
+### الاختبار: PEERAGE-D18-OK — 8 أقسام: الأحجام، بوابات وحقول CtorPeerageSort (مع تصفير +0x2b إثباته بpair[1] يحمل بايتاً علوياً)، المُنشئ (الـ proxy و*proxy=&vec وفشل تخصيصه)، البنّاء (وفشله بسجل)، النمو 1→2→3→4→6→9 مع الحفاظ على الترتيب وتحرير المخازن القديمة (5)، FindSortById بفروعه، مسارات _Insert_n المباشرة (count=0 no-op والإدراج بالوسط بإعادة التخصيص)، وتوازن التخصيصات.

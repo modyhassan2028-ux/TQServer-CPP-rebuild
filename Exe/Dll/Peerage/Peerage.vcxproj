@@ -2,8 +2,10 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="Port\PeerageModule.cpp" />
+    <ClCompile Include="Port\PeerageSortMgr.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Port\PeerageModule.h" />
+    <ClInclude Include="Port\PeerageSortMgr.h" />
   </ItemGroup>
 </Project>

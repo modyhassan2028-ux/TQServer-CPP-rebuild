@@ -58,11 +58,22 @@
   (141551ff0/141551640/1415516a0) والاستعلامان
   (141551520/141551550) — كلها في
   `Exe/Dll/Peerage/Port/PeerageModule.{h,cpp}`.
-- **الباقي:** عائلة الكائن الفرعي (FUN_141555690
-  البنّاء وFUN_1415569f0 التهيئة — حالياً seams
-  `g_fnMakePeerageObj`/`g_fnPeerageObjInit`)، ثم
-  أجسام vt الخدمة والرسائل (المعالجات الفعلية
-  لـ 0x3ea/0x810) وفق ظهورها في الديكمبايل.
+- **D18 (T2) مقفولة:** عائلة CPeerageSort (0x30)
+  وCPeerageSortMgr (0x50) والمتجه std::vector<void*>
+  بنمط MSVC-debug كاملاً (push_back 141555cb0،
+  النمو 141555a30، _Insert_n 1415553d0 بفروعه
+  الثلاثة، move 141554f40/141553ef0، alloc
+  141553850، length_error 141553050، FindById
+  1415548b0) في `PeerageSortMgr.{h,cpp}`.
+- **الباقي (D19):** الفرز الكبير FUN_141555f80
+  (stable_sort عبر 141555b60 + المقارن
+  FUN_141552810)، ثم **(D20)** تحميل DB
+  FUN_1415569f0 (استعلاما SELECT rank_num /
+  SELECT dyna_rank_rec_... عبر InstanceGet +
+  عائلة الصفوف) — عندها تُربط الـ seams
+  `g_fnMakePeerageObj`/`g_fnPeerageObjInit` في D17
+  بالأجسام الحقيقية، ثم أجسام vt الخدمة
+  والرسائل (معالجات 0x3ea/0x810).
 الأضخم أولاً — كل DLL وحدة استيراد مستقلة بنفس قواعد الحرفية:
 - **Syndicate.dll** 9,862 • **CQBase.dll** 3,095 • **ElitePKArenic.dll** 2,226 • **ClanPKArenic.dll** 2,315 • **PopPKArenic.dll** 2,311 • **DB.dll** 2,736 • **TeamArenic.dll** 2,039 • **Family.dll** 2,039 • **LeaveWord.dll** 1,803 • **FamilyArenic.dll** 1,756 • ثم الباقي (~25 ملف أصغر).
 

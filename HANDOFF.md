@@ -79,13 +79,32 @@
     أسبقية `==` على `&` في asserts تحتاج أقواساً؛
     الـ obj في عقد -2/+1 يجب أن يكون مخزناً حقيقياً
     في الاختبارات.
-- **رجريشن: 17/17 وحدة × 6/6** (analyst_d1/d2 +
-  title_d3..d12 + training_d13..d16 + peerage_d17).
-- **التالي (D18):** عائلة الكائن الفرعي في Peerage:
-  FUN_141555690 (البنّاء) وFUN_1415569f0 (التهيئة) —
-  حالياً seams `g_fnMakePeerageObj`/
-  `g_fnPeerageObjInit` في D17؛ ثم أجسام vt الخدمة
-  والرسائل (معالجات 0x3ea/0x810 الفعلية).
+- **D18 (Peerage T2) مقفولة (جلسة 25/10):** عائلة
+  CPeerageSort (0x30: vft/row/+0x14/+0x18/+0x1c qword/
+  +0x24 qword مع تصفير بايته الأعلى +0x2b — بايت خام
+  بموصّلات لعدم المحاذاة) وCPeerageSortMgr (0x50:
+  vec@+0x08 حجم 0x30 بمؤشر begin@0x20/end@0x28/
+  cap@0x30 وproxy رجوعه &vec، +0x38 صفري،
+  +0x40 الـ DB، +0x48 dword الرتب) في
+  `Exe/Dll/Peerage/Port/PeerageSortMgr.{h,cpp}`:
+  - 141552340/141552170 (الغرض)، 141554ff0/
+    141555690 (المُنشئ والبنّاء)، push_back 141555cb0،
+    النمو 141555a30 (زوج الـ proxy-iterator +
+    فحوصات *proxy)، _Insert_n 1415553d0 بفروعه
+    الثلاثة (نمو 1.5x وحد 0x1fffffffffffffff)، move
+    141554f40/141553ef0، alloc 141553850 (bad_alloc
+    عند (-1ULL)/count < 8)، length_error 141553050،
+    FindById 1415548b0.
+  - فخاخ: قيمة push_back هي *ppObj وليس عنوان
+    البنية؛ حجم المتجه 0x30.
+- **رجريشن: 18/18 وحدة × 6/6** (analyst_d1/d2 +
+  title_d3..d12 + training_d13..d16 + peerage_d17/d18).
+- **التالي (D19):** الفرز FUN_141555f80 (المقارن
+  FUN_141552810 + 141555b60) ثم **(D20)** تحميل DB
+  FUN_1415569f0 (SELECT rank_num FROM dyna_rank_t و
+  SELECT dyna_rank_rec_..._FROM_cq_user عبر
+  InstanceGet) وربطه بـ seams D17، ثم معالجات
+  0x3ea/0x810 الفعلية.
 
 ## 0ب) حالة NpcServer لحظياً (جلسة 24/10)
 - **جديد (موجة الـ DLLs — Title.dll D3-D10):** هيكل الموديول +
