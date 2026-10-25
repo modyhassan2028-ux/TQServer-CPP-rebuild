@@ -1,5 +1,5 @@
 # 🔵 NEXT AGENT HANDOFF — ابدأ من هنا
-> آخر تحديث: 2026-10-27 05:30 (NpcServer 1-47 كاملة + MsgServer M1-M41، الرجريجن 82/82 — سلسلة التشفير الموصولة)
+> آخر تحديث: 2026-10-25 09:15 (NpcServer 1-47 كاملة + MsgServer M1-**M42**، الرجريجن 82/82 + msg_cheat_monitor خضراء — **وحدة جديدة: Cheating Program Monitor كاملة**)، بعده M43 = دوال FUN_140001c00 (الـ handler السابق للمونيتور في recv chain) أو أي وحدة MsgServer تالية
 > هذا الملف هو نقطة البداية لأي agent هيكمل الشغل. اقرأه كله قبل أي سطر كود.
 
 ---
@@ -126,6 +126,18 @@
 2. **M34:** وصل m_fnRest في MsgTimerProc بالـ MsgTimerInitChain الحقيقي (الخياطات الافتراضية) وأزود حقول الـ dlg-state المشتركة.
 3. **M35:** مين بيستخدم vt+8 بتوع الجدولين؟ (فهم معنى السولت).
 4. بعدها: عيلة 140508xxx المتبقية (معالجات الرسائل بعد فك التشفير).
+
+## 5) وحدة M42 (الجديدة — اترفعت على GitHub)
+
+**M42 = Cheating Program Monitor كاملة** (`Exe/MsgServer/Port/MsgStdDes.{h,cpp}` + `MsgCheatMonitor.{h,cpp}` + `tests/msg_cheat_monitor_test.cpp`):
+
+- **MsgStdDes:** محرك DES القياسي (FIPS) — محاكاة libeay32 اللي بيستوردها المونيتور (مستقلة تماماً عن descore بتاع M40). كل قطعة متحققة آلياً:
+  - البلوك مقابل OpenSSL (legacy provider) + pycryptodome: 500/500 عشوائي + المتجهات الكلاسيكية (3fa40e8a984d4815 / 0000000000000000 / d5d44ff720683d0d)
+  - `DES_string_to_key("df29duw")` (كلمة السر الحرفية في FUN_140003dc0) = **382c5b389ebc1916** — طبق str2key.c حرفياً (fold<<1، parity table، cbc_cksum بـ ivec=key مع zero-pad للذيل، parity تاني)
+  - `DES_cfb64_encrypt` مطابق لـ `openssl enc -des-cfb` بايت-بايت (48 بايت + 7 بايت جزئي) — feedback بتاع فك التشفير = بايت السيفertext نفسه، و`num` (0..7) بيكمل عبر النداءات
+- **MsgCheatMonitor:** FUN_140001c70 (wrapper فك التشفير بحوارسه: null → log "Cheating Program Monitor invalid msg"، len في 1..0x30، num null) + FUN_140002510 (demux: 1001 تكرار، النوع u16 عند buf+4؛ النوع 0 محتاج 0x30 → FUN_140001900 (النسخة بقناع البايت 47 + سبب STR_GENERAL_BOT_SIN لو buf[0xf]==0)، الأنواع 1..4 محتاجة 0xf → FUN_140001a50 (struct 0x30: u32 id + u16 type + اسم 9 بايت عند +6 + سبب عند +0xf: GENERAL/KEY/SERIOUS_BOT_SIN أو HACK_TOOL_SIN)، أي نوع تاني = توقف الحلقة) + الخيط FUN_140003dc0 كآلة حالة (Init/Tick/Stop عبر seams): ini "CheatingMonitor" (ListenPort افتراضي 0x23be، IPNum بحد 20 مع لوج "astrict ip number overrun max ip number!")، 64 سلوث (السلوث 0 = الـ listen pseudo-client)، select بـ 500usec، قبول + رفض "lawless ip address %s!"، recv → فك تشفير في الموضع → demux، مسار الخروج بلوجين client(%s : %u) logout / one client logout، والفشل select → إيقاف. ملاحظة: **ivec/num بتوع CFB مشتركين على مستوى الخيط كله** (الحالة منقولة عبر النداءات) — حرفياً كما في الأصل.
+- الاختبار `tests/msg_cheat_monitor_test.cpp` أخضر بالكامل، ومفيش **أي تعديل** على ملفات موجودة (وحدة إضافة صافية) — فالرجريجن 82/82 القديم في أمان.
+- **التالي (M43):** دوال MsgServer اللي بعد المونيتور في سلسلة الـ recv، أو أي وحدة تالية من PORTING_LOG. فيه ملاحظة إن `DES_set_key_checked` بيرجع نتيجة فحص الـ parity/weak-key **والبيناري بيتجاهلها حرفياً** — منفذة كده.
 
 **تحذير منهجي:** أي تعديل على الملف ده لازم يتأكد فيه إن النص المستهدف موجود (python assert) — جلسات سابقة عدلت "آخر تحديث" واستبدالات فشلت بصمت فظل الملف متوقف من عهد M6.
 
