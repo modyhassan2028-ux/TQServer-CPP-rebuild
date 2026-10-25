@@ -403,3 +403,9 @@ D24 — راجع REMAINING_ROADMAP.md أو دوال Peerage.dll المتبقية
 - **D24 مقفولة:** PeerageService.{h,cpp} (9 دوال: 141551920/1a00/1b00/1b90/1bf0/1c20/1eb0 + 1415549d0/141555070). رجريشن 24/24 × 6.
 - **المتبقي في Peerage.dll:** عائلة CMyHeap/السرد (141552040-1415527a0، 141552ed0-141553210) ثم DLL التالي (Syndicate.dll الأضخم).
 - نقطة الاستئناف: `bash tools/run_dwave_regression.sh` → ALL-6X-GREEN: 24/24.
+
+## نقطة البداية للجلسة الجاية (بعد D25)
+
+- **D25 مقفولة ومرفوعة:** PeerageSortObj.{h,cpp} (12 دالة: 141552040/180/190/250/2b0/310/780/7a0/ed0/f10/f80/fc0). **Peerage.dll مقفول بالكامل** — رجريشن 25/25 × 6.
+- **التالي:** Syndicate.dll (9,862 دالة — الأضخم في الخريطة) بنفس قواعد الحرفية: قراءة → سِمات TBD → اختبار → رجريشن → توثيق → رفع.
+- نقطة الاستئناف: `bash tools/run_dwave_regression.sh` يجب أن تطبع ALL-6X-GREEN: 25/25 قبل أي شغل جديد. الديكومبايل في co_repo/Native-Decompiled/Syndicate.dll.decompiled.c.

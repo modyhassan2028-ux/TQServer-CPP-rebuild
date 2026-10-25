@@ -1748,3 +1748,27 @@ segfault عشوائي ABI.
 للهيدر (مشتركان). **فخ حرفي موثق:** حجم هيدر 141557740 يُكتب قبل زيادة
 العداد — يتأخر سجلًا واحدًا (سلوك أصلي، الاختبار يثبته).
 **peerage_d24_test**: 10 أقسام. **رجريشن 24/24 × 6 أخضر.**
+
+## D25 — عائلة كائن CPeerageSort الختامية (مقفولة) — Peerage.dll كامل
+**PeerageSortObj.{h,cpp}** — 12 دالة حرفية:
+- **141552040** DtorCPeerageSort: vft أولًا، row vt[0](row,1,a,b,-2)، تصفير
+  الـ row مرتين
+- **141552180** GetSortKey18: قراءة +0x18
+- **141552190/250/2b0** أغلفة CMyHeap الساكنة: init-once (DAT_14155f2e8 |= 1)
+  + CMyHeap ctor + atexit ثم Alloc/Free/IsValidPt عبر سِمات (TBD-190-ATX:
+  ثَنْك atexit في Common.dll)
+- **141552310** scalar deleting dtor: الدالة السابقة + HeapFree عند flags فردية
+- **141552780/7a0** عمليا الصف: vt+0x10(0)→vt+0x40 و vt+0x10(2)→vt+0xa0 + vt+0x38
+- **141552ed0/f10/f80/fc0** عائلة مكرّر البروكسي (deref/next/prev/eq) بفحوصات
+  MSVC-debug الحرفية
+
+**سلوك حرفي موثق (الاختبار يثبته بـ fork):** مسار البروكسي الفارغ —
+invalid_parameter الأصلي لا يرجع أبدًا؛ مع سِم غير مُجهِّض قراءة 0x20
+تسقط العملية — الابن crash-proves الدلالة.
+**غير منقول (CRT/STL بدائل قياسية — موثق فقط):** 141552460/4a0/4d0
+(bad_alloc)، 141552530 (thunk فارغ)، 141552540/590/5f0 (logic_error)،
+1415525d0 (string data بـ SSO)، 141552650/6b0/700 (length_error) — تدعم
+سِمات الرمي من D18.
+**peerage_d25_test**: 8 أقسام. **رجريشن 25/25 × 6 أخضر.**
+**Peerage.dll مقفول بالكامل** (كل دواله الفريدة منقولة حرفيًا أو موثقة
+كـ CRT/STL). التالي حسب REMAINING_ROADMAP: Syndicate.dll (9,862 دالة).
