@@ -1,5 +1,5 @@
 # 🔵 NEXT AGENT HANDOFF — ابدأ من هنا
-> آخر تحديث: 2026-10-25 09:15 (NpcServer 1-47 كاملة + MsgServer M1-**M42**، الرجريجن 82/82 + msg_cheat_monitor خضراء — **وحدة جديدة: Cheating Program Monitor كاملة**)، بعده M43 = دوال FUN_140001c00 (الـ handler السابق للمونيتور في recv chain) أو أي وحدة MsgServer تالية
+> آخر تحديث: 2026-10-25 09:40 (NpcServer 1-47 كاملة + MsgServer M1-**M43** — **وحدة جديدة: مُطبّع زمن الحدث FUN_140001ce0**)، بعده M44 = دوال الـ msgserverdlg المساعدة عند كولرَي 198639/198797 (سياق الاستخدام الفعلي للمُطبّع) أو أي وحدة تالية
 > هذا الملف هو نقطة البداية لأي agent هيكمل الشغل. اقرأه كله قبل أي سطر كود.
 
 ---
@@ -138,6 +138,17 @@
 - **MsgCheatMonitor:** FUN_140001c70 (wrapper فك التشفير بحوارسه: null → log "Cheating Program Monitor invalid msg"، len في 1..0x30، num null) + FUN_140002510 (demux: 1001 تكرار، النوع u16 عند buf+4؛ النوع 0 محتاج 0x30 → FUN_140001900 (النسخة بقناع البايت 47 + سبب STR_GENERAL_BOT_SIN لو buf[0xf]==0)، الأنواع 1..4 محتاجة 0xf → FUN_140001a50 (struct 0x30: u32 id + u16 type + اسم 9 بايت عند +6 + سبب عند +0xf: GENERAL/KEY/SERIOUS_BOT_SIN أو HACK_TOOL_SIN)، أي نوع تاني = توقف الحلقة) + الخيط FUN_140003dc0 كآلة حالة (Init/Tick/Stop عبر seams): ini "CheatingMonitor" (ListenPort افتراضي 0x23be، IPNum بحد 20 مع لوج "astrict ip number overrun max ip number!")، 64 سلوث (السلوث 0 = الـ listen pseudo-client)، select بـ 500usec، قبول + رفض "lawless ip address %s!"، recv → فك تشفير في الموضع → demux، مسار الخروج بلوجين client(%s : %u) logout / one client logout، والفشل select → إيقاف. ملاحظة: **ivec/num بتوع CFB مشتركين على مستوى الخيط كله** (الحالة منقولة عبر النداءات) — حرفياً كما في الأصل.
 - الاختبار `tests/msg_cheat_monitor_test.cpp` أخضر بالكامل، ومفيش **أي تعديل** على ملفات موجودة (وحدة إضافة صافية) — فالرجريجن 82/82 القديم في أمان.
 - **التالي (M43):** دوال MsgServer اللي بعد المونيتور في سلسلة الـ recv، أو أي وحدة تالية من PORTING_LOG. فيه ملاحظة إن `DES_set_key_checked` بيرجع نتيجة فحص الـ parity/weak-key **والبيناري بيتجاهلها حرفياً** — منفذة كده.
+
+## 6) وحدة M43 (الجديدة — مُطبّع زمن الحدث)
+
+**M43 = FUN_140001ce0** (`Exe/MsgServer/Port/MsgCheatTime.{h,cpp}` + `tests/msg_cheat_time_test.cpp`):
+
+- الدالة اللي بيناديها كولرَي الـ msgserverdlg (سطر 198639 و198797) لتطبيع زمن الحدث: مصدر واحد "YYMMDDHH" بيتقسم u16 لأربع خانات YY/MM/DD/HH (الكولر بيجيب بافرات مُصفّرة)
+- الحارسان: null → 0x227، نص فاضي → 0x228 — **quirk حرفي:** أي نص غير فاضي بيعدي و8 بايت بتتقرأ برضه (الأصل متكئ على بافر الكولر)
+- لو Bias != -0x1e0 (GMT+8): mktime → t2 = t - 0x7080 - Bias×60 → localtime (فشل → 0x244) → إعادة بـ itoa **من غير حشو** ("9" مش "09")
+- الخياطات (m_fnBias/m_fnMktime/m_fnLocaltime) قابلة للحقن للاختبار، والافتراضي وقت المضيف
+- **MSG_CHEAT_TIME_OK** من أول تشغيلة؛ وحدة إضافة صافية (صفر تعديلات) + rerun عيلة المونيتور أخضر
+- **التالي (M44):** الدوال المحيطة عند الكولرَي (198639/198797) — سياق الـ msgserverdlg اللي بيستهلك المُطبّع، أو أي وحدة تالية من PORTING_LOG
 
 **تحذير منهجي:** أي تعديل على الملف ده لازم يتأكد فيه إن النص المستهدف موجود (python assert) — جلسات سابقة عدلت "آخر تحديث" واستبدالات فشلت بصمت فظل الملف متوقف من عهد M6.
 
