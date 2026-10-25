@@ -599,9 +599,6 @@ uint32_t SPercentCfg::LoadPercentConfig(
 }
 
 // ===== M60: ORIGINAL FUN_140011280 @ 140011280 =====
-// seam: the ORIGINAL node insert (FUN_140010ec0).
-static SMapNode* (*g_fnMapInsert)(SObjMap*, uint32_t);
-
 uint32_t* MapOperatorAt(SObjMap* pMap, uint32_t dwKey) {
     SMapNode* pSent = (SMapNode*)pMap->m_pInner;
     SMapNode* pCand = pSent;              // puVar3
@@ -625,26 +622,73 @@ uint32_t* MapOperatorAt(SObjMap* pMap, uint32_t dwKey) {
         // (the two local container ctors + the copy
         // FUN_14000e970/cleanup FUN_14000c310 = the
         // record sub-set - seam: zero-initialized here)
-        if (g_fnMapInsert)
-            g_fnMapInsert(pMap, dwKey);
-        // minimal tree link so the port stays usable
-        // (the REAL link is FUN_140010ec0 - TBD):
-        pNew->m_pParent = pSent;
+        // the new node's NIL links (the ORIGINAL
+        // allocator FUN_140010280 gives NIL/parent/NIL):
         pNew->m_pLeft = pNew->m_pRight = pSent;
-        if (pSent->m_pParent == pSent) {
-            pSent->m_pParent = pNew;   // root
-            pSent->m_pLeft = pSent->m_pRight = pNew;
+        pNew->m_pParent = pSent;
+        // ===== M61: the FUN_140010ec0 head branches
+        // VERBATIM =====
+        SMapNode* pLeftM = pSent->m_pLeft;   // *(sent+0)
+        SMapNode* pRightM = pSent->m_pRight; // sent+0x10
+        if (pMap->m_qCount == 0) {
+            // ORIGINAL: count==0 -> 600(map, ret, 1,
+            // SENTINEL, key) - the root branch
+            MapInsertLink(pMap, pSent, true, pNew);
+        } else if (pCand == pLeftM &&
+                   dwKey < pLeftM->m_dwKey) {
+            // ORIGINAL ec0: if (pCand == leftmost &&
+            // key < leftmost->key) -> 600(1, leftmost)
+            MapInsertLink(pMap, pLeftM, true, pNew);
+        } else if (pCand == pSent &&
+                   pRightM->m_dwKey < dwKey) {
+            // ORIGINAL ec0 else: if (pCand == SENTINEL &&
+            // rightmost->key < key) -> 600(0, rightmost)
+            MapInsertLink(pMap, pRightM, false, pNew);
         } else {
-            if (dwKey < pCand->m_dwKey)
-                pCand->m_pLeft = pNew;
-            else
-                pCand->m_pRight = pNew;
+            // the ec0 INTERIOR hint-validation walk is
+            // TBD; provisional route: link left/right of
+            // the lower-bound candidate
+            MapInsertLink(pMap, pCand,
+                          dwKey < pCand->m_dwKey, pNew);
         }
-        pMap->m_qCount++;
         return &pNew->m_aRecord[0];   // node + 0x1c
     }
     // HIT: return node + 0x1c
     return &pCand->m_aRecord[0];
+}
+
+// ===== M61: ORIGINAL FUN_140010600 @ 140010600
+// (the link core) =====
+void MapInsertLink(SObjMap* pMap, SMapNode* pHint,
+                   bool bAfter, SMapNode* pNew) {
+    SMapNode* pSent = (SMapNode*)pMap->m_pInner;
+    // the VERBATIM max_size gate:
+    // 0x2c8590b21642c83 -> length_error
+    // ("map/set<T> too long") - unreachable in practice
+    if ((uint64_t)pMap->m_qCount >
+            0x02c8590b21642c83ULL) {
+        throw std::length_error("map/set<T> too long");
+    }
+    // (the node alloc FUN_140010280 + record copy =
+    // the caller already built pNew - TBD note)
+    pMap->m_qCount++;            // param_1[7] += 1
+    // the VERBATIM link branches:
+    if (pHint == pSent) {
+        pSent->m_pParent = pNew;     // sent+8 (root)
+        pSent->m_pLeft  = pNew;      // sent+0 (leftmost)
+        pSent->m_pRight = pNew;      // sent+0x10 (right)
+    } else if (!bAfter) {
+        pHint->m_pRight = pNew;      // param_4[2]
+        if (pHint == pSent->m_pRight)
+            pSent->m_pRight = pNew;  // rightmost fixup
+    } else {
+        pHint->m_pLeft = pNew;       // *param_4
+        if (pHint == pSent->m_pLeft)
+            pSent->m_pLeft = pNew;   // leftmost fixup
+    }
+    // the ORIGINAL RB-fixup walk (the +0x74 flag chain
+    // with rotations) - TBD: the set rotations are at
+    // +0x1d; the map node variant is not yet ported
 }
 
 } // namespace msg

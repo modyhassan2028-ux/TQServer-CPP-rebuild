@@ -214,4 +214,20 @@ struct SObjMap {
 // (node + 0x1c).
 uint32_t* MapOperatorAt(SObjMap* pMap, uint32_t dwKey);
 
+// ===== M61: ORIGINAL FUN_140010600 link core +
+// FUN_140010ec0 hint-insert head (the map insert) =====
+// the VERBATIM max_size gate ("map/set<T> too long"),
+// count++, and the EXACT link branches of the set
+// insert generalized to map nodes:
+//   root:  sent+8 = sent+0 = sent+0x10 = node
+//   bAfter==0: hint+0x10(right) = node; if hint ==
+//     rightmost -> rightmost = node
+//   else: hint+0(left) = node; if hint == leftmost ->
+//     leftmost = node
+// The node ALLOCATOR (FUN_140010280: new(0x78) +
+// record copy) and the map RB-fixup walk (the +0x74
+// chain after the links) are the NEXT TBDs.
+void MapInsertLink(SObjMap* pMap, SMapNode* pHint,
+                   bool bAfter, SMapNode* pNew);
+
 } // namespace msg

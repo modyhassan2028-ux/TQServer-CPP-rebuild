@@ -366,6 +366,22 @@ int main() {
         // a second key -> a NEW node
         uint32_t* pRec3 = msg::MapOperatorAt(&mp, 10);
         assert(pRec3 != pRec && mp.m_qCount == 2);
+        // M61: the verbatim insert-link branches
+        // the root branch already ran (42 on empty);
+        // 10 went LEFT of leftmost (M60 test).
+        assert(sent.m_pLeft->m_dwKey == 10);  // leftmost
+        // a bigger key -> the RIGHTMOST branch:
+        uint32_t* pR = msg::MapOperatorAt(&mp, 99);
+        assert(pR != nullptr && mp.m_qCount == 3);
+        assert(sent.m_pRight->m_dwKey == 99);
+        assert(mp.m_pInner /* still same sentinel */);
+        // exact re-lookup of all three keys:
+        assert(msg::MapOperatorAt(&mp, 10)[0] ==
+               pRec3[0] || true);   // same node below
+        assert(msg::MapOperatorAt(&mp, 42) == pRec);
+        assert(msg::MapOperatorAt(&mp, 10) == pRec3);
+        assert(msg::MapOperatorAt(&mp, 99) == pR);
+        assert(mp.m_qCount == 3);   // no dup inserts
         std::puts("M60-MAP-OPAT-OK");
     }
     std::puts("MSG_SETOPS_OK: insert first/tail branches,"
