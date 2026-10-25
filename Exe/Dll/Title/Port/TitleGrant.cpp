@@ -7,8 +7,8 @@ std::function<uint32_t(void*, int)> g_fnGetTitleMask =
     [](void*, int){ return 0u; };
 std::function<void(void*, int, uint32_t)> g_fnSetTitleMask =
     [](void*, int, uint32_t){};
-std::function<void*(void*)> g_fnMgrGetRecord =
-    [](void*){ return nullptr; };
+std::function<void*(void*, int)> g_fnMgrGetRecord =
+    [](void*, int){ return (void*)nullptr; };
 std::function<void(void*, int, CMsgBase*)> g_fnSendTitleMsg =
     [](void*, int, CMsgBase*){};
 std::function<void(const char*)> g_fnGrantLogError =
@@ -80,7 +80,7 @@ bool GrantTitle(CTitleMgr* pMgr, int nTitleId, short sIdx) {
         return false;
     }
     // mgr vtable+0x28 () -> the record
-    void* pRec = g_fnMgrGetRecord(pMgr);
+    void* pRec = g_fnMgrGetRecord(pMgr, nTitleId);
     if (pRec == nullptr) return false;
     if (!TitleMaskCheckSet((STitleMaskRec*)pRec, sIdx))
         return false;

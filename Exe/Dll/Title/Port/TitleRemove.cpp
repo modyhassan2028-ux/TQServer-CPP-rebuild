@@ -60,7 +60,7 @@ bool RemoveTitle(void* pMgr, int nTitleId, short sIdx) {
     }
     // ORIGINAL: mgr vt+0x28 -> the record
     STitleMaskRec* pRec =
-        (STitleMaskRec*)g_fnMgrGetRecord(pMgr);
+        (STitleMaskRec*)g_fnMgrGetRecord(pMgr, nTitleId);
     if (pRec == nullptr) return false;
     if (!TitleMaskClearBit(pRec, sIdx)) return false;
 

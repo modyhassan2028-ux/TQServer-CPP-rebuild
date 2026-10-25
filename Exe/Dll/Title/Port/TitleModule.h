@@ -20,6 +20,8 @@ extern std::function<void*(size_t)> g_fnAlloc;
 extern std::function<void(void*)> g_fnFree;
     // operator_delete
 extern std::function<void()> g_fnCMsgInit;
+// the CMsg::Create thunk (jumptable TBD — buffers in)
+extern std::function<bool(void*, const char*, uint16_t)> g_fnCMsgCreate;
     // tq::CMsg::Init — the ORIGINAL is an unrecovered
     // jumptable thunk (141975678/14197567e region)
 extern std::function<void(const char*)> g_fnLogError;

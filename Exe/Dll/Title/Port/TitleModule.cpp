@@ -7,6 +7,8 @@ namespace title {
 std::function<void*(size_t)> g_fnAlloc = [](size_t){ return nullptr; };
 std::function<void(void*)> g_fnFree   = [](void*){};
 std::function<void()> g_fnCMsgInit    = []{};
+std::function<bool(void*, const char*, uint16_t)> g_fnCMsgCreate =
+    [](void*, const char*, uint16_t){ return false; };
 std::function<void(const char*)> g_fnLogError = [](const char*){};
 std::function<void()> g_fnAtexit     = []{};
 std::function<bool(uint32_t, void*)> g_fnKernelRegisterMsg =

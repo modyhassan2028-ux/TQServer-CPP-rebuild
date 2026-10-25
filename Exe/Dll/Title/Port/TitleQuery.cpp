@@ -42,7 +42,7 @@ bool MgrHasTitle(void* pMgr, int nTitleId, uint16_t uIdx) {
         return false;
     }
     STitleMaskRec* pRec =
-        (STitleMaskRec*)g_fnMgrGetRecord(pMgr);
+        (STitleMaskRec*)g_fnMgrGetRecord(pMgr, nTitleId);
     if (pRec == nullptr) return false;
     return HasTitleBit(pRec, uIdx);
 }
@@ -51,7 +51,7 @@ bool MgrHasTitle(void* pMgr, int nTitleId, uint16_t uIdx) {
 int MgrCountTitles(void* pMgr, int nTitleId) {
     if (nTitleId != 0) {
         STitleMaskRec* pRec =
-            (STitleMaskRec*)g_fnMgrGetRecord(pMgr);
+            (STitleMaskRec*)g_fnMgrGetRecord(pMgr, nTitleId);
         if (pRec != nullptr) return CountTitles(pRec);
     }
     return 0;
