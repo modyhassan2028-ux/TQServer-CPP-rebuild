@@ -598,4 +598,53 @@ uint32_t SPercentCfg::LoadPercentConfig(
     return (uint32_t)n;
 }
 
+// ===== M60: ORIGINAL FUN_140011280 @ 140011280 =====
+// seam: the ORIGINAL node insert (FUN_140010ec0).
+static SMapNode* (*g_fnMapInsert)(SObjMap*, uint32_t);
+
+uint32_t* MapOperatorAt(SObjMap* pMap, uint32_t dwKey) {
+    SMapNode* pSent = (SMapNode*)pMap->m_pInner;
+    SMapNode* pCand = pSent;              // puVar3
+    // the VERBATIM walk (sentinel +8 = root):
+    SMapNode* pCur = pSent->m_pParent;
+    while (pCur->m_byFlag == 0) {
+        if (pCur->m_dwKey < dwKey)
+            pCur = pCur->m_pRight;        // puVar1[2]
+        else {
+            pCand = pCur;                 // lower-bound
+            pCur = pCur->m_pLeft;         // *puVar1
+        }
+    }
+    // the ORIGINAL exact check: candidate == sentinel
+    // || key < candidate->key -> MISS
+    if (pCand == pSent || dwKey < pCand->m_dwKey) {
+        // default record VERBATIM: local_c0 =
+        // {key, 0,0,0,0,0,0}
+        SMapNode* pNew = new SMapNode();
+        pNew->m_dwKey = dwKey;
+        // (the two local container ctors + the copy
+        // FUN_14000e970/cleanup FUN_14000c310 = the
+        // record sub-set - seam: zero-initialized here)
+        if (g_fnMapInsert)
+            g_fnMapInsert(pMap, dwKey);
+        // minimal tree link so the port stays usable
+        // (the REAL link is FUN_140010ec0 - TBD):
+        pNew->m_pParent = pSent;
+        pNew->m_pLeft = pNew->m_pRight = pSent;
+        if (pSent->m_pParent == pSent) {
+            pSent->m_pParent = pNew;   // root
+            pSent->m_pLeft = pSent->m_pRight = pNew;
+        } else {
+            if (dwKey < pCand->m_dwKey)
+                pCand->m_pLeft = pNew;
+            else
+                pCand->m_pRight = pNew;
+        }
+        pMap->m_qCount++;
+        return &pNew->m_aRecord[0];   // node + 0x1c
+    }
+    // HIT: return node + 0x1c
+    return &pCand->m_aRecord[0];
+}
+
 } // namespace msg

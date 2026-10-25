@@ -21,6 +21,7 @@
 #include <cstdint>
 #include <functional>
 #include <string>
+#include <cstring>
 #include <vector>
 namespace msg {
 struct SInnerObj {                 // the allocated sentinel
@@ -179,5 +180,38 @@ struct SPercentCfg {
                                uint32_t dwType,
                                const char* szDescrib);
 };
+
+// ===== M60: ORIGINAL FUN_140011280 @ 140011280 =====
+// the ACTIVITY-MAP operator[] (find-or-default-insert).
+// Node layout (from the walk + the return):
+//   +0 left, +8 parent, +0x10 right (M57 field map),
+//   +0x18 u32 key, +0x1c VALUE record start
+//   (6 ints + a sub-set), +0x75 the end-flag byte
+struct SMapNode {
+    SMapNode* m_pLeft;
+    SMapNode* m_pParent;   // +8 (M57 map: parent)
+    SMapNode* m_pRight;    // +0x10
+    uint32_t  m_dwKey;     // +0x18
+    uint32_t  m_aRecord[6];// +0x1c (value record)
+    uint8_t   m_pad[0x54]; // record tail (sub-set etc.)
+    uint8_t   m_byFlag;    // +0x75 (sentinel=1)
+    SMapNode() : m_pLeft(nullptr), m_pParent(nullptr),
+                 m_pRight(nullptr), m_dwKey(0),
+                 m_byFlag(0) {
+        std::memset(m_aRecord, 0, sizeof m_aRecord);
+        std::memset(m_pad, 0, sizeof m_pad);
+    }
+};
+struct SObjMap {
+    void*     m_pInner;    // the sentinel node
+    uint64_t  m_qCount;
+};
+
+// the operator[] VERBATIM walk + default record
+// {key,0,0,0,0,0,0}; the node INSERT is a seam (the
+// ORIGINAL calls FUN_140010ec0 with the built record -
+// not yet ported). Returns the VALUE pointer
+// (node + 0x1c).
+uint32_t* MapOperatorAt(SObjMap* pMap, uint32_t dwKey);
 
 } // namespace msg

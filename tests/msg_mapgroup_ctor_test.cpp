@@ -345,6 +345,29 @@ int main() {
             "1 2 3 4 5 6 7 8 9 10 11 12 13 14") == 13);
         std::puts("M59-PERCENT-CFG-OK");
     }
+    // M60: the activity-map operator[]
+    {
+        msg::SMapNode sent; sent.m_byFlag = 1;
+        sent.m_pLeft = sent.m_pParent = sent.m_pRight =
+            &sent;
+        msg::SObjMap mp;
+        mp.m_pInner = &sent; mp.m_qCount = 0;
+        // miss -> default record {0,0,0,0,0,0}
+        uint32_t* pRec = msg::MapOperatorAt(&mp, 42);
+        assert(mp.m_qCount == 1);
+        assert(pRec[0] == 0 && pRec[5] == 0);
+        // write through the returned VALUE ptr
+        pRec[0] = 7; pRec[3] = 9;
+        // hit -> the SAME record pointer
+        uint32_t* pRec2 = msg::MapOperatorAt(&mp, 42);
+        assert(pRec2 == pRec);
+        assert(pRec2[0] == 7 && pRec2[3] == 9);
+        assert(mp.m_qCount == 1);      // no new node
+        // a second key -> a NEW node
+        uint32_t* pRec3 = msg::MapOperatorAt(&mp, 10);
+        assert(pRec3 != pRec && mp.m_qCount == 2);
+        std::puts("M60-MAP-OPAT-OK");
+    }
     std::puts("MSG_SETOPS_OK: insert first/tail branches,"
               " erase unlink + end() out_of_range"
               " verbatim | MSG_MAPGROUP_CTOR_OK: ctor order, 0x40 set "
