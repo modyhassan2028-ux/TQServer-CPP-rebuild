@@ -245,6 +245,26 @@ int main() {
         assert(r2 && !bExists && st.m_qCount == 2);
         std::puts("M55-KEYED-INSERT-OK");
     }
+    // M56: the verbatim single/leaf-child splice
+    {
+        SObjSet st; std::memset(&st, 0, sizeof st);
+        SSetNode h;
+        SSetNode* r = new SSetNode{};   // root, only node
+        SSetNode* c = new SSetNode{};   // left child
+        std::memset(&h,0,sizeof h);
+        h.m_byFlag = 1;
+        h.m_pPrev = h.m_pNext = h.m_pParent = &h;
+        st.m_pInner = (SInnerObj*)&h; st.m_qCount = 2;
+        r->m_pParent = &h; h.m_pParent = r; h.m_pNext = r;
+        r->m_pPrev = c; c->m_pParent = r;
+        c->m_pPrev = c->m_pNext = &h;
+        r->m_pNext = &h;               // no right child
+        msg::SetErase(&st, r);         // leaf splice path
+        assert(st.m_qCount == 1);
+        // sentinel reverts to self-links (both fixups ran)
+        assert(h.m_pNext == &h && h.m_pPrev == &h);
+        delete c;
+    }
     std::puts("MSG_SETOPS_OK: insert first/tail branches,"
               " erase unlink + end() out_of_range"
               " verbatim | MSG_MAPGROUP_CTOR_OK: ctor order, 0x40 set "

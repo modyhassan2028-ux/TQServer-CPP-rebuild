@@ -174,16 +174,42 @@ SSetNode* SetErase(SObjSet* pSet, SSetNode* pIt) {
         pSent->m_pPrev = pPred;          // [in this port:
         //  +0 slot == m_pPrev/leftmost] VERBATIM slot 0
     } else {
-        // single/no-child relink (simplified, tail of
-        // the ORIGINAL else branch - TBD full splice)
-        if (pL->m_byFlag == 0)
-            pL->m_pParent = pPar;
-        if (pR->m_byFlag == 0)
-            pR->m_pParent = pPar;
+        // ===== M56: the VERBATIM single/leaf splice
+        // (FUN_14000ab40 decompile 8628-8668) =====
+        if (pPar->m_byFlag == 0)
+            pPar->m_pNext = pR;   // plVar12[1] = plVar11
         if (pSent->m_pNext == pIt)
-            pSent->m_pNext = (pR->m_byFlag==0)?pR:pL;
-        if (pSent->m_pPrev == pIt)
-            pSent->m_pPrev = (pL->m_byFlag==0)?pL:pR;
+            pSent->m_pNext = pPar;   // head-child fixup
+        else if (pR->m_pPrev == pIt)
+            pR->m_pPrev = pPar;      // *plVar11
+        else
+            pR->m_pParent = pPar;    // plVar11[2]
+        // leftmost fixup (sentinel +0 slot):
+        if (pSent->m_pPrev == pIt) {
+            SSetNode* pW = pR;       // plVar10 = plVar11
+            if (pPar->m_byFlag == 0) {
+                SSetNode* p9 = pPar;
+                SSetNode* p6 = pPar->m_pPrev;
+                while (p6->m_byFlag == 0) {
+                    p9 = p6; p6 = p6->m_pPrev;
+                }
+                pW = p9;
+            }
+            pSent->m_pPrev = pW;
+        }
+        // rightmost fixup (sentinel +0x10 slot):
+        if (pSent->m_pParent == pIt) {
+            SSetNode* pW2 = pR;
+            if (pPar->m_byFlag == 0) {
+                SSetNode* p9 = pPar;
+                SSetNode* p6 = pPar->m_pParent;
+                while (p6->m_byFlag == 0) {
+                    p9 = p6; p6 = p6->m_pParent;
+                }
+                pW2 = p9;
+            }
+            pSent->m_pParent = pW2;
+        }
     }
     // rightmost fixup on the sentinel (+0x10):
     if (pSent->m_pParent == pIt) {
