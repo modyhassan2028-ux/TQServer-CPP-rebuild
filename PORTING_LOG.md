@@ -5185,3 +5185,49 @@ M18: مستقبِل تبادل المفاتيح المشفّر
   فالصورة الوهمية في الاختبار لازم
   تكون تحت 4GB — استخدمنا MAP_32BIT.
 - **الرجريجن 65/65 أخضر.**
+
+## جلسة 2026-10-26 20:10 — MsgServer
+الوحدتان M26 + M27: محمّل الـ PE اليدوي كامل
+
+### الوحدة M26 (Exe/MsgServer/Port/MsgPeValidate)
+- **FUN_140509760 (تحقق الـ PE):** الحجم > 0x3f،
+  MZ، **e_lfanew عند +0x3c** (Ghidra عرضه short*+0x1e)،
+  e_lfanew+0x108 <= حجم الملف، PE sig، خصائص
+  DLL(0x2000)|EXEC(2)، SizeOfOptionalHeader = 0xf0
+  (PE32+)، فحص حدود كل سكشن من NT+0x118
+  (SizeOfRawData+PointerToRawData). الديسكربتور:
+  +0x18 الملف، +0x20 الهيدر، +0x28 جدول السكاشن.
+- **FUN_140509820 (الحجم الافتراضي):** align =
+  NT+0x38؛ total = alignUp(SizeOfHeaders NT+0x54)؛
+  لكل سكشن: alignUp(max(VirtualSize@+8،
+  SizeOfRawData@+0x10) + VA@+0xc).
+
+### الوحدة M27 (Exe/MsgServer/Port/MsgPeLoader)
+- **FUN_1405098b0 (النسخ):** memmove الهيدرات
+  (SizeOfHeaders + nSecs*0x28) + كل سكشن
+  (base+VA من ملف+rawPtr)؛ إعادة ربط الديسكربتور
+  على **النسخة المُعيّنة**: +0x18=base، +0x20=
+  base+e_lfanew، +0x28=+0x108.
+- **FUN_1405094d0 (إعادة التموضع):** dir عند
+  NT+0xb0 (RELOCS مش imports — تصحيح قراءتي
+  الأولى). مسار البلوكات: (BlockSize-8)/2 مدخل؛
+  نوع 0xA000 (DIR64): *(base+PageRVA+off) +=
+  base - ImageBase (qword عند NT+0x30).
+- **FUN_1405095a0 (الاستيرادات):** dir عند NT+0x90.
+  نسخ الاسم بحارس strlen 0xff، GetModuleHandleA
+  (فشل → 0)، ILT: high-bit → ordinal &0xffff،
+  غير كده اسم عند base+thunk+2 (hint+2)،
+  GetProcAddress → كتابة FirstThunk.
+- **FUN_140509990 (الموزّع):** من الديزامبلي: r8
+  (حجم الملف) بيتوّج لـ 760 زي ما هو. VirtualAlloc
+  (0، حجم، 0x3000، 0x40) → نسخ → relocs لو
+  NT+0xb0/0xb4 → imports (فشل → VirtualFree
+  0x8000) → **VirtualProtect بدون فحص رجوعه** →
+  hdr+0x30=base → entry = base+NT+0x28 عند
+  desc+0x08 → entry(base,1)؛ نجاح: flag=1،
+  desc+0x10=base؛ فشل: entry(base,0,0) +
+  VirtualFree + تصفير entry.
+- **فخ وثق:** escape هكس جشع في اختبار C
+  ("\x01\x02Func..." — \x02F بتاكل F؛ فصلنا
+  البايتات).
+- **الرجريجن 68/68 أخضر.**
