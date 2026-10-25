@@ -71,4 +71,65 @@ bool CTitleMgrPort::DeleteUserTitle(CTitleMgr* pMgr, int nId) {
     return true;                    // CONCAT71(..., 1)
 }
 
+
+// ============ FUN_141974630: the mgr deleting dtor ============
+// ORIGINAL flow: vftable write; walk Lmost..Rmost destroying
+// each node's CTitle (log ERROR if the slot is null; zero
+// the slot TWICE verbatim); erase-all the nodes; the head
+// freed and nulled (+0x38/+0x40); the proxy (+0x08) freed.
+void CTitleMgrPort::DeletingDtor(CTitleMgr* pMgr) {
+    // *param_1 = title::CTitleMgr::vftable (modeled)
+    SMapKernel* pMap =
+        (SMapKernel*)((uint8_t*)pMgr + 0x08);
+    STreeNode* pHead = pMap->m_pHead38;
+    // plVar5 = head->left (the Lmost)
+    STreeNode* pNode = pHead->m_pLeft00;
+    while (pNode != pHead) {
+        if (pNode->m_pValue20 == nullptr) {
+            // plVar5[4] == 0 -> log ERROR (verbatim)
+            g_fnLogError("DAT_141978310");
+        } else {
+            // FUN_141971580 (node+0x20)
+            SafeDestroyTitle(pNode->m_pValue20);
+            // the TWICE-verbatim zero
+            pNode->m_pValue20 = nullptr;
+            pNode->m_pValue20 = nullptr;
+        }
+        // the in-order successor (the ORIGINAL's iterator
+        // ++ body: leftmost of the right subtree, else
+        // climb while the node is the parent's right)
+        if (!pNode->m_pRight10->m_bIsnil29) {
+            STreeNode* q = pNode->m_pRight10;
+            while (!q->m_pLeft00->m_bIsnil29)
+                q = q->m_pLeft00;
+            pNode = q;
+        } else {
+            // the ORIGINAL's climb: continues ONLY while
+            // the parent is NOT the sentinel (its +0x29
+            // isnil) and the node is the parent's RIGHT
+            STreeNode* par = pNode->m_pParent08;
+            while (!par->m_bIsnil29
+                   && pNode == par->m_pRight10) {
+                pNode = par;
+                par = pNode->m_pParent08;
+            }
+            pNode = par;   // the head stops the walk
+        }
+    }
+    // erase-all the nodes (the 141972c50-walk from the
+    // root: subtree-destroy, free, move left) + the
+    // head re-circularization + size 0
+    pMap->Clear();
+    // 141973ee0(end,end) -> 141972e10 (clear again —
+    // the no-op path) then the head teardown:
+    g_fnFree(pMap->m_pHead38);
+    pMap->m_pHead38 = nullptr;          // param_1[7] = 0
+    pMap->m_nSize40 = 0;                // param_1[8] = 0
+    // the proxy free (operator_delete(*plVar5))
+    g_fnFree(pMap->m_pProxy08);
+    pMap->m_pProxy08 = nullptr;
+}
+
 } // namespace
+
+

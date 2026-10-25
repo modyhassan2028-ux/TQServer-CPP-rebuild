@@ -23,6 +23,12 @@ public:
     static bool DeleteUserTitle(CTitleMgr* pMgr, int nId);
     // ORIGINAL FUN_141971580 (title)
     static void SafeDestroyTitle(void* pTitle);
+    // ORIGINAL FUN_141974630: the mgr DELETING dtor —
+    // vtable write + destroy every node's CTitle (the
+    // DAT_141978310 ERROR log when the slot is null +
+    // the TWICE-verbatim zero) + erase-all the nodes +
+    // free the head (nulled) + free the proxy
+    static void DeletingDtor(CTitleMgr* pMgr);
 };
 
 } // namespace
