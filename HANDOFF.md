@@ -437,3 +437,10 @@ D24 — راجع REMAINING_ROADMAP.md أو دوال Peerage.dll المتبقية
 - `bash tools/run_dwave_regression.sh` يجب أن تطبع ALL-6X-GREEN: 29/29.
 - عرف الورقة: أولاد عقدة الإدراج يشيرون للـ head sentinel والأب = عقدة الالتصاق (e790 → e1a0).
 - قيم العقد: مخزنا heap عند +0x20 و+0x50 (تحررهما e240)؛ اللون +0x60؛ _Isnil +0x61.
+
+## نقطة البداية للجلسة الجاية (بعد D30)
+
+- **D30 مقفولة ومرفوعة:** SyndicateOwnTree.{h,cpp} — عائلة شجرة الملكية 0x28 (8 دوال، من بينها bf40 بدلالة equal_range الموثقة تجريبيًا). رجريشن 30/30 × 6.
+- **التالي (D31):** طبقة سلاسل الملكية فوق النواتين — FUN_14173eb10 (unwind الملكية، سطر 25003) + cb90 (23256) + f0c0 (25332) + ef80 (25254) + c0b0 (الإزالة مع out_of_range، سطر 22660) — توصيل هذه بالسِمات المتبقية في CrossMerit (g_fnOrphanCB90/g_fnSpliceCD80/g_fnTreeInsertF0C0/...) — أو عائلة CLeague.
+- `bash tools/run_dwave_regression.sh` يجب أن تطبع ALL-6X-GREEN: 30/30.
+- عرف الورقة (D29) سارٍ في العائلتين؛ bf40 = equal_range وليست "pair walk" عامة.
