@@ -4,5 +4,6 @@
     <ClCompile Include="Port\TitleModule.cpp" />
     <ClCompile Include="Port\TitleRecord.cpp" />
     <ClCompile Include="Port\TitleGrant.cpp" />
+    <ClCompile Include="Port\TitleRemove.cpp" />
   </ItemGroup>
 </Project>
