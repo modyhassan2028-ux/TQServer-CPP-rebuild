@@ -5493,3 +5493,65 @@ M18: مستقبِل تبادل المفاتيح المشفّر
   (m_fnUpdateUi) لحين بورت
   CStringT::Format.
 - **الرجريجن 75/75 أخضر.**
+
+## جلسة 2026-10-27 02:25 — MsgServer
+الوحدتان M35 + M36: نهاية
+FUN_140024860 كاملة
+
+### الوحدة M35 (Exe/MsgServer/Port/MsgState4)
+- **state 4:** KillTimer(1) ←
+  FUN_14001f070 ← Sleep(3000) ←
+  لو DAT_1409758f0:
+  ShellExecuteA بإعادة تشغيل نفس
+  الـ EXE (AfxGetModuleState+0x20)
+  ← 4 نداءات تنظيف ←
+  CDialog::OnOK.
+
+### الوحدة M36 (Exe/MsgServer/Port/MsgAuthTimer)
+- **timer id 2 كاملًا:**
+  - **state 0 (+0x2278):** نسخ
+    اسمي الـ authserver (+0x227c ثم
+    +0x228c عند الفشل) إلى +0x229c،
+    كل واحد ببوابة FUN_140005ea0
+    (فشل → FUN_140005d20). النجاح →
+    state 1 + FUN_14001e0b0(+0x22c4)
+    + لوج success. ملاحظة حرفية:
+    +0x229c بيفضل آخر اسم مجرَّب.
+  - **state 1 والاتصال مفقود:**
+    فحص رأس DEADLOOP على
+    PTR_s_DEADLOOP (otherwise
+    Ordinal_12) → بناء باقت
+    "IP:%s VERSION:%s" مع فحص الطول
+    <0xfe → إرسال FUN_140006880 لو
+    الاتصال راجع. لوج "authentication
+    (%s) faild." (بالإملاء الحرفي
+    faild) → state 3 + KillTimer(2) +
+    WM_CLOSE.
+  - **state 1 والاستقبال:** أول قطعة
+    >3 بايت: حجم البلجن = أول 4
+    بايت (+0x22b8)، new(الحجم)
+    (+0x22b0)، استهلاك 4، تصفير
+    DAT_140975938. الباقي memmove
+    تجميعي مع استهلاك الطول.
+    الاكتمال (total >= size): فصل ←
+    state 3 ← KillTimer(2) ←
+    FUN_140508f60(buf, size, 1):
+    نجاح → تصفير +0x22bc/+0x22c0 +
+    SetTimer(1, 200) + لوج
+    success؛ فشل → "import function
+    failed at %s, %d" بالمسار
+    الحرفي f:\version\cqserver-78.0.11
+    -1204\msgserver\msgserverdlg.cpp +
+    WM_CLOSE.
+  - **مهلة المصادقة:** +0x22c0 != 0 و
+    +0x22bc+0x22c0 <= now/1000 →
+    تصفير + KillTimer(2) + WM_CLOSE.
+- **نمذجة مهمة:** الـ allocation بقت
+  خياطة (m_fnAlloc) — تحويل الحجم
+  لعنوان مباشرة كان بيعمل segfault
+  في الاختبار، وده كشفه.
+- **FUN_140024860 اكتملت بجميع
+  فروعها** (البرولوج M31 + السلاسل
+  M32/M33 + الأداء M34 + الخروج M35
+  + الـ authserver M36).
+- **الرجريجن 77/77 أخضر.**
