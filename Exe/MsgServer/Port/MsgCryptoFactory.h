@@ -46,6 +46,19 @@
 //              ("*J_@'n 3" for the
 //              plugin image)
 //
+//  M41: the factory now wires
+//  REAL implementations by default
+//  (pImpl owns the object):
+//    DES -> MsgDes (M40, the
+//      custom-variant descore;
+//      zero-init = the fresh-heap
+//      zeroed-pages observation)
+//    Checksum/Standard ->
+//      MsgMd5Checksum (M30)
+//  The std::function seams stay
+//  overridable (the unit tests
+//  may rewire).
+//
 //  the users of vt+8 (the M23
 //  leftover):
 //    - FUN_140508610 (key.dat gen):
@@ -65,6 +78,7 @@
 #pragma once
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <string>
 
 namespace msg {
@@ -102,6 +116,10 @@ struct MsgCryptoProvider {
         std::string& sKey)>
         m_fnSetKey;
     int nKind = -1;   // which class
+    // M41: the real object (the
+    // DES ctx / the MD5 ctx),
+    // owned by the provider
+    std::shared_ptr<void> pImpl;
 };
 
 // the factory: VERBATIM

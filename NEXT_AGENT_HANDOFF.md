@@ -1,5 +1,5 @@
 # 🔵 NEXT AGENT HANDOFF — ابدأ من هنا
-> آخر تحديث: 2026-10-27 04:50 (NpcServer 1-47 كاملة + MsgServer M1-M40، الرجريجن 81/81 — كائن DES المعدّل كامل)
+> آخر تحديث: 2026-10-27 05:30 (NpcServer 1-47 كاملة + MsgServer M1-M41، الرجريجن 82/82 — سلسلة التشفير الموصولة)
 > هذا الملف هو نقطة البداية لأي agent هيكمل الشغل. اقرأه كله قبل أي سطر كود.
 
 ---
@@ -113,13 +113,14 @@
 - **M34:** بلوك الأداء والإحصائيات في MsgPerfStats (FUN_140024860 state 2، سطور ~29890-30056): فترات 600/300 ثانية، تصفير 8+12 عداد بـ LOCK/UNLOCK، البانر "-"×47، فورمات إحصائيات السوكيتات الحرفي، قاعدة انحراف CCU (نافذة signed ±10 + العبور الصفري، وFromOSCCU/ToOSCCU بـ abs)، فحص انسداد الأنبوب (>10000 و%1000==0)، وrequest الريستارت → state 3.
 - **M35:** state 4 في MsgState4 (سطور ~30387-30410): KillTimer(1) + f070 + Sleep(3000) + إعادة التشغيل الشرطية بنفس الـ EXE + التنظيف + OnOK.
 - **M36:** فرع timer-2 كاملًا في MsgAuthTimer (سطور ~30413-30533): سلسلة أسماء الـ authserver ببوابات الاتصال، مسار الفقد (فحص DEADLOOP + Ordinal_12 + باقت "IP:%s VERSION:%s" + لوج faild بالإملاء الحرفي)، تنزيل البلجن بالتقطيع (الحجم في أول 4 بايت من القطعة الأولى + استهلاك 4، memmove تجميعي، بوابة الاكتمال)، FUN_140508f60 بالمسار الحرفي عند الفشل + SetTimer(1,200) عند النجاح، ومهلة المصادقة. **FUN_140024860 (CMsgServerDlg::OnTimer) اكتملت بجميع فروعها.**
+- **M41:** سلسلة التشفير الموصولة: المصنع (M38) بيوصل DES الحقيقي (M40) وMD5 (M30) افتراضيًا عبر pImpl، والاختبار msg_crypto_chain_test بيشغّل المسارات الأربعة الحقيقية (vt interface ضد متجهات M40، البلجن بفك الصورة بمفتاح '*J_@'n 3'، key.dat بتبديل نصفي+صفر الذيل، shell.dat بتبديل نصلي بدون setkey، بصمة MAC بالسولت). الاكتشاف: التهيئة الصفرية = نمذجة fresh-heap، ومسارات بدون setkey = تبديل نصفي للبلوكات.
 - **M40:** كائن DES الكامل (MsgDes): تخطيط الـ vftable مستخرج من .rdata (delete/ECB-enc/ECB-dec/setkey/stubs)، بنية descore (8 SP tables + 16×8 schedule بترتيب 6-bits/byte)، الـ S-boxes **معدّلة عن القياسي** (variant مخصص - مش DES قياسي!)، الجولات الـ unswapped مع الـ IP-by-load والـ FP-by-store الضمني، فك التشفير بالأدوار المعاكسة، الـ ECB بـ padding الأصفار، وثلاث quirks حرفية: decrypt(غير مضاعف 8) بيلف للأبد، الـ ECB encrypt بيستاهل len<1 فقط، وفرع schedule-الخام كود ميت.
 - **M39:** عيلة serverlock في MsgServerLock: FUN_140508440 (iphlpapi/GetAdaptersInfo 0x2c00، تخطي 192.168.39/181، strcmp مع Ordinal_12، لوجات IF_OK/hModule وASSERT بالمسار الحرفي، والمشي مستمر بعد فشل الاستعلام حرفيًا) + FUN_14001e3d0 (جدول dwordين 0x060817ac/0x090b17ac من .data) + فرع OnInitDialog (192.168.9.138 في عناوين الـ authserver + منفذ 0x268d + لوج "This is a inner server.").
 - **M38:** مصنع مزودات التشفير FUN_140509280 في MsgCryptoFactory: 0=DES(0x890)، 1=CMD5Checksum (السولت)، 2=Standard، 3=الـ slot يفضل UNTOUCHED (حرفي)، أكبر→NULL. **إجابة سؤال السولت (متبقي M23):** السولت مخصوص لمسار بصمة MAC (القناة 1) فقط — MD5(input+السولت)؛ وkey.dat/shell.dat/البلجن بيستخدموا الـ DES (vt+8 تشفير/vt+0x10 فك/vt+0x18 مفتاح "*J_@'n 3").
 - **M37:** التجميع في MsgOnTimer: البرولوج (M31) على كل tick + حارس DAT_14097593c + توزيع +0x1fc (0/1→M32، 2→M34، 3→M33، 4→M35، غير معروف→ERROR) + timer 2→M36 + بقية المعرفات→CWnd::Default. مصدر الحقيقة الوحيد لـ +0x1fc هو prologue.nState. MsgOnTimerResetBoot ينزّل الحارس بعد نجاح استيراد البلجن لبوت جديد. اختبار دورة حياة كامل (بوت→عمل→restart→إغلاق→خروج + auth→بلجن→بوت + shutdown→kickout→إغلاق بنفس الـ tick).
 
 ### التالي (بالترتيب):
-1. **M41:** أكمل عيلة 14050a-14050b المتبقية إن وجدت (14050ac50 — دالة دمج جدولين 128-بايت بالـ OR — راجع استدعاءاتها)، و FUN_14001f070 وFUN_140021bd0 وFUN_14001e540 (دوال الـ dlg المساعدة) لو ظهروا في مسار. كمان راجع منادي DES::setkey في مسار تحميل البلجن (MsgPluginInstall) للتأكد إن المفتاح الـ 8 بايت بيمر سليمًا.
+1. **M42:** خيط Cheating Program Monitor (~سطر 3151 في MsgServerDlg OnTimer): DES_string_to_key("df29duw", ...) + DES_set_key_checked + DES_cfb64_encrypt — واردات libeay32 (OpenSSL) — موديول محتمل جديد؛ وكمان FUN_14001f070 وFUN_140021bd0 وFUN_14001e540 (دوال الـ dlg المساعدة) لو ظهروا في مسار. ملحوظة: 14050ac50 (دمج جدولين 128-بايت) ليس له منادون في الديكومبايل — كود ميت على الأغلب.
 2. **M42:** خيط Cheating Program Monitor (~سطر 3151): DES_string_to_key("df29duw", ...) + DES_set_key_checked — الواردات من libeay32 (OpenSSL الأصلي!) للـ cfb — موديول محتمل جديد.
 3. لاحقًا: موديولات دخول MsgServer المتبقية من M1-M22 إن وجدت، ثم تجميع الـ smoke المطول.
 2. **M34:** وصل m_fnRest في MsgTimerProc بالـ MsgTimerInitChain الحقيقي (الخياطات الافتراضية) وأزود حقول الـ dlg-state المشتركة.
