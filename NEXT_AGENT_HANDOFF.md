@@ -1,5 +1,5 @@
 # 🔵 NEXT AGENT HANDOFF — ابدأ من هنا
-> آخر تحديث: 2026-10-27 00:55 (NpcServer 1-47 كاملة + MsgServer M1-M33، الرجريجن 74/74)
+> آخر تحديث: 2026-10-27 01:40 (NpcServer 1-47 كاملة + MsgServer M1-M34، الرجريجن 75/75)
 > هذا الملف هو نقطة البداية لأي agent هيكمل الشغل. اقرأه كله قبل أي سطر كود.
 
 ---
@@ -110,13 +110,13 @@
 - **M31:** برولوج WM_TIMER في MsgTimerProc (FUN_140024860 سطور 29534-29641): فلاج مرة واحدة لحدث shutdown (WaitForSingleObject 20ms) + نص "shutdown" وعدّ 50 ثانية، ثم "kickoutall" بمهلة 10 ثوانٍ، مع تصفير → state 3 + Refresh. سلسلة إنشاء خيوط timer 1 = seam (m_fnRest) للـ M32.
 - **M32:** سلسلة إنشاء الخيوط في MsgInitChain (FUN_140024860 سطور 29643-29890): state 0→4/1→3، 14 خيط بالترتيب الحرفي (178→180→1c0→1e0→الخرائط→1c8→1b8→[1d8]→1e8→[228]/[238]/[230]) مع AddThreadHandle بعد كل تحقق وموجة Resume مرتّبة، state 2 + مؤقتات 600/300 ثانية بعد البوست-إينت. الفشل في أي خطوة يوقف السلسلة (state تفضل 3).
 - **M33:** شلال الإغلاق في MsgKernelClose (FUN_140024860 state 3، سطور ~30057-30404): موجة CloseThread أولى بالترتيب والمه Literal (2000/3000/4000/10000/120000/3000/60000/8000/4000) ثم موجة الإغلاق+التدمير+التحديث بجدول الرسائل الحرفي (Cross/World/Chat/Auction/AsyncDB/Log + لوب الخرائط 300000) مع SetLogThreadStatus(0) قبل خيط اللوج، والذيل → state 4.
+- **M34:** بلوك الأداء والإحصائيات في MsgPerfStats (FUN_140024860 state 2، سطور ~29890-30056): فترات 600/300 ثانية، تصفير 8+12 عداد بـ LOCK/UNLOCK، البانر "-"×47، فورمات إحصائيات السوكيتات الحرفي، قاعدة انحراف CCU (نافذة signed ±10 + العبور الصفري، وFromOSCCU/ToOSCCU بـ abs)، فحص انسداد الأنبوب (>10000 و%1000==0)، وrequest الريستارت → state 3.
 
 ### التالي (بالترتيب):
-1. **M34:** state 2 (سطور ~29900-30056): مؤقتات الأداء 600s/300s عبر FUN_1400149a0 من +0x144/+0x14c + RecordPerformanceInfo/RecordThreadTimesInfo/SaveLog، ثم بلوك الإحصائيات: 8 تصفيرات LOCK/UNLOCK لعدادات السوكيتات (client/Npc/Account send/recv bytes/Msgs) + لوج البانر "-"×47، فحوص CCU/FromOSCCU/ToOSCCU (نوافذ <10 فرق أو صفري)، بناء نص الواجهة CStringT::Format (3 فورمات ضخمة) + كتابة "Game server online.txt" (fopen wt + fprintf + fclose)، وبلوك التحقق من انسداد أنبوب الرسائل (FUN_14050c390 > 10000 و i%1000==0 → "Message pipe block, server may be slowly!!!" + dump كل call stacks)، ولو DAT_1409758f0 != 0 → state=3.
-2. **M35:** state 4 (سطور 30387-30410): KillTimer(1) + FUN_14001f070 + Sleep(3000) + لو DAT_1409758f0: ShellExecuteA restart + FUN_140028960/14002ad90/1400018c0/1400029f0 + CDialog::OnOK. وبعده فرع timer id 2 (إعادة وصل الـ authserver +0x2278/+0x229c، سطور 30413-30533).
-3. **M36:** توصيل الخياطات: m_fnRest → MsgTimerInitChain، والموجات في MsgTimerProc للمؤقتات 2/3.
-4. **M37:** مستخدمو vt+8 بتوع الجدولين (معنى السولت).
-5. بعدها: عيلة 140508xxx المتبقية.
+1. **M35:** state 4 (سطور 30387-30410): KillTimer(1) + FUN_14001f070 + Sleep(3000) + لو DAT_1409758f0: ShellExecuteA(AfxGetModuleState()->m_appName كأمر) + FUN_140028960/14002ad90/1400018c0/1400029f0 + CDialog::OnOK. وبعده فرع timer id 2 (إعادة وصل الـ authserver: حالة +0x2278 (0→نسخ +0x227c/+0x228c إلى +0x229c مرتين مع FUN_140005ea0/140005d20 بينهم، وFUN_140005e80 للاتصال، ونجاح → +0x2278=1 + FUN_14001e0b0(+0x240, +0x22c4) + لوج "reconnect authserver(%s) success.")، سطور 30413-30533 — اقرأ الباقي أولًا.
+2. **M36:** توصيل الخياطات: m_fnRest → MsgTimerInitChain، والموجات في MsgTimerProc للمؤقتات 2/3، ودمج حالات M32-M34 في MsgTimerDlgState الموحدة.
+3. **M37:** مستخدمو vt+8 بتوع الجدولين (معنى السولت).
+4. بعدها: عيلة 140508xxx المتبقية.
 2. **M34:** وصل m_fnRest في MsgTimerProc بالـ MsgTimerInitChain الحقيقي (الخياطات الافتراضية) وأزود حقول الـ dlg-state المشتركة.
 3. **M35:** مين بيستخدم vt+8 بتوع الجدولين؟ (فهم معنى السولت).
 4. بعدها: عيلة 140508xxx المتبقية (معالجات الرسائل بعد فك التشفير).

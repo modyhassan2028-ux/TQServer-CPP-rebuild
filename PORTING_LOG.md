@@ -5446,3 +5446,50 @@ M18: مستقبِل تبادل المفاتيح المشفّر
   (؛ ء) في نهايات بعض الرسائل —
   مستخرجة من البيناري حرفيًا.
 - **الرجريجن 74/74 أخضر.**
+
+## جلسة 2026-10-27 01:40 — MsgServer
+الوحدة M34: بلوك الأداء والإحصائيات
+(FUN_140024860 state 2، سطور
+~29890-30056)
+
+### الوحدة M34 (Exe/MsgServer/Port/MsgPerfStats)
+- **فترة 600 ثانية** (FUN_1400149a0
+  من +0x144): RecordPerformanceInfo
+  + RecordThreadTimesInfo(true) +
+  CMyHeapMgr::SaveLog.
+- **فترة 300 ثانية** (+0x14c):
+  FUN_14001f070 ثم بوابه
+  FUN_1400222e0(+0x134,300):
+  - تصفير 8 عدادات بـ LOCK/UNLOCK
+    (6f8/6fc/714/718/730/734/744/
+    740)
+  - لوج البانر "-"×47 مع نصّي
+    الواجهة (+0xf8/+0xe8)
+  - لوج إحصائيات السوكيتات
+    (client/Npc/Account send/recv
+    bytes/Msgs) ثم تصفير 12 عدادًا
+    (788..7b4)
+- **فحوص الانحراف:** CCU بنافذة
+  signed (-10,10) + فحص العبور
+  الصفري → لوج "CCU:%d, PCU:%d,
+  login:%d, logout:%d" + تصفير
+  login/logout + PCU=CCU. نفس
+  المنطق لـ FromOSCCU/ToOSCCU بنفس
+  النمط (وإشارة الـ abs في الأصل
+  بـ ((x^s)-s)). ملاحظة مهمة:
+  حرفي الـ -10 في Ghidra يظهر
+  unsigned لكن ده معناه مقارنة
+  signed (نافذة ±10) — محاولة
+  الـ unsigned طلعت شرط مستحيل.
+- **فحص انسداد الأنبوب:**
+  FUN_14050c390() > 10000 و
+  i%1000==0 → "Message pipe block,
+  server may be slowly!!!" + dump
+  كل الـ call stacks.
+- **DAT_1409758f0 != 0 → state 3**
+  (طلب الريستارت).
+- بناء نص الواجهة وكتابة "Game
+  server online.txt" = seam
+  (m_fnUpdateUi) لحين بورت
+  CStringT::Format.
+- **الرجريجن 75/75 أخضر.**
