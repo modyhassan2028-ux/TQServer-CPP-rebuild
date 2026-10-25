@@ -55,3 +55,31 @@ public:
     std::vector<size_t> m_vecAllocSizes;
 };
 } // namespace msg
+
+namespace msg {
+
+// ===== M49: container insert/erase (the MSVC-Tree-style
+// intrusive family). ORIGINAL:
+//   FUN_14000bfd0 @ 14000bfd0 - insert
+//   FUN_14000ab40 @ 14000ab40 - erase
+// The sentinel flag byte (+0x1d) IS the "end()" marker.
+struct SSetNode {
+    SSetNode* m_pPrev;    // +0
+    SSetNode* m_pNext;    // +8
+    SSetNode* m_pParent;  // +0x10
+    uint8_t   m_byFlag;   // node: 0; sentinel: 1
+    uint8_t   m_bySentinelReady; // (size-3) pre-flag
+};
+
+// insert: returns the new node; throws the VERBATIM
+// std::length_error("map/set<T> too long") past max.
+// bAfter: ORIGINAL param_3 ('\0' = link AFTER hint).
+SSetNode* SetInsert(SObjSet* pSet, SSetNode* pHint,
+                    bool bAfter, uint64_t qKey);
+
+// erase: throws the VERBATIM std::out_of_range
+// ("invalid map/set<T> iterator") when pIt is the
+// sentinel (end()).
+void SetErase(SObjSet* pSet, SSetNode* pIt);
+
+} // namespace msg

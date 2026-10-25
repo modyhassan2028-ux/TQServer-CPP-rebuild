@@ -3,6 +3,7 @@
 #include <cassert>
 #include <cstdio>
 #include <cstring>
+#include <stdexcept>
 using namespace msg;
 
 #include <cstddef>
@@ -68,7 +69,34 @@ int main() {
     assert(*((uint8_t*)k.m_setJail.m_pInner + 0x78) == 1);
     assert(*((uint8_t*)k.m_setJail.m_pInner + 0x79) == 1);
 
-    std::puts("MSG_MAPGROUP_CTOR_OK: ctor order, 0x40 set "
+    // ===== M49: insert/erase VERBATIM semantics =====
+    SObjSet s; std::memset(&s, 0, sizeof s);
+    // sentinel: raised flag byte (+0x1d) + tri-self-link
+    SSetNode sent; std::memset(&sent, 0, sizeof sent);
+    sent.m_byFlag = 1; sent.m_bySentinelReady = 1;
+    sent.m_pPrev = sent.m_pNext = sent.m_pParent = &sent;
+    s.m_pInner = (SInnerObj*)&sent; s.m_qCount = 0;
+    SSetNode* n1 = msg::SetInsert(&s, &sent, false, 1);
+    assert(s.m_qCount == 1);
+    assert(sent.m_pNext == n1 && sent.m_pPrev == n1 &&
+           sent.m_pParent == n1);   // first-node branch
+    SSetNode* n2 = msg::SetInsert(&s, &sent, true, 2);
+    assert(sent.m_pPrev == n2);      // tail fixup
+    // erase the end() sentinel -> VERBATIM out_of_range
+    bool bThrew = false;
+    try { msg::SetErase(&s, &sent); }
+    catch (const std::out_of_range& e) {
+        bThrew = true;
+        assert(!std::strcmp(e.what(),
+            "invalid map/set<T> iterator")); }
+    assert(bThrew);
+    msg::SetErase(&s, n1);
+    assert(s.m_qCount == 1);
+    msg::SetErase(&s, n2);
+    assert(s.m_qCount == 0);
+    std::puts("MSG_SETOPS_OK: insert first/tail branches,"
+              " erase unlink + end() out_of_range"
+              " verbatim | MSG_MAPGROUP_CTOR_OK: ctor order, 0x40 set "
               "layout, tri-self-link, flag bytes 0x1d/0x29/"
               "0x79, jail alloc 0x80/0x78=1");
     return 0;

@@ -1,4 +1,5 @@
 #include "MsgMapGroupKernel.h"
+#include <stdexcept>
 #include <cstdlib>
 namespace msg {
 // the VERBATIM container init pattern (FUN_14000ef40 /
@@ -76,4 +77,70 @@ CMapGroupKernel::CMapGroupKernel() {
     InitObjSet(&m_setB3,   m_fnAllocB,    0x29);
     InitObjSet(&m_setJail, m_fnAllocJail, 0x79);
 }
+} // namespace msg
+
+namespace msg {
+
+// ===== M49: ORIGINAL FUN_14000bfd0 (insert) =====
+SSetNode* SetInsert(SObjSet* pSet, SSetNode* pHint,
+                    bool bAfter, uint64_t qKey) {
+    // max_size guard VERBATIM: 0x3ffffffffffffffd
+    if (0x3ffffffffffffffdULL < (uint64_t)pSet->m_qCount) {
+        throw std::length_error(
+            "map/set<T> too long");
+    }
+    // ORIGINAL: FUN_140009ab0 allocates + links the node
+    // into the tree (the red-black rebalance) - seam:
+    SSetNode* pNew = new SSetNode{nullptr, nullptr,
+                                  nullptr, 0, 0};
+    pNew->m_pParent = (SSetNode*)(uintptr_t)qKey;
+    pSet->m_qCount++;               // [7]+1 VERBATIM
+    SSetNode* pSent = (SSetNode*)pSet->m_pInner;
+    if (pHint == pSent) {
+        // the EMPTY/first branch VERBATIM: sentinel+8,
+        // sentinel+0 and sentinel+0x10 all -> node
+        pSent->m_pNext = pNew;
+        pSent->m_pPrev = pNew;
+        pSent->m_pParent = pNew;
+    } else if (!bAfter) {
+        // link AFTER the hint: hint[2] = node
+        pHint->m_pParent = pNew;
+        if (pHint == pSent->m_pPrev) {
+            // hint == tail: sentinel+0x10 = node
+            pSent->m_pPrev = pNew;
+        }
+    } else {
+        // link BEFORE the hint: *hint = node; head fixup
+        pHint->m_pPrev = pNew;
+        if (pHint == pSent->m_pNext) {
+            // hint == head: sentinel+8 = node
+            pSent->m_pNext = pNew;
+        }
+    }
+    return pNew;
+}
+
+// ===== M49: ORIGINAL FUN_14000ab40 (erase) =====
+void SetErase(SObjSet* pSet, SSetNode* pIt) {
+    // the end() check VERBATIM: the sentinel is flagged
+    if (pIt->m_byFlag != 0) {
+        throw std::out_of_range(
+            "invalid map/set<T> iterator");
+    }
+    // ORIGINAL FUN_1400075f0: the tree erase-rebalance -
+    // seam (TBD); the unlink relink VERBATIM:
+    SSetNode* pSent = (SSetNode*)pSet->m_pInner;
+    SSetNode* pPrev = pIt->m_pPrev;
+    SSetNode* pNext = pIt->m_pNext;
+    if (pPrev && pPrev->m_byFlag == 0)
+        pPrev->m_pNext = pNext;
+    if (pNext && pNext->m_byFlag == 0)
+        pNext->m_pPrev = pPrev;
+    // head/tail fixups on the sentinel:
+    if (pSent->m_pNext == pIt) pSent->m_pNext = pNext;
+    if (pSent->m_pPrev == pIt) pSent->m_pPrev = pPrev;
+    pSet->m_qCount--;               // [7]-1 VERBATIM
+    delete pIt;
+}
+
 } // namespace msg
