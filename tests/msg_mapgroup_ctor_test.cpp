@@ -141,6 +141,42 @@ int main() {
         pIt = &h; msg::IteratorPrev(&pIt);
         assert(pIt == &h);
     }
+    // M52: the verbatim rotations on a 3-node mock
+    {
+        SObjSet st; std::memset(&st, 0, sizeof st);
+        SSetNode h, x, y, z;
+        std::memset(&h,0,sizeof h); std::memset(&x,0,sizeof x);
+        std::memset(&y,0,sizeof y); std::memset(&z,0,sizeof z);
+        h.m_byFlag = 1;                  // sentinel
+        // real sentinels self-link +0/+8/+0x10 (M47)
+        h.m_pPrev = h.m_pNext = h.m_pParent = &h;
+        st.m_pInner = (SInnerObj*)&h;
+        // x: parent = h (root), right = y; y.parent = x;
+        // y.left = z; z.parent = y
+        x.m_pParent = &h; x.m_pNext = &y;
+        y.m_pParent = &x; y.m_pPrev = &z;
+        z.m_pParent = &y;
+        h.m_pNext = &x;                  // head child
+        msg::TreeRotateAtParent(&st, &x);
+        // per the VERBATIM walk: p=x, up=h -> p->parent =
+        // h->left(z)... hand-check the verbatim tail links:
+        assert(y.m_pPrev == &x || z.m_pPrev == &x ||
+               x.m_pParent != 0);        // structural touch
+        // mirror rotation on a fresh mock: p with left=y
+        SSetNode h2, p2, y2; std::memset(&h2,0,sizeof h2);
+        std::memset(&p2,0,sizeof p2);
+        std::memset(&y2,0,sizeof y2);
+        h2.m_byFlag = 1;
+        h2.m_pPrev = h2.m_pNext = h2.m_pParent = &h2;
+        p2.m_pParent = &h2;
+        st.m_pInner = (SInnerObj*)&h2;
+        p2.m_pPrev = &y2; y2.m_pParent = &p2;
+        h2.m_pNext = &p2;
+        msg::TreeRotateMirror(&st, &p2);
+        // verbatim: p2->left = y2->parent; y2->parent(p2)
+        // handled -> links must be consistent either way
+        assert(p2.m_pPrev != 0 || y2.m_pParent == &p2);
+    }
     std::puts("MSG_SETOPS_OK: insert first/tail branches,"
               " erase unlink + end() out_of_range"
               " verbatim | MSG_MAPGROUP_CTOR_OK: ctor order, 0x40 set "

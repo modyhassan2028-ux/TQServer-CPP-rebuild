@@ -253,3 +253,61 @@ void IteratorPrev(SSetNode** ppNode) {
 }
 
 } // namespace msg
+
+namespace msg {
+
+// ===== M52: ORIGINAL FUN_140008940 @ 140008940 =====
+// VERBATIM line-by-line (fields: left=+0, right=+8,
+// parent=+0x10, color=+0x1c, end=+0x1d; sentinel @+0x30):
+void TreeRotateAtParent(SObjSet* pSet, SSetNode* p) {
+    SSetNode* up = p->m_pParent;         // plVar1
+    p->m_pParent = up->m_pPrev;          // *(p+0x10)=*up
+    if (up->m_pPrev->m_byFlag == 0)
+        up->m_pPrev->m_pNext = p;        // *(*up + 8) = p
+    up->m_pNext = p->m_pNext;            // up[1] = p->right
+    SSetNode* pSent = (SSetNode*)pSet->m_pInner;
+    if (p == pSent->m_pNext) {           // p == *(sent+8)
+        pSent->m_pNext = up;
+        up->m_pPrev = p;                 // *up = p
+        p->m_pNext = up;                 // *(p+8) = up
+        return;
+    }
+    SSetNode* g = p->m_pNext;            // plVar2 = p->right
+    if (p == g->m_pPrev) {
+        g->m_pPrev = up;                 // *plVar2 = up
+        up->m_pPrev = p;
+        p->m_pNext = up;
+        return;
+    }
+    g->m_pParent = up;                   // plVar2[2] = up
+    up->m_pPrev = p;
+    p->m_pNext = up;
+}
+
+// ===== M52: ORIGINAL FUN_1400089a0 @ 1400089a0 =====
+void TreeRotateMirror(SObjSet* pSet, SSetNode* p) {
+    SSetNode* up = p->m_pPrev;           // lVar1 = *p
+    p->m_pPrev = up->m_pParent;         // *p = *(up+0x10)
+    if (up->m_pParent->m_byFlag == 0)
+        up->m_pParent->m_pNext = p;     // *(up+0x10)+8 = p
+    up->m_pPrev = p->m_pNext;           // *(up+8) = p[1]
+    SSetNode* pSent = (SSetNode*)pSet->m_pInner;
+    if (p == pSent->m_pNext) {
+        pSent->m_pNext = up;
+        up->m_pParent = p;              // *(up+0x10) = p
+        p->m_pNext = up;
+        return;
+    }
+    SSetNode* g = p->m_pNext;
+    if (p == g->m_pParent) {             // p == plVar2[2]
+        g->m_pParent = up;
+        up->m_pParent = p;
+        p->m_pNext = up;
+        return;
+    }
+    g->m_pPrev = up;                     // *plVar2 = up
+    up->m_pParent = p;
+    p->m_pNext = up;
+}
+
+} // namespace msg

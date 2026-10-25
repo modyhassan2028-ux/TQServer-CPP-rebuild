@@ -55,6 +55,7 @@ public:
     std::vector<size_t> m_vecAllocSizes;
 };
 
+
 } // namespace msg
 
 namespace msg {
@@ -98,4 +99,11 @@ SSetNode* TreeNodeAlloc(SSetNode* pLeft, SSetNode* pRight,
 // PREVIOUS walk (operator--): three verbatim paths on the
 // +0x1d sentinel flag.
 void IteratorPrev(SSetNode** ppNode);
+// ===== M52: the RB rotations VERBATIM =====
+// ORIGINAL FUN_140008940 @ 140008940: rotate at the
+// PARENT of the given node (the parent goes down-left).
+void TreeRotateAtParent(SObjSet* pSet, SSetNode* p);
+// ORIGINAL FUN_1400089a0 @ 1400089a0: the mirror rotate
+// (the given node's LEFT rises; the node goes down).
+void TreeRotateMirror(SObjSet* pSet, SSetNode* p);
 } // namespace msg
