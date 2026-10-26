@@ -84,4 +84,27 @@ int MeedMemberIndex(void* pMembers, int nId);
 // ---- FUN_141741410: the null gate + the <8 check ----
 void MeedMemberCheck(void* pObj, int nId);
 
+// ---- D46: the grade lookup (141779090 / 141779400) --
+// the member sub-object protocol (vt+8 with index):
+extern void* (*g_fnMeedMemSub)(void* pMember, int n);
+// sub(2) vt+0x40() -> the member id
+extern int (*g_fnMeedSubNId)(void* pSub);
+// sub(3) vt+0x48() -> the entry grade-type
+extern int (*g_fnMeedSubNType)(void* pSub);
+// member vt+0x10(member, 4) -> sub4
+extern void* (*g_fnMeedSub4)(void* pMember);
+// sub4 vt+0x48() -> the grade value
+extern uint64_t (*g_fnMeedSub4Val)(void* pSub);
+
+// ---- FUN_141779090: find the member cell matching
+// (uUser, nType) in the league's meed vector →
+// the out iterator {proxy, cell} (the end if absent)
+void MeedEntryFind(void* pLeague, void* pItOut,
+                   uint64_t uUser, int nType);
+
+// ---- FUN_141779400: the member's grade (0 if the
+// member/type is absent) ----
+uint64_t MeedGradeOf(void* pLeague, uint64_t uUser,
+                     int nType);
+
 } // namespace syndicate

@@ -14,8 +14,6 @@ static void DefMeedLog() {}
 static int DefMgrUserId(void*) { return 0; }
 static void DefMgrVt3a8(void*) {}
 static void DefMgrVt378(void*, int) {}
-static uint64_t DefMeedGradeOf(void*, uint64_t, int)
-    { return 0; }
 static void* DefMeedSub5(void* p) { return p; }
 static int DefMeedSub5Flag(void*) { return 0; }
 static void* DefMeedSub2(void* p) { return p; }
@@ -26,8 +24,10 @@ int (*g_fnMgrUserId)(void* pMgr) = DefMgrUserId;
 void (*g_fnMgrVt3a8)(void* pMgr) = DefMgrVt3a8;
 void (*g_fnMgrVt378)(void* pMgr, int n)
     = DefMgrVt378;
+// (the original 14177f980 calls 141779400 directly
+//  — the D45 seam now defaults to the REAL function)
 uint64_t (*g_fnMeedGradeOf)(void*, uint64_t, int)
-    = DefMeedGradeOf;
+    = &MeedGradeOf;
 void* (*g_fnMeedSub5)(void*) = DefMeedSub5;
 int (*g_fnMeedSub5Flag)(void*) = DefMeedSub5Flag;
 void* (*g_fnMeedSub2)(void*) = DefMeedSub2;
@@ -244,6 +244,106 @@ void MeedMemberCheck(void* pObj, int nId) {
     if (uVar2 < 8) {
         g_fnMgrVt3a8(pMgr);
     }
+}
+
+// ---- D46: the grade lookup (141779090/141779400) --
+static void* DefMeedMemSub(void* p, int) { return p; }
+static int DefMeedSubNId(void*) { return 0; }
+static int DefMeedSubNType(void*) { return 0; }
+static void* DefMeedSub4(void* p) { return p; }
+static uint64_t DefMeedSub4Val(void*) { return 0; }
+
+void* (*g_fnMeedMemSub)(void*, int) = DefMeedMemSub;
+int (*g_fnMeedSubNId)(void*) = DefMeedSubNId;
+int (*g_fnMeedSubNType)(void*) = DefMeedSubNType;
+void* (*g_fnMeedSub4)(void*) = DefMeedSub4;
+uint64_t (*g_fnMeedSub4Val)(void*) = DefMeedSub4Val;
+
+// ---- FUN_141779090: the member-cell walk ----
+// (the league vector: dbg-proxy@+8, begin@+0x20,
+//  end@+0x28; the cell stride 8; verbatim gates)
+void MeedEntryFind(void* pLeague, void* pItOut,
+                   uint64_t uUser, int nType) {
+    char* pc = (char*)pLeague;
+    int64_t* pOut = (int64_t*)pItOut;
+    uint64_t uVar1 = *(uint64_t*)(pc + 0x20); // begin
+    pOut[0] = 0;
+    if (*(uint64_t*)(pc + 0x28) < uVar1) {
+        g_fnMeritInvalid();
+    }
+    int64_t lVar5 = *(int64_t*)(pc + 8);      // proxy
+    pOut[1] = (int64_t)uVar1;                // the cell
+    pOut[0] = lVar5;
+    do {
+        uVar1 = *(uint64_t*)(pc + 0x28);     // end
+        if (uVar1 < *(uint64_t*)(pc + 0x20)) {
+            g_fnMeritInvalid();
+        }
+        if (*(int64_t*)(pc + 8) == 0
+            || *(int64_t*)(pc + 8) != pOut[0]) {
+            g_fnMeritInvalid();
+        }
+        if (uVar1 == (uint64_t)pOut[1]) {
+            return;                          // the end
+        }
+        // member = *(the cell)
+        int64_t* plVar4 = *(int64_t**)pOut[1];
+        if (plVar4 != nullptr) {
+            void* pSub2 = g_fnMeedMemSub(plVar4, 2);
+            int iVar2 = g_fnMeedSubNId(pSub2);
+            if (iVar2 == (int)uUser) {
+                void* pSub3 =
+                    g_fnMeedMemSub(plVar4, 3);
+                iVar2 = g_fnMeedSubNType(pSub3);
+                if (iVar2 == nType) {
+                    return;                  // found
+                }
+            }
+        }
+        // the debug advance (verbatim)
+        int64_t lVar6 = (pOut[0] == 0) ? 0
+            : *(int64_t*)pOut[0];
+        if (*(uint64_t*)(lVar6 + 0x20)
+            <= (uint64_t)pOut[1]) {
+            g_fnMeritInvalid();
+        }
+        pOut[1] = pOut[1] + 8;               // stride
+    } while (true);
+}
+
+// ---- FUN_141779400: the grade of (user, type) --
+uint64_t MeedGradeOf(void* pLeague, uint64_t uUser,
+                     int nType) {
+    char* pc = (char*)pLeague;
+    int64_t it[2] = { 0, 0 };
+    MeedEntryFind(pLeague, it, uUser, nType);
+    // the debug-iterator vs end (verbatim)
+    int64_t* plVar1 =
+        *(int64_t**)(pc + 0x28);             // end
+    if (plVar1 < *(int64_t**)(pc + 0x20)) {
+        g_fnMeritInvalid();
+    }
+    if (*(int64_t*)(pc + 8) == 0
+        || *(int64_t*)(pc + 8) != it[0]) {
+        g_fnMeritInvalid();
+    }
+    if (plVar1 != (int64_t*)it[1]) {
+        // dereference the found cell
+        if (it[0] == 0) {
+            g_fnMeritInvalid();
+        }
+        int64_t lVar3 = *(int64_t*)it[0];
+        if (*(int64_t**)(lVar3 + 0x20)
+            <= (int64_t*)it[1]) {
+            g_fnMeritInvalid();
+        }
+        int64_t* pMem = *(int64_t**)it[1];
+        if (pMem != nullptr) {
+            void* pSub4 = g_fnMeedSub4(pMem);
+            return g_fnMeedSub4Val(pSub4);
+        }
+    }
+    return 0;
 }
 
 } // namespace syndicate
