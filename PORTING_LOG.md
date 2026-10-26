@@ -3865,3 +3865,24 @@ null name → 0; ‏MgrLeagueFind=0 → 0; ‏vt+0x1f8(actor) ≠ cb0(entity,2) 
 - الاختبار: 7 أقسام — الحقول، المشيات، البوابات (بترتيبها المصحح)، الأنواع الثلاثة بكل رسائلها، البريد بمعادلة التاريخ الحرفية + uFlag، مسار ال rec مقابل be40، وE2E عبر حالة 0x27 من موزّع D61 (مع wire ‏g_fnGetGameMgr من SyndicateCrossMerit.h).
 
 **الرجريجن: 69/69 × 6، ASan نظيف.** ‏commit ‏D65.
+
+## وحدة D66 (2026-10-26) — تحزيم الفئات: أول 12 جسم CMsg::Process متبقي (دفعة واحدة)
+
+**نطاق الوحدة (الجرد المكتمل):** مسح بيناري لكل جداول CMsg (نمط qword: slot2=0x14177e2f0، slot4=0x14177e2d0) → **32 جدول**، وربط كل فئة بعنوان Process بتاعها عبر تفكيك المُشيّدات (lea rip-rel في كل مشيّد من عائلة FUN_1417d9710). الجرد النهائي: 4 مقفولين سابقاً (Log/ChgDomName/LeagueOpt/LeagueRobOpt) + **12 في هذه الوحدة** + CMsgSyndicate ‏(1417db7b0، 416 سطراً → D67 لوحده) + الباقي stubs ‏(0x14177e2e0).
+
+**الأجسام:** SynDomain ‏1417dcf90، SynProffer ‏1417dd960، SynAttrInfo ‏1417daba0 (لوج ASSERT صافي، سطر 0x79)، SynMemberInfo ‏1417dd1c0 (بدون بوابة — ذيل ae9b0)، SynMemberList ‏1417dd610 (لوج الفعل الخاطئ بذيل jmp لـ IAT)، SynBaseProffer ‏1417dadb0 (`ret 0` حرفي)، SynProfferRank ‏1417ddbb0، SelfSynMemAwardRank ‏1417da570 (جداول قفز 13 خانة عند 0x1417da7d0)، SynRecruitAdvertising ‏1417ddd90 (نداء 11 وسطاً vt+0x3e8)، SynRecruitAdvertisingOpt ‏1417de2f0، SynRecruitAdvertisingList ‏1417de120 (movsxd)، LeagueToken ‏1417d92d0 (vt+0x610 بسبعة وسطاء / vt+0x608).
+
+**تصحيحات التفكيك الخام على الديكومبايلر:**
+1. **1417ac6f0/1417ac710 بياخدوا (logic, actor)** — edx عدّاي عبر الـ mgr-thunk؛ الديكومبايلر أظهر وسطاً واحداً.
+2. **1417ac810(logic, actor)** — جسم الحالة 0xb بيحمّل edx=actor قبل النداء؛ الديكومبايلر قال وسط واحد.
+3. **1417b2df0(logic, actor, u32*, u32*, u32*)** — r8/r9/[rsp+0x20] مؤشرات OUT الدالة بتملأها (mgr-vt[0x4b8/8=147])؛ الديكومبايلر حذفهم وقرأ الثلاثة المحلية المُصفّرة كأصفار.
+4. حالة 2-7 في SelfSynMemAwardRank فيها `cmp r12d, r12d; jne` **no-op حرفي** (مستحيل الحدوث) — منقول كتعليق.
+5. جدول القفز: الحالتان 8/9 → النهاية الافتراضية المشتركة (0x1417da712).
+6. **r9 stale**: كل نداءات 1417ac750 في هذه الأجسام لا تضبط r9 — عدّاي متقادم من مستدعي Process؛ البورت يمرر 0 مع التعليق، والوسط الرابع في ac750 بقالة (مذكور في ترويسة الملف).
+7. فحص طول اسم الإعلان (repne scasb/not/dec = strlen): len > 0xff → **عودة صامتة بدون announce** — الديكومبايلر لم يفصح عن صمتها.
+
+**السلاسل الحرفية:** اللوج الخماسي `«%s(%s)» in %s, %d` ‏(0x141824ca8) + CHECK/ASSERT + التعابير الحرفية (rProvider.CheckUserOnline(idActor)، ID_NONE != idActor، !"CMsgSynAttrInfo::Process()") + مسارات الملفات ‏msgselfsynmemawardrank.cpp/…msgsynrecruitadvertising{,opt,list}.cpp/msgsynattrinfo.cpp + سطور 0xdf/0xe4/0x44/0x2e/0x5b/0x79 + حرفية GBK للوج الفعل الخاطئ في RAOpt ‏(0x14183e670).
+
+**الاختبار:** tests/syndicate_d66_test.cpp — 12 قسماً، 39 تأكيداً تغطي كل البوابات وحواف جدول القفز وامتلاء مؤشرات OUT والامتداد المُشوّر (movsxd) والعودة الصامتة للاسم الطويل.
+
+**الرجريجن: 70/70 × 6، ASan نظيف.** ‏commit ‏D66.

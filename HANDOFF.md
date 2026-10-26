@@ -138,3 +138,12 @@
 - **اكتشافات التفكيك الخام**: (1) قراءة الرتبة vt+0x518 (فتحة **163**) قبل موزّع الأنواع. (2) ‏esi ‏النوع 3 = **الحرة** مش emoney. (3) الماجيك 0xd1b71759 ‏shr 13 = قسمة على **10000** (مش 86400) — معادلة تاريخ البريد الحرفية. (4) السلسلة المسحوبة من StringMgr هي الـ format ‏نفسه لـ _snprintf بثلاثة varargs. (5) ‏vt+0x298 ‏بياخد دلتا **int64** سالبة (-cost). (6) ‏vt+0x140 ‏بستة وسائط والوسيط الخامس **0x49** ‏(0x43 في D64) + سطر gmlog 4318.
 - رجريجن **69/69 × 6** + ‏ASan نظيف (7 أقسام + E2E ‏0x27 عبر موزّع D61). ملاحظة: UBSan بيعترض على stores غير المحاذاة في PB ‏— حرفية مقصودة، البروتوكول ASan-only.
 - **التالي (D66+)**: من الأعماق الموثقة — 1417b98e0، 1417b0680 ‏(الإعلان — AnnounceStrCheck + ‏STR_INVALID_CHARACTER + 1417ac750)، 1417b48b0، 1417b4d60، 1417b0ea0، 1417b3300، 1417bed70، 1417b3a90، أو جدول CSyndicateLogic ‏(232 فتحة)، ثم ModuleCreate ‏(14177ec90) وهدايا الفك اليدوي 1417ab8c0/1417ac2d0.
+
+## D66 (2026-10-26) — تحزيم الفئات: 12 جسم CMsg::Process الصغيرة الباقية دفعة واحدة
+
+- **الجرد المكتمل (مسح بيناري)**: نمط qword (slot2=0x14177e2f0، slot4=0x14177e2d0) → **32 جدول CMsg**؛ ربط كل فئة بـ Process عبر تفكيك المُشيّدات (lea rip-rel). ‏4 مقفولين سابقاً + ‏12 هنا + ‏CMsgSyndicate ‏(1417db7b0، 416 سطراً → D67 لوحده) + الباقي stubs.
+- **الأجسام**: SynDomain/SynProffer/SynAttrInfo/SynMemberInfo/SynMemberList/SynBaseProffer(`ret 0`)/SynProfferRank/SelfSynMemAwardRank(جدول قفز 13 خانة عند 0x1417da7d0)/SynRecruitAdvertising(نداء 11 وسطاً vt+0x3e8)/SynRecruitAdvertisingOpt/SynRecruitAdvertisingList(movsxd)/LeagueToken(vt+0x610 سبعة وسطاء / vt+0x608).
+- **كذبات الديكومبايلر المكتشفة بالخام**: (1) ‏ac6f0/ac710 بياخدوا (logic, actor) — edx عدّاي عبر mgr-thunk. (2) ‏ac810(logic, actor). (3) ‏**b2df0(logic, actor, u32* out×3)** — مؤشرات OUT حذفها الديكومبايلر. (4) ‏`cmp r12d,r12d` ‏no-op حرفي في حالة 2-7. (5) جدول القفز: 8/9 → افتراضي. (6) ‏**r9 stale** في كل نداءات ac750. (7) اسم الإعلان > 0xff → عودة صامتة بدون announce.
+- الملفات: `Exe/Dll/Syndicate/Port/SyndicateMsgProcess2.{h,cpp}` + `tests/syndicate_d66_test.cpp` (12 قسماً، 39 تأكيداً).
+- رجريجن **70/70 × 6** + ‏ASan نظيف.
+- **التالي (D67+)**: ‏CMsgSyndicate::Process (0x1417db7b0) وحدة مستقلة، ثم الأعماق الموثقة (1417b98e0، 1417b03b0، 1417b0680، 1417b48b0، 1417b4d60، 1417b0ea0، 1417b3300، 1417bed70، 1417b3a90)، جدول CSyndicateLogic (232 فتحة)، إغلاق ModuleCreate (14177ec90)، وفك يدوي 1417ab8c0/1417ac2d0.
