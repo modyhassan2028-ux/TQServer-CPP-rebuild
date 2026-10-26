@@ -53,7 +53,7 @@
 //   line 1128, IF_OK(m_pRec))
 //   the format "\xa1\xef%s(%s)\xa1\xef in %s, %d"
 //   = DAT_141824ca8 (GBK \xa1\xef = ★)
-//   the tq::CString vftable @ 0x14182cef0
+//   the tq::CString vftable @ 0x141824cf0
 #ifndef SYNDICATE_LEAGUE_NAME_APPLY_H
 #define SYNDICATE_LEAGUE_NAME_APPLY_H
 
@@ -121,8 +121,8 @@ uint64_t LeagueNameApply(void* pLogic, uint32_t uActor,
                          uint32_t uSynId, char* pszName);
 
 // the tq::CString vftable literal (lea r13 at
-// 1417b0b7e -> 0x14182cef0)
-constexpr uint64_t kCStrVftable = 0x14182cef0ull;
+// 1417b0b7e -> 0x141824cf0)
+constexpr uint64_t kCStrVftable = 0x141824cf0ull;
 
 }  // namespace syndicate
 

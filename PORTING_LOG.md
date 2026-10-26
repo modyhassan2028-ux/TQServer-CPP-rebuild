@@ -3816,3 +3816,26 @@ null name → 0; MgrLeagueFind(logic+0x50, synId)=0 → 0; LeagueGetRecByIdx(ent
 المساعدون الأربعة مع سطور اللوج الحرفية (322/431/1128)، المشيّة (الإصابة/الفراغ/حد 0x10)، المنسّق (الصفر/الوسيطان/القص 0xfff-1)، الأبواب التسعة كاملة، تدفق النجاح مع كل الوسائط المسجلة، وE2E ‏عبر حالة 6 ‏من موزّع D61 ‏(PB+4=0x16 + الديسباتش).
 
 **الرجريجن: 67/67 × 6، ASan نظيف.** commit ‏D63.
+
+## D64 — تغيير اسم النقابة GM (1417b03b0، 26-10-2026)
+
+### الوحدة
+`Exe/Dll/Syndicate/Port/SyndicateLeagueGmName.{h,cpp}` — جسم seam ‏g_fn1417b03b0 ‏(حالة 0x33 من موزّع D61) + القارئ البسيط **14174e750** ‏LeagueNamePriceGet ‏= *(uint32*)(host+0x18c).
+
+### ما حسمه التفكيك (capstone، على الديكمبايلر)
+1. نداء 141743cb0 الوحيد هنا بـ **edx=2** (resolve(2)) — ولا توجد بوابة sub-8 أصلاً (عكس b0a40 الذي يبدأ بها).
+2. **vt+0x140 بستة وسائط**: (mgr, actor, 0, price, dword 0x43, **byte 1**) — الديكمبايلر أظهر أربعة فقط؛ [rsp+0x20]=0x43 و[rsp+0x28]=byte 1 على الستاك.
+3. **MyLogSave بخمسة varargs** (الديكمبايلر أسقط الستاكيين): MyLogSave("gmlog/emoney_buy", "%u\t%s\t%u\t350\t4237\t%d\t%d\t1\t", actor, الاسم(vt+0x1d8), النوع(vt+0x200), price, price) — كل الوسائط موثقة من الـ rip/التستيج، فالـ seam هنا كامل بخلاف TBD-LOGSAVE ‏القديم.
+4. **بوابة e3f0 معكوسة** عن b0a40: نداء vt+0x70(7, synId, 0, name) يقع عند **e3f0 != synId** (بدون فحص rec4 الفارغ أصلاً)، والاسم وسيط خامس على الستاك.
+5. لا يوجد LeagueSetFlagFlush ولا قراءة sub8/rec4 في الذيل الناجح: SetRecStr(1, name, 1) → GetId → vt+0x428(id, name) → البوابة المعكوسة.
+
+### التدفق (الأبواب بالترتيب الحرفي)
+null name → 0; ‏MgrLeagueFind=0 → 0; ‏vt+0x1f8(actor) ≠ cb0(entity,2) → 0; ‏LogRecMapFind=0 → 0; ‏!RecFlagIs1000 → 0; ‏strlen ≥ 0x10 → 0; ‏vt+0x2e8(name)=false → 0; ‏ForbidNameFind يصطدم → STR_FORBIDDEN عبر vt+0x18 → 0; ‏price(e750) > vt+0x238(actor) → 0; ‏vt+0x140(0, price, 0x43, 1)=false → 0. النجاح: سطر gmlog، حزمة STR_BROADCAST_NEW_LEAGUE_NAME عبر CStrFormat2 → vt+0x90(str.c_str(), 2000)، SetRecStr، GetId → vt+0x428، البوابة المعكوسة. رجوع 1.
+
+### حرفيات جديدة مثبتة من .rdata
+"gmlog/emoney_buy" ‏(0x141830c38)، "%u\t%s\t%u\t350\t4237\t%d\t%d\t1\t" ‏(0x141837258)، و**تصحيح kCStrVftable من D63**: العنوان الصحيح **0x141824cf0** (كان محسوباً خطأً 0x14182cef0) — أضيف static_assert في اختبار D63.
+
+### الاختبار (tests/syndicate_d64_test.cpp، 4 أقسام)
+حقل السعر، البوابات العشر (بما فيها price/emoney والشحن)، تدفق النجاح بكل الوسائط المسجلة (الشحن الستّي + سطر gmlog الخمسي)، وE2E عبر حالة 0x33 من موزّع D61.
+
+**الرجريجن: 68/68 × 6، ASan نظيف.** commit ‏D64.

@@ -169,6 +169,11 @@ static void FillVt(void** vt, int n) {
         vt[i] = (void*)MockLogicVt;   // trap
 }
 
+// the literal vftable address (disasm-verified
+// b03b0/b0a40 both lea the same table)
+static_assert(kCStrVftable == 0x141824cf0ull,
+             "the tq::CString vftable @ 0x141824cf0");
+
 int main() {
     // ================= the fixtures =================
     FillVt(s_apSub1Vt, 32);

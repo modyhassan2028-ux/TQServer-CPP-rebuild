@@ -119,3 +119,13 @@
 - رجريجن **67/67 × 6** + ‏ASan نظيف (9 أقسام + E2E عبر موزّع D61).
 - **دروس مهمة**: (1) سطور InlineLogERROR حرفية: 322 ‏(cb0, ""/"")، 431 ‏(4030, CHECK/m_pRec)، 1128 ‏(8c0, IF_OK/m_pRec, synattr.cpp). (2) strncmp ‏بحد 0x10 مش قص بادئة — التطابق يقع فقط إن اتفقت أول 0x10 بايت. (3) مخازن std::string ‏الحرفية في الستاك تُبنى بـ union raw + placement-ctor يدوي وإلا double-free.
 - **التالي (D64+)**: بقية الأعماق الموثقة من D61 — 1417b4310 ‏(237 سطراً)، 1417b98e0، 1417b03b0 ‏(فحص تغيير الاسم 116)، 1417b0680، 1417b48b0، 1417b4d60، 1417b0ea0، 1417b3300، 1417bed70، 1417b3a90، أو جدول CSyndicateLogic ‏(232 فتحة)، ثم إغلاق ModuleCreate ‏(14177ec90) وهدايا الفك اليدوي 1417ab8c0/1417ac2d0.
+
+---
+
+## تحديث D64 (2026-10-26)
+
+- **D64 مقفولة**: تدفق تغيير اسم النقابة GM ‏1417b03b0 (جسم seam ‏g_fn1417b03b0 من حالة 0x33) + قارئ السعر 14174e750 ‏(*(uint*)(host+0x18c)) في `Exe/Dll/Syndicate/Port/SyndicateLeagueGmName.{h,cpp}`.
+- **اكتشافات التفكيك الخام**: (1) cb0 الوحيد هنا edx=2 ولا بوابة sub-8. (2) vt+0x140 ‏ستة وسائط: (mgr, actor, 0, price, 0x43, byte 1). (3) MyLogSave ‏بخمسة varargs موثقة كاملة ("gmlog/emoney_buy", "%u\t%s\t%u\t350\t4237\t%d\t%d\t1\t") — seam كامل g_fnGmNameLogSave بخلاف TBD-LOGSAVE القديم. (4) بوابة e3f0 **معكوسة** عن b0a40 (≠ synId، الاسم وسيط خامس). (5) لا SetFlagFlush ولا rec4.
+- **تصحيح D63**: kCStrVftable ‏= 0x141824cf0 ‏(كان 0x14182cef0 خطأ حسابياً) + static_assert.
+- رجريجن **68/68 × 6** + ‏ASan نظيف (4 أقسام + E2E ‏0x33).
+- **التالي (D65+)**: 1417b4310 ‏(237 سطراً)، 1417b98e0، 1417b0680 (الإعلان — AnnounceStrCheck + ‏STR_INVALID_CHARACTER + 1417ac750)، 1417b48b0، 1417b4d60، 1417b0ea0، 1417b3300، 1417bed70، 1417b3a90، أو جدول CSyndicateLogic ‏(232 فتحة)، ثم ModuleCreate ‏(14177ec90) وهدايا الفك اليدوي 1417ab8c0/1417ac2d0.
