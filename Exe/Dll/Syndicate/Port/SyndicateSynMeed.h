@@ -41,7 +41,7 @@ extern int (*g_fnMgrUserId)(void* pMgr);
 // (mgr+8)->vt+0x3a8()
 extern void (*g_fnMgrVt3a8)(void* pMgr);
 // mgr->vt+0x378(mgr, type)
-extern void (*g_fnMgrVt378)(void* pMgr, int n);
+extern uint64_t (*g_fnMgrVt378)(void* pMgr, int n);
 
 // ---- the league-grade seam (141779400, D46) ----
 // (league, user, type) -> the grade u64
@@ -76,7 +76,10 @@ void* MeedUserLeague(void* pMap, uint32_t uId);
 uint64_t MeedGetUserGrade(uint64_t uUser, int nType);
 
 // ---- FUN_14177fa10: the mgr vt+0x378 pass-through --
-void MeedPostGrade(void* pMgr, uint64_t uA, int nType);
+// (returns the vt+0x378 result — the point query
+//  used by the D55b scorer table)
+uint64_t MeedPostGrade(void* pMgr, uint64_t uA,
+                       int nType);
 
 // ---- FUN_141740fd0: the members-vector index ----
 int MeedMemberIndex(void* pMembers, int nId);

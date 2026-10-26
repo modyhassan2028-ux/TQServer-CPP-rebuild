@@ -13,7 +13,8 @@ namespace syndicate {
 static void DefMeedLog() {}
 static int DefMgrUserId(void*) { return 0; }
 static void DefMgrVt3a8(void*) {}
-static void DefMgrVt378(void*, int) {}
+static uint64_t DefMgrVt378(void*, int)
+    { return 0; }
 static void* DefMeedSub5(void* p) { return p; }
 static int DefMeedSub5Flag(void*) { return 0; }
 static void* DefMeedSub2(void* p) { return p; }
@@ -22,7 +23,7 @@ static int DefMeedSub2Id(void*) { return 0; }
 void (*g_fnMeedLog)() = DefMeedLog;
 int (*g_fnMgrUserId)(void* pMgr) = DefMgrUserId;
 void (*g_fnMgrVt3a8)(void* pMgr) = DefMgrVt3a8;
-void (*g_fnMgrVt378)(void* pMgr, int n)
+uint64_t (*g_fnMgrVt378)(void* pMgr, int n)
     = DefMgrVt378;
 // (the original 14177f980 calls 141779400 directly
 //  — the D45 seam now defaults to the REAL function)
@@ -174,9 +175,10 @@ uint64_t MeedGetUserGrade(uint64_t uUser, int nType) {
 }
 
 // ---- FUN_14177fa10: the vt+0x378 pass-through ----
-void MeedPostGrade(void* pMgr, uint64_t uA, int nType) {
+uint64_t MeedPostGrade(void* pMgr, uint64_t uA,
+                       int nType) {
     (void)uA;
-    g_fnMgrVt378(pMgr, nType);
+    return g_fnMgrVt378(pMgr, nType);
 }
 
 // ---- FUN_141740fd0: the members index walk ----

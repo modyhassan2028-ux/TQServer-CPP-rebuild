@@ -36,8 +36,10 @@ static void MockVt3a8(void* m) {
     assert(m == g_mgr); ++g_nVt3a8;
 }
 static int g_nVt378 = 0; static int g_vt378Arg = 0;
-static void MockVt378(void* m, int n) {
+static int g_vt378Ret = 0;
+static uint64_t MockVt378(void* m, int n) {
     assert(m == g_mgr); ++g_nVt378; g_vt378Arg = n;
+    return (uint64_t)g_vt378Ret;
 }
 static int g_nGrade = 0;
 static uint64_t MockGradeOf(void* pL, uint64_t uU,
