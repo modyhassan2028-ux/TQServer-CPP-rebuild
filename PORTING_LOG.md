@@ -3555,3 +3555,64 @@ g_nMeedEmoneyCap = DAT_141886d68 (INT_MAX من المُهيئ 141821a10).
 
 ### الرجريجن (O0 المعتمد)
 - **الكامل: 60/60 PASS × 6** (d26..d56).
+
+---
+
+## D57: مُشيّدات طبقة CMsg للوحدة (عائلة 14177ead0)
+
+**الحالة: مكتمل — 61/61 × 6. المصادر: SyndicateCMsgCtors.{h,cpp} + tests/syndicate_d57_test.cpp**
+
+### الدوال المنقولة verbatim (19)
+| العنوان | العنوان الأصلي | الفئة | النمط |
+|---|---|---|---|
+| CtorCMsgLog | 1417d9710 | CMsgLog @+0x10 | بسيط |
+| CtorCMsgSyndicate | 1417db2b0 | CMsgSyndicate @+0x428 | packer (+0x20, 0x3e5) |
+| CtorCMsgSynDomain | 1417dca60 | CMsgSynDomain @+0x850 | packer (+0x128, 0x2d9) |
+| CtorCMsgSynProffer | 1417dd6e0 | @+0xc78 | بسيط |
+| CtorCMsgSynAttrInfo | 1417da860 | @+0x1088 | بسيط |
+| CtorCMsgSynChgDomName | 1417dae10 | @+0x1498 | بسيط |
+| CtorCMsgSynMemberInfo | 1417dd050 | @+0x18a8 | بسيط |
+| CtorCMsgSynMemberList | 1417dd230 | @+0x1cb8 | بسيط |
+| CtorCMsgSynBaseProffer | 1417dac30 | @+0x20c8 | بسيط |
+| CtorCMsgSynProfferRank | 1417dd9f0 | @+0x24d8 | بسيط |
+| CtorCMsgSelfSynMemAwardRank | 1417d9e60 | @+0x28e8 | بسيط |
+| CtorCMsgSynRecruitAdvertising | 1417ddc60 | @+0x2cf8 | بسيط |
+| CtorCMsgSynRecruitAdvertisingOpt | 1417de240 | @+0x3108 | بسيط |
+| CtorCMsgSynRecruitAdvertisingList | 1417ddf50 | @+0x3518 | بسيط |
+| CtorCMsgLeagueOpt | 1417d6640 | @+0x3928 | packer (+0x1a, 0x3ee) |
+| CtorCMsgLeagueToken | 1417d9000 | @+0x3d50 | PB (f1600) |
+| CtorCMsgLeagueRobOpt | 1417d8390 | @+0x41a8 | PB (f05f0) |
+| CtorCMsgLeagueTokenPB | 1417f1600 | حقل +0x408 | PB |
+| CtorCMsgLeagueRobOptPB | 1417f05f0 | حقل +0x408 | PB |
+
+### الأنماط الحرفية الثلاثة
+- **بسيط** (12): vftable ‏tq::CMsg + Init ثم vftable الفئة + Init ثم
+  *(this+0x408) = this+8.
+- **packer** (3): مثل البسيط مع CStringPacker@+0x410 قبل الـ Init الثاني
+  وSetBuf(+0x410, buf, cap, true) بعد الـ self-ptr.
+- **PB** (2): مثل البسيط مع استدعاء مُشيّد الـ protobuf@+0x408 مكان
+  الـ self-ptr (النص الأصلي لا يخزن self-ptr لهذين).
+
+### الحقول الحرفية للـ PB
+TokenPB (f1600): string@+8 (placement-new) ثم ثنك 1417e8050 (seam
+‏g_fnPbDefaultInit) ثم أصفار +0x34/+0x38/+0x3c/+0x40/+0x44 و+0x48 =
+DAT_141886ea0 (النسخة الافتراضية) و+0x30.
+RobOptPB (f05f0): string@+8 ثم **qword** صفر@+0x40 وأصفار +0x48/+0x4c/
++0x50/+0x34/+0x38/+0x3c/+0x30 — **ولا يستدعي الثنك إطلاقاً** (فرق
+حرفي عن TokenPB).
+
+### الربط
+g_aMsgCtor[17] ‏(seams وحدة Module السابقة) تُربط بالأجسام الحقيقية
+في الاختبار — InitCModule/ModuleCreate يعملان الآن بالمُشيّدات الفعلية.
+
+### الاختبار: d57 (4 أقسام)
+1. E2E مُشيّد الوحدة: vtable مزدوج، id@+8، kernel@+0x420، 34 استدعاء
+   Init، 3 packers بحروفهم (بفر/سعة/ملكية)، vtable كل فئة في 17 خانة،
+   15 self-ptr (+0x408=+8)، حقلان PB بكامل أصفارهم والstring حي
+   والنسخة الافتراضية@+0x48.
+2. ModuleCreate: 0x4608 op-new + 18+4 تسجيلات + KSet نجاح.
+3. فشل التسجيل: dtor الحذف vt[1] + إرجاع null.
+4. فشل op-new: InlineLogERROR + إرجاع null.
+
+### الرجريجن (O0 المعتمد)
+- **الكامل: 61/61 PASS × 6** (d26..d57).
