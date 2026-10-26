@@ -5,18 +5,21 @@
 #include "SyndicateLeagueMgrErase.h"
 #include "SyndicateCrossMerit.h"
 #include "SyndicateLeagueMgrLife.h"   // the clears 4b0/4f8
+#include "SyndicateLeagueMgrErOne.h" // the D41b real
+                                     //  erase-ones
 
 namespace syndicate {
 
-FnMgrEraseOne g_fnMgrErOne38  = nullptr;
-FnMgrEraseOne g_fnMgrErOne538 = nullptr;
-FnMgrEraseOne g_fnMgrErOne4f8 = nullptr;
-FnMgrEraseOne g_fnMgrErOne4b0 = nullptr;
-FnMgrEraseOne g_fnMgrErOne470 = nullptr;
-FnMgrEraseOne g_fnMgrErOne318 = nullptr;
-FnMgrEraseOne g_fnMgrErOne2b0 = nullptr;
-FnMgrEraseOne g_fnMgrErOne228 = nullptr;
-FnMgrEraseOne g_fnMgrErOne108 = nullptr;
+// the D41b erase-ones now REAL (the defaults)
+FnMgrEraseOne g_fnMgrErOne38  = &MgrErOne38;
+FnMgrEraseOne g_fnMgrErOne538 = &MgrErOne538;
+FnMgrEraseOne g_fnMgrErOne4f8 = &MgrErOne4f8;
+FnMgrEraseOne g_fnMgrErOne4b0 = &MgrErOne4b0;
+FnMgrEraseOne g_fnMgrErOne470 = &MgrErOne470;
+FnMgrEraseOne g_fnMgrErOne318 = &MgrErOne318;
+FnMgrEraseOne g_fnMgrErOne2b0 = &MgrErOne2b0;
+FnMgrEraseOne g_fnMgrErOne228 = &MgrErOne228;
+FnMgrEraseOne g_fnMgrErOne108 = &MgrErOne108;
 FnNestedEr g_fnNestedErA = nullptr;   // 14172a410
 FnNestedEr g_fnNestedErB = nullptr;   // 141762db0
 
