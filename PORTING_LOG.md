@@ -3724,3 +3724,37 @@ D60-1..8 لكل دالة (إصابات/أخطاء/فحوص invalid/فحوص ال
 ومسار ب (سجل مفقود → بحث حساب عبر مفتاح الجلسة → كتابة حقل 8 → مسح).
 
 **الرجريجن: 64/64 × 6، ASan نظيف.** ‏commit ‏D60.
+
+## D61 — CMsgLeagueOpt::Process (موزّع خيارات النقابة، 26-10-2026)
+
+### الوحدة
+`Exe/Dll/Syndicate/Port/SyndicateLeagueOpt.{h,cpp}` — الموزّع 1417d68d0
+(45+ حالة opt عبر *(ushort*)(PB+4)) + 13 جسماً حرفياً:
+
+| الدالة | العنوان | الدور |
+|---|---|---|
+| LeagueOptProcess | 1417d68d0 | الموزّع الكامل (الحالات 0..0x4e) |
+| LeagueOptGate | 1417ac700 | بوابة vt: slot ‏+0x278 على كائن logic+8 (الفهرس أظهره jumptable-FAIL وهمياً) |
+| LeagueTailDispatch | 1417ac7d0 | نداء الذيل (rcx=[rcx+8]; rax=[rcx]; jmp [rax+8]) |
+| Fn1417b0db0/b0de0/b0e00/b0e20/b0e50/b0e70/b1660/b1690 | — | أغلفة تمرير الحساب (بوابات null ثم acct=log+0x50) |
+| Fn1417b15b0 | — | تدفق المحظية: فحص المالك (vt 0x4a8) مقابل 14174e3f0 → تطبيق أو إرسال STR_LEAGUE_CONCUBINES_FAIL (vt+0x28 بلون 0xffff00) |
+| Fn1417b14c0 | — | قائمة المحظية: فحص online (vt 0x1e0) → تطبيق 14174ee40 أو STR_LEAGUE_CONCUBINES_USER_OFFLINE / STR_LEAGUE_OTHER_LEAGUE_USER |
+| Fn1417b1980/b1a40 | — | فحص خريطة الجلسة (14176e600) + تدفق الرمز (بوابة vt 0x510 ثم 14176ea30 + 1417b0ea0 + 141767560 بـ CONCAT71) |
+| Fn1417bf4d0 | — | محوّل ثلاثي 0x67/0xcd/0xce |
+
+### السلاسل الحرفية (verbatim)
+- `"f:\\version\\cqserver-78.0.11-1204\\modules\\syndicate\\src\\msg\\msgleagueopt.cpp"` (سجل m_pInfo ‏CHECK ‏مع "CHECK","m_pInfo")
+- `"STR_LEAGUE_CONCUBINES_FAIL"`, `"STR_LEAGUE_CONCUBINES_USER_OFFLINE"`, `"STR_LEAGUE_OTHER_LEAGUE_USER"`
+- لون الإرسال الحرفي 0xffff00
+
+### ملاحظات حرفية مهمة
+1. **بوابة القائمة البيضاء**: عندما يرجع الـ gate ‏≠0 ‏فقط الأنواع {0,1,2,3,4,0xf,0x10,0x17,0x1b,0x1f,0x22,0x25,0x28,0x40,0x47,0x48,0x4e} تعبر؛ أي شيء آخر return ‏مبكر.
+2. **قلب الوسائط في 0x4c/0x4d**: الأصل يمرر (logic, PB+10, actor, ...) وليس (logic, actor, PB+10, ...) كما في 0x4a/0x4b — منقول كما هو.
+3. **&IMAGE_DOS_HEADER_141720000** (قاعدة الصورة 0x141720000) تمرَّر حرفياً كوسيط رابع في نداءات 1417b19c0/b0de0/b0e00/b0e50/b0e70.
+4. **CONCAT71((int7)(uVar3 >> 8), 1)** في 1417b1a40 = (u3 & ~0xff) | 1.
+5. نداءا ‏vt ‏0x4a8 (b15b0) و0x510 (b1a40) أظهر الديكمبايلر وسيطاتهما ساقطة — نُقلت مع this ‏فقط وتوثقت ‏TBD ‏(فك ‏capstone).
+
+### الاختبار (tests/syndicate_d61_test.cpp، 8 أقسام)
+البوابة/سجل الـ null/القائمة البيضاء/توزيعات ‏vt/حالات السلاسل (6→0x16+ذيل، 33→0x33+ذيل، 42)/الأغلفة/تدفقات المحظية الثلاثة/قلب 0x4c.
+
+**الرجريجن: 65/65 × 6، ASan نظيف.** ‏commit ‏D61.
