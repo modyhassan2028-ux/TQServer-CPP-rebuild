@@ -11,14 +11,14 @@
 
 namespace syndicate {
 
+int MeedGetRecord(void*, uint64_t, int32_t*,
+                int, int, int);  // D49 real
+
 // ---- the defaults ----
 static void DefTqCMsgInit(void*) {}
 static void* DefMeedPoolCtor(void* p) {
     (void)p; return nullptr;
 }
-static int DefMeedGradePage(void*, uint64_t,
-                            int32_t*, int, int,
-                            int) { return 0; }
 static char* DefMgrNameOf(void*, uint32_t) {
     return nullptr;
 }
@@ -36,7 +36,7 @@ void (*g_fnMeedListFill)(void*, int*, int*,
     = &MeedPoolGetSynMeed;
 int (*g_fnMeedGradePage)(void*, uint64_t, int32_t*,
                          int, int, int)
-    = DefMeedGradePage;
+    = &MeedGetRecord;
 char* (*g_fnMgrNameOf)(void*, uint32_t)
     = DefMgrNameOf;
 void (*g_fnMeedSend)(void*, void*, void*)
@@ -216,7 +216,7 @@ bool MeedIsMemberUser(void* pMember,
 void MeedPoolGetSynMeed(void* pPool, int* pnA,
                         int* pnB, uint32_t uUser,
                         int nType) {
-    if (3 < (uint32_t)(nType - 1)) {
+    if (2 < (uint32_t)(nType - 1)) {  // verbatim
         g_fnMeedLog();
         return;
     }
@@ -271,6 +271,192 @@ void MeedPoolGetSynMeed(void* pPool, int* pnA,
     }
     *pnA = (int)uVar5;
     *pnB = (int)uVar6;
+}
+
+
+// ---- D49: the grade page query (141779f40) ----
+static void DefMeedSortRaw(void**, void**, int) {}
+void (*g_fnMeedSortRaw)(void**, void**, int)
+    = DefMeedSortRaw;   // (D50: the real introsort)
+
+// the sub reads: vt+0x48 (the value slots) and
+// the vt+0x40 id (via the D46 seams)
+static int Sub48(void* pM, int n) {
+    void* pSub = g_fnMeedMemSub(pM, n);
+    return g_fnMeedSubNType(pSub);
+}
+static int SubId(void* pM) {
+    void* pSub = g_fnMeedMemSub(pM, 2);
+    return g_fnMeedSubNId(pSub);
+}
+
+// ---- FUN_1417782c0: the entry type match ------
+bool MeedRecMatchType(void* pL, void* pM,
+                      int nType) {
+    (void)pL;
+    if (pM == nullptr) {
+        g_fnMeedLog();
+        return false;
+    }
+    void* pSub = g_fnMeedMemSub(pM, 3);
+    return g_fnMeedSubNType(pSub) == nType;
+}
+
+// ---- FUN_141779eb0: the lazy sort (verbatim) --
+void MeedSortIfNeeded(void* pL) {
+    char* pc = (char*)pL;
+    if (*(void***)(pc + 0x28)
+        < *(void***)(pc + 0x20)) {
+        g_fnMeritInvalid();
+    }
+    void** ppBegin = *(void***)(pc + 0x20);
+    void** ppEnd = *(void***)(pc + 0x28);
+    if (*(void***)(pc + 0x28) < ppBegin) {
+        g_fnMeritInvalid();
+    }
+    int64_t lVar3 = *(int64_t*)(pc + 8);
+    if (*(void***)(pc + 0x28) < ppBegin) {
+        g_fnMeritInvalid();
+    }
+    if ((lVar3 == 0)
+        || (lVar3 != *(int64_t*)(pc + 8))) {
+        g_fnMeritInvalid();
+    }
+    g_fnMeedSortRaw(ppBegin, ppEnd,
+        (int)(((int64_t)ppEnd - (int64_t)ppBegin)
+              >> 3));
+    *(uint8_t*)(pc + 0x38) = 1;
+}
+
+// ---- FUN_141779f40: GetMeedRecord (verbatim) --
+int MeedGetRecord(void* pL, uint64_t uUser,
+                  int32_t* pOut, int nType,
+                  int nLimit, int nPage) {
+    char* pc = (char*)pL;
+    if (2 < (uint32_t)(nType - 1)) {  // verbatim
+        g_fnMeedLog();
+        return 0;
+    }
+    if (*(uint8_t*)(pc + 0x38) == 0) {
+        MeedSortIfNeeded(pL);
+    }
+    int ret = 0;        // r13d
+    int matches = 0;    // edi (the window count)
+    if (nType == 2) {
+        if (0 < nPage) {
+            int32_t* cursor = pOut + 3;
+            int64_t visited = 0;
+            int64_t cellIdx = 0;
+            int written = 0;
+            do {
+                int64_t count =
+                    ((int64_t)*(void***)(pc + 0x28)
+                    - (int64_t)*(void***)(pc
+                        + 0x20)) >> 3;
+                if (count <= visited) {
+                    return ret;
+                }
+                if (count <= cellIdx) {
+                    g_fnMeritInvalid();
+                }
+                int64_t* cell =
+                    *(int64_t**)(*(char**)(pc
+                        + 0x20) + cellIdx * 8);
+                if (cell != nullptr
+                    && MeedRecMatchType(pL, cell, 2)
+                    && matches < nLimit) {
+                    matches = matches + 1; // skip
+                } else {
+                    // the write (verbatim —
+                    // matches stays frozen)
+                    cursor[-3] = matches + 1;
+                    cursor[1] = Sub48(cell, 6);
+                    *cursor = Sub48(cell, 5);
+                    cursor[-1] = Sub48(cell, 4);
+                    cursor[-2] = SubId(cell);
+                    ret = ret + 1;
+                    written = written + 1;
+                    cursor = cursor + 5;
+                }
+                visited = visited + 1;
+                cellIdx = cellIdx + 1;
+            } while (written < nPage);
+        }
+    } else if (nType == 1 || nType == 3) {
+        // r12 = cellIdx, r14d = visited, ebp = rank
+        int rank = 1;
+        int64_t selfWritten = 0;   // local_40
+        int32_t* cursorB = pOut + 8;  // slot 1
+        int64_t cellIdx = 0;
+        int64_t visited = 0;
+        bool exited = false;
+        int64_t count =
+            ((int64_t)*(void***)(pc + 0x28)
+            - (int64_t)*(void***)(pc + 0x20)) >> 3;
+        if (count != 0) {
+            do {
+                if (count <= cellIdx) {
+                    g_fnMeritInvalid();
+                }
+                int64_t* cell =
+                    *(int64_t**)(*(char**)(pc
+                        + 0x20) + cellIdx * 8);
+                if (cell != nullptr
+                    && MeedRecMatchType(pL, cell,
+                                        nType)) {
+                    bool bSelf =
+                        MeedIsMemberUser(cell,
+                                         (uint32_t)
+                                         uUser);
+                    if (bSelf) {
+                        // the SELF path: slot 0
+                        pOut[0] = rank;
+                        pOut[4] = Sub48(cell, 6);
+                        pOut[3] = Sub48(cell, 5);
+                        pOut[2] = Sub48(cell, 4);
+                        pOut[1] = SubId(cell);
+                        if ((int64_t)nPage
+                            <= selfWritten) {
+                            ret = ret + 1;
+                            exited = true;
+                            break;  // a300
+                        }
+                    }
+                    // a22d (both paths reach)
+                    if (matches < nLimit) {
+                        matches = matches + 1;
+                        rank = rank + 1;
+                    } else if (selfWritten
+                               < nPage) {
+                        cursorB[-3] = rank;
+                        cursorB[1] =
+                            Sub48(cell, 6);
+                        *cursorB =
+                            Sub48(cell, 5);
+                        cursorB[-1] =
+                            Sub48(cell, 4);
+                        cursorB[-2] =
+                            SubId(cell);
+                        selfWritten
+                            = selfWritten + 1;
+                        rank = rank + 1;
+                        ret = ret + 1;
+                        cursorB = cursorB + 5;
+                    } else {
+                        rank = rank + 1;
+                    }
+                }
+                visited = visited + 1;
+                cellIdx = cellIdx + 1;
+            } while (visited < count);
+        } else {
+            ret = ret + 1;  // a300 (the empty
+        }                   //  vector → 1!)
+        if (!exited && count == 0) {
+            // (handled above)
+        }
+    }
+    return ret;
 }
 
 // ---- FUN_14177f700: SendMemberGrade (verbatim) --

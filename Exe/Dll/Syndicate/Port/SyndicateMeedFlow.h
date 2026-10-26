@@ -80,4 +80,19 @@ void MeedPoolGetSynMeed(void* pPool, int* pnA,
                         int* pnB, uint32_t uUser,
                         int nType);
 
+
+// ---- D49: the grade page query (141779f40) -----
+// the sort seam (141779790 family — D50)
+extern void (*g_fnMeedSortRaw)(void** ppBegin,
+                              void** ppEnd,
+                              int nCount);
+// FUN_1417782c0: the entry type match
+bool MeedRecMatchType(void* pL, void* pM, int nType);
+// FUN_141779eb0: the lazy sort (the +0x38 flag)
+void MeedSortIfNeeded(void* pL);
+// FUN_141779f40: CMeedRecord::GetMeedRecord
+int MeedGetRecord(void* pL, uint64_t uUser,
+                  int32_t* pOut, int nType,
+                  int nLimit, int nPage);
+
 } // namespace syndicate
