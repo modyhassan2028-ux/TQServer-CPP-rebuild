@@ -147,3 +147,11 @@
 - الملفات: `Exe/Dll/Syndicate/Port/SyndicateMsgProcess2.{h,cpp}` + `tests/syndicate_d66_test.cpp` (12 قسماً، 39 تأكيداً).
 - رجريجن **70/70 × 6** + ‏ASan نظيف.
 - **التالي (D67+)**: ‏CMsgSyndicate::Process (0x1417db7b0) وحدة مستقلة، ثم الأعماق الموثقة (1417b98e0، 1417b03b0، 1417b0680، 1417b48b0، 1417b4d60، 1417b0ea0، 1417b3300، 1417bed70، 1417b3a90)، جدول CSyndicateLogic (232 فتحة)، إغلاق ModuleCreate (14177ec90)، وفك يدوي 1417ab8c0/1417ac2d0.
+
+## D67 (2026-10-26) — CMsgSyndicate::Process (4297 بايت) — أكبر جسم
+
+- فك 3 جداول قفز (رئيسي 29 حالة + جدولا الرتب). **انتبه: r13=0x141720000 — الجداول عند 0x1417dc87c/944/95c بعد نهاية الدالة.**
+- كذبات الديكومبايلر: كل _snprintf خمسة وسائط «%d %d %d %d %d» (rank, ce0ret/1, a50ret/1, ac430ret, ثابت لكل رتبة: 0/650/320/270/100/0)؛ عائد ac430 مستخدم؛ ac7f0 بياخد الـ GetString buffer؛ r9=0x100 متقادم في 0x1b؛ r9=ac800ret في 0x1d؛ معالج 0x348 بدون memset؛ 0x25 يرد عبر CMsgSyndicate كومة-مكدس (مُشيّد D57) وac7d0 مرسالها stackMsg بينما 0x2d مرسالها الرسالة الواردة.
+- الملفات: `Exe/Dll/Syndicate/Port/SyndicateMsgSyndicate.{h,cpp}` + `tests/syndicate_d67_test.cpp` (13 قسماً، 67 تأكيداً، خريطة D34 حقيقية للسلسلة).
+- رجريجن **71/71 × 6** + ASan نظيف.
+- **التالي (D68+)**: طبقة CMsg كلها مقفولة الآن — انتقال للأعماق: 1417b98e0، 1417b03b0، 1417b0680، 1417b48b0، 1417b4d60، 1417b0ea0، 1417b3300، 1417bed70، 1417b3a90 (التحزيم ممكن)، جدول CSyndicateLogic (232 فتحة)، إغلاق ModuleCreate (14177ec90)، وفك يدوي 1417ab8c0/1417ac2d0.
