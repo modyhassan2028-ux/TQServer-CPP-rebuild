@@ -10,16 +10,19 @@
 #include "SyndicateLeagueCmp.h"       // the log seams
 #include "SyndicateLeagueOps.h"       // the InstanceGet seam
 #include "SyndicateLeagueMgr.h"       // g_fnMgrStrCopy
+#include "SyndicateLeagueRelease.h"  // the real walks
 #include <cstring>
 
 namespace syndicate {
 
 // ---------- the seams ----------
 void* g_fnLeagueLifeVftable = nullptr;
+// the D38 seams now DEFAULT to the D39 real walks
+// (tests may override for isolation)
 void (*g_fnLeagueReleaseUsers)(int64_t, int64_t, int64_t,
-                               int64_t) = nullptr;
+    int64_t) = &LeagueReleaseUsers;
 void (*g_fnLeagueReleaseTokens)(int64_t, int64_t, int64_t,
-                                int64_t) = nullptr;
+    int64_t) = &LeagueReleaseTokens;
 int (*g_fnLeagueMemMoveS)(void*, size_t, const void*,
                               size_t) = nullptr;
 
