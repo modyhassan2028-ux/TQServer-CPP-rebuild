@@ -27,5 +27,5 @@ for pass in 1 2 3 4 5 6; do
     fi
   done
 done
-[ $FAIL -eq 0 ] && echo "ALL-6X-GREEN: 68/68"
+[ $FAIL -eq 0 ] && echo "ALL-6X-GREEN: 69/69"
 exit $FAIL
