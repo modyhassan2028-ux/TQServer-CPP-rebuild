@@ -7,20 +7,24 @@
 #include "SyndicateOwnTree.h"        // OwnAnchorAlloc
 #include "SyndicateEraseLayer.h"     // OwnEraseRange
 #include "SyndicateLeagueLife.h"     // LeagueUsersMapCtor
+#include "SyndicateLeagueMgrErase.h"  // the D41a real
+                                     //  erase-ranges
 
 namespace syndicate {
 
 int64_t g_MgrDat141886d00 = 0;
 void* g_fnMgrVftable = nullptr;
-FnMgrEraseRange g_fnMgrErase38  = nullptr;
-FnMgrEraseRange g_fnMgrErase538 = nullptr;
-FnMgrEraseRange g_fnMgrErase4f8 = nullptr;
-FnMgrEraseRange g_fnMgrErase4b0 = nullptr;
-FnMgrEraseRange g_fnMgrErase470 = nullptr;
-FnMgrEraseRange g_fnMgrErase318 = nullptr;
-FnMgrEraseRange g_fnMgrErase2b0 = nullptr;
-FnMgrEraseRange g_fnMgrErase228 = nullptr;
-FnMgrEraseRange g_fnMgrErase108 = nullptr;
+// the D41 seams now DEFAULT to the real D41a
+// erase-ranges (tests may override for isolation)
+FnMgrEraseRange g_fnMgrErase38  = &MgrEraseRange38;
+FnMgrEraseRange g_fnMgrErase538 = &MgrEraseRange538;
+FnMgrEraseRange g_fnMgrErase4f8 = &MgrEraseRange4f8;
+FnMgrEraseRange g_fnMgrErase4b0 = &MgrEraseRange4b0;
+FnMgrEraseRange g_fnMgrErase470 = &MgrEraseRange470;
+FnMgrEraseRange g_fnMgrErase318 = &MgrEraseRange318;
+FnMgrEraseRange g_fnMgrErase2b0 = &MgrEraseRange2b0;
+FnMgrEraseRange g_fnMgrErase228 = &MgrEraseRange228;
+FnMgrEraseRange g_fnMgrErase108 = &MgrEraseRange108;
 
 // ============ the head allocators ============
 // 141756200 (0x30, isnil 0x29, +0x28 color 1)
