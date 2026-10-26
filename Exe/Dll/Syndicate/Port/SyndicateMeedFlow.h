@@ -66,4 +66,18 @@ uint64_t MeedSendMemberGrade(void* pUserProxy,
                              uint64_t uUser,
                              int nType, int nPage);
 
+// ---- D48: the pool list fill (14177cdc0) ---------
+// the sub-object protocol for the B out (vt+8 idx 4)
+extern void* (*g_fnMeedMemSubV)(void* pMember);
+extern uint32_t (*g_fnMeedSubVVal)(void* pSub);
+// ---- FUN_14177cb40: GetVecByMeedType -----------
+void* MeedPoolVecByType(void* pPool, int nType);
+// ---- FUN_14177cad0: IsMemberUser --------------
+bool MeedIsMemberUser(void* pMember,
+                      uint32_t uUser);
+// ---- FUN_14177cdc0: CMeedSetMgr::GetSynMeed ---
+void MeedPoolGetSynMeed(void* pPool, int* pnA,
+                        int* pnB, uint32_t uUser,
+                        int nType);
+
 } // namespace syndicate

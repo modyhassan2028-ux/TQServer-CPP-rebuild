@@ -16,8 +16,6 @@ static void DefTqCMsgInit(void*) {}
 static void* DefMeedPoolCtor(void* p) {
     (void)p; return nullptr;
 }
-static void DefMeedListFill(void*, int*, int*,
-                            uint32_t, int) {}
 static int DefMeedGradePage(void*, uint64_t,
                             int32_t*, int, int,
                             int) { return 0; }
@@ -31,9 +29,11 @@ void (*g_fnTqCMsgInit)(void*) = DefTqCMsgInit;
 
 void* g_pMeedPool = nullptr;      // DAT_141886d40
 void* (*g_fnMeedPoolCtor)(void*) = DefMeedPoolCtor;
+// (the original flow calls 14177cdc0 directly —
+//  the seam now defaults to the REAL function)
 void (*g_fnMeedListFill)(void*, int*, int*,
                          uint32_t, int)
-    = DefMeedListFill;
+    = &MeedPoolGetSynMeed;
 int (*g_fnMeedGradePage)(void*, uint64_t, int32_t*,
                          int, int, int)
     = DefMeedGradePage;
@@ -180,6 +180,97 @@ int CMsgMemAwardRankAppend(void* pMsg, int32_t* pE,
     int32_t* piVar1 = (int32_t*)(lVar3 + 0xe);
     *piVar1 = *piVar1 + 1;           // the count
     return 1;
+}
+
+
+// ---- D48: the pool list fill (14177cdc0) ------
+static void* DefMeedMemSubV(void* p) { return p; }
+static uint32_t DefMeedSubVVal(void*) { return 0; }
+
+void* (*g_fnMeedMemSubV)(void*) = DefMeedMemSubV;
+uint32_t (*g_fnMeedSubVVal)(void*) = DefMeedSubVVal;
+
+// ---- FUN_14177cb40: GetVecByMeedType (verbatim) --
+void* MeedPoolVecByType(void* pPool, int nType) {
+    char* pc = (char*)pPool;
+    if ((uint32_t)(nType - 1) < 3) {
+        return pc + (uint64_t)(nType - 1) * 0x30;
+    }
+    g_fnMeedLog();
+    return pc + 0x98;
+}
+
+// ---- FUN_14177cad0: IsMemberUser (verbatim) ----
+bool MeedIsMemberUser(void* pMember,
+                      uint32_t uUser) {
+    if (pMember == nullptr) {
+        g_fnMeedLog();
+        return false;
+    }
+    void* pSub2 = g_fnMeedMemSub(pMember, 2);
+    int iVar1 = g_fnMeedSubNId(pSub2);
+    return (uint32_t)iVar1 == uUser;
+}
+
+// ---- FUN_14177cdc0: GetSynMeed (verbatim) -----
+void MeedPoolGetSynMeed(void* pPool, int* pnA,
+                        int* pnB, uint32_t uUser,
+                        int nType) {
+    if (3 < (uint32_t)(nType - 1)) {
+        g_fnMeedLog();
+        return;
+    }
+    if (pnA == nullptr || pnB == nullptr) {
+        g_fnMeedLog();
+        return;
+    }
+    uint32_t uVar5 = 0, uVar6 = 0;
+    char* pv = (char*)MeedPoolVecByType(pPool,
+                                        nType);
+    char** ppProxy = (char**)pv;
+    char** puVar8 = *(char***)(pv + 0x18); // begin
+    if (*(char***)(pv + 0x20) < puVar8) {   // end
+        g_fnMeritInvalid();
+    }
+    char* plVar1 = *(char**)pv;             // proxy
+    while (true) {
+        char** puVar2 = *(char***)(pv + 0x20);
+        if (puVar2 < *(char***)(pv + 0x18)) {
+            g_fnMeritInvalid();
+        }
+        if (*ppProxy == nullptr
+            || *ppProxy != plVar1) {
+            g_fnMeritInvalid();
+        }
+        if (puVar2 == puVar8) break;   // the end
+        // the debug deref gate (verbatim)
+        int64_t lVar9 = (plVar1 == nullptr) ? 0
+            : *(int64_t*)plVar1;
+        if (*(char**)(lVar9 + 0x20)
+            <= (char*)puVar8) {
+            g_fnMeritInvalid();
+        }
+        char* pMem = *puVar8;
+        if (pMem != nullptr
+            && MeedIsMemberUser(pMem, uUser)) {
+            // the member sub(3)/sub(4) outs
+            void* pSub3 = g_fnMeedMemSub(pMem, 3);
+            uVar5 = (uint32_t)
+                g_fnMeedSubNType(pSub3);
+            void* pSub4 = g_fnMeedMemSubV(pMem);
+            uVar6 = g_fnMeedSubVVal(pSub4);
+            break;
+        }
+        lVar9 = (plVar1 == nullptr) ? 0
+            : *(int64_t*)plVar1;
+        if (*(char**)(lVar9 + 0x20)
+            <= (char*)puVar8) {
+            g_fnMeritInvalid();
+        }
+        puVar8 = puVar8 + 1;           // the stride
+    }
+    *pnA = (int)uVar5;
+    *pnB = (int)uVar6;
 }
 
 // ---- FUN_14177f700: SendMemberGrade (verbatim) --
