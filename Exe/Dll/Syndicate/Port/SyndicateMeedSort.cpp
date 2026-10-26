@@ -42,8 +42,8 @@ bool MeedSortCmp(void* a, void* b) {
 
 // ---- FUN_1417786d0: the median-of-3 order ----
 void MeedMedian3(void** p1, void** p2,
-                 void** p3) {
-    auto cmp = MeedSortCmp;
+                 void** p3,
+                 MeedSortCmpFn cmp) {
     if (cmp(*p2, *p1) && p2 != p1) {
         void* t = *p2;
         *p2 = *p1;
@@ -63,26 +63,27 @@ void MeedMedian3(void** p1, void** p2,
 
 // ---- FUN_1417788c0: the median guess ---------
 void MeedGuessMedian(void** p1, void** p2,
-                     void** p3) {
+                     void** p3,
+                     MeedSortCmpFn cmp) {
     int64_t n =
         ((int64_t)p3 - (int64_t)p1) >> 3;
     if (0x28 < n) {
         n = n + 1;
         int64_t m =
             (n + (((n >> 63)) & 7)) >> 3;
-        MeedMedian3(p1, p1 + m, p1 + 2 * m);
-        MeedMedian3(p2 - m, p2, p2 + m);
-        MeedMedian3(p3 - 2 * m, p3 - m, p3);
-        MeedMedian3(p1 + m, p2, p3 - m);
+        MeedMedian3(p1, p1 + m, p1 + 2 * m, cmp);
+        MeedMedian3(p2 - m, p2, p2 + m, cmp);
+        MeedMedian3(p3 - 2 * m, p3 - m, p3, cmp);
+        MeedMedian3(p1 + m, p2, p3 - m, cmp);
         return;
     }
-    MeedMedian3(p1, p2, p3);
+    MeedMedian3(p1, p2, p3, cmp);
 }
 
 // ---- FUN_141778760: the heap sift-down ------
 void MeedSiftDown(void** base, int64_t nHole,
-                  int64_t nLen, void* pVal) {
-    auto cmp = MeedSortCmp;
+                  int64_t nLen, void* pVal,
+                  MeedSortCmpFn cmp) {
     int64_t hole = nHole;
     int64_t child;
     while (true) {
@@ -113,7 +114,8 @@ void MeedSiftDown(void** base, int64_t nHole,
 }
 
 // ---- FUN_141778d90: the bottom-up heapify ----
-void MeedMakeHeap(void** begin, void** end) {
+void MeedMakeHeap(void** begin, void** end,
+                 MeedSortCmpFn cmp) {
     int64_t n =
         ((int64_t)end - (int64_t)begin) >> 3;
     if (1 < n) {
@@ -122,13 +124,15 @@ void MeedMakeHeap(void** begin, void** end) {
             int64_t off = i * 8;
             i = i - 1;
             MeedSiftDown(begin, i, n,
-                *(void**)((char*)begin - 8 + off));
+                *(void**)((char*)begin - 8 + off),
+                cmp);
         }
     }
 }
 
 // ---- FUN_141778f80: the sort-heap -------------
-void MeedSortHeap(void** begin, void** end) {
+void MeedSortHeap(void** begin, void** end,
+                 MeedSortCmpFn cmp) {
     for (int64_t len = (int64_t)end
                        - (int64_t)begin;
          1 < (len >> 3); len = len - 8) {
@@ -137,14 +141,14 @@ void MeedSortHeap(void** begin, void** end) {
         *(void**)((char*)begin + len - 8) =
             *begin;
         MeedSiftDown(begin, 0, (len - 8) >> 3,
-                     val);
+                     val, cmp);
     }
 }
 
 // ---- FUN_141778a20: the insertion sort --------
 void MeedInsertionSort(void** begin,
-                       void** end) {
-    auto cmp = MeedSortCmp;
+                       void** end,
+                       MeedSortCmpFn cmp) {
     if (begin == end || begin + 1 == end) {
         return;
     }
@@ -179,13 +183,13 @@ void MeedInsertionSort(void** begin,
 //  disassembly — goto-faithful)
 void MeedPartitionImpl(void*** out,
                        void** first,
-                       void** last) {
-    auto cmp = MeedSortCmp;
+                       void** last,
+                       MeedSortCmpFn cmp) {
     int64_t n = ((int64_t)last - (int64_t)first)
                 >> 3;
     void** mid = first
         + ((n - (n >> 63)) >> 1);
-    MeedGuessMedian(first, mid, last - 1);
+    MeedGuessMedian(first, mid, last - 1, cmp);
     void** up = mid + 1;
     // the down-scan: skip the equal run
     if (first < mid) {
@@ -329,41 +333,45 @@ L_exit:
 
 // ---- FUN_141779790: the introsort driver -----
 void MeedSortDriver(void** begin, void** end,
-                    int64_t nDepth) {
+                    int64_t nDepth,
+                    MeedSortCmpFn cmp) {
     int64_t span = (int64_t)end
                    - (int64_t)begin;
     while (true) {
         int64_t n = span >> 3;
         if (n < 0x21) {
             if (1 < n) {
-                MeedInsertionSort(begin, end);
+                MeedInsertionSort(begin, end,
+                                  cmp);
             }
             return;
         }
         if (nDepth < 1) {
             if (0x20 < n) {
-                MeedMakeHeap(begin, end);
-                MeedSortHeap(begin, end);
+                MeedMakeHeap(begin, end, cmp);
+                MeedSortHeap(begin, end, cmp);
                 return;
             }
             if (1 < n) {
-                MeedInsertionSort(begin, end);
+                MeedInsertionSort(begin, end,
+                                  cmp);
             }
             return;
         }
         void** midOut[2];
-        MeedPartitionImpl(midOut, begin, end);
+        MeedPartitionImpl(midOut, begin, end,
+                          cmp);
         nDepth = nDepth / 2 + (nDepth / 2) / 2;
         if (((int64_t)midOut[0]
              - (int64_t)begin & ~7)
             < ((int64_t)end
                - (int64_t)midOut[1] & ~7)) {
             MeedSortDriver(begin, midOut[0],
-                           nDepth);
+                           nDepth, cmp);
             begin = (void**)midOut[1];
         } else {
             MeedSortDriver(midOut[1], end,
-                           nDepth);
+                           nDepth, cmp);
             end = (void**)midOut[0];
         }
         span = (int64_t)end - (int64_t)begin;
@@ -373,7 +381,8 @@ void MeedSortDriver(void** begin, void** end,
 // ---- the seam target (141779eb0's backend) ---
 void MeedSortRaw(void** ppBegin, void** ppEnd,
                  int nCount) {
-    MeedSortDriver(ppBegin, ppEnd, nCount);
+    MeedSortDriver(ppBegin, ppEnd, nCount,
+                   MeedSortCmp);
 }
 
 } // namespace syndicate

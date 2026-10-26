@@ -34,16 +34,25 @@ void MeedSortRaw(void** ppBegin, void** ppEnd,
                  int nCount);
 
 // the individual stages (exposed for the tests)
-void MeedMedian3(void** p1, void** p2, void** p3);
+typedef bool (*MeedSortCmpFn)(void*, void*);
+
+void MeedMedian3(void** p1, void** p2,
+                void** p3, MeedSortCmpFn cmp);
 void MeedGuessMedian(void** p1, void** p2,
-                     void** p3);
+                     void** p3,
+                     MeedSortCmpFn cmp);
 void MeedSiftDown(void** base, int64_t nHole,
-                  int64_t nLen, void* pVal);
-void MeedMakeHeap(void** begin, void** end);
-void MeedSortHeap(void** begin, void** end);
-void MeedInsertionSort(void** begin, void** end);
+                  int64_t nLen, void* pVal,
+                  MeedSortCmpFn cmp);
+void MeedMakeHeap(void** begin, void** end,
+                  MeedSortCmpFn cmp);
+void MeedSortHeap(void** begin, void** end,
+                  MeedSortCmpFn cmp);
+void MeedInsertionSort(void** begin, void** end,
+                       MeedSortCmpFn cmp);
 void MeedSortDriver(void** begin, void** end,
-                    int64_t nDepth);
+                    int64_t nDepth,
+                    MeedSortCmpFn cmp);
 
 } // namespace syndicate
 #endif
