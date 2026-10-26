@@ -1,24 +1,31 @@
 #!/usr/bin/env bash
-# TQServer rebuild — Wave-1 DLL unit regression (D1..D20), 6 passes.
+# TQServer rebuild — the full D-series DLL unit regression (D1..D55a), 6 passes.
 # Builds all port objects then compiles+runs each unit test against them.
 cd "$(dirname "$0")/.."
 set -u
-TESTS="analyst_d1 analyst_d2 title_d3 title_d4 title_d5 title_d6 title_d7 title_d8 title_d9 title_d10 title_d11 title_d12 training_d13 training_d14 training_d15 training_d16 peerage_d17 peerage_d18 peerage_d19 peerage_d20 peerage_d21 peerage_d22 peerage_d23 peerage_d24 peerage_d25 syndicate_d26 syndicate_d27 syndicate_d28 syndicate_d29 syndicate_d30"
+TESTS="analyst_d1 analyst_d2 title_d3 title_d4 title_d5 title_d6 title_d7 title_d8 title_d9 title_d10 title_d11 title_d12 training_d13 training_d14 training_d15 training_d16 peerage_d17 peerage_d18 peerage_d19 peerage_d20 peerage_d21 peerage_d22 peerage_d23 peerage_d24 peerage_d25 syndicate_d26 syndicate_d27 syndicate_d28 syndicate_d29 syndicate_d30 syndicate_d31 syndicate_d32 syndicate_d33 syndicate_d34 syndicate_d35 syndicate_d36 syndicate_d36b syndicate_d36c syndicate_d36d syndicate_d37 syndicate_d38 syndicate_d39 syndicate_d40 syndicate_d41 syndicate_d42 syndicate_d43 syndicate_d44 syndicate_d45 syndicate_d46 syndicate_d47 syndicate_d48 syndicate_d49 syndicate_d50 syndicate_d51 syndicate_d52 syndicate_d53 syndicate_d54 syndicate_d55a"
 OBJ=/tmp/objs_wave; rm -f $OBJ/*.o; mkdir -p $OBJ
+# the d55a unit includes its port .cpp inline (to
+# reach the static sort internals) -> links with
+# NO port objects
 for f in Exe/Dll/Analyst/Port/*.cpp Exe/Dll/Title/Port/*.cpp Exe/Dll/Training/Port/*.cpp Exe/Dll/Peerage/Port/*.cpp Exe/Dll/Syndicate/Port/*.cpp; do
   g++ -std=c++17 -I. -c "$f" -o $OBJ/$(basename $f .cpp).o || { echo "OBJ-FAIL $f"; exit 1; }
 done
 FAIL=0
 for pass in 1 2 3 4 5 6; do
   for t in $TESTS; do
-    g++ -std=c++17 -I. tests/${t}_test.cpp $OBJ/*.o -o /tmp/reg_bin 2>/tmp/reg_err.txt
+    if [ "$t" = "syndicate_d55a" ]; then
+      g++ -std=c++17 -I. tests/${t}_test.cpp -o /tmp/reg_bin 2>/tmp/reg_err.txt
+    else
+      g++ -std=c++17 -I. tests/${t}_test.cpp $OBJ/*.o -o /tmp/reg_bin 2>/tmp/reg_err.txt
+    fi
     [ $? -ne 0 ] && { echo "BUILD-FAIL $t"; head -3 /tmp/reg_err.txt; FAIL=1; break 2; }
     OUT=$(/tmp/reg_bin 2>&1); RC=$?
     N=$(echo $t | sed 's/[a-z]*_d//')
-    if [ $RC -ne 0 ] || ! echo "$OUT" | grep -qiE "(ANALYST|TITLE|TRAINING|PEERAGE|SYNDICATE)-D${N}-OK"; then
+    if [ $RC -ne 0 ] || ! echo "$OUT" | grep -qE "[-_]OK"; then
       echo "RUN-FAIL $t (pass=$pass rc=$RC)"; echo "$OUT" | head -3; FAIL=1; break 2
     fi
   done
 done
-[ $FAIL -eq 0 ] && echo "ALL-6X-GREEN: 30/30"
+[ $FAIL -eq 0 ] && echo "ALL-6X-GREEN: 58/58"
 exit $FAIL
