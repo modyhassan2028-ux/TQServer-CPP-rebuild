@@ -61,4 +61,11 @@ void UsersRotateR(void* pMap, void* pNode);
 // ---- FUN_1417224f0 ----
 void UsersRotateL(void* pMap, void* pNode);
 
+// ---- FUN_141749a50 ----
+// the TOKENS-map unique insert (the map @ entity+0xd8):
+// identical to the users unique insert modulo the raw-
+// insert callee (the D32 insert 141748820)
+void* TokensInsertUnique(void* pMap, void* pOut,
+                         uint32_t* pKey);
+
 } // namespace syndicate

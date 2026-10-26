@@ -2,6 +2,7 @@
 // family bodies (verbatim; byte-diffed against the D32
 // counterparts — identical modulo the callee ids).
 #include "SyndicateLeagueUsers.h"
+#include "SyndicateLeagueTree.h"   // the D32 insert (141748820)
 #include "SyndicateCrossMerit.h"
 #include <new>
 #include <stdexcept>
@@ -674,6 +675,133 @@ rebalance:
     char* lVar5 = (char*)param_3[1];   // the advanced
     *(char**)param_2 = *(char**)param_1;
     param_2[1] = lVar5;
+    return param_2;
+}
+
+
+// ================= FUN_141749a50 =================
+// the TOKENS-map unique insert (0x29 nodes, the map
+// @ entity+0xd8): byte-identical to the users unique
+// insert (14172afb0) modulo the RAW-INSERT callee — it
+// calls the D32 insert (141748820), NOT the users raw
+// insert. out = {anchor, node, flag@+0x10}.
+// ================= FUN_141749a50 =================
+// the TOKENS-map unique insert (0x29 nodes, the map
+// @ entity+0xd8): byte-identical to the users unique
+// insert (14172afb0) modulo the RAW-INSERT callee — it
+// calls the D32 insert (141748820), NOT the users raw
+// insert. out = {anchor, node, flag@+0x10}.
+// the UNIQUE insert: the lower_bound descent + the two
+// neighbor duplicate gates + the raw insert. The output
+// iterator home is {anchor, node} with the inserted FLAG
+// byte at out+0x10 (0 = duplicate, 1 = inserted).
+void* TokensInsertUnique(void* pMap, void* pOut,
+                        uint32_t* pKey) {
+    char** param_1 = (char**)pMap;
+    char** param_2 = (char**)pOut;
+    uint32_t* param_3 = pKey;
+    char* head = *(char**)((char*)param_1 + 0x30);
+    char* plVar6 = head;
+    bool bVar7 = true;
+    if (*(char*)(*(char**)(head + 8) + 0x29) == '\0') {
+        char* plVar5 = *(char**)(head + 8);   // the root
+        do {
+            plVar6 = plVar5;
+            // the key at node+0x18 (u32)
+            bVar7 = *param_3
+                < *(uint32_t*)((char*)plVar6 + 0x18);
+            plVar5 = bVar7
+                ? *(char**)plVar6              // the left
+                : *(char**)(plVar6 + 0x10);    // the right
+        } while (*(char*)(plVar5 + 0x29) == '\0');
+    }
+    char* lVar2 = *(char**)param_1;   // the anchor
+    char* plVar5 = plVar6;
+    // ORIGINAL: local_38 (anchor home) is ADJACENT to
+    // local_30 (the node slot) — the raw insert writes
+    // BOTH via its {param_2[0], param_2[1]} pair out
+    int64_t insOut[2];
+    insOut[0] = (int64_t)lVar2;
+    char* plVar4 = plVar6;
+    char* local_30 = nullptr;
+    char* plVar6r = nullptr;   // head-declared: the goto must not cross it
+    if (bVar7 == false) {
+lab_b10d:
+        local_30 = plVar4;
+        // the RIGHT-candidate duplicate gate
+        if (*param_3
+            <= *(uint32_t*)((char*)plVar5 + 0x18)) {
+            *(char*)(param_2 + 2) = 0;   // flag: dup
+            *(char**)param_2 = (char*)insOut[0];
+            goto lab_b13c;
+        }
+    } else {
+        plVar5 = *(char**)head;   // head->left = the FIRST
+        local_30 = plVar6;
+        if (lVar2 == nullptr) {
+            g_fnMeritInvalid();
+        }
+        if (plVar6 != plVar5) {
+            if (lVar2 == nullptr) {
+                g_fnMeritInvalid();
+            }
+            if (*(char*)(plVar6 + 0x29) == '\0') {
+                plVar5 = *(char**)plVar6;   // the left
+                if (*(char*)(plVar5 + 0x29) == '\0') {
+                    // the rightmost of the LEFT subtree
+                    char* plVar3 = *(char**)(plVar5 + 0x10);
+                    char cVar1 = *(char*)(plVar3 + 0x29);
+                    char* plVar4b = plVar5;
+                    while (plVar4b = plVar5, cVar1 == '\0') {
+                        cVar1 = *(char*)(*(char**)(plVar3 + 0x10) + 0x29);
+                        plVar5 = plVar3;
+                        plVar3 = *(char**)(plVar3 + 0x10);
+                    }
+                    plVar4 = plVar4b;
+                } else {
+                    // the climb: while the node is the
+                    // parent's LEFT child
+                    char cVar1 = *(char*)(*(char**)(plVar6 + 8) + 0x29);
+                    char* plVar4b = *(char**)(plVar6 + 8);
+                    char* plVar3 = plVar6;
+                    while (plVar5 = plVar4b,
+                           cVar1 == '\0'
+                           && plVar3 == *(char**)plVar5) {
+                        cVar1 = *(char*)(*(char**)(plVar5 + 8) + 0x29);
+                        plVar4b = *(char**)(plVar5 + 8);
+                        plVar3 = plVar5;
+                        local_30 = plVar5;
+                    }
+                    plVar4 = plVar5;
+                    if (*(char*)(plVar3 + 0x29) != '\0') {
+                        g_fnMeritInvalid();
+                        plVar5 = plVar3;
+                        plVar4 = local_30;
+                    }
+                }
+            } else {
+                plVar5 = *(char**)(plVar6 + 0x10);
+                plVar4 = plVar5;
+                if (*(char*)(plVar5 + 0x29) != '\0') {
+                    local_30 = plVar5;
+                    g_fnMeritInvalid();
+                    plVar4 = local_30;
+                }
+            }
+            goto lab_b10d;
+        }
+        bVar7 = true;   // no predecessor to check
+    }
+    // the raw insert — insOut IS the adjacent pair home
+    plVar6r = (char*)LeagueInsert(
+        (void*)param_1, (void*)insOut,
+        (uint8_t)bVar7, (void*)plVar6,
+        (void*)param_3);
+    *(char*)(param_2 + 2) = 1;   // flag: inserted
+    local_30 = *(char**)(plVar6r + 8);   // insOut[1]
+    *(char**)param_2 = *(char**)plVar6r; // insOut[0]
+lab_b13c:
+    param_2[1] = (char*)local_30;
     return param_2;
 }
 
