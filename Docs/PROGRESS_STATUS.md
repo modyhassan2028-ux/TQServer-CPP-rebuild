@@ -37,5 +37,9 @@
 
 ## قائمة العمل التالية في سلسلة حرب النهب (جبهة العميل)
 1. **D78**: CSyndicateLogic::SignUpPlunderWarFromClient
-   (FUN_1417c2470، 600 سطر).
+   (FUN_1417c2470، 600 سطر) — محللة بالكامل في
+   Docs/D78_SIGNUP_PLUNDER_WAR_PLAN.md: أول دالة
+   CSyndicateLogic في السلسلة، بناء vector حقيقي +
+   جدول cq_token_type + نص sprintf + رسالتان جديدتان
+   (~14 seam). جاهزة للبورت.
 2. ثم بقية دوال 14176xxxx ثم الـ ~52 كلاس متبقٍ.
