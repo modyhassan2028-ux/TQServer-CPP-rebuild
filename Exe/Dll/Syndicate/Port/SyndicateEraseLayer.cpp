@@ -321,14 +321,14 @@ void* OwnEraseRange(void* pMap, void* pOutIter,
     char** param_4 = (char**)pIterLast;
     char* lVar2 = *(char**)(param_1 + 6);  // head
     if ((*param_3 == nullptr)
-        || (*param_3 != (char*)param_1)) {
-        g_fnMeritInvalid();
-    }
+        || (*param_3 != *(char**)param_1)) {
+        g_fnMeritInvalid();   // the proxy gate (VERBATIM:
+    }                        //  *param_3 != *param_1)
     if (param_3[1] == (char*)lVar2) {
         // the first is the end iter
         lVar2 = (char*)param_1[6];
         if ((*param_4 == nullptr)
-            || (*param_4 != (char*)param_1)) {
+            || (*param_4 != *(char**)param_1)) {
             g_fnMeritInvalid();
         }
         if (param_4[1] == lVar2) {
