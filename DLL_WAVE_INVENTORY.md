@@ -93,3 +93,4 @@
 - **D58**: ذيل الوحدة (20 دالة: 14177ed50–1417809d0) — المُفكك، كومة CSynArenicMeed، حلقات المصفوفات stride-0x14، **LeaveAwardFlow (14177f340) مع SendLeaveAward (14177eda0) المفكوك يدوياً بـ capstone** (الـ decompiler فشل فيه؛ 211 تعليمة، منقول حرفياً في `SyndicateLeaveAward.{h,cpp}`).
 - **D58b مدمج في اختبار D58** (9 أقسام، E2E يربط Flow بالجسم الحقيقي): 62/62 × 6، ASan نظيف.
 - **الجرد المفتوح القادم**: أجسام Process لـ 39 فئة CMsg (كل العناوين في الجرد)، جدول CSyndicateLogic (232 فتحة)، IProvider (224)، إغلاق ModuleCreate (14177ec90)، الفشلان المتبقيان (1417ab8c0، 1417ac2d0 — فك يدوي بنفس الأسلوب).
+- **D59 (2026-10-26)**: أول جسدين Process مقفولين — CMsgLog (0x1417d97c0) + CMsgSynChgDomName (0x1417daee0) + نداء الذيل 1417ac7d0 (نقل من التفكيك: deref اثنتان، الـ decompiler أظهر 3). العمق (1417b7010/1417ac620/1417afb20) موثق كـ seams. رجريجن 63/63 × 6.

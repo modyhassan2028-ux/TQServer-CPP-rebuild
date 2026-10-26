@@ -3661,3 +3661,34 @@ g_aMsgCtor[17] ‏(seams وحدة Module السابقة) تُربط بالأجس
 ### D58 اختبار (9 أقسام، 62/62 × 6)
 - D58-9 الجديد: ربط SendLeaveAward الحقيقي بمسار LeaveAwardFlow E2E، مع تغطية: نوع خارج النطاق، المنح الجزئي (يسجل overflow — مطابق للتفكيك: الشرط الحرفي `r14 != ebx || r13d != edi`)، المنح الكامل، سقف سعة المخزن، فرع 0x2710، فشل DeleteRecord.
 - ASan نظيف (0 تسريبات بعد إصلاح تسريبات الاختبار).
+
+---
+
+## D59 — أول جسدين Process لفئات CMsg (تاريخ: 2026-10-26)
+
+### الوحدة (SyndicateMsgProcess.{h,cpp})
+1. **CMsgLog::Process (0x1417d97c0)** — الـ dispatcher الحرفي:
+   - `pLogic = FUN_1417b6210()` (الـ singleton — seam ‏g_fnGetGameMgr المعاد استخدامه من CrossMerit، ‏DAT_141886dd0).
+   - `nType = *(int*)(*(pMsg+0x408)+8)` (حقل الـ Type في الـ PB).
+   - 0 → FUN_1417b7010 (تدفق سجل الإعلان العميق — seam ‏g_fnLogRecord)، ‏1 → FUN_1417ac620 (إزالة سجل المستخدم — seam ‏g_fnLogRemove)، غيره → ERROR حرفي: `"syndicate::CMsgLog::Process(idActor), idActor:%d, Type:%d, MsgType:%d"`.
+2. **CMsgSynChgDomName::Process (0x1417daee0)**:
+   - الفحص FUN_1417afb20 (seam ‏g_fnChgDomCheck: خذ ‏syn id من PB+4 والاسم من PB+8) → الرد FUN_1417dae90 (كتب +0x18=النتيجة، ‏+0x02=0x837، ‏+0x00=0x1c + استدعاء tq::CMsg::Init) → نداء الذيل FUN_1417ac7d0.
+3. **نداء الذيل FUN_1417ac7d0** — نقل حرفي من التفكيك (الـ decompiler وقع في "jumptable" وهمي):
+   ```
+   mov rcx,[rcx+8]   ; A = *(pLogic+8)
+   mov rax,[rcx]    ; vt = *A
+   jmp [rax+8]      ; استدعاء vt[1](this=A)
+   ```
+   (خطأ نقل مصحح أثناء الوحدة: كانت 3 derefs في المسودة — ‏2 فقط هي الحرفية).
+4. **tq::CMsg::Init (0x1417e8016)** — thunk للـ PB runtime (نفس نمط 1417e8050 المسجل TBD في D57) — seam ‏g_fnCMsgInitThunk.
+5. سلاسل القاعدة للـ 14177e2d0/2e0/2f0 مؤكدة: ‏"tq::CMsg::Process(OBJID idActor, void* pInfo) error" / ‏"...(OBJID idActor)..." / ‏"...(void* pInfo)..." (ليست Init كما بدا من الـ vtable — فتحة +0x10 هي Process(pInfo) المسجلة كخطأ).
+
+### الاختبار (syndicate_d59_test.cpp)
+- القسمان: D59-1 الـ dispatch (0/1/خارج النطاق + السلسلة الحرفية)، ‏D59-2 التدفق الكامل (خ_args الفحص، كتابات الرد 0x837/0x1c/النتيجة، نداء الذيل عبر vtable وهمي، حالة الفشل uOk=0).
+- الرجريجن: 63/63 × 6، ‏ASan نظيف.
+
+### المتبقي المسجل (seams للوحدات القادمة)
+- 1417b7010 (تدفق الإعلان: 3 كائنات CMsg مكدسية 1072 بايت + STR_SYN_RECRUIT_ADVERTISING) — 0x1417b7010.
+- 1417ac620 (إزالة سجل المستخدم: خريطة +7 دوال تابعة).
+- 1417afb20 (فحص تغيير الاسم: العضوية + 14179c4f0).
+- بقية فئات CMsg الـ 37 (كل العناوين في tools/syndicate_vtables.json).

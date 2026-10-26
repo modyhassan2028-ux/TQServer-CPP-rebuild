@@ -133,3 +133,8 @@
 - **الدولة**: 62/62 × 6 أخضر. D58 مقفول بكل أجزائه (بما كان TBD: SendLeaveAward).
 - **الأولوية التالية (D59+)**: أجسام Process لفئات CMsg (39 عنوان معلوم من الجرد؛ ابدأ CMsgLog 0x1417d97c0 ثم ChgDomName 0x1417daee0 ثم LeagueOpt 0x1417d68d0/LeagueRobOpt 0x1417d8920) → إغلاق ModuleCreate (14177ec90) → الفشلان المتبقيان في الفهرس (1417ab8c0/1417ac2d0، كلاهما بجدول CSyndicateLogic) → جدول CSyndicateLogic كوحدات منطق (232 فتحة).
 - **المسار الأطول نفسه**: بقية واجهة المدير (~65 دالة) + 172 نوع cq_action المتبقي + CQCrossServer.
+
+
+## تحديث 2026-10-26 بعد D59
+- 63/63 × 6 أخضر. أول Process handlers مقفولين (CMsgLog + ChgDomName). نمط العمل للفئات الـ 37 الباقية راسخ: dispatcher حرفي + العمق كـ seams ثم إغلاق العمق وحدة وحدة.
+- الترتيب: بقية Process (LeagueOpt 0x1417d68d0 → LeagueRobOpt 0x1417d8920 → الباقي من الجرد) مع إغلاق 1417b7010/1417ac620/1417afb20 بين الوحدات.

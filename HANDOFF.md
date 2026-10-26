@@ -71,3 +71,13 @@
 2. بقية الفئات الـ 37 (كل Process فريد في الجرد).
 3. الفشلان المتبقيان في الفهرس (1417ab8c0 502 بايت، 1417ac2d0 346 بايت — كلاهما داخل جدول CSyndicateLogic) — فكّ يدوي بنفس أسلوب SendLeaveAward.
 4. واجهة المدير المتبقية + إغلاق ModuleCreate (14177ec90).
+
+
+---
+
+## تحديث D59 (2026-10-26)
+
+- **D59 مقفول**: أول جسدين Process حرفيين — CMsgLog (0x1417d97c0) + CMsgSynChgDomName (0x1417daee0) + نداء الذيل 1417ac7d0 منقول من التفكيك مباشرة (`rcx=[p+8]; rax=[rcx]; jmp [rax+8]` — الـ decompiler أظهره "jumptable" وهمياً؛ الحرفية: deref اثنتان فقط).
+- رجريجن **63/63 × 6** + ‏ASan نظيف. الملفات: `Exe/Dll/Syndicate/Port/SyndicateMsgProcess.{h,cpp}`، اختبار قسمين.
+- **دروس مهمة**: (1) ثق بالتفكيك على الـ decompiler في النndlات القصيرة — 1417ac7d0 كان 3 تعليمات فقط. (2) ثقوب vtable الأساسية 14177e2d0/2e0/2f0 هي Process-error loggers حرفية ("tq::CMsg::Process(...) error") وليست Init. (3) tq::CMsg::Init الحقيقي @ 1417e8016 = ‏thunk للـ PB runtime (نفس عائلة 1417e8050 الـ TBD).
+- **الترتيب التالي (D60+)**: بقية أجسام Process من الجرد — LeagueOpt (0x1417d68d0) ثم LeagueRobOpt (0x1417d8920)، أو إغلاق العمق أولاً: 1417b7010 (تدفق سجل الإعلان) / 1417ac620 (إزالة السجل) / 1417afb20 (فحص الاسم) — كلها seams مفتوحة موثقة في PORTING_LOG.
