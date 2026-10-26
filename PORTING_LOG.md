@@ -3231,3 +3231,85 @@ E2E كاملاً (النوع 1 صفحة 1 مع الطلب self)
   الثلاثة الكبيرة (141780cb0 2058B / 141783470
   1229B / 141784cd0 2582B)، بقية واجهة المدير،
   هاندلرز الوحدة/طبقة CMsg الباقية
+
+## D53/T16 — تدفق SetArenicMeed (141780cb0) + عائلة Apply (مقفولة)
+
+**التاريخ:** 26 أكتوبر 2026
+
+### الإصلاح اللاحق لـ D52 (commit 9a8c6b5)
+فاكتَر D52 أضاف باراميتر المقارِن لعائلة الترتيب (حسب ABI الأصل) لكن
+`tests/syndicate_d50_test.cpp` المرفوع لم يتحدث — لا يُبنى على afde581.
+أُصلح نداءان (`MeedMedian3(..., MeedSortCmp)` / `MeedSortDriver(..., 0,
+MeedSortCmp)`) والرجريشن 41/41 تتكرر الآن حرفياً على HEAD.
+
+### الوحدة الجديدة: `Exe/Dll/Syndicate/Port/SyndicateMeedApply.{h,cpp}`
+- **FUN_141780cb0 → `MeedSetArenic`**: التدفق الكامل — بوابة النوع
+  (log "CSynArenicMeed::SetArenicMeed, Type[%d] is not found!")،
+  بوابة vt+0x78، مسار النوع-3 (vt+0x388 مع الـ out + ERROR1/ERROR2
+  المباشرة عبر theInstance + vt+0x390 + vt+0x18 الإرسال)، بوابة
+  المال، vt+0x268/0x278 (الرصيد)، MeedPoolGet + MeedPoolGetSynMeed،
+  حدود 14177caa0، المساران (fresh مع تخفيض المال vt+0x1f0/vt+0x1f8
+  بقصر الدائرة || الحرفي — vt+0x1f8 يُتخطى عند نجاح 1f0،
+  وexisting مع بافر CMsg)، عرض vt+0x350 عند emoney>0،
+  db90 مع flag الرفع، الإعلان vt+0x290 + fbc0(6) + vt+200-عشري
+  (0xc8!)، gmlog عبر fad0 مع fmt 14182f690/14182f5d0،
+  fbc0(1)/(2) + الإرسال vt+0x40، والذيل المشترك:
+  CMsgMemAwardRankCtor + ترميز 1417da0d0 + vt+8 + (نوع-3)
+  vt+0x398 + Dtor، والعائد CONCAT71(uVar10>>8, ca8).
+- **FUN_14177db90 → `MeedSetMgrSetSynMeed`**: البوابات، فرز علم+0x90
+  الكسول (للنوعين 1/3)، فحص عنصر القمة (اللف الحرفي: فراغ أو
+  القمة هي المستخدم → *out=1؛ وإلا مقارنة النقاط
+  `f3 + f4*50000 < (emoney+sumEmoney)*50000 + money+sumMoney` →
+  *out=1 و goto)، إعادة المسح للعثور على المستخدم، ثم Insert
+  (غير موجود) أو AddMore (موجود) مع مسار العنصر الفارغ (log).
+- **FUN_14177d5f0 → `MeedSetMgrInsert`**: سلسلة cq_setmeed
+  (InstanceGet → vt+0x20 → حقول 1-4 بـ b0/b8) + دفع 141732200 +
+  exec vt+0x50 + علم +0x90 = 0 (لا release عند فشل exec — حرفي).
+- **FUN_14177cbd0 → `MeedSetMgrAddMore`**: الجمع عبر vt+0x10(3/4)+
+  vt+0x48، حدود DAT_141886d48، الكتابة vt+0xb0، علم +0x90 = 0،
+  والحفظ vt+0x38(عضو, 0).
+- **FUN_14177cb90 → `MeedSortFlagGet`**: +0x90+(نوع-1)، والمسار
+  الميت +0xc8 (=200 عشري — الفخ المتكرر).
+- **FUN_14177caa0 → `MeedApplyBounds`**: حدود g_nMeedMoneyCap
+  (DAT_141886d48 — قابل للضبط من الconfig).
+- **FUN_14177ff70 → `MeedEmonyType`**: الثوابت 0x15-0x18/0x1a-0x1d/
+  0x25-0x28/0x29/0x2a + مسار اللوج (نوع-2 + mt-4).
+- **FUN_14177fbc0 → `MeedPromptGet`**: مفاتيح STR_* الـ 17 مع بوابة
+  vt+0x360 للنوع-1 فقط (حالات 1/2).
+- **FUN_14177fad0 → `MeedGmLogName`**: التسعة الحرفية
+  ("gmlog/money_vlmarenic" ... "gmlog/cross_vlm_meed_overflow")
+  + "gmlog/meed_error".
+- **FUN_1417da0d0 → `CMsgAwardRankEncode`**: ترويسة 0x20/0x427
+  والحقول عند +2/+4/+6/+0xe/+0x12/+0x16.
+- **FUN_141732200 → `MeedVecPush`**: التخزين المباشر عند وجود
+  سعة (حساب السعة من vec+0x28) وسِم النمو `g_fnMeedVecInsert`
+  لـ 1417311d0.
+
+### السِمات TBD (Ghidra أسقط الـ varargs — لا يوجد
+Syndicate.dll أصلي في هذه البيئة لتمرير objdump)
+- `g_fnMeedSnprintf(dst, 0x400, fmt)`: نداءات _snprintf الأربعة.
+- `g_fnMeedLogSave(file, fmt, uId)`: tq::MyLogSave (uId = uVar3
+  المحمّل حرفياً قبل كل نداء).
+
+### الأخطاء الحرفية المكتشفة في المراجعة (قبل الاختبار)
+1. db90: لف عنصر القمة — الفراغ يجب أن يرفع *out أيضاً (fallthrough
+   إلى 79345 الحرفي).
+2. fad0: حرفيات النوع-3 كانت مخمنة — صُححت للتسعة الحرفية + مسار
+   "gmlog/meed_error".
+3. MeedVecPush: قراءة السعة كانت `*(char**)pVec + 5` (خطأ تجميع
+   إزاحة 5 بايت على الـ proxy!) — الصحيح vec+0x28.
+4. cb0: مدخلات التدخل {id, money, emoney} في المسارين — متغيرات
+   منفصلة قد لا تتراصف؛ صُححت لمصفوفات [3] مضمونة التراصف
+   (الموضع الأصلي في المكدس حرفي متجاور).
+
+### الاختبار `tests/syndicate_d53_test.cpp` (12 قسماً، 804 أسطر)
+الحدود، الأعلام (+0x90 والمسار الميت +0xc8)، الثوابت الـ 15،
+حرفيات gmlog التسعة، الترميز، المفاتيح مع بوابة 0x360، الدفع
+(بسعة وبالنمو السِمي)، AddMore (الجمع/الحدود/العلم/الحفظ)،
+Insert (السلسلة/الدفع/exec والعلم)، SetSynMeed fresh، وE2E
+كاملة للمسارين (fresh مع Insert، وexisting مع AddMore + النوع-3
+الفرعي + الرفع/الإعلان/اللمس/المفاتيح المجمّدة).
+
+### الرجريشن (O0 المعتمد)
+- **syndicate d26-d53: 31/31 + peerage/analyst 11/11
+  = 42/42 PASS × 6**
