@@ -3839,3 +3839,29 @@ null name → 0; ‏MgrLeagueFind=0 → 0; ‏vt+0x1f8(actor) ≠ cb0(entity,2) 
 حقل السعر، البوابات العشر (بما فيها price/emoney والشحن)، تدفق النجاح بكل الوسائط المسجلة (الشحن الستّي + سطر gmlog الخمسي)، وE2E عبر حالة 0x33 من موزّع D61.
 
 **الرجريجن: 68/68 × 6، ASan نظيف.** commit ‏D64.
+
+---
+
+## وحدة D65 (2026-10-26) — توزيع رواتب النقابة FUN_1417b4310 (جسم seam g_fn1417b4310 من حالة 0x27 بموزّع D61)
+
+الملفات: `Exe/Dll/Syndicate/Port/SyndicateLeagueSalary.{h,cpp}` (الرأس فيه ملاحظات الاستكشاف الكاملة) + `tests/syndicate_d65_test.cpp` (7 أقسام + E2E).
+
+### البنية
+المعالج: `(logic, actor, type)`. البوابات بالترتيب الحرفي: بوابة 0x278(mgr)≠0 → سقوط؛ synId=vt+0x510(logic, actor)=0 → سقوط؛ MgrLeagueFind(host@+0x50, synId)=0 → سقوط؛ **قراءة الرتبة vt+0x518(mgr, actor) تحدث قبل موزّع الأنواع** (كل أنواع 1-4 بتمر عليها)؛ rec موجود → MemberRecPostGet=1 وإلا LeagueMemberPostGet(entity, actor)=1 وإلا سقوط؛ esi حسب النوع: type1 = ‏الحرة (host+0x300)، type2 = المساهمة (e990: host+0x304)، type3 = **الحرة** (host+0x300 — غريبة لكن حرفية)، type4 → سقوط فوري.
+
+### الأنواع (ثلاثة فقط)
+- **type2 (مساهمة emoney):** amount≤0 → DBERROR 0x249f0 "contribution salary amount"؛ vt+0x290(mgr, actor)=الرصيد؛ cost=host+0x2f8؛ cost>رصيد → سقوط؛ cost≤0 → سقوط؛ نجاح: vt+0x298(mgr, actor, **-cost (int64)**, byte 1) ثم المقطع المشترك.
+- **type3 (emoney):** vt+0x248(mgr, actor)=false → سقوط؛ amount(host+0x308)≤0 → DBERROR 0x249f1 "emoney salary amount"؛ price=host+0x2fc=0 → سقوط؛ price>vt+0x238(actor) → STR_TRAINING_GONGFU_EMONEY_NOT_ENOUGH عبر vt+0x28(str, **0xffff00**) → سقوط؛ نجاح: vt+0x140 ‏**بستة وسائط** (mgr, actor, 0, price, **0x49**, byte 1) + سطر gmlog "gmlog/emoney_buy" بصيغة ‏"%lu\t%s\t%lu\t350\t4318\t%u\t%u\t1\t" ‏(350=vt+0x200، 4318=نقطة البيع، p1/p2=price/price) ثم المقطع المشترك.
+- **المقطع المشترك:** esi≤0 → DBERROR 0x249ff "free salary amount"؛ count=SalaryCountGet(host, rank)=0 → سقوط؛ 0x508 = single-shot: ‏vt+0x508(mgr, actor, count, amount, byte 1, word 1)=true → vt+0x500(mgr, actor, count, **1**, amount, byte 1) + uFlag=1؛ وإلا حلقة count مرات: بريد عبر vt+0x118(mgr, mailstruct) وuFlag=0.
+
+### الرد والإيميل
+الرد: CtorCMsgLeagueOpt ‏(0x440 بايت) → ReplyInit(PB: 0=0x13, 2=0xa3e, 4=الحالة, 6=0, 0xa=0, 0xe=uFlag) → vt+0x8(mgr, actor, msg) → dtor (بفحص vft وpacker dtor عند +0x410). بنية الإيميل عند vt+0x118: actor@+0, sender@+4 ‏(strncpy 0x10 من STR_SYSTEM_NAME), title@+0x24 ‏(_snprintf 0x20 من STR_LEAGUE_TITLE_ORDER_SALARY + NUL يدوي@+0x43), content@+0x44 ‏(**_snprintf 0xff ‏والسلسلة المسحوبة هي الـ format نفسه** بثلاثة varargs: سنة/وسيط/باقٍ — القيم من TimeGet(3): days=sec/10000 ‏(الماجيك 0xd1b71759 ‏shr 13 قسمة على **10000 مش 86400**)، year=days+0x76c، mid=(sec-days*10000)/100 ‏(الماجيك 0x51eb851f)، rem=sec%100؛ + NUL يدوي@+0x142), amount@+0x14c, ثابتة 6@+0x154.
+
+### المشيات الحرفية (على ستايل STL)
+خريطة الرواتب (head@host+0x568، cont@+0x538): مفتاح **u16** (الرتبة)، القيمة@+0x20 → resolve(3)=عددها، resolve(4)=قيمتها. خريطة الأعضاء (head@entity+0x88، cont@entity+0x58): مفتاح u32 (actor)، القيمة@+0x20 → resolve(3) → sub: vt+0x20=GetPost, vt+0x188… لا: vt+0x20 Get وvt+0xd8 Set + flush على مزوّد الحاوية vt+0x38. ال rec: resolve(0x1b) → sub: vt+0x48=Get, vt+0xb0=Set ‏(u32) + نفس الـ flush.
+
+### حرفيات وملاحظات
+- دروس D65: (1) فتحة 0x518/8=**163** (حسبت 165 بالغلط أول مرة). (2) قراءة الرتبة قبل الموزّع فكل الأنواع تمر عليها. (3) حلقة إيميل type3 عددها الحرة (esi الحرة) بينما type2 عددها المساهمة. (4) معامِل القسمة 10000 للماجيك d1b71759 — الأرقام الحرفية لـ sec=1234567890 هي ‏125356/78/90. (5) السلسلة المسحوبة من STR هي الـ format الحقيقي لـ _snprintf ‏(متلتف بـ %s تتلف الحرفية). (6) ASan نظيف؛ UBSan بيعترض على الـ stores غير المحاذاة في PB ‏(+6/+0xa/+0xe من PB عند msg+8) — **حرفية من البيناري ومقصودة**، البروتوكول القائم ASan-only.
+- الاختبار: 7 أقسام — الحقول، المشيات، البوابات (بترتيبها المصحح)، الأنواع الثلاثة بكل رسائلها، البريد بمعادلة التاريخ الحرفية + uFlag، مسار ال rec مقابل be40، وE2E عبر حالة 0x27 من موزّع D61 (مع wire ‏g_fnGetGameMgr من SyndicateCrossMerit.h).
+
+**الرجريجن: 69/69 × 6، ASan نظيف.** ‏commit ‏D65.
