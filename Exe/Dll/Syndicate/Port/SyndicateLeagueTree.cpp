@@ -226,7 +226,12 @@ void* LeagueInsert(void* pMap, void* pOutIter,
                     *(char**)(*(char**)(lVar4 + 0x10) + 8)
                         = plVar7;
                 }
-                *(char**)(lVar4 + 8) = *(char**)plVar7;
+                // ORIGINAL: *(longlong *)(lVar4 + 8) =
+                // plVar7[1] — the grand's PARENT slot
+                // (+8 on the raw grand pointer), not the
+                // grand's left (was *plVar7: the lifted
+                // parent inherited its own child)
+                *(char**)(lVar4 + 8) = *(char**)(plVar7 + 8);
                 if (plVar7 == *(char**)(head + 8)) {
                     *(char**)(head + 8) = lVar4;
                 } else {
@@ -268,9 +273,16 @@ void* LeagueInsert(void* pMap, void* pOutIter,
                         *(char**)(head + 8) = lVar4;
                     } else {
                         plVar6 = *(char**)plVar7;
-                        if (plVar2 == *(char**)plVar6) {
-                            *(char**)(plVar6 + 0x10)
-                                = lVar4;
+                        // ORIGINAL: if (plVar2 == plVar6[2])
+                        // { plVar6[2] = lVar4; } else
+                        // { *plVar6 = lVar4; } — the
+                        // grand's RIGHT slot (plVar6[2]),
+                        // not the left: the parent IS the
+                        // grand's right child in this
+                        // branch (was mirrored: 312 landed
+                        // at 70->left and cycled)
+                        if (plVar2 == *(char**)(plVar6 + 0x10)) {
+                            *(char**)(plVar6 + 0x10) = lVar4;
                         } else {
                             *(char**)plVar6 = lVar4;
                         }

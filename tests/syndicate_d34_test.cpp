@@ -101,8 +101,10 @@ static Reserver s_reserver;
 
 // the D32 tree seams (the same mock kit as syndicate_d32_test)
 namespace syndicate {
-void (*g_fnMeritInvalid)() = nullptr;
-void (*g_fnMeritOpDelete)(void*) = nullptr;
+// the merit seams come from SyndicateCrossMerit.o
+// (the defaults) — these were bare re-definitions that
+// collided at link time once SyndicateMapTree needed
+// the real definitions
 }
 
 int main() {

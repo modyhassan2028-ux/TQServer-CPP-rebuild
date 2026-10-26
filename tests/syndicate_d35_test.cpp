@@ -28,8 +28,10 @@ static void TestLogWrite(void*, uint32_t, int) {}
 static uint8_t s_vftLogic[8];
 static uint8_t s_vftProvider[8];
 namespace syndicate {
-void (*g_fnMeritInvalid)() = nullptr;
-void (*g_fnMeritOpDelete)(void*) = nullptr;
+extern void (*g_fnMeritInvalid)();
+extern void (*g_fnMeritOpDelete)(void*);
+using syndicate::g_fnMeritInvalid;
+using syndicate::g_fnMeritOpDelete;
 }
 
 // ---------------- the vector container ----------------

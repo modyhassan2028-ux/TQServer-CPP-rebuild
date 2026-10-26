@@ -111,7 +111,16 @@ static void Bind() {
     g_fnSvcSendMsg = [](void* k, uint32_t id,
                         void* msg) {
         (void)k; g_vSentId.push_back(id);
-        g_vSentMsg.push_back(msg); };
+        // the ORIGINAL builds the top-list message in a
+        // STACK CMsg local (local_468[1072] in the
+        // decompile); the real kernel's send seam
+        // consumes it inside the call, and the frame
+        // dies on return. Recording the bare pointer
+        // dangles (heisenbug depending on later stack
+        // use) — deep-copy the 0x430 buffer verbatim.
+        char* pCopy = (char*)malloc(0x430);
+        memcpy(pCopy, msg, 0x430);
+        g_vSentMsg.push_back(pCopy); };
     g_fnSvcIsVisible = [](void* k, uint32_t id) {
         (void)k; g_vVisible.push_back(id);
         return (char)1; };

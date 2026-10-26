@@ -23,8 +23,10 @@ static int s_nLogs = 0;
 static void* TestLogFactory() { s_nLogs++; return (void*)0x1; }
 static void TestLogWrite(void*, uint32_t, int) {}
 namespace syndicate {
-void (*g_fnMeritInvalid)() = nullptr;
-void (*g_fnMeritOpDelete)(void*) = nullptr;
+extern void (*g_fnMeritInvalid)();
+extern void (*g_fnMeritOpDelete)(void*);
+using syndicate::g_fnMeritInvalid;
+using syndicate::g_fnMeritOpDelete;
 }
 
 // the D32 insert helper (same as the d35 test)
