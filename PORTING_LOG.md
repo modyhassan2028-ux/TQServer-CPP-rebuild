@@ -3510,3 +3510,48 @@ vt+0xb8/vt+0x40 + توازن op-new/delete كامل. 10 E2E compete-3 عبر
 ### الرجريجن (O0 المعتمد)
 - **الكامل: 59/59 PASS × 6** (d26..d55b).
 - tools/run_dwave_regression.sh حُدّث (59)؛ d55b يربط كائنات port.
+
+---
+
+## D56: منح الميد الأونلاين (1417814c0)
+
+**الحالة: مكتمل — 60/60 × 6. المصادر: SyndicateMeedAwardOnline.{h,cpp} + tests/syndicate_d56_test.cpp**
+
+### الدالة المنقولة verbatim
+| العنوان | العنوان الأصلي | الوظيفة |
+|---|---|---|
+| MeedAwardOnline | 1417814c0 | الجسم الحقيقي لـ seam ‏g_fnMeedAwardOnline (مسار الأونلاين في توجيه D55b ‏21d0) |
+
+مسارها: نوع غير صالح (1..3 وإلا InlineLogERROR "CSynArenicMeed::AwardUserOnline, Type[%d] is not found!")
+→ مسار الموني: القص إلى (vt+0x3e0 − vt+0x230) عند تجاوز السقف، ثم vt+0x138(user, id, amt, 1)،
+وسيَد الملاحظة "gmlog/syndenote" فقط عند 9999 < nMoney (vt+0x1f8 اسم + vt+0x1d8 بعده)
+→ مسار الإيموني: القص إلى DAT_141886d68 (سقف INT_MAX — المُهيئ 141821a10: std::numeric_limits<int>::max())
+ناقص vt+0x238، ثم MeedEmonyType(., type, 1) + vt+0x148(user, id, 0, amt) وإلا InlineLogERROR
+"GainUserEMoney() error!"، وملاحظة "emoney %u" دوماً
+→ الختام: prompt ‏fbc0(., type, 3) عبر _snprintf ‏0x400 + إرسال vt+0x10(user, id, 2000, buf)
+ثم gmlog فاد0(نوع، 2) "idUser[%u], nPoint[%d], ..." وعند عدم التطابق
+(المُنح ≠ المطلوب) gmlog ‏3 "nOldEMoney[%d], ..., nGainMoney[%I64d]".
+الإرجاع المبكر: لا موني مطلوب ولا إيموني → لا prompt ولا إرسال.
+
+### الثابت الجديد
+g_nMeedEmoneyCap = DAT_141886d68 (INT_MAX من المُهيئ 141821a10).
+
+### إصلاحات النقل
+1. إعادة حساب القص كانت خارج الشرط (كانت تُطبق دائماً وتقص كل منحة) —
+   النص الأصلي يعيد القراءة والطرح داخل `if (cap - cur < n)` فقط.
+2. توقيع MeedGmLogName في منفذ D53 ‏(type, idx) — الـ this الأمامي غير مستخدم
+   في جسم 14177fad0 (احتفظنا بتوقيع المنفذ).
+
+### مصائد اختبار (ليست من الكود)
+- ret148 يُمسح بالـ memset في Reset → أعيد ضبطه.
+- بوابة الأونلاين vt+0x268 يحتاجها الـ E2E (توجيه 21d0).
+- StrOf (بيت fbc0) يتطلب seams النصوص g_fnMeedStrInst/g_fnMeedStrGet.
+
+### الاختبار: d56 (9 أقسام)
+النوع السيئ؛ مسار الموني دون ملاحظة؛ القص + ملاحظة 9999 + gmlog عدم
+التطابق؛ مسار الإيموني؛ سقف INT_MAX؛ فشل GainUserEMoney (الإرسال يستمر)؛
+الإرجاع المبكر؛ القص إلى صفر مع استمرار الـ prompt؛ E2E عبر توجيه D55b
+لأونلاين حقيقي.
+
+### الرجريجن (O0 المعتمد)
+- **الكامل: 60/60 PASS × 6** (d26..d56).
