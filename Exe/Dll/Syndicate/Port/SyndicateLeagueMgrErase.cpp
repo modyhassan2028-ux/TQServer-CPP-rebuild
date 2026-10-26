@@ -7,6 +7,8 @@
 #include "SyndicateLeagueMgrLife.h"   // the clears 4b0/4f8
 #include "SyndicateLeagueMgrErOne.h" // the D41b real
                                      //  erase-ones
+#include "SyndicateLeagueMgrNested.h" // the D41c real
+                                     //  nested ranges
 
 namespace syndicate {
 
@@ -20,8 +22,9 @@ FnMgrEraseOne g_fnMgrErOne318 = &MgrErOne318;
 FnMgrEraseOne g_fnMgrErOne2b0 = &MgrErOne2b0;
 FnMgrEraseOne g_fnMgrErOne228 = &MgrErOne228;
 FnMgrEraseOne g_fnMgrErOne108 = &MgrErOne108;
-FnNestedEr g_fnNestedErA = nullptr;   // 14172a410
-FnNestedEr g_fnNestedErB = nullptr;   // 141762db0
+// the D41c nested ranges now REAL (the defaults)
+FnNestedEr g_fnNestedErA = &NestedErRangeA;   // 14172a410
+FnNestedEr g_fnNestedErB = &NestedErRangeB;   // 141762db0
 
 // ============ the recursive subtree frees ============
 // the shared shape (verbatim per family): walk while
