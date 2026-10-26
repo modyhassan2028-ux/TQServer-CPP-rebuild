@@ -1,5 +1,5 @@
-# سجل الإنجاز والمتبقي — محدث حتى D76 (27 أكتوبر)
-> الرجريشن الأخضر: 80/80 ×6 — ASan/UBSan نظيف.
+# سجل الإنجاز والمتبقي — محدث حتى D77 (27 أكتوبر)
+> الرجريشن الأخضر: 81/81 ×6 — ASan/UBSan نظيف.
 
 ## المنجز (كل شيء أدناه مرفوع على GitHub، آخر commit: a2fb5d5)
 - **D26→D73**: نواة النقابة + عائلات BeRob/RobOpt/LeagueOpt/Token
@@ -9,9 +9,14 @@
 - **D74**: AddTodayPlunderWarInfo كاملة — 34 تأكيدًا (78/78).
 - **D75**: SendPlunderWarListToClient (FUN_141766500) كاملة —
   بورت + 26 تأكيدًا + ASan نظيف (79/79).
-- **D76 (اليوم)**: ClientQueryPlunderWarInfo (FUN_141766e90)
-  كاملة — أول Pagination في المشروع، بورت + 35 تأكيدًا +
-  ASan صفر تسريبات، 80/80 ×6 (commit f12c8b9).
+- **D76**: ClientQueryPlunderWarInfo (FUN_141766e90)
+  كاملة — أول Pagination في المشروع، 35 تأكيدًا (80/80).
+- **D77 (اليوم)**: SendUserPlunderWarStatus (FUN_14176ca70،
+  812 سطر) كاملة — كانت seam فقط من D73؛ خمس مراحل:
+  حضور RobOpt بتوجيه مزدوج + بوابة الحرب + أربع مراحل
+  منسوخة (0x370/0x3b0/0x430/0x470) بعائلة رسالة جديدة
+  7-seams ونمط الدفعات مع إعادة الإنشاء بنفس الوسائط.
+  بورت + 33 تأكيدًا + ASan صفر تسريبات، 81/81 ×6.
 - **Docs**: INVENTORY_REPORT، ROADMAP الرسمي (المراحل الأربع)،
   خطة D74، **خطة D75 (جديدة — التحليل الكامل لـ
   SendPlunderWarListToClient FUN_141766500 + هدف D76
@@ -31,11 +36,6 @@
   kit (تُستكمل مع أول استخدام مفكك حقيقي).
 
 ## قائمة العمل التالية في سلسلة حرب النهب (جبهة العميل)
-1. **D77**: SendUserPlunderWarStatus (FUN_14176ca70، 812
-   سطر) — محللة بالكامل في
-   Docs/D77_SEND_USER_PLUNDER_STATUS_PLAN.md: خمس مراحل
-   (حضور RobOpt + أربع مراحل منسوخة بعائلة رسالة جديدة
-   7-seams ونمط دفعات مع إعادة إنشاء). جاهزة للبورت.
-2. **D78**: CSyndicateLogic::SignUpPlunderWarFromClient
+1. **D78**: CSyndicateLogic::SignUpPlunderWarFromClient
    (FUN_1417c2470، 600 سطر).
-3. ثم بقية دوال 14176xxxx ثم الـ ~52 كلاس متبقٍ.
+2. ثم بقية دوال 14176xxxx ثم الـ ~52 كلاس متبقٍ.
