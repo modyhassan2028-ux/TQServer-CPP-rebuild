@@ -409,10 +409,11 @@ void* ModuleCreate(uint64_t uA, uint32_t uId) {
     }
     bool bVar1 = ModuleInit(plVar3);
     if (!bVar1) {
-        // (**(code **)*plVar3)(plVar3) — vt[0]
+        // (**(code **)(*plVar3 + 8))(plVar3) — the
+        // SCALAR DELETING dtor at vt[1] (14177ec00)
         void* pVt = *(void**)plVar3;
         auto fnDtor = (void (*)(void*))
-            *(void**)pVt;
+            *(void**)((char*)pVt + 8);
         fnDtor(plVar3);
         plVar3 = nullptr;
     }

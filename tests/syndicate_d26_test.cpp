@@ -149,7 +149,7 @@ static void Bind() {
     }
 }
 
-static void* s_vtDtor[1] = { nullptr };
+static void* s_vtDtor[2] = { nullptr, nullptr };
 
 int main() {
     Bind();
@@ -400,21 +400,22 @@ int main() {
         assert(ModuleCreate(1, 1) == nullptr);
         assert(g_vLog.size() == 1);
         g_fnOpNew = fnSave;
-        // KSet down -> Init false -> vt[0] destroy
+        // KSet down -> Init false -> vt[1] (the
+        // scalar DELETING dtor) destroy
         Reset();
         auto fnKSet = g_fnKSet;
         g_fnKSet = [](void*, int, void*) {
             return (char)0; };
-        // the fresh module's vt[0] must be callable
+        // the fresh module's vt[1] must be callable
         auto fnNew = g_fnOpNew;
-        s_vtDtor[0] =
+        s_vtDtor[1] =
             (void*)ScalarDeletingDtorModule;
         g_fnOpNew = [](size_t n) -> void* {
             return malloc(n); };
-        // the destroy path calls vt[0] on the fresh
+        // the destroy path calls vt[1] on the fresh
         // module — the ctor seam for msg 0 sits at
         // module+0x10, so bind it to install the
-        // module vtable (slot 0 = the scalar dtor)
+        // module vtable (slot 1 = the scalar dtor)
         g_aMsgCtor[0] = [](void* pMsg) {
             char* pMod = (char*)pMsg - 0x10;
             *(void**)pMod = s_vtDtor; };
