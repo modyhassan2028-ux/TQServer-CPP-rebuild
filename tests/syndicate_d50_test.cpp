@@ -139,7 +139,7 @@ int main() {
     static Member m2 = { 2, 5, 1 };
     static Member m3 = { 3, 3, 3 };
     void* p1 = &m1; void* p2 = &m2; void* p3 = &m3;
-    MeedMedian3(&p1, &p2, &p3);
+    MeedMedian3(&p1, &p2, &p3, MeedSortCmp);
     // p2 = the median (type 3)
     assert(((Member*)p2)->type == 3
         && "the median lands at p2");
@@ -179,7 +179,7 @@ int main() {
         std::vector<Member*> before = ptrs;
         MeedSortDriver((void**)ptrs.data(),
                        (void**)(ptrs.data() + n),
-                       0);
+                       0, MeedSortCmp);
         assert(CheckSorted(ptrs));
         assert(SameMultiset(before, ptrs));
         printf("D50-4 the heap fallback ok\n");
