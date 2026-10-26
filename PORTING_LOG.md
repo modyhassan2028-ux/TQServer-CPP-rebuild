@@ -3782,3 +3782,37 @@ D60-1..8 لكل دالة (إصابات/أخطاء/فحوص invalid/فحوص ال
 skip/القائمة المعكوسة/حالات 680/سقف 10/حالات 6e0+730/حد النوع>6.
 
 **الرجريجن: 66/66 × 6، ASan نظيف.** ‏commit ‏D62.
+
+## D63 — تدفق تطبيق اسم النقابة (1417b0a40، 26-10-2026)
+
+### الوحدة
+`Exe/Dll/Syndicate/Port/SyndicateLeagueNameApply.{h,cpp}` — الجسم الحقيقي للـ seam ‏g_fn1417b0a40 ‏(حالة 6 ‏من موزّع D61) + 6 مساعدين حرفيين:
+- **141743cb0** ‏LeagueGetRecByIdx(entity, idx) — resolve(idx) → rec-vt+0x48; مزوّد فارغ → log سطر 322 ‏(0x142, ""/"", league.cpp) → 0
+- **141743e00** ‏LeagueGetRec4Str(entity) — مزوّد فارغ → 0 صامت (بلا log); resolve(4) → vt+0x78
+- **141744030** ‏LeagueSetFlagFlush(entity, val, flush) — resolve(8) → vt+0xd8(val); flush → provider vt+0x38(0); مزوّد فارغ → log سطر 431 ‏(0x1af, CHECK/m_pRec)
+- **1417868c0** ‏RecFlagIs1000(rec) — obj=*rec; null → log سطر 1128 ‏(0x468, IF_OK/m_pRec, synattr.cpp) → false; resolve(2) → vt+0x48 == 1000
+- **14175eb70** ‏ForbidNameFind(host, name) — مشيّة الموشي المفحوص على خريطة العصبات (نفس خريطة +0x38: anchor@host+0x38, head@host+0x68=pplMap[6], البداية=*(head) الأيسر) — القيمة (الكيان) عند +0x20، isnil@+0x29، strncmp ‏بحد 0x10 على LeagueGetRec1Str(كيان) — **فحص "الاسم مأخوذ" الشامل**
+- **1417215d0** ‏CStrFormat2(cstr, fmt, a, b) — منسّق tq::CString: صفر مخزن 0x1000، vsprintf_s ‏حد 0xfff، assign ‏في std::string@cstr+8
+
+### ما حسمه التفكيك (capstone، على الديكمبايلر)
+**الاكتشاف الحرج**: الديكمبايلر أظهر نداءي 141743cb0 بوسيط واحد بلا فهرس. التفكيك الخام:
+```
+mov edx, 8 ; call 0x141743cb0   ; قبلها rax=الكيان
+...
+mov edx, 2 ; call 0x141743cb0
+```
+وذيل 141743cb0 نفسها: `mov rcx,[rcx+8]; call [rax+0x10]; jmp [[rax]+0x48]` — أي أن edx ‏**يعبر كما هو** إلى فتحة resolve ‏(+0x10) في الـ provider. الدالة ثنائية الوسائط: الأول resolve(8) ‏والثاني resolve(2). نفس النمط ظاهر صراحة في 141743e00 ‏(edx=4) و141744030 ‏(edx=8) و1417868c0 ‏(edx=2).
+
+### التدفق (الأبواب بالترتيب الحرفي)
+null name → 0; MgrLeagueFind(logic+0x50, synId)=0 → 0; LeagueGetRecByIdx(entity,8)=0 → رجوعها; vt+0x1f8(actor) ≠ LeagueGetRecByIdx(entity,2) → رجوع & ~0xff; LogRecMapFind(logic+0x18, actor)=0 → 0; !RecFlagIs1000 → 0; strlen ≥ 0x10 → 0; vt+0x2e8(name)=false → & ~0xff; ForbidNameFind يصطدم → STR_FORBIDDEN_LEAGUE_NAME عبر vt+0x18(actor,str) → & ~0xff. النجاح: حزمة STR_BROADCAST_NEW_LEAGUE_NAME ‏(fmt, ‏الاسم القديم من LeagueGetRec1Str, ‏الجديد) عبر CStrFormat2 → vt+0x90(str.c_str(), 2000); LeagueSetRecStr(entity,1,name,1); LeagueSetFlagFlush(entity,0,1); vt+0x428(LeagueGetId(entity)&0xffffffff, name); وعند e3f0(logic+0x50)==synId والاسم الجاري (rec4) فارغ "" ‏→ vt+0x70(7, synId, 0, name). رجوع 1.
+
+### تفاصيل حرفية
+1. السلاسل: "STR_FORBIDDEN_LEAGUE_NAME" ‏(rip+0x8671f)، "STR_BROADCAST_NEW_LEAGUE_NAME" ‏(rip+0x86690)، فورمات اللوج "★%s(%s)★ in %s, %d" ‏(DAT_141824ca8, ‏GBK)، vftable ‏تق CString ‏عند 0x14182cef0 ‏(lea r13).
+2. مقارنة الاسم الفارغ في الذيل: `mov ecx,1; repe cmpsb` — بايت واحد مقابل ""؛ ‏null-rec4 ‏dereference ‏حرفي (الأصل يفعلها كذلك).
+3. SSO: `cmp [rsp+0x60],0x10; cmovae` — جلب c_str ‏من الستاك/الهيب = std::string::c_str().
+4. المخزن المحلي: الاتحاد raw ‏{vftable@0, سلسلة@+8} مع placement-ctor/dtor يدويين (الأصل يفعل ctor/dtor ‏صريحين عند 0x1417b0b77/0x1417b0c70).
+
+### الاختبار (tests/syndicate_d63_test.cpp، 9 أقسام)
+المساعدون الأربعة مع سطور اللوج الحرفية (322/431/1128)، المشيّة (الإصابة/الفراغ/حد 0x10)، المنسّق (الصفر/الوسيطان/القص 0xfff-1)، الأبواب التسعة كاملة، تدفق النجاح مع كل الوسائط المسجلة، وE2E ‏عبر حالة 6 ‏من موزّع D61 ‏(PB+4=0x16 + الديسباتش).
+
+**الرجريجن: 67/67 × 6، ASan نظيف.** commit ‏D63.
