@@ -81,6 +81,20 @@ void MeedPoolGetSynMeed(void* pPool, int* pnA,
                         int nType);
 
 
+
+// ---- D51: the REAL pool ctor family ----------
+// FUN_141729200: the 0x30 vector element ctor
+void* MeedPoolVecElemCtor(void* pElem);
+// FUN_141727880: the element dtor
+void MeedPoolVecElemDtor(void* pElem);
+// FUN_14172cfe0: the anchor clear (end = begin,
+// capacity kept — verbatim, the memmove size
+// is always 0 in the original)
+void MeedPoolVecClearKeepCap(void* pVec);
+// FUN_14177cfa0: CMeedPool ctor (the 3 type
+// vectors + the anchor at +0x98 + the +0xc8 byte)
+void* MeedPoolCtorReal(void* pPool);
+
 // ---- D49: the grade page query (141779f40) -----
 // the sort seam (141779790 family — D50)
 extern void (*g_fnMeedSortRaw)(void** ppBegin,

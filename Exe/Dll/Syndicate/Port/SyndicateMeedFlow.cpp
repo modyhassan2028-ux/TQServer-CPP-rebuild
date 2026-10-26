@@ -15,11 +15,10 @@ namespace syndicate {
 int MeedGetRecord(void*, uint64_t, int32_t*,
                 int, int, int);  // D49 real
 
+void* MeedPoolCtorReal(void*);  // D51 real
+
 // ---- the defaults ----
 static void DefTqCMsgInit(void*) {}
-static void* DefMeedPoolCtor(void* p) {
-    (void)p; return nullptr;
-}
 static char* DefMgrNameOf(void*, uint32_t) {
     return nullptr;
 }
@@ -29,7 +28,10 @@ void* g_pMsgMemAwardRankVft = (void*)0x1234;
 void (*g_fnTqCMsgInit)(void*) = DefTqCMsgInit;
 
 void* g_pMeedPool = nullptr;      // DAT_141886d40
-void* (*g_fnMeedPoolCtor)(void*) = DefMeedPoolCtor;
+// (D51: the REAL 14177cfa0 family — the seam
+//  now defaults to the real ctor)
+void* (*g_fnMeedPoolCtor)(void*) =
+    &MeedPoolCtorReal;
 // (the original flow calls 14177cdc0 directly —
 //  the seam now defaults to the REAL function)
 void (*g_fnMeedListFill)(void*, int*, int*,
@@ -44,6 +46,106 @@ void (*g_fnMeedSend)(void*, void*, void*)
     = DefMeedSend;
 
 void MeedPoolReset() { g_pMeedPool = nullptr; }
+
+
+// ---- D51: the REAL pool ctor family (14177cfa0) ----
+
+// FUN_141729200: the 0x30 vector element ctor
+void* MeedPoolVecElemCtor(void* pElem) {
+    void** puVar2 = (void**)g_fnMeritOpNew(8);
+    void* puVar3 = nullptr;
+    if (puVar2 != nullptr) {
+        *puVar2 = pElem;
+        puVar3 = puVar2;
+    }
+    *(void**)pElem = puVar3;
+    char* pc = (char*)pElem;
+    *(void***)(pc + 0x18) = nullptr;
+    *(void***)(pc + 0x20) = nullptr;
+    *(void***)(pc + 0x28) = nullptr;
+    return pElem;
+}
+
+// FUN_141727880: the element dtor (verbatim —
+// the DIRECT slots at +0x18/+0x20/+0x28, the
+// proxy at +0x0; NO deref of the proxy content)
+void MeedPoolVecElemDtor(void* pElem) {
+    char* pc = (char*)pElem;
+    void** begin = *(void***)(pc + 0x18);
+    if (begin != nullptr) {
+        g_fnMeritOpDelete(begin);
+    }
+    *(void***)(pc + 0x18) = nullptr;
+    *(void***)(pc + 0x20) = nullptr;
+    *(void***)(pc + 0x28) = nullptr;
+    g_fnMeritOpDelete(*(void**)pc);
+}
+
+// FUN_14172cfe0: the anchor clear (verbatim — the
+// memmove size computes to 0 in the original
+// because _Src == the end slot; net: end = begin)
+void MeedPoolVecClearKeepCap(void* pVec) {
+    char* pc = (char*)pVec;   // the vector base
+    void** pBegin = *(void***)(pc + 0x18);
+    void** pEnd = *(void***)(pc + 0x20);
+    void* pSrc = (void*)pEnd;        // [+0x20]
+    if (pSrc < (void*)pBegin) {
+        g_fnMeritInvalid();
+    }
+    void* pDst = (void*)pBegin;
+    if ((void*)pEnd < pDst) {
+        g_fnMeritInvalid();
+    }
+    if ((pDst < (void*)pBegin)
+        || ((void*)pEnd < pDst)) {
+        g_fnMeritInvalid();
+    }
+    int64_t lVar1 = *(int64_t*)pc;   // the proxy
+    if ((pSrc < (void*)pBegin)
+        || ((void*)pEnd < pSrc)) {
+        g_fnMeritInvalid();
+    }
+    if ((lVar1 == 0)
+        || (lVar1 != *(int64_t*)pc)) {
+        g_fnMeritInvalid();
+    }
+    if (pDst != pSrc) {
+        int64_t n =
+            ((int64_t)pEnd - (int64_t)pSrc) >> 3;
+        size_t sz = (size_t)(n * 8);
+        if (0 < n) {
+            memmove(pDst, pSrc, sz);
+        }
+        *(void***)(pc + 0x20) =
+            (void**)((int64_t)sz
+                     + (int64_t)pDst);
+    }
+}
+
+// FUN_14177cfa0: the REAL pool ctor (verbatim)
+void* MeedPoolCtorReal(void* pPool) {
+    char* pc = (char*)pPool;
+    // _eh_vector_constructor_iterator_(
+    //     p, 0x30, 3, ctor, dtor)
+    for (int i = 0; i < 3; ++i) {
+        MeedPoolVecElemCtor(pc + i * 0x30);
+    }
+    // the anchor vector at +0x98
+    void** anchor = (void**)(pc + 0x98);
+    void** puVar2 = (void**)g_fnMeritOpNew(8);
+    void* puVar3 = nullptr;
+    if (puVar2 != nullptr) {
+        *puVar2 = anchor;
+        puVar3 = puVar2;
+    }
+    *anchor = (void**)puVar3;
+    *(void***)(pc + 0xb0) = nullptr;
+    *(void***)(pc + 0xb8) = nullptr;
+    *(void***)(pc + 0xc0) = nullptr;
+    *(uint8_t*)(pc + 200) = 1;   // 200 = 0xc8!
+    MeedPoolVecClearKeepCap(anchor);
+    return pPool;
+}
 
 // ---- FUN_14177d350: the pool lazy get ----
 void* MeedPoolGet() {
