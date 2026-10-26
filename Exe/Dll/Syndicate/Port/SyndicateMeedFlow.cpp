@@ -3,6 +3,7 @@
 // (see SyndicateMeedFlow.h for the address map).
 // ============================================================
 #include "SyndicateMeedFlow.h"
+#include "SyndicateMeedSort.h"
 #include "SyndicateSynMeed.h"     // the meed core
 #include "SyndicateModule.h"       // g_fnGetServiceInst
 #include "SyndicateCrossMerit.h"  // op-new seams
@@ -275,9 +276,10 @@ void MeedPoolGetSynMeed(void* pPool, int* pnA,
 
 
 // ---- D49: the grade page query (141779f40) ----
-static void DefMeedSortRaw(void**, void**, int) {}
+// (D50: the REAL introsort family — the seam
+//  now defaults to SyndicateMeedSort)
 void (*g_fnMeedSortRaw)(void**, void**, int)
-    = DefMeedSortRaw;   // (D50: the real introsort)
+    = &MeedSortRaw;
 
 // the sub reads: vt+0x48 (the value slots) and
 // the vt+0x40 id (via the D46 seams)
