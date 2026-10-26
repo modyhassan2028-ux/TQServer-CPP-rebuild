@@ -48,3 +48,26 @@
 - أحجام الكائنات: آخر خريطة ممتدة 0x40 (proxy/head/size) — المدير **0x580** مش 0x540، الكيان 0x118، الوحدة 0x4608.
 - التقدم للمخلف في المسح: prelude بأسلوب do (ابن اليمين أولاً) وإلا تتكسر حالة "ابن يسار ابن اليمين نيل".
 - تحرير التوكن: args `(sub, 1, p3, p4, -2)` ثم deleting dtor ذاتي، والقيمة تصفر مرتين (حرفي).
+
+---
+
+## تحديث D58+D58b (2026-10-26)
+
+### أصول جديدة مهمة جداً
+1. **Syndicate.dll الأصلي مسترجع**: `co_decomp/orig_binaries/Source/Syndicate.dll` (1.59MB، ImageBase 0x141720000 مطابق 100% للفهرس) — من أرشيف `Conquer_Online_Source_v6159.7z` (829MB، فيه كل مصادر اللعبة: MsgServer/NpcServer/DLLs الأصلية). أي دالة يفشل فيها الـ decompiler يمكن فكّها يدوياً الآن بـ capstone (القالب موجود في سجل هذه الوحدة).
+2. **جرد vtables كامل**: `tools/syndicate_vtables.json` — 66 جدول مسمّى عبر RTTI، أهمها:
+   - نمط جدول CMsg (5 فتحات): `[dtor, deleting, Init(base 0x14177e2f0), Process, tail(0x14177e2d0)]` — **Process لكل فئة الآن معلوم العنوان** (CMsgLog=0x1417d97c0, ChgDomName=0x1417daee0, LeagueOpt=0x1417d68d0, LeagueRobOpt=0x1417d8920 ...).
+   - جدول CModule (9 فتحات) مؤكد: Startup=+0x10 (0x14177e620), SvcPassThrough=+0x18 (0x14177eaa0), ProcessMsg=+0x20 (0x14177ec30).
+   - جدول CSyndicateLogic = **232 فتحة** وIProvider = 224 — خريطة المنافذ الكاملة لوحدات المنطق القادمة.
+   - ملحوظة thunk غريبة: بعض خانات deleting-dtor تشير لعنوان فردي 0x1417e7fda (thunk بيتوسط تعليمة) — عالجه كأنه entry+N سابق عند الفك.
+
+### حالة D58
+- مكتمل ومقفول: ذيل الوحدة (20 دالة) + **SendLeaveAward (14177eda0) مفكوك يدوياً ومنقول حرفياً** في `SyndicateLeaveAward.{h,cpp}` — كان الـ TBD الوحيد.
+- الاختبار: 9 أقسام (D58-9 يربط Flow بالجسم الحقيقي E2E)، رجريجن 62/62 × 6، ASan نظيف.
+- فتحات mgr الموثقة لـ SendLeaveAward: +0x138/+0x148/+0x1d8/+0x1f8/+0x230/+0x238/+0x3e0 (انظر PORTING_LOG للتفاصيل والسلاسل الحرفية).
+
+### التالي (بالأولوية)
+1. **D59: أجسام Process لفئات CMsg** — العناوين الآن كلها معلومة من الجرد؛ ابدأ بـ CMsgLog::Process (0x1417d97c0) ثم ChgDomName (0x1417daee0) — كلاهما في نطاق كود اللعبة.
+2. بقية الفئات الـ 37 (كل Process فريد في الجرد).
+3. الفشلان المتبقيان في الفهرس (1417ab8c0 502 بايت، 1417ac2d0 346 بايت — كلاهما داخل جدول CSyndicateLogic) — فكّ يدوي بنفس أسلوب SendLeaveAward.
+4. واجهة المدير المتبقية + إغلاق ModuleCreate (14177ec90).

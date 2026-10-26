@@ -3616,3 +3616,48 @@ g_aMsgCtor[17] ‏(seams وحدة Module السابقة) تُربط بالأجس
 
 ### الرجريجن (O0 المعتمد)
 - **الكامل: 61/61 PASS × 6** (d26..d57).
+
+---
+
+## D58 + D58b — CMsg unit layer + CPointRecordMgr::SendLeaveAward (تاريخ: 2026-10-26)
+
+### استرجاع Syndicate.dll الأصلي (مصدر جديد كامل)
+- المصدر: Conquer_Online_Source_v6159.7z (رابط ميديافير من المالك) — 829MB، 2886 ملف.
+- `Source/Syndicate.dll` — 1,592,832 بايت، md5 `be9a0c77d8e5827a1967ec102d6e9ef3`.
+- منسوخ إلى `co_decomp/orig_binaries/Source/Syndicate.dll`.
+- PE: ImageBase 0x141720000 (مطابق 100% لعناوين الـ decompiled index)، .text @ 0x141721000 (vsize 0x10100e)، .rdata @ 0x141823000، .data @ 0x141884000.
+
+### استخراج جرد الـ vtables الكامل (RTTI walk)
+- 66 جدول vtable مسمّى عبر Complete Object Locator → TypeDescriptor.
+- الأصول الحاسمة (كل الجرد في `tools/syndicate_vtables.json`):
+  - `CMsg::tq` @ 0x14182e368 (5 فتحات: dtor 0x14177e300, deleting 0x1417e7fda — thunk __noreturn غريب: 0x1417e7fda عنوان فردي! راجع لاحقاً, base Init 0x14177e2f0, base Process 0x14177e2e0, tail 0x14177e2d0)
+  - `gs::IModule` @ 0x14182e428 (9 فتحات: 0x14177e380 dtor, 0x1417f3374 ×4 thunks فارغة, ثم 0x14177e340/350/360/370)
+  - `CModule::syndicate` @ 0x14182e5a8 (9 فتحات): [+0x00]=0x14177ec00 dtor, [+0x08]=0x14177e600 deleting, [+0x10]=0x14177e620 ModuleStartup, [+0x18]=0x14177eaa0 SvcPassThrough, [+0x20]=0x14177ec30 ModuleProcessMsg, [+0x28..0x40]=0x14177e340/350/360/370 (واجهة IModule)
+  - `CMsgLog::syndicate` @ 0x14182e4a0: [+0x18] **Process = 0x1417d97c0**
+  - `CMsgSynChgDomName::syndicate` @ 0x14182e520: [+0x18] **Process = 0x1417daee0**
+  - 39 فئة CMsg/CMsgSyn/CMsgLeague بجدول 5 فتحات (نمط: dtor, deleting, base-Init 0x14177e2f0, Process فريد أو base 0x14177e2e0, tail 0x14177e2d0) — Process الفريدة: LeagueOpt=0x1417d68d0, LeagueRobOpt=0x1417d8920 (جدول 6 فتحات), LeagueBeRobRePB الخ 12 protobuf (12 فتحة)
+  - `CSyndicateLogic::syndicate` @ 0x141835068 — **232 فتحة** (منافذ المنطق الكاملة، أداة رسم وحدة D59+)
+  - `IProvider::syndicate` @ 0x141834928 — 224 فتحة (كلها 0x1417f3374 عدا [+0x00]=0x1417a9640)
+  - `CSynManager::syndicate` @ 0x14183b430 (2 فتحة: 0x1417c5860, 0x1417cf2b0)
+
+### D58b: CPointRecordMgr::SendLeaveAward (14177eda0) — فك يدوي
+- الـ decompiler فشل في هذه الدالة (812 بايت)؛ فُكّت يدوياً بـ capstone (211 تعليمة) من الـ binary المسترجع.
+- الاسم الحقيقي من النص الحرفي: `CPointRecordMgr::SendLeaveAward`.
+- التوقيع: `char SendLeaveAward(void* pModule, uint32_t uId, int nType, int nMoney, int nEMoney)`.
+- البنية الحرفية:
+  - نطاق النوع: `lea eax,[r8-1]; cmp eax,2; ja` — الأنواع 1..3 فقط، وإلا ERROR `"CPointRecordMgr::SendLeaveAward, Type[%d] is not found!"` (سلسلة @ 0x14182e7f8) وإرجاع 0.
+  - رجل الإيموني (r9d=money في الحقيقة هو [r11+0x20] spill... الترتيب الفعلي: nMoney=[rsp+0xc8]=arg4, nEMoney=[rsp+0xd0]=arg5):
+    - أكواد النوع: 1→0x1d، 2→0x18، 3→0x28 (خطأ: `"invalid emoney type[%d]"` @ 0x14182ea38)
+    - السقف: **DAT_141886d58** (عالم .data، ≠ DAT_141886d68 لسقف D56!) — `nGain = min(DAT_141886d58 - vt238(mgr,id), nEMoney)`
+    - vt+0x148(mgr, id, id, nGain, cbType, 1) = DeleteRecord؛ فشله: ERROR `"DeleteRecord failed! idUser[%u], nMoney[%d], nEMoney[%d], nType[%d]"` @ 0x14182e9f0
+    - سجل: `gmlog/syndenote` — `"User:%s[%u] Get (MeedAward[%d] Leave) syn[%u] emoney %u"` (vt+0x1d8=الاسم، vt+0x1f8=الsyn، %d=nType، %u=nGain)
+  - رجل الفلوس: `nGain = min(vt3e0(mgr) - vt230(mgr,id), nMoney)` (سعة المخزن!) ثم vt+0x138(mgr, id, nGain, 1)؛ إذا `nMoney >= 0x2710` سجل `gmlog/syndenote` بنص `%I64d` للفلوس
+  - سجل الخلاصة: `gmlog/syn_meed_award` — `"CPointRecordMgr::SendLeaveAward idUser[%u], nEmoney[%d], nGainEmoney[%d], nMoney[%d], nGainMoney[%I64d]"` @ 0x14182e900
+  - فحص الفائض: `if (nGainMoney != nMoney || nGainEmoney != nEMoney)` → `gmlog/award_overflow` — `"CSynArenicMeed::AwardUserOnline idUser[%u], nOldEMoney[%d], nAwardEMoney[%d], nGainEMoney[%d], nOldMoney[%I64d], nAwardMoney[%d], nGainMoney[%I64d]"` @ 0x14182e850
+  - إرجاع 1.
+- فتحات mgr المستخدمة: +0x238 (الإيموني الحالي)، +0x230 (بداية المخزن)، +0x148 (DeleteRecord)، +0x1f8 (syn id)، +0x1d8 (الاسم)، +0x3e0 (نهاية المخزن)، +0x138 (إضافة فلوس).
+- الملفات: `Exe/Dll/Syndicate/Port/SyndicateLeaveAward.{h,cpp}` (seams + جسم حرفي).
+
+### D58 اختبار (9 أقسام، 62/62 × 6)
+- D58-9 الجديد: ربط SendLeaveAward الحقيقي بمسار LeaveAwardFlow E2E، مع تغطية: نوع خارج النطاق، المنح الجزئي (يسجل overflow — مطابق للتفكيك: الشرط الحرفي `r14 != ebx || r13d != edi`)، المنح الكامل، سقف سعة المخزن، فرع 0x2710، فشل DeleteRecord.
+- ASan نظيف (0 تسريبات بعد إصلاح تسريبات الاختبار).
