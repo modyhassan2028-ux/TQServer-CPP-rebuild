@@ -89,19 +89,19 @@ static void Reset() {
 int main() {
     // ---- S1: +0x368 the id triage ----
     Reset();
-    assert(pL->Slot368(0) == 0);   // the null gate
-    assert(pL->Slot368(0x11) == 0x65);  // player found
+    assert(pL->Slot510(0) == 0);   // the null gate
+    assert(pL->Slot510(0x11) == 0x65);  // player found
     assert(s_nVt518 == 1 && s_uArgs[0] == 0x51);
-    assert(pL->Slot368(0x42) == 0x61);  // player miss
+    assert(pL->Slot510(0x42) == 0x61);  // player miss
     assert(s_nEE00 == 1 && s_nC8E0 == 2);
     // ---- S2: +0x370 ----
     Reset();
-    assert(pL->Slot370(1) == 0x71);
-    assert(pL->Slot370(0) == 0x71);   // lg always found
+    assert(pL->Slot518(1) == 0x71);
+    assert(pL->Slot518(0) == 0x71);   // lg always found
     // ---- S3: +0x378/+0x380 null gates ----
     Reset();
-    assert(pL->Slot378(0) == 0);
-    assert(pL->Slot378(2) == 0x62);
+    assert(pL->Slot520(0) == 0);
+    assert(pL->Slot520(2) == 0x62);
     assert(s_uArgs[0] == 2);
     assert(pL->Slot380(0) == 0);
     assert(pL->Slot380(-3) == 0x63);

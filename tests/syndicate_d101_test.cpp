@@ -127,42 +127,42 @@ int main() {
     // ---- S1: the pass-through family ----
     Reset();
     int32_t ai[2] = {11, 22};
-    pL->Slot2D8(ai);
+    pL->Slot480(ai);
     assert(s_nFE50 == 1 && s_aiFE50[0] == 11
            && s_aiFE50[1] == 22);
-    pL->Slot2E0();
+    pL->Slot488();
     assert(s_nACE0 == 1);
-    pL->Slot2E8(1, 2, "x");
+    pL->Slot490(1, 2, "x");
     assert(s_n3DD0 == 1 && s_aiArgs[0] == 1
            && s_aiArgs[1] == 2 && s_pcArg[0] == 'x');
-    pL->Slot2F0(3, 4, "y");
+    pL->Slot498(3, 4, "y");
     assert(s_n4000 == 1 && s_aiArgs[0] == 3);
-    pL->Slot2F8(5, 6, "z");
+    pL->Slot4A0(5, 6, "z");
     assert(s_n4230 == 1 && s_aiArgs[0] == 5);
-    pL->Slot300(7, 8);
+    pL->Slot4A8(7, 8);
     assert(s_n4300 == 1 && s_aiArgs[0] == 7
            && s_aiArgs[1] == 8);
-    pL->Slot308(1, 2, 3);
+    pL->Slot4B0(1, 2, 3);
     assert(s_nEFC0 == 1 && s_aiArgs[2] == 3);
-    pL->Slot310();
+    pL->Slot4B8();
     assert(s_nF190 == 1);
-    pL->Slot320(0x77);
+    pL->Slot4C8(0x77);
     assert(s_n45C0 == 1 && s_aiArgs[0] == 0x77);
-    pL->Slot330();
+    pL->Slot4D8();
     assert(s_nVtA0 == 1);
     // ---- S2: +0x318 the lookup pair ----
     Reset();
-    pL->Slot318(9, 0x44);   // 7630d0 -> 0x77
+    pL->Slot4C0(9, 0x44);   // 7630d0 -> 0x77
     assert(s_n45920 == 1 && s_nVt480 == 1);
     assert(s_uVt480Arg == 9);
     s_pv7630D0 = 0;
-    pL->Slot318(9, 0x44);
+    pL->Slot4C0(9, 0x44);
     assert(s_nLog == 1 && s_nVt480 == 1);
     // ---- S3: +0x328 the cur==0 gate ----
     Reset();
     // 74e3f0=0, ea40=0 -> proceed; 90390=0 ->
     // the vt+0x4e8 path
-    pL->Slot328(0x31);
+    pL->Slot4D0(0x31);
     assert(s_nLgFind == 1 && s_nF470 == 1);
     assert(s_nVt4e8 == 1);
     assert(s_uVt4e8Args[0] == 0x1234);
@@ -172,7 +172,7 @@ int main() {
     // 90390 != 0 -> the box vt+0x478 path
     Reset();
     s_u90390Ret = 0x99;
-    pL->Slot328(0x31);
+    pL->Slot4D0(0x31);
     assert(s_nVt4e8 == 0 && s_nVt478 == 1);
     assert(s_uVt478Args[0] == 0xAB);
     assert(s_uVt478Args[1] == 6);
@@ -180,17 +180,17 @@ int main() {
     // the inner lookup fails -> literal log
     Reset();
     s_u90390Ret = 0x99; s_pv7630D0 = 0;
-    pL->Slot328(0x31);
+    pL->Slot4D0(0x31);
     assert(s_nLog == 1 && s_nVt478 == 0);
     // LgFind fails -> literal log, no other calls
     Reset();
     s_uLgFindRet = 0;
-    pL->Slot328(0x31);
+    pL->Slot4D0(0x31);
     assert(s_nLog == 1 && s_nF470 == 0);
     // the gate blocks: ea40 != 0
     Reset();
     s_cEA40Ret = 1;
-    pL->Slot328(0x31);
+    pL->Slot4D0(0x31);
     assert(s_nLgFind == 0 && s_nLog == 0);
     puts("SYNDICATE_D101_OK: wave 10");
     return 0;

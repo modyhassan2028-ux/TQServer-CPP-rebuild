@@ -183,11 +183,11 @@ static void Reset() {
 int main() {
     // ---- S1: the null gate ----
     Reset();
-    assert(pL->Slot340(0x42, 0, 1) == false);
+    assert(pL->Slot4E8(0x42, 0, 1) == false);
     assert(s_nVt18 == 0);
     // ---- S2: too long (> 15) -> no vt+0x2e8 ----
     Reset();
-    assert(pL->Slot340(0x42, "aaaaaaaaaaaaaaaa", 1)
+    assert(pL->Slot4E8(0x42, "aaaaaaaaaaaaaaaa", 1)
            == false);
     assert(s_nVt2e8 == 0 && s_nVt18 == 1);
     assert(strcmp(s_acVt18Str[0], "STR_INVALID_NAME")
@@ -195,38 +195,38 @@ int main() {
     // ---- S3: rejected by vt+0x2e8 ----
     Reset();
     s_c2e8Ret = 0;
-    assert(pL->Slot340(0x42, "abc", 1) == false);
+    assert(pL->Slot4E8(0x42, "abc", 1) == false);
     assert(s_nVt2e8 == 1 && s_nVt18 == 1);
     // ---- S4: forbidden name ----
     Reset();
     s_iEB70Ret = 5;
-    assert(pL->Slot340(0x42, "abc", 1) == false);
+    assert(pL->Slot4E8(0x42, "abc", 1) == false);
     assert(strcmp(s_acVt18Str[0],
                   "STR_FORBIDDEN_LEAGUE_NAME") == 0);
     // ---- S5/S6: the player gates ----
     Reset();
     s_pvC8E0 = 0;
-    assert(pL->Slot340(0x42, "abc", 1) == false);
+    assert(pL->Slot4E8(0x42, "abc", 1) == false);
     assert(s_nEB70 == 1 && s_n68C0 == 0);
     Reset();
     s_c68C0Ret = 0;
-    assert(pL->Slot340(0x42, "abc", 1) == false);
+    assert(pL->Slot4E8(0x42, "abc", 1) == false);
     assert(s_nC8E0 == 1 && s_nF7F0 == 0);
     // ---- S7: the lg gates ----
     Reset();
     s_u90390 = 7;
-    assert(pL->Slot340(0x42, "abc", 1) == false);
+    assert(pL->Slot4E8(0x42, "abc", 1) == false);
     assert(s_nF7F0 == 0);
     // ---- S8: c4=0, not enough money ----
     Reset();
     s_uF550 = 50;   // < cost 100
-    assert(pL->Slot340(0x42, "abc", 0) == false);
+    assert(pL->Slot4E8(0x42, "abc", 0) == false);
     assert(s_nF550 == 1 && s_nFa70 == 0);
     assert(s_nF7F0 == 0);
     // ---- S9: c4=0, F7F0 fails -> the money ran ----
     Reset();
     s_cF7F0Null = 1;
-    assert(pL->Slot340(0x42, "abc", 0) == false);
+    assert(pL->Slot4E8(0x42, "abc", 0) == false);
     assert(s_nFa70 == 1);
     assert(s_nVt350 == 1 && s_uVt350Args[0] == 0x42);
     assert(s_uVt350Args[1] == 0x77);
@@ -238,7 +238,7 @@ int main() {
     assert(s_nF7F0 == 1);
     // ---- S10: full success, c4=0 ----
     Reset();
-    assert(pL->Slot340(0x42, "abc", 0) == true);
+    assert(pL->Slot4E8(0x42, "abc", 0) == true);
     assert(s_nMyLog == 1);   // the money path
     assert(s_nF7F0 == 1);
     assert(strcmp(s_pcNameArg, "abc") == 0);
@@ -254,7 +254,7 @@ int main() {
     assert(s_nVt478 == 0);
     // ---- S11: full success, c4=1 ----
     Reset();
-    assert(pL->Slot340(0x42, "abc", 1) == true);
+    assert(pL->Slot4E8(0x42, "abc", 1) == true);
     assert(s_nMyLog == 0);   // no money path
     assert(s_nVt8 == 1);      // the CMsg broadcast
     // 74e740 second call = 100 != 0 -> create path
@@ -263,7 +263,7 @@ int main() {
     // ---- S12: c4=1, 74e740 == 0 -> the else path ----
     Reset();
     s_i74E740b = 0;
-    assert(pL->Slot340(0x42, "abc", 1) == true);
+    assert(pL->Slot4E8(0x42, "abc", 1) == true);
     assert(s_nVt90 == 0);
     assert(s_nVt478 == 1 && s_uVt478Args[1] == 6);
     assert(s_nEA30 == 1);

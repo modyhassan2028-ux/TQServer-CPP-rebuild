@@ -2376,51 +2376,51 @@ void CSyndicateLogic::Slot2D0(int32_t n, uint32_t u,
 // ================= D101 wave 10 (+0x2d8..+0x330) =================
 
 // +0x2d8: 1417b22a0
-void CSyndicateLogic::Slot2D8(int32_t* p2) {
+void CSyndicateLogic::Slot480(int32_t* p2) {
     g_fn76FE50(((void**)this)[10], p2);
 }
 
 // +0x2e0: 1417b22b0
-void CSyndicateLogic::Slot2E0(void) {
+void CSyndicateLogic::Slot488(void) {
     g_fn76ACE0(((void**)this)[10]);
 }
 
 // +0x2e8: 1417b22c0
-void CSyndicateLogic::Slot2E8(int32_t n2, int32_t n3,
+void CSyndicateLogic::Slot490(int32_t n2, int32_t n3,
                               const char* p4) {
     g_fn763DD0(((void**)this)[10], n2, n3, p4);
 }
 
 // +0x2f0: 1417b22d0
-void CSyndicateLogic::Slot2F0(int32_t n2, int32_t n3,
+void CSyndicateLogic::Slot498(int32_t n2, int32_t n3,
                               const char* p4) {
     g_fn764000(((void**)this)[10], n2, n3, p4);
 }
 
 // +0x2f8: 1417b22e0
-void CSyndicateLogic::Slot2F8(int32_t n2, int32_t n3,
+void CSyndicateLogic::Slot4A0(int32_t n2, int32_t n3,
                               const char* p4) {
     g_fn764230(((void**)this)[10], n2, n3, p4);
 }
 
 // +0x300: 1417b22f0
-void CSyndicateLogic::Slot300(uint32_t u2, int32_t n3) {
+void CSyndicateLogic::Slot4A8(uint32_t u2, int32_t n3) {
     g_fn764300(((void**)this)[10], u2, n3);
 }
 
 // +0x308: 1417b2300
-void CSyndicateLogic::Slot308(int32_t n2, int32_t n3,
+void CSyndicateLogic::Slot4B0(int32_t n2, int32_t n3,
                               int32_t n4) {
     g_fn76EFC0(((void**)this)[10], n2, n3, n4);
 }
 
 // +0x310: 1417b2310
-void CSyndicateLogic::Slot310(void) {
+void CSyndicateLogic::Slot4B8(void) {
     g_fn76F190(((void**)this)[10]);
 }
 
 // +0x318: 1417b2320
-void CSyndicateLogic::Slot318(uint16_t u2, uint32_t u3) {
+void CSyndicateLogic::Slot4C0(uint16_t u2, uint32_t u3) {
     void** pp = (void**)this;
     void* lLg = g_fn7630D0(pp[10], u3);
     if (lLg == 0) {
@@ -2441,12 +2441,12 @@ void CSyndicateLogic::Slot318(uint16_t u2, uint32_t u3) {
 }
 
 // +0x320: 1417b23f0
-void CSyndicateLogic::Slot320(uint32_t u2) {
+void CSyndicateLogic::Slot4C8(uint32_t u2) {
     g_fn7645C0(((void**)this)[10], u2);
 }
 
 // +0x328: 1417b2400
-void CSyndicateLogic::Slot328(uint32_t u) {
+void CSyndicateLogic::Slot4D0(uint32_t u) {
     void** pp = (void**)this;
     int32_t iVar3 = (int32_t)g_fn74E3F0(pp[10]);
     if (iVar3 == 0 && g_fn74EA40(pp[10]) == 0) {
@@ -2484,14 +2484,14 @@ void CSyndicateLogic::Slot328(uint32_t u) {
 }
 
 // +0x330: 1417b2540
-void CSyndicateLogic::Slot330(void) {
+void CSyndicateLogic::Slot4D8(void) {
     void** pp = (void**)this;
     // RAW: box vt+0xa0 (no visible args at all)
     ((void (*)(void*))
         (*(void***)pp[1])[0xa0/8])(pp[1]);
 }
 // +0x340: 1417b8940 — the create-league flow
-bool CSyndicateLogic::Slot340(uint32_t u2,
+bool CSyndicateLogic::Slot4E8(uint32_t u2,
                               const char* p3, char c4) {
     void** pp = (void**)this;
     if (p3 == 0) return false;
@@ -2627,7 +2627,7 @@ bool CSyndicateLogic::Slot340(uint32_t u2,
     return false;
 }
 // +0x350: 1417b16b0 — the join-league flow
-void CSyndicateLogic::Slot350(uint32_t u2, uint32_t u3,
+void CSyndicateLogic::Slot4F8(uint32_t u2, uint32_t u3,
                               uint32_t u4) {
     void** pp = (void**)this;
     int64_t lLg = g_fnLgFind(pp[2], u3);
@@ -2753,7 +2753,7 @@ void CSyndicateLogic::Slot350(uint32_t u2, uint32_t u3,
     }
 }
 // +0x358: 1417c13e0 — the exit-league flow
-void CSyndicateLogic::Slot358(uint32_t u2, uint32_t u3,
+void CSyndicateLogic::Slot500(uint32_t u2, uint32_t u3,
                               uint32_t u4) {
     void** pp = (void**)this;
     void* lLg2 = g_fn7630D0(pp[10], u4);
@@ -2855,7 +2855,7 @@ void CSyndicateLogic::Slot358(uint32_t u2, uint32_t u3,
     }
 }
 // +0x360: 1417b9380 — the leader-change flow
-void CSyndicateLogic::Slot360(uint32_t u2, uint32_t u3,
+void CSyndicateLogic::Slot508(uint32_t u2, uint32_t u3,
                               uint32_t u4) {
     void** pp = (void**)this;
     if (u2 == u4) return;
@@ -2929,7 +2929,7 @@ void CSyndicateLogic::Slot360(uint32_t u2, uint32_t u3,
 // ================= D106 wave 11 (+0x368..+0x3b0) =================
 
 // +0x368: 1417b02f0
-uint32_t CSyndicateLogic::Slot368(uint32_t u2) {
+uint32_t CSyndicateLogic::Slot510(uint32_t u2) {
     void** pp = (void**)this;
     if (u2 == 0) return 0;
     void* plPlayer = g_fn78C8E0(pp[3], u2);
@@ -2947,7 +2947,7 @@ uint32_t CSyndicateLogic::Slot368(uint32_t u2) {
 }
 
 // +0x370: 1417afe40
-uint64_t CSyndicateLogic::Slot370(uint32_t u2) {
+uint64_t CSyndicateLogic::Slot518(uint32_t u2) {
     void** pp = (void**)this;
     int64_t lLg = g_fnLgFind(pp[2], u2);
     if (lLg != 0) {
@@ -2957,7 +2957,7 @@ uint64_t CSyndicateLogic::Slot370(uint32_t u2) {
 }
 
 // +0x378: 1417b5810
-uint64_t CSyndicateLogic::Slot378(uint32_t u2) {
+uint64_t CSyndicateLogic::Slot520(uint32_t u2) {
     if (u2 == 0) {
         // RAW: in_RAX & 0xff..00 (upper garbage)
         return 0;
@@ -4513,5 +4513,466 @@ uint64_t CSyndicateLogic::Slot118(uint32_t u2,
     return uVar7;
 }
 
+
+
+
+// ============================================================
+// D112 — wave 17 (TRUE offsets +0x2e0..+0x370), 19 bodies,
+// raw-verified against Syndicate.dll (imagebase 0x141720000).
+// ============================================================
+
+// ---- the D112 seams (default null — tests bind them) ----
+void*    (*g_fn1417c8c10)(void*, uint32_t);
+void*    (*g_fn1417c8d80)(void*, uint32_t);
+void     (*g_fn1417cb270)(void*, uint32_t);
+void     (*g_fn1417cb360)(void*, uint32_t, uint32_t);
+void*    (*g_fn141790100)(void*);
+uint32_t (*g_fn14178f790)(void*);
+uint64_t (*g_fn14178f7d0)(void*, uint32_t);
+uint64_t (*g_fn14178f7b0)(void*, int64_t, int64_t,
+                          int64_t);
+void     (*g_fn1417c6c90)(void*);
+void     (*g_fn1417c6c80)(void*);
+void     (*g_fn1417cfb60)(void*, uint32_t);
+void     (*g_fn1417a8d30)(void*, uint32_t, uint32_t);
+void     (*g_fn1417a8e40)(void*, uint32_t, int32_t,
+                          uint32_t, uint32_t);
+void     (*g_fn1417a8f70)(void*, uint32_t, int32_t,
+                          uint32_t, uint32_t);
+void     (*g_fn1417a8810)(void*, uint32_t);
+void     (*g_fn1417a88a0)(void*, uint32_t, void*);
+void     (*g_fn1417a8b00)(void*, uint32_t);
+void     (*g_fn1417a7e70)(void*);
+uint8_t  (*g_fn1417a8a50)(void*, uint32_t, void*);
+void     (*g_fn14179d3c0)(void*, int32_t, int32_t);
+
+// ---- the D112 seam defaults ----
+static void DefSynLogCheck(const char*, const char*,
+                           const char*, const char*,
+                           uint32_t) {}
+static void DefSynNoteLog(const char*, const char*,
+                          const void*, uint32_t,
+                          uint32_t, uint32_t) {}
+// KERNEL32 MulDiv semantics: (a*b)/c rounded to the
+// nearest integer; 0 on overflow or c==0.
+static int32_t DefMulDiv(uint32_t a, uint32_t b,
+                         uint32_t c) {
+    if (c == 0) return 0;
+    uint64_t n = (uint64_t)a * b;
+    if (n > 0x7fffffffull * (uint64_t)c) return 0;
+    uint64_t q = n / c, r = n % c;
+    if (r * 2 >= c) ++q;          // round to nearest
+    return (int32_t)q;
+}
+void (*g_fnSynLogCheck)(const char*, const char*,
+    const char*, const char*, uint32_t) = DefSynLogCheck;
+void (*g_fnSynNoteLog)(const char*, const char*,
+    const void*, uint32_t, uint32_t, uint32_t) =
+    DefSynNoteLog;
+int32_t (*g_fnMulDiv)(uint32_t, uint32_t, uint32_t) =
+    DefMulDiv;
+// the ORIGINAL source path literal in the star logs
+static const char* s_pszLogicSrc =
+    "f:\\version\\cqserver-78.0.11-1204\\modules"
+    "\\syndicate\\src\\syndicatelogic.cpp";
+// the RAW fmt DAT_141824ca8 (GBK \xa1\xef = ★)
+#define STAR_FMT "\xa1\xef%s(%s)\xa1\xef in %s, %d"
+
+// ================= +0x2e0: 1417af7d0 =================
+// the 9-field clear: cb270(mgr,u2) then cb360 for the
+// fields 1..9; miss -> the star log (dUser/pSyn,
+// line 0x1487) -> 0; always returns 1 on success.
+uint8_t CSyndicateLogic::Slot2E0(uint32_t u2) {
+    void** pp = (void**)this;
+    void* pSyn = (void*)g_fnLgFind(pp[2], u2);
+    if (pSyn == 0) {
+        g_fnSynLogCheck(STAR_FMT, "dUser", "pSyn",
+                        s_pszLogicSrc, 0x1487);
+        return 0;
+    }
+    g_fn1417cb270(pp[2], u2);
+    g_fn1417cb360(pp[2], u2, 1);
+    g_fn1417cb360(pp[2], u2, 2);
+    g_fn1417cb360(pp[2], u2, 3);
+    g_fn1417cb360(pp[2], u2, 4);
+    g_fn1417cb360(pp[2], u2, 5);
+    g_fn1417cb360(pp[2], u2, 6);
+    g_fn1417cb360(pp[2], u2, 7);
+    g_fn1417cb360(pp[2], u2, 8);
+    g_fn1417cb360(pp[2], u2, 9);
+    return 1;
+}
+
+// ================= +0x2e8: 1417af8e0 =================
+// find -> 90100(syn) != 0; the star log on miss
+// (CHECKF/pSyn, line 0x149a).
+uint8_t CSyndicateLogic::Slot2E8(uint32_t u2) {
+    void** pp = (void**)this;
+    void* pSyn = (void*)g_fnLgFind(pp[2], u2);
+    if (pSyn == 0) {
+        g_fnSynLogCheck(STAR_FMT, "CHECKF", "pSyn",
+                        s_pszLogicSrc, 0x149a);
+        return 0;
+    }
+    return g_fn141790100(pSyn) != 0;
+}
+
+// ================= +0x2f0: 1417af940 =================
+// find -> the f790 tail; the star log on miss
+// (CHECKF/pSyn, line 0x14a2).
+uint32_t CSyndicateLogic::Slot2F0(uint32_t u2) {
+    void** pp = (void**)this;
+    void* pSyn = (void*)g_fnLgFind(pp[2], u2);
+    if (pSyn == 0) {
+        g_fnSynLogCheck(STAR_FMT, "CHECKF", "pSyn",
+                        s_pszLogicSrc, 0x14a2);
+        return 0;
+    }
+    return g_fn14178f790(pSyn);
+}
+
+// ================= +0x2f8: 1417af990 =================
+// find -> the f7d0(syn, p3) tail; the star log on miss
+// (dUser/pSyn, line 0x14aa). RAW: ebx = r8d rides the
+// second arg straight into the tail.
+uint64_t CSyndicateLogic::Slot2F8(uint32_t u2,
+                                  uint32_t u3) {
+    void** pp = (void**)this;
+    void* pSyn = (void*)g_fnLgFind(pp[2], u2);
+    if (pSyn == 0) {
+        g_fnSynLogCheck(STAR_FMT, "dUser", "pSyn",
+                        s_pszLogicSrc, 0x14aa);
+        return 0;
+    }
+    return g_fn14178f7d0(pSyn, u3);
+}
+
+// ================= +0x300: 1417af9f0 =================
+// find -> the f7b0(syn, p3, p4, p5) tail — p5 rides
+// the first STACK slot; the star log on miss
+// (CHECKF/pSyn, line 0x14b2).
+uint64_t CSyndicateLogic::Slot300(uint32_t u2,
+    int64_t l3, int64_t l4, int64_t l5) {
+    void** pp = (void**)this;
+    void* pSyn = (void*)g_fnLgFind(pp[2], u2);
+    if (pSyn == 0) {
+        g_fnSynLogCheck(STAR_FMT, "CHECKF", "pSyn",
+                        s_pszLogicSrc, 0x14b2);
+        return 0;
+    }
+    return g_fn14178f7b0(pSyn, l3, l4, l5);
+}
+
+// ================= +0x308: 1417ac2d0 =================
+// the SynWar prize cut (the 2% flow):
+//   p4<=0 -> 0; box vt+0x1f8(box) [NO 2nd arg] -> synA;
+//   0 -> 0; box vt+0x2f8(box, p3) -> synB; synA==synB ->
+//   0; the leagues find pair; cut = MulDiv(p4,2,100);
+//   cut>0: cap by f4f0(synB) (cmovg), >=10000 -> the
+//   gmlog/syndenote save, bf80(synB,-cut), box
+//   vt+0x138(box,p2,cut,1); then ALWAYS d3c0(synA,p3,p4)
+//   when synA!=0 -> return 1.
+char CSyndicateLogic::Slot308(uint32_t u2,
+                              uint32_t u3, int32_t n4) {
+    if (n4 <= 0)
+        return 0;
+    void** pp = (void**)this;
+    // RAW: mov rcx,[rcx+8]; call [rax+0x1f8] — single arg
+    uint32_t uSynA = ((uint32_t (*)(void*))
+        (*(void***)pp[1])[0x1f8 / 8])(pp[1]);
+    if (uSynA == 0)
+        return 0;
+    uint32_t uSynB = ((uint32_t (*)(void*, uint32_t))
+        (*(void***)pp[1])[0x2f8 / 8])(pp[1], u3);
+    if (uSynA == uSynB)
+        return 0;
+    void* pSynA = (void*)g_fnLgFind(pp[2], uSynA);
+    void* pSynB = (void*)g_fnLgFind(pp[2], uSynB);
+    // RAW: MulDiv(p4, 2, 100) — the 2% cut
+    int32_t nCut = g_fnMulDiv((uint32_t)n4, 2, 100);
+    if (nCut > 0) {
+        if (pSynB != 0) {
+            uint32_t uCap =
+                (uint32_t)g_fn78F4F0(pSynB);
+            // RAW: cmp ebx,eax; cmovg ebx,eax (min)
+            if (nCut > (int32_t)uCap)
+                nCut = (int32_t)uCap;
+        }
+        if (nCut >= 0x2710) {
+            // RAW: box vt+0x1d8(box, p2) -> the name
+            const void* pvName = ((const void* (*)(
+                void*, uint32_t))
+                (*(void***)pp[1])[0x1d8 / 8])(pp[1], u2);
+            // RAW: MyLogSave(file, fmt, name(r8),
+            // actor(r9=p2), synA([rsp+0x20]),
+            // cut([rsp+0x28]))
+            g_fnSynNoteLog("gmlog/syndenote",
+                "User:%s[%u] Get (SynWar Prize) "
+                "syn[%u] money %u",
+                pvName, u2, uSynA, (uint32_t)nCut);
+        }
+        // RAW: eax=ebx; neg; movsxd -> bf80(synB, -cut)
+        g_fn79BF80(pSynB, -(int64_t)nCut);
+        // RAW: movsxd r8,ebx; mov r9b,1; edx=p2
+        ((void (*)(void*, uint32_t, int64_t,
+                   uint8_t))
+            (*(void***)pp[1])[0x138 / 8])(
+                pp[1], u2, (int64_t)nCut, 1);
+    }
+    if (pSynA != 0)
+        g_fn14179d3c0(pSynA, (int32_t)u3, n4);
+    return 1;
+}
+
+// ================= +0x310: 1417bd550 =================
+// the targeted war-status sweep:
+//   vt+0x2f8(box) [NO args] -> id; 0 -> out;
+//   cad00(mgr,id)==0 -> out; new(8) sentinel;
+//   vt+0x2b0(this, id, &anchorHome) -> ok; then for
+//   each u32 in the vector: box vt+0x268(box, id) ->
+//   fire vt+0x2e0(box, id, 0x283e); the cleanup deletes
+//   the buffer then the sentinel node.
+void CSyndicateLogic::Slot310(void) {
+    void** pp = (void**)this;
+    uint32_t uId = ((uint32_t (*)(void*))
+        (*(void***)pp[1])[0x2f8 / 8])(pp[1]);
+    if (uId == 0)
+        return;
+    void* pMember = (void*)g_fnLgFind(pp[2], uId);
+    if (pMember == 0)
+        return;
+    // RAW: operator new(8) then *node = &home
+    void** pNode = (void**)operator new(8);
+    void* apHome[3] = {0};
+    if (pNode != 0) {
+        *pNode = apHome;
+        apHome[0] = pNode;
+    }
+    // RAW: the vector {begin, end, cap} zeroed
+    uint32_t* puBegin = 0; uint32_t* puEnd = 0;
+    uint32_t* puCap = 0;
+    // RAW: this+0 -> the vtable (lea rax,[rbp]) slot 0x2b0
+    char bOk = ((char (*)(void*, uint32_t, void*))
+        (*(void***)pp)[0x2b0 / 8])(
+            this, uId, apHome);
+    if (bOk != 0 &&
+        (puEnd != 0) &&
+        (((uintptr_t)puEnd - (uintptr_t)puBegin) >> 2
+         != 0)) {
+        for (uint32_t* pu = puBegin; pu != puEnd;
+             ++pu) {
+            // RAW: the checked-vector re-validation
+            // hops (4x _invalid_parameter_noinfo)
+            // ride before each deref — kept as the
+            // raw read below
+            uint32_t uOne = *pu;
+            // RAW: box vt+0x268(box, id) — TRUE -> send
+            char bLive = ((char (*)(void*, uint32_t))
+                (*(void***)pp[1])[0x268 / 8])(
+                    pp[1], uOne);
+            if (bLive != 0) {
+                ((void (*)(void*, uint32_t, uint32_t))
+                    (*(void***)pp[1])[0x2e0 / 8])(
+                        pp[1], uOne, 0x283e);
+            }
+        }
+    }
+    // the RAW cleanup: delete[] the buffer, zero the
+    // trio, delete the sentinel node
+    ::operator delete(puBegin);
+    puBegin = 0; puEnd = 0; puCap = 0;
+    ::operator delete(apHome[0]);
+}
+
+// ============ +0x318/+0x320/+0x330: the mgr pass-throughs ============
+// RAW: rcx = [this+0x10]; c6c90/c6c80/cfb60(mgr, u2)
+uint8_t CSyndicateLogic::Slot318(void) {
+    g_fn1417c6c90(*(void**)((char*)this + 0x10));
+    return 1;
+}
+uint8_t CSyndicateLogic::Slot320(void) {
+    g_fn1417c6c80(*(void**)((char*)this + 0x10));
+    return 1;
+}
+// RAW: ab1a0 — cfb60(mgr, u2) with the edx ride
+uint8_t CSyndicateLogic::Slot330(uint32_t u2) {
+    g_fn1417cfb60(*(void**)((char*)this + 0x10), u2);
+    return 1;
+}
+
+// ============ +0x338..+0x370: the box(+0x20) forwards ============
+// RAW: af290 — the null gate on this+0x20
+void CSyndicateLogic::Slot338(uint32_t u2, uint32_t u3) {
+    void* pBox = *(void**)((char*)this + 0x20);
+    if (pBox != 0)
+        g_fn1417a8d30(pBox, u2, u3);
+}
+// RAW: af230 — NO null gate, 5 args ride through
+void CSyndicateLogic::Slot340(uint32_t u2, int32_t n3,
+                              uint32_t u4, uint32_t u5) {
+    g_fn1417a8e40(*(void**)((char*)this + 0x20),
+                  u2, n3, u4, u5);
+}
+// RAW: af250 — NO null gate, the mirror
+void CSyndicateLogic::Slot348(uint32_t u2, int32_t n3,
+                              uint32_t u4, uint32_t u5) {
+    g_fn1417a8f70(*(void**)((char*)this + 0x20),
+                  u2, n3, u4, u5);
+}
+// RAW: af270 — the gate + a8810(box, u2)
+void CSyndicateLogic::Slot350(uint32_t u2) {
+    void* pBox = *(void**)((char*)this + 0x20);
+    if (pBox != 0)
+        g_fn1417a8810(pBox, u2);
+}
+// RAW: af2b0 — the gate + a88a0(box, u2, p3)
+void CSyndicateLogic::Slot358(uint32_t u2, void* p3) {
+    void* pBox = *(void**)((char*)this + 0x20);
+    if (pBox != 0)
+        g_fn1417a88a0(pBox, u2, p3);
+}
+// RAW: af2d0 — the gate + a8b00(box, u2)
+void CSyndicateLogic::Slot360(uint32_t u2) {
+    void* pBox = *(void**)((char*)this + 0x20);
+    if (pBox != 0)
+        g_fn1417a8b00(pBox, u2);
+}
+// RAW: afb00 — the gate + a7e70(box)
+void CSyndicateLogic::Slot368(void) {
+    void* pBox = *(void**)((char*)this + 0x20);
+    if (pBox != 0)
+        g_fn1417a7e70(pBox);
+}
+// RAW: af2f0 — the gate then the a8a50 TAIL; the miss
+// path returns `xor al, al` (0 in AL only)
+uint8_t CSyndicateLogic::Slot370(uint32_t u2, void* p3) {
+    void* pBox = *(void**)((char*)this + 0x20);
+    if (pBox == 0)
+        return 0;
+    return g_fn1417a8a50(pBox, u2, p3);
+}
+
+// ================= +0x328: 1417ab340 =================
+// the SynWar prize flow (the giant, 706 bytes):
+//   c8c10(mgr,u2) -> the war record (0 -> out);
+//   (void)c8d80(mgr,u2) — the RAW side-effect call with
+//   the return DISCARDED; f270(rec)==0 -> out;
+//   vt+0x2f8(box,u2) -> the league id; !=0: its record;
+//   f4f0>0: the x*10/10 magic (sar 6 + the sign fix) ->
+//   bf80(league,-x) + bf80(rec,+x);
+//   always: vt+0x308(box,u2, f270&0xffffffff); the
+//   STR_GOT_WIN_s notify (ONE snprintf vararg = the
+//   f470 name) via vt+0x78; vt+0x300 -> warId; when
+//   warId==0x40e: db3a0(msg,0x11,f318ret) with the
+//   IF_OK(SET_WHITE_SYN) log on miss, line 0x664; when
+//   warId==1000: the mirror with 0x12 (SET_BLACK_SYN),
+//   line 0x66c; both end in the dtor.
+uint8_t CSyndicateLogic::Slot328(uint32_t u2) {
+    void** pp = (void**)this;
+    void* pWarRec = g_fn1417c8c10(pp[2], u2);
+    // RAW: the second lookup call fires UNCONDITIONALLY
+    // with its return thrown away
+    (void)g_fn1417c8d80(pp[2], u2);
+    if (pWarRec == 0)
+        return 0;
+    if (g_fn78F270(pWarRec) == 0)
+        return 0;
+    uint32_t uLgId = ((uint32_t (*)(void*, uint32_t))
+        (*(void***)pp[1])[0x2f8 / 8])(pp[1], u2);
+    if (uLgId != 0) {
+        void* pLg = (void*)g_fnLgFind(pp[2], uLgId);
+        if (pLg != 0) {
+            int32_t nPrize =
+                (int32_t)g_fn78F4F0(pLg);
+            if (nPrize > 0) {
+                // RAW: lea rcx,[rcx+rcx*4]; add rcx,rcx
+                //   (x*10); movabs 0xa3d70a3d70a3d70b;
+                //   imul; lea rbx,[rcx+rdx]; sar rbx,6;
+                //   mov rax,rbx; shr rax,0x3f; add rbx,rax
+                int64_t lTen =
+                    (int64_t)(int32_t)nPrize;
+                lTen = lTen + lTen * 4;
+                lTen = lTen + lTen;      // *10
+                int64_t lHi = (int64_t)(
+                    ((__int128)lTen *
+                     (__int128)(int64_t)
+                     0xa3d70a3d70a3d70bLL)
+                    >> 64);
+                int64_t lSum = lTen + lHi;
+                lSum >>= 6;              // sar
+                lSum += (int64_t)(
+                    (uint64_t)lSum >> 63);
+                int32_t nX = (int32_t)lSum;
+                if (nX > 0) {
+                    g_fn79BF80(pLg,
+                        -(int64_t)nX);
+                    g_fn79BF80(pWarRec,
+                        (int64_t)nX);
+                }
+            }
+        }
+    }
+    // RAW: vt+0x308(box, u2, f270(rec)&0xffffffff)
+    ((void (*)(void*, uint32_t, uint32_t))
+        (*(void***)pp[1])[0x308 / 8])(
+            pp[1], u2,
+            (uint32_t)g_fn78F270(pWarRec));
+    // the STR_GOT_WIN_s notify
+    char acBuf[0x400];
+    acBuf[0] = 0;
+    memset(acBuf + 1, 0, 0x3ff);
+    void* pInst = g_fnStringMgrInstance();
+    const void* pvName = g_fn78F470(pWarRec);
+    const char* pcFmt = (const char*)
+        g_fnStringMgrGetStr(pInst,
+            "STR_GOT_WIN_s");
+    snprintf(acBuf, 0x400, pcFmt, pvName);
+    acBuf[0x3ff] = 0;
+    ((void (*)(void*, void*))
+        (*(void***)pp[1])[0x78 / 8])(pp[1], acBuf);
+    uint32_t uWarId = ((uint32_t (*)(void*,
+        uint32_t))(*(void***)pp[1])[0x300 / 8])(
+            pp[1], u2);
+    uint32_t uF318 = ((uint32_t (*)(void*,
+        uint32_t))(*(void***)pp[1])[0x318 / 8])(
+            pp[1], u2);
+    // RAW: vt+0x310(box, uWarId) — the return discarded
+    (void)((uint32_t (*)(void*, uint32_t))
+        (*(void***)pp[1])[0x310 / 8])(pp[1], uWarId);
+    if (uWarId == 0x40e) {
+        uint8_t abMsg[0x430];
+        g_fn7DB2B0(abMsg);
+        if (g_fn7DB3A0(abMsg, 0x11,
+                       (int32_t)uF318) != 0) {
+            ((void (*)(void*, void*))
+                (*(void***)pp[1])[0xe0 / 8])(
+                    pp[1], abMsg);
+        } else {
+            g_fnSynLogCheck(STAR_FMT, "IF_OK",
+                "msg.Create(SET_WHITE_SYN, "
+                "idMapOwnerID)",
+                s_pszLogicSrc, 0x664);
+        }
+        g_fn7DB330(abMsg);
+        return 1;
+    }
+    if (uWarId == 0x3e8) {
+        uint8_t abMsg[0x430];
+        g_fn7DB2B0(abMsg);
+        if (g_fn7DB3A0(abMsg, 0x12,
+                       (int32_t)uF318) != 0) {
+            ((void (*)(void*, void*))
+                (*(void***)pp[1])[0xe0 / 8])(
+                    pp[1], abMsg);
+        } else {
+            g_fnSynLogCheck(STAR_FMT, "IF_OK",
+                "msg.Create(SET_BLACK_SYN, "
+                "idMapOwnerID)",
+                s_pszLogicSrc, 0x66c);
+        }
+        g_fn7DB330(abMsg);
+    }
+    return 1;
+}
 
 }  // namespace syndicate

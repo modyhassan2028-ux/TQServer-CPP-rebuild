@@ -127,14 +127,14 @@ static void Reset() {
 int main() {
     // ---- S1: the lead gate (743c80 == u3) ----
     Reset();
-    pL->Slot358(0x22, 0x71, 0x44);  // 743c80=0x71==u3
+    pL->Slot500(0x22, 0x71, 0x44);  // 743c80=0x71==u3
     assert(s_nD490 == 0 && s_nVt88 == 0);
     // ---- S2: lg lookup fails -> silent ----
     Reset();
     // 743c80 = 0x71 != 0x33 -> proceeds; LgFind(u3=
     // 0x33) -> 0x55 ok; 78f2d0=0x22==u2 ok;
     // 790390=0x44==u4 ok; 7903d0 ok -> full path
-    pL->Slot358(0x22, 0x33, 0x44);
+    pL->Slot500(0x22, 0x33, 0x44);
     assert(s_nD490 == 1);
     assert(s_nVt88 == 1);
     assert(s_uVt88Args[0] == 0x33 &&
@@ -161,18 +161,18 @@ int main() {
     // id 3 (first 2a0 call): 2a0 != 9 -> no 2a8
     s_ai2a0Ret[0] = 7;
     // id 4: full
-    pL->Slot358(0x22, 0x33, 0x44);
+    pL->Slot500(0x22, 0x33, 0x44);
     assert(s_n2a8 == 1);
     assert(s_u2a8Args[0][0] == 4);
     assert(s_n280 == 3 && s_n2a0 == 2);
     // ---- S4: 9e6d0 fails -> no sweep, no leak ----
     Reset();
     s_c9E6D0Null = 1;
-    pL->Slot358(0x22, 0x33, 0x44);
+    pL->Slot500(0x22, 0x33, 0x44);
     assert(s_n268 == 0 && s_n2a8 == 0);
     // ---- S5: the 7903d0 gate ----
     Reset();
-    pL->Slot358(0x22, 0x33, 0x55);  // 790390 != u4
+    pL->Slot500(0x22, 0x33, 0x55);  // 790390 != u4
     assert(s_nD490 == 0 && s_nVt88 == 0);
     puts("SYNDICATE_D104_OK: the exit flow");
     return 0;

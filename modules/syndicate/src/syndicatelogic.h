@@ -94,6 +94,52 @@ extern void*    (*g_fnStringMgrGetStr)(void*, const char*);
 extern char     (*g_fnA84HasOldPos)(void*);
 extern uint32_t (*g_fnA84GetOldId)(void*);
 
+// ---- D112 seams (wave 17: TRUE +0x2e0..+0x370) ----
+extern void*    (*g_fn1417c8c10)(void*, uint32_t);     // 1417c8c10
+extern void*    (*g_fn1417c8d80)(void*, uint32_t);     // 1417c8d80 (ret discarded)
+extern void     (*g_fn1417cb270)(void*, uint32_t);      // 1417cb270
+extern void     (*g_fn1417cb360)(void*, uint32_t,
+                                 uint32_t);            // 1417cb360
+extern void*    (*g_fn141790100)(void*);                // 141790100
+extern uint32_t (*g_fn14178f790)(void*);                // 14178f790
+extern uint64_t (*g_fn14178f7d0)(void*, uint32_t);       // 14178f7d0
+extern uint64_t (*g_fn14178f7b0)(void*, int64_t,
+                                 int64_t, int64_t);    // 14178f7b0
+extern void     (*g_fn1417c6c90)(void*);                // 1417c6c90
+extern void     (*g_fn1417c6c80)(void*);                // 1417c6c80
+extern void     (*g_fn1417cfb60)(void*, uint32_t);       // 1417cfb60
+extern void     (*g_fn1417a8d30)(void*, uint32_t,
+                                 uint32_t);            // 1417a8d30
+extern void     (*g_fn1417a8e40)(void*, uint32_t,
+                                 int32_t, uint32_t,
+                                 uint32_t);            // 1417a8e40
+extern void     (*g_fn1417a8f70)(void*, uint32_t,
+                                 int32_t, uint32_t,
+                                 uint32_t);            // 1417a8f70
+extern void     (*g_fn1417a8810)(void*, uint32_t);       // 1417a8810
+extern void     (*g_fn1417a88a0)(void*, uint32_t, void*);// 1417a88a0
+extern void     (*g_fn1417a8b00)(void*, uint32_t);       // 1417a8b00
+extern void     (*g_fn1417a7e70)(void*);                // 1417a7e70
+extern uint8_t  (*g_fn1417a8a50)(void*, uint32_t, void*);// 1417a8a50
+extern void     (*g_fn14179d3c0)(void*, int32_t,
+                                 int32_t);             // 14179d3c0
+// RAW: KERNEL32 MulDiv(nMult1, nMult2, nDiv) — rounds to
+// nearest, 0 on overflow/div0 (ac2d0: MulDiv(p4,2,100) =
+// the 2% SynWar prize cut)
+extern int32_t  (*g_fnMulDiv)(uint32_t, uint32_t,
+                              uint32_t);
+// the RAW 5-arg star log: (fmt "★%s(%s)★ in %s, %d",
+// type, var, path, line) — D112 lines 0x1487/0x149a/
+// 0x14a2/0x14aa/0x14b2/0x664/0x66c
+extern void     (*g_fnSynLogCheck)(const char*, const char*,
+                                   const char*, const char*,
+                                   uint32_t);
+// the RAW 4-vararg gmlog/syndenote save (ac2d0: the prize
+// cut): MyLogSave(file, fmt, name, actor, synId, money)
+extern void     (*g_fnSynNoteLog)(const char*, const char*,
+                                  const void*, uint32_t,
+                                  uint32_t, uint32_t);
+
 // ---- D111 seams (wave 16: +0x038/+0x0e8/+0x118) ----
 extern char     (*g_fn797750)(void*, uint32_t);     // 141797750
 extern void*    (*g_fn78C9F0)(void*, void*);        // 14178c9f0 (by-name find; RAW takes the std::string obj)
@@ -589,33 +635,33 @@ public:
     void* Slot2C8(uint32_t u);                    // 1417b1dd0
     void Slot2D0(int32_t n, uint32_t u,
                  const char* p4);                 // 1417b1e80
-    void Slot2D8(int32_t* p2);                    // 1417b22a0
-    void Slot2E0(void);                           // 1417b22b0
-    void Slot2E8(int32_t n2, int32_t n3,
+    void Slot480(int32_t* p2);                    // 1417b22a0
+    void Slot488(void);                           // 1417b22b0
+    void Slot490(int32_t n2, int32_t n3,
                  const char* p4);                 // 1417b22c0
-    void Slot2F0(int32_t n2, int32_t n3,
+    void Slot498(int32_t n2, int32_t n3,
                  const char* p4);                 // 1417b22d0
-    void Slot2F8(int32_t n2, int32_t n3,
+    void Slot4A0(int32_t n2, int32_t n3,
                  const char* p4);                 // 1417b22e0
-    void Slot300(uint32_t u2, int32_t n3);        // 1417b22f0
-    void Slot308(int32_t n2, int32_t n3,
+    void Slot4A8(uint32_t u2, int32_t n3);        // 1417b22f0
+    void Slot4B0(int32_t n2, int32_t n3,
                  int32_t n4);                     // 1417b2300
-    void Slot310(void);                           // 1417b2310
-    void Slot318(uint16_t u2, uint32_t u3);       // 1417b2320
-    void Slot320(uint32_t u2);                     // 1417b23f0
-    void Slot328(uint32_t u);                      // 1417b2400
-    void Slot330(void);                           // 1417b2540
-    bool Slot340(uint32_t u2, const char* p3,
+    void Slot4B8(void);                           // 1417b2310
+    void Slot4C0(uint16_t u2, uint32_t u3);       // 1417b2320
+    void Slot4C8(uint32_t u2);                     // 1417b23f0
+    void Slot4D0(uint32_t u);                      // 1417b2400
+    void Slot4D8(void);                           // 1417b2540
+    bool Slot4E8(uint32_t u2, const char* p3,
                  char c4);                         // 1417b8940
-    void Slot350(uint32_t u2, uint32_t u3,
+    void Slot4F8(uint32_t u2, uint32_t u3,
                  uint32_t u4);                     // 1417b16b0
-    void Slot358(uint32_t u2, uint32_t u3,
+    void Slot500(uint32_t u2, uint32_t u3,
                  uint32_t u4);                     // 1417c13e0
-    void Slot360(uint32_t u2, uint32_t u3,
+    void Slot508(uint32_t u2, uint32_t u3,
                  uint32_t u4);                     // 1417b9380
-    uint32_t Slot368(uint32_t u2);                 // 1417b02f0
-    uint64_t Slot370(uint32_t u2);                 // 1417afe40
-    uint64_t Slot378(uint32_t u2);                 // 1417b5810
+    uint32_t Slot510(uint32_t u2);                 // 1417b02f0
+    uint64_t Slot518(uint32_t u2);                 // 1417afe40
+    uint64_t Slot520(uint32_t u2);                 // 1417b5810
     uint64_t Slot380(int32_t n2);                   // 1417b5820
     void Slot388(uint32_t u2);                     // 1417b0e90
     void Slot390(uint32_t u2);                     // 1417afe70
@@ -677,8 +723,33 @@ public:
 
 
 
-};
+    // ---- D112 wave 17 (TRUE offsets +0x2e0..+0x370) ----
+    uint8_t  Slot2E0(uint32_t u2);                 // 1417af7d0
+    uint8_t  Slot2E8(uint32_t u2);                 // 1417af8e0
+    uint32_t Slot2F0(uint32_t u2);                  // 1417af940
+    uint64_t Slot2F8(uint32_t u2, uint32_t u3);      // 1417af990
+    uint64_t Slot300(uint32_t u2, int64_t l3,
+                     int64_t l4, int64_t l5);       // 1417af9f0
+    char     Slot308(uint32_t u2, uint32_t u3,
+                     int32_t n4);                   // 1417ac2d0
+    void     Slot310(void);                         // 1417bd550
+    uint8_t  Slot318(void);                         // 1417ac060
+    uint8_t  Slot320(void);                         // 1417ac080
+    uint8_t  Slot328(uint32_t u2);                  // 1417ab340
+    uint8_t  Slot330(uint32_t u2);                  // 1417ab1a0
+    void     Slot338(uint32_t u2, uint32_t u3);     // 1417af290
+    void     Slot340(uint32_t u2, int32_t n3,
+                     uint32_t u4, uint32_t u5);     // 1417af230
+    void     Slot348(uint32_t u2, int32_t n3,
+                     uint32_t u4, uint32_t u5);     // 1417af250
+    void     Slot350(uint32_t u2);                  // 1417af270
+    void     Slot358(uint32_t u2, void* p3);        // 1417af2b0
+    void     Slot360(uint32_t u2);                  // 1417af2d0
+    void     Slot368(void);                         // 1417afb00
+    uint8_t  Slot370(uint32_t u2, void* p3);        // 1417af2f0
 
-}  // namespace syndicate
+};
+}
+  // namespace syndicate
 
 #endif  // MODULES_SYNDICATE_SRC_SYNDECATELOGIC_H

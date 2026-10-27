@@ -121,23 +121,23 @@ static void Reset() {
 int main() {
     // ---- S1: the lg gate fails silently ----
     Reset();
-    pL->Slot350(0x22, 0x99, 0x44);  // LgFind miss
+    pL->Slot4F8(0x22, 0x99, 0x44);  // LgFind miss
     assert(s_nLgFind == 1 && s_nVt28 == 0);
     // ---- S2: type mismatch -> silent ----
     Reset();
     // 78f2d0 = 0x22 == u2 0x22 ok; use u2 wrong:
-    pL->Slot350(0x99, 0x33, 0x44);
+    pL->Slot4F8(0x99, 0x33, 0x44);
     assert(s_nC80 == 0 && s_nVt28 == 0);
     // ---- S3: leader lookup fails -> literal log ----
     Reset();
     s_uC80Ret = 0x71;   // no lg at 0x71
-    pL->Slot350(0x22, 0x33, 0x44);
+    pL->Slot4F8(0x22, 0x33, 0x44);
     assert(s_nC80 == 2);   // called again in the log
     assert(s_nLog == 1);
     // ---- S4: enemy -> STR_LEAGUE_IS_ENEMY_SYN ----
     Reset();
     s_c977D0Ret = 1;
-    pL->Slot350(0x22, 0x33, 0x44);
+    pL->Slot4F8(0x22, 0x33, 0x44);
     assert(s_nVt28 == 1 && s_nVt90 == 0);
     assert(strcmp(s_acVt28Str[0],
                   "STR_LEAGUE_IS_ENEMY_SYN") == 0);
@@ -145,7 +145,7 @@ int main() {
     // ---- S5: leave-soon -> STR_LEAGUE_LEAVE_SOON ----
     Reset();
     s_c3920Ret = 0;   // 763920 == 0 -> leave path
-    pL->Slot350(0x22, 0x33, 0x44);
+    pL->Slot4F8(0x22, 0x33, 0x44);
     assert(s_n977D0 == 2);   // both checks ran
     assert(s_nE7E0 == 1);
     assert(strcmp(s_acVt28Str[0],
@@ -154,14 +154,14 @@ int main() {
     // ---- S6: 03D0 fails -> the failure log ----
     Reset();
     s_c3920Ret = 1; s_c03D0Ret = 0;
-    pL->Slot350(0x22, 0x33, 0x44);
+    pL->Slot4F8(0x22, 0x33, 0x44);
     assert(s_nF470 == 1 && s_nLog == 1
            && s_cLog2 == 1);
     assert(s_nVt90 == 0 && s_nDCD0 == 0);
     // ---- S7: the full success path ----
     Reset();
     s_c3920Ret = 1;
-    pL->Slot350(0x22, 0x33, 0x44);
+    pL->Slot4F8(0x22, 0x33, 0x44);
     assert(s_nDCD0 == 1 && s_nVt710 == 1);
     assert(s_nVt3f0 == 1);
     // 0x44 + 3*1000000 = 3000068

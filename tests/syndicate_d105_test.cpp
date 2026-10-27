@@ -111,12 +111,12 @@ static void Reset() {
 int main() {
     // ---- S1: u2 == u4 -> nothing ----
     Reset();
-    pL->Slot360(7, 0x33, 7);
+    pL->Slot508(7, 0x33, 7);
     assert(s_nC8E0 == 0 && s_nVtA0 == 0);
     // ---- S2: synA != leader -> silent ----
     Reset();
     // plA syn = 0x51 == leader 0x51 -> proceeds
-    pL->Slot360(0x11, 0x33, 0x44);
+    pL->Slot508(0x11, 0x33, 0x44);
     assert(s_nE80 == 1 && s_nD3E0 == 1);
     assert(s_nVtA0 == 1);
     assert(s_uVtA0Args[0] == 0x33 &&
@@ -134,21 +134,21 @@ int main() {
     // ---- S3: not king -> no king broadcast ----
     Reset();
     s_u45520Ret = 0x50;   // != 74e3f0 (0x99)
-    pL->Slot360(0x11, 0x33, 0x44);
+    pL->Slot508(0x11, 0x33, 0x44);
     assert(s_nVt90 == 0 && s_nVt430 == 0);
     assert(s_nVtA0 == 1 && s_n92B0 == 1);
     // ---- S4: the 790390 gate fails ----
     Reset();
     s_i74E3F0 = 0x50; s_u45520Ret = 0x50;
     // 790390 = 0x33 == u3 0x33 ok; break it:
-    pL->Slot360(0x11, 0x11 + 1, 0x44);
+    pL->Slot508(0x11, 0x11 + 1, 0x44);
     // ...u3 still 0x33 -> passes; make u3 differ:
-    pL->Slot360(0x11, 0x77, 0x44);  // 790390 != u3
+    pL->Slot508(0x11, 0x77, 0x44);  // 790390 != u3
     assert(s_nVtA0 == 0 && s_nE80 == 0);
     // ---- S5: player lookup fails ----
     Reset();
     // both lookups must succeed; force via u2==u4
-    pL->Slot360(0x44, 0x33, 0x44);
+    pL->Slot508(0x44, 0x33, 0x44);
     assert(s_nE80 == 0 && s_nVtA0 == 0);
     puts("SYNDICATE_D105_OK: the leader change");
     return 0;
