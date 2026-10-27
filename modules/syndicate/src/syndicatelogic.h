@@ -94,6 +94,22 @@ extern void*    (*g_fnStringMgrGetStr)(void*, const char*);
 extern char     (*g_fnA84HasOldPos)(void*);
 extern uint32_t (*g_fnA84GetOldId)(void*);
 
+// ---- wave-5 seams (D95) ----
+extern int64_t  (*g_fnLgFindByName)(void*, const char*); // 1417c8aa0
+extern char     (*g_fnLgIsAlly)(void*, uint32_t);        // 141797750
+extern char     (*g_fnLgIsAntag)(void*, uint32_t);       // 1417977d0
+extern int32_t  (*g_fnLgEnemyCnt)(void*);                // 141791c70
+extern int32_t  (*g_fnLgEnemyMax)(void*);                 // 1417901d0
+extern uint32_t (*g_fnLgAddEnemySlot)(void*, uint32_t);  // 14178e370
+extern void     (*g_fnLgSetEnemy)(void*, uint32_t, uint32_t); // 14179a500
+extern uint32_t (*g_fnLgFindAllySlot)(void*, int32_t);   // 14178e200
+extern void     (*g_fnLgSetAlly)(void*, uint32_t, uint32_t);  // 14179a280
+extern uint32_t (*g_fnLgFindAntagSlot)(void*, int32_t);  // 14178e270
+extern void*    (*g_fnLgRefresh)(void*);                // 14178f470
+extern uint64_t (*g_fnRecGetName)(void*);                 // 1417867d0
+extern int64_t  (*g_fnRecGetMemberNo)(void*);             // 141787120
+extern uint64_t (*g_fnBoxVt1d8)(void*, uint32_t);         // vt+0x1d8
+
 // ---- wave-4 seams (D94) ----
 extern uint64_t (*g_fnLgGetId)(void*);             // 14178f270
 extern void*    (*g_fnFlowerA)(void*, int32_t, uint64_t, uint64_t);  // 1417886b0
@@ -216,6 +232,17 @@ public:
                              int64_t lAmt);     // 1417abac0
     uint64_t Slot1a0InviteGate(uint32_t uUser,
                                uint32_t uWho);   // 1417ba630
+    // ---- D95 wave 5: slots +0x1a8..+0x1c8 ----
+    uint64_t Slot1a8SetAntagonize(uint32_t uUser,
+                                  const char* pszName); // 1417aa5c0
+    uint8_t  Slot1b0ClearAlly(uint32_t uUser,
+                              const char* pszName);   // 1417ac9f0
+    uint64_t Slot1b8ClearAntagonize(uint32_t uUser,
+                                    const char* pszName); // 1417aa910
+    uint64_t Slot1c0IsAllyGate(uint32_t uLg,
+                               uint32_t uOther);       // 1417b6df0
+    uint64_t Slot1c8IsAntagGate(uint32_t uLg,
+                                uint32_t uOther);      // 1417b6e30
 
 
 

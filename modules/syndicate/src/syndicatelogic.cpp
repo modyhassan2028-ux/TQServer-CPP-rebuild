@@ -1,5 +1,6 @@
 // SyndicateLogicTable1.cpp — unit D90 (the header has the
 // address map + the seam list).
+#include <cstdio>
 #include "modules/syndicate/src/syndicatelogic.h"
 #include "modules/syndicate/src/SyndicateLeagueCmp.h"       // LeagueMemberLookup
 #include "modules/syndicate/src/SyndicateLogRemove.h"        // LogRecMapFind
@@ -869,6 +870,22 @@ int32_t CSyndicateLogic::Slot188RecI(uint32_t uUser) {
     return g_fnRecI((void*)lRec);
 }
 
+// ---- D95 seams (default null — tests bind them) ----
+int64_t  (*g_fnLgFindByName)(void*, const char*);
+char     (*g_fnLgIsAlly)(void*, uint32_t);
+char     (*g_fnLgIsAntag)(void*, uint32_t);
+int32_t  (*g_fnLgEnemyCnt)(void*);
+int32_t  (*g_fnLgEnemyMax)(void*);
+uint32_t (*g_fnLgAddEnemySlot)(void*, uint32_t);
+void     (*g_fnLgSetEnemy)(void*, uint32_t, uint32_t);
+uint32_t (*g_fnLgFindAllySlot)(void*, int32_t);
+void     (*g_fnLgSetAlly)(void*, uint32_t, uint32_t);
+uint32_t (*g_fnLgFindAntagSlot)(void*, int32_t);
+void*    (*g_fnLgRefresh)(void*);
+uint64_t (*g_fnRecGetName)(void*);
+int64_t  (*g_fnRecGetMemberNo)(void*);
+uint64_t (*g_fnBoxVt1d8)(void*, uint32_t);
+
 // ================= D94 wave 4 (+0x190..+0x1a0) =================
 
 uint64_t CSyndicateLogic::OnFlowerChange(
@@ -970,6 +987,250 @@ uint64_t CSyndicateLogic::Slot1a0InviteGate(
             return (uLead & ~0xffULL) |
                    (uint64_t)(uint8_t)bLead;
         }
+    }
+    return 0;
+}
+
+// ================= D95 wave 5 (+0x1a8..+0x1c8) =================
+
+// the box vt+0x88 broadcast (RAW: (**(code**)(boxvt+0x88))(box, id, buf, 0))
+static uint64_t BoxVt88Broadcast(void* pBox,
+                                 uint32_t uId, const char* psz) {
+    // RAW: box is the object at logic+8; its first
+    // pointer is the vt
+    return ((uint64_t (*)(void*, uint32_t, const char*,
+                          uint64_t))
+        (*(void***)pBox)[0x88/8])(
+            pBox, uId, psz, 0);
+}
+
+// the box vt+0x18 tip (RAW: (**(code**)(boxvt+0x18))(box, user, str))
+static uint64_t BoxVt18Tip(void* pBox, uint32_t uUser,
+                           const void* pv) {
+    return ((uint64_t (*)(void*, uint32_t, const void*))
+        (*(void***)pBox)[0x18/8])(
+            pBox, uUser, pv);
+}
+
+uint64_t CSyndicateLogic::Slot1a8SetAntagonize(
+    uint32_t uUser, const char* pszName) {
+    void* pLogic = this;
+    char szBuf[1024];
+    if (uUser == 0) { g_fnT1LogError(0); return 0; }
+    if (pszName == 0) { g_fnT1LogError(0); return 0; }
+    int64_t lRec = LogRecMapFind(
+        *(void**)((char*)pLogic + 0x18), uUser);
+    if (lRec == 0) return 0;
+    if (!g_fnRecIsLeader((void*)lRec)) return 0;
+    uint32_t uMyLg =
+        (uint32_t)g_fnA84GetSynId2((void*)lRec);
+    int64_t lMyLg = g_fnLgFind(
+        *(void**)((char*)pLogic + 0x10), uMyLg);
+    if (lMyLg == 0) return 0;
+    int64_t lTgtLg = g_fnLgFindByName(
+        *(void**)((char*)pLogic + 0x10), pszName);
+    if (lTgtLg == 0) return 0;
+    uint32_t uTgtLg =
+        (uint32_t)g_fnLgGetId((void*)lTgtLg);
+    if (uMyLg == uTgtLg) return 0;
+    void* pBox = *(void**)((char*)pLogic + 8);
+    if (g_fnLgIsAlly((void*)lMyLg, uTgtLg)) {
+        void* pIv = g_fnStringMgrInstance();
+        const void* pv = g_fnStringMgrGetStr(pIv,
+            "STR_SET_ALLY_SYNDICATE_FRIENDLY");
+        return BoxVt18Tip(pBox, uUser, pv);
+    }
+    if (g_fnLgIsAntag((void*)lMyLg, uTgtLg)) {
+        void* pIv = g_fnStringMgrInstance();
+        const void* pv = g_fnStringMgrGetStr(pIv,
+            "STR_SET_ANTAGONIZE_ALREADY_SET");
+        return BoxVt18Tip(pBox, uUser, pv);
+    }
+    if (g_fnLgEnemyMax((void*)lMyLg) <=
+        g_fnLgEnemyCnt((void*)lMyLg)) {
+        void* pIv = g_fnStringMgrInstance();
+        const void* pv = g_fnStringMgrGetStr(pIv,
+            "STR_OVER_ENEMY_SYNDICATE_COUNT");
+        return BoxVt18Tip(pBox, uUser, pv);
+    }
+    uint32_t uSlot = g_fnLgAddEnemySlot(
+        (void*)lMyLg, uTgtLg);
+    if (uSlot == 0xffffffff) {
+        void* pIv = g_fnStringMgrInstance();
+        const void* pv = g_fnStringMgrGetStr(pIv,
+            "STR_SET_ANTAGONIZE_FULL");
+        return BoxVt18Tip(pBox, uUser, pv);
+    }
+    g_fnLgSetEnemy((void*)lMyLg, uSlot, uTgtLg);
+    uint64_t uName = g_fnRecGetName((void*)lRec);
+    int64_t lNo = g_fnRecGetMemberNo((void*)lRec);
+    {
+        void* pIv = g_fnStringMgrInstance();
+        const char* pc = (const char*)
+            g_fnStringMgrGetStr(pIv,
+                "STR_SET_ANTAGONIZE_SUCCESS");
+        snprintf(szBuf, 0x400, pc,
+                 (int64_t)lNo, pszName);
+        BoxVt88Broadcast(pBox, uMyLg, szBuf);
+    }
+    g_fnLgRefresh((void*)lTgtLg);
+    {
+        void* pIv = g_fnStringMgrInstance();
+        const char* pc = (const char*)
+            g_fnStringMgrGetStr(pIv,
+                "STR_SET_ANTAGONIZE_SUCCESS_TO_TARGET");
+        snprintf(szBuf, 0x400, pc,
+                 (uint32_t)uName, (char*)lNo);
+        uint64_t uR = BoxVt88Broadcast(pBox,
+            uTgtLg, szBuf);
+        // RAW: CONCAT71((int7)(uVar7 >> 8), 1)
+        return ((uR >> 8) & ~0xffULL) | 1;
+    }
+}
+
+uint8_t CSyndicateLogic::Slot1b0ClearAlly(
+    uint32_t uUser, const char* pszName) {
+    void* pLogic = this;
+    char szBuf[1024]; szBuf[0] = 0;
+    if (pszName == 0) { g_fnT1LogError(0); return 0; }
+    int64_t lRec = LogRecMapFind(
+        *(void**)((char*)pLogic + 0x18), uUser);
+    if (lRec == 0) return 0;
+    if (!g_fnRecIsLeader((void*)lRec)) return 0;
+    uint32_t uMyLg =
+        (uint32_t)g_fnA84GetSynId2((void*)lRec);
+    int64_t lMyLg = g_fnLgFind(
+        *(void**)((char*)pLogic + 0x10), uMyLg);
+    if (lMyLg == 0) return 0;
+    int64_t lTgtLg = g_fnLgFindByName(
+        *(void**)((char*)pLogic + 0x10), pszName);
+    if (lTgtLg == 0) return 0;
+    int32_t nTgtLg =
+        (int32_t)g_fnLgGetId((void*)lTgtLg);
+    uint32_t uSlot = g_fnLgFindAllySlot(
+        (void*)lMyLg, nTgtLg);
+    if (uSlot == 0xffffffff) {
+        void* pIv = g_fnStringMgrInstance();
+        const void* pv = g_fnStringMgrGetStr(
+            pIv, "STR_NOT_ALLY");
+        void* pBox = *(void**)((char*)pLogic + 8);
+        BoxVt18Tip(pBox, uUser, pv);
+        return 0;
+    }
+    g_fnLgSetAlly((void*)lMyLg, uSlot, 0);
+    uint32_t uOther = g_fnLgFindAllySlot(
+        (void*)lTgtLg, (int32_t)uMyLg);
+    if (uOther != 0xffffffff)
+        g_fnLgSetAlly((void*)lTgtLg, uOther, 0);
+    szBuf[0] = 0;
+    memset(szBuf + 1, 0, 0x3ff);
+    void* pBox = *(void**)((char*)pLogic + 8);
+    void* pvTgtName = (void*)g_fnLgRefresh(
+        (void*)lTgtLg);
+    int64_t lNo = g_fnRecGetMemberNo((void*)lRec);
+    g_fnRecGetName((void*)lRec);
+    {
+        void* pIv = g_fnStringMgrInstance();
+        const char* pc = (const char*)
+            g_fnStringMgrGetStr(pIv,
+                "STR_CLEAR_ALLY_SUCCESS");
+        snprintf(szBuf, 0x400, pc, pvTgtName, lNo);
+        BoxVt88Broadcast(pBox, uMyLg, szBuf);
+    }
+    lNo = g_fnRecGetMemberNo((void*)lRec);
+    uint64_t uName = g_fnRecGetName((void*)lRec);
+    g_fnLgRefresh((void*)lMyLg);
+    {
+        void* pIv = g_fnStringMgrInstance();
+        const char* pc = (const char*)
+            g_fnStringMgrGetStr(pIv,
+                "STR_CLEAR_ALLY_SUCCESS_TO_TARGET");
+        snprintf(szBuf, 0x400, pc, (uint32_t)uName,
+                 (void*)lNo);
+        BoxVt88Broadcast(pBox, (uint32_t)nTgtLg,
+            szBuf);
+    }
+    return 1;
+}
+
+uint64_t CSyndicateLogic::Slot1b8ClearAntagonize(
+    uint32_t uUser, const char* pszName) {
+    void* pLogic = this;
+    char szBuf[1024];
+    if (pszName == 0) { g_fnT1LogError(0); return 0; }
+    int64_t lRec = LogRecMapFind(
+        *(void**)((char*)pLogic + 0x18), uUser);
+    if (lRec == 0) return 0;
+    if (!g_fnRecIsLeader((void*)lRec)) return 0;
+    uint32_t uMyLg =
+        (uint32_t)g_fnA84GetSynId2((void*)lRec);
+    int64_t lMyLg = g_fnLgFind(
+        *(void**)((char*)pLogic + 0x10), uMyLg);
+    if (lMyLg == 0) return 0;
+    int64_t lTgtLg = g_fnLgFindByName(
+        *(void**)((char*)pLogic + 0x10), pszName);
+    if (lTgtLg == 0) return 0;
+    int32_t nTgtLg =
+        (int32_t)g_fnLgGetId((void*)lTgtLg);
+    uint32_t uSlot = g_fnLgFindAntagSlot(
+        (void*)lMyLg, nTgtLg);
+    if (uSlot == 0xffffffff) {
+        void* pIv = g_fnStringMgrInstance();
+        const void* pv = g_fnStringMgrGetStr(
+            pIv, "STR_NOT_ANTAGONIZE");
+        void* pBox = *(void**)((char*)pLogic + 8);
+        return BoxVt18Tip(pBox, uUser, pv);
+    }
+    g_fnLgSetEnemy((void*)lMyLg, uSlot, 0);
+    uint64_t uName = g_fnRecGetName((void*)lRec);
+    int64_t lNo = g_fnRecGetMemberNo((void*)lRec);
+    void* pBox = *(void**)((char*)pLogic + 8);
+    {
+        uint64_t uVt = g_fnBoxVt1d8(pBox, uUser);
+        void* pIv = g_fnStringMgrInstance();
+        const char* pc = (const char*)
+            g_fnStringMgrGetStr(pIv,
+                "STR_CLEAR_ANTAGONIZE_SUCCESS");
+        snprintf(szBuf, 0x400, pc, uVt, pszName);
+        BoxVt88Broadcast(pBox, uMyLg, szBuf);
+    }
+    g_fnLgRefresh((void*)lMyLg);
+    {
+        void* pIv = g_fnStringMgrInstance();
+        const char* pc = (const char*)
+            g_fnStringMgrGetStr(pIv,
+                "STR_CLEAR_ANTAGONIZE_SUCCESS_TO_TARGET");
+        snprintf(szBuf, 0x400, pc, (uint32_t)uName,
+                 (char*)lNo);
+        uint64_t uR = BoxVt88Broadcast(pBox,
+            (uint32_t)nTgtLg, szBuf);
+        // RAW: CONCAT71((int7)(uVar4 >> 8), 1)
+        return ((uR >> 8) & ~0xffULL) | 1;
+    }
+}
+
+uint64_t CSyndicateLogic::Slot1c0IsAllyGate(
+    uint32_t uLg, uint32_t uOther) {
+    void* pLogic = this;
+    if (uOther != 0 && uLg != 0) {
+        int64_t lLg = g_fnLgFind(
+            *(void**)((char*)pLogic + 0x10), uLg);
+        if (lLg != 0)
+            return (uint64_t)(uint8_t)g_fnLgIsAlly(
+                (void*)lLg, uOther);
+    }
+    return 0;
+}
+
+uint64_t CSyndicateLogic::Slot1c8IsAntagGate(
+    uint32_t uLg, uint32_t uOther) {
+    void* pLogic = this;
+    if (uOther != 0 && uLg != 0) {
+        int64_t lLg = g_fnLgFind(
+            *(void**)((char*)pLogic + 0x10), uLg);
+        if (lLg != 0)
+            return (uint64_t)(uint8_t)g_fnLgIsAntag(
+                (void*)lLg, uOther);
     }
     return 0;
 }

@@ -4130,3 +4130,34 @@ __FILE__ الحرفية في الثنائيات (f:\version\cqserver-78.0.11-120
   syndicate.cpp الأصلي) مستثناة من بناء الرجريجن (بناءات DLL منفصلة،
   ModuleCreate متعارض بين الحزم — سلوك سابق محفوظ)
 - رجريجن 97/97 × 6 على البنية الجديدة
+
+## D95 — موجة 5 من جدول CSyndicateLogic: الدبلوماسية (27-10-2026)
+
+5 أجسام (الفتحات +0x1a8..+0x1c8) — إعلان/إلغاء العداء والحلف:
+
+### 1417aa5c0 (+0x1a8) — إعلان العداء
+بوابات: user==0/name==0 (سجل)، السجل، القائد، دوريّ اللاعب، البحث
+بالاسم 1417c8aa0. المسالك الحرفية بالترتيب:
+1. الحليف → STR_SET_ALLY_SYNDICATE_FRIENDLY (vt+0x18)
+2. عدو سابقاً → STR_SET_ANTAGONIZE_ALREADY_SET
+3. العدد ≥ الحد (141791c70/1417901d0) → STR_OVER_ENEMY_SYNDICATE_COUNT
+4. الجدول ممتلئ (14178e370 → 0xffffffff) → STR_SET_ANTAGONIZE_FULL
+ثم 14179a500(lg, slot, tgt)، ورسالتا STR_SET_ANTAGONIZE_SUCCESS ثم
+..._TO_TARGET (vt+0x88 مع مخزن 0x400 وsnprintf بالوسيطين بالترتيب
+الحرفي)، مع 14178f470 بين الرسالتين. العائدة CONCAT71((rax>>8), 1).
+
+### 1417ac9f0 (+0x1b0) — فك الحلف
+البحث عن خانة الحلف 14178e200 → 0xffffffff → STR_NOT_ALLY. ثم
+14179a280 مرتين (دوريّي ودوريّ الهدف)، ثم رسالتا
+STR_CLEAR_ALLY_SUCCESS و..._TO_TARGET. عائدة byte.
+
+### 1417aa910 (+0x1b8) — إلغاء العداء
+14178e270 → 0xffffffff → STR_NOT_ANTAGONIZE. ثم 14179a500(slot,0)
+ورسالتا STR_CLEAR_ANTAGONIZE_SUCCESS (وسيطها الأول من vt+0x1d8)
+و..._TO_TARGET.
+
+### 1417b6df0/1417b6e30 (+0x1c0/+0x1c8) — بوابتا العلاقة
+lg/other != 0 ثم 1417cad00 ثم 141797750/1417977d0 مباشرة.
+
+14 seam جديدة (منها g_fnLgRefresh بقيمة عائدة: التفكيك يستخدم
+عائدة 14178f470 كوسيط snprintf). رجريجن 98/98 × 6.
