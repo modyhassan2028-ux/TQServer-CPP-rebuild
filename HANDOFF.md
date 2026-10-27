@@ -155,3 +155,12 @@
 - الملفات: `Exe/Dll/Syndicate/Port/SyndicateMsgSyndicate.{h,cpp}` + `tests/syndicate_d67_test.cpp` (13 قسماً، 67 تأكيداً، خريطة D34 حقيقية للسلسلة).
 - رجريجن **71/71 × 6** + ASan نظيف.
 - **التالي (D68+)**: طبقة CMsg كلها مقفولة الآن — انتقال للأعماق: 1417b98e0، 1417b03b0، 1417b0680، 1417b48b0، 1417b4d60، 1417b0ea0، 1417b3300، 1417bed70، 1417b3a90 (التحزيم ممكن)، جدول CSyndicateLogic (232 فتحة)، إغلاق ModuleCreate (14177ec90)، وفك يدوي 1417ab8c0/1417ac2d0.
+
+---
+
+## تحديث D89 (2026-10-27)
+
+- **D89 مقفولة**: CLeagueMgr::FlyToInvadeWarning (141774500، 299 سطراً) + كيت CMsgInvadeWarning الحرفي (المُشيّد 1417d50f0 / Init النوع 0xc1c عبر 1417d5250 / فحص الإنشاء 1417d5170 / المدمران) في `Exe/Dll/Syndicate/Port/SyndicateLeagueInvadeWarn.{h,cpp}`.
+- رجريجن **93/93 × 6** + ‏ASan/UBSan نظيف (اختبار 10 أقسام، 26 تأكيداً، التقاط محتوى الرسالة وقت الإرسال).
+- **دروس مهمة**: (1) بوابة vt+0x288 ‏this ‏فقط (الخام بلا edx). (2) رأس الخريطة يُقرأ من *(map+0x30) — 600 عشري في الديكمبايل = +0x258. (3) local_538 = قيمة إرجاع rax من إدراج الخريطة الفرعية. (4) 4 نداءات operator_delete حرفية في مسار الإدراج. (5) بوابة الـ pop: plVar3 != *plVar3.
+- **التالي (D90+)**: بقية نطاق Syndicate.dll ‏— أجسام Process/CMsg ‏المتبقية من الجرد، 1417b4310 ‏(237)، جدول CSyndicateLogic (232)، IProvider (224)، إغلاق ModuleCreate (14177ec90)، هدفا الفك اليدوي (1417ab8c0، 1417ac2d0).
