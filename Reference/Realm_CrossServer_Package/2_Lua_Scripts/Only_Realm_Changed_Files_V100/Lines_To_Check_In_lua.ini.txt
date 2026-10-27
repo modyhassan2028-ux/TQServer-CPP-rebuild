@@ -1,0 +1,13 @@
+﻿# لو عندك فولدر lua خاص بيك ومش عايز تستبدله بالكامل، انسخ ملفات V100 دي داخل فولدر lua عندك
+# وتأكد إن السطور دي موجودة في ملف lua/lua.ini:
+
+FILE=V100/BasicData/[Imperial][BasicData]RealmText.lua
+FILE=V100/TaskScript/[Conquer][TaskScript]InterServeTaskCrystal.lua
+FILE=V100/TaskScript/[Conquer][TaskScript]InterServeTaskHisHero.lua
+FILE=V100/TaskScript/[Conquer][TaskScript]InterServeTaskKiller.lua
+FILE=V100/TaskScript/[Conquer][TaskScript]InterServeTaskMoveBRIC.lua
+FILE=V100/TaskScript/[Conquer][TaskScript]InterServeTaskPatrioticHero.lua
+FILE=V100/TaskScript/[Conquer][TaskScript]InterServeTaskSpy.lua
+FILE=V100/TaskScript/FrontierTask/[Conquer][TaskScript]FirstPerson.lua
+FILE=V100/TaskScript/FrontierTask/[Conquer][TaskScript]InterServeTaskLootingvillages.lua
+FILE=V100/ActiveScript/CrossActive/[Conquer][ActiveScript]CrossVisitingEnvoys.lua

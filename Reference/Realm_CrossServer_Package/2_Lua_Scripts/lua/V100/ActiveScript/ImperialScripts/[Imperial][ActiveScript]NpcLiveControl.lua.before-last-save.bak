@@ -1,0 +1,5 @@
+-- Written atomically by Imperial NPC Live Manager.
+tImperialNpcLiveRevision = "639285541822591898"
+tImperialNpcLiveCommand = {
+    Operation="move", NpcId=10062, MapId=5000, X=122, Y=91
+}

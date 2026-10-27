@@ -1,0 +1,26 @@
+// ====================================================================
+// ضيف السطور دي جوه ملف lua\lua.ini تحت قسم [MOD] (لو مش موجودة عندك)
+// Add these lines inside lua\lua.ini under [MOD] section:
+// ====================================================================
+
+// 1. نصوص وقوالب جوائز الريلم (Realm Text & Reward Template):
+00020 = V100\BasicData\[Imperial][BasicData]RealmText.lua
+02007 = V100\TempLogic\[Conquer][TempLogic]RewardTemplate.lua
+
+// 2. كوستات الريلم الأساسية الكلاسيكية (Classic 2015 Realm Missions):
+20006 = V100\TaskScript\[Conquer][TaskScript]InterServeTaskSpy.lua
+20007 = V100\TaskScript\[Conquer][TaskScript]InterServeTaskPatrioticHero.lua
+20008 = V100\TaskScript\[Conquer][TaskScript]InterServeTaskHisHero.lua
+20009 = V100\TaskScript\[Conquer][TaskScript]InterServeTaskMoveBRIC.lua
+20011 = V100\TaskScript\[Conquer][TaskScript]InterServeTaskCrystal.lua
+20012 = V100\TaskScript\[Conquer][TaskScript]InterServeTaskKiller.lua
+
+// 3. كوستات الريلم الإضافية والحديثة (Burning Village / Looting Villages & Thunder Strike / FirstPerson):
+20015 = V100\TaskScript\[Conquer][TaskScript]ServerTransferOfficer.lua
+20029 = V100\TaskScript\[Conquer][TaskScript]BorderTaskSurvey.lua
+20036 = V100\TaskScript\FrontierTask\[Conquer][TaskScript]InterServeTaskLootingvillages.lua
+20038 = V100\TaskScript\FrontierTask\[Conquer][TaskScript]FirstPerson.lua
+
+// 4. إيفنتات الكروس سيرفر والريلم (Cross-Server Events):
+40013 = V100\ActiveScript\CrossActive\[Conquer][ActiveScript]GuildNienTournament.lua
+40016 = V100\ActiveScript\CrossActive\[Conquer][ActiveScript]CrossVisitingEnvoys.lua
