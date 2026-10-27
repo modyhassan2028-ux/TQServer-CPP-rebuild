@@ -359,6 +359,26 @@ extern uint64_t(*g_fnLeaveSyn)(void*, void*, void*, const char*, char, char, cha
 
 class CSyndicateLogic {
 public:
+    // ==== NUMBERING CORRECTION (2026-10-27) ====
+    // The TRUE vtable is 232 slots at file off 0x113668
+    // (+0x000..+0x738). D97-D107 slot labels were taken
+    // from a base 53 slots late: a label "+0xNNN" written
+    // in those units is truly +0xNNN+0x1a8. Mapping of
+    // the mislabeled waves to TRUE offsets:
+    //   D97  +0x210..0x258 -> +0x3b8..+0x400
+    //   D98  +0x218        -> +0x3c0
+    //   D99/D100 +0x2d0    -> +0x478
+    //   D101 +0x2d8..+0x330-> +0x480..+0x4d8
+    //   D102 +0x340        -> +0x4e8
+    //   D103 +0x350        -> +0x4f8
+    //   D104 +0x358        -> +0x500
+    //   D105 +0x360        -> +0x508
+    //   D106 +0x368..+0x3b0-> +0x510..+0x558
+    //   D107 +0x0e8..+0x130-> +0x2b0..+0x2d8
+    // Method NAMES below (SlotXXX from those waves) keep
+    // their old labels; do not reuse those numbers for
+    // new slots. All ported bodies verified genuine.
+
     // ---- the vtable bodies (slot = the vtable
     // offset; the REAL name only where the binary
     // reveals it) ----
