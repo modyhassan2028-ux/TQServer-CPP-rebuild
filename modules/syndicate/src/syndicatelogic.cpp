@@ -1333,6 +1333,16 @@ void CSyndicateLogic::Slot208B4b0ThenSink3(
     g_fnSink3OpC(pObj);
 }
 
+// ---- D107 seams (default null — tests bind them) ----
+void     (*g_fn7CB000)(void*, uint32_t);
+int64_t  (*g_fn78F4E0)(void*);
+void     (*g_fn7873A0)(int32_t);
+int32_t  (*g_fn798800)(void*);
+uint32_t (*g_fn78F400)(void*);
+uint64_t (*g_fn78F410)(void*);
+void     (*g_fn76ACF0)(void*, int32_t, uint32_t, int32_t,
+                       uint16_t, uint16_t);
+
 // ---- D106 seams (default null — tests bind them) ----
 uint32_t (*g_fn75EE00)(void*, uint32_t);
 uint64_t (*g_fn74EF00)(void*, uint32_t);
@@ -2947,6 +2957,102 @@ void CSyndicateLogic::Slot3B0(int32_t n2, uint32_t u3) {
     if (n2 != 0) {
         g_fn7524D0(((void**)this)[10], n2, u3);
     }
+}
+// ================= D107 wave 12 (+0x0e8..+0x130) =================
+// NB: these slots read *(this+0x10) / *(this+0x50)
+// which in the ported layout are pp[2] / pp[10].
+
+// +0x0e8: 1417ab1c0
+void CSyndicateLogic::Slot0E8(uint32_t u2) {
+    g_fn7CB000(((void**)this)[2], u2);
+}
+
+// +0x0f0: 1417ab2b0
+int64_t CSyndicateLogic::Slot0F0(uint32_t u2) {
+    if (u2 == 0) return 0;
+    int64_t lLg = g_fnLgFind(((void**)this)[2], u2);
+    if (lLg != 0) {
+        return g_fn78F4E0((void*)lLg);
+    }
+    return 0;
+}
+
+// +0x0f8: 1417aeba0 — no `this` use at all
+void CSyndicateLogic::Slot0F8(int32_t n2) {
+    g_fn7873A0(n2);
+}
+
+// +0x100: 1417af4b0
+bool CSyndicateLogic::Slot100(uint32_t u2) {
+    int64_t lLg = g_fnLgFind(((void**)this)[2], u2);
+    return lLg != 0;
+}
+
+// +0x108: 1417af720
+uint64_t CSyndicateLogic::Slot108(uint32_t u2,
+                                  void** pp3) {
+    int64_t lLg = g_fnLgFind(((void**)this)[2], u2);
+    if (lLg == 0) {
+        g_fnT1LogError("\xa1\xef%s(%s)\xa1\xef in %s, %d");
+        return 0;
+    }
+    return g_fn79E6D0((void*)lLg, pp3);
+}
+
+// +0x110: 1417af780
+int32_t CSyndicateLogic::Slot110(uint32_t u2) {
+    int64_t lLg = g_fnLgFind(((void**)this)[2], u2);
+    if (lLg == 0) {
+        g_fnT1LogError("\xa1\xef%s(%s)\xa1\xef in %s, %d");
+        return 0;
+    }
+    return g_fn798800((void*)lLg);
+}
+
+// +0x118: 1417afd50
+uint32_t CSyndicateLogic::Slot118(uint32_t u2) {
+    void** pp = (void**)this;
+    if (pp[2] == 0) {
+        g_fnT1LogError("\xa1\xef%s(%s)\xa1\xef in %s, %d");
+    } else {
+        int64_t lLg = g_fnLgFind(pp[2], u2);
+        if (lLg != 0) {
+            return g_fn78F400((void*)lLg);
+        }
+    }
+    return 0;
+}
+
+// +0x120: 1417afdb0
+uint64_t CSyndicateLogic::Slot120(uint32_t u2) {
+    void** pp = (void**)this;
+    if (pp[2] == 0) {
+        g_fnT1LogError("\xa1\xef%s(%s)\xa1\xef in %s, %d");
+    } else {
+        int64_t lLg = g_fnLgFind(pp[2], u2);
+        if (lLg != 0) {
+            return g_fn78F410((void*)lLg);
+        }
+    }
+    return 0;
+}
+
+// +0x128: 1417afe10
+uint64_t CSyndicateLogic::Slot128(uint32_t u2) {
+    if (u2 == 0) return 0;
+    int64_t lLg = g_fnLgFind(((void**)this)[2], u2);
+    if (lLg != 0) {
+        return g_fn78F2D0((void*)lLg);
+    }
+    return 0;
+}
+
+// +0x130: 1417b2780
+void CSyndicateLogic::Slot130(int32_t n2, uint32_t u3,
+                              int32_t n4, uint16_t u5,
+                              uint16_t u6) {
+    g_fn76ACF0(((void**)this)[10], n2, u3, n4, u5,
+               u6);
 }
 
 

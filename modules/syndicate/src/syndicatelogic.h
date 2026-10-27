@@ -94,6 +94,16 @@ extern void*    (*g_fnStringMgrGetStr)(void*, const char*);
 extern char     (*g_fnA84HasOldPos)(void*);
 extern uint32_t (*g_fnA84GetOldId)(void*);
 
+// ---- D107 seams (wave 12) ----
+extern void     (*g_fn7CB000)(void*, uint32_t);       // 1417cb000
+extern int64_t  (*g_fn78F4E0)(void*);                 // 14178f4e0
+extern void     (*g_fn7873A0)(int32_t);               // 1417873a0
+extern int32_t  (*g_fn798800)(void*);                 // 141798800
+extern uint32_t (*g_fn78F400)(void*);                 // 14178f400
+extern uint64_t (*g_fn78F410)(void*);                 // 14178f410
+extern void     (*g_fn76ACF0)(void*, int32_t, uint32_t,
+                              int32_t, uint16_t, uint16_t); // 14176acf0
+
 // ---- D106 seams (wave 11) ----
 extern uint32_t (*g_fn75EE00)(void*, uint32_t);      // 14175ee00
 extern uint64_t (*g_fn74EF00)(void*, uint32_t);      // 14174ef00
@@ -516,6 +526,18 @@ public:
     uint64_t Slot3A0(uint32_t u2);                 // 1417aff10
     void Slot3A8(uint16_t u2);                     // 1417aff60
     void Slot3B0(int32_t n2, uint32_t u3);         // 1417aff80
+    void Slot0E8(uint32_t u2);                     // 1417ab1c0
+    int64_t Slot0F0(uint32_t u2);                  // 1417ab2b0
+    void Slot0F8(int32_t n2);                      // 1417aeba0
+    bool Slot100(uint32_t u2);                      // 1417af4b0
+    uint64_t Slot108(uint32_t u2, void** pp3);      // 1417af720
+    int32_t Slot110(uint32_t u2);                   // 1417af780
+    uint32_t Slot118(uint32_t u2);                  // 1417afd50
+    uint64_t Slot120(uint32_t u2);                  // 1417afdb0
+    uint64_t Slot128(uint32_t u2);                  // 1417afe10
+    void Slot130(int32_t n2, uint32_t u3,
+                 int32_t n4, uint16_t u5,
+                 uint16_t u6);                      // 1417b2780
 
 
 
