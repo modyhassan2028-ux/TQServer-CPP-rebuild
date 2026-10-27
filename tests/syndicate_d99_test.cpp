@@ -164,19 +164,19 @@ int main() {
     ((void**)abLogic)[2] = (void*)0x22;  // back to mgr
     // ---- S2: +0x268 / +0x270 the rank gates ----
     Reset();
-    assert(pL->Slot268(0) == 0);
-    assert(pL->Slot268(1) == 0);      // 1 != 0
+    assert(pL->Slot410(0) == 0);
+    assert(pL->Slot410(1) == 0);      // 1 != 0
     s_u647E0Ret = 1;
-    assert(pL->Slot268(1) == 1);      // match
-    assert(pL->Slot270(0) == 0);
+    assert(pL->Slot410(1) == 1);      // match
+    assert(pL->Slot418(0) == 0);
     s_u510 = 0;
-    assert(pL->Slot270(1) == 0);      // vt510 ret 0
+    assert(pL->Slot418(1) == 0);      // vt510 ret 0
     s_u510 = 7; s_u74E3F0 = 7;
-    assert(pL->Slot270(1) == 1);      // 7 == 7
+    assert(pL->Slot418(1) == 1);      // 7 == 7
     // ---- S3: +0x278 the country-league flow ----
     Reset();
     s_u763680 = 0x88; s_u763C80 = 0;
-    pL->Slot278(5, 4, 0x66, 1);      // c5=1: no bcast
+    pL->Slot420(5, 4, 0x66, 1);      // c5=1: no bcast
     assert(s_nFbf0 == 1 && s_cFbf0Last == 1
            && s_nVt8 == 1);
     assert(s_uVt8Args[0] == 0xAA);   // the lg type
@@ -187,7 +187,7 @@ int main() {
     assert(s_nVtA0 == 0);            // c5!=0: no a0
     assert(s_nCtor == 2 && s_nDtor == 2);
     // c5=0 + uVar3<n3 -> the STR_NOTIFY bcast
-    pL->Slot278(5, 4, 0x66, 0);
+    pL->Slot420(5, 4, 0x66, 0);
     assert(s_nVtA0 == 1 && s_nVt98 == 2);
     assert(strstr(s_pcVtA0Buf,
                   "STR_NOTIFY_NEW_COUNTRY_LEAGUE")
@@ -196,13 +196,13 @@ int main() {
     // ---- S4: +0x280 the short cousin ----
     Reset();
     s_u763680 = 0x88;
-    pL->Slot280(6, 2, (void*)0x66);
+    pL->Slot428(6, 2, (void*)0x66);
     assert(s_nEcf0 == 1 && s_n9220 == 1);
     assert(s_u52d0Args[0] == 0x99);
     // ---- S5: the +0x50 family ----
     Reset();
     s_u763C80 = 33;
-    pL->Slot288(9);
+    pL->Slot430(9);
     assert(s_u763C80Arg == 9);   // u forwarded
     pL->Slot298();
     s_pv7630D0 = (void*)0x77; s_u74E3F0 = 3;
