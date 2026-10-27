@@ -9,6 +9,7 @@
 #include "modules/syndicate/src/SyndicateLeagueOpt.h"        // the string mgr
 #include "modules/syndicate/src/SyndicateAppoint3de.h"       // the A84 seams
 #include "modules/syndicate/src/SyndicateLeagueBeRobFlow.h"  // g_fnLbrOpDelete
+#include "modules/syndicate/src/SyndicateInviteNotify.h"      // D114a msg seams
 #include <cstring>
 #include <vector>
 #include <string>
@@ -5280,6 +5281,470 @@ void CSyndicateLogic::Slot400(uint32_t u2) {
         (*(void***)pp[1])[0x1f8 / 8])(pp[1], u2);
     if (uId != 0)
         g_fn1417d3680(pp[9], u2, uId);
+}
+
+
+// ============================================================
+// D114a — wave 19 (TRUE offsets +0x560..+0x678, the small
+// half), 26 bodies, raw-verified against Syndicate.dll
+// (imagebase 0x141720000).
+// ============================================================
+
+// ---- the D114a seams (default null — tests bind them) ----
+bool     (*g_fn1417d9cc0)(void*, uint32_t, uint32_t,
+    uint32_t, uint32_t, const char*, const char*);
+void     (*g_fn14175efe0)(void*, uint32_t, uint32_t);
+void     (*g_fn141798a20)(void*, uint32_t, uint64_t);
+void     (*g_fn14174eee0)(void*, uint32_t, void*,
+                          uint64_t);
+void     (*g_fn14175f4a0)(void*, uint32_t, uint32_t);
+void     (*g_fn141764b80)(void*, uint32_t, uint32_t);
+void     (*g_fn141764f10)(void*, uint32_t, uint32_t);
+void     (*g_fn14175fa60)(void*, uint32_t);
+void     (*g_fn1417652c0)(void*, uint32_t);
+void     (*g_fn1417684b0)(void*, uint16_t);
+void     (*g_fn1417685f0)(void*, uint16_t);
+void     (*g_fn14174ebb0)(void*);
+void     (*g_fn1417715f0)(void*, uint32_t, int32_t,
+                          void***);
+void     (*g_fn141774c20)(void*);
+void     (*g_fn141766330)(void*, uint16_t, uint32_t*);
+void     (*g_fn14176ff50)(void*, uint16_t, uint32_t*);
+void*    (*g_fn1417630d0)(void*, uint32_t);
+int64_t  (*g_fn1417440d0)(void*);
+uint64_t (*g_fn141744130)(void*, uint32_t, uint8_t);
+uint64_t (*g_fn141764990)(void*, uint32_t, uint32_t);
+char     (*g_fn141774500)(void*, uint32_t, uint64_t);
+void*    (*g_fn14178c8e0)(void*, uint32_t);
+void     (*g_fn141787d70)(void*, uint64_t);
+int32_t  (*g_fn141787de0)(void*);
+void     (*g_fn141767890)(void*, uint32_t, uint64_t,
+                          uint32_t);
+void     (*g_fn14174b360)(void*, uint32_t, int32_t,
+                          uint64_t);
+char     (*g_fn14174be40)(void*, uint32_t);
+
+// ===== the OVERHEAD broadcast trio (msg.Create family) =====
+// RAW ffa0: p2==0 out; p5==0 out [RAW: [rsp+0x538] =
+// arg6 psz]; vt+0x278(box) -> 0 = SILENT out; the four
+// box setters vt+0x158(u2,u3)/+0x168(u2,b4)/+0x170(u2,
+// b5)/+0x178(u2,psz6); msg ctor d9900; d9b30(buf, **0**,
+// u2, u3, b4, b5, psz6, u7); miss -> the IF_OK log
+// 0x15f9; hit -> vt+0x58(box, u2, buf, r9b=1); d9950
+void CSyndicateLogic::Slot560(uint32_t u2, uint32_t u3,
+    uint8_t b4, uint8_t b5, const char* psz6,
+    uint32_t u7) {
+    void** pp = (void**)this;
+    if (u2 == 0 || psz6 == 0)
+        return;
+    void** ppVt = *(void***)pp[1];    // box vtable
+    void* pBox = pp[1];
+    char cOk = ((char (*)(void*))(
+        ppVt[0x278 / 8]))(pBox);
+    if (cOk == 0)
+        return;                     // RAW: silent out
+    ((void (*)(void*, uint32_t, uint32_t))
+     ppVt[0x158 / 8])(pBox, u2, u3);
+    ((void (*)(void*, uint32_t, uint8_t))
+     ppVt[0x168 / 8])(pBox, u2, b4);
+    ((void (*)(void*, uint32_t, uint8_t))
+     ppVt[0x170 / 8])(pBox, u2, b5);
+    ((void (*)(void*, uint32_t, const void*))
+     ppVt[0x178 / 8])(pBox, u2, psz6);
+    char acMsg[0x440];
+    g_fn1417d9900(acMsg);
+    if (!g_fn1417d9b30(acMsg, 0, u2, u3, b4, b5,
+                       psz6, u7)) {
+        g_fnSynLogCheck(STAR_FMT, "IF_OK",
+            "msg.Create(OVERHEAD_USER, idUser, "
+            "idLeague, bIsLeagueLeader, "
+            "bIsCountryLeagueMember, pszLeagueName, "
+            "idServer)",
+            s_pszLogicSrc, 0x15f9);
+    } else {
+        ((void (*)(void*, uint32_t, void*, uint8_t))
+         ppVt[0x58 / 8])(pBox, u2, acMsg, 1);
+    }
+    g_fn1417d9950(acMsg);
+}
+
+// RAW 0100: p2==0 out; p6 psz==0 out; msg ctor; spill
+// [0x38]=u7(dword), [0x30]=psz6, [0x28]=b5(byte),
+// [0x20]=b4(byte); d9b30(buf, **1**, u2, u3, b4, b5,
+// psz6, u7); miss -> 0x1607; hit -> vt+0x98(box, buf)
+void CSyndicateLogic::Slot568(uint32_t u2, uint32_t u3,
+    uint8_t b4, uint8_t b5, const char* psz6,
+    uint32_t u7) {
+    void** pp = (void**)this;
+    if (u2 == 0 || psz6 == 0)
+        return;
+    char acMsg[0x440];
+    g_fn1417d9900(acMsg);
+    if (!g_fn1417d9b30(acMsg, 1, u2, u3, b4, b5,
+                       psz6, u7)) {
+        g_fnSynLogCheck(STAR_FMT, "IF_OK",
+            "msg.Create(OVERHEAD_SYNDICATE, idSyn, "
+            "idLeague, bIsLeagueLeader, "
+            "bIsCountryLeagueMember, pszLeagueName, "
+            "idServer)",
+            s_pszLogicSrc, 0x1607);
+    } else {
+        void** ppBox = *(void***)pp[1];
+        ((void (*)(void*, void*))(
+            ppBox[0x98 / 8]))(pp[1], acMsg);
+    }
+    g_fn1417d9950(acMsg);
+}
+
+// RAW 0200: p5 psz==0 out; p6 psz==0 out; d9cc0(buf,
+// **2**, u2, u3, u4, psz5, psz6); miss -> 0x1615; hit ->
+// vt+0x98(box, buf)
+void CSyndicateLogic::Slot570(uint32_t u2, uint32_t u3,
+    uint32_t u4, const char* psz5, const char* psz6) {
+    void** pp = (void**)this;
+    if (psz5 == 0 || psz6 == 0)
+        return;
+    char acMsg[0x440];
+    g_fn1417d9900(acMsg);
+    if (!g_fn1417d9cc0(acMsg, 2, u2, u3, u4,
+                       psz5, psz6)) {
+        g_fnSynLogCheck(STAR_FMT, "IF_OK",
+            "msg.Create(OVERHEAD_ON_COUNTRY_CHANGED, "
+            "idOldCountryLeague, idNewCountryLeague, "
+            "idServer, pszStepDownLeague, "
+            "pszOnStageLeague)",
+            s_pszLogicSrc, 0x1615);
+    } else {
+        void** ppBox = *(void***)pp[1];
+        ((void (*)(void*, void*))(
+            ppBox[0x98 / 8]))(pp[1], acMsg);
+    }
+    g_fn1417d9950(acMsg);
+}
+
+// ===== the talk-channel family (vt+0x278 gate ->
+// vt+0x538(box, N, u2, 0, u3) with the literal channel
+// numbers; else the this+0x50 forward) =====
+// RAW 0810: u2==0 out; vt+0x278(box) -> vt+0x538(box,
+// **5**, u2, 0, u3); else 75efe0(this+0x50, u2, u3)
+void CSyndicateLogic::Slot5b8(uint32_t u2, uint32_t u3) {
+    void** pp = (void**)this;
+    if (u2 == 0)
+        return;
+    void** ppVt = *(void***)pp[1];
+    char cOk = ((char (*)(void*))(
+        ppVt[0x278 / 8]))(pp[1]);
+    if (cOk != 0) {
+        ((void (*)(void*, int, uint32_t, int, uint32_t))
+         ppVt[0x538 / 8])(pp[1], 5, u2, 0, u3);
+        return;
+    }
+    g_fn14175efe0(pp[10], u2, u3);
+}
+
+// RAW 0890: u2==0 or u3==0 out; vt+0x278 -> vt+0x538(
+// box, **3**, u2, u3, n4); else cad00(mgr,u3) syn ->
+// 798a20(syn, u2, n4)
+void CSyndicateLogic::Slot5c8(int32_t n2, uint32_t u3,
+                              int32_t n4) {
+    void** pp = (void**)this;
+    if (n2 == 0 || u3 == 0)
+        return;
+    void** ppVt = *(void***)pp[1];
+    char cOk = ((char (*)(void*))(
+        ppVt[0x278 / 8]))(pp[1]);
+    if (cOk == 0) {
+        void* pSyn = (void*)g_fnLgFind(pp[2], u3);
+        if (pSyn != 0)
+            g_fn141798a20(pSyn, (uint32_t)n2,
+                          (uint64_t)(uint32_t)n4);
+    } else {
+        ((void (*)(void*, int, uint32_t, uint32_t, int))
+         ppVt[0x538 / 8])(pp[1], 3, (uint32_t)n2, u3,
+                           n4);
+    }
+}
+
+// RAW 1e00: vt+0x278 -> vt+0x538(box, **6**, u2, 0,
+// u3); else 75f4a0(this+0x50, u2, u3)
+void CSyndicateLogic::Slot5d8(int32_t n2, uint32_t u3) {
+    void** pp = (void**)this;
+    void** ppVt = *(void***)pp[1];
+    char cOk = ((char (*)(void*))(
+        ppVt[0x278 / 8]))(pp[1]);
+    if (cOk != 0) {
+        ((void (*)(void*, int, uint32_t, int, uint32_t))
+         ppVt[0x538 / 8])(pp[1], 6, (uint32_t)n2, 0,
+                           u3);
+        return;
+    }
+    g_fn14175f4a0(pp[10], (uint32_t)n2, u3);
+}
+
+// RAW 1450: u2==0 out; vt+0x278 -> vt+0x538(box, **9**,
+// u2, 0, 0); else 74eee0(this+0x50, u2, p3, l4)
+void CSyndicateLogic::Slot5f8(uint32_t u2, void* p3,
+                              uint64_t l4) {
+    void** pp = (void**)this;
+    if (u2 == 0)
+        return;
+    void** ppVt = *(void***)pp[1];
+    char cOk = ((char (*)(void*))(
+        ppVt[0x278 / 8]))(pp[1]);
+    if (cOk != 0) {
+        ((void (*)(void*, int, uint32_t, int, int))
+         ppVt[0x538 / 8])(pp[1], 9, u2, 0, 0);
+        return;
+    }
+    g_fn14174eee0(pp[10], u2, p3, l4);
+}
+
+// ===== 27b0/28c0: the member-in-my-syn arbitration =====
+// RAW 27b0: u2==0 or u3==0 -> 0; vt+0x278 -> vt+0x550(
+// box, u2, u3) return 1; else vt+0x510(this,u2) != 0 &&
+// vt+0x440(this) != 0 && equal && (b0370(this,id)==u2
+// || vt+0x530(this,u2)) -> 774500(this+0x50, u2, u3)
+bool CSyndicateLogic::Slot588(uint32_t u2, uint32_t u3) {
+    void** pp = (void**)this;
+    void** ppVtSelf = *(void***)this;
+    if (u2 == 0 || u3 == 0)
+        return 0;
+    void** ppVt = *(void***)pp[1];
+    char cOk = ((char (*)(void*))(
+        ppVt[0x278 / 8]))(pp[1]);
+    if (cOk != 0) {
+        ((void (*)(void*, uint32_t, uint32_t))
+         ppVt[0x550 / 8])(pp[1], u2, u3);
+        return 1;
+    }
+    uint32_t uVt510 = ((uint32_t (*)(void*, uint32_t))
+        ppVtSelf[0x510 / 8])(this, u2);
+    if (uVt510 != 0) {
+        uint32_t uVt440 = ((uint32_t (*)(void*))
+            ppVtSelf[0x440 / 8])(this);
+        if (uVt440 != 0 && uVt510 == uVt440) {
+            if (g_fn1417b0370(this, uVt510) == (int)u2)
+                return g_fn141774500(pp[10], u2, u3);
+            char c530 = ((char (*)(void*, uint32_t))
+                ppVtSelf[0x530 / 8])(this, u2);
+            if (c530 != 0)
+                return g_fn141774500(pp[10], u2, u3);
+        }
+    }
+    return 0;
+}
+
+// RAW 28c0: u2==0 or u3==0 -> 0; vt+0x280(box) -> 0
+// = out (RAW: in_RAX & 0xff..ff00 quirk); vt+0x510(this,
+// u2) != 0 && vt+0x440(this) equal && (b0370==u2 ||
+// vt+0x530) -> 764990(this+0x50, u2, u3)
+uint64_t CSyndicateLogic::Slot648(int32_t n2,
+                                  uint32_t u3) {
+    void** pp = (void**)this;
+    void** ppVtSelf = *(void***)this;
+    if (n2 == 0 || u3 == 0)
+        return 0;
+    void** ppVt = *(void***)pp[1];
+    char cOk = ((char (*)(void*))(
+        ppVt[0x280 / 8]))(pp[1]);
+    if (cOk == 0)
+        return 0;
+    uint32_t uVt510 = ((uint32_t (*)(void*, uint32_t))
+        ppVtSelf[0x510 / 8])(this, (uint32_t)n2);
+    if (uVt510 != 0) {
+        uint32_t uVt440 = ((uint32_t (*)(void*))
+            ppVtSelf[0x440 / 8])(this);
+        if (uVt440 != 0 && uVt510 == uVt440) {
+            if (g_fn1417b0370(this, uVt510) == n2)
+                return g_fn141764990(pp[10],
+                                      (uint32_t)n2, u3);
+            char c530 = ((char (*)(void*, uint32_t))
+                ppVtSelf[0x530 / 8])(this, (uint32_t)n2);
+            if (c530 != 0)
+                return g_fn141764990(pp[10],
+                                      (uint32_t)n2, u3);
+        }
+    }
+    return 0;
+}
+
+// the d6640 seam (declared in syndicatelogic.h)
+void     (*g_fn1417d6640)(void*);
+
+// ===== 1380/29a0/31c0/5760/5830/5880 + the getters =====
+// RAW 1380 (beats the decompile's (cOk<<8) CONCAT
+// artifact): vt+0x278 != 0 -> xor al,al ret 0; vt+0x4a8(
+// box, u2) id == 0 -> 0; 74e3f0(this+0x50) != id -> 0;
+// 630d0(this+0x50, id) syn == 0 -> 0; 78c8e0(this+0x18,
+// u2): miss -> 74be40(syn, u2): al==1 -> 1 else 0; hit
+// -> 787de0(lVar): al==1 -> 1 else 0
+bool CSyndicateLogic::Slot600(uint32_t u2) {
+    void** pp = (void**)this;
+    void** ppVt = *(void***)pp[1];
+    char cOk = ((char (*)(void*))(
+        ppVt[0x278 / 8]))(pp[1]);
+    if (cOk != 0)
+        return false;
+    uint32_t uId = ((uint32_t (*)(void*, uint32_t))
+        ppVt[0x4a8 / 8])(pp[1], u2);
+    if (uId == 0)
+        return 0;
+    if ((uint32_t)g_fn14174e3f0(pp[10]) != uId)
+        return 0;
+    void* pSyn = g_fn1417630d0(pp[10], uId);
+    if (pSyn == 0)
+        return 0;
+    void* pRec = g_fn14178c8e0(pp[3], u2);
+    if (pRec == 0) {
+        char cBe = g_fn14174be40(pSyn, u2);
+        if (cBe != 1)
+            return 0;
+        return 1;
+    }
+    if (g_fn141787de0(pRec) != 1)
+        return 0;
+    return 1;
+}
+
+// RAW 29a0: u3==0 out; 78c8e0(this+0x18, u2) hit ->
+// 787d70(rec, l4); miss -> 630d0(this+0x50, u3) syn ->
+// 74b360(syn, u2, **4**, l4); ALWAYS 767890(this+0x50,
+// u2, l4, u3)
+void CSyndicateLogic::Slot640(uint32_t u2, uint32_t u3,
+                              int32_t n4) {
+    void** pp = (void**)this;
+    if (u3 == 0)
+        return;
+    void* pRec = g_fn14178c8e0(pp[3], u2);
+    if (pRec != 0) {
+        g_fn141787d70(pRec,
+                      (uint64_t)(uint32_t)n4);
+    } else {
+        void* pSyn = g_fn1417630d0(pp[10], u3);
+        if (pSyn == 0)
+            return;                  // RAW: je -> out
+        g_fn14174b360(pSyn, u2, 4,
+                      (uint64_t)(uint32_t)n4);
+    }
+    g_fn141767890(pp[10], u2,
+                  (uint64_t)(uint32_t)n4, u3);
+}
+
+// RAW 31c0: the 0x34-family msg — d6640(buf); d6820(buf,
+// 0x34, psz4, u2, u3, 0); hit -> vt+0x98(box, buf);
+// d66c0(buf)
+void CSyndicateLogic::Slot618(uint32_t u2, uint32_t u3,
+                              const char* psz4) {
+    void** pp = (void**)this;
+    char acMsg[0x438];       // RAW: 1072-byte local
+    g_fn1417d6640(acMsg);
+    if (g_fn1417d6820(acMsg, 0x34, psz4, u2, u3, 0)) {
+        void** ppVt = *(void***)pp[1];
+        ((void (*)(void*, void*))(
+            ppVt[0x98 / 8]))(pp[1], acMsg);
+    }
+    g_fn1417d66c0(acMsg);
+}
+
+// RAW 5760: vt+0x278 -> vt+0x578(box, u2) == 0 -> the
+// IF_OK log line 0x26d3 ("m_pConsumer->OSUserLogout(
+// idUser)" — the decompile showed a bare
+// InlineLogERROR; RAW wins); else vt+0x4e8(box, u2,
+// u3, u4, u5, u6)
+void CSyndicateLogic::Slot650(uint32_t u2, uint32_t u3,
+    uint32_t u4, uint16_t u5, uint16_t u6) {
+    void** pp = (void**)this;
+    void** ppVt = *(void***)pp[1];
+    char cOk = ((char (*)(void*))(
+        ppVt[0x278 / 8]))(pp[1]);
+    if (cOk != 0) {
+        char c578 = ((char (*)(void*, uint32_t))
+            ppVt[0x578 / 8])(pp[1], u2);
+        if (c578 == 0)
+            g_fnSynLogCheck(STAR_FMT, "IF_OK",
+                "m_pConsumer->OSUserLogout(idUser)",
+                s_pszLogicSrc, 0x26d3);
+        else
+            ((void (*)(void*, uint32_t, uint32_t,
+                       uint32_t, uint16_t, uint16_t))
+             ppVt[0x4e8 / 8])(pp[1], u2, u3, u4, u5,
+                               u6);
+    }
+}
+
+// RAW 5830: 630d0(this+0x50, u2) syn; 7440d0(syn) +
+// n3 < 0x2e90edd001 (the DATE magic)
+bool CSyndicateLogic::Slot5a0(uint32_t u2, int32_t n3) {
+    void** pp = (void**)this;
+    void* pSyn = g_fn1417630d0(pp[10], u2);
+    if (pSyn == 0)
+        return false;
+    int64_t lTime = g_fn1417440d0(pSyn);
+    return (uint64_t)(lTime + n3) < 0x2e90edd001ull;
+}
+
+// RAW 5880 (beats the decompile's 200000000000/CONCAT
+// artifacts): movsxd n3; sum = 7440d0(syn) + n3 (FULL
+// 64-bit lea); cmp sum, 0x2e90edd000; **ja** -> xor
+// al,al ret 0; else 744130(syn, sum, r8b=1); mov al,1
+bool CSyndicateLogic::Slot5a8(uint32_t u2,
+                              int32_t n3) {
+    void** pp = (void**)this;
+    void* pSyn = g_fn1417630d0(pp[10], u2);
+    if (pSyn == 0)
+        return false;
+    uint64_t uSum = (uint64_t)g_fn1417440d0(pSyn) +
+                    (uint64_t)(int64_t)n3;
+    if (uSum > 0x2e90edd000ull)
+        return false;
+    g_fn141744130(pSyn, (uint32_t)uSum, 1);
+    return true;
+}
+
+// ===== the +0x50 getter cluster (all verbatim
+// forwards) =====
+void CSyndicateLogic::Slot590(uint32_t u2,
+                              uint32_t u3) {
+    g_fn141764b80(*(void**)((char*)this + 0x50),
+                  u2, u3);
+}
+void CSyndicateLogic::Slot598(uint32_t u2,
+                              uint32_t u3) {
+    g_fn141764f10(*(void**)((char*)this + 0x50),
+                  u2, u3);
+}
+void CSyndicateLogic::Slot620(uint16_t u2) {
+    g_fn1417684b0(*(void**)((char*)this + 0x50), u2);
+}
+void CSyndicateLogic::Slot628(uint16_t u2) {
+    g_fn1417685f0(*(void**)((char*)this + 0x50), u2);
+}
+void CSyndicateLogic::Slot630(uint32_t u2) {
+    g_fn14175fa60(*(void**)((char*)this + 0x50), u2);
+}
+void CSyndicateLogic::Slot638(uint32_t u2) {
+    g_fn1417652c0(*(void**)((char*)this + 0x50), u2);
+}
+void CSyndicateLogic::Slot668(void) {
+    g_fn14174ebb0(*(void**)((char*)this + 0x50));
+}
+void CSyndicateLogic::Slot670(uint32_t u2, int32_t n3,
+                              void*** ppp4) {
+    g_fn1417715f0(*(void**)((char*)this + 0x50),
+                  u2, n3, ppp4);
+}
+void CSyndicateLogic::Slot678(void) {
+    g_fn141774c20(*(void**)((char*)this + 0x50));
+}
+void CSyndicateLogic::Slot658(uint16_t u2,
+                              uint32_t* pu3) {
+    g_fn141766330(*(void**)((char*)this + 0x50),
+                  u2, pu3);
+}
+void CSyndicateLogic::Slot660(uint16_t u2,
+                              uint32_t* pu3) {
+    g_fn14176ff50(*(void**)((char*)this + 0x50),
+                  u2, pu3);
 }
 
 }  // namespace syndicate
