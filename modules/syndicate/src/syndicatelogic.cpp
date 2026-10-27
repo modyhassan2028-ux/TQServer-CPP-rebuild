@@ -1333,6 +1333,17 @@ void CSyndicateLogic::Slot208B4b0ThenSink3(
     g_fnSink3OpC(pObj);
 }
 
+// ---- D106 seams (default null — tests bind them) ----
+uint32_t (*g_fn75EE00)(void*, uint32_t);
+uint64_t (*g_fn74EF00)(void*, uint32_t);
+uint64_t (*g_fn74EF20)(void*, int32_t);
+void     (*g_fn74ED30)(void*, uint32_t);
+void     (*g_fn74EBE0)(void*, uint32_t, int32_t);
+void     (*g_fn74EC50)(void*, uint32_t, int32_t);
+uint64_t (*g_fn74ECC0)(void*, uint32_t, int32_t);
+void     (*g_fn768020)(void*, uint16_t);
+void     (*g_fn7524D0)(void*, int32_t, uint32_t);
+
 // ---- D105 seams (default null — tests bind them) ----
 void  (*g_fn743E80)(void*, int32_t, int32_t, char);
 void  (*g_fn74D3E0)(void*);
@@ -2835,6 +2846,106 @@ void CSyndicateLogic::Slot360(uint32_t u2, uint32_t u3,
                 }
             }
         }
+    }
+}
+// ================= D106 wave 11 (+0x368..+0x3b0) =================
+
+// +0x368: 1417b02f0
+uint32_t CSyndicateLogic::Slot368(uint32_t u2) {
+    void** pp = (void**)this;
+    if (u2 == 0) return 0;
+    void* plPlayer = g_fn78C8E0(pp[3], u2);
+    if (plPlayer == 0) {
+        return g_fn75EE00(pp[10], u2);
+    }
+    uint64_t uSyn = g_fn785EA0(plPlayer);
+    if ((int32_t)uSyn != 0) {
+        // RAW: logic vt+0x518(this, synId)
+        return ((uint32_t (*)(void*, uint32_t))
+            (*(void***)this)[0x518/8])(
+                this, (uint32_t)uSyn);
+    }
+    return 0;
+}
+
+// +0x370: 1417afe40
+uint64_t CSyndicateLogic::Slot370(uint32_t u2) {
+    void** pp = (void**)this;
+    int64_t lLg = g_fnLgFind(pp[2], u2);
+    if (lLg != 0) {
+        return g_fn790390((void*)lLg);
+    }
+    return 0;
+}
+
+// +0x378: 1417b5810
+uint64_t CSyndicateLogic::Slot378(uint32_t u2) {
+    if (u2 == 0) {
+        // RAW: in_RAX & 0xff..00 (upper garbage)
+        return 0;
+    }
+    return g_fn74EF00(((void**)this)[10], u2);
+}
+
+// +0x380: 1417b5820
+uint64_t CSyndicateLogic::Slot380(int32_t n2) {
+    if (n2 == 0) {
+        return 0;
+    }
+    return g_fn74EF20(((void**)this)[10], n2);
+}
+
+// +0x388: 1417b0e90
+void CSyndicateLogic::Slot388(uint32_t u2) {
+    g_fn74ED30(((void**)this)[10], u2);
+}
+
+// +0x390: 1417afe70
+void CSyndicateLogic::Slot390(uint32_t u2) {
+    void** pp = (void**)this;
+    int32_t iVar1 =
+        ((int32_t (*)(void*, void*))
+            (*(void***)pp[1])[0x4a8/8])(pp[1], 0);
+    if (iVar1 == 0) return;
+    g_fn74EBE0(pp[10], u2, iVar1);
+}
+
+// +0x398: 1417afec0
+void CSyndicateLogic::Slot398(uint32_t u2) {
+    void** pp = (void**)this;
+    int32_t iVar1 =
+        ((int32_t (*)(void*, void*))
+            (*(void***)pp[1])[0x4a8/8])(pp[1], 0);
+    if (iVar1 == 0) return;
+    g_fn74EC50(pp[10], u2, iVar1);
+}
+
+// +0x3a0: 1417aff10
+uint64_t CSyndicateLogic::Slot3A0(uint32_t u2) {
+    void** pp = (void**)this;
+    uint64_t uVar1 =
+        (uint64_t)(int64_t)
+        ((int32_t (*)(void*, void*))
+            (*(void***)pp[1])[0x4a8/8])(pp[1], 0);
+    if ((int32_t)uVar1 == 0) {
+        // RAW: CONCAT71((int7)(uVar1 >> 8), 1)
+        return (uVar1 & ~0xffULL) | 1;
+    }
+    return g_fn74ECC0(pp[10], u2, (int32_t)uVar1);
+}
+
+// +0x3a8: 1417aff60
+void CSyndicateLogic::Slot3A8(uint16_t u2) {
+    void** pp = (void**)this;
+    if (u2 != 0 && pp[10] != 0) {
+        g_fn768020(pp[10], u2);
+    }
+}
+
+// +0x3b0: 1417aff80
+void CSyndicateLogic::Slot3B0(int32_t n2, uint32_t u3) {
+    if (n2 != 0) {
+        g_fn7524D0(((void**)this)[10], n2, u3);
     }
 }
 
