@@ -133,11 +133,11 @@ static void* Stub630d0(void* h, uint32_t id) {
 static int64_t s_lTime;
 static int64_t Stub440d0(void* s) {
     assert(s == s_pSynGot); return s_lTime; }
-static uint64_t Stub44130(void* s, uint32_t t,
-                          uint8_t f) {
+// 141744130 ret type corrected per RAW: void
+static void Stub44130(void* s, int64_t t,
+                      uint8_t f) {
     assert(s == s_pSynGot);
-    s_aTalk[0]=t; s_aTalk[1]=f;
-    return s_lTalk; }
+    s_aTalk[0]=(uint32_t)t; s_aTalk[1]=f; }
 static void* s_pRecRet; static void* s_pRecHost;
 static uint32_t s_uRecArg;
 static void* Stub8c8e0(void* h, uint32_t id) {

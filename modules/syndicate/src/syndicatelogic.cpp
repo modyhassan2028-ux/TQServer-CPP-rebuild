@@ -5311,8 +5311,75 @@ void     (*g_fn141774c20)(void*);
 void     (*g_fn141766330)(void*, uint16_t, uint32_t*);
 void     (*g_fn14176ff50)(void*, uint16_t, uint32_t*);
 void*    (*g_fn1417630d0)(void*, uint32_t);
+void     (*g_fn14174dda0)(void*, void*);
+void     (*g_fn1417bf610)(void*, void*, int64_t, void*);
+void     (*g_fn1417d9410)(void*);
+uint8_t  (*g_fn1417d94c0)(void*, uint32_t, int64_t,
+                          uint32_t);
+uint8_t  (*g_fn1417d9550)(void*, void*);
+void     (*g_fn1417d9690)(void*);
+void     (*g_fn1417d9460)(void*);
+void     (*g_fn14174ef80)(void*, void*);
+void     (*g_fn1417bf7c0)(void*, void*, int64_t, void*);
+void     (*g_fn1417d7800)(void*);
+uint8_t  (*g_fn1417d78b0)(void*, uint8_t);
+void     (*g_fn1417d7850)(void*);
+uint8_t  (*g_fn1417d7910)(void*, void*);
+void     (*g_fn1417d7a40)(void*);
+void     (*g_fn14174ef60)(void*, void*);
+void     (*g_fn14174efa0)(void*, void*);
+void     (*g_fn1417d5e50)(void*);
+uint8_t  (*g_fn1417d5f00)(void*, uint8_t);
+uint8_t  (*g_fn1417d5f60)(void*, void*);
+void     (*g_fn1417d60a0)(void*);
+void     (*g_fn1417d5ea0)(void*);
+void*    (*g_fn141777a30)(void*, uint32_t, uint32_t);
+uint32_t (*g_fn1418232c8)(uint32_t);
+void*    (*g_fn141764870)(void*, uint32_t);
+void*    (*g_fn14174bac0)(void*, uint32_t);
+uint32_t (*g_fn141745520)(void*);
+uint32_t (*g_fn141743e70)(void*);
+char     (*g_fn14174f000)(void*, uint32_t, uint32_t);
+int32_t  (*g_fn14174e950)(void*);
+void     (*g_fn141823090)(const char*, uint32_t,
+                          const char*, uint32_t);
+void     (*g_fn1418230a8)(const char*, const char*, uint32_t,
+                          void*, uint32_t, uint32_t, uint32_t,
+                          uint32_t, uint32_t);
+void     (*g_fn1417d4f30)(void*, uint32_t, uint32_t, uint8_t);
+void     (*g_fn1417d7350)(void*);
+uint32_t (*g_fn1417d4ed0)(void*, uint32_t);
+char     (*g_fn1417d7650)(void*, uint32_t, uint8_t,
+                          uint32_t);
+void     (*g_fn1417d73a0)(void*);
+char     (*g_fn1417632e0)(void*, uint32_t, void*, uint32_t);
+void     (*g_fn141790440)(void*, void*);
+void     (*g_fn1417d8c20)(void*);
+char     (*g_fn1417d8cd0)(void*, int32_t);
+char     (*g_fn1417d8d40)(void*, void*);
+void     (*g_fn1417d8e50)(void*);
+void     (*g_fn1417d8c70)(void*);
+void     (*g_fn14174d5a0)(void*, void*);
+uint32_t (*g_fn1417d4e70)(void*);
+uint32_t (*g_fn141823048)(uint32_t);
+char     (*g_fn1417d73e0)(void*);
+char     (*g_fn1417d7440)(void*);
+char     (*g_fn1417d7770)(void*, uint32_t, uint8_t, void*);
+void*    (*g_fn14174bbe0)(void*, uint32_t);
 int64_t  (*g_fn1417440d0)(void*);
-uint64_t (*g_fn141744130)(void*, uint32_t, uint8_t);
+void     (*g_fn141744130)(void*, int64_t, uint8_t);
+char     (*g_fn1417b2570)(void*, uint32_t, void*, void*,
+                          void*, void*);
+void     (*g_fn141823280)(void*);
+void     (*g_fn141823290)(void*);
+void     (*g_fn1417be5f0)(void*, uint32_t, uint32_t, uint32_t,
+                         void*);
+void     (*g_fn141732040)(void*, void*);
+void     (*g_fn1417d9000)(void*);
+char     (*g_fn1417d9140)(void*, uint32_t, uint32_t, uint32_t,
+                         const char*, uint32_t);
+void     (*g_fn1417d9050)(void*);
+void     (*g_fn141777de0)(void*, uint32_t, uint32_t, void*);
 uint64_t (*g_fn141764990)(void*, uint32_t, uint32_t);
 char     (*g_fn141774500)(void*, uint32_t, uint64_t);
 void*    (*g_fn14178c8e0)(void*, uint32_t);
@@ -5681,6 +5748,1253 @@ bool CSyndicateLogic::Slot5a0(uint32_t u2, int32_t n3) {
         return false;
     int64_t lTime = g_fn1417440d0(pSyn);
     return (uint64_t)(lTime + n3) < 0x2e90edd001ull;
+}
+
+// ===== Slot610 = 1417c1a90 (RAW) =====
+// The publish-token flow (the largest in D114b).
+// RAW (6 params): u2/u3/u4/u5==0 -> 0; vt+0x288
+// (box) map miss -> the STR_DIE vt+0x18 notify ->
+// 0; vt+0x278(box, u2) online: vt+0x4c8(box, u2)
+// miss -> STR_MAP_CANNOT_PUBLISH_TOKEN -> 0; hit
+// -> vt+0x450(box, **u3, u2**, u4, u5, u6, u7) ->
+// 1. OFFLINE: vt+0x280(box, u2) or vt+0x4c8 hit ->
+// main, else the notify -> 0. MAIN: vt+0x4a8(box,
+// u2) lid (0 -> 0); 630d0 miss -> the **0x201a**
+// "pSynLeague" log -> 0; 74bac0(lg, u3) member,
+// fallback 74bbe0, both miss -> the **0x2025**
+// "pToken" log -> 0; d4ed0(mem, **2**) type ->
+// 64870(host, type) objB null -> the 4-arg
+// 141823090 log (**0x202d**) -> 0; the string obj
+// (141823280 ctor) + b2570(this, u2, lg, mem, objB,
+// &str) miss -> 141823290 dtor -> 0; objB-vt[2](
+// objB, 4) sub -> vt+0x58 = cost; 440d0(lg) <
+// cost -> STR_NOT_ENOUGH_LEAGUE_MONEY_... ->
+// dtor -> 0; else the delta (0 or 440d0-cost) ->
+// 44130(lg, delta, 1); 4f30(mem, **3**, f3+1, 0);
+// 4f30(mem, **4**, 23048(1), 1); the /1000-style
+// cap adjust (cap = objB-vt[2](objB, **3**)->
+// vt+0x50; f4 = d4ed0(mem,4); adj = cap+now2 >
+// now ? cap-now2+f4 : 0); d7350 ctor + d7650(
+// msg, d4e70(mem), (uint8_t)f3, adj) hit -> vt+0x8;
+// then the Slot5b0-twin block: memset 0x146 +
+// 45580(lg, rec); vt+0x568(box, u2, lid) ->
+// 66b60(host, id, &out1@0x40, 0x10, buf1) +
+// 66d10(host, id, &out2@0x48, 0x10, buf2); the
+// /1000 magic BOTH outs; b5370(this, u2, lg) flag;
+// d6110 + d61c0(msg, rec, flag, out1/1000,
+// out2/1000, buf1, buf2) miss -> the **0x2060**
+// IF_OK log, hit -> vt+0x8; the vec1 fill via
+// be5f0(this, u2, lid, type, &vec1); the loop:
+// id 0 or == u2 skip; vt+0x268/0x4d8 gates;
+// (vt+0x280 OR vt+0x4d0) hit -> 141732040(vec2,
+// id); d9000 msg ctor + vt+0x4b0(box) + d4ed0(
+// mem, 2) type -> d9140(msg, **1**, u2, type,
+// str.data(), 4b0) miss -> the **0x2087** IF_OK
+// log, hit -> vt+0x40(box, msg, vec2); the pack:
+// {u4, u5, u6, u7, 4b0+232c8(0)} -> 777de0(
+// this+0x58, u2, type, &pack); d9050 dtor; free
+// vecs; d6160 + d73a0 + 141823290; return 1.
+bool CSyndicateLogic::Slot610(uint32_t u2,
+                              uint32_t u3,
+                              uint32_t u4,
+                              uint32_t u5,
+                              uint32_t u6,
+                              uint32_t u7) {
+    void** pp = (void**)this;
+    if (u2 == 0 || u3 == 0 || u4 == 0 ||
+        u5 == 0)
+        return 0;
+    void** ppVt = *(void***)pp[1];
+    if (((char (*)(void*))ppVt[0x288 / 8])
+            (pp[1]) == 0) {
+        void* pInst = g_fnStringMgrInstance();
+        uint64_t uStr = (uint64_t)
+            g_fnStringMgrGetStr(pInst, "STR_DIE");
+        ((void (*)(void*, uint32_t, uint64_t))
+         ppVt[0x18 / 8])(pp[1], u2, uStr);
+        return 0;
+    }
+    if (((char (*)(void*, uint32_t))ppVt[0x278/8])
+            (pp[1], u2) != 0) {
+        if (((char (*)(void*, uint32_t))
+                 ppVt[0x4c8 / 8])(pp[1], u2) == 0) {
+            void* pInst = g_fnStringMgrInstance();
+            uint64_t uStr = (uint64_t)
+                g_fnStringMgrGetStr(
+                    pInst,
+                    "STR_MAP_CANNOT_PUBLISH_"
+                    "TOKEN");
+            ((void (*)(void*, uint32_t, uint64_t))
+             ppVt[0x18 / 8])(pp[1], u2, uStr);
+            return 0;
+        }
+        ((void (*)(void*, uint32_t, uint32_t,
+                   uint32_t, uint32_t, uint32_t,
+                   uint32_t))
+         ppVt[0x450 / 8])(pp[1], u3, u2, u4,
+                          u5, u6, u7);
+        return 1;
+    }
+    char cMain = ((char (*)(void*, uint32_t))
+                     ppVt[0x280 / 8])(pp[1], u2);
+    if (cMain == 0)
+        cMain = ((char (*)(void*, uint32_t))
+                     ppVt[0x4c8 / 8])(pp[1],
+                                       u2);
+    if (cMain == 0) {
+        void* pInst = g_fnStringMgrInstance();
+        uint64_t uStr = (uint64_t)
+            g_fnStringMgrGetStr(
+                pInst,
+                "STR_MAP_CANNOT_PUBLISH_"
+                "TOKEN");
+        ((void (*)(void*, uint32_t, uint64_t))
+         ppVt[0x18 / 8])(pp[1], u2, uStr);
+        return 0;
+    }
+    uint32_t uLid = ((uint32_t (*)(void*, uint32_t))
+        ppVt[0x4a8 / 8])(pp[1], u2);
+    if (uLid == 0)
+        return 0;
+    void* pLg = g_fn1417630d0(pp[10], uLid);
+    if (pLg == 0) {
+        g_fnSynLogCheck(STAR_FMT, "IF_NOT",
+            "pSynLeague", s_pszLogicSrc, 0x201a);
+        return 0;
+    }
+    void* pMem = g_fn14174bac0(pLg, u3);
+    if (pMem == 0)
+        pMem = g_fn14174bbe0(pLg, u3);
+    if (pMem == 0) {
+        g_fnSynLogCheck(STAR_FMT, "IF_NOT",
+            "pToken", s_pszLogicSrc, 0x2025);
+        return 0;
+    }
+    uint32_t uType = g_fn1417d4ed0(pMem, 2);
+    void* pObjB = g_fn141764870(pp[10], uType);
+    if (pObjB == 0) {
+        g_fn141823090(
+            "table:cq_token_type, can not find "
+            "token_id[%lu] at %s, %d.", uType,
+            s_pszLogicSrc, 0x202d);
+        return 0;
+    }
+    char acStr[0x40];
+    g_fn141823280(acStr);
+    if (g_fn1417b2570(this, u2, pLg, pMem, pObjB,
+                      acStr) == 0) {
+        g_fn141823290(acStr);
+        return 0;
+    }
+    void* pSub4 = ((void* (*)(void*, int32_t))
+        (*(void***)pObjB)[0x10 / 8])(pObjB, 4);
+    int64_t nCost = ((int64_t (*)(void*))
+        (*(void***)pSub4)[0x58 / 8])(pSub4);
+    if (g_fn1417440d0(pLg) < nCost) {
+        void* pInst = g_fnStringMgrInstance();
+        uint64_t uStr = (uint64_t)
+            g_fnStringMgrGetStr(
+                pInst,
+                "STR_NOT_ENOUGH_LEAGUE_MONEY_"
+                "TO_PUBLISH_TOKEN");
+        ((void (*)(void*, uint32_t, uint64_t))
+         ppVt[0x18 / 8])(pp[1], u2, uStr);
+        g_fn141823290(acStr);
+        return 0;
+    }
+    int64_t nDelta = g_fn1417440d0(pLg) - nCost;
+    if (g_fn1417440d0(pLg) < nCost)
+        nDelta = 0;
+    g_fn141744130(pLg, nDelta, 1);
+    uint32_t uF3 = g_fn1417d4ed0(pMem, 3);
+    g_fn1417d4f30(pMem, 3, uF3 + 1, 0);
+    uint32_t uNow = g_fn141823048(1);
+    g_fn1417d4f30(pMem, 4, uNow, 1);
+    uint32_t uF4 = g_fn1417d4ed0(pMem, 4);
+    uint32_t uNow2 = g_fn141823048(1);
+    void* pSub3 = ((void* (*)(void*, int32_t))
+        (*(void***)pObjB)[0x10 / 8])(pObjB, 3);
+    uint32_t uCap = ((uint32_t (*)(void*))
+        (*(void***)pSub3)[0x50 / 8])(pSub3);
+    uint32_t uAdj = 0;
+    if (uCap + uF4 > uNow2)
+        uAdj = uCap - uNow2 + uF4;
+    uint8_t acMsgA[0x200];
+    g_fn1417d7350(acMsgA);
+    uint32_t uId = g_fn1417d4e70(pMem);
+    uint32_t uF3b = g_fn1417d4ed0(pMem, 3);
+    if (g_fn1417d7650(acMsgA, uId, (uint8_t)uF3b,
+                      uAdj) != 0) {
+        ((void (*)(void*, uint32_t, void*))
+         ppVt[0x8 / 8])(pp[1], u2, acMsgA);
+    }
+    uint8_t acRec[0x146];
+    memset(acRec, 0, 0x146);
+    g_fn141745580(pLg, acRec);
+    uint32_t uOut1 = 0;       // [rsp+0x40]
+    uint32_t uOut2 = 0;       // [rsp+0x48]
+    uint8_t abBuf1[0x11];     // 0xf70
+    uint8_t abBuf2[0x11];     // 0xf60
+    memset(abBuf1, 0, 0x11);
+    memset(abBuf2, 0, 0x11);
+    uint32_t uMsgId = ((uint32_t (*)(void*,
+        uint32_t, uint32_t))
+        ppVt[0x568 / 8])(pp[1], u2, uLid);
+    g_fn141766b60(pp[10], uMsgId, &uOut1, abBuf1,
+                  0x10);
+    g_fn141766d10(pp[10], uMsgId, &uOut2, abBuf2,
+                  0x10);
+    uint8_t acMsgB[0x470];
+    g_fn1417d6110(acMsgB);
+    uint32_t uFlag = g_fn1417b5370(this, u2, pLg);
+    // the /1000 magic (0x431bde83 >> 0x12)
+    if (!g_fn1417d61c0(acMsgB, acRec, uFlag,
+                       uOut1 / 1000, uOut2 / 1000,
+                       (const char*)abBuf1,
+                       (const char*)abBuf2)) {
+        g_fnSynLogCheck(STAR_FMT, "IF_OK",
+            "msgLeagueInfo.Create(stLeagueInfo, "
+            "this->GetLeagueAwardFlag(idUser ,"
+            "pSynLeague), ID_SERVER_LEAGUE_SERVER("
+            "idPlunder), ID_SERVER_LEAGUE_SERVER("
+            "idPlundered), szPlunder, szPlundered)",
+            s_pszLogicSrc, 0x2060);
+    } else {
+        ((void (*)(void*, uint32_t, void*))
+         ppVt[0x8 / 8])(pp[1], u2, acMsgB);
+    }
+    static std::vector<uint32_t> s_vec1;
+    s_vec1.clear();
+    g_fn1417be5f0(this, u2, uLid, uType,
+                  (void*)&s_vec1);
+    static std::vector<uint32_t> s_vec2;
+    s_vec2.clear();
+    for (uint32_t uId2 : s_vec1) {
+        if (uId2 == 0 || uId2 == u2)
+            continue;
+        if (((char (*)(void*, uint32_t))
+                 ppVt[0x268 / 8])(pp[1], uId2)
+                == 0)
+            continue;
+        if (((char (*)(void*, uint32_t))
+                 ppVt[0x4d8 / 8])(pp[1], uId2)
+                == 0)
+            continue;
+        char cAdd = ((char (*)(void*, uint32_t))
+            ppVt[0x280 / 8])(pp[1], uId2);
+        if (cAdd == 0)
+            cAdd = ((char (*)(void*, uint32_t))
+                ppVt[0x4d0 / 8])(pp[1], uId2);
+        if (cAdd != 0)
+            g_fn141732040((void*)&s_vec2, &uId2);
+    }
+    uint8_t acMsgC[0x200];
+    g_fn1417d9000(acMsgC);
+    uint32_t u4b0 = ((uint32_t (*)(void*))
+        ppVt[0x4b0 / 8])(pp[1]);
+    uint32_t uType2 = g_fn1417d4ed0(pMem, 2);
+    if (g_fn1417d9140(acMsgC, 1, u2, uType2,
+                      (const char*)acStr,
+                      u4b0) == 0) {
+        g_fnSynLogCheck(STAR_FMT, "IF_OK",
+            "msgLeagueToken.Create(CMsgLeagueToken::"
+            "LEAGUE_TOKEN_CALLUP, idUser, pToken->"
+            "GetInt(LEAGUE_TOKEN_DATA_TOKEN_TYPE), "
+            "strPublishName, iArg1)",
+            s_pszLogicSrc, 0x2087);
+    } else {
+        ((void (*)(void*, void*, void*))
+         ppVt[0x40 / 8])(pp[1], acMsgC,
+                         (void*)&s_vec2);
+    }
+    uint32_t auPack[5];
+    auPack[0] = u4;
+    auPack[1] = u5;
+    auPack[2] = u6;
+    auPack[3] = u7;
+    auPack[4] = u4b0 + g_fn1418232c8(0);
+    g_fn141777de0(pp[11], u2, uType2, auPack);
+    g_fn1417d9050(acMsgC);
+    g_fn1417d6160(acMsgB);
+    g_fn1417d73a0(acMsgA);
+    g_fn141823290(acStr);
+    return 1;
+}
+
+// ===== Slot578 = 1417bdb20 (RAW) =====
+// The token/member-list broadcaster. RAW: online ->
+// vt+0x460(box, u2) + out; THIS-vt+0x510(this, u2)
+// -> league id; 630d0(host, id) league (null -> out);
+// the PTR-stride-8 vector filled by 74d5a0(lg,
+// &vec); d7350 msg ctor + d73e0(msg) header (miss ->
+// dtor + out); the loop (stride **8**, elements are
+// member PTRs): null element -> the **0x1e57**
+// IF_NOT "pToken" log -> next; d4e70(member) ->
+// 64870(host, id) objA (null -> the 141823090
+// "table:cq_token_type, token[%lu] is not exist"
+// log -> next); ebx = d4ed0(member, **4**); r13 =
+// 141823048(**1**); objA-vt[2](objA, **3**) subA ->
+// subA-vt[0x50/8=10](subA) = cap; edx = 0; if (ebx
+// != 0 && cap + ebx > r13) edx = cap - r13 + ebx;
+// r12 = edx; ebx = d4ed0(member, **3**); eax =
+// d4e70(member); d7770(msg, eax, (uint8_t)ebx, r12)
+// != 0 -> next (added); == 0 -> the flush: d7440(
+// msg) hit -> vt+0x8(box, u2, msg); d73e0(msg)
+// re-header (miss -> dtor + out); the retry d7770;
+// loop end -> d7440 hit -> vt+0x8 + d73a0 dtor.
+void CSyndicateLogic::Slot578(uint32_t u2) {
+    void** pp = (void**)this;
+    void** ppVt = *(void***)pp[1];
+    if (((char (*)(void*))ppVt[0x278 / 8])
+            (pp[1]) != 0) {
+        ((void (*)(void*, uint32_t))
+         ppVt[0x460 / 8])(pp[1], u2);
+        return;
+    }
+    uint32_t uLid = ((uint32_t (*)(void*, uint32_t))
+        (*(void***)this)[0x510 / 8])(this, u2);
+    void* pLg = g_fn1417630d0(pp[10], uLid);
+    if (pLg == 0)
+        return;
+    static std::vector<void*> s_vec578;
+    s_vec578.clear();
+    g_fn14174d5a0(pLg, (void*)&s_vec578);
+    uint8_t acMsg[0x200];
+    g_fn1417d7350(acMsg);
+    if (g_fn1417d73e0(acMsg) == 0) {
+        g_fn1417d73a0(acMsg);
+        return;
+    }
+    for (void* pMember : s_vec578) {
+        if (pMember == 0) {
+            g_fnSynLogCheck(STAR_FMT, "IF_NOT",
+                "pToken", s_pszLogicSrc, 0x1e57);
+            continue;
+        }
+        uint32_t uTokId = g_fn1417d4e70(pMember);
+        void* pObjA = g_fn141764870(pp[10],
+                                    uTokId);
+        if (pObjA == 0) {
+            // RAW: only (fmt, uTokId) set
+            g_fn141823090(
+                "table:cq_token_type, token[%lu] "
+                "is not exist", uTokId, 0, 0);
+            continue;
+        }
+        uint32_t uF4 = g_fn1417d4ed0(pMember, 4);
+        uint32_t uNow = g_fn141823048(1);
+        void* pSubA = ((void* (*)(void*, int32_t))
+            (*(void***)pObjA)[0x10 / 8])(pObjA, 3);
+        uint32_t uCap = ((uint32_t (*)(void*))
+            (*(void***)pSubA)[0x50 / 8])(pSubA);
+        uint32_t uAdj = 0;
+        if (uF4 != 0) {
+            uint32_t uSum = uCap + uF4;
+            if (uSum > uNow)
+                uAdj = uCap - uNow + uF4;
+        }
+        uint32_t uF3 = g_fn1417d4ed0(pMember, 3);
+        uint32_t uId2 = g_fn1417d4e70(pMember);
+        if (g_fn1417d7770(acMsg, uId2,
+                          (uint8_t)uF3,
+                          (void*)(size_t)uAdj) != 0)
+            continue;
+        if (g_fn1417d7440(acMsg) != 0) {
+            ((void (*)(void*, uint32_t, void*))
+             (*(void***)pp[1])[0x8 / 8])(
+                pp[1], u2, acMsg);
+        }
+        if (g_fn1417d73e0(acMsg) == 0) {
+            g_fn1417d73a0(acMsg);
+            return;
+        }
+        g_fn1417d7770(acMsg, uId2, (uint8_t)uF3,
+                      (void*)(size_t)uAdj);
+    }
+    if (g_fn1417d7440(acMsg) != 0) {
+        ((void (*)(void*, uint32_t, void*))
+         (*(void***)pp[1])[0x8 / 8])(
+            pp[1], u2, acMsg);
+    }
+    g_fn1417d73a0(acMsg);
+}
+
+// ===== Slot5c0 = 1417bd730 (RAW) =====
+// The member-list pager. RAW: u2==0 or u3==0 out;
+// vt+0x278(box) online -> vt+0x538(box, **2**, u2,
+// u3, u4); else nPage = u4 * **0xF** (15 per page);
+// the dword vector filled by 632e0(this+0x50, u3,
+// &vec, 0) (miss -> free + out); count = size();
+// nPage >= count or nPage < 0 -> out; d8c20 msg
+// ctor + d8cd0(msg, count) miss -> the **0x17a4**
+// IF_NOT log ("msgList.Create((int)vecMember."
+// "size())") -> dtor + out; the loop from
+// &vec[nPage], max **15** iterations: LgFind(
+// this+0x10, id) user (null -> SKIP, no count, no
+// send); the 0x30 info block zeroed + 90440(user,
+// block) fill; d8d40(msg, block) MISS -> vt+0x8(
+// box, u2, msg) + d8e50 clear + d8d40 RETRY; then
+// the tail vt+0x8 + d8c70 dtor.
+void CSyndicateLogic::Slot5c0(uint32_t u2,
+                              uint32_t u3,
+                              uint32_t u4) {
+    void** pp = (void**)this;
+    if (u2 == 0 || u3 == 0)
+        return;
+    void** ppVt = *(void***)pp[1];
+    char cOn = ((char (*)(void*))(
+        ppVt[0x278 / 8]))(pp[1]);
+    if (cOn != 0) {
+        ((void (*)(void*, uint8_t, uint32_t,
+                   uint32_t, uint32_t))
+         ppVt[0x538 / 8])(pp[1], 2, u2, u3, u4);
+        return;
+    }
+    int32_t nPage = (int32_t)u4 * 0xF;
+    static std::vector<uint32_t> s_vec5c0;
+    s_vec5c0.clear();
+    if (g_fn1417632e0(pp[10], u3,
+                      (void*)&s_vec5c0, 0) == 0)
+        return;
+    int32_t nCnt = (int32_t)s_vec5c0.size();
+    if (nPage >= nCnt || nPage < 0)
+        return;
+    uint8_t acMsg[0x200];
+    g_fn1417d8c20(acMsg);
+    if (g_fn1417d8cd0(acMsg, nCnt) == 0) {
+        g_fnSynLogCheck(STAR_FMT, "IF_NOT",
+            "msgList.Create((int)vecMember.size())",
+            s_pszLogicSrc, 0x17a4);
+        g_fn1417d8c70(acMsg);
+        return;
+    }
+    int n = 0;
+    for (size_t i = (size_t)nPage;
+         i < s_vec5c0.size(); ++i) {
+        if (n >= 0xF)
+            break;
+        void* pUser = (void*)g_fnLgFind(
+            pp[2], s_vec5c0[i]);
+        if (pUser == 0)
+            continue;      // RAW: skip, NO count
+        uint8_t abInfo[0x30];
+        memset(abInfo, 0, 0x30);
+        g_fn141790440(pUser, abInfo);
+        if (g_fn1417d8d40(acMsg, abInfo) == 0) {
+            ((void (*)(void*, uint32_t, void*))
+             (*(void***)pp[1])[0x8 / 8])(
+                pp[1], u2, acMsg);
+            g_fn1417d8e50(acMsg);
+            g_fn1417d8d40(acMsg, abInfo);
+        }
+        ++n;
+    }
+    ((void (*)(void*, uint32_t, void*))
+     (*(void***)pp[1])[0x8 / 8])(pp[1], u2,
+                                 acMsg);
+    g_fn1417d8c70(acMsg);
+}
+
+// ===== Slot580 = 1417b2e30 (RAW) =====
+// The clean-CD/emoney-buy flow. RAW: online ->
+// vt+0x468(box, u2, u3) + return 1; 64870(host, u3)
+// objA (null -> 0); objA-vt[2](objA, **8**) subA,
+// subA-vt[9](subA)==0 -> 0; vt+0x4a8(box, u2) league
+// id (0 -> 0); 630d0(host, id) league (null -> 0);
+// 74bac0(lg, u3) member (null -> 0); THIS-vt+0x440
+// vs 45520(lg): equal -> main; else objA-vt[2]
+// (objA, **0**) + subA-vt[9], the **signed /100**
+// (magic 0x51eb851f sar 5) == 1 AND 43e70(lg) == u2
+// -> main; else the position loop i=5..7: objA-vt[2]
+// (objA, i) subA, subA-vt[9] != 0 -> 74f000(host,
+// u2, n) hit -> main; i>7 -> 0. MAIN: 74e950(host)
+// count <= 0 -> 141823090("cq_config: type=%u ,"
+// "clean token cd money is not config", **0x249fa**)
+// -> 0; vt+0x238(box,u2): count > it -> the
+// STR_TRAINING_GONGFU_EMONEY_NOT_ENOUGH notify via
+// vt+0x28(box, u2, str, **0xffff00**) -> 0; the
+// switch u3: **0x66** -> (0x47, 0x10dc), **0xCC** ->
+// (0x48, 0x10dd), else 141823090("cq_token_type: "
+// "token %u can not clean cd", u3) -> 0; vt+0x140
+// (box, u2, 0, count, uPos, 1) miss -> the same
+// notify -> 0; vt+0x200 -> u200 + vt+0x1d8(box,u2)
+// -> p1d8; the 1418230a8 gmlog ("gmlog/emoney_buy",
+// "%lu\t%s\t%lu\t%lu\t%lu\t%u\t%u\t1\t", u2,
+// p1d8, u200, **0x15e**, uR14, count, count);
+// 4f30(member, 4, 0, 1); vt+0x280(box,u2) hit ->
+// vt+0x470(box, u2, u4); d7350 msg ctor;
+// 4ed0(member, 3) -> d7650(msg, (uint8_t)u3, n,
+// 0) hit -> vt+0x8(box, u2, msg); d73a0 dtor;
+// return 1.
+bool CSyndicateLogic::Slot580(uint32_t u2,
+                              uint32_t u3,
+                              uint32_t u4) {
+    void** pp = (void**)this;
+    void** ppVt = *(void***)pp[1];
+    if (((char (*)(void*, uint32_t))ppVt[0x278 / 8])
+            (pp[1], u2) != 0) {
+        ((void (*)(void*, uint32_t, uint32_t))
+         ppVt[0x468 / 8])(pp[1], u2, u3);
+        return 1;
+    }
+    void* pObjA = g_fn141764870(pp[10], u3);
+    if (pObjA == 0)
+        return 0;
+    void* pSubA = ((void* (*)(void*, int32_t))
+        (*(void***)pObjA)[0x10 / 8])(pObjA, 8);
+    if (((int32_t (*)(void*))(*(void***)pSubA)
+         [0x48 / 8])(pSubA) == 0)
+        return 0;
+    uint32_t uLid = ((uint32_t (*)(void*, uint32_t))
+        ppVt[0x4a8 / 8])(pp[1], u2);
+    if (uLid == 0)
+        return 0;
+    void* pLg = g_fn1417630d0(pp[10], uLid);
+    if (pLg == 0)
+        return 0;
+    void* pMem = g_fn14174bac0(pLg, u3);
+    if (pMem == 0)
+        return 0;
+    uint32_t u440 = ((uint32_t (*)(void*))
+        (*(void***)this)[0x440 / 8])(this);
+    bool bMain = false;
+    if (g_fn141745520(pLg) == u440) {
+        bMain = true;
+    } else {
+        void* pSubB = ((void* (*)(void*, int32_t))
+            (*(void***)pObjA)[0x10 / 8])(pObjA, 0);
+        int32_t n9 = ((int32_t (*)(void*))
+            (*(void***)pSubB)[0x48 / 8])(pSubB);
+        // RAW: the signed /100 magic 0x51eb851f
+        if (n9 / 100 == 1) {
+            if (g_fn141743e70(pLg) == u2)
+                bMain = true;
+        }
+        if (!bMain) {
+            for (uint32_t i = 5;; ++i) {
+                void* pSubC =
+                    ((void* (*)(void*, int32_t))
+                     (*(void***)pObjA)[0x10 / 8])(
+                        pObjA, (int32_t)i);
+                int32_t n9c = ((int32_t (*)(void*))
+                    (*(void***)pSubC)[0x48 / 8])(
+                        pSubC);
+                if (n9c != 0) {
+                    if (g_fn14174f000(pp[10], u2,
+                            (uint32_t)n9c) != 0) {
+                        bMain = true;
+                        break;
+                    }
+                }
+                if (i + 1 > 7)      // inc; cmp 7
+                    return 0;
+            }
+        }
+    }
+    (void)bMain;
+    int32_t nCnt = g_fn14174e950(pp[10]);
+    if (nCnt <= 0) {
+        // RAW passes only (fmt, line); r8/r9 left
+        // as register leftovers
+        g_fn141823090(
+            "cq_config: type=%u ,clean token cd "
+            "money is not config", 0x249fa, 0, 0);
+        return 0;
+    }
+    uint32_t u238 = ((uint32_t (*)(void*, uint32_t))
+        (*(void***)pp[1])[0x238 / 8])(pp[1], u2);
+    if (nCnt > (int32_t)u238) {
+        void* pInst = g_fnStringMgrInstance();
+        uint64_t uStr = (uint64_t)
+            g_fnStringMgrGetStr(
+                pInst,
+                "STR_TRAINING_GONGFU_EMONEY_"
+                "NOT_ENOUGH");
+        ((void (*)(void*, uint32_t, uint64_t,
+                   uint32_t))
+         (*(void***)pp[1])[0x28 / 8])(
+            pp[1], u2, uStr, 0xffff00);
+        return 0;
+    }
+    uint32_t uPos, uR14;
+    if (u3 == 0x66) {
+        uPos = 0x47;
+        uR14 = 0x10dc;
+    } else if (u3 == 0xCC) {
+        uPos = 0x48;
+        uR14 = 0x10dd;
+    } else {
+        // RAW: only (fmt, u3) set
+        g_fn141823090(
+            "cq_token_type: token %u can not clean "
+            "cd", u3, 0, 0);
+        return 0;
+    }
+    char c140 = ((char (*)(void*, uint32_t, uint32_t,
+                           uint32_t, uint32_t, uint8_t))
+        (*(void***)pp[1])[0x140 / 8])(
+            pp[1], u2, 0, (uint32_t)nCnt, uPos, 1);
+    if (c140 == 0) {
+        void* pInst = g_fnStringMgrInstance();
+        uint64_t uStr = (uint64_t)
+            g_fnStringMgrGetStr(
+                pInst,
+                "STR_TRAINING_GONGFU_EMONEY_"
+                "NOT_ENOUGH");
+        ((void (*)(void*, uint32_t, uint64_t,
+                   uint32_t))
+         (*(void***)pp[1])[0x28 / 8])(
+            pp[1], u2, uStr, 0xffff00);
+        return 0;
+    }
+    uint32_t u200 = ((uint32_t (*)(void*, uint32_t))
+        (*(void***)pp[1])[0x200 / 8])(pp[1], u2);
+    void* p1d8 = ((void* (*)(void*, uint32_t))
+        (*(void***)pp[1])[0x1d8 / 8])(pp[1], u2);
+    g_fn1418230a8(
+        "gmlog/emoney_buy",
+        "%lu\t%s\t%lu\t%lu\t%lu\t%u\t%u\t1\t",
+        u2, p1d8, u200, 0x15e, uR14, (uint32_t)nCnt,
+        (uint32_t)nCnt);
+    g_fn1417d4f30(pMem, 4, 0, 1);
+    if (((char (*)(void*, uint32_t))
+             (*(void***)pp[1])[0x280 / 8])
+            (pp[1], u2) != 0) {
+        ((void (*)(void*, uint32_t, uint32_t))
+         (*(void***)pp[1])[0x470 / 8])(pp[1], u2,
+                                       u4);
+    }
+    uint8_t acMsg[0x200];
+    g_fn1417d7350(acMsg);
+    uint32_t u4ed = g_fn1417d4ed0(pMem, 3);
+    char c765 = g_fn1417d7650(acMsg,
+                              (uint32_t)(uint8_t)u3,
+                              (uint8_t)u4ed, 0);
+    if (c765 != 0) {
+        ((void (*)(void*, uint32_t, void*))
+         (*(void***)pp[1])[0x8 / 8])(pp[1], u2,
+                                     acMsg);
+    }
+    g_fn1417d73a0(acMsg);
+    return 1;
+}
+
+// ===== Slot5e0 = 1417bfa40 (RAW) =====
+// The IMPERIAL official-list broadcaster (sibling of
+// Slot5e8, same msg family). RAW: u2==0 out;
+// vt+0x278(box) online -> vt+0x538(box, **7**, u2,
+// 0, 0); else the 0x2b-record vector filled by
+// 74efa0(this+0x50, &vec); count == 0 -> d5e50 ctor
+// + d5f00(msg, **0**) [NOT 1 like Slot5e8]; miss ->
+// the 0x19b3 IF_NOT log ("msgList.Create(
+// STATE_OFFICIAL_TYPE_IMPERIAL)") -> dtor + free;
+// hit -> vt+0x8(box, u2, msg) + dtor + free, NO
+// loop, NO header record; count != 0 -> d5e50 +
+// d5f00(msg, 0), miss -> the **0x19bc** log ->
+// dtor + free; else the loop d5f60(msg, elem)
+// miss -> vt+0x8 + d60a0 clear + d5f60 RETRY
+// (stride 0x2b); then ALWAYS vt+0x8 + d5ea0 dtor.
+void CSyndicateLogic::Slot5e0(uint32_t u2) {
+    void** pp = (void**)this;
+    if (u2 == 0)
+        return;
+    void** ppVt = *(void***)pp[1];
+    char cOn = ((char (*)(void*))(
+        ppVt[0x278 / 8]))(pp[1]);
+    if (cOn != 0) {
+        ((void (*)(void*, uint8_t, uint32_t, uint32_t,
+                   uint32_t))
+         ppVt[0x538 / 8])(pp[1], 7, u2, 0, 0);
+        return;
+    }
+    static std::vector<Rec2b> s_vec5e0;
+    s_vec5e0.clear();
+    g_fn14174efa0(pp[10], (void*)&s_vec5e0);
+    if (s_vec5e0.empty()) {
+        uint8_t acMsgA[0x200];
+        g_fn1417d5e50(acMsgA);
+        if (g_fn1417d5f00(acMsgA, 0) == 0) {
+            g_fnSynLogCheck(STAR_FMT, "IF_NOT",
+                "msgList.Create("
+                "STATE_OFFICIAL_TYPE_IMPERIAL)",
+                s_pszLogicSrc, 0x19b3);
+        } else {
+            ((void (*)(void*, uint32_t, void*))
+             (*(void***)pp[1])[0x8 / 8])(pp[1], u2,
+                                         acMsgA);
+        }
+        g_fn1417d5ea0(acMsgA);
+        return;
+    }
+    uint8_t acMsg[0x200];
+    g_fn1417d5e50(acMsg);
+    if (g_fn1417d5f00(acMsg, 0) == 0) {
+        g_fnSynLogCheck(STAR_FMT, "IF_NOT",
+            "msgList.Create("
+            "STATE_OFFICIAL_TYPE_IMPERIAL)",
+            s_pszLogicSrc, 0x19bc);
+        g_fn1417d5ea0(acMsg);
+        return;
+    }
+    for (Rec2b& r : s_vec5e0) {
+        if (g_fn1417d5f60(acMsg, r.ab) == 0) {
+            ((void (*)(void*, uint32_t, void*))
+             (*(void***)pp[1])[0x8 / 8])(pp[1], u2,
+                                         acMsg);
+            g_fn1417d60a0(acMsg);
+            g_fn1417d5f60(acMsg, r.ab);  // retry
+        }
+    }
+    ((void (*)(void*, uint32_t, void*))
+     (*(void***)pp[1])[0x8 / 8])(pp[1], u2, acMsg);
+    g_fn1417d5ea0(acMsg);
+}
+
+// ===== Slot5b0 = 1417b8d90 (RAW) =====
+// The league-award info sender (twin of the
+// InviteNotify flow, same seams). RAW: u2==0 out;
+// vt+0x278(box) online -> vt+0x538(box, **1**, u2,
+// 0, 0) [channel **1**]; THIS-vt+0x510(this, u2) ->
+// the league id (0 -> silent out); 630d0(host, id)
+// syn miss -> the 0x1761 IF_NOT "pLeague" log; the
+// 0x146 record block memset(0,0x146) + 45580 fill;
+// the two 17-byte char buffers with the LITERAL
+// clear pattern (b/q/d/w/b at +0x5c0 and +0x5b0);
+// box-vt+0x568(box, u2, id) -> the msg id;
+// 66b60(host, id, &valOut@0x44, buf5c0, 0x10) +
+// 66d10(host, id, &keyOut@0x40, buf5b0, 0x10);
+// d6110 msg ctor; BOTH outs are the RAW magic
+// 0x431bde83>>0x12 = **/1000** (per the InviteNotify
+// precedent); b5370(this, u2, syn) -> the award
+// flag; d61c0(msg, rec, flag, keyOut/1000,
+// valOut/1000, buf5c0, buf5b0) miss -> the 0x1772
+// IF_OK log ("msgInfo.Create(stInfo, this->
+// GetLeagueAwardFlag...)"); hit -> vt+0x8(box, u2,
+// msg); d6160 dtor either way.
+void CSyndicateLogic::Slot5b0(uint32_t u2) {
+    void** pp = (void**)this;
+    if (u2 == 0)
+        return;
+    void** ppVt = *(void***)pp[1];
+    char cOn = ((char (*)(void*))(
+        ppVt[0x278 / 8]))(pp[1]);
+    if (cOn != 0) {
+        ((void (*)(void*, uint8_t, uint32_t, uint32_t,
+                   uint32_t))
+         ppVt[0x538 / 8])(pp[1], 1, u2, 0, 0);
+        return;
+    }
+    uint32_t uLid = ((uint32_t (*)(void*, uint32_t))
+        (*(void***)this)[0x510 / 8])(this, u2);
+    if (uLid == 0)
+        return;
+    void* pSyn = g_fn1417630d0(pp[10], uLid);
+    if (pSyn == 0) {
+        g_fnSynLogCheck(STAR_FMT, "IF_NOT", "pLeague",
+                        s_pszLogicSrc, 0x1761);
+        return;
+    }
+    uint8_t acRec[0x146];
+    memset(acRec, 0, 0x146);    // f30c0(0, 0x146)
+    g_fn141745580(pSyn, acRec);
+    uint32_t uValOut = 0;       // [rsp+0x44]
+    uint32_t uKeyOut = 0;       // [rsp+0x40]
+    uint8_t abBuf1[0x11];       // [rsp+0x5c0]
+    uint8_t abBuf2[0x11];       // [rsp+0x5b0]
+    memset(abBuf1, 0, 0x11);
+    memset(abBuf2, 0, 0x11);
+    uint32_t uId = ((uint32_t (*)(void*, uint32_t,
+                                  uint32_t))
+        ppVt[0x568 / 8])(pp[1], u2, uLid);
+    g_fn141766b60(pp[10], uId, &uValOut, abBuf1,
+                  0x10);
+    g_fn141766d10(pp[10], uId, &uKeyOut, abBuf2,
+                  0x10);
+    uint8_t acMsg[0x470];
+    g_fn1417d6110(acMsg);
+    // RAW magic 0x431bde83 >> 0x12 on BOTH = /1000
+    uint32_t uB = uKeyOut / 1000;
+    uint32_t uA = uValOut / 1000;
+    uint32_t uFlag = g_fn1417b5370(this, u2, pSyn);
+    if (!g_fn1417d61c0(acMsg, acRec, uFlag, uB, uA,
+                       (const char*)abBuf1,
+                       (const char*)abBuf2)) {
+        g_fnSynLogCheck(STAR_FMT, "IF_OK",
+            "msgInfo.Create(stInfo, this->"
+            "GetLeagueAwardFlag(idUser ,pLeague), "
+            "ID_SERVER_LEAGUE_SERVER(idPlunder), "
+            "ID_SERVER_LEAGUE_SERVER(idPlundered), "
+            "szPlunder, szPlundered)",
+            s_pszLogicSrc, 0x1772);
+    } else {
+        ((void (*)(void*, uint32_t, void*))
+         (*(void***)pp[1])[0x8 / 8])(pp[1], u2,
+                                     acMsg);
+    }
+    g_fn1417d6160(acMsg);
+}
+
+// ===== Slot608 = 1417b2a30 (RAW) =====
+// The call-up token ack. RAW: three 0-gates on
+// u2/u3/u4 -> return 0; vt+0x288(box) war gate miss
+// -> the STR_DIE notify via the string-mgr pair +
+// vt+0x18(box, u2, str) -> 0; online (vt+0x278):
+// vt+0x4d0 miss -> the STR_MAP_CANNOT_ACK_TOKEN
+// notify -> 0; else vt+0x458(box, u2, u3, u4) ->
+// **1**; offline: vt+0x268(box,u2) miss -> 0 [al
+// from the call]; the twin vt+0x4a8(box,u2) vs
+// vt+0x4a8(box,u3) id check (unequal -> 0);
+// vt+0x4d8(box,u2) miss -> 0; 777a30(this+0x58,
+// u3, u4) rec (null -> 0); the global 1418232c8(0)
+// counter: [rec+0x10] < counter -> the
+// STR_CALLUP_ACK_TOKEN_TIMEOUT notify -> 0;
+// vt+0x3f0(box) vs [rec]: MISMATCH branch ->
+// vt+0x280(box,u2) ? vt+0x448(box, u3f0, u2,
+// [rec], [rec+4], [rec+8], [rec+0xc]) : (vt+0x4d0
+// gate -> the CANNOT_ACK notify + 0; vt+0x4e0(box,
+// u2, [rec]) miss -> the IF_OK log **0x1fda**
+// ("m_pConsumer->NotifyCSAddEnterOSUser(idMember,
+// pStPublishToken->idPublishServer)") — **but still
+// returns 1**; hit -> vt+0x4e8(box, u2, [rec],
+// [rec+4], [rec+8], [rec+0xc])); MATCH branch ->
+// vt+0x280 ? vt+0x448(...) : (vt+0x4d0 gate ->
+// notify + 0; vt+0x4c0(box, u2, [rec+4], the packed
+// qword [rec+8]|[rec+0xc])); every tail path
+// returns 1.
+bool CSyndicateLogic::Slot608(uint32_t u2,
+                              uint32_t u3,
+                              uint32_t u4) {
+    void** pp = (void**)this;
+    if (u2 == 0)
+        return 0;
+    if (u3 == 0)
+        return 0;
+    if (u4 == 0)
+        return 0;
+    void** ppVt = *(void***)pp[1];
+    if (((char (*)(void*))ppVt[0x288 / 8])
+            (pp[1]) == 0) {
+        void* pInst = g_fnStringMgrInstance();
+        uint64_t uStr = (uint64_t)
+            g_fnStringMgrGetStr(pInst, "STR_DIE");
+        ((void (*)(void*, uint32_t, uint64_t))
+         ppVt[0x18 / 8])(pp[1], u2, uStr);
+        return 0;
+    }
+    if (((char (*)(void*, uint32_t))ppVt[0x278 / 8])
+            (pp[1], u2) != 0) {
+        if (((char (*)(void*, uint32_t))
+                 ppVt[0x4d0 / 8])(pp[1], u2) == 0) {
+            void* pInst = g_fnStringMgrInstance();
+            uint64_t uStr = (uint64_t)
+                g_fnStringMgrGetStr(
+                    pInst,
+                    "STR_MAP_CANNOT_ACK_TOKEN");
+            ((void (*)(void*, uint32_t, uint64_t))
+             ppVt[0x18 / 8])(pp[1], u2, uStr);
+            return 0;
+        }
+        ((void (*)(void*, uint32_t, uint32_t,
+                   uint32_t))
+         ppVt[0x458 / 8])(pp[1], u2, u3, u4);
+        return 1;
+    }
+    if (((char (*)(void*, uint32_t))ppVt[0x268 / 8])
+            (pp[1], u2) == 0)
+        return 0;
+    uint32_t uIdA = ((uint32_t (*)(void*, uint32_t))
+        ppVt[0x4a8 / 8])(pp[1], u2);
+    uint32_t uIdB = ((uint32_t (*)(void*, uint32_t))
+        ppVt[0x4a8 / 8])(pp[1], u3);
+    if (uIdA != uIdB)
+        return 0;
+    if (((char (*)(void*, uint32_t))ppVt[0x4d8 / 8])
+            (pp[1], u2) == 0)
+        return 0;
+    void* pRec = g_fn141777a30(pp[11], u3, u4);
+    if (pRec == 0)
+        return 0;
+    uint32_t uCnt = g_fn1418232c8(0);
+    if (*(int32_t*)((char*)pRec + 0x10) <
+        (int32_t)uCnt) {
+        void* pInst = g_fnStringMgrInstance();
+        uint64_t uStr = (uint64_t)
+            g_fnStringMgrGetStr(
+                pInst, "STR_CALLUP_ACK_TOKEN_TIMEOUT");
+        ((void (*)(void*, uint32_t, uint64_t))
+         ppVt[0x18 / 8])(pp[1], u2, uStr);
+        return 0;
+    }
+    uint32_t u3f0 = ((uint32_t (*)(void*))
+        (*(void***)pp[1])[0x3f0 / 8])(pp[1]);
+    uint32_t* pu = (uint32_t*)pRec;
+    if (u3f0 != pu[0]) {
+        // the MISMATCH branch
+        if (((char (*)(void*, uint32_t))
+                 (*(void***)pp[1])[0x280 / 8])
+                (pp[1], u2) != 0) {
+            ((void (*)(void*, uint32_t, uint32_t,
+                       uint32_t, uint32_t, uint32_t,
+                       uint32_t))
+             (*(void***)pp[1])[0x448 / 8])(
+                pp[1], u3f0, u2, pu[0], pu[1],
+                pu[2], pu[3]);
+            return 1;
+        }
+        if (((char (*)(void*, uint32_t))
+                 (*(void***)pp[1])[0x4d0 / 8])
+                (pp[1], u2) == 0) {
+            void* pInst = g_fnStringMgrInstance();
+            uint64_t uStr = (uint64_t)
+                g_fnStringMgrGetStr(
+                    pInst,
+                    "STR_MAP_CANNOT_ACK_TOKEN");
+            ((void (*)(void*, uint32_t, uint64_t))
+             (*(void***)pp[1])[0x18 / 8])(
+                pp[1], u2, uStr);
+            return 0;
+        }
+        if (((char (*)(void*, uint32_t, uint32_t))
+                 (*(void***)pp[1])[0x4e0 / 8])
+                (pp[1], u2, pu[0]) == 0) {
+            // RAW: logs but STILL returns 1
+            g_fnSynLogCheck(STAR_FMT, "IF_OK",
+                "m_pConsumer->NotifyCSAddEnterOSUser("
+                "idMember, pStPublishToken->"
+                "idPublishServer)",
+                s_pszLogicSrc, 0x1fda);
+        } else {
+            ((void (*)(void*, uint32_t, uint32_t,
+                       uint32_t, uint32_t, uint32_t))
+             (*(void***)pp[1])[0x4e8 / 8])(
+                pp[1], u2, pu[0], pu[1], pu[2], pu[3]);
+        }
+        return 1;
+    }
+    // the MATCH branch
+    if (((char (*)(void*, uint32_t))
+             (*(void***)pp[1])[0x280 / 8])
+            (pp[1], u2) != 0) {
+        ((void (*)(void*, uint32_t, uint32_t,
+                   uint32_t, uint32_t, uint32_t,
+                   uint32_t))
+         (*(void***)pp[1])[0x448 / 8])(
+            pp[1], u3f0, u2, pu[0], pu[1], pu[2],
+            pu[3]);
+        return 1;
+    }
+    if (((char (*)(void*, uint32_t))
+             (*(void***)pp[1])[0x4d0 / 8])
+            (pp[1], u2) == 0) {
+        void* pInst = g_fnStringMgrInstance();
+        uint64_t uStr = (uint64_t)
+            g_fnStringMgrGetStr(
+                pInst, "STR_MAP_CANNOT_ACK_TOKEN");
+        ((void (*)(void*, uint32_t, uint64_t))
+         (*(void***)pp[1])[0x18 / 8])(pp[1], u2,
+                                      uStr);
+        return 0;
+    }
+    ((void (*)(void*, uint32_t, uint32_t,
+               uint64_t))
+     (*(void***)pp[1])[0x4c0 / 8])(
+        pp[1], u2, pu[1],
+        *(const uint64_t*)(pu + 2));   // packed
+    return 1;
+}
+
+// ===== Slot5e8 = 1417bfdd0 (RAW) =====
+// The official-list broadcaster. RAW: u2==0 out;
+// vt+0x278(box) online -> vt+0x538(box, **8**, u2,
+// 0, 0) [xor esi + [rsp+0x20]=0]; else a 0x2b header
+// record zeroed at rsp+0x490 (the literal clear
+// pattern: d490/w494/d496/d49a/d49e/d4a2/w4a6/w4a8/
+// b4aa/q4ab/q4b3) filled by 74ef60(this+0x50, &rec);
+// a 0x2b-record vector filled by 74efa0(this+0x50,
+// &vec); msg d5e50 ctor; d5f00(msg, **1**) miss -> the
+// IF_NOT log **0x19e4** ("msgList.Create(
+// STATE_OFFICIAL_TYPE_IMPERIAL_AND_KING)") -> d5ea0
+// dtor + free, out; else d5f60(msg, &rec) [result
+// NOT checked]; the loop over the vector: d5f60 miss
+// -> vt+0x8(box, u2, msg) + d60a0(msg) [clear] +
+// d5f60 RETRY; stride 0x2b; then ALWAYS vt+0x8(box,
+// u2, msg) + d5ea0 + free.
+void CSyndicateLogic::Slot5e8(uint32_t u2) {
+    void** pp = (void**)this;
+    if (u2 == 0)
+        return;
+    void** ppVt = *(void***)pp[1];
+    char cOn = ((char (*)(void*))(
+        ppVt[0x278 / 8]))(pp[1]);
+    if (cOn != 0) {
+        ((void (*)(void*, uint8_t, uint32_t, uint32_t,
+                   uint32_t))
+         ppVt[0x538 / 8])(pp[1], 8, u2, 0, 0);
+        return;
+    }
+    Rec2b acRec;
+    memset(acRec.ab, 0, 0x2b);    // the literal clear
+    g_fn14174ef60(pp[10], acRec.ab);
+    static std::vector<Rec2b> s_vec5e8;
+    s_vec5e8.clear();
+    g_fn14174efa0(pp[10], (void*)&s_vec5e8);
+    uint8_t acMsg[0x200];
+    g_fn1417d5e50(acMsg);
+    if (g_fn1417d5f00(acMsg, 1) == 0) {
+        g_fnSynLogCheck(STAR_FMT, "IF_NOT",
+            "msgList.Create("
+            "STATE_OFFICIAL_TYPE_IMPERIAL_AND_KING)",
+            s_pszLogicSrc, 0x19e4);
+        g_fn1417d5ea0(acMsg);
+        return;
+    }
+    g_fn1417d5f60(acMsg, acRec.ab);   // NOT checked
+    for (Rec2b& r : s_vec5e8) {
+        if (g_fn1417d5f60(acMsg, r.ab) == 0) {
+            ((void (*)(void*, uint32_t, void*))
+             (*(void***)pp[1])[0x8 / 8])(pp[1], u2,
+                                         acMsg);
+            g_fn1417d60a0(acMsg);
+            g_fn1417d5f60(acMsg, r.ab); // the retry
+        }
+    }
+    ((void (*)(void*, uint32_t, void*))
+     (*(void***)pp[1])[0x8 / 8])(pp[1], u2, acMsg);
+    g_fn1417d5ea0(acMsg);
+}
+
+// the RAW sort predicate 1417b0950 (baked into the lea
+// of c0d10 — ported verbatim as a module static):
+// flag byte @+0x1a, key WORD @+0x4, **seta = DESCENDING**
+// (vs b0920's setb ascending).
+static char SynListPred1417b0950(const void* pa,
+                                const void* pb) {
+    const uint8_t* a = (const uint8_t*)pa;
+    const uint8_t* b = (const uint8_t*)pb;
+    uint8_t aF = a[0x1a];
+    if (aF != 0) {
+        if (b[0x1a] == 0)
+            return 1;               // mov al,1; ret
+        // both set -> the word compare
+    } else {
+        if (b[0x1a] != 0)
+            return 0;              // xor al,al; ret
+        // both clear -> the word compare
+    }
+    uint16_t uB = *(const uint16_t*)(b + 0x4);
+    return *(const uint16_t*)(a + 0x4) > uB;   // seta
+}
+
+// ===== Slot5f0 = 1417c0d10 (RAW, the 5th big fn) =====
+// The 0x2b-stride list pager. RAW: u2==0 out; b3 =
+// movzx r8b; b3 < 1 (unsigned jb) out; vt+0x278(box)
+// online -> vt+0x538(box, **10**, u2, **0**, b3 [the
+// 5th stack arg]); else 74ef80(this+0x50, &vec) —
+// NOTE: no syn lookup, the manager pointer directly;
+// the 0x2b records; nPage = b3*10 - 10 (lea *5, *2,
+// -0xa); count = (end-begin)/43 (the
+// 0x5f417d05f417d06 magic); nPage >= count -> the
+// SINGLE-PAGE branch: d7800 ctor + d78b0(msg, b3),
+// miss -> the IF_NOT log **0x195b** ("msgList.Create(
+// ucPage)"), hit -> vt+0x8(box, u2, msg), then d7850
+// dtor + free either way; nPage < count -> sort the
+// WHOLE vector bf7c0(begin, end, count,
+// &SynListPred1417b0950), d7800 + d78b0 (miss -> the
+// **0x1967** log), then the window loop p = begin +
+// nPage*0x2b, n=0, cap 10: d7910(msg, p) miss ->
+// vt+0x8(box, u2, msg) + d7a40(msg) + d7910 RETRY;
+// then ALWAYS vt+0x8(box, u2, msg) + d7850 + free.
+void CSyndicateLogic::Slot5f0(uint32_t u2,
+                              uint8_t b3) {
+    void** pp = (void**)this;
+    if (u2 == 0)
+        return;
+    if (b3 < 1)                     // cmp bl,1; jb
+        return;
+    void** ppVt = *(void***)pp[1];
+    char cOn = ((char (*)(void*))(
+        ppVt[0x278 / 8]))(pp[1]);
+    if (cOn != 0) {
+        // RAW: [rsp+0x20] = (uint32_t)b3
+        ((void (*)(void*, uint8_t, uint32_t, uint32_t,
+                   uint32_t))
+         ppVt[0x538 / 8])(pp[1], 0xa, u2, 0, b3);
+        return;
+    }
+    // RAW models the MSVC checked-iterated vector of
+    // 0x2b records (f3166(8)/anchor probes = no-ops)
+    static std::vector<Rec2b> s_vec2b;
+    s_vec2b.clear();
+    g_fn14174ef80(pp[10], (void*)&s_vec2b);
+    int32_t nPage = (int32_t)(b3 * 10 - 10);   // ebp
+    int64_t nCount = (int64_t)s_vec2b.size();
+    char* pBegin = (char*)s_vec2b.data();
+    char* pEnd = pBegin + s_vec2b.size() * 0x2b;
+    if (nPage >= nCount) {
+        // the single-page branch
+        uint8_t acMsg2[0x200];
+        g_fn1417d7800(acMsg2);
+        if (g_fn1417d78b0(acMsg2, b3) == 0) {
+            g_fnSynLogCheck(STAR_FMT, "IF_NOT",
+                "msgList.Create(ucPage)",
+                s_pszLogicSrc, 0x195b);
+        } else {
+            ((void (*)(void*, uint32_t, void*))
+             (*(void***)pp[1])[0x8 / 8])(pp[1], u2,
+                                         acMsg2);
+        }
+        g_fn1417d7850(acMsg2);
+        return;
+    }
+    g_fn1417bf7c0(pBegin, pEnd, nCount,
+                  (void*)&SynListPred1417b0950);
+    uint8_t acMsg[0x200];
+    g_fn1417d7800(acMsg);
+    if (g_fn1417d78b0(acMsg, b3) == 0) {
+        g_fnSynLogCheck(STAR_FMT, "IF_NOT",
+            "msgList.Create(ucPage)",
+            s_pszLogicSrc, 0x1967);
+        g_fn1417d7850(acMsg);
+        return;
+    }
+    char* p = pBegin + (int64_t)nPage * 0x2b;
+    uint32_t n = 0;
+    for (; p != pEnd && n < 0xa; ++n, p += 0x2b) {
+        if (g_fn1417d7910(acMsg, p) == 0) {
+            ((void (*)(void*, uint32_t, void*))
+             (*(void***)pp[1])[0x8 / 8])(pp[1], u2,
+                                         acMsg);
+            g_fn1417d7a40(acMsg);
+            g_fn1417d7910(acMsg, p);      // the retry
+        }
+    }
+    ((void (*)(void*, uint32_t, void*))
+     (*(void***)pp[1])[0x8 / 8])(pp[1], u2, acMsg);
+    g_fn1417d7850(acMsg);
+}
+
+// ===== Slot5d0 = 1417c0860 (RAW, the 4th big fn) =====
+// The 0x2d-stride info-list fn. RAW: u2==0 out; u3==0
+// out; vt+0x278(box) online -> vt+0x538(box, **4**, u2,
+// u3, u4) [NOTE the 5th stack arg = u4 — different arg
+// order than the channel-3/5 family]; else
+// 630d0(this+0x50, **u3**) syn (==0 out); a checked-
+// iterated std::vector<0x2d records> filled by
+// 74dda0(syn, &vec); edi = u4*10 (32-bit lea);
+// count = (end-begin)/45 (the 0x2d82d82d82d82d83 magic);
+// u4*10 >= count or < 0 -> vector free, OUT (no msg
+// yet); std::sort bf610(begin, end, count, &SynInfoPred
+// [1417b0920]); msg d9410 ctor; d94c0(msg, 0, count, 0)
+// miss -> the IF_NOT log 0x17fb ("msgInfo.Create(ID_NONE
+// , (int)vecInfo.size())") + d9460 dtor + free, out;
+// the record loop: p = begin + movsxd(u4*10)*0x2d,
+// n=0; while (p != end && n < 10): copy the 45 bytes,
+// then with uKey = *(uint32_t*)(rec+0x27): rec.d0x23 =
+// vt+0x228(box, uKey); rec.d0x1f = vt+0x540(**this**,
+// uKey); if vt+0x268(box, uKey) -> rec.w0x2b = vt+0x258(
+// box, uKey); d9550(msg, &rec) miss -> vt+0x8(box, u2,
+// msg) + d9690(msg) + d9550(msg, &rec) RETRY; inc n;
+// p += 0x2d; then ALWAYS vt+0x8(box, u2, msg) + d9460
+// dtor + vector free.
+//
+// the RAW sort predicate 1417b0920 (a real fn ADDRESS
+// baked into the lea — ported verbatim as a module
+// static): pred(a,b): a.b0xe&&!b.b0xe -> true; !a.b0xe&&
+// b.b0xe -> false; equal flags -> a.d0x27 <u b.d0x27
+// (setb).
+static char SynInfoPred1417b0920(const void* pa,
+                                 const void* pb) {
+    const uint8_t* a = (const uint8_t*)pa;
+    const uint8_t* b = (const uint8_t*)pb;
+    uint8_t aE = a[0xe];
+    if (aE != 0) {
+        if (b[0xe] == 0)
+            return 1;               // mov al,1; ret
+        // both set -> the d27 compare
+    } else {
+        if (b[0xe] != 0)
+            return 0;              // xor al,al; ret
+        // both clear -> the d27 compare
+    }
+    uint32_t uB = *(const uint32_t*)(b + 0x27);
+    return *(const uint32_t*)(a + 0x27) < uB;
+}
+
+void CSyndicateLogic::Slot5d0(uint32_t u2,
+                              uint32_t u3,
+                              uint32_t u4) {
+    void** pp = (void**)this;
+    if (u2 == 0)
+        return;
+    if (u3 == 0)
+        return;
+    void** ppVt = *(void***)pp[1];
+    char cOn = ((char (*)(void*))(
+        ppVt[0x278 / 8]))(pp[1]);
+    if (cOn != 0) {
+        // RAW: [rsp+0x20] = u4 (the 5th arg)
+        ((void (*)(void*, uint8_t, uint32_t, uint32_t,
+                   uint32_t))
+         ppVt[0x538 / 8])(pp[1], 4, u2, u3, u4);
+        return;
+    }
+    void* pSyn = g_fn1417630d0(pp[10], u3);
+    if (pSyn == 0)
+        return;
+    // RAW models an MSVC checked-iterated
+    // std::vector<0x2d records>; the f3166(8)/f2fdc +
+    // anchor probes are iterator-safety no-ops modeled
+    // by std::vector itself here.
+    static std::vector<Rec2d> s_vec2d;
+    s_vec2d.clear();
+    g_fn14174dda0(pSyn, (void*)&s_vec2d);
+    int32_t nOff = (int32_t)(u4 * 10);   // lea edi*5; add
+    int64_t nCount = (int64_t)s_vec2d.size();
+    if (nOff >= nCount || nOff < 0)
+        return;                        // jge / js -> free+out
+    char* pBegin = (char*)s_vec2d.data();
+    char* pEnd = pBegin + s_vec2d.size() * 0x2d;
+    g_fn1417bf610(pBegin, pEnd, nCount,
+                  (void*)&SynInfoPred1417b0920);
+    uint8_t acMsg[0x200];
+    g_fn1417d9410(acMsg);
+    if (g_fn1417d94c0(acMsg, 0, nCount, 0) == 0) {
+        g_fnSynLogCheck(STAR_FMT, "IF_NOT",
+            "msgInfo.Create(ID_NONE, "
+            "(int)vecInfo.size())",
+            s_pszLogicSrc, 0x17fb);
+        g_fn1417d9460(acMsg);
+        return;
+    }
+    char* p = pBegin + (int64_t)nOff * 0x2d;
+    uint32_t n = 0;
+    for (; p != pEnd && n < 0xa;
+         ++n, p += 0x2d) {
+        Rec2d acRec;
+        memcpy(acRec.ab, p, 0x2d);     // the verbatim copy
+        uint32_t uKey = *(uint32_t*)(acRec.ab + 0x27);
+        void** ppBox = *(void***)pp[1];
+        *(uint32_t*)(acRec.ab + 0x23) =
+            ((uint32_t (*)(void*, uint32_t))
+             ppBox[0x228 / 8])(pp[1], uKey);
+        *(uint32_t*)(acRec.ab + 0x1f) =
+            ((uint32_t (*)(void*, uint32_t))
+             (*(void***)this)[0x540 / 8])(this, uKey);
+        if (((char (*)(void*, uint32_t))
+             ppBox[0x268 / 8])(pp[1], uKey) != 0)
+            *(uint16_t*)(acRec.ab + 0x2b) =
+                ((uint16_t (*)(void*, uint32_t))
+                 ppBox[0x258 / 8])(pp[1], uKey);
+        if (g_fn1417d9550(acMsg, acRec.ab) == 0) {
+            ((void (*)(void*, uint32_t, void*))
+             ppBox[0x8 / 8])(pp[1], u2, acMsg);
+            g_fn1417d9690(acMsg);
+            g_fn1417d9550(acMsg, acRec.ab);  // the retry
+        }
+    }
+    ((void (*)(void*, uint32_t, void*))
+     (*(void***)pp[1])[0x8 / 8])(pp[1], u2, acMsg);
+    g_fn1417d9460(acMsg);
 }
 
 // RAW 5880 (beats the decompile's 200000000000/CONCAT

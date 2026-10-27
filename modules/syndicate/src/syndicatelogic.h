@@ -122,10 +122,109 @@ extern void     (*g_fn141766330)(void*, uint16_t,
                                  uint32_t*);          // 141766330
 extern void     (*g_fn14176ff50)(void*, uint16_t,
                                  uint32_t*);          // 14176ff50
+// the 0x2d-byte stride record of the info-list vector
+// (14174dda0 fill contract)
+struct Rec2d {
+    uint8_t ab[0x2d];
+};
+
+// the 0x2b-byte stride record of the list-page vector
+// (14174ef80 fill contract)
+struct Rec2b {
+    uint8_t ab[0x2b];
+};
+
 extern void*    (*g_fn1417630d0)(void*, uint32_t);   // 1417630d0
-extern int64_t  (*g_fn1417440d0)(void*);              // 1417440d0
-extern uint64_t (*g_fn141744130)(void*, uint32_t,
-                                 uint8_t);            // 141744130
+extern void     (*g_fn14174dda0)(void*, void*);           // 14174dda0
+extern void     (*g_fn1417bf610)(void*, void*, int64_t,
+                                 void*);                  // 1417bf610
+extern void     (*g_fn1417d9410)(void*);                  // 1417d9410
+extern uint8_t  (*g_fn1417d94c0)(void*, uint32_t, int64_t,
+                                 uint32_t);              // 1417d94c0
+extern uint8_t  (*g_fn1417d9550)(void*, void*);           // 1417d9550
+extern void     (*g_fn1417d9690)(void*);                  // 1417d9690
+extern void     (*g_fn1417d9460)(void*);                  // 1417d9460
+extern void     (*g_fn14174ef80)(void*, void*);           // 14174ef80
+extern void     (*g_fn1417bf7c0)(void*, void*, int64_t,
+                                 void*);                  // 1417bf7c0
+extern void     (*g_fn1417d7800)(void*);                  // 1417d7800
+extern uint8_t  (*g_fn1417d78b0)(void*, uint8_t);         // 1417d78b0
+extern void     (*g_fn1417d7850)(void*);                  // 1417d7850
+extern uint8_t  (*g_fn1417d7910)(void*, void*);           // 1417d7910
+extern void     (*g_fn1417d7a40)(void*);                  // 1417d7a40
+extern void     (*g_fn14174ef60)(void*, void*);           // 14174ef60
+extern void     (*g_fn14174efa0)(void*, void*);           // 14174efa0
+extern void     (*g_fn1417d5e50)(void*);                   // 1417d5e50
+extern uint8_t  (*g_fn1417d5f00)(void*, uint8_t);         // 1417d5f00
+extern uint8_t  (*g_fn1417d5f60)(void*, void*);           // 1417d5f60
+extern void     (*g_fn1417d60a0)(void*);                   // 1417d60a0
+extern void     (*g_fn1417d5ea0)(void*);                   // 1417d5ea0
+extern void*    (*g_fn141777a30)(void*, uint32_t,
+                                 uint32_t);               // 141777a30
+extern void     (*g_fn141745580)(void*, void*);           // 141745580
+extern uint32_t (*g_fn1417b5370)(void*, uint32_t,
+                                 void*);                  // 1417b5370
+extern void     (*g_fn141766b60)(void*, uint32_t, void*,
+                                 void*, uint32_t);       // 141766b60
+extern void     (*g_fn141766d10)(void*, uint32_t, void*,
+                                 void*, uint32_t);       // 141766d10
+extern void     (*g_fn1417d6110)(void*);                  // 1417d6110
+extern bool     (*g_fn1417d61c0)(void*, const void*,
+    uint32_t, uint32_t, uint32_t, const char*,
+    const char*);                                          // 1417d61c0
+extern void     (*g_fn1417d6160)(void*);                  // 1417d6160
+extern void*    (*g_fn141764870)(void*, uint32_t);         // 141764870
+extern void*    (*g_fn14174bac0)(void*, uint32_t);          // 14174bac0
+extern uint32_t (*g_fn141745520)(void*);                     // 141745520
+extern uint32_t (*g_fn141743e70)(void*);                     // 141743e70
+extern char     (*g_fn14174f000)(void*, uint32_t,
+                                 uint32_t);                 // 14174f000
+extern int32_t  (*g_fn14174e950)(void*);                      // 14174e950
+extern void     (*g_fn141823090)(const char*,
+    uint32_t, const char*, uint32_t);                       // 141823090
+extern void     (*g_fn1418230a8)(const char*, const char*,
+    uint32_t, void*, uint32_t, uint32_t, uint32_t, uint32_t,
+    uint32_t);                                               // 1418230a8
+extern void     (*g_fn1417d4f30)(void*, uint32_t, uint32_t,
+                                 uint8_t);                   // 1417d4f30
+extern void     (*g_fn1417d7350)(void*);                     // 1417d7350
+extern uint32_t (*g_fn1417d4ed0)(void*, uint32_t);           // 1417d4ed0
+extern char     (*g_fn1417d7650)(void*, uint32_t,
+                                 uint8_t, uint32_t);         // 1417d7650
+extern void     (*g_fn1417d73a0)(void*);                     // 1417d73a0
+extern char     (*g_fn1417632e0)(void*, uint32_t, void*,
+                                 uint32_t);                 // 1417632e0
+extern void     (*g_fn141790440)(void*, void*);              // 141790440
+extern void     (*g_fn1417d8c20)(void*);                     // 1417d8c20
+extern char     (*g_fn1417d8cd0)(void*, int32_t);           // 1417d8cd0
+extern char     (*g_fn1417d8d40)(void*, void*);              // 1417d8d40
+extern void     (*g_fn1417d8e50)(void*);                     // 1417d8e50
+extern void     (*g_fn1417d8c70)(void*);                     // 1417d8c70
+extern void     (*g_fn14174d5a0)(void*, void*);               // 14174d5a0
+extern uint32_t (*g_fn1417d4e70)(void*);                      // 1417d4e70
+extern uint32_t (*g_fn141823048)(uint32_t);                  // 141823048
+extern char     (*g_fn1417d73e0)(void*);                     // 1417d73e0
+extern char     (*g_fn1417d7440)(void*);                     // 1417d7440
+extern char     (*g_fn1417d7770)(void*, uint32_t, uint8_t,
+                                 void*);                      // 1417d7770
+extern void*    (*g_fn14174bbe0)(void*, uint32_t);          // 14174bbe0
+extern int64_t  (*g_fn1417440d0)(void*);                      // 1417440d0
+extern void     (*g_fn141744130)(void*, int64_t,
+                                 uint8_t);                  // 141744130
+extern char     (*g_fn1417b2570)(void*, uint32_t, void*,
+    void*, void*, void*);                                    // 1417b2570
+extern void     (*g_fn141823280)(void*);                     // 141823280
+extern void     (*g_fn141823290)(void*);                     // 141823290
+extern void     (*g_fn1417be5f0)(void*, uint32_t, uint32_t,
+    uint32_t, void*);                                        // 1417be5f0
+extern void     (*g_fn141732040)(void*, void*);               // 141732040
+extern void     (*g_fn1417d9000)(void*);                     // 1417d9000
+extern char     (*g_fn1417d9140)(void*, uint32_t, uint32_t,
+    uint32_t, const char*, uint32_t);                        // 1417d9140
+extern void     (*g_fn1417d9050)(void*);                     // 1417d9050
+extern void     (*g_fn141777de0)(void*, uint32_t, uint32_t,
+                                 void*);                     // 141777de0
+extern uint32_t (*g_fn1418232c8)(uint32_t);               // 1418232c8
 extern uint64_t (*g_fn141764990)(void*, uint32_t,
                                  uint32_t);           // 141764990
 extern char     (*g_fn141774500)(void*, uint32_t,
@@ -897,6 +996,23 @@ public:
                  uint32_t u3);      // 1417b0810
     void Slot5c8(int32_t n2, uint32_t u3,
                  int32_t n4);      // 1417b0890
+    void Slot5d0(uint32_t u2, uint32_t u3,
+                 uint32_t u4);     // 1417c0860
+    void Slot5f0(uint32_t u2,
+                 uint8_t b3);      // 1417c0d10
+    void Slot5e8(uint32_t u2);      // 1417bfdd0
+    bool Slot608(uint32_t u2, uint32_t u3,
+                 uint32_t u4);     // 1417b2a30
+    void Slot5b0(uint32_t u2);     // 1417b8d90
+    void Slot5e0(uint32_t u2);     // 1417bfa40
+    bool Slot580(uint32_t u2, uint32_t u3,
+                 uint32_t u4);     // 1417b2e30
+    void Slot5c0(uint32_t u2, uint32_t u3,
+                 uint32_t u4);     // 1417bd730
+    void Slot578(uint32_t u2);     // 1417bdb20
+    bool Slot610(uint32_t u2, uint32_t u3,
+                 uint32_t u4, uint32_t u5,
+                 uint32_t u6, uint32_t u7);   // 1417c1a90
     void Slot5d8(int32_t n2,
                  uint32_t u3);      // 1417b1e00
     void Slot5f8(uint32_t u2, void* p3,
