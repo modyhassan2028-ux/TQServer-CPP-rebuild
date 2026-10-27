@@ -525,11 +525,15 @@ int main() {
                 MemM* m = (MemM*)p;
                 return (n == 3)
                     ? (void*)&m->f3 : (void*)&m->f4; };
-        static void (*memSave)(void*, int64_t) =
-            +[](void* p, int64_t a) {
+        // RAW 14177cbd0: cVar1 = (vt+0x38)(member, 0)
+        // is a REAL return value read as char — the void
+        // mock used to depend on leftover AL garbage
+        static char (*memSave)(void*, int64_t) =
+            +[](void* p, int64_t a) -> char {
                 ((MemM*)p)->nSave++;
                 ((MemM*)p)->saveA =
-                    (uint64_t)a; };
+                    (uint64_t)a;
+                return 1; };
         s_mm.vtS.s[0x10 / 8] = (void*)memField;
         s_mm.vtS.s[0x38 / 8] = (void*)memSave;
         // the fields: get@0x48, set@0xb0
