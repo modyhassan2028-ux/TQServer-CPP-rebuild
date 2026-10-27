@@ -10,6 +10,7 @@
 #include "modules/syndicate/src/SyndicateAppoint3de.h"       // the A84 seams
 #include "modules/syndicate/src/SyndicateLeagueBeRobFlow.h"  // g_fnLbrOpDelete
 #include <cstring>
+#include <cstdlib>
 
 namespace syndicate {
 
@@ -1332,6 +1333,12 @@ void CSyndicateLogic::Slot208B4b0ThenSink3(
     g_fnSink3OpC(pObj);
 }
 
+// ---- D104 seams (default null — tests bind them) ----
+void  (*g_fn74D490)(void*, uint32_t);
+void  (*g_fn7C1180)(void*, uint32_t, uint32_t, uint64_t);
+void  (*g_fn76ACA0)(void*, uint32_t);
+char  (*g_fn79E6D0)(void*, void*);
+
 // ---- D103 seams (default null — tests bind them) ----
 uint64_t (*g_fn743C80)(void*);
 char     (*g_fn7977D0)(void*, uint32_t);
@@ -2647,6 +2654,108 @@ void CSyndicateLogic::Slot350(uint32_t u2, uint32_t u3,
                         (const char*)(uintptr_t)uStr,
                         0xffff00);
             }
+        }
+    }
+}
+// +0x358: 1417c13e0 — the exit-league flow
+void CSyndicateLogic::Slot358(uint32_t u2, uint32_t u3,
+                              uint32_t u4) {
+    void** pp = (void**)this;
+    void* lLg2 = g_fn7630D0(pp[10], u4);
+    if (lLg2 != 0
+        && (uint32_t)g_fn743C80(lLg2) != u3) {
+        int64_t lLg = g_fnLgFind(pp[2], u3);
+        if (lLg != 0
+            && (uint32_t)g_fn78F2D0((void*)lLg) == u2
+            && (uint32_t)g_fn790390((void*)lLg) == u4
+            && g_fn7903D0((void*)lLg, 0) != 0) {
+            g_fn74D490(lLg2, u3);
+            char buf[1024];
+            buf[0] = 0;
+            memset(buf + 1, 0, 0x3ff);
+            void* pIv = g_fnStringMgrInstance();
+            g_fn743Dd0(lLg2);
+            const char* pcFmt = (const char*)
+                g_fnStringMgrGetStr(pIv,
+                    "STR_SYN_EXIT_LEAGUE");
+            snprintf(buf, 0x400, pcFmt);
+            // RAW: local_4a8 = 0x7d5
+            uint16_t uLocal4a8 = 0x7d5;
+            (void)uLocal4a8;
+            // RAW: box vt+0x88(box, u3, buf, 0)
+            ((void (*)(void*, uint32_t,
+                       const char*, uint32_t))
+                (*(void***)pp[1])[0x88/8])(
+                    pp[1], u3, buf, 0);
+            uint64_t uVar7 = 5;
+            // RAW: logic vt+0x710(this, lg, 0, 5)
+            ((void (*)(void*, void*, uint32_t,
+                       int32_t))
+                (*(void***)this)[0x710/8])(
+                    this, (void*)lLg, 0,
+                    (int32_t)uVar7);
+            g_fn7C1180(this, u3, u4, uVar7);
+            g_fn76ACA0(pp[10], u2);
+            // ---- the checked-iterator member sweep
+            // (MSVC vector: apVec[0]=proxy,
+            // apVec[1]=begin, apVec[2]=end; the
+            // _invalid_parameter_noinfo probes are
+            // the debug checks, modeled by asserts) ----
+            void* pProxy = malloc(8);
+            void* apVec[3];
+            apVec[0] = 0; apVec[1] = 0; apVec[2] = 0;
+            if (pProxy != 0) {
+                *(void**)pProxy = apVec;
+                apVec[0] = pProxy;
+            }
+            uint64_t uOk = g_fn79E6D0(
+                (void*)lLg, apVec);
+            uint32_t* puBegin = (uint32_t*)apVec[1];
+            uint32_t* puEnd = (uint32_t*)apVec[2];
+            uint32_t* puIt = puBegin;
+            if ((char)uOk != 0) {
+                while (true) {
+                    uint32_t* puCur = puEnd;
+                    if (puIt == puCur) break;
+                    uint32_t uId = *puIt;
+                    char c268 =
+                        ((char (*)(void*, uint32_t))
+                            (*(void***)pp[1])
+                             [0x268/8])(pp[1], uId);
+                    if (c268 != 0) {
+                        char c280 =
+                            ((char (*)(void*,
+                                uint32_t))
+                                (*(void***)pp[1])
+                                 [0x280/8])(
+                                    pp[1], uId);
+                        if (c280 == 0) {
+                            int32_t i2a0 =
+                                ((int32_t (*)
+                                  (void*, uint32_t))
+                                    (*(void***)pp[1])
+                                     [0x2a0/8])(
+                                        pp[1], uId);
+                            if (i2a0 == 9) {
+                                ((void (*)(void*,
+                                    uint32_t,
+                                    int32_t))
+                                    (*(void***)pp[1])
+                                     [0x2a8/8])(
+                                        pp[1], uId,
+                                        3);
+                            }
+                        }
+                    }
+                    puIt = puIt + 1;
+                }
+            }
+            if (puBegin != 0) {
+                free(puBegin);
+            }
+            apVec[1] = 0;
+            apVec[2] = 0;
+            free(apVec[0]);
         }
     }
 }
