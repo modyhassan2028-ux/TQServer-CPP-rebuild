@@ -94,6 +94,33 @@ extern void*    (*g_fnStringMgrGetStr)(void*, const char*);
 extern char     (*g_fnA84HasOldPos)(void*);
 extern uint32_t (*g_fnA84GetOldId)(void*);
 
+// ---- wave-8 seams (D98) ----
+extern void     (*g_fnInvalidParam)(void);               // _invalid_parameter_noinfo
+extern void     (*g_fnMyLogSave)(const char*, const char*); // tq::MyLogSave
+extern char     (*g_fnLgBf80)(void*, uint64_t);          // 14179bf80
+extern uint64_t (*g_fnLgF550)(void*);                    // 14178f550
+extern char     (*g_fnLgFa70)(void*, uint64_t);          // 14178fa70
+extern void     (*g_fnIterC50)(void*, void*);           // 141741c50
+extern void     (*g_fnIter730)(void*);                   // 141741730
+
+// the prize tables (read verbatim from .rdata, ranks 1..8)
+// DAT_1418347c4+4*r  (cross money):   100000,80000,...
+static const uint32_t s_auCrossMoney[8] = {
+    100000, 80000, 60000, 50000, 40000, 30000,
+    20000, 10000 };
+// DAT_1418347e4+4*r  (cross emoney):  10000,8000,...
+static const uint32_t s_auCrossEmoney[8] = {
+    10000, 8000, 6000, 5000, 4000, 3000,
+    2000, 1000 };
+// DAT_141834804+4*r  (vlm money):     12000,10000,...
+static const uint32_t s_auVlmMoney[8] = {
+    12000, 10000, 8000, 6500, 5000, 4000,
+    3000, 2000 };
+// DAT_141834824+4*r  (vlm emoney):    3000,2000,...
+static const uint32_t s_auVlmEmoney[8] = {
+    3000, 2000, 1000, 600, 500, 400,
+    300, 200 };
+
 // ---- wave-7 seams (D97) ----
 extern void     (*g_fnSink3OpD)(void*);                 // 1417434f0
 extern void     (*g_fnSub38Cdc0)(void*, const void*,
@@ -326,6 +353,8 @@ public:
     void Slot250InviteFlow(uint32_t u, uint64_t p3,
                            uint64_t p4);             // 1417b8620
     void Slot258Sub9D3680(int32_t n);                // 1417afc90
+    void Slot218AwardPrizeVlmOrCross(
+        void* pvSynID, void* pvBSelf, char bCross); // 1417c3ed0
 
 
 

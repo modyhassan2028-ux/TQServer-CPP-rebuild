@@ -1332,6 +1332,15 @@ void CSyndicateLogic::Slot208B4b0ThenSink3(
     g_fnSink3OpC(pObj);
 }
 
+// ---- D98 seams (default null — tests bind them) ----
+void     (*g_fnInvalidParam)(void);
+void     (*g_fnMyLogSave)(const char*, const char*);
+char     (*g_fnLgBf80)(void*, uint64_t);
+uint64_t (*g_fnLgF550)(void*);
+char     (*g_fnLgFa70)(void*, uint64_t);
+void     (*g_fnIterC50)(void*, void*);
+void     (*g_fnIter730)(void*);
+
 // ================= D97 wave 7 (+0x210..+0x258) =================
 
 void CSyndicateLogic::Slot210Flag60Sink3() {
@@ -1517,6 +1526,294 @@ void CSyndicateLogic::Slot258Sub9D3680(int32_t n) {
             (*(void***)pBox)[0x1f8/8])(pBox, n);
         if (iVar2 != 0)
             g_fnSub9D3680((void*)pp[9], n, iVar2);
+    }
+}
+
+// ================= D98 (+0x218) — the iterator monster =================
+// RAW 1417c3ed0: CSyndicateLogic::AwardPrizeVlmOrCross.
+// vecSynID (param_2) and vecBSelf (param_3) are MSVC vector /
+// checked-iterator structs; every _invalid_parameter_noinfo()
+// release check kept via g_fnInvalidParam.
+
+void CSyndicateLogic::Slot218AwardPrizeVlmOrCross(
+    void* pvSynID, void* pvBSelf, char bCross) {
+    void* pLogic = this;
+    void** pp = (void**)pLogic;
+    void** ppSynID = (void**)pvSynID;
+    void** ppBSelf = (void**)pvBSelf;
+    // local_4a8 == param_4 (the cross flag)
+    char bCrossLocal = bCross;
+    char szBuf[1024];
+    if ((uint32_t)((uint64_t)ppSynID[4] -
+                   (uint64_t)ppSynID[3]) >> 2 ==
+        (uint32_t)(uint64_t)ppBSelf[2]) {
+        uint32_t* puId = (uint32_t*)ppSynID[3];
+        if ((uint32_t*)ppSynID[4] < puId)
+            g_fnInvalidParam();
+        uint32_t* puB = (uint32_t*)ppBSelf[6];
+        void** plOwner = (void**)*ppSynID;
+        if ((uint32_t*)ppBSelf[7] < puB)
+            g_fnInvalidParam();
+        void** plIter = (void**)*ppBSelf;
+        uint64_t lIdx = 0;
+        uint32_t uCount = 0;
+        uint64_t lRank = 0;
+        do {
+            // RAW local_470: set once, never updated
+            lIdx = 0;
+            uint32_t* puBCur = puB;
+            void** plIterCur = plIter;
+            uint32_t* puEnd =
+                (uint32_t*)ppSynID[4];
+            if (puEnd < (uint32_t*)ppSynID[3])
+                g_fnInvalidParam();
+            if (plOwner == 0 ||
+                plOwner != (void**)*ppSynID)
+                g_fnInvalidParam();
+            if (puId == puEnd) return;
+            uint32_t* puB2 =
+                (uint32_t*)ppBSelf[6];
+            if ((uint32_t*)ppBSelf[7] < puB2)
+                g_fnInvalidParam();
+            // RAW: the {current,pos} iterator pair the
+            // C50 call may update; local_470 stays 0
+            uint64_t pIterPair[2];
+            *(void**)pIterPair = *(void**)ppBSelf;
+            pIterPair[1] = 0;
+            uint32_t* puBCur2 = puB2;
+            if (ppBSelf[2] != 0)
+                g_fnIterC50(pIterPair, ppBSelf[2]);
+            if (puBCur == puBCur2 && lIdx ==
+                pIterPair[1])
+                return;
+            uCount = uCount + 1;
+            uint64_t lRankNew = lRank + 1;
+            lRank = lRankNew;
+            // the owner deref chain (release checks)
+            uint64_t lOwner;
+            if (plOwner == 0) {
+                g_fnInvalidParam();
+                lOwner = 0;
+            } else lOwner = (uint64_t)*plOwner;
+            if (*(uint32_t**)(lOwner + 0x20) <=
+                puId)
+                g_fnInvalidParam();
+            if (*puId != 0) {
+                if (bCrossLocal != 0) {
+                    // the cross path: the vecBSelf
+                    // iterator walk + the flag bit
+                    void** plWalk = plIterCur;
+                    if (plWalk == 0) {
+                        plWalk = 0;
+                        g_fnInvalidParam();
+                    } else {
+                        plWalk = (void**)*plWalk;
+                        if (plWalk == 0) {
+                            g_fnInvalidParam();
+                            goto next_iter;
+                        }
+                    }
+                    plWalk = (void**)*plWalk;
+                    if (plWalk == 0 || puBCur == 0)
+                        g_fnInvalidParam();
+                    uint64_t lNode;
+                    if (plWalk == 0) lNode = 0;
+                    else lNode = (uint64_t)*plWalk;
+                    uint64_t uBase = *(uint64_t*)
+                        (lNode + 0x30);
+                    if (*(uint64_t*)(lNode + 0x38) <
+                        uBase)
+                        g_fnInvalidParam();
+                    if (plWalk == 0) lNode = 0;
+                    else lNode = (uint64_t)*plWalk;
+                    if (*(uint64_t*)(lNode + 0x10) <=
+                        ((uint64_t)(puBCur - uBase)
+                         >> 2) * 0x20 + lIdx)
+                        g_fnInvalidParam();
+                    // the eligibility bit
+                    if ((*puBCur &
+                         (1u << ((uint32_t)lIdx &
+                                 0x1f))) == 0)
+                        goto next_iter;
+                }
+                if (plOwner == 0) {
+                    g_fnInvalidParam();
+                } else if (*(uint32_t**)
+                               ((uint64_t)*plOwner +
+                                0x20) <= puId) {
+                    g_fnInvalidParam();
+                }
+                uint64_t lLg = g_fnLgFind(
+                    pp[2], *puId);
+                if (lLg == 0) {
+                    if (plOwner == 0) {
+                        g_fnInvalidParam();
+                    } else if (*(uint32_t**)
+                                   ((uint64_t)
+                                        *plOwner +
+                                    0x20) <= puId) {
+                        g_fnInvalidParam();
+                    }
+                    g_fnT1LogError(
+                        "CSyndicateLogic::"
+                        "AwardPrizeVlmOrCross, SynID"
+                        "[%u] is not exist");
+                } else {
+                    uint32_t uMoney, uEmoney;
+                    if (bCrossLocal == 0) {
+                        uMoney =
+                            s_auVlmMoney[lRankNew-1];
+                        uEmoney =
+                            s_auVlmEmoney[lRankNew-1];
+                    } else {
+                        uMoney = s_auCrossMoney[
+                            lRankNew-1];
+                        uEmoney = s_auCrossEmoney[
+                            lRankNew-1];
+                    }
+                    uint32_t uMoneyX100 =
+                        uMoney * 10000;
+                    char bMoney = g_fnLgBf80(
+                        (void*)lLg, uMoneyX100);
+                    if (bMoney) {
+                        if (plOwner == 0) {
+                            g_fnInvalidParam();
+                        } else if (*(uint32_t**)
+                                       ((uint64_t)
+                                            *plOwner +
+                                        0x20) <=
+                                   puId) {
+                            g_fnInvalidParam();
+                        }
+                        g_fnLgRefresh((void*)lLg);
+                        if (bCrossLocal == 0)
+                            g_fnMyLogSave(
+                                "gmlog/synvlmaward",
+                                "Syn:%s[%u] Rank[%d]"
+                                " Get money %u");
+                        else
+                            g_fnMyLogSave(
+                                "gmlog/"
+                                "syncrossvlmaward",
+                                "Syn:%s[%u] Rank[%d]"
+                                " Get money %u");
+                    }
+                    uint64_t uCur =
+                        g_fnLgF550((void*)lLg);
+                    uint32_t uSum =
+                        (uint32_t)uCur + uEmoney;
+                    if (uSum < 1000000000) {
+                        void* pBox = pp[1];
+                        uint64_t uLgId =
+                            g_fnLgGetId(
+                                (void*)lLg);
+                        // RAW: box vt+0x350
+                        ((void (*)(void*, uint32_t,
+                                   uint32_t,
+                                   uint32_t))
+                            (*(void***)pBox)
+                                [0x350/8])(
+                            pBox, 0x2b, 0,
+                            (uint32_t)uLgId);
+                        char bEmoney = g_fnLgFa70(
+                            (void*)lLg, uSum);
+                        if (bEmoney) {
+                            if (bCrossLocal != 0) {
+                                if (plOwner == 0) {
+                                    g_fnInvalidParam();
+                                } else if (
+                                    *(uint32_t**)
+                                    ((uint64_t)
+                                     *plOwner + 0x20)
+                                    <= puId) {
+                                    g_fnInvalidParam();
+                                }
+                                g_fnLgRefresh(
+                                    (void*)lLg);
+                                g_fnMyLogSave(
+                                    "gmlog/"
+                                    "syncrossvlmaward",
+                                    "Syn:%s[%u] "
+                                    "Rank[%d] Get "
+                                    "emoney %u");
+                                }
+                            else {
+                            if (plOwner == 0) {
+                                g_fnInvalidParam();
+                            } else if (*(uint32_t**)
+                                           ((uint64_t)
+                                                *plOwner +
+                                            0x20) <=
+                                       puId) {
+                                g_fnInvalidParam();
+                            }
+                            g_fnLgRefresh(
+                                (void*)lLg);
+                            g_fnMyLogSave(
+                                "gmlog/synvlmaward",
+                                "Syn:%s[%u] Rank[%d]"
+                                " Get emoney %u");
+                            // RAW: no goto here — the
+                            // vlm path falls through to
+                            // the STR_VLM_AWARD bcast
+                            }
+                        }
+                    }
+                    // the award broadcast
+                    szBuf[0] = 0;
+                    memset(szBuf + 1, 0, 0x3ff);
+                    {
+                        void* pIv =
+                            g_fnStringMgrInstance();
+                        const char* pc;
+                        if (bCrossLocal != 0)
+                            pc = (const char*)
+                                g_fnStringMgrGetStr(
+                                    pIv,
+                                    "STR_CROSS_VLM_AWARD");
+                        else
+                            pc = (const char*)
+                                g_fnStringMgrGetStr(
+                                    pIv,
+                                    "STR_VLM_AWARD");
+                        snprintf(szBuf, 0x400, pc);
+                        if (plOwner == 0) {
+                            g_fnInvalidParam();
+                        } else if (*(uint32_t**)
+                                       ((uint64_t)
+                                            *plOwner +
+                                        0x20) <=
+                                   puId) {
+                            g_fnInvalidParam();
+                        }
+                        // RAW: logic vt+0x40
+                        ((void (*)(void*, uint32_t,
+                                   const char*,
+                                   uint32_t))
+                            (*(void***)pLogic)
+                                [0x40/8])(
+                            pLogic, *puId, szBuf, 0);
+                        bCrossLocal = bCrossLocal;
+                        goto next_iter;
+                    }
+                }
+            }
+next_iter:
+            if (plOwner == 0) {
+                g_fnInvalidParam();
+            } else if (*(uint32_t**)
+                           ((uint64_t)*plOwner +
+                            0x20) <= puId) {
+                g_fnInvalidParam();
+            }
+            puId = puId + 1;
+            g_fnIter730((void**)&plIter);
+        } while ((int32_t)uCount < 8);
+    } else {
+        g_fnT1LogError(
+            "CSyndicateLogic::AwardPrizeVlmOrCross."
+            " bCross && vecSynID.size() != "
+            "vecBSelf.size()");
     }
 }
 

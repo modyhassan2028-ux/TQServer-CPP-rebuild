@@ -4206,3 +4206,33 @@ lg/other != 0 ثم 1417cad00 ثم 141797750/1417977d0 مباشرة.
   vt+0x1f8(box, u) → 1417d3680(sub9, n, ret)
 
 21 seam جديدة. رجريجن 100/100 × 6.
+
+## D98 — CSyndicateLogic +0x218: AwardPrizeVlmOrCross، وحش الـ checked-iterators (27-10-2026)
+
+الجسم 1417c3ed0 (~10K حرف تفكيك) منقولاً حرفياً:
+
+- **الجداول الحرفية من .rdata** (إزاحات VA): ‏cross money
+  DAT_1418347c4+4r (100000/80000/60000/50000/40000/30000/
+  20000/10000)، ‏cross emoney DAT_1418347e4+4r (10000/8000/
+  6000/5000/4000/3000/2000/1000)، ‏vlm money DAT_141834804+4r
+  (12000/10000/8000/6500/5000/4000/3000/2000)، ‏vlm emoney
+  DAT_141834824+4r (3000/2000/1000/600/500/400/300/200).
+- **حمايات المفكك**: كل نداءات ‏_invalid_parameter_noinfo
+  عبر seam ‏g_fnInvalidParam ‏(في الأصل لا يعود — إحباط).
+- **المسار**: فحص الأحجام (سجل خطأ "bCross && vecSynID.size()
+  != vecBSelf.size()") ← حلقة 8 رتب كحد أقصى ← LgFind
+  ("SynID[%u] is not exist") ← جدول ×10000 عبر 14179bf80 ←
+  MyLogSave(gmlog/synvlmaward ‏أو gmlog/syncrossvlmaward) ←
+  14178f550+emoney < ‏1e9 ← box vt+0x350(box, 0x2b, 0, lgId)
+  ← 14178fa70 ← MyLogSave ‏emoney ← بث STR_VLM_AWARD ‏أو
+  STR_CROSS_VLM_AWARD عبر logic vt+0x40(logic, synId, buf, 0).
+- **مسار cross الإضافي**: سلسلة مكرر vecBSelf الكاملة
+  (proxy→proxy→node→container) وفحص بت الأهلية
+  (*puBCur & 1<<(idx&31)).
+- **فخان RAW تم اكتشافهما وتصحيحهما**: (1) حفظ emoney
+  للـ vlm لا يقفز — يكمل لبث STR_VLM؛ ‏(2) حفظ emoney
+  للـ cross يقفز لـ LAB_1417c4303 (بث STR_CROSS) ولا يسقط
+  لفرع الـ vlm.
+- 7 seams جديدة (InvalidParam/MyLogSave/LgBf80/LgF550/
+  LgFa70/IterC50/Iter730). اختبار 5 أقسام.
+- رجريجن **101/101 × 6** + ‏ASan/UBSan ‏نظيف.
