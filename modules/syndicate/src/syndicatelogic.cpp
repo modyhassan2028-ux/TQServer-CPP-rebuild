@@ -492,6 +492,18 @@ uint64_t(*g_fnLgGetY)(void*);
 uint64_t(*g_fnLgZ)(void*, char);
 uint64_t(*g_fnLeaveSyn)(void*, void*, void*, const char*, char, char, char);
 
+
+// ---- D93 seams (default null — tests bind them) ----
+uint64_t (*g_fnRecA)(void*, int32_t);
+uint64_t (*g_fnRecB)(void*, int32_t, uint64_t, uint64_t);
+uint64_t (*g_fnRecC)(void*, int32_t, void*, char);
+uint64_t (*g_fnRecD)(void*, int32_t, char);
+void     (*g_fnRecE)(void*);
+uint64_t (*g_fnRecF)(void*);
+uint64_t (*g_fnRecG)(void*);
+uint64_t (*g_fnRecH)(void*);
+int32_t  (*g_fnRecI)(void*);
+
 // ================= D92 wave 2 (+0x0b0..+0x140) =================
 
 uint64_t CSyndicateLogic::Slot0b0GetSynId(uint32_t uUser) {
@@ -768,6 +780,83 @@ uint64_t CSyndicateLogic::Slot140RecGetX(
         *(void**)((char*)pLogic + 0x18), uUser);
     if (lRec == 0) return 0;
     return g_fnRecGetX((void*)lRec, n);
+}
+
+// ================= D93 wave 3 (+0x148..+0x188) =================
+
+uint64_t CSyndicateLogic::Slot148RecA(uint32_t uUser, int32_t n) {
+    void* pLogic = this;
+    int64_t lRec = LogRecMapFind(
+        *(void**)((char*)pLogic + 0x18), uUser);
+    if (lRec == 0) return 0;
+    return g_fnRecA((void*)lRec, n);
+}
+
+uint64_t CSyndicateLogic::Slot150RecB(uint32_t uUser,
+    int32_t n, uint64_t uB, uint64_t uC) {
+    void* pLogic = this;
+    int64_t lRec = LogRecMapFind(
+        *(void**)((char*)pLogic + 0x18), uUser);
+    if (lRec == 0) return 0;
+    return g_fnRecB((void*)lRec, n, uB, uC);
+}
+
+uint64_t CSyndicateLogic::Slot158RecC(uint32_t uUser, int32_t n) {
+    void* pLogic = this;
+    int64_t lRec = LogRecMapFind(
+        *(void**)((char*)pLogic + 0x18), uUser);
+    if (lRec == 0) return 0;
+    // RAW: FUN_141788400(rec, n, DAT_1418347c0, 1)
+    return g_fnRecC((void*)lRec, n,
+        (void*)0x1418347c0, '\x01');
+}
+
+uint64_t CSyndicateLogic::Slot160RecD(uint32_t uUser, int32_t n) {
+    void* pLogic = this;
+    int64_t lRec = LogRecMapFind(
+        *(void**)((char*)pLogic + 0x18), uUser);
+    if (lRec == 0) return 0;
+    return g_fnRecD((void*)lRec, n, '\x01');
+}
+
+void CSyndicateLogic::Slot168RecE(uint32_t uUser) {
+    void* pLogic = this;
+    int64_t lRec = LogRecMapFind(
+        *(void**)((char*)pLogic + 0x18), uUser);
+    if (lRec == 0) return;
+    g_fnRecE((void*)lRec);
+}
+
+uint64_t CSyndicateLogic::Slot170RecF(uint32_t uUser) {
+    void* pLogic = this;
+    int64_t lRec = LogRecMapFind(
+        *(void**)((char*)pLogic + 0x18), uUser);
+    if (lRec == 0) return 0;
+    return g_fnRecF((void*)lRec);
+}
+
+uint64_t CSyndicateLogic::Slot178RecG(uint32_t uUser) {
+    void* pLogic = this;
+    int64_t lRec = LogRecMapFind(
+        *(void**)((char*)pLogic + 0x18), uUser);
+    if (lRec == 0) return 0;
+    return g_fnRecG((void*)lRec);
+}
+
+uint64_t CSyndicateLogic::Slot180RecH(uint32_t uUser) {
+    void* pLogic = this;
+    int64_t lRec = LogRecMapFind(
+        *(void**)((char*)pLogic + 0x18), uUser);
+    if (lRec == 0) return 0;
+    return g_fnRecH((void*)lRec);
+}
+
+int32_t CSyndicateLogic::Slot188RecI(uint32_t uUser) {
+    void* pLogic = this;
+    int64_t lRec = LogRecMapFind(
+        *(void**)((char*)pLogic + 0x18), uUser);
+    if (lRec == 0) return 0;
+    return g_fnRecI((void*)lRec);
 }
 
 }  // namespace syndicate
