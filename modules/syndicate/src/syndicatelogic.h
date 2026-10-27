@@ -94,6 +94,26 @@ extern void*    (*g_fnStringMgrGetStr)(void*, const char*);
 extern char     (*g_fnA84HasOldPos)(void*);
 extern uint32_t (*g_fnA84GetOldId)(void*);
 
+// ---- D111 seams (wave 16: +0x038/+0x0e8/+0x118) ----
+extern char     (*g_fn797750)(void*, uint32_t);     // 141797750
+extern void*    (*g_fn78C9F0)(void*, void*);        // 14178c9f0 (by-name find; RAW takes the std::string obj)
+extern char     (*g_fn787300)(void*);                // 141787300
+extern uint64_t (*g_fn785DC0)(void*);                // 141785dc0
+extern char     (*g_fn786960)(void*);                // 141786960
+extern void     (*g_fn79F650)(void*, void*, int32_t); // 14179f650
+extern void     (*g_fn7C6BD0)(void*, void*, void*,
+                              uint32_t);            // 1417c6bd0
+extern char     (*g_fn787390)(void*);                // 141787390
+extern uint64_t (*g_fn787380)(void*);                // 141787380
+extern void     (*g_fn79FA60)(void*, uint32_t);      // 14179fa60
+extern void     (*g_fn78F900)(void*, const char*);   // 14178f900
+extern void     (*g_fn78F960)(void*, uint32_t);       // 14178f960
+extern char     (*g_fn7DB630)(void*, int32_t, int32_t,
+                              uint32_t, void*);     // 1417db630
+extern void     (*g_fn79E020)(void*);                // 14179e020
+extern void*    (*g_fn796390)(void*, int32_t);       // 141796390
+extern void     (*g_fn786E30)(void*, int32_t);       // 141786e30
+
 // ---- D110 seams (wave 15: +0x050/+0x060/+0x120) ----
 extern void     (*g_fn787370)(void*, uint32_t);     // 141787370
 
@@ -648,6 +668,12 @@ public:
                      int64_t l4);                   // 1417b62e0
     uint64_t Slot060(uint32_t u2, uint32_t u3);     // 1417b64e0
     uint64_t Slot120(uint32_t u2, uint32_t u3);     // 1417b6ab0
+    // ---- D111 wave 16 (TRUE offsets) ----
+    void Slot038(uint32_t u2, int64_t l3);          // 1417c0510
+    char Slot0e8(uint32_t u2, const char* pc3,
+                  char c4);                          // 1417ba6f0
+    uint64_t Slot118(uint32_t u2,
+                      const char* pc3);              // 1417b6770
 
 
 

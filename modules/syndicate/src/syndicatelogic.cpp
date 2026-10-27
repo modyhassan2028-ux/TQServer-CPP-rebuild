@@ -11,6 +11,7 @@
 #include "modules/syndicate/src/SyndicateLeagueBeRobFlow.h"  // g_fnLbrOpDelete
 #include <cstring>
 #include <vector>
+#include <string>
 #include <cstdlib>
 
 namespace syndicate {
@@ -1333,6 +1334,24 @@ void CSyndicateLogic::Slot208B4b0ThenSink3(
     void* pObj = g_fnSink3Get();
     g_fnSink3OpC(pObj);
 }
+
+// ---- D111 seams (default null — tests bind them) ----
+char     (*g_fn797750)(void*, uint32_t);
+void*    (*g_fn78C9F0)(void*, void*);
+char     (*g_fn787300)(void*);
+uint64_t (*g_fn785DC0)(void*);
+char     (*g_fn786960)(void*);
+void     (*g_fn79F650)(void*, void*, int32_t);
+void     (*g_fn7C6BD0)(void*, void*, void*, uint32_t);
+char     (*g_fn787390)(void*);
+uint64_t (*g_fn787380)(void*);
+void     (*g_fn79FA60)(void*, uint32_t);
+void     (*g_fn78F900)(void*, const char*);
+void     (*g_fn78F960)(void*, uint32_t);
+char     (*g_fn7DB630)(void*, int32_t, int32_t, uint32_t, void*);
+void     (*g_fn79E020)(void*);
+void*    (*g_fn796390)(void*, int32_t);
+void     (*g_fn786E30)(void*, int32_t);
 
 // ---- D110 seams (default null — tests bind them) ----
 void     (*g_fn787370)(void*, uint32_t);
@@ -3841,6 +3860,657 @@ uint64_t CSyndicateLogic::Slot120(uint32_t u2,
         }
     }
     return uVar6;
+}
+// ============ D111 wave 16 (TRUE +0x038/+0x0e8/+0x118) ============
+
+// +0x038: 1417c0510 — the targeted-guild member
+// sweep/broadcast flow
+void CSyndicateLogic::Slot038(uint32_t u2, int64_t l3) {
+    void** pp = (void**)this;
+    if (l3 != 0 && pp[1] != 0) {
+        void* plVar5 = g_fn78C8E0(pp[3], u2);
+        if (plVar5 != 0) {
+            uint64_t uVar6 = g_fn785EA0(plVar5);
+            int64_t lVar7 = g_fnLgFind(pp[2],
+                                       (uint32_t)uVar6);
+            if (lVar7 != 0) {
+                char bVar3 = g_fn78E590(
+                    (void*)lVar7);
+                if (bVar3) {
+                    void* pIVar8 =
+                        g_fnStringMgrInstance();
+                    int64_t lVt = **(int64_t**)pp[1];
+                    const void* pv =
+                        g_fnStringMgrGetStr(pIVar8,
+                            "STR_TOO_LOWER_SYN_MONEY");
+                    ((uint64_t (*)(void*, uint32_t,
+                                   const void*))
+                     (*(void***)pp[1])[0x18/8])(
+                         pp[1], u2, pv);
+                    (void)lVt;
+                }
+                else {
+                    // RAW: the MSVC checked-vector
+                    // proxy (1417495d0 init +
+                    // 141732040 push) modeled
+                    // with std::vector
+                    static std::vector<uint32_t>
+                        vAll, vMatch;
+                    vAll.clear(); vMatch.clear();
+                    // RAW: box vt+0x50(box, &v, u2, 0)
+                    ((void (*)(void*, void*,
+                               uint32_t, uint64_t))
+                     (*(void***)pp[1])[0x50/8])(
+                         pp[1], &vAll, u2, 0);
+                    for (uint32_t uId : vAll) {
+                        // RAW: box vt+0x1f8() —
+                        // the id arg was lost by
+                        // the decompiler
+                        uint32_t uVar4 =
+                            ((uint32_t (*)
+                              (void*, uint32_t))
+                             (*(void***)
+                              pp[1])[0x1f8/8])(
+                                 pp[1], uId);
+                        if (uId != 0 &&
+                            uVar4 != 0) {
+                            if ((uint32_t)uVar6 ==
+                                uVar4 ||
+                                g_fn797750(
+                                    (void*)lVar7,
+                                    uVar4) != 0) {
+                                vMatch.push_back(
+                                    uId);
+                            }
+                        }
+                    }
+                    // RAW: (end - begin & ~3) == 0
+                    if (!vMatch.empty()) {
+                        // RAW: box vt+0x48(box,
+                        // param_3, &vMatch)
+                        ((void (*)(void*, int64_t,
+                                   void*))
+                         (*(void***)pp[1])[0x48/8])(
+                             pp[1], l3, &vMatch);
+                    }
+                }
+            }
+        }
+    }
+    return;
+}
+
+// +0x0e8: 1417ba6f0 — the leader demise/abdicate flow
+char CSyndicateLogic::Slot0e8(uint32_t u2,
+                              const char* pc3,
+                              char c4) {
+    void** pp = (void**)this;
+    if (pc3 == 0) {
+        g_fnT1LogError("\xa1\xef%s(%s)\xa1\xef in %s, %d");
+        return 0;
+    }
+    void* plVar8 = g_fn78C8E0(pp[3], u2);
+    char uVar3 = 0;
+    if (plVar8 != 0) {
+        uint64_t uVar9 = g_fn785EA0(plVar8);
+        uint32_t uVar4 = (uint32_t)uVar9;
+        int64_t lVar10 = g_fnLgFind(pp[2], uVar4);
+        uVar3 = 0;
+        if (lVar10 != 0) {
+            char bVar1 = g_fn7868C0(plVar8);
+            uVar3 = 0;
+            if (bVar1) {
+                std::string sName(pc3);
+                void* plVar11 = g_fn78C9F0(
+                    pp[3], &sName);
+                if (plVar11 == 0) {
+                    uVar3 = 0;
+                }
+                else {
+                    char cVar2 =
+                        g_fn787300(plVar11);
+                    if (cVar2 == 0) {
+                        void* pIVar12 =
+                            g_fnStringMgrInstance();
+                        const void* pv =
+                            g_fnStringMgrGetStr(
+                                pIVar12,
+                                "STR_SYN_APPOINT_TARGET_OFFLINE");
+                        ((uint64_t (*)
+                          (void*, uint32_t,
+                           const void*))
+                         (*(void***)pp[1])[0x18/8])(
+                             pp[1], u2, pv);
+                        uVar3 = 0;
+                    }
+                    else {
+                        uint64_t uVar14 =
+                            g_fn785DC0(plVar11);
+                        uint32_t uVar5 =
+                            (uint32_t)uVar14;
+                        if (u2 == uVar5) {
+                            uVar3 = 0;
+                        }
+                        else {
+                            uint64_t uVar13 =
+                                g_fn785EA0(
+                                    plVar11);
+                            if (uVar4 ==
+                                (uint32_t)uVar13) {
+                                uVar13 =
+                                    g_fn7867D0(
+                                        plVar11);
+                                char uVar15 =
+                                    g_fn786960(
+                                        plVar11);
+                                if (uVar15 == 0 ||
+                                    (int32_t)uVar13
+                                        == 0x25a) {
+                                    // RAW: box
+                                    // vt+0x328
+                                    uint32_t uVar6 =
+                                        ((uint32_t (*)
+                                          (void*,
+                                           uint32_t))
+                                         (*(void***)
+                                          pp[1])
+                                          [0x328/8])(
+                                             pp[1],
+                                             uVar9 &
+                                             0xffffffff);
+                                    g_fn79F650(
+                                        (void*)lVar10,
+                                        plVar8, 200);
+                                    g_fn7C6BD0(
+                                        pp[2],
+                                        plVar8,
+                                        (void*)lVar10,
+                                        uVar6);
+                                    char bA =
+                                        g_fn787390(
+                                            plVar8);
+                                    if (bA) {
+                                        uint64_t uVar7 =
+                                            g_fn787380(
+                                                plVar8);
+                                        void* plVar16 =
+                                            g_fn78C8E0(
+                                                pp[3],
+                                                (uint32_t)
+                                                uVar7);
+                                        if (plVar16 != 0 &&
+                                            (uint32_t)
+                                            g_fn785EA0(
+                                                plVar16)
+                                            == uVar4 &&
+                                            (int32_t)
+                                            g_fn7867D0(
+                                                plVar16)
+                                            == 0x398) {
+                                            g_fn7A0760(
+                                                (void*)lVar10,
+                                                plVar16,
+                                                200,
+                                                uVar6,
+                                                0);
+                                            g_fn79F650(
+                                                (void*)lVar10,
+                                                plVar16,
+                                                200);
+                                            g_fn7C6BD0(
+                                                pp[2],
+                                                plVar16,
+                                                (void*)lVar10,
+                                                uVar6);
+                                        }
+                                    }
+                                    g_fn79FA60(
+                                        (void*)lVar10,
+                                        u2);
+                                    g_fn79F650(
+                                        (void*)lVar10,
+                                        plVar11,
+                                        1000);
+                                    g_fn78F900(
+                                        (void*)lVar10,
+                                        pc3);
+                                    g_fn78F960(
+                                        (void*)lVar10,
+                                        uVar5);
+                                    g_fn7C6BD0(
+                                        pp[2], plVar11,
+                                        (void*)lVar10,
+                                        uVar6);
+                                    char szBc[1025];
+                                    if (c4 == 0) {
+                                        void* pIV =
+                                            g_fnStringMgrInstance();
+                                        const void* pvF =
+                                            g_fnStringMgrGetStr(
+                                                pIV,
+                                                "STR_DEMISE_SUCCESS");
+                                        char* pcName =
+                                            g_fn787120(
+                                                plVar8);
+                                        snprintf(szBc,
+                                            0x400,
+                                            (const char*)
+                                            pvF, pcName);
+                                    }
+                                    else {
+                                        void* pIV =
+                                            g_fnStringMgrInstance();
+                                        const void* pvF =
+                                            g_fnStringMgrGetStr(
+                                                pIV,
+                                                "STR_SYN_REPLACE_SUCCESS");
+                                        snprintf(szBc,
+                                            0x400,
+                                            (const char*)
+                                            pvF, pc3);
+                                    }
+                                    szBc[1024] = 0;
+                                    uint64_t uLg =
+                                        g_fn78F270(
+                                            (void*)lVar10);
+                                    ((uint64_t (*)
+                                      (void*, uint32_t,
+                                       void*, uint64_t))
+                                     (*(void***)
+                                      pp[1])[0x88/8])(
+                                         pp[1],
+                                         (uint32_t)
+                                         (uLg &
+                                          0xffffffff),
+                                         szBc, 0);
+                                    static uint8_t
+                                        abMsgA[1072],
+                                        abMsgB[1072];
+                                    if (c4 == 0) {
+                                        g_fn7DB2B0(
+                                            abMsgA);
+                                        uint64_t uR =
+                                            g_fn7DB630(
+                                                abMsgA,
+                                                0x27,
+                                                1000,
+                                                uVar6,
+                                                (void*)pc3);
+                                        if ((char)uR) {
+                                            ((void (*)
+                                              (void*,
+                                               uint32_t,
+                                               void*))
+                                             (*(void***)
+                                              pp[1])[8/8])(
+                                                 pp[1],
+                                                 u2,
+                                                 abMsgA);
+                                        }
+                                        g_fn7DB2B0(
+                                            abMsgB);
+                                        char* pcName =
+                                            g_fn787120(
+                                                plVar8);
+                                        uR =
+                                            g_fn7DB630(
+                                                abMsgB,
+                                                0x28,
+                                                1000,
+                                                uVar6,
+                                                pcName);
+                                        if ((char)uR) {
+                                            ((void (*)
+                                              (void*,
+                                               uint32_t,
+                                               void*))
+                                             (*(void***)
+                                              pp[1])[8/8])(
+                                                 pp[1],
+                                                 (uint32_t)
+                                                 (uVar14 &
+                                                  0xffffffff),
+                                                 abMsgB);
+                                        }
+                                        g_fn7DB330(
+                                            abMsgB);
+                                        g_fn7DB330(
+                                            abMsgA);
+                                    }
+                                    else {
+                                        g_fn7DB2B0(
+                                            abMsgA);
+                                        char* pcName =
+                                            g_fn787120(
+                                                plVar8);
+                                        uint64_t uR =
+                                            g_fn7DB630(
+                                                abMsgA,
+                                                0x2e,
+                                                1000,
+                                                uVar6,
+                                                pcName);
+                                        if ((char)uR) {
+                                            ((void (*)
+                                              (void*,
+                                               uint32_t,
+                                               void*))
+                                             (*(void***)
+                                              pp[1])[8/8])(
+                                                 pp[1],
+                                                 (uint32_t)
+                                                 (uVar14 &
+                                                  0xffffffff),
+                                                 abMsgA);
+                                        }
+                                        // RAW: box
+                                        // vt+0x3b8
+                                        void* pIV =
+                                            g_fnStringMgrInstance();
+                                        const void* pvL =
+                                            g_fnStringMgrGetStr(
+                                                pIV,
+                                                "STR_SYN_REPLACE_SUCCESS_LEAVEWORD");
+                                        uint64_t uDc =
+                                            g_fn785DC0(
+                                                plVar8);
+                                        int64_t lF4 =
+                                            g_fn78F4E0(
+                                                (void*)lVar10);
+                                        ((void (*)
+                                          (void*, int64_t,
+                                           uint32_t,
+                                           const void*))
+                                         (*(void***)
+                                          pp[1])
+                                          [0x3b8/8])(
+                                              pp[1],
+                                              lF4,
+                                              (uint32_t)
+                                              (uDc &
+                                               0xffffffff),
+                                              pvL);
+                                        g_fn7DB330(
+                                            abMsgA);
+                                    }
+                                    char bB =
+                                        g_fn787390(
+                                            plVar11);
+                                    if (bB) {
+                                        uint64_t uVar7 =
+                                            g_fn787380(
+                                                plVar11);
+                                        void* plV8 =
+                                            g_fn78C8E0(
+                                                pp[3],
+                                                (uint32_t)
+                                                uVar7);
+                                        if (plV8 != 0 &&
+                                            (uint32_t)
+                                            g_fn785EA0(
+                                                plV8)
+                                            == uVar4) {
+                                            int64_t lR =
+                                                g_fn7867D0(
+                                                    plV8);
+                                            if ((int32_t)lR
+                                                != 0x3de) {
+                                                lR =
+                                                    g_fn7867D0(
+                                                        plV8);
+                                                if ((int32_t)lR
+                                                    != 0x3d4 &&
+                                                    g_fn786960(
+                                                        plV8)
+                                                    == 0) {
+                                                    g_fn79F650(
+                                                        (void*)lVar10,
+                                                        plV8,
+                                                        0x398);
+                                                    g_fn7C6BD0(
+                                                        pp[2],
+                                                        plV8,
+                                                        (void*)lVar10,
+                                                        uVar6);
+                                                    g_fn7A0760(
+                                                        (void*)lVar10,
+                                                        plV8,
+                                                        0x262,
+                                                        uVar6,
+                                                        0);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    g_fn7A0760(
+                                        (void*)lVar10,
+                                        plVar11, 200,
+                                        uVar6, 0);
+                                    g_fn79E020(
+                                        (void*)lVar10);
+                                    uint64_t uP =
+                                        g_fn790390(
+                                            (void*)lVar10);
+                                    if ((int32_t)uP
+                                        != 0) {
+                                        uP =
+                                            g_fn790390(
+                                                (void*)lVar10);
+                                        uint64_t uChk =
+                                            g_fn763680(
+                                                pp[10],
+                                                (uint32_t)uP);
+                                        uint64_t uLg2 =
+                                            g_fn78F270(
+                                                (void*)lVar10);
+                                        if ((int32_t)uChk ==
+                                            (int32_t)uLg2) {
+                                            uP =
+                                                g_fn790390(
+                                                    (void*)lVar10);
+                                            g_fn7B92B0(
+                                                this, u2,
+                                                uVar5,
+                                                (uint32_t)uP,
+                                                pc3);
+                                        }
+                                    }
+                                    g_fnMyLogSave(
+                                        "gmlog/syn_demise",
+                                        "player:%u to player:%u %s");
+                                    uVar3 = 1;
+                                }
+                                else {
+                                    uVar3 = 0;
+                                }
+                            }
+                            else {
+                                uVar3 = 0;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return uVar3;
+}
+
+// +0x118: 1417b6770 — the kick-out-by-name flow
+uint64_t CSyndicateLogic::Slot118(uint32_t u2,
+                                  const char* pc3) {
+    void** pp = (void**)this;
+    if (pc3 == 0) {
+        g_fnT1LogError("\xa1\xef%s(%s)\xa1\xef in %s, %d");
+        return 0;   // RAW: RAX & ~0xff
+    }
+    void* plVar4 = g_fn78C8E0(pp[3], u2);
+    uint64_t uVar7 = 0;
+    if (plVar4 != 0) {
+        std::string sName(pc3);
+        void* plVar5 = g_fn78C9F0(pp[3], &sName);
+        if (plVar5 == 0) {
+            uVar7 = uVar7 & ~0xffULL;
+        }
+        else {
+            uint64_t uVar6 = g_fn785EA0(plVar4);
+            uVar7 = g_fn785EA0(plVar5);
+            if ((uint32_t)uVar7 == (uint32_t)uVar6) {
+                int64_t uVar8 = g_fn7867D0(plVar4);
+                uVar7 = g_fn7867D0(plVar5);
+                if ((int32_t)uVar8 == 1000 ||
+                    (0x397 < (int32_t)uVar8 &&
+                     (int32_t)uVar7 < 0x2b3)) {
+                    int64_t lVar9 = g_fnLgFind(
+                        pp[2], (uint32_t)uVar6);
+                    uVar7 = 0;
+                    if (lVar9 != 0) {
+                        char bVar2 = g_fn78E590(
+                            (void*)lVar9);
+                        if (bVar2) {
+                            void* pIVar10 =
+                                g_fnStringMgrInstance();
+                            const void* pv =
+                                g_fnStringMgrGetStr(
+                                    pIVar10,
+                                    "STR_TOO_LOWER_SYN_MONEY");
+                            ((uint64_t (*)
+                              (void*, uint32_t,
+                               const void*))
+                             (*(void***)pp[1])
+                              [0x18/8])(
+                                  pp[1], u2, pv);
+                            uVar7 = uVar7 &
+                                    ~0xffULL;
+                        }
+                        else {
+                            uint64_t uVar11 =
+                                g_fn785DC0(
+                                    plVar5);
+                            char cVar3 =
+                                g_fn787300(
+                                    plVar5);
+                            char szBuf[129];
+                            szBuf[0] = 0;
+                            memset(szBuf + 1, 0,
+                                   0x7f);
+                            snprintf(szBuf, 0x80,
+                                "User[%lu]"
+                                " KickOutMember"
+                                " By Name",
+                                (unsigned long)u2);
+                            uVar7 = g_fn7AEBB0(
+                                this, (void*)lVar9,
+                                plVar5, szBuf, 0,
+                                1, 0);
+                            if ((char)uVar7 == 0) {
+                                uVar7 = uVar7 &
+                                        ~0xffULL;
+                            }
+                            else {
+                                void* plV5 =
+                                    g_fn796390(
+                                        (void*)lVar9,
+                                        (int32_t)
+                                        uVar11);
+                                if (plV5 != 0) {
+                                    g_fn786E30(
+                                        plV5, 0);
+                                }
+                                if (cVar3 != 0) {
+                                    void* pIV =
+                                        g_fnStringMgrInstance();
+                                    int64_t lVt =
+                                        **(int64_t**)
+                                        pp[1];
+                                    char* pcName =
+                                        g_fn787120(
+                                            plVar4);
+                                    const void* pv2 =
+                                        g_fnStringMgrGetStr(
+                                            pIV,
+                                            "STR_KICKOUT_ME_s");
+                                    // RAW: box
+                                    // vt+0x18, 4 args
+                                    ((uint64_t (*)
+                                      (void*, uint32_t,
+                                       const void*,
+                                       char*))
+                                     (*(void***)
+                                      pp[1])[0x18/8])(
+                                         pp[1],
+                                         (uint32_t)
+                                         (uVar11 &
+                                          0xffffffff),
+                                         pv2, pcName);
+                                    (void)lVt;
+                                }
+                                char szBc[1025];
+                                szBc[0] = 0;
+                                memset(szBc + 1, 0,
+                                       0x3ff);
+                                void* pIV2 =
+                                    g_fnStringMgrInstance();
+                                const void* pv3 =
+                                    g_fnStringMgrGetStr(
+                                        pIV2,
+                                        "STR_KICKOUT_MEMBER_s");
+                                snprintf(szBc, 0x3ff,
+                                         (const char*)
+                                         pv3, pc3);
+                                szBc[1024] = 0;
+                                int64_t lVt2 =
+                                    **(int64_t**)
+                                    pp[1];
+                                uint64_t uLg =
+                                    g_fn78F270(
+                                        (void*)lVar9);
+                                ((uint64_t (*)
+                                  (void*, uint32_t,
+                                   void*, uint64_t))
+                                 (*(void***)
+                                  pp[1])[0x88/8])(
+                                     pp[1],
+                                     (uint32_t)
+                                     (uLg &
+                                      0xffffffff),
+                                     szBc, 0);
+                                (void)lVt2;
+                                static uint8_t
+                                    abMsg[1072];
+                                g_fn7DB2B0(abMsg);
+                                uVar7 =
+                                    g_fn7DB3A0(
+                                        abMsg,
+                                        0x2c, 0);
+                                if ((char)uVar7 != 0) {
+                                    ((void (*)
+                                      (void*, uint32_t,
+                                       void*))
+                                     (*(void***)
+                                      pp[1])[8/8])(
+                                         pp[1], u2,
+                                         abMsg);
+                                }
+                                uint64_t uVar6b =
+                                    g_fn7DB330(
+                                        abMsg);
+                                uVar7 = (uVar6b &
+                                         ~0xffULL)|1;
+                            }
+                        }
+                    }
+                }
+                else {
+                    uVar7 = uVar7 & ~0xffULL;
+                }
+            }
+            else {
+                uVar7 = uVar7 & ~0xffULL;
+            }
+        }
+    }
+    return uVar7;
 }
 
 
