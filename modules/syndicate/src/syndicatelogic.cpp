@@ -1249,6 +1249,28 @@ uint64_t CSyndicateLogic::Slot1c8IsAntagGate(
     return 0;
 }
 
+// ---- D97 seams (default null — tests bind them) ----
+void     (*g_fnSink3OpD)(void*);
+void     (*g_fnSub38Cdc0)(void*, const void*, const void*, int32_t, int32_t);
+void     (*g_fnSub28Cd0)(void*, uint32_t, uint32_t);
+uint64_t (*g_fnSub28F980)(void*, int32_t, int32_t);
+void     (*g_fnSub48D4670)(void*, uint32_t, uint32_t, const char*, uint32_t, int16_t, int16_t, int16_t, int16_t, int16_t, int16_t);
+void     (*g_fnSub48D3100)(void*, int32_t, uint64_t);
+char     (*g_fnLgInviteOk)(void*, uint32_t, uint64_t, uint64_t);
+char     (*g_fnSub9D3530)(void*, uint32_t, uint32_t);
+char     (*g_fnLgMoneyLow)(void*);
+char     (*g_fnLgMemberFull)(void*);
+uint64_t (*g_fnLgLeaderRank)(void*);
+void     (*g_fnSub10Call)(void*, uint32_t, uint32_t);
+void     (*g_fnB19C0)(void*, uint32_t, char, uint64_t);
+char     (*g_fnB8470)(void*, void*, uint32_t, int32_t, int32_t, char);
+void     (*g_fnLgF4E0)(void*);
+void     (*g_fnDelayMs)(uint32_t);
+void     (*g_fnLgAd50)(void*, uint32_t);
+void     (*g_fnSub9D3680)(void*, int32_t, int32_t);
+uint32_t (*g_fnLogicVt510)(void*, uint32_t);
+char     (*g_fnLogicVt78)(void*);
+
 // ================= D96 wave 6 (+0x1d0..+0x208) =================
 
 uint32_t CSyndicateLogic::Slot1d0Sub20Delegate(
@@ -1308,6 +1330,194 @@ void CSyndicateLogic::Slot208B4b0ThenSink3(
     g_fnB4B0(*(void**)((char*)pLogic + 0x30), 3, p, q);
     void* pObj = g_fnSink3Get();
     g_fnSink3OpC(pObj);
+}
+
+// ================= D97 wave 7 (+0x210..+0x258) =================
+
+void CSyndicateLogic::Slot210Flag60Sink3() {
+    void* pLogic = this;
+    if (*((char*)pLogic + 0x60) != 0) {
+        void* pObj = g_fnSink3Get();
+        g_fnSink3OpD(pObj);
+    }
+}
+
+void CSyndicateLogic::Slot220Sub38Cdc0(
+    int32_t a, int32_t b, const void* p, const void* q) {
+    void* pLogic = this;
+    if (*(void**)((char*)pLogic + 0x38) != 0)
+        g_fnSub38Cdc0(
+            *(void**)((char*)pLogic + 0x38), p, q, a, b);
+}
+
+void CSyndicateLogic::Slot228Sub28Cd0(
+    uint32_t a, uint32_t b) {
+    void* pLogic = this;
+    if (*(void**)((char*)pLogic + 0x28) != 0)
+        g_fnSub28Cd0(*(void**)((char*)pLogic + 0x28),
+                     a, b);
+}
+
+uint64_t CSyndicateLogic::Slot230Sub28F980(
+    int32_t a, int32_t b) {
+    void* pLogic = this;
+    if (*(void**)((char*)pLogic + 0x28) != 0)
+        return g_fnSub28F980(
+            *(void**)((char*)pLogic + 0x28), a, b);
+    return 0;
+}
+
+void CSyndicateLogic::Slot238Sub30B4b0(
+    uint32_t a, const void* p, const void* q) {
+    void* pLogic = this;
+    if (*(void**)((char*)pLogic + 0x30) != 0)
+        g_fnB4B0(*(void**)((char*)pLogic + 0x30), a,
+                 p, q);
+}
+
+void CSyndicateLogic::Slot240Sub48D4670(
+    uint32_t a, uint32_t b, const char* s, uint32_t c,
+    int16_t s1, int16_t s2, int16_t s3, int16_t s4,
+    int16_t s5, int16_t s6) {
+    void* pLogic = this;
+    if (*(void**)((char*)pLogic + 0x48) == 0) {
+        g_fnT1LogError(0); return;
+    }
+    g_fnSub48D4670(
+        *(void**)((char*)pLogic + 0x48), a, b, s, c,
+        s1, s2, s3, s4, s5, s6);
+}
+
+void CSyndicateLogic::Slot248Sub48D3100(
+    int32_t a, uint64_t b) {
+    void* pLogic = this;
+    if (*(void**)((char*)pLogic + 0x48) == 0) {
+        g_fnT1LogError(0); return;
+    }
+    g_fnSub48D3100(*(void**)((char*)pLogic + 0x48),
+                   a, b);
+}
+
+void CSyndicateLogic::Slot250InviteFlow(
+    uint32_t u, uint64_t p3, uint64_t p4) {
+    void* pLogic = this;
+    void** pp = (void**)pLogic;
+    void* pBox = pp[1];
+    uint32_t uLgId = (uint32_t)p3;
+    char szBuf[1024]; szBuf[0] = 0;
+    if (pp[9] == 0) { g_fnT1LogError(0); }
+    else if (pp[2] == 0) { g_fnT1LogError(0); }
+    else if (uLgId == 0) { g_fnT1LogError(0); }
+    else {
+        // RAW: (**(code**)(boxvt + 0x1f8))() — no
+        // visible args (same shape as OnFlowerChange)
+        int32_t iVar4 = (int32_t)((uint64_t (*)())
+            (*(void***)pBox)[0x1f8/8])();
+        if (iVar4 == 0) {
+            int64_t lLg = g_fnLgFind(pp[2], uLgId);
+            if (lLg != 0) {
+                char bOk = g_fnLgInviteOk(
+                    (void*)lLg, u, p3, p4);
+                if (bOk) {
+                    char bInv = g_fnSub9D3530(
+                        (void*)pp[9], u, uLgId);
+                    if (bInv) {
+                        if (g_fnLgMoneyLow(
+                                (void*)lLg)) {
+                            void* pIv =
+                                g_fnStringMgrInstance();
+                            const void* pv =
+                                g_fnStringMgrGetStr(pIv,
+                                    "STR_TOO_LOWER_SYN_MONEY");
+                            BoxVt18Tip(pBox, u, pv);
+                        } else if (g_fnLgMemberFull(
+                                       (void*)lLg)) {
+                            void* pIv =
+                                g_fnStringMgrInstance();
+                            const void* pv =
+                                g_fnStringMgrGetStr(pIv,
+                                    "STR_SYN_FULL");
+                            BoxVt18Tip(pBox, u, pv);
+                        } else {
+                            // RAW: logic vt+0x510
+                            // (this, u)
+                            uint32_t uLeader =
+                                g_fnLogicVt510(pLogic,
+                                               u);
+                            if (uLeader != 0) {
+                                uint64_t uRank =
+                                    g_fnLgLeaderRank(
+                                        (void*)lLg);
+                                if (uLeader == uRank)
+                                    g_fnSub10Call(
+                                        pp[10], uLeader,
+                                        u);
+                                else
+                                    g_fnB19C0(pLogic, u,
+                                              1, p4);
+                            }
+                            char bSent = g_fnB8470(
+                                pLogic, (void*)lLg, u,
+                                200, 0, 0);
+                            if (bSent) {
+                                // RAW: box vt+0x370 ()
+                                ((void (*)())
+                                    (*(void***)
+                                        *(char**)
+                                            ((char*)pLogic
+                                             + 8))
+                                        [0x370/8])();
+                                szBuf[0] = 0;
+                                memset(szBuf + 1, 0,
+                                       0x3ff);
+                                // RAW: box vt+0x1d8
+                                // (box, u)
+                                g_fnBoxVt1d8(pBox, u);
+                                g_fnLgRefresh(
+                                    (void*)lLg);
+                                g_fnLgF4E0((void*)lLg);
+                                g_fnDelayMs(1000);
+                                void* pIv =
+                                    g_fnStringMgrInstance();
+                                const char* pc =
+                                    (const char*)
+                                    g_fnStringMgrGetStr(
+                                        pIv,
+                                        "STR_SYN_INVITE_JOIN");
+                                snprintf(szBuf, 0x400,
+                                         pc);
+                                uint64_t uBc =
+                                    g_fnLgGetId(
+                                        (void*)lLg);
+                                BoxVt88Broadcast(pBox,
+                                    (uint32_t)uBc,
+                                    szBuf);
+                                g_fnLgAd50((void*)lLg,
+                                           u);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void CSyndicateLogic::Slot258Sub9D3680(int32_t n) {
+    void* pLogic = this;
+    void** pp = (void**)pLogic;
+    void* pBox = pp[1];
+    if (n == 0) { g_fnT1LogError(0); return; }
+    if (pp[9] == 0) { g_fnT1LogError(0); return; }
+    // RAW: (**(code**)(logicvt + 0x78))()
+    char cOk = g_fnLogicVt78(pLogic);
+    if (cOk) {
+        int32_t iVar2 = (int32_t)((int32_t (*)(
+            void*, int32_t))
+            (*(void***)pBox)[0x1f8/8])(pBox, n);
+        if (iVar2 != 0)
+            g_fnSub9D3680((void*)pp[9], n, iVar2);
+    }
 }
 
 

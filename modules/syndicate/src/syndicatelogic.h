@@ -94,6 +94,41 @@ extern void*    (*g_fnStringMgrGetStr)(void*, const char*);
 extern char     (*g_fnA84HasOldPos)(void*);
 extern uint32_t (*g_fnA84GetOldId)(void*);
 
+// ---- wave-7 seams (D97) ----
+extern void     (*g_fnSink3OpD)(void*);                 // 1417434f0
+extern void     (*g_fnSub38Cdc0)(void*, const void*,
+                    const void*, int32_t, int32_t);      // 14177cdc0
+extern void     (*g_fnSub28Cd0)(void*, uint32_t,
+                                 uint32_t);              // 141784cd0
+extern uint64_t (*g_fnSub28F980)(void*, int32_t,
+                                 int32_t);               // 14177f980
+extern void     (*g_fnSub48D4670)(void*, uint32_t,
+                    uint32_t, const char*, uint32_t,
+                    int16_t, int16_t, int16_t, int16_t,
+                    int16_t, int16_t);                   // 1417d4670
+extern void     (*g_fnSub48D3100)(void*, int32_t,
+                                  uint64_t);              // 1417d3100
+extern char     (*g_fnLgInviteOk)(void*, uint32_t,
+                    uint64_t, uint64_t);                 // 14179c8b0
+extern char     (*g_fnSub9D3530)(void*, uint32_t,
+                    uint32_t);                           // 1417d3530
+extern char     (*g_fnLgMoneyLow)(void*);               // 14178e590
+extern char     (*g_fnLgMemberFull)(void*);              // 14178e600
+extern uint64_t(*g_fnLgLeaderRank)(void*);               // 141790390
+extern void     (*g_fnSub10Call)(void*, uint32_t,
+                                 uint32_t);              // 1417638e0
+extern void     (*g_fnB19C0)(void*, uint32_t, char,
+                              uint64_t);                 // 1417b19c0
+extern char     (*g_fnB8470)(void*, void*, uint32_t,
+                    int32_t, int32_t, char);             // 1417b8470
+extern void     (*g_fnLgF4E0)(void*);                    // 14178f4e0
+extern void     (*g_fnDelayMs)(uint32_t);                // 1417873a0
+extern void     (*g_fnLgAd50)(void*, uint32_t);          // 14179ad50
+extern void     (*g_fnSub9D3680)(void*, int32_t,
+                                  int32_t);              // 1417d3680
+extern uint32_t (*g_fnLogicVt510)(void*, uint32_t);      // vt+0x510
+extern char     (*g_fnLogicVt78)(void*);                // vt+0x78
+
 // ---- wave-6 seams (D96) ----
 extern uint32_t (*g_fnA8940)(void*, uint32_t);         // 1417a8940
 extern void*    (*g_fnSink1Get)(void);                  // 14173f9c0
@@ -270,6 +305,27 @@ public:
     void Slot200Sink3OpB(int32_t n);               // 1417af410
     void Slot208B4b0ThenSink3(const void* p,
                               const void* q);      // 1417af430
+    // ---- D97 wave 7: slots +0x210..+0x258 ----
+    void Slot210Flag60Sink3();                      // 1417af460
+    void Slot220Sub38Cdc0(int32_t a, int32_t b,
+                          const void* p,
+                          const void* q);            // 1417afa70
+    void Slot228Sub28Cd0(uint32_t a, uint32_t b);    // 1417afaa0
+    uint64_t Slot230Sub28F980(int32_t a,
+                              int32_t b);            // 1417afac0
+    void Slot238Sub30B4b0(uint32_t a, const void* p,
+                          const void* q);            // 1417afae0
+    void Slot240Sub48D4670(uint32_t a, uint32_t b,
+                           const char* s, uint32_t c,
+                           int16_t s1, int16_t s2,
+                           int16_t s3, int16_t s4,
+                           int16_t s5,
+                           int16_t s6);             // 1417afba0
+    void Slot248Sub48D3100(int32_t a,
+                           uint64_t b);              // 1417afc40
+    void Slot250InviteFlow(uint32_t u, uint64_t p3,
+                           uint64_t p4);             // 1417b8620
+    void Slot258Sub9D3680(int32_t n);                // 1417afc90
 
 
 
