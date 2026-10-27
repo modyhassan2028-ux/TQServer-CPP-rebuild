@@ -103,41 +103,41 @@ int main() {
     assert(pL->Slot520(0) == 0);
     assert(pL->Slot520(2) == 0x62);
     assert(s_uArgs[0] == 2);
-    assert(pL->Slot380(0) == 0);
-    assert(pL->Slot380(-3) == 0x63);
+    assert(pL->Slot528(0) == 0);
+    assert(pL->Slot528(-3) == 0x63);
     assert(s_uArgs[0] == (uint32_t)-3);
     // ---- S4: +0x388 ----
     Reset();
-    pL->Slot388(7);
+    pL->Slot530(7);
     assert(s_nED30 == 1);
     // ---- S5: +0x390/+0x398 with the vt+0x4a8 gate ----
     Reset();
-    pL->Slot390(7);
+    pL->Slot538(7);
     assert(s_nVt4a8 == 1 && s_nEBE0 == 1);
-    pL->Slot398(7);
+    pL->Slot540(7);
     assert(s_nVt4a8 == 2 && s_nEC50 == 1);
     s_iVt4a8Ret = 0;
-    pL->Slot390(7); pL->Slot398(7);
+    pL->Slot538(7); pL->Slot540(7);
     assert(s_nEBE0 == 1 && s_nEC50 == 1);  // gated
     // ---- S6: +0x3a0 the CONCAT71 pattern ----
     Reset();
-    assert(pL->Slot3A0(7) == 0x64);
+    assert(pL->Slot548(7) == 0x64);
     s_iVt4a8Ret = 0;
     // CONCAT71((int7)(uVar1 >> 8), 1) with uVar1 = 0
-    assert(pL->Slot3A0(7) == 1);
+    assert(pL->Slot548(7) == 1);
     // ---- S7: +0x3a8/+0x3b0 gates ----
     Reset();
-    pL->Slot3A8(0);   // u2 == 0 -> no call
+    pL->Slot550(0);   // u2 == 0 -> no call
     assert(s_n8020 == 0);
     ((void**)abLogic)[10] = 0;
-    pL->Slot3A8(9);   // p10 == 0 -> no call
+    pL->Slot550(9);   // p10 == 0 -> no call
     assert(s_n8020 == 0);
     ((void**)abLogic)[10] = abSub;
-    pL->Slot3A8(9);
+    pL->Slot550(9);
     assert(s_n8020 == 1);
-    pL->Slot3B0(0, 4);   // n2 == 0 -> no call
+    pL->Slot558(0, 4);   // n2 == 0 -> no call
     assert(s_n24D0 == 0);
-    pL->Slot3B0(3, 4);
+    pL->Slot558(3, 4);
     assert(s_n24D0 == 1);
     puts("SYNDICATE_D106_OK: wave 11");
     return 0;

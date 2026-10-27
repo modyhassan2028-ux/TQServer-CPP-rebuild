@@ -94,6 +94,55 @@ extern void*    (*g_fnStringMgrGetStr)(void*, const char*);
 extern char     (*g_fnA84HasOldPos)(void*);
 extern uint32_t (*g_fnA84GetOldId)(void*);
 
+// ---- D113 seams (wave 18: TRUE +0x378..+0x470) ----
+extern uint32_t (*g_fn1417a8940)(void*, uint32_t);     // 1417a8940
+extern void*    (*g_fn14173f9c0)();                     // 14173f9c0
+extern void     (*g_fn14173fa40)(void*, uint32_t);      // 14173fa40
+extern void     (*g_fn14173dbc0)(void*, uint32_t,
+                                 uint32_t, uint32_t);  // 14173dbc0
+extern void     (*g_fn14173f4d0)(void*);                // 14173f4d0
+extern void*    (*g_fn141781b60)();                     // 141781b60
+extern void     (*g_fn141783470)(void*, uint32_t);       // 141783470
+extern void*    (*g_fn141741a30)();                     // 141741a30
+extern void     (*g_fn141742810)(void*, void*);          // 141742810
+extern void     (*g_fn141740fd0)(void*, uint32_t);       // 141740fd0
+extern void     (*g_fn141741b10)(void*);                // 141741b10
+extern void     (*g_fn1417434f0)(void*);                // 1417434f0
+extern void     (*g_fn14177b4b0)(void*, int32_t,
+                                 int64_t, int64_t);    // 14177b4b0
+// RAW afa70: the callee args are REORDERED —
+// cdc0(x, p4, p5, p2, p3)
+extern void     (*g_fn14177cdc0)(void*, int64_t,
+                                 int64_t, uint32_t,
+                                 uint32_t);            // 14177cdc0
+extern void     (*g_fn141784cd0)(void*, uint32_t,
+                                 uint32_t);            // 141784cd0
+extern uint64_t (*g_fn14177f980)(void*, uint32_t,
+                                 uint32_t);           // 14177f980
+extern void     (*g_fn1417d4670)(void*, uint32_t,
+                                 uint32_t, const void*,
+                                 uint32_t, int16_t, int16_t,
+                                 int16_t, int16_t, int16_t,
+                                 int16_t);             // 1417d4670
+extern void     (*g_fn1417d3100)(void*, uint32_t,
+                                 uint32_t);            // 1417d3100
+extern void     (*g_fn1417d3680)(void*, uint32_t,
+                                 uint32_t);            // 1417d3680
+extern char     (*g_fn14179c8b0)(void*, uint32_t,
+                                 int64_t, int64_t);    // 14179c8b0
+extern char     (*g_fn1417d3530)(void*, uint32_t,
+                                 uint32_t);            // 1417d3530
+extern char     (*g_fn14178e600)(void*);                // 14178e600
+extern int32_t   (*g_fn141790390)(void* pLeague);          // 141790390 (shared with InviteNotify)
+extern void     (*g_fn1417638e0)(void*, uint32_t,
+                                 uint32_t);            // 1417638e0
+extern char     (*g_fn1417b8470)(void*, void*,
+                                 uint32_t, int32_t,
+                                 int32_t, int32_t);    // 1417b8470
+extern void*    (*g_fn1417873a0)(int32_t);              // 1417873a0
+extern void*    (*g_fn14178f4e0)(void*);                // 14178f4e0
+extern void     (*g_fn14179ad50)(void*, uint32_t);       // 14179ad50
+
 // ---- D112 seams (wave 17: TRUE +0x2e0..+0x370) ----
 extern void*    (*g_fn1417c8c10)(void*, uint32_t);     // 1417c8c10
 extern void*    (*g_fn1417c8d80)(void*, uint32_t);     // 1417c8d80 (ret discarded)
@@ -662,13 +711,13 @@ public:
     uint32_t Slot510(uint32_t u2);                 // 1417b02f0
     uint64_t Slot518(uint32_t u2);                 // 1417afe40
     uint64_t Slot520(uint32_t u2);                 // 1417b5810
-    uint64_t Slot380(int32_t n2);                   // 1417b5820
-    void Slot388(uint32_t u2);                     // 1417b0e90
-    void Slot390(uint32_t u2);                     // 1417afe70
-    void Slot398(uint32_t u2);                     // 1417afec0
-    uint64_t Slot3A0(uint32_t u2);                 // 1417aff10
-    void Slot3A8(uint16_t u2);                     // 1417aff60
-    void Slot3B0(int32_t n2, uint32_t u3);         // 1417aff80
+    uint64_t Slot528(int32_t n2);                   // 1417b5820
+    void Slot530(uint32_t u2);                     // 1417b0e90
+    void Slot538(uint32_t u2);                     // 1417afe70
+    void Slot540(uint32_t u2);                     // 1417afec0
+    uint64_t Slot548(uint32_t u2);                 // 1417aff10
+    void Slot550(uint16_t u2);                     // 1417aff60
+    void Slot558(int32_t n2, uint32_t u3);         // 1417aff80
     void Slot0E8(uint32_t u2);                     // 1417ab1c0
     int64_t Slot0F0(uint32_t u2);                  // 1417ab2b0
     void Slot0F8(int32_t n2);                      // 1417aeba0
@@ -748,8 +797,37 @@ public:
     void     Slot368(void);                         // 1417afb00
     uint8_t  Slot370(uint32_t u2, void* p3);        // 1417af2f0
 
+    // ---- D113 wave 18 (TRUE offsets +0x378..+0x470) ----
+    uint32_t Slot378(uint32_t u2);                 // 1417af310
+    void     Slot380(uint32_t u2);                 // 1417af330
+    void     Slot388(uint32_t u2, uint32_t u3,
+                     uint32_t u4);                 // 1417af350
+    void     Slot390(void);                        // 1417af390
+    void     Slot398(uint32_t u2);                 // 1417af3b0
+    void     Slot3a0(int32_t n2, void* p3);        // 1417af3d0
+    void     Slot3a8(uint32_t u2);                 // 1417af410
+    void     Slot3b0(int32_t n2, int64_t l3,
+                     int64_t l4);                   // 1417af430
+    void     Slot3b8(void);                        // 1417af460
+    void     Slot3c8(uint32_t u2, uint32_t u3,
+                     int64_t l4, int64_t l5);       // 1417afa70
+    void     Slot3d0(uint32_t u2, uint32_t u3);    // 1417afaa0
+    uint64_t Slot3d8(uint32_t u2, uint32_t u3);    // 1417afac0
+    void     Slot3e0(uint32_t u2, uint32_t u3,
+                     uint32_t u4);                  // 1417afae0
+    void     Slot3e8(uint32_t u2, uint32_t u3,
+                     const char* pc4, uint32_t u5,
+                     int16_t n6, int16_t n7,
+                     int16_t n8, int16_t n9,
+                     int16_t n10, int16_t n11);    // 1417afba0
+    void     Slot3f0(uint32_t u2, uint32_t u3);    // 1417afc40
+    void     Slot3f8(uint32_t u2, uint32_t u3,
+                     uint32_t u4);                  // 1417b8620
+    void     Slot400(uint32_t u2);                 // 1417afc90
+
 };
 }
+
   // namespace syndicate
 
 #endif  // MODULES_SYNDICATE_SRC_SYNDECATELOGIC_H
