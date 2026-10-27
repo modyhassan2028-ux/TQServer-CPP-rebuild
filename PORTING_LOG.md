@@ -4084,3 +4084,27 @@ modules/syndicate/src/syndicatelogic.cpp — كلها البحث LogRecMapFind �
 - 1417ac240 (+0x188) → 141785d50(rec) → int
 
 9 seams جديدة (g_fnRecA..I). رجريجن 96/96 × 6.
+
+## D94 — موجة 4 من جدول CSyndicateLogic (27-10-2026)
+
+3 أجسام متوسطة (الفتحات +0x190..+0x1a0) داخل syndicatelogic.cpp:
+
+### 1417aae40 (+0x190) — **OnFlowerChange** (الاسم الحقيقي من السجل الحرفي)
+بوابة vt+0x1f8 للصندوق (بلا وسائط) → 0 → عودة 1 (CONCAT71). ثم بحث الدوري
+1417cad00 (فشل → السجل الحرفي "CSyndicateLogic::OnFlowerChange. can't find
+syndicate. user[%d] syndicate[%d]") ثم بحث السجل (&DAT_141824ca8 عند
+الفشل) ثم مطابقة 141785ea0 مع 14178f270 ثم تفويض الزهرة:
+النوع 0→1417886b0، 1→1417888b0، 2→1417887b0، 3→1417889b0، غير ذلك →
+السجل الحرفي "ERROR: CUser::SetFlower error flower type %d". العائدة
+CONCAT71((ret >> 8), 1).
+
+### 1417abac0 (+0x198) — نقل الأموال بين الدوريين
+بوابات: user==0 (سجل)، amt<1 (سجل)، to==0، amt<10000 → 0. ثم القائد
+(1417868c0)، rank==to → 0، رصيد الدوري 14178f4f0 < amt → 0، ثم
+14179bf80(from, -amt) و14179bf80(to, +amt) → 1.
+
+### 1417ba630 (+0x1a0) — بوابة الدعوة
+user/who != 0، بحث سجل who، القائد، rank==0 (سجل)، بحث الدوري، ثم
+تفويض 1417b8210(this, user, lg).
+
+8 seams جديدة. رجريجن 97/97 × 6.

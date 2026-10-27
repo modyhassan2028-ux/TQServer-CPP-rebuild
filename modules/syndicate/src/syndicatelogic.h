@@ -94,6 +94,16 @@ extern void*    (*g_fnStringMgrGetStr)(void*, const char*);
 extern char     (*g_fnA84HasOldPos)(void*);
 extern uint32_t (*g_fnA84GetOldId)(void*);
 
+// ---- wave-4 seams (D94) ----
+extern uint64_t (*g_fnLgGetId)(void*);             // 14178f270
+extern void*    (*g_fnFlowerA)(void*, int32_t, uint64_t, uint64_t);  // 1417886b0
+extern void*    (*g_fnFlowerB)(void*, int32_t, uint64_t, uint64_t);  // 1417888b0
+extern void*    (*g_fnFlowerC)(void*, int32_t, uint64_t, uint64_t);  // 1417887b0
+extern void*    (*g_fnFlowerD)(void*, int32_t, uint64_t, uint64_t);  // 1417889b0
+extern int64_t  (*g_fnLgGetFunds)(void*);          // 14178f4f0
+extern void     (*g_fnLgAddFunds)(void*, int64_t); // 14179bf80
+extern uint64_t (*g_fnInviteB210)(void*, uint32_t, void*); // 1417b8210
+
 // ---- wave-3 seams (D93) ----
 extern uint64_t (*g_fnRecA)(void*, int32_t);       // 1417881f0
 extern uint64_t (*g_fnRecB)(void*, int32_t, uint64_t, uint64_t); // 141788370
@@ -198,6 +208,15 @@ public:
     uint64_t Slot178RecG(uint32_t u);              // 1417ac1e0
     uint64_t Slot180RecH(uint32_t u);              // 1417ac210
     int32_t Slot188RecI(uint32_t u);               // 1417ac240
+    // ---- D94 wave 4: slots +0x190..+0x1a0 ----
+    // the REAL name — the literal log names it
+    uint64_t OnFlowerChange(uint32_t uUser, int32_t nType,
+                            int32_t n, uint64_t uB); // 1417aae40
+    uint8_t Slot198MoveFunds(uint32_t uUser, uint32_t uTo,
+                             int64_t lAmt);     // 1417abac0
+    uint64_t Slot1a0InviteGate(uint32_t uUser,
+                               uint32_t uWho);   // 1417ba630
+
 
 
 };

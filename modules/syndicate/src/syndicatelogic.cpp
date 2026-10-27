@@ -782,6 +782,16 @@ uint64_t CSyndicateLogic::Slot140RecGetX(
     return g_fnRecGetX((void*)lRec, n);
 }
 
+// ---- D94 seams (default null — tests bind them) ----
+uint64_t (*g_fnLgGetId)(void*);
+void*    (*g_fnFlowerA)(void*, int32_t, uint64_t, uint64_t);
+void*    (*g_fnFlowerB)(void*, int32_t, uint64_t, uint64_t);
+void*    (*g_fnFlowerC)(void*, int32_t, uint64_t, uint64_t);
+void*    (*g_fnFlowerD)(void*, int32_t, uint64_t, uint64_t);
+int64_t  (*g_fnLgGetFunds)(void*);
+void     (*g_fnLgAddFunds)(void*, int64_t);
+uint64_t (*g_fnInviteB210)(void*, uint32_t, void*);
+
 // ================= D93 wave 3 (+0x148..+0x188) =================
 
 uint64_t CSyndicateLogic::Slot148RecA(uint32_t uUser, int32_t n) {
@@ -858,5 +868,111 @@ int32_t CSyndicateLogic::Slot188RecI(uint32_t uUser) {
     if (lRec == 0) return 0;
     return g_fnRecI((void*)lRec);
 }
+
+// ================= D94 wave 4 (+0x190..+0x1a0) =================
+
+uint64_t CSyndicateLogic::OnFlowerChange(
+    uint32_t uUser, int32_t nType, int32_t n,
+    uint64_t uB) {
+    void* pLogic = this;
+    uint64_t uVar7 = (uint64_t)(int64_t)nType;
+    uint64_t uVar8 = uB;
+    uint64_t uVt = ((uint64_t (*)())
+        (*(void***)*(char***)((char*)pLogic + 8))
+            [0x1f8/8])();
+    uint64_t uRet;
+    if ((uint32_t)uVt == 0) {
+        // RAW: CONCAT71((int7)(uVar1 >> 8), 1)
+        return (uVt & ~0xffULL) | 1;
+    }
+    int64_t lLg = g_fnLgFind(
+        *(void**)((char*)pLogic + 0x10), (uint32_t)uVt);
+    if (lLg == 0) {
+        g_fnT1LogError(
+            "CSyndicateLogic::OnFlowerChange. can't find"
+            " syndicate. user[%d] syndicate[%d]");
+        return 0;
+    }
+    int64_t lRec = LogRecMapFind(
+        *(void**)((char*)pLogic + 0x18), uUser);
+    if (lRec == 0) { g_fnT1LogError(0); return 0; }
+    uint64_t uRank = g_fnA84GetSynId2((void*)lRec);
+    uint64_t uLgId = g_fnLgGetId((void*)lLg);
+    if ((int32_t)uRank != (int32_t)uLgId) return 0;
+    void* pRes = nullptr;
+    if (nType == 0) {
+        pRes = g_fnFlowerA((void*)lRec, n, uVar7, uVar8);
+    } else if (nType == 1) {
+        pRes = g_fnFlowerB((void*)lRec, n, uVar7, uVar8);
+    } else if (nType == 2) {
+        pRes = g_fnFlowerC((void*)lRec, n, uVar7, uVar8);
+    } else if (nType == 3) {
+        pRes = g_fnFlowerD((void*)lRec, n, uVar7, uVar8);
+    } else {
+        g_fnT1LogError(
+            "ERROR: CUser::SetFlower error flower type %d");
+        return 0;
+    }
+    // RAW: CONCAT71((int7)(puVar5 >> 8), 1)
+    return ((uint64_t)pRes & ~0xffULL) | 1;
+}
+
+uint8_t CSyndicateLogic::Slot198MoveFunds(
+    uint32_t uUser, uint32_t uTo, int64_t lAmt) {
+    void* pLogic = this;
+    if (uUser == 0) { g_fnT1LogError(0); return 0; }
+    if (lAmt < 1)   { g_fnT1LogError(0); return 0; }
+    if (uTo == 0)  return 0;
+    if (lAmt < 10000) return 0;
+    int64_t lRec = LogRecMapFind(
+        *(void**)((char*)pLogic + 0x18), uUser);
+    if (lRec == 0) return 0;
+    if (!g_fnRecIsLeader((void*)lRec)) return 0;
+    uint64_t uRank = g_fnA84GetSynId2((void*)lRec);
+    if ((uint32_t)uRank == uTo) return 0;
+    int64_t lFrom = g_fnLgFind(
+        *(void**)((char*)pLogic + 0x10), (uint32_t)uRank);
+    if (lFrom == 0) return 0;
+    if (g_fnLgGetFunds((void*)lFrom) < lAmt) return 0;
+    int64_t lDest = g_fnLgFind(
+        *(void**)((char*)pLogic + 0x10), uTo);
+    if (lDest == 0) return 0;
+    g_fnLgAddFunds((void*)lFrom, -lAmt);
+    g_fnLgAddFunds((void*)lDest, lAmt);
+    return 1;
+}
+
+uint64_t CSyndicateLogic::Slot1a0InviteGate(
+    uint32_t uUser, uint32_t uWho) {
+    void* pLogic = this;
+    if (uUser != 0 && uWho != 0) {
+        int64_t lRec = LogRecMapFind(
+            *(void**)((char*)pLogic + 0x18), uWho);
+        if (lRec != 0) {
+            char bLead = g_fnRecIsLeader((void*)lRec);
+            uint64_t uLead = (uint64_t)(uint8_t)bLead;
+            if (bLead) {
+                uint64_t uRank =
+                    g_fnA84GetSynId2((void*)lRec);
+                if ((uint32_t)uRank == 0) {
+                    g_fnT1LogError(0);
+                    return 0;
+                }
+                int64_t lLg = g_fnLgFind(
+                    *(void**)((char*)pLogic + 0x10),
+                    (uint32_t)uRank);
+                if (lLg != 0)
+                    return g_fnInviteB210(
+                        pLogic, uUser, (void*)lLg);
+                return 0;
+            }
+            // RAW: CONCAT71(extraout_var, bVar1)
+            return (uLead & ~0xffULL) |
+                   (uint64_t)(uint8_t)bLead;
+        }
+    }
+    return 0;
+}
+
 
 }  // namespace syndicate
