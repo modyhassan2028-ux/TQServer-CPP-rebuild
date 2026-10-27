@@ -1332,6 +1332,14 @@ void CSyndicateLogic::Slot208B4b0ThenSink3(
     g_fnSink3OpC(pObj);
 }
 
+// ---- D103 seams (default null — tests bind them) ----
+uint64_t (*g_fn743C80)(void*);
+char     (*g_fn7977D0)(void*, uint32_t);
+char     (*g_fn763920)(void*, uint32_t);
+void     (*g_fn74E7E0)(void*);
+int32_t  (*g_fn76CA70)(void*, uint32_t, int32_t,
+                       uint32_t);
+
 // ---- D102 seams (default null — tests bind them) ----
 int64_t  (*g_fn75EB70)(void*, const char*);
 void*    (*g_fn78C8E0)(void*, uint32_t);
@@ -1343,7 +1351,7 @@ char*    (*g_fn787120)(void*);
 void*    (*g_fn76F7F0)(void*, uint32_t, const char*,
                        char, uint32_t, const char*);
 void     (*g_fn74DCD0)(void*, int32_t);
-void     (*g_fn7903D0)(void*, int32_t);
+char     (*g_fn7903D0)(void*, int32_t);
 void     (*g_fn7B0EA0)(void*, uint32_t, char);
 
 // ---- D101 seams (default null — tests bind them) ----
@@ -2515,6 +2523,132 @@ bool CSyndicateLogic::Slot340(uint32_t u2,
         return true;
     }
     return false;
+}
+// +0x350: 1417b16b0 — the join-league flow
+void CSyndicateLogic::Slot350(uint32_t u2, uint32_t u3,
+                              uint32_t u4) {
+    void** pp = (void**)this;
+    int64_t lLg = g_fnLgFind(pp[2], u3);
+    if (lLg != 0
+        && (uint32_t)g_fn78F2D0((void*)lLg) == u2
+        && (int32_t)g_fn790390((void*)lLg) == 0) {
+        void* lVar4 = g_fn7630D0(pp[10], u4);
+        if (lVar4 != 0) {
+            uint64_t uLead = g_fn743C80(lVar4);
+            int64_t lLeader =
+                g_fnLgFind(pp[2], (uint32_t)uLead);
+            if (lLeader == 0) {
+                // RAW: FUN_141743c80(lVar4) again
+                // before the literal log
+                g_fn743C80(lVar4);
+                g_fnT1LogError(
+                    "CSyndicateLogic::SynJoinLeague,"
+                    " league[%lu] leader syndicate[%lu]"
+                    " is null");
+            } else {
+                if (g_fn7977D0((void*)lLeader, u3)
+                    == 0) {
+                    uint64_t uLead2 =
+                        g_fn743C80(lVar4);
+                    if (g_fn7977D0((void*)lLg,
+                                   (uint32_t)uLead2)
+                        == 0) {
+                        // RAW: 141763920(sub, u2)
+                        char cLeave =
+                            g_fn763920(pp[10], u2);
+                        if (cLeave == 0) {
+                            char buf[512];
+                            buf[0] = 0;
+                            memset(buf + 1, 0, 0x1ff);
+                            void* pIv =
+                                g_fnStringMgrInstance();
+                            g_fn74E7E0(pp[10]);
+                            const char* pc =
+                                (const char*)
+                                g_fnStringMgrGetStr(pIv,
+                                    "STR_LEAGUE_LEAVE_SOON");
+                            snprintf(buf, 0x200, pc);
+                            // RAW: box vt+0x28(box,
+                            // u2, buf, 0xffff00)
+                            ((void (*)(void*,
+                                uint32_t,
+                                const char*,
+                                uint32_t))
+                                (*(void***)pp[1])
+                                 [0x28/8])(
+                                    pp[1], u2, buf,
+                                    0xffff00);
+                            return;
+                        }
+                        if (g_fn7903D0((void*)lLg,
+                                       (int32_t)u4)
+                            == 0) {
+                            g_fn78F470((void*)lLg);
+                            g_fnT1LogError(
+                                "SynJoinLeague failure"
+                                "\xa3\xacidSyn:%d ,"
+                                " SynName:%s ,"
+                                " idLeague:%d ");
+                            return;
+                        }
+                        g_fn74DCD0(lVar4,
+                                   (int32_t)u3);
+                        // RAW: logic vt+0x710(this,
+                        // lg, u4, 0xb)
+                        ((void (*)(void*, void*,
+                                   uint32_t, int32_t))
+                            (*(void***)this)[0x710/8])(
+                                this, (void*)lLg, u4,
+                                0xb);
+                        int32_t iVar1 =
+                            ((int32_t (*)(void*, void*))
+                                (*(void***)pp[1])
+                                 [0x3f0/8])(
+                                    pp[1], 0);
+                        g_fn76CA70(pp[10],
+                                   u4 + (uint32_t)
+                                       iVar1 * 1000000,
+                                   0, u3);
+                        char buf2[1024];
+                        buf2[0] = 0;
+                        memset(buf2 + 1, 0, 0x3ff);
+                        void* pIv2 =
+                            g_fnStringMgrInstance();
+                        uint64_t uName =
+                            (uint64_t)
+                            g_fn743Dd0(lVar4);
+                        g_fn78F470((void*)lLg);
+                        const char* pc2 =
+                            (const char*)
+                            g_fnStringMgrGetStr(pIv2,
+                                "STR_SYN_JOIN_LEAGUE");
+                        (void)uName; // RAW: local_658
+                        snprintf(buf2, 0x3ff, pc2);
+                        // RAW: box vt+0x90(box, buf2,
+                        // 0x843)
+                        ((void (*)(void*,
+                                   const char*,
+                                   uint32_t))
+                            (*(void***)pp[1])
+                             [0x90/8])(
+                                pp[1], buf2, 0x843);
+                        return;
+                    }
+                }
+                // the enemy path
+                void* pIv3 = g_fnStringMgrInstance();
+                uint64_t uStr = (uint64_t)
+                    g_fnStringMgrGetStr(pIv3,
+                        "STR_LEAGUE_IS_ENEMY_SYN");
+                ((void (*)(void*, uint32_t,
+                           const char*, uint32_t))
+                    (*(void***)pp[1])[0x28/8])(
+                        pp[1], u2,
+                        (const char*)(uintptr_t)uStr,
+                        0xffff00);
+            }
+        }
+    }
 }
 
 

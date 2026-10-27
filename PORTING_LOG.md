@@ -4360,3 +4360,34 @@ lg/other != 0 ثم 1417cad00 ثم 141797750/1417977d0 مباشرة.
   78F270/787120/76F7F0/74DCD0/7903D0/7B0EA0). اختبار 12
   قسماً.
 - رجريجن **105/105 × 6** + ‏ASan/UBSan ‏نظيف.
+
+## D103 — CSyndicateLogic +0x350: تدفق انضمام التحالف 1417b16b0 (27-10-2026)
+
+الجسم (3247 حرف تفكيك) منقولاً حرفياً:
+
+- **البوابات المتسلسلة بـ &&**: LgFind(p1[2], u3) ←
+  14178f2d0(lg) == u2 ← 141790390(lg) == 0 ←
+  1417630d0(sub, u4) — عند فشل أي بوابة: خروج صامت
+- **بحث القائد**: 141743c80(lg2) ثم LgFind — عند
+  الفشل نداء 141743c80 ثانية (حرفي) ثم السجل الحرفي
+  "CSyndicateLogic::SynJoinLeague, league[%lu]
+  leader syndicate[%lu] is null"
+- **فحص العدو المزدوج**: 1417977d0(leaderLg, u3) ثم
+  عند الصفر 141743c80(lg2) ثانية و1417977d0(selfLg,
+  leadId) — عند أي نجاح: بث STR_LEAGUE_IS_ENEMY_SYN
+  عبر box vt+0x28(box, u2, str, 0xffff00)
+- **مسار المغادرة**: 141763920(sub, u2) == 0 →
+  14174e7e0(sub) وsnprintf بحرفية STR_LEAGUE_LEAVE_SOON
+  وبث box vt+0x28(box, u2, buf, 0xffff00) وreturn
+- **مسار الانضمام**: 1417903d0(lg, u4) == 0 →
+  14178f470(lg) ثم السجل الحرفي "SynJoinLeague
+  failure\xa3\xacidSyn:%d , SynName:%s , idLeague:%d "
+  (بايتات GBK) وreturn؛ وإلا 14174dcd0(lg2, u3) ثم
+  logic vt+0x710(this, lg, u4, 0xb) ثم box vt+0x3f0
+  ثم 14176ca70(sub, u4 + vt3f0*1000000, 0, u3) ثم
+  141743dd0(lg2) و14178f470(lg) وsnprintf بحرفية
+  STR_SYN_JOIN_LEAGUE وبث box vt+0x90(box, buf, 0x843)
+- 5 seams جديدة (743C80/7977D0/763920/74E7E0/76CA70)
+  وتعديل g_fn7903D0 إلى char. اختبار 7 أقسام، أخضر
+  من أول تشغيل.
+- رجريجن **106/106 × 6** + ‏ASan/UBSan ‏نظيف.

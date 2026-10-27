@@ -94,6 +94,14 @@ extern void*    (*g_fnStringMgrGetStr)(void*, const char*);
 extern char     (*g_fnA84HasOldPos)(void*);
 extern uint32_t (*g_fnA84GetOldId)(void*);
 
+// ---- D103 seams (+0x350 join flow) ----
+extern uint64_t (*g_fn743C80)(void*);                // 141743c80
+extern char  (*g_fn7977D0)(void*, uint32_t);         // 1417977d0
+extern char  (*g_fn763920)(void*, uint32_t);         // 141763920
+extern void  (*g_fn74E7E0)(void*);                   // 14174e7e0
+extern int32_t (*g_fn76CA70)(void*, uint32_t, int32_t,
+                             uint32_t);             // 14176ca70
+
 // ---- D102 seams (+0x340 create flow) ----
 extern int64_t (*g_fn75EB70)(void*, const char*);   // 14175eb70
 extern void*  (*g_fn78C8E0)(void*, uint32_t);       // 14178c8e0
@@ -106,7 +114,7 @@ extern void*   (*g_fn76F7F0)(void*, uint32_t,
                              const char*, char, uint32_t,
                              const char*);           // 14176f7f0
 extern void    (*g_fn74DCD0)(void*, int32_t);       // 14174dcd0
-extern void    (*g_fn7903D0)(void*, int32_t);       // 1417903d0
+extern char    (*g_fn7903D0)(void*, int32_t);       // 1417903d0
 extern void    (*g_fn7B0EA0)(void*, uint32_t, char); // 1417b0ea0
 
 // ---- D101 seams (wave 10) ----
@@ -467,6 +475,8 @@ public:
     void Slot330(void);                           // 1417b2540
     bool Slot340(uint32_t u2, const char* p3,
                  char c4);                         // 1417b8940
+    void Slot350(uint32_t u2, uint32_t u3,
+                 uint32_t u4);                     // 1417b16b0
 
 
 

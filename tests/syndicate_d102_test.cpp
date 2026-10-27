@@ -132,9 +132,9 @@ static void Reset() {
     g_fn74DCD0 = [](void* p, int32_t a) {
         s_nDCD0++; assert(p == (void*)0x66);
         assert(a == (int32_t)0x77); };
-    g_fn7903D0 = [](void* p, int32_t a) {
+    g_fn7903D0 = [](void* p, int32_t a) -> char {
         s_n03D0++; assert(p == (void*)0x55);
-        assert(a == (int32_t)0xAB); };
+        assert(a == (int32_t)0xAB); return 1; };
     g_fn7B0EA0 = [](void* p, uint32_t u, char c) {
         s_n0EA0++; assert(p == (void*)abLogic);
         assert(u == 0x42 && c == 1); };
