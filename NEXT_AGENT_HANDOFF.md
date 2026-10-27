@@ -723,3 +723,22 @@ OnProcess بحلقة CONNECTMSG/READMSG/
 EVENTMSG/SO_BROADCAST_MAPGROUPMSG/
 SOCKET_SENDMULTICLIENTMSG)، ثم World/
 UserLogin/Chat/Auction بنفس الطريقة.
+
+---
+
+## المسار أ-5 — CSocketThread::OnProcess [2026-10-28]
+
+**المنتهي:** 14002bd30 في
+msgserver/threads/MsgSocketThread.{h,cpp}
+(راجع PORTING_LOG: ProcessMsg خام بخمسة
+معاملات vt+0x10، نافذة 0x4c، إحصاءات مباشرة
+cmovl max، idle 0x14094989c). 5/5 + رجريجن
+60/60×6 + ASan.
+
+**التالي أ-6:** CWorldThread/CUserLoginThread/
+CChatThread بنفس قالب أ-4/أ-5 (تحقق objdump
+لكل واحد: عنوان الـ vt الخاص بـ ProcessMsg
+ومعاملاته، نافذة السحب، عناوين
+الإحصاءات/idle، معرفات التيكات). ثم
+CAuctionSearchThread ثم CServerStatusMonitor
+(14002b2d0، وحدة مستقلة كبيرة).

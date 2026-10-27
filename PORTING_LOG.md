@@ -5710,3 +5710,47 @@ port الحرفية، الإحصاءات مع idx خارج النطاق،
 14002bxxx، CWorldThread، CUserLoginThread،
 CChatThread، CAuctionSearchThread...) بنفس
 منهجية objdump-التحقق.
+
+## المسار أ-5 — CSocketThread::OnProcess (14002bd30) [2026-10-28]
+
+**مصدر: التفكيك الخام objdump (14002bd30-
+14002bf55).** نفس شكل CMapGroupThread (أ-4)
+مع فروق السوكت المؤكدة خاماً:
+- statics: flag 0x1409759d0 / base
+  0x1409759cc
+- تيكات: 0x23 (العملية) / 0x2a
+  (CSocketKernel::OnTimer) / 0x24
+  (ProcessMsg) — لا تيك 0x47 حول Peek
+- **ProcessMsg في vt+0x10 بخمسة معاملات
+  خام**: (kernel, packet=[info+4], buf,
+  arg8=[info+8], port=[info+0] كمعامل
+  خامس على الستاك)
+- نافذة السحب 0x4c (76) — السحب
+  base+=0x4c، resync عند diff > 0x2710
+  مع WARNING "resync CSocketKernel::"
+  "OnTimer cumulative deviation %dms"
+  بالنص فقط دون معاملات
+- الإحصاءات مباشرة بدون فهرس: cum
+  0x14097569c بـ lock xadd، cnt
+  0x1409756a0 بـ lock add، max
+  0x140975698 عبر **cmovl** (بدون فرع،
+  غير ذري)
+- idle عند 0x14094989c (نافذة 0x4c)
+- ERROR "CSocketThread::OnProcess
+  ProcessMsg returned error with
+  packet:%d, port:%d" بزوج
+  (packet=[info+4], port=[info+0])
+
+**المنقول في msgserver/threads/
+MsgSocketThread.{h,cpp}** بإعادة استخدام
+SMGMsgInfo من أ-4. **الاختبار
+msg_socket_test.cpp:** 5 أقسام. رجريجن
+**60/60 ×6** + ASan/UBSan نظيف.
+
+**ملاحظة:** 14002b2d0 هو CServerStatusMonitor
+(سوكت مراقبة الحالة، منفذ من INI،
+select/WSAAccept حتى 0x40 عميل) — وحدة
+مستقلة للتالي. **التالي أ-6:**
+CWorldThread/CUserLoginThread/CChatThread
+(نفس القالب؛ يُتوقع ProcessMsg بـ
+vt+0x18 مع أربعة معاملات، ويُتحقق خاماً).
