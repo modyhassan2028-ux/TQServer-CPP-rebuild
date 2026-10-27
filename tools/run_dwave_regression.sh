@@ -8,7 +8,7 @@ OBJ=/tmp/objs_wave; rm -f $OBJ/*.o; mkdir -p $OBJ
 # the d55a unit includes its port .cpp inline (to
 # reach the static sort internals) -> links with
 # NO port objects
-for f in Exe/Dll/Analyst/Port/*.cpp Exe/Dll/Title/Port/*.cpp Exe/Dll/Training/Port/*.cpp Exe/Dll/Peerage/Port/*.cpp Exe/Dll/Syndicate/Port/*.cpp; do
+for f in Exe/Dll/Analyst/Port/*.cpp Exe/Dll/Title/Port/*.cpp Exe/Dll/Training/Port/*.cpp Exe/Dll/Peerage/Port/*.cpp Exe/Dll/Syndicate/Port/*.cpp modules/syndicate/src/*.cpp; do
   g++ -std=c++17 -I. -c "$f" -o $OBJ/$(basename $f .cpp).o || { echo "OBJ-FAIL $f"; exit 1; }
 done
 FAIL=0

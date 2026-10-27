@@ -1,6 +1,6 @@
 // SyndicateLeagueInvadeWarn.cpp — unit D89 (see the header
 // for the address map and the seam list).
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueInvadeWarn.h"
+#include "modules/syndicate/src/league.h"
 #include "Exe/Dll/Syndicate/Port/SyndicateLogRemove.h"        // g_fnTreeFindAF0
 #include "Exe/Dll/Syndicate/Port/SyndicateLeagueMgrNested.h"  // NestedErOneB/RangeB
 #include "Exe/Dll/Syndicate/Port/SyndicateLeaguePlunderSignup.h"   // g_fnSupTimeGet
@@ -76,8 +76,8 @@ namespace syndicate {
 
 // ================= FUN_141774500 =================
 // CLeagueMgr::FlyToInvadeWarning — verbatim.
-uint8_t FlyToInvadeWarning(int64_t lMgr, uint32_t uUser,
-                           uint32_t uTarget) {
+uint8_t CLeagueMgr::FlyToInvadeWarning(
+    int64_t lMgr, uint32_t uUser, uint32_t uTarget) {
     char* pcMgr = (char*)lMgr;
     if (uUser == 0 || uTarget == 0) {
         return 0;

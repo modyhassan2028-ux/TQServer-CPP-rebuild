@@ -4018,3 +4018,23 @@ CSyndicateLogic (0x141835068، 232 فتحة): المدمّر المحذف (1417b
 ### الاختبار
 13 قسماً: الكيت، البوابات، الإرسالات، التبرع (بالنقاش TOO_LOWER)، التبديل بمساري
 التأكيد، بوابات الرتب العشر، OnUserDelRole بمساريها، المدمّر. 94/94 × 6، ASan/UBSan صفر.
+
+## D91 — إعادة التنظيم على الهيكل الأصلي الحقيقي (27-10-2026)
+
+### الاكتشاف: المسارات الأصلية من حرفية السلاسل
+استخراج عناوين الملفات الأصلية من السلاسل الحرفية للسجلات
+(f:\version\cqserver-78.0.11-1204\modules\syndicate\src\*.cpp):
+syndicatelogic.cpp (28 إشارة — موطن CSyndicateLogic)، country.cpp (22 —
+CCountry)، synmanager.cpp (17)، league.cpp (4 — CLeagueMgr)،
+msg/msgsyndicate.cpp وغيرها. الخريطة الكاملة (46 دالة → ملفها) في /tmp/addr2file.json.
+
+### التغيير
+- الشجرة الحقيقية `modules/syndicate/src/` قائمة الآن بالأسماء الأصلية:
+  - league.{h,cpp}: `class CLeagueMgr { FlyToInvadeWarning }` (D89 نُقل هنا)
+  - syndicatelogaic.{h,cpp}: `class CSyndicateLogic` بفتحات D90 كطرق صنف
+    (+OnUserDelRole باسمه الحقيقي من السجل الحرفي)
+- مسارات Port/ القديمة أصبحت shims تمريرية فقط — الملفات الجديدة تُكتب
+  في الشجرة الحقيقية حصراً.
+- بناء الرجريجن يشمل modules/syndicate/src/*.cpp.
+
+رجريجن 94/94 × 6، d89/d90 أخضران على الشجرة الجديدة.
