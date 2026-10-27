@@ -1333,6 +1333,12 @@ void CSyndicateLogic::Slot208B4b0ThenSink3(
     g_fnSink3OpC(pObj);
 }
 
+// ---- D105 seams (default null — tests bind them) ----
+void  (*g_fn743E80)(void*, int32_t, int32_t, char);
+void  (*g_fn74D3E0)(void*);
+void  (*g_fn7B92B0)(void*, uint32_t, uint32_t, uint32_t,
+                    const char*);
+
 // ---- D104 seams (default null — tests bind them) ----
 void  (*g_fn74D490)(void*, uint32_t);
 void  (*g_fn7C1180)(void*, uint32_t, uint32_t, uint64_t);
@@ -2756,6 +2762,78 @@ void CSyndicateLogic::Slot358(uint32_t u2, uint32_t u3,
             apVec[1] = 0;
             apVec[2] = 0;
             free(apVec[0]);
+        }
+    }
+}
+// +0x360: 1417b9380 — the leader-change flow
+void CSyndicateLogic::Slot360(uint32_t u2, uint32_t u3,
+                              uint32_t u4) {
+    void** pp = (void**)this;
+    if (u2 == u4) return;
+    void* lLg2 = g_fn7630D0(pp[10], u3);
+    if (lLg2 == 0) return;
+    void* plA = g_fn78C8E0(pp[3], u2);
+    void* plB = g_fn78C8E0(pp[3], u4);
+    if (plA != 0 && plB != 0
+        && g_fn7868C0(plB) && g_fn7868C0(plA)) {
+        uint64_t uSynA = g_fn785EA0(plA);
+        uint64_t uLead = g_fn743C80(lLg2);
+        if ((int32_t)uSynA == (int32_t)uLead) {
+            uint64_t uSynB = g_fn785EA0(plB);
+            int64_t lLg =
+                g_fnLgFind(pp[2], (uint32_t)uSynB);
+            if (lLg != 0
+                && (uint32_t)g_fn790390((void*)lLg)
+                    == u3) {
+                uint64_t uEm =
+                    g_fn78F270((void*)lLg);
+                g_fn743E80(lLg2, 2, (int32_t)uEm, 1);
+                g_fn74D3E0(lLg2);
+                char buf[1024];
+                buf[0] = 0;
+                memset(buf + 1, 0, 0x3ff);
+                void* pIv = g_fnStringMgrInstance();
+                g_fn787120(plB);
+                g_fn787120(plA);
+                const char* pc = (const char*)
+                    g_fnStringMgrGetStr(pIv,
+                        "STR_LEAGUE_LEADER_CHANGE");
+                snprintf(buf, 0x400, pc);
+                // RAW: box vt+0xa0(box, u3, buf, 0)
+                ((void (*)(void*, uint32_t,
+                           const char*, uint32_t))
+                    (*(void***)pp[1])[0xa0/8])(
+                        pp[1], u3, buf, 0);
+                const char* pcName =
+                    g_fn787120(plB);
+                g_fn7B92B0(this, u2, u4, u3, pcName);
+                int32_t iVar2 = g_fn74E3F0(pp[10]);
+                uint64_t uType = g_fn745520(lLg2);
+                if ((int32_t)uType == iVar2) {
+                    memset(buf, 0, 0x400);
+                    void* pIv2 =
+                        g_fnStringMgrInstance();
+                    g_fn787120(plB);
+                    g_fn787120(plA);
+                    const char* pc2 = (const char*)
+                        g_fnStringMgrGetStr(pIv2,
+                            "STR_LEAGUE_KING_CHANGE");
+                    snprintf(buf, 0x400, pc2);
+                    // RAW: box vt+0x90(box, buf, 0x843)
+                    ((void (*)(void*,
+                               const char*,
+                               uint32_t))
+                        (*(void***)pp[1])[0x90/8])(
+                            pp[1], buf, 0x843);
+                    const char* pcName2 =
+                        g_fn787120(plB);
+                    // RAW: box vt+0x430(box, u3, name)
+                    ((void (*)(void*, uint32_t,
+                               const char*))
+                        (*(void***)pp[1])[0x430/8])(
+                            pp[1], u3, pcName2);
+                }
+            }
         }
     }
 }

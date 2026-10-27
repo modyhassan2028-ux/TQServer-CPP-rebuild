@@ -94,6 +94,13 @@ extern void*    (*g_fnStringMgrGetStr)(void*, const char*);
 extern char     (*g_fnA84HasOldPos)(void*);
 extern uint32_t (*g_fnA84GetOldId)(void*);
 
+// ---- D105 seams (+0x360 leader change) ----
+extern void  (*g_fn743E80)(void*, int32_t, int32_t,
+                          char);                // 141743e80
+extern void  (*g_fn74D3E0)(void*);                // 14174d3e0
+extern void  (*g_fn7B92B0)(void*, uint32_t, uint32_t,
+                           uint32_t, const char*); // 1417b92b0
+
 // ---- D104 seams (+0x358 exit flow) ----
 extern void  (*g_fn74D490)(void*, uint32_t);         // 14174d490
 extern void  (*g_fn7C1180)(void*, uint32_t, uint32_t,
@@ -486,6 +493,8 @@ public:
                  uint32_t u4);                     // 1417b16b0
     void Slot358(uint32_t u2, uint32_t u3,
                  uint32_t u4);                     // 1417c13e0
+    void Slot360(uint32_t u2, uint32_t u3,
+                 uint32_t u4);                     // 1417b9380
 
 
 
