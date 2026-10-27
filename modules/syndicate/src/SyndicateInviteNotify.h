@@ -78,9 +78,9 @@ extern bool (*g_fn141763920)(void* pHost, uint32_t uTarget);     // b48b0/b4d60
 extern void (*g_fn14176ca70)(void* pHost, uint32_t uId,
     uint32_t uTarget, uint32_t uArg);                            // b48b0/b4d60
 extern uint32_t (*g_fn14178f2d0)(void* pLeague);                 // b48b0/b4d60
-extern void (*g_fn14178f470)(void* pLeague);                     // b48b0
+extern int32_t (*g_fn14178f470)(void* pLeague);     // b48b0 (raw returns int)
 extern int32_t (*g_fn141790390)(void* pLeague);                  // b48b0/b4d60
-extern void (*g_fn1417903d0)(void* pLeague, uint32_t uId);      // b48b0
+extern char (*g_fn1417903d0)(void* pLeague, uint32_t uId);     // b48b0
 extern void (*g_fn14174dcd0)(void* pRec, uint32_t uArg);         // b48b0
 extern void (*g_fnTqStrCopy)(char* pDst, const char* pSrc,
                              size_t uCap);                       // b4d60 (import)

@@ -6,6 +6,7 @@
 #include "modules/syndicate/src/SyndicateLogRemove.h"        // LogRecMapFind
 #include "modules/syndicate/src/SyndicateCMsgCtors.h"        // the msg ctors
 #include "modules/syndicate/src/SyndicateLeagueMgr.h"        // MgrUserLeagueId/Find
+#include "modules/syndicate/src/SyndicateAppoint3de.h"   // A84FindSyn (7cad00)
 #include "modules/syndicate/src/SyndicateLeagueOpt.h"        // the string mgr
 #include "modules/syndicate/src/SyndicateAppoint3de.h"       // the A84 seams
 #include "modules/syndicate/src/SyndicateLeagueBeRobFlow.h"  // g_fnLbrOpDelete
@@ -4565,6 +4566,22 @@ static int32_t DefMulDiv(uint32_t a, uint32_t b,
     if (r * 2 >= c) ++q;          // round to nearest
     return (int32_t)q;
 }
+char     (*g_fn1417bf960)(void*, void*) = nullptr;
+char     (*g_fn14179e6d0)(void*, void*) = nullptr;
+char     (*g_fn141787300)(void*) = nullptr;
+uint32_t (*g_fn141785dc0)(void*) = nullptr;
+uint32_t (*g_fn14178f270)(void*) = nullptr;
+void     (*g_fn14176aca0)(void*, uint32_t) = nullptr;
+void     (*g_fn14174d490)(void*, uint32_t) = nullptr;
+uint32_t (*g_fn141743c80)(void*) = nullptr;
+int32_t  (*g_fn141743e60)(void*) = nullptr;
+void     (*g_fn1417c1180)(void*, uint32_t, uint32_t) = nullptr;
+void     (*g_fn1417b1090)(void*, uint32_t) = nullptr;
+void*    (*g_fn1417f3166)(uint32_t) = nullptr;
+void     (*g_fn1417f2fdc)(void*) = nullptr;
+void     (*g_fn1417f30c0)(void*, int, size_t) = nullptr;
+void*    (*g_fn141823050)(void) = nullptr;
+int      (*g_fn1418233c8)(char*, size_t, const char*, void*) = nullptr;
 void (*g_fnSynLogCheck)(const char*, const char*,
     const char*, const char*, uint32_t) = DefSynLogCheck;
 void (*g_fnSynNoteLog)(const char*, const char*,
@@ -5380,6 +5397,27 @@ char     (*g_fn1417d9140)(void*, uint32_t, uint32_t, uint32_t,
                          const char*, uint32_t);
 void     (*g_fn1417d9050)(void*);
 void     (*g_fn141777de0)(void*, uint32_t, uint32_t, void*);
+void     (*g_fn14176b0d0)(void*, uint32_t);
+void     (*g_fn141774c70)(void*, uint32_t);
+void     (*g_fn141775350)(void*, uint32_t);
+void     (*g_fn14174ebc0)(void*, uint32_t);
+char     (*g_fn141765410)(void*, uint32_t, uint32_t);
+void     (*g_fn141765800)(void*, uint32_t);
+void     (*g_fn141765920)(void*, uint32_t);
+void     (*g_fn141765d60)(void*, uint32_t);
+char     (*g_fn1417655c0)(void*, uint32_t, uint32_t);
+char     (*g_fn141765540)(void*, uint32_t);
+void     (*g_fn141771f90)(void*, uint32_t, uint32_t,
+                          uint32_t);
+char     (*g_fn14174f120)(void*);
+void     (*g_fn14175f830)(void*, uint32_t, uint32_t);
+char     (*g_fn141763a90)(void*, uint32_t, uint32_t);
+char     (*g_fn141763bc0)(void*, uint32_t, uint32_t,
+                          uint32_t);
+void     (*g_fn141766500)(void*, uint32_t);
+void     (*g_fn141766e90)(void*, uint32_t, uint32_t,
+                          uint32_t, uint32_t);
+void     (*g_fn141769100)(void*, uint32_t);
 uint64_t (*g_fn141764990)(void*, uint32_t, uint32_t);
 char     (*g_fn141774500)(void*, uint32_t, uint64_t);
 void*    (*g_fn14178c8e0)(void*, uint32_t);
@@ -6019,6 +6057,380 @@ bool CSyndicateLogic::Slot610(uint32_t u2,
     g_fn1417d73a0(acMsgA);
     g_fn141823290(acStr);
     return 1;
+}
+
+// ===== D114c: the class tail (+0x680..+0x738) =====
+// RAW thunks: mov rcx,[rcx+0x50]; jmp <target>
+void CSyndicateLogic::Slot688(uint32_t u2) {
+    g_fn14176b0d0(
+        *(void**)((char*)this + 0x50), u2);
+}
+void CSyndicateLogic::Slot690(uint32_t u2) {
+    g_fn141774c70(
+        *(void**)((char*)this + 0x50), u2);
+}
+void CSyndicateLogic::Slot698(uint32_t u2) {
+    g_fn141775350(
+        *(void**)((char*)this + 0x50), u2);
+}
+void CSyndicateLogic::Slot6a0(uint32_t u2) {
+    // 74ebc0: mov dword [rcx+0x35c],0 ; ret
+    g_fn14174ebc0(
+        *(void**)((char*)this + 0x50), u2);
+}
+void CSyndicateLogic::Slot6b8(uint32_t u2) {
+    g_fn141765800(
+        *(void**)((char*)this + 0x50), u2);
+}
+void CSyndicateLogic::Slot6c0(uint32_t u2) {
+    g_fn141765920(
+        *(void**)((char*)this + 0x50), u2);
+}
+void CSyndicateLogic::Slot6c8(uint32_t u2) {
+    g_fn141765d60(
+        *(void**)((char*)this + 0x50), u2);
+}
+void CSyndicateLogic::Slot6e8(uint32_t u2, uint32_t u3,
+                              uint32_t u4) {
+    g_fn141771f90(
+        *(void**)((char*)this + 0x50), u2, u3, u4);
+}
+char CSyndicateLogic::Slot6f0(void) {
+    // 74f120: mov al,[rcx+0x2c]; ret
+    return g_fn14174f120(
+        *(void**)((char*)this + 0x50));
+}
+void CSyndicateLogic::Slot6f8(uint32_t u2,
+                              uint32_t u3) {
+    g_fn14175f830(
+        *(void**)((char*)this + 0x50), u2, u3);
+}
+void CSyndicateLogic::Slot720(uint32_t u2) {
+    g_fn141766500(
+        *(void**)((char*)this + 0x50), u2);
+}
+void CSyndicateLogic::Slot730(uint32_t u2, uint32_t u3,
+                              uint32_t u4,
+                              uint32_t u5) {
+    // RAW 5710: sub 0x38; arg5 forwarded via
+    // [rsp+0x20] to 766e90 (host, u2..u5)
+    g_fn141766e90(
+        *(void**)((char*)this + 0x50),
+        u2, u3, u4, u5);
+}
+void CSyndicateLogic::Slot738(uint32_t u2) {
+    g_fn141769100(
+        *(void**)((char*)this + 0x50), u2);
+}
+
+// RAW 5430: box8-vt+0x4a8(box, u3) -> esi (0 ->
+// skip, returns al=0); vt+0x3e8(box, u3) -> eax;
+// sum = esi + eax*0xf4240; tail 765410(host, u2,
+// sum)
+char CSyndicateLogic::Slot6a8(uint32_t u2,
+                              uint32_t u3) {
+    void** pp = (void**)this;
+    void** ppVt = *(void***)pp[1];
+    uint32_t uR = ((uint32_t (*)(void*, uint32_t))
+        ppVt[0x4a8 / 8])(pp[1], u3);
+    if (uR == 0)
+        return 0;
+    uint32_t uF = ((uint32_t (*)(void*, uint32_t))
+        ppVt[0x3e8 / 8])(pp[1], u3);
+    return g_fn141765410(pp[10], u2,
+        uR + uF * 0xf4240);
+}
+
+// RAW 54a0: u2==0 -> false; this-vt+0x440(this) ->
+// ebx; box8-vt+0x3f0(box) (edx leftover) -> eax;
+// sum = ebx + eax*0xf4240; tail 765410(host, u2,
+// sum)
+char CSyndicateLogic::Slot6b0(uint32_t u2) {
+    void** pp = (void**)this;
+    if (u2 == 0)
+        return 0;
+    uint32_t u440 = ((uint32_t (*)(void*))
+        (*(void***)this)[0x440 / 8])(this);
+    void** ppVt = *(void***)pp[1];
+    // RAW: vt+0x3f0(box) arg-less (edx leftover)
+    uint32_t uF = ((uint32_t (*)(void*))
+        ppVt[0x3f0 / 8])(pp[1]);
+    return g_fn141765410(pp[10], u2,
+        u440 + uF * 0xf4240);
+}
+
+// RAW 5510: u2==0 -> false; box8-vt+0x278(box)
+// (edx=u2 leftover in RAW) true -> false;
+// vt+0x280(box, u2) true -> false; vt+0x4a8(box,
+// u2) -> esi; 0 -> false; this-vt+0x440(this) ->
+// edi; 0 -> false; esi != edi -> false; vt+0x3f0(
+// box) -> eax; tail 765540(host, edi + eax*0xf4240)
+char CSyndicateLogic::Slot6d8(uint32_t u2) {
+    void** pp = (void**)this;
+    if (u2 == 0)
+        return 0;
+    void** ppVt = *(void***)pp[1];
+    // RAW: vt+0x278(box) arg-less (edx leftover)
+    if (((char (*)(void*))
+            ppVt[0x278 / 8])(pp[1]) != 0)
+        return 0;
+    if (((char (*)(void*, uint32_t))
+            ppVt[0x280 / 8])(pp[1], u2) != 0)
+        return 0;
+    uint32_t uEsi = ((uint32_t (*)(void*, uint32_t))
+        ppVt[0x4a8 / 8])(pp[1], u2);
+    if (uEsi == 0)
+        return 0;
+    uint32_t uEdi = ((uint32_t (*)(void*))
+        (*(void***)this)[0x440 / 8])(this);
+    if (uEdi == 0)
+        return 0;
+    if (uEsi != uEdi)
+        return 0;
+    // RAW: vt+0x3f0(box) arg-less (edx leftover)
+    uint32_t uF = ((uint32_t (*)(void*))
+        ppVt[0x3f0 / 8])(pp[1]);
+    return g_fn141765540(pp[10],
+        uEdi + uF * 0xf4240);
+}
+
+// RAW 55d0: box8-vt+0x4a8(box, u2) -> esi; 0 ->
+// false; vt+0x3e8(box, u2) -> edi = esi +
+// edi*0xf4240; vt+0x4a8(box, u3) -> esi; 0 ->
+// false; vt+0x3e8(box, u3) -> eax; 7655c0(host,
+// sum1, esi + eax*0xf4240) (r9 leftover in RAW)
+char CSyndicateLogic::Slot6d0(uint32_t u2,
+                              uint32_t u3) {
+    void** pp = (void**)this;
+    void** ppVt = *(void***)pp[1];
+    uint32_t uEsi = ((uint32_t (*)(void*, uint32_t))
+        ppVt[0x4a8 / 8])(pp[1], u2);
+    if (uEsi == 0)
+        return 0;
+    uint32_t uA = ((uint32_t (*)(void*, uint32_t))
+        ppVt[0x3e8 / 8])(pp[1], u2);
+    uint32_t uSum1 = uEsi + uA * 0xf4240;
+    uint32_t uEsi2 = ((uint32_t (*)(void*, uint32_t))
+        ppVt[0x4a8 / 8])(pp[1], u3);
+    if (uEsi2 == 0)
+        return 0;
+    uint32_t uB = ((uint32_t (*)(void*, uint32_t))
+        ppVt[0x3e8 / 8])(pp[1], u3);
+    return g_fn1417655c0(pp[10], uSum1,
+        uEsi2 + uB * 0xf4240);
+}
+
+// RAW 1ae0: u2==0 -> false; this-vt+0x510(this) ->
+// eax; 0 -> false; tail 763a90(host, u2, eax)
+char CSyndicateLogic::Slot710(uint32_t u2) {
+    void** pp = (void**)this;
+    if (u2 == 0)
+        return 0;
+    uint32_t uR = ((uint32_t (*)(void*))
+        (*(void***)this)[0x510 / 8])(this);
+    if (uR == 0)
+        return 0;
+    return g_fn141763a90(pp[10], u2, uR);
+}
+
+// RAW 1b30: u2==0 or u3==0 -> false; this-vt+0x510(
+// this) -> eax; 0 -> false; tail 763bc0(host, u2,
+// eax, u3)
+char CSyndicateLogic::Slot718(uint32_t u2,
+                              uint32_t u3) {
+    void** pp = (void**)this;
+    if (u2 == 0 || u3 == 0)
+        return 0;
+    uint32_t uR = ((uint32_t (*)(void*))
+        (*(void***)this)[0x510 / 8])(this);
+    if (uR == 0)
+        return 0;
+    return g_fn141763bc0(pp[10], u2, uR, u3);
+}
+
+// ===== Slot700 = 1417c16f0 (RAW) =====
+// league-dismiss flow: pSyn = 7630d0(host,u4);
+// u3 != 743c80(pSyn) required; pLeague2 =
+// 7cad00(this+0x10, 743c80(pSyn)); 790390(pLeague2)
+// == u4 required; 7903d0(pLeague2,0) required;
+// 74d490(pSyn,u3); then two vsnprintf-format rounds
+// (STR_LEAGUE_DEL_SYN via 78f470(pLeague2), and
+// STR_SYN_DEL_BY_LEAGUE via 743e60(pSyn)) -> box
+// vt+0x10(box,u2,0x7d5,buf) and box vt+0x88(box,u3,
+// buf,0,0x7d5); this-vt+0x710(this,pLeague2,0,5);
+// c1180(this,u3,u4); 76aca0(host,78f2d0(pLeague2));
+// 9e6d0(pLeague2,&cont) int-vector; per id: vt+0x268
+// && !vt+0x280 && vt+0x2a0==9 -> vt+0x2a8(box,id,3)
+struct RawCont114c {
+    void* pPad0;      // +0x00
+    void* pPad1;      // +0x08
+    void* pPad2;      // +0x10
+    void* pFirst;     // +0x18
+    void* pLast;      // +0x20
+    void* pEnd;       // +0x28
+    void* pProxy;     // +0x30
+};
+void CSyndicateLogic::Slot700(uint32_t u2, uint32_t u3,
+                              uint32_t u4) {
+    void** pp = (void**)this;
+    void* pHost = *(void**)((char*)this + 0x50);
+    void* pSyn = g_fn1417630d0(pHost, u4);
+    if (pSyn == 0)
+        return;
+    if (u3 == g_fn141743c80(pSyn))
+        return;
+    void* pLeague2 = (void*)
+        ((void* (*)(void*, uint32_t))
+         g_fnA84FindSyn)(pp[2], g_fn141743c80(pSyn));
+    if (pLeague2 == 0)
+        return;
+    if (g_fn141790390(pLeague2) != (int32_t)u4)
+        return;
+    if (!g_fn1417903d0(pLeague2, 0))
+        return;
+    g_fn14174d490(pSyn, u3);
+
+    // ---- format round 1: STR_LEAGUE_DEL_SYN ----
+    char acBuf[0x400];
+    acBuf[0] = 0;
+    g_fn1417f30c0(acBuf + 1, 0, 0x3ff);
+    void* pProv = g_fn141823050();
+    int32_t nName = g_fn14178f470(pLeague2);
+    const char* pszFmt1 = ((const char* (*)(void*, const char*))
+        (*(void***)pProv)[0])(pProv,
+            "STR_LEAGUE_DEL_SYN");
+    g_fn1418233c8(acBuf, 0x400, pszFmt1, (void*)(intptr_t)nName);
+    acBuf[0x3ff] = 0;
+    ((void (*)(void*, uint32_t, uint32_t, void*))
+     (*(void***)pp[1])[0x10 / 8])(pp[1], u2, 0x7d5, acBuf);
+
+    // ---- format round 2: STR_SYN_DEL_BY_LEAGUE ----
+    g_fn1417f30c0(acBuf, 0, 0x400);
+    pProv = g_fn141823050();
+    int32_t nSyn = g_fn141743e60(pSyn);
+    const char* pszFmt2 = ((const char* (*)(void*, const char*))
+        (*(void***)pProv)[0])(pProv,
+            "STR_SYN_DEL_BY_LEAGUE");
+    g_fn1418233c8(acBuf, 0x400, pszFmt2, (void*)(intptr_t)nSyn);
+    acBuf[0x3ff] = 0;
+    ((void (*)(void*, uint32_t, void*, uint32_t, uint32_t))
+     (*(void***)pp[1])[0x88 / 8])(pp[1], u3, acBuf, 0, 0x7d5);
+
+    // this-vt+0x710 dispatch (RAW: rdx=pLeague2,
+    // r8=0, r9=5; slot consumes only u2)
+    ((char (*)(void*, uint32_t))
+     (*(void***)this)[0x710 / 8])(this,
+        (uint32_t)(uintptr_t)pLeague2);
+    g_fn1417c1180(this, u3, u4);
+    g_fn14176aca0(pHost, g_fn14178f2d0(pLeague2));
+
+    // ---- member-id iteration (9e6d0 fills) ----
+    RawCont114c sCont;
+    void* pSent = g_fn1417f3166(8);
+    if (pSent != 0)
+        *(void**)pSent = &sCont;
+    sCont.pPad0 = pSent;
+    sCont.pFirst = sCont.pLast = sCont.pEnd = 0;
+    if (g_fn14179e6d0(pLeague2, &sCont)) {
+        void** ppBox = *(void***)pp[1];
+        int32_t* p = (int32_t*)sCont.pFirst;
+        int32_t* pEnd = (int32_t*)sCont.pLast;
+        for (; p != pEnd; ++p) {
+            uint32_t id = (uint32_t)*p;
+            if (((char (*)(void*, uint32_t))
+                    ppBox[0x268 / 8])(pp[1], id) == 0)
+                continue;
+            if (((char (*)(void*, uint32_t))
+                    ppBox[0x280 / 8])(pp[1], id) != 0)
+                continue;
+            if (((uint32_t (*)(void*, uint32_t))
+                    ppBox[0x2a0 / 8])(pp[1], id) != 9)
+                continue;
+            ((void (*)(void*, uint32_t, uint32_t))
+             ppBox[0x2a8 / 8])(pp[1], id, 3);
+        }
+    }
+    if (sCont.pFirst != 0)
+        g_fn1417f2fdc(sCont.pFirst);
+    sCont.pFirst = sCont.pLast = sCont.pEnd = 0;
+    g_fn1417f2fdc(sCont.pPad0);
+}
+
+// ===== Slot708 = 1417c16f0's twin: 1417c0110 (RAW) =====
+// msgOpt.Create(usAction, idNewLeague, country) flow:
+// cont init (f3166(8) sentinel); bf960(pLeague,&cont);
+// msg ctor; r9d = 74e3f0(host); d6790(&msg,u4,u3,r9d,
+// 0) -> if !al: CHECK-log 0x1c67 "msgOpt.Create(
+// usAction, idNewLeague, m_pLeagueMgr->
+// GetCountryLeague())"; else loop over cont elems
+// {elem!=0, 787300(elem) -> vt+0x158(box,
+// 785dc0(elem), u3); found=1}; vt+0x38(box,
+// 78f270(pLeague), &msg, 0); if found vt+0x110(box,
+// 78f270(pLeague), u3, 8); b1090(this, 78f270(
+// pLeague)); vt+0x70(box, 8, 790390(pLeague),
+// 78f270(pLeague), ""); dtor; cleanup
+void CSyndicateLogic::Slot708(void* pLeague,
+                              uint32_t u3,
+                              uint16_t u4) {
+    void** pp = (void**)this;
+    void* pHost = *(void**)((char*)this + 0x50);
+
+    // ---- container init (literal raw pattern) ----
+    RawCont114c sCont;
+    void* pSent = g_fn1417f3166(8);
+    if (pSent != 0)
+        *(void**)pSent = &sCont;
+    sCont.pPad0 = pSent;
+    sCont.pFirst = sCont.pLast = sCont.pEnd = 0;
+    g_fn1417bf960(pLeague, &sCont);
+
+    // ---- msg + create ----
+    char acMsg[0x470];
+    g_fn1417d6640(acMsg);
+    uint32_t uCountry = (uint32_t)g_fn14174e3f0(pHost);
+    if (!g_fn1417d6790(acMsg, (uint32_t)u4, u3,
+                      uCountry, 0)) {
+        g_fnSynLogCheck(STAR_FMT, "CHECK",
+            "msgOpt.Create(usAction, idNewLeague, "
+            "m_pLeagueMgr->GetCountryLeague())",
+            s_pszLogicSrc, 0x1c67);
+    } else {
+        void** ppBox = *(void***)pp[1];
+        char cFound = 0;
+        void** p = (void**)sCont.pFirst;
+        void** pEnd = (void**)sCont.pLast;
+        for (; p != pEnd; ++p) {
+            void* pElem = *p;
+            if (pElem == 0)
+                continue;
+            if (!g_fn141787300(pElem))
+                continue;
+            ((void (*)(void*, uint32_t, uint32_t))
+             ppBox[0x158 / 8])(pp[1],
+                g_fn141785dc0(pElem), u3);
+            cFound = 1;
+        }
+        ((void (*)(void*, uint32_t, void*, uint32_t))
+         ppBox[0x38 / 8])(pp[1],
+            g_fn14178f270(pLeague), acMsg, 0);
+        if (cFound) {
+            ((void (*)(void*, uint32_t, uint32_t,
+                       uint32_t))
+             ppBox[0x110 / 8])(pp[1],
+                g_fn14178f270(pLeague), u3, 8);
+        }
+        g_fn1417b1090(this, g_fn14178f270(pLeague));
+        ((void (*)(void*, uint32_t, uint32_t, uint32_t,
+                   const char*))
+         ppBox[0x70 / 8])(pp[1], 8,
+            (uint32_t)g_fn141790390(pLeague),
+            g_fn14178f270(pLeague), "");
+    }
+    g_fn1417d66c0(acMsg);
+    if (sCont.pFirst != 0)
+        g_fn1417f2fdc(sCont.pFirst);
+    sCont.pFirst = sCont.pLast = sCont.pEnd = 0;
+    g_fn1417f2fdc(sCont.pPad0);
 }
 
 // ===== Slot578 = 1417bdb20 (RAW) =====

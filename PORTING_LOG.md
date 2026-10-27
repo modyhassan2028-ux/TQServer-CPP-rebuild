@@ -4904,3 +4904,69 @@ fdd0(Slot5e8)، c0d10(Slot5f0 — قناة 10 + لوج
 
 المتبقي: ذيل الكلاس D114c (0x680..0x738) ثم
 إغلاق ملف syndicatelogic.
+
+---
+
+## D114c — ذيل CSyndicateLogic (0x680..0x738): 21 فتحة، منهم Slot700 (c16f0) و Slot708 (c0110) [2026-10-27]
+
+**النطاق:** آخر بلوك vtable للكلاس. استُخرجت 23
+فتحة، منها b5910 خارج الـ vtable (دالة حرة) و
+b5710 بوسيطه الخامس على المكدس.
+
+**نُقل:**
+1. **19 فتحة صغيرة/متوسطة (S1-S6):** الثانكس
+   1417c11f0/c1220/c1280/c12e0/c1340/c13a0،
+   الواحد بعد الخام 1417c1400/1460/14c0،
+   عائلة اللوج 6a8/6b0/6d8/6d0، ومسار
+   710/718
+2. **Slot708 (1417c0110) — RAW:** مسار
+   msgOpt.Create: حرفياً نمط الحاوية sentinel
+   f3166(8) → *pSent=&cont → bf960(pLeague,
+   &cont)؛ msg ctor d6640؛ country=74e3f0(
+   host@+0x50)؛ d6790(msg,u4,u3,country,0) →
+   إن فشل: CHECK-log 0x1c67 بالنص الحرفي
+   "msgOpt.Create(usAction, idNewLeague,
+   m_pLeagueMgr->GetCountryLeague())"
+   من .rdata؛ وإلا حلقة عناصر الحاوية
+   {elem≠0 ∧ 787300(elem) → box vt+0x158(
+   785dc0(elem), u3); found=1} ثم vt+0x38(box,
+   78f270(pLeague), msg, 0) وإن found:
+   vt+0x110(box, 78f270, u3, 8) ثم b1090(
+   this, 78f270) و vt+0x70(box, 8, 790390(
+   pLeague), 78f270, "") و dtor d66c0 +
+   تفكيك الحاوية (f2fdc أول + sentinel)
+3. **Slot700 (1417c16f0) — RAW:** بوابات
+   الحل الخمس: pSyn=7630d0(host,u4)=null،
+   u3==743c80(pSyn)، pLeague2=A84FindSyn(
+   pp[2], type)=null، 790390(pLeague2)≠u4،
+   7903d0(pLeague2,0)=false؛ ثم التنسيق
+   STR_LEAGUE_DEL_SYN عبر vsnprintf مع
+   78f470(pLeague2) و vt+0x10(box, u2,
+   0x7d5, buf) و STR_SYN_DEL_BY_LEAGUE
+   مع 743e60(pSyn) و vt+0x88(box, u3, buf,
+   0, 0x7d5)؛ vt+0x710(this, pLeague2)؛
+   c1180(this, u3, u4)؛ 76aca0(host,
+   78f2d0(pLeague2))؛ حلقة الأعضاء
+   9e6d0(pLeague2, &cont) → {268(id) ∧
+   ¬280(id) ∧ 2a0(id)==9 → 2a8(id, 3)}
+
+**تصحيحات جوهرية بالخام:**
+1. توقيع Slot708: (void* pLeague, uint32 u3,
+   uint16_t u4) — الخام يمرر u2 كليغي وu4
+   كـ WORD في d6790
+2. توقيعا 1417903d0 (bool) و14178f470 (int)
+   في SyndicateInviteNotify كانا void بالخطأ
+3. سلاسل 0x1c67 و STR_LEAGUE_DEL_SYN/
+   STR_SYN_DEL_BY_LEAGUE مستخرجة من .rdata
+   مباشرة وليست مُركّبة
+4. قناة بث 790390 في vt+0x70 (وليس 7903d0)
+5. Wire() في اختبار d114c: ربط d6640/d66c0
+   (كانت null → segfault أول تشغيل)
+
+**اختبار syndicate_d114c_test: 8 أقسام (S1-S8)**
+بكل بوابات ونقاط التفرع. رجريجن كامل
+**119/119 × 6 جولات** + ASan/UBSan نظيف.
+
+المتبقي: العملاقان c2470 و c3230 (خارج نطاق
+الـ vtable — دوال مساعدة كبيرة) ثم إغلاق
+ملف syndicatelogic.

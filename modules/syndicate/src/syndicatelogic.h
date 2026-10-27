@@ -59,6 +59,7 @@
 #define MODULES_SYNDICATE_SRC_SYNDECATELOGIC_H
 
 #include <cstdint>
+#include <cstddef>
 
 namespace syndicate {
 
@@ -224,6 +225,50 @@ extern char     (*g_fn1417d9140)(void*, uint32_t, uint32_t,
 extern void     (*g_fn1417d9050)(void*);                     // 1417d9050
 extern void     (*g_fn141777de0)(void*, uint32_t, uint32_t,
                                  void*);                     // 141777de0
+extern void     (*g_fn14176b0d0)(void*, uint32_t);        // 14176b0d0
+extern void     (*g_fn141774c70)(void*, uint32_t);        // 141774c70
+extern void     (*g_fn141775350)(void*, uint32_t);        // 141775350
+extern void     (*g_fn14174ebc0)(void*, uint32_t);        // 14174ebc0
+extern char     (*g_fn141765410)(void*, uint32_t,
+                                 uint32_t);                  // 141765410
+extern void     (*g_fn141765800)(void*, uint32_t);        // 141765800
+extern void     (*g_fn141765920)(void*, uint32_t);        // 141765920
+extern void     (*g_fn141765d60)(void*, uint32_t);        // 141765d60
+extern char     (*g_fn1417655c0)(void*, uint32_t,
+                                 uint32_t);                  // 1417655c0
+extern char     (*g_fn141765540)(void*, uint32_t);        // 141765540
+extern void     (*g_fn141771f90)(void*, uint32_t, uint32_t,
+                                 uint32_t);                  // 141771f90
+extern char     (*g_fn14174f120)(void*);                    // 14174f120
+extern void     (*g_fn14175f830)(void*, uint32_t,
+                                 uint32_t);                  // 14175f830
+extern char     (*g_fn141763a90)(void*, uint32_t,
+                                 uint32_t);                  // 141763a90
+extern char     (*g_fn141763bc0)(void*, uint32_t, uint32_t,
+                                 uint32_t);                  // 141763bc0
+extern void     (*g_fn141766500)(void*, uint32_t);        // 141766500
+extern void     (*g_fn141766e90)(void*, uint32_t, uint32_t,
+                                 uint32_t, uint32_t);        // 141766e90
+extern void     (*g_fn141769100)(void*, uint32_t);        // 141769100
+extern char     (*g_fn1417bf960)(void* pLeague, void* pCont);   // 1417bf960
+extern char     (*g_fn14179e6d0)(void* pLeague, void* pCont);   // 14179e6d0
+extern char     (*g_fn141787300)(void* pElem);                  // 141787300
+extern uint32_t (*g_fn141785dc0)(void* pElem);                  // 141785dc0
+extern uint32_t (*g_fn14178f270)(void* pLeague);               // 14178f270
+extern void     (*g_fn14176aca0)(void* pHost, uint32_t uId);    // 14176aca0
+extern void     (*g_fn14174d490)(void* pSyn, uint32_t u3);      // 14174d490
+extern uint32_t (*g_fn141743c80)(void* pSyn);                   // 141743c80
+extern int32_t  (*g_fn141743e60)(void* pSyn);                   // 141743e60
+// 14178f470 decl lives in SyndicateInviteNotify.h (void)
+extern void     (*g_fn1417c1180)(void* pLogic, uint32_t u3,
+                                 uint32_t u4);                  // 1417c1180
+extern void     (*g_fn1417b1090)(void* pLogic, uint32_t uId);   // 1417b1090
+extern void*    (*g_fn1417f3166)(uint32_t cb);                   // 1417f3166 alloc
+extern void     (*g_fn1417f2fdc)(void* p);                      // 1417f2fdc delete
+extern void     (*g_fn1417f30c0)(void* p, int c, size_t n);     // 1417f30c0 memset
+extern void*    (*g_fn141823050)(void);                         // import 141823050
+extern int      (*g_fn1418233c8)(char* buf, size_t n,
+                                 const char* fmt, void* arg);  // import vsnprintf
 extern uint32_t (*g_fn1418232c8)(uint32_t);               // 1418232c8
 extern uint64_t (*g_fn141764990)(void*, uint32_t,
                                  uint32_t);           // 141764990
@@ -1039,6 +1084,40 @@ public:
     void Slot670(uint32_t u2, int32_t n3,
                  void*** ppp4);     // 1417b56b0
     void Slot678(void);             // 1417b56c0
+    // ==== D114c (the class tail, +0x680..+0x738) ====
+    void Slot680(uint32_t u2, uint32_t u3,
+                 uint32_t u4, uint32_t u5);   // 1417c2470
+    void Slot688(uint32_t u2);     // 1417b56d0
+    void Slot690(uint32_t u2);     // 1417b56e0
+    void Slot698(uint32_t u2);     // 1417b56f0
+    void Slot6a0(uint32_t u2);     // 1417b5700
+    char Slot6a8(uint32_t u2,
+                 uint32_t u3);     // 1417b5430
+    char Slot6b0(uint32_t u2);     // 1417b54a0
+    void Slot6b8(uint32_t u2);     // 1417b5680
+    void Slot6c0(uint32_t u2);     // 1417b5690
+    void Slot6c8(uint32_t u2);     // 1417b56a0
+    char Slot6d0(uint32_t u2,
+                 uint32_t u3);     // 1417b55d0
+    char Slot6d8(uint32_t u2);     // 1417b5510
+    void Slot6e0(uint32_t u2, uint32_t u3,
+                 uint32_t u4);     // 1417c3230
+    void Slot6e8(uint32_t u2, uint32_t u3,
+                 uint32_t u4);     // 1417b58f0
+    char Slot6f0(void);            // 1417b5900
+    void Slot6f8(uint32_t u2,
+                 uint32_t u3);     // 1417b1e70
+    void Slot700(uint32_t u2, uint32_t u3,
+                 uint32_t u4);     // 1417c16f0
+    void Slot708(void* pLeague, uint32_t u3,
+                 uint16_t u4);     // 1417c0110
+    char Slot710(uint32_t u2);     // 1417b1ae0
+    char Slot718(uint32_t u2,
+                 uint32_t u3);     // 1417b1b30
+    void Slot720(uint32_t u2);     // 1417b5750
+    void Slot730(uint32_t u2, uint32_t u3,
+                 uint32_t u4, uint32_t u5);   // 1417b5710
+    void Slot738(uint32_t u2);     // 1417b58e0
 
 };
 }

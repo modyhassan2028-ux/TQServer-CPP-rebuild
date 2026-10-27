@@ -44,9 +44,9 @@ bool (*g_fn141763920)(void*, uint32_t) = nullptr;
 void (*g_fn14176ca70)(void*, uint32_t, uint32_t,
                       uint32_t) = nullptr;
 uint32_t (*g_fn14178f2d0)(void*) = nullptr;
-void (*g_fn14178f470)(void*) = nullptr;
+int32_t (*g_fn14178f470)(void*) = nullptr;
 int32_t (*g_fn141790390)(void*) = nullptr;
-void (*g_fn1417903d0)(void*, uint32_t) = nullptr;
+char (*g_fn1417903d0)(void*, uint32_t) = nullptr;
 void (*g_fn14174dcd0)(void*, uint32_t) = nullptr;
 void (*g_fnTqStrCopy)(char*, const char*, size_t) = nullptr;
 

@@ -217,14 +217,14 @@ static void S14176ca70(void*, uint32_t id,
 static uint32_t s_f2d0 = 0;
 static uint32_t S14178f2d0(void* lg) {
     C("f2d0"); return s_f2d0 ? s_f2d0 : (uint32_t)(uintptr_t)lg; }
-static void S14178f470(void*) { C("f470"); }
+static int32_t S14178f470(void*) { C("f470"); return 0; }
 static int32_t s_90390 = 0;
 static int32_t S141790390(void*) { C("90390");
     return s_90390; }
 static std::string g_903d0;
-static void S1417903d0(void* lg, uint32_t id) {
+static char S1417903d0(void* lg, uint32_t id) {
     char t2[64]; snprintf(t2, sizeof t2, "903d0 %u",
-        id); g_903d0 = t2; C(t2); }
+        id); g_903d0 = t2; C(t2); return 0; }
 static std::string g_dcd0;
 static void S14174dcd0(void*, uint32_t a) {
     char t2[64]; snprintf(t2, sizeof t2, "dcd0 %u", a);
