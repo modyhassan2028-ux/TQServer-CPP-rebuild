@@ -1334,6 +1334,15 @@ void CSyndicateLogic::Slot208B4b0ThenSink3(
     g_fnSink3OpC(pObj);
 }
 
+// ---- D109 seams (default null — tests bind them) ----
+uint64_t (*g_fn7CEC20)(void*, uint32_t);
+void     (*g_fn77D180)(void*, uint32_t, int32_t);
+void     (*g_fn77BEB0)(void*, uint32_t, int32_t, int64_t);
+void*    (*g_fn73F9C0)();
+void     (*g_fn73F4B0)(void*, uint32_t);
+void     (*g_fn7D4870)(void*, uint32_t, void*, int64_t);
+char     (*g_fn7CD250)(void*, const char*);
+
 // ---- D108 seams (default null — tests bind them) ----
 uint32_t (*g_fn78E4A0)(void*, int32_t);
 uint32_t (*g_fn78E400)(void*, int32_t);
@@ -3358,6 +3367,161 @@ bool CSyndicateLogic::Slot280(int32_t n2) {
 // +0x288: 1417abc60
 bool CSyndicateLogic::Slot288(int32_t n2) {
     return n2 < 0x37b;
+}
+// ============ D109 wave 14 (TRUE +0x230/+0x238) ============
+
+// +0x230: 1417bd310 — the guild-disband-all flow
+uint64_t CSyndicateLogic::Slot230(uint32_t u2) {
+    void** pp = (void**)this;
+    uint64_t uVar12 = 0xfffffffffffffffeULL;
+    // RAW: the MSVC proxy pattern for a checked
+    // std::vector<uint>; modeled with std::vector and
+    // the raw register-leak args kept verbatim.
+    static std::vector<uint32_t> vec;
+    vec.clear();
+    // RAW: uVar2 = box vt+0x1f8(box, u2)
+    uint32_t uVar2 = ((uint32_t (*)(void*, uint32_t))
+        (*(void***)pp[1])[0x1f8/8])(pp[1], u2);
+    // RAW: lVar9 = **box (the box vtable base)
+    int64_t lVar9 = **(int64_t**)pp[1];
+    // RAW: box vt+0x2f0(box, uVar2, &vec, vt, 0xff..fe)
+    ((void (*)(void*, uint32_t, void*,
+               int64_t, uint64_t))
+        (*(void***)pp[1])[0x2f0/8])(
+            pp[1], uVar2, &vec, lVar9, uVar12);
+    uint64_t uVar5 =
+        g_fn7CEC20(pp[2], u2);
+    uint32_t uVar3 = (uint32_t)uVar5;
+    if (uVar3 == 0) {
+        return 0;   // RAW: extraout_RAX & ~0xff
+    }
+    for (uint32_t uId : vec) {
+        // RAW: box vt+0x108(box, uId, uVar3, vt)
+        ((void (*)(void*, uint32_t, uint32_t,
+                   int64_t))
+            (*(void***)pp[1])[0x108/8])(
+                pp[1], uId, uVar3, lVar9);
+    }
+    g_fn77D180(pp[7], uVar3, 2);
+    g_fn77D180(pp[7], uVar3, 1);
+    uVar12 = 3;
+    g_fn77D180(pp[7], uVar3, 3);
+    g_fn77BEB0(pp[6], uVar3, 3, lVar9);
+    // RAW: box vt+0x368(box, uVar5)
+    ((void (*)(void*, uint32_t))
+        (*(void***)pp[1])[0x368/8])(pp[1], uVar5);
+    void* puVar6 = g_fn73F9C0();
+    g_fn73F4B0(puVar6, uVar3);
+    if (pp[9] != 0) {
+        g_fn7D4870(pp[9], uVar3, &vec, lVar9);
+    }
+    // RAW: CONCAT71((int7)(extraout_RAX >> 8), 1)
+    return 1;
+}
+
+// +0x238: 1417ab610 — the syndicate name-change flow
+uint64_t CSyndicateLogic::Slot238(uint32_t u2,
+                                  const char* pc3,
+                                  uint32_t u4,
+                                  uint32_t u5) {
+    void** pp = (void**)this;
+    if (pp[3] == 0) {
+        g_fnT1LogError("\xa1\xef%s(%s)\xa1\xef in %s, %d");
+        return 0;
+    }
+    if (pp[2] == 0) {
+        g_fnT1LogError("\xa1\xef%s(%s)\xa1\xef in %s, %d");
+        return 0;
+    }
+    if (pp[1] == 0) {
+        g_fnT1LogError("\xa1\xef%s(%s)\xa1\xef in %s, %d");
+        return 0;
+    }
+    if (u2 == 0 || pc3 == 0) {
+        return 0;   // RAW: in_RAX & ~0xff
+    }
+    // RAW: the do-while strlen loop; ~uVar7 - 1 == L
+    uint64_t uVar7 = 0xffffffffffffffffULL;
+    const char* pc = pc3;
+    char cVar1;
+    do {
+        if (uVar7 == 0) break;
+        uVar7 = uVar7 - 1;
+        cVar1 = *pc;
+        pc = pc + 1;
+    } while (cVar1 != '\0');
+    if (((1 < ~uVar7 - 1) && (~uVar7 - 1 < 0x24)) &&
+        // RAW: cVar1 = box vt+0x2e8(box, name)
+        ((cVar1 = ((char (*)(void*, const char*))
+            (*(void***)pp[1])[0x2e8/8])(pp[1],
+                                        pc3)) != '\0')) {
+        void* plVar3 = g_fn78C8E0(pp[3], u2);
+        uVar7 = 0;
+        if (plVar3 != 0) {
+            char bVar2 = g_fn7868C0(plVar3);
+            uVar7 = (uint64_t)bVar2;
+            if (bVar2) {
+                uVar7 = g_fn785EA0(plVar3);
+                if ((uint32_t)uVar7 == 0) {
+                    g_fnT1LogError("\xa1\xef%s(%s)\xa1\xef in %s, %d");
+                    return 0;
+                }
+                int64_t lVar4 = g_fnLgFind(pp[2],
+                                           (uint32_t)uVar7);
+                if (lVar4 == 0) {
+                    return 0;
+                }
+                char bVar3 = g_fn7CD250(pp[2], pc3);
+                if (!bVar3) {
+                    void* pIVar5 = g_fnStringMgrInstance();
+                    const void* pv = g_fnStringMgrGetStr(
+                        pIVar5,
+                        "STR_SYNDICATE_CHANGE_NAME_ERR_DUPLICATE");
+                    uint64_t uVar6 =
+                        ((uint64_t (*)(void*, uint32_t,
+                                       const void*))
+                         (*(void***)pp[1])[0x18/8])(
+                             pp[1], u2, pv);
+                    return uVar6 & ~0xffULL;
+                }
+                lVar4 = g_fn7C8AA0(pp[2], pc3);
+                if (lVar4 != 0) {
+                    void* pIVar5 = g_fnStringMgrInstance();
+                    const void* pv = g_fnStringMgrGetStr(
+                        pIVar5,
+                        "STR_SYNDICATE_CHANGE_NAME_ERR_DUPLICATE");
+                    uint64_t uVar6 =
+                        ((uint64_t (*)(void*, uint32_t,
+                                       const void*))
+                         (*(void***)pp[1])[0x18/8])(
+                             pp[1], u2, pv);
+                    return uVar6 & ~0xffULL;
+                }
+                // RAW: box vt+0x3d8(box, u2, lg, name, u4, u5)
+                uint64_t uVar6 =
+                    ((uint64_t (*)(void*, uint32_t,
+                                   uint32_t, const char*,
+                                   uint32_t, uint32_t))
+                     (*(void***)pp[1])[0x3d8/8])(
+                         pp[1], u2,
+                         (uint32_t)uVar7, pc3, u4, u5);
+                return (uVar6 & ~0xffULL) | 1;
+            }
+        }
+        return uVar7 & ~0xffULL;
+    }
+    // bad name length or vt+0x2e8 rejected
+    {
+        void* pIVar5 = g_fnStringMgrInstance();
+        const void* pv = g_fnStringMgrGetStr(
+            pIVar5, "STR_INVALID_GUILD_NAME");
+        uint64_t uVar7 =
+            ((uint64_t (*)(void*, uint32_t,
+                           const void*))
+             (*(void***)pp[1])[0x18/8])(
+                 pp[1], u2, pv);
+        return uVar7 & ~0xffULL;
+    }
 }
 
 
