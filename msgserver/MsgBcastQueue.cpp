@@ -284,3 +284,110 @@ SBcastQ* BcastQCreate(SBcastQ* pQ, SBcastQ* pSrc) {
 }
 
 } // namespace msg
+
+namespace msg {
+
+// ===== M67c: ORIGINAL FUN_1400a3410 VERBATIM =====
+uint64_t* BcastQueueFind(SBcastQ* pQ, uint32_t dwKey,
+                         uint64_t* pOut) {
+    // the Park-Miller hash (16807/2836 minimal
+    // standard) of the obfuscated key
+    uint32_t q = ((dwKey ^ 0xdeadbeefU) &
+                  0x7fffffffU) / 0x1f31dU;
+    int32_t n = ((int32_t)(((dwKey ^ 0xdeadbeefU) &
+                  0x7fffffffU) % 0x1f31dU) * 0x41a7) -
+                (int32_t)q * 0xb14;
+    if (n < 0)
+        n += 0x7fffffff;
+    uint64_t mask = pQ->m_q78;
+    uint64_t idx = (uint64_t)n & mask;
+    if (pQ->m_q80 <= idx)
+        idx = idx + (-1ULL - (mask >> 1));
+    uint64_t qVecSize =
+        ((char*)pQ->m_vLast - (char*)pQ->m_vFirst)
+        >> 4;
+    if (qVecSize <= idx) {
+        g_fnBcastInvalidParam(); return pOut;
+    }
+    void* pAnchorCell =
+        *(void**)((char*)pQ + 0x10);   // plVar2
+    void* pBucket =
+        *(void**)((char*)pQ->m_vFirst + 8 +
+                  idx * 0x10);
+    if (pAnchorCell == nullptr) {
+        g_fnBcastInvalidParam(); return pOut;
+    }
+    void* pListObj =
+        *(void**)pAnchorCell;          // lVar7
+    void* node = pBucket;
+    for (;;) {
+        if (qVecSize <= idx + 1) {
+            g_fnBcastInvalidParam(); return pOut;
+        }
+        // the empty bucket: next bucket shares node
+        if (*(void**)((char*)pQ->m_vFirst + 8 +
+                (idx + 1) * 0x10) == pBucket) {
+            pOut[1] = (uint64_t)pQ->m_pSent;
+            pOut[0] = (uint64_t)pAnchorCell;
+            return pOut;
+        }
+        if (pListObj == nullptr) {
+            g_fnBcastInvalidParam(); return pOut;
+        }
+        if (node == *(void**)((char*)pListObj + 0x28)) {
+            g_fnBcastInvalidParam(); return pOut;
+        }
+        // the key at data[0].u32 (node+0x10)
+        if (dwKey <= *(uint32_t*)((char*)node + 0x10))
+            break;
+        if (node == *(void**)((char*)pListObj + 0x28)) {
+            g_fnBcastInvalidParam(); return pOut;
+        }
+        node = *(void**)node;   // next chain node
+    }
+    // node.key >= key: found or END
+    if (node == *(void**)((char*)pListObj + 0x28)) {
+        g_fnBcastInvalidParam(); return pOut;
+    }
+    if (dwKey < *(uint32_t*)((char*)node + 0x10)) {
+        // lower_bound overshoot -> END pair
+        pOut[0] = (uint64_t)pAnchorCell;
+        pOut[1] = (uint64_t)pQ->m_pSent;
+    } else {
+        pOut[0] = (uint64_t)pAnchorCell;
+        pOut[1] = (uint64_t)node;
+    }
+    return pOut;
+}
+
+// ===== M67c: ORIGINAL FUN_1400b29c0 VERBATIM =====
+void* BcastQueueLookupData(void* pMapGroup,
+                           uint32_t dwKey) {
+    SBcastQ* pQ =
+        (SBcastQ*)((char*)pMapGroup + 0x4b8);
+    uint64_t aIt[2] = {0, 0};
+    BcastQueueFind(pQ, dwKey, aIt);
+    void* pSent = *(void**)((char*)pMapGroup + 0x4f0);
+    if (aIt[0] == 0 ||
+        aIt[0] != *(uint64_t*)((char*)pMapGroup + 0x4c8)) {
+        g_fnBcastInvalidParam(); return nullptr;
+    }
+    if (aIt[1] != (uint64_t)pSent) {
+        // found: re-find + the sentinel guard
+        uint64_t aIt2[2] = {0, 0};
+        BcastQueueFind(pQ, dwKey, aIt2);
+        void* pObj = nullptr;
+        if (aIt2[0] == 0) {
+            g_fnBcastInvalidParam(); return nullptr;
+        }
+        pObj = *(void**)aIt2[0];
+        if (aIt[1] == (uint64_t)
+                *(void**)((char*)pObj + 0x28)) {
+            g_fnBcastInvalidParam(); return nullptr;
+        }
+        return (void*)(aIt[1] + 0x18);
+    }
+    return nullptr;
+}
+
+} // namespace msg

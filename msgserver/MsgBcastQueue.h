@@ -94,3 +94,31 @@ SBcastQ* BcastQCreate(SBcastQ* pQ, SBcastQ* pSrc);
 } // namespace msg
 
 #endif // MSG_BCAST_QUEUE_H
+
+namespace msg {
+
+// ===== M67c: ORIGINAL FUN_1400a3410 VERBATIM =====
+// the queue's ORDERED-HASH lookup (a lower_bound
+// over the list chains, bucket-accelerated):
+//   s = parkmiller(key ^ 0xdeadbeef) & mask(+0x78)
+//   if (threshold(+0x80) <= s) s += -1-(mask>>1)
+//   bucket = vec[s].second (a list NODE); if
+//   vec[s].second == vec[s+1].second -> empty
+//   (the bucket pair chain is a slice of the
+//   ORDERED list; walk while key > node.key
+//   (data[0].u32 at node+0x10), sentinel-guarded)
+//   found -> out={anchor-cell, node}; else
+//   out={anchor-cell, sentinel} (the END pair).
+// Returns out.
+uint64_t* BcastQueueFind(SBcastQ* pQ, uint32_t dwKey,
+                         uint64_t* pOut);
+
+// ===== M67c: ORIGINAL FUN_1400b29c0 VERBATIM =====
+// the CMapGroup(+0x4b8 queue) lookup wrapper: find,
+// sanity-check the pair vs the anchor cell, re-find
+// + sentinel-guard, then return the element payload
+// (node+0x18); not found -> 0.
+void* BcastQueueLookupData(void* pMapGroup,
+                           uint32_t dwKey);
+
+} // namespace msg
