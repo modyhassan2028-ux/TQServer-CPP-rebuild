@@ -4970,3 +4970,70 @@ b5710 بوسيطه الخامس على المكدس.
 المتبقي: العملاقان c2470 و c3230 (خارج نطاق
 الـ vtable — دوال مساعدة كبيرة) ثم إغلاق
 ملف syndicatelogic.
+
+## D114d — إغلاق جدول CSyndicateLogic الكامل: آخر 4 فتحات [2026-10-27]
+
+**نطاق:** آخر ما تبقى من جدول الـ vtable الكامل
+(232 فتحة، القاعدة 0x113668):
+1. **Slot240 = 1417ab8c0** — تغيير اسم
+   السينديكت (فشل الديكمبايلر فيها بالكامل —
+   استخراج خام objdump). البوابات CHECKF:
+   attr mgr (+0x18، log 0x6f7) → syn mgr
+   (+0x10، log 0x6f8) → consumer (+0x8، log
+   0x6f9)؛ ثم فحص u2/u3/name؛ FindSyn
+   (cad00)؛ c5==0 أو 7cd250 فشل → بث
+   STR_SYNDICATE_CHANGE_NAME_ERR_DUPLICATE
+   عبر vt+0x18(box, u2, str) وإرجاع false؛
+   النجاح: cef50(mgr, fe90(pSyn), name) →
+   fdc0(pSyn, name) → gmlog
+   ("gmlog/syndicate_change_name",
+   "user_id[%u] syn_id[%u] old_syn_name[%s]
+   new_syn_name[%s]...", u2, 78f270(pSyn),
+   78f470(pSyn), name) → true
+2. **Slot4E0 = 1417b0980** — مزامنة رتبة
+   العضو: 78c8e0(attr mgr, u2) موجود →
+   787150(attr, n4)؛ وإلا 631d0(host, u2)
+   موجود → b360(user, u2, 7, n3) + b360(user,
+   u2, 6, n4)؛ ثم vt+0x4a8(box, u2) ≠ 0 →
+   767780(host, u2, (uint16)n4, u5)
+3. **Slot4F0 = 1417b0ca0** — ضبط الاسم:
+   78c8e0 → 787130(attr, name) وإلا 631d0 →
+   b610(user, u2, name)؛ ثم vt+0x4a8 ≠ 0 →
+   uV=63680(host, u5)، pSyn=cad00(mgr, uV)؛
+   uW=f2d0(pSyn) إن وُجد؛ u2==uW →
+   7630d0(host, u5) → 441f0(user, name)؛
+   دائماً 767670(host, u2, name, u5)
+4. **Slot6f8 = 1417b5910** — بث رسالة 0x4f:
+   بوابة n2≠0 ∧ 74f120(host)؛ CMsg محلي 0x438
+   بايت (ctor 7d6640)؛ Create=7d6790(msg,
+   0x4f, 0, 74f130(host), 0)؛ نجاح →
+   vt+0x8(box, n2, msg)؛ dtor 7d66c0
+
+**تصحيح انزياح ترقيم ذيل D114c (اكتشاف
+جوهري):** b5910 اتقص بالخطأ من الجدول
+فانزاح ترقيم الذيل فتحة كاملة. صُحح
+السلسلة كاملة (h/cpp/tests): Slot6f8→700
+(b1e70)، Slot700→708 (c16f0)، Slot708→710
+(c0110)، Slot710→718 (b1ae0)، Slot718→720
+(b1b30)، Slot720→728 (b5750) — وأضيفت
+Slot6f8 الجديدة (b5910). الأجسام لم تتغير
+(الترقيم توثيقي + vtable).
+
+**Seams جديدة (10):** 14174f130، 1417441f0،
+141767670، 14174b610، 141787130، 14178fe90،
+1417cef50، 14178fdc0، 78F470Name (نوع
+char* مختلف عن 78f470 الموجود)،
+1418230a8_6 (نفس استيراد الـ gmlog بتوقيع
+6 وسائط).
+
+**اختبار syndicate_d114d_test: 4 أقسام
+(S1-S4)** بكل المسارات: بوابات CHECKF،
+رسالة التكرار (المفتاح STR_...ERR_DUPLICATE
+نصياً)، مسار النجاح مع gmlog الكامل (القيم
+u2/0x2222/OldSyn/New)، اقتطاع 16-بت في
+CtyFwdC، سلسلة الليجو الكاملة في 4F0
+(بما فيها حالة syn==0)، وبث 0x4f مع فشل
+Create.
+
+**الحالة:** جدول CSyndicateLogic الكامل (232
+فتحة) منقول بالكامل 100%. ASan/UBSan نظيف.

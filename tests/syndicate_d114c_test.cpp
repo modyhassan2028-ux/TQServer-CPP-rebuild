@@ -87,7 +87,7 @@ static char s_c280 = 0; static int s_n280;
 static char Vt280(void* b, uint32_t u) {
     (void)b; ++s_n280; return s_c280; }
 
-// ---- Slot708/Slot700 support ----
+// ---- Slot710/Slot708 support ----
 #include <cstdlib>
 #include <cstdint>
 typedef struct { void* pPad0; void* pPad1; void* pPad2;
@@ -177,7 +177,7 @@ static void TSynLogCheck(const char* f, const char* w,
 static uint32_t s_u74e3f0 = 0x31;
 static int32_t T74e3f0(void* h) { (void)h; return s_u74e3f0; }
 static int32_t (*g_fn14174e3f0_test)(void*) = 0;
-// ---- Slot700 ----
+// ---- Slot708 ----
 static void* s_pSyn = (void*)0x900;
 static void* T7630d0(void* h, uint32_t u) {
     (void)h; (void)u; return s_pSyn; }
@@ -370,45 +370,45 @@ int main() {
         pL->Slot6b8(5); assert(s_a2.size() == 5 && s_a2[4].a == 5);
         pL->Slot6c0(6); assert(s_a2.size() == 6 && s_a2[5].a == 6);
         pL->Slot6c8(7); assert(s_a2.size() == 7 && s_a2[6].a == 7);
-        pL->Slot720(8); assert(s_a2.size() == 8 && s_a2[7].a == 8);
+        pL->Slot728(8); assert(s_a2.size() == 8 && s_a2[7].a == 8);
         pL->Slot738(9); assert(s_a2.size() == 9 && s_a2[8].a == 9);
         pL->Slot6e8(2, 3, 4);
         assert(s_aN.size() == 1 && s_aN[0].first == s_host &&
                s_aN[0].second == (std::vector<uint32_t>{2,3,4}));
-        pL->Slot6f8(10, 11);
+        pL->Slot700(10, 11);
         assert(s_aN.size() == 2 && s_aN[1].second == (std::vector<uint32_t>{10,11}));
         pL->Slot730(1, 2, 3, 4);
         assert(s_aN.size() == 3 && s_aN[2].second == (std::vector<uint32_t>{1,2,3,4}));
         assert(pL->Slot6f0() == 0x2c);
         printf("S1 ok (thunks)\n");
     }
-    // ==== S2: Slot710/Slot718 gates + forwarding ====
+    // ==== S2: Slot718/Slot720 gates + forwarding ====
     {
         Wire();
-        assert(pL->Slot710(0) == 0);
+        assert(pL->Slot718(0) == 0);
         assert(s_n63a90 == 0);
         s_u510 = 0;
-        assert(pL->Slot710(5) == 0);
+        assert(pL->Slot718(5) == 0);
         assert(s_n63a90 == 0);
         s_u510 = 0x77;
-        assert(pL->Slot710(5) == 1);
+        assert(pL->Slot718(5) == 1);
         assert(s_n63a90 == 1);
         assert(s_a63a90[0] == 0x1234 && s_a63a90[1] == 5 && s_a63a90[2] == 0x77);
         s_c63a90 = 0;
-        assert(pL->Slot710(6) == 0);
+        assert(pL->Slot718(6) == 0);
         s_c63a90 = 1;
-        assert(pL->Slot718(0, 3) == 0);
-        assert(pL->Slot718(3, 0) == 0);
+        assert(pL->Slot720(0, 3) == 0);
+        assert(pL->Slot720(3, 0) == 0);
         assert(s_n63bc0 == 0);
         s_u510 = 0;
-        assert(pL->Slot718(3, 4) == 0);
+        assert(pL->Slot720(3, 4) == 0);
         assert(s_n63bc0 == 0);
         s_u510 = 0x88;
-        assert(pL->Slot718(3, 4) == 1);
+        assert(pL->Slot720(3, 4) == 1);
         assert(s_n63bc0 == 1);
         assert(s_a63bc0[1] == 3 && s_a63bc0[2] == 0x88 && s_a63bc0[3] == 4);
         s_c63bc0 = 0;
-        assert(pL->Slot718(3, 4) == 0);
+        assert(pL->Slot720(3, 4) == 0);
         printf("S2 ok (710/718)\n");
     }
     // ==== S3: Slot6a8 ====
@@ -477,11 +477,11 @@ int main() {
         assert(s_a655c0[2] == 0x20 + 3 * 0xf4240);
         printf("S6 ok (6d0)\n");
     }
-    // ==== S7: Slot708 (c0110) ====
+    // ==== S7: Slot710 (c0110) ====
     {
         Wire();
         s_cD6790 = 0;   // create-miss -> CHECK log
-        pL->Slot708(s_pLeague2, 7, 0x99);
+        pL->Slot710(s_pLeague2, 7, 0x99);
         assert(s_nD6790 == 1);
         assert(s_aD6790[0] == 0x99 && s_aD6790[1] == 7
                && s_aD6790[2] == 0x31 && s_aD6790[3] == 0);
@@ -492,7 +492,7 @@ int main() {
         // happy, empty container
         Wire();
         s_cD6790 = 1;
-        pL->Slot708(s_pLeague2, 7, 0x99);
+        pL->Slot710(s_pLeague2, 7, 0x99);
         assert(s_n708_38 == 1 && s_a708_38[0] == 0x66
                && s_a708_38[1] == 0);
         assert(s_n708_110 == 0);   // not found
@@ -510,7 +510,7 @@ int main() {
         s_m87300[s_pElem2] = 1;
         s_m85dc0[s_pElem1] = 0x111;
         s_m85dc0[s_pElem2] = 0x222;
-        pL->Slot708(s_pLeague2, 7, 0x99);
+        pL->Slot710(s_pLeague2, 7, 0x99);
         assert(s_n708_158 == 2);
         assert(s_a708_158[0] == 0x111 && s_a708_158[1] == 7);
         assert(s_a708_158[2] == 0x222);
@@ -518,30 +518,30 @@ int main() {
                && s_a708_110[2] == 8);
         printf("S7 ok (708)\n");
     }
-    // ==== S8: Slot700 (c16f0) ====
+    // ==== S8: Slot708 (c16f0) ====
     {
         // gate: pSyn null
         Wire();
         s_pSyn = 0;
-        pL->Slot700(5, 6, 0x77);
+        pL->Slot708(5, 6, 0x77);
         assert(s_nD4490 == 0);
         // gate: u3 == 743c80(pSyn)
         Wire();
-        pL->Slot700(5, 0x45, 0x77);
+        pL->Slot708(5, 0x45, 0x77);
         assert(s_nD4490 == 0);
         // gate: pLeague2 null
         Wire();
         s_pLeague2 = 0;
-        pL->Slot700(5, 6, 0x77);
+        pL->Slot708(5, 6, 0x77);
         assert(s_nD4490 == 0);
         // gate: 790390 != u4
         Wire();
-        pL->Slot700(5, 6, 0x55);
+        pL->Slot708(5, 6, 0x55);
         assert(s_nD4490 == 0);
         // gate: 7903d0 false
         Wire();
         s_c7903d0 = 0;
-        pL->Slot700(5, 6, 0x77);
+        pL->Slot708(5, 6, 0x77);
         assert(s_nD4490 == 0);
         // happy full flow
         Wire();
@@ -550,7 +550,7 @@ int main() {
         s_nIds = 3;
         s_mVt268[1] = 1; s_mVt280[1] = 0; s_mVt2a0[1] = 9;
         s_mVt268[3] = 1; s_mVt280[3] = 0; s_mVt2a0[3] = 5;
-        pL->Slot700(5, 6, 0x77);
+        pL->Slot708(5, 6, 0x77);
         assert(s_nD4490 == 1 && s_aD4490[0] == 6);
         assert(s_aA84Id == 0x45);
         assert(s_nVt10 == 1 && s_aVt10[0] == 5

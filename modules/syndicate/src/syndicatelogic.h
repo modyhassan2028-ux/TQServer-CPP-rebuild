@@ -240,6 +240,20 @@ extern char     (*g_fn141765540)(void*, uint32_t);        // 141765540
 extern void     (*g_fn141771f90)(void*, uint32_t, uint32_t,
                                  uint32_t);                  // 141771f90
 extern char     (*g_fn14174f120)(void*);                    // 14174f120
+extern uint32_t (*g_fn14174f130)(void*);                    // 14174f130
+extern void     (*g_fn1417441f0)(void*, const char*);       // 1417441f0
+extern void     (*g_fn141767670)(void*, uint32_t,
+                                 const char*, uint32_t);   // 141767670
+extern void     (*g_fn14174b610)(void*, uint32_t,
+                                 const char*);             // 14174b610
+extern void     (*g_fn141787130)(void*, const char*);       // 141787130
+extern const char* (*g_fn14178fe90)(void*);                 // 14178fe90
+extern uint64_t (*g_fn1417cef50)(void*, const char*,
+                                 const char*);              // 1417cef50
+extern uint64_t (*g_fn14178fdc0)(void*, const char*);       // 14178fdc0
+extern const char* (*g_fn78F470Name)(void*);                // 14178f470
+extern void     (*g_fn1418230a8_6)(const char*, const char*,
+    uint32_t, uint32_t, const void*, const void*);           // 1418230a8
 extern void     (*g_fn14175f830)(void*, uint32_t,
                                  uint32_t);                  // 14175f830
 extern char     (*g_fn141763a90)(void*, uint32_t,
@@ -890,8 +904,11 @@ public:
     void Slot4C8(uint32_t u2);                     // 1417b23f0
     void Slot4D0(uint32_t u);                      // 1417b2400
     void Slot4D8(void);                           // 1417b2540
+    void Slot4E0(uint32_t u2, int32_t n3,
+                 int32_t n4);                      // 1417b0980
     bool Slot4E8(uint32_t u2, const char* p3,
                  char c4);                         // 1417b8940
+    void Slot4F0(uint32_t u2, const char* pc3);    // 1417b0ca0
     void Slot4F8(uint32_t u2, uint32_t u3,
                  uint32_t u4);                     // 1417b16b0
     void Slot500(uint32_t u2, uint32_t u3,
@@ -948,6 +965,8 @@ public:
     uint64_t Slot230(uint32_t u2);                   // 1417bd310
     uint64_t Slot238(uint32_t u2, const char* pc3,
                      uint32_t u4, uint32_t u5);      // 1417ab610
+    char Slot240(uint32_t u2, uint32_t u3,
+                 const char* pc4, char c5);  // 1417ab8c0
     // ---- D110 wave 15 (TRUE offsets) ----
     int64_t  Slot050(uint32_t u2, uint64_t u3,
                      int64_t l4);                   // 1417b62e0
@@ -1105,16 +1124,17 @@ public:
     void Slot6e8(uint32_t u2, uint32_t u3,
                  uint32_t u4);     // 1417b58f0
     char Slot6f0(void);            // 1417b5900
-    void Slot6f8(uint32_t u2,
+    void Slot6f8(int32_t n2);       // 1417b5910
+    void Slot700(uint32_t u2,
                  uint32_t u3);     // 1417b1e70
-    void Slot700(uint32_t u2, uint32_t u3,
+    void Slot708(uint32_t u2, uint32_t u3,
                  uint32_t u4);     // 1417c16f0
-    void Slot708(void* pLeague, uint32_t u3,
+    void Slot710(void* pLeague, uint32_t u3,
                  uint16_t u4);     // 1417c0110
-    char Slot710(uint32_t u2);     // 1417b1ae0
-    char Slot718(uint32_t u2,
+    char Slot718(uint32_t u2);     // 1417b1ae0
+    char Slot720(uint32_t u2,
                  uint32_t u3);     // 1417b1b30
-    void Slot720(uint32_t u2);     // 1417b5750
+    void Slot728(uint32_t u2);     // 1417b5750
     void Slot730(uint32_t u2, uint32_t u3,
                  uint32_t u4, uint32_t u5);   // 1417b5710
     void Slot738(uint32_t u2);     // 1417b58e0

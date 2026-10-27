@@ -2492,6 +2492,35 @@ void CSyndicateLogic::Slot4D8(void) {
     ((void (*)(void*))
         (*(void***)pp[1])[0xa0/8])(pp[1]);
 }
+// +0x4e0: 1417b0980 — attr/user rank sync + vt+0x4a8 fwd
+void CSyndicateLogic::Slot4E0(uint32_t u2, int32_t n3,
+                              int32_t n4) {
+    void** pp = (void**)this;
+    // RAW 99d: pA = 14178c8e0([this+0x18], u2)
+    void* pA = g_fn14178c8e0(pp[3], u2);
+    if (pA != 0) {
+        // RAW b3: 141787150(pA, n4)
+        g_fnRecSetC(pA, n4);
+    } else {
+        // RAW bf: pU = 1417631d0([this+0x50], u2)
+        void* pU = (void*)g_fnCtyFind(pp[10], u2);
+        if (pU != 0) {
+            // RAW d2/e5: 14174b360(pU, u2, 7, n3)
+            //                            (pU, u2, 6, n4)
+            g_fn14174b360(pU, u2, 7, n3);
+            g_fn14174b360(pU, u2, 6, n4);
+        }
+    }
+    // RAW f8: u5 = vt+0x4a8(box, u2)
+    uint32_t u5 = ((uint32_t (*)(void*, uint32_t))
+        (*(void***)pp[1])[0x4a8 / 8])(pp[1], u2);
+    if (u5 != 0) {
+        // RAW 0b: 141767780(mgr, u2, (uint16)n4, u5)
+        g_fnCtyFwdC(pp[10], u2,
+                    (int16_t)(uint16_t)n4, u5);
+    }
+}
+
 // +0x340: 1417b8940 — the create-league flow
 bool CSyndicateLogic::Slot4E8(uint32_t u2,
                               const char* p3, char c4) {
@@ -2628,6 +2657,44 @@ bool CSyndicateLogic::Slot4E8(uint32_t u2,
     }
     return false;
 }
+// +0x4f0: 1417b0ca0 — set name on attr/user + league chain
+void CSyndicateLogic::Slot4F0(uint32_t u2,
+                              const char* pc3) {
+    void** pp = (void**)this;
+    void* pA = g_fn14178c8e0(pp[3], u2);
+    if (pA != 0) {
+        g_fn141787130(pA, pc3);
+    } else {
+        void* pU = (void*)g_fnCtyFind(pp[10], u2);
+        if (pU != 0) {
+            g_fn14174b610(pU, u2, pc3);
+        }
+    }
+    // RAW cf4: u5 = vt+0x4a8(box, u2)
+    uint32_t u5 = ((uint32_t (*)(void*, uint32_t))
+        (*(void***)pp[1])[0x4a8 / 8])(pp[1], u2);
+    if (u5 != 0) {
+        // RAW d09: uV = 141763680(mgr, u5)
+        uint32_t uV = (uint32_t)g_fn763680(pp[10], u5);
+        // RAW d14: pSyn = 1417cad00(m_pSynMgr, uV)
+        void* pSyn = (void*)g_fnLgFind(pp[2], uV);
+        uint32_t uW = 0;
+        if (pSyn != 0) {
+            // RAW d27: uW = (uint32_t)14178f2d0(pSyn)
+            uW = (uint32_t)g_fn78F2D0(pSyn);
+        }
+        if (u2 == uW) {
+            // RAW d30: pU2 = 1417630d0(mgr, u5)
+            void* pU2 = g_fn7630D0(pp[10], u5);
+            if (pU2 != 0) {
+                g_fn1417441f0(pU2, pc3);
+            }
+        }
+        // RAW d4b: 141767670(mgr, u2, pc3, u5)
+        g_fn141767670(pp[10], u2, pc3, u5);
+    }
+}
+
 // +0x350: 1417b16b0 — the join-league flow
 void CSyndicateLogic::Slot4F8(uint32_t u2, uint32_t u3,
                               uint32_t u4) {
@@ -3558,6 +3625,62 @@ uint64_t CSyndicateLogic::Slot238(uint32_t u2,
         return uVar7 & ~0xffULL;
     }
 }
+// +0x240: 1417ab8c0 — change syndicate name (RAW:
+// CHECKF attr mgr 0x6f7 / syn mgr 0x6f8 / consumer
+// 0x6f9; flag==0 or name-in-use -> duplicate msg)
+char CSyndicateLogic::Slot240(uint32_t u2, uint32_t u3,
+                              const char* pc4,
+                              char c5) {
+    void** pp = (void**)this;
+    if (pp[3] == 0) {
+        g_fnT1LogError("\xa1\xef%s(%s)\xa1\xef in %s, %d");
+        return 0;
+    }
+    if (pp[2] == 0) {
+        g_fnT1LogError("\xa1\xef%s(%s)\xa1\xef in %s, %d");
+        return 0;
+    }
+    if (pp[1] == 0) {
+        g_fnT1LogError("\xa1\xef%s(%s)\xa1\xef in %s, %d");
+        return 0;
+    }
+    if (u2 == 0 || u3 == 0 || pc4 == 0) return 0;
+    // RAW 9b0: pSyn = 1417cad00(m_pSynMgr, u3)
+    void* pSyn = (void*)g_fnLgFind(pp[2], u3);
+    if (pSyn == 0) return 0;
+    if (c5 == 0) {
+        void* pIStr = g_fnStringMgrInstance();
+        const void* pv = g_fnStringMgrGetStr(
+            pIStr, "STR_SYNDICATE_CHANGE_NAME_ERR_DUPLICATE");
+        ((uint64_t (*)(void*, uint32_t, const void*))
+            (*(void***)pp[1])[0x18 / 8])(pp[1], u2, pv);
+        return 0;
+    }
+    // RAW 9fc: b = 1417cd250(m_pSynMgr, pc4)
+    if (!g_fn7CD250(pp[2], pc4)) {
+        void* pIStr = g_fnStringMgrInstance();
+        const void* pv = g_fnStringMgrGetStr(
+            pIStr, "STR_SYNDICATE_CHANGE_NAME_ERR_DUPLICATE");
+        ((uint64_t (*)(void*, uint32_t, const void*))
+            (*(void***)pp[1])[0x18 / 8])(pp[1], u2, pv);
+        return 0;
+    }
+    // RAW ba3a: 1417cef50(mgr, old, new)
+    g_fn1417cef50(pp[2], g_fn14178fe90(pSyn), pc4);
+    // RAW ba51: 14178fdc0(pSyn, pc4)
+    g_fn14178fdc0(pSyn, pc4);
+    // RAW ba5c..a8d: gmlog with old name (78f470)
+    //                 and syn id (78f270)
+    const char* pcOld = g_fn78F470Name(pSyn);
+    uint32_t uSynId = (uint32_t)g_fn78F270(pSyn);
+    g_fn1418230a8_6(
+        "gmlog/syndicate_change_name",
+        "user_id[%u] syn_id[%u] old_syn_name[%s] "
+        "new_syn_name[%s] change syndicate name success.",
+        u2, uSynId, pcOld, pc4);
+    return 1;
+}
+
 // ============ D110 wave 15 (TRUE +0x050/+0x060/+0x120) ============
 
 // +0x050: 1417b62e0 — the death money-spend flow
@@ -5410,6 +5533,20 @@ char     (*g_fn141765540)(void*, uint32_t);
 void     (*g_fn141771f90)(void*, uint32_t, uint32_t,
                           uint32_t);
 char     (*g_fn14174f120)(void*);
+uint32_t (*g_fn14174f130)(void*);
+void     (*g_fn1417441f0)(void*, const char*);
+void     (*g_fn141767670)(void*, uint32_t,
+                          const char*, uint32_t);
+void     (*g_fn14174b610)(void*, uint32_t,
+                          const char*);
+void     (*g_fn141787130)(void*, const char*);
+const char* (*g_fn14178fe90)(void*);
+uint64_t (*g_fn1417cef50)(void*, const char*,
+                          const char*);
+uint64_t (*g_fn14178fdc0)(void*, const char*);
+const char* (*g_fn78F470Name)(void*);
+void     (*g_fn1418230a8_6)(const char*, const char*,
+    uint32_t, uint32_t, const void*, const void*);
 void     (*g_fn14175f830)(void*, uint32_t, uint32_t);
 char     (*g_fn141763a90)(void*, uint32_t, uint32_t);
 char     (*g_fn141763bc0)(void*, uint32_t, uint32_t,
@@ -6100,12 +6237,33 @@ char CSyndicateLogic::Slot6f0(void) {
     return g_fn14174f120(
         *(void**)((char*)this + 0x50));
 }
-void CSyndicateLogic::Slot6f8(uint32_t u2,
+void CSyndicateLogic::Slot6f8(int32_t n2) {
+    // RAW 5910: gate 74f120(host); CMsg ctor 6640;
+    // Create6790(msg, 0x4f, 0, 74f130(host), 0);
+    // send vt+0x8(box, n2, &msg); dtor 66c0
+    void** pp = (void**)this;
+    void* pHost = *(void**)((char*)this + 0x50);
+    if (n2 != 0 && g_fn14174f120(pHost) != 0) {
+        char aMsg[0x438];
+        g_fnCMsgCtor6640(aMsg);
+        uint32_t uV = g_fn14174f130(pHost);
+        uint64_t uR = g_fnCMsgInit6790(
+            aMsg, 0x4f, 0, uV, 0);
+        if ((char)uR != 0) {
+            ((void (*)(void*, uint32_t, void*))
+                (*(void***)pp[1])[0x8 / 8])(
+                    pp[1], (uint32_t)n2, aMsg);
+        }
+        g_fnCMsgDtor66C0(aMsg);
+    }
+}
+
+void CSyndicateLogic::Slot700(uint32_t u2,
                               uint32_t u3) {
     g_fn14175f830(
         *(void**)((char*)this + 0x50), u2, u3);
 }
-void CSyndicateLogic::Slot720(uint32_t u2) {
+void CSyndicateLogic::Slot728(uint32_t u2) {
     g_fn141766500(
         *(void**)((char*)this + 0x50), u2);
 }
@@ -6222,7 +6380,7 @@ char CSyndicateLogic::Slot6d0(uint32_t u2,
 
 // RAW 1ae0: u2==0 -> false; this-vt+0x510(this) ->
 // eax; 0 -> false; tail 763a90(host, u2, eax)
-char CSyndicateLogic::Slot710(uint32_t u2) {
+char CSyndicateLogic::Slot718(uint32_t u2) {
     void** pp = (void**)this;
     if (u2 == 0)
         return 0;
@@ -6236,7 +6394,7 @@ char CSyndicateLogic::Slot710(uint32_t u2) {
 // RAW 1b30: u2==0 or u3==0 -> false; this-vt+0x510(
 // this) -> eax; 0 -> false; tail 763bc0(host, u2,
 // eax, u3)
-char CSyndicateLogic::Slot718(uint32_t u2,
+char CSyndicateLogic::Slot720(uint32_t u2,
                               uint32_t u3) {
     void** pp = (void**)this;
     if (u2 == 0 || u3 == 0)
@@ -6248,7 +6406,7 @@ char CSyndicateLogic::Slot718(uint32_t u2,
     return g_fn141763bc0(pp[10], u2, uR, u3);
 }
 
-// ===== Slot700 = 1417c16f0 (RAW) =====
+// ===== Slot708 = 1417c16f0 (RAW) =====
 // league-dismiss flow: pSyn = 7630d0(host,u4);
 // u3 != 743c80(pSyn) required; pLeague2 =
 // 7cad00(this+0x10, 743c80(pSyn)); 790390(pLeague2)
@@ -6270,7 +6428,7 @@ struct RawCont114c {
     void* pEnd;       // +0x28
     void* pProxy;     // +0x30
 };
-void CSyndicateLogic::Slot700(uint32_t u2, uint32_t u3,
+void CSyndicateLogic::Slot708(uint32_t u2, uint32_t u3,
                               uint32_t u4) {
     void** pp = (void**)this;
     void* pHost = *(void**)((char*)this + 0x50);
@@ -6356,7 +6514,7 @@ void CSyndicateLogic::Slot700(uint32_t u2, uint32_t u3,
     g_fn1417f2fdc(sCont.pPad0);
 }
 
-// ===== Slot708 = 1417c16f0's twin: 1417c0110 (RAW) =====
+// ===== Slot710 = 1417c16f0's twin: 1417c0110 (RAW) =====
 // msgOpt.Create(usAction, idNewLeague, country) flow:
 // cont init (f3166(8) sentinel); bf960(pLeague,&cont);
 // msg ctor; r9d = 74e3f0(host); d6790(&msg,u4,u3,r9d,
@@ -6369,7 +6527,7 @@ void CSyndicateLogic::Slot700(uint32_t u2, uint32_t u3,
 // 78f270(pLeague), u3, 8); b1090(this, 78f270(
 // pLeague)); vt+0x70(box, 8, 790390(pLeague),
 // 78f270(pLeague), ""); dtor; cleanup
-void CSyndicateLogic::Slot708(void* pLeague,
+void CSyndicateLogic::Slot710(void* pLeague,
                               uint32_t u3,
                               uint16_t u4) {
     void** pp = (void**)this;
