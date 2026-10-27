@@ -94,6 +94,27 @@ extern void*    (*g_fnStringMgrGetStr)(void*, const char*);
 extern char     (*g_fnA84HasOldPos)(void*);
 extern uint32_t (*g_fnA84GetOldId)(void*);
 
+// ---- D110 seams (wave 15: +0x050/+0x060/+0x120) ----
+extern void     (*g_fn787370)(void*, uint32_t);     // 141787370
+
+extern int32_t  (*g_fn7AEA90)(void*, void*, void*); // 1417aea90
+extern int64_t  (*g_fn7862C0)(void*);              // 1417862c0
+extern void     (*g_fn785F00)(void*, int32_t,
+                              void*, int64_t);    // 141785f00
+extern char     (*g_fn78E590)(void*);              // 14178e590
+extern int64_t  (*g_fn7867D0)(void*);              // 1417867d0
+extern int64_t  (*g_fn7A05D0)(void*, void*,
+                              void*);              // 1417a05d0
+extern void     (*g_fn7A0760)(void*, void*, int32_t,
+                              uint32_t, char);     // 1417a0760
+extern uint64_t (*g_fn7AEBB0)(void*, void*, void*,
+                              const char*, char, char,
+                              char);               // 1417aebb0
+extern void     (*g_fn7DB2B0)(void*);              // 1417db2b0
+extern char     (*g_fn7DB3A0)(void*, int32_t,
+                              int32_t);           // 1417db3a0
+extern uint64_t (*g_fn7DB330)(void*);              // 1417db330
+
 // ---- D109 seams (wave 14: +0x230/+0x238) ----
 extern uint64_t (*g_fn7CEC20)(void*, uint32_t);     // 1417cec20
 extern void     (*g_fn77D180)(void*, uint32_t, int32_t); // 14177d180
@@ -622,6 +643,11 @@ public:
     uint64_t Slot230(uint32_t u2);                   // 1417bd310
     uint64_t Slot238(uint32_t u2, const char* pc3,
                      uint32_t u4, uint32_t u5);      // 1417ab610
+    // ---- D110 wave 15 (TRUE offsets) ----
+    int64_t  Slot050(uint32_t u2, uint64_t u3,
+                     int64_t l4);                   // 1417b62e0
+    uint64_t Slot060(uint32_t u2, uint32_t u3);     // 1417b64e0
+    uint64_t Slot120(uint32_t u2, uint32_t u3);     // 1417b6ab0
 
 
 
