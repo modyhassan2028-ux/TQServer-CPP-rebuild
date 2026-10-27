@@ -87,6 +87,42 @@ extern uint64_t (*g_fnT1QuitFlow)(void*, void*, void*,
                                   const char*, char, char, char);
 extern void  (*g_fnT1LogError)(const char*);
 
+
+// ---- the shared string-mgr + A84 tails ----
+extern void*    (*g_fnStringMgrInstance)();
+extern void*    (*g_fnStringMgrGetStr)(void*, const char*);
+extern char     (*g_fnA84HasOldPos)(void*);
+extern uint32_t (*g_fnA84GetOldId)(void*);
+
+// ---- wave-2 seams (D92) ----
+extern int64_t (*g_fnLgFind)(void*, uint32_t);      // 1417cad00
+extern char    (*g_fnLgFindB)(void*, uint32_t);     // 1417cad90
+extern void    (*g_fnLgClearA)(void*);              // 1417caa00
+extern void    (*g_fnLgClearB)(void*);              // 1417cb030
+extern uint64_t(*g_fnLgRankUpd)(void*, void*, void*, uint32_t); // 1417c6bd0
+extern int64_t (*g_fnCtyFind)(void*, uint32_t);     // 1417631d0
+extern void    (*g_fnCtyPush)(void*, uint32_t, int32_t, int32_t); // 14174b360
+extern void    (*g_fnCtyFwdA)(void*, uint32_t, int16_t, uint32_t); // 1417679a0
+extern void    (*g_fnCtyFwdB)(void*, uint32_t, int32_t, uint32_t); // 141767ab0
+extern void    (*g_fnCtyFwdC)(void*, uint32_t, int16_t, uint32_t); // 141767780
+extern void    (*g_fnRecKick)(void*);              // 141787120
+extern void    (*g_fnRecSetA)(void*, int32_t);     // 1417871c0
+extern void    (*g_fnRecSetB)(void*, int32_t);     // 1417871b0
+extern void    (*g_fnRecSetC)(void*, int32_t);     // 141787150
+extern void    (*g_fnRecClr)(void*);               // 141786ff0
+extern uint64_t(*g_fnRecGetX)(void*, int32_t);     // 141788c20
+extern uint64_t(*g_fnRecChk)(void*, int32_t);      // 141789160
+extern uint64_t(*g_fnRecGetRank)(void*);            // 1417867d0
+extern char    (*g_fnRecIsLeader)(void*);           // 1417868c0
+extern uint64_t(*g_fnA84GetSynId2)(void*);          // 141785ea0 (rank get)
+extern void    (*g_fnRankSetA)(void*, void*, int32_t);   // 14179f650
+extern void    (*g_fnRankSetB)(void*, void*, int32_t, uint32_t, char); // 1417a0760
+extern char    (*g_fnLgTest)(void*, char);          // 1417983e0
+extern uint64_t(*g_fnLgGetX)(void*);               // 14178f2d0
+extern uint64_t(*g_fnLgGetY)(void*);               // 14178f610
+extern uint64_t(*g_fnLgZ)(void*, char);            // 14179c0f0
+extern uint64_t(*g_fnLeaveSyn)(void*, void*, void*, const char*, char, char, char); // 1417aebb0
+
 class CSyndicateLogic {
 public:
     // ---- the vtable bodies (slot = the vtable
@@ -122,6 +158,25 @@ public:
     int64_t Slot0a0Gate2b228a();                 // 1417ab170
     // the REAL name — the literal log names it
     uint64_t OnUserDelRole(uint32_t uUser);     // 1417b6e70
+
+    // ---- D92 wave 2: slots +0x0b0..+0x140 ----
+    uint64_t Slot0b0GetSynId(uint32_t uUser);   // 1417aacb0
+    void    Slot0b8RecKick(uint32_t uUser);    // 1417abe90
+    void    Slot0c0RecSet5(uint32_t uUser, int32_t n);  // 1417abec0
+    void    Slot0c8RecSet9(uint32_t uUser, int32_t n);  // 1417abf50
+    void    Slot0d0LgClearA();                 // 1417ac010
+    uint64_t Slot0d8LeaderSwap(uint32_t uA, uint32_t uB); // 1417abcd0
+    uint8_t Slot0e0LgClearB();                  // 1417ac040
+    uint64_t Slot0f0QuitSyn(uint32_t u, uint32_t n);  // 1417ac510
+    uint64_t Slot0f8GetRankIfLeague(uint32_t u); // 1417aabf0
+    uint64_t Slot100QuitOrKick(uint32_t u);     // 1417b8150
+    uint64_t Slot108RecSet6(uint32_t u, int32_t n);   // 1417ac440
+    uint64_t Slot110LgZ(uint32_t u, char c);    // 1417ac270
+    uint64_t Slot128LgGetY(uint32_t u);         // 1417aac80
+    void    Slot130RecClr(uint32_t u);          // 1417af480
+    uint64_t Slot138RecChkFwd(uint32_t u, int32_t n); // 1417aa540
+    uint64_t Slot140RecGetX(uint32_t u, int32_t n);   // 1417ac0a0
+
 };
 
 }  // namespace syndicate

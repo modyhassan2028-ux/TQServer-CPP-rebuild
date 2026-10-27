@@ -461,4 +461,313 @@ uint64_t CSyndicateLogic::OnUserDelRole(
     return uRank & 0xffffffffffffff00ULL;
 }
 
+
+
+// ---- D92 seams (default null — tests bind them) ----
+int64_t (*g_fnLgFind)(void*, uint32_t);
+char    (*g_fnLgFindB)(void*, uint32_t);
+void    (*g_fnLgClearA)(void*);
+void    (*g_fnLgClearB)(void*);
+uint64_t(*g_fnLgRankUpd)(void*, void*, void*, uint32_t);
+int64_t (*g_fnCtyFind)(void*, uint32_t);
+void    (*g_fnCtyPush)(void*, uint32_t, int32_t, int32_t);
+void    (*g_fnCtyFwdA)(void*, uint32_t, int16_t, uint32_t);
+void    (*g_fnCtyFwdB)(void*, uint32_t, int32_t, uint32_t);
+void    (*g_fnCtyFwdC)(void*, uint32_t, int16_t, uint32_t);
+void    (*g_fnRecKick)(void*);
+void    (*g_fnRecSetA)(void*, int32_t);
+void    (*g_fnRecSetB)(void*, int32_t);
+void    (*g_fnRecSetC)(void*, int32_t);
+void    (*g_fnRecClr)(void*);
+uint64_t(*g_fnRecGetX)(void*, int32_t);
+uint64_t(*g_fnRecChk)(void*, int32_t);
+uint64_t(*g_fnRecGetRank)(void*);
+char    (*g_fnRecIsLeader)(void*);
+uint64_t(*g_fnA84GetSynId2)(void*);
+void    (*g_fnRankSetA)(void*, void*, int32_t);
+void    (*g_fnRankSetB)(void*, void*, int32_t, uint32_t, char);
+char    (*g_fnLgTest)(void*, char);
+uint64_t(*g_fnLgGetX)(void*);
+uint64_t(*g_fnLgGetY)(void*);
+uint64_t(*g_fnLgZ)(void*, char);
+uint64_t(*g_fnLeaveSyn)(void*, void*, void*, const char*, char, char, char);
+
+// ================= D92 wave 2 (+0x0b0..+0x140) =================
+
+uint64_t CSyndicateLogic::Slot0b0GetSynId(uint32_t uUser) {
+    void* pLogic = this;
+    if (uUser == 0) { g_fnT1LogError(0); return 0; }
+    int64_t lRec = LogRecMapFind(
+        *(void**)((char*)pLogic + 0x18), uUser);
+    if (lRec == 0) return 0;
+    uint64_t uRank = g_fnA84GetSynId2((void*)lRec);
+    uint32_t uRankLo = (uint32_t)uRank;
+    char bHas = g_fnLgFindB(
+        *(void**)((char*)pLogic + 0x10), uRankLo);
+    if (!bHas) return 0;
+    return uRankLo;
+}
+
+void CSyndicateLogic::Slot0b8RecKick(uint32_t uUser) {
+    void* pLogic = this;
+    int64_t lRec = LogRecMapFind(
+        *(void**)((char*)pLogic + 0x18), uUser);
+    if (lRec == 0) return;
+    g_fnRecKick((void*)lRec);
+}
+
+void CSyndicateLogic::Slot0c0RecSet5(uint32_t uUser, int32_t n) {
+    void* pLogic = this;
+    int64_t lRec = LogRecMapFind(
+        *(void**)((char*)pLogic + 0x18), uUser);
+    if (lRec == 0) {
+        int64_t lCty = g_fnCtyFind(
+            *(void**)((char*)pLogic + 0x50), uUser);
+        if (lCty != 0)
+            g_fnCtyPush((void*)lCty, uUser, 5, n);
+    } else {
+        g_fnRecSetA((void*)lRec, n);
+    }
+    uint32_t uR = ((uint32_t (*)(void*, uint32_t))
+        (*(void***)*(char***)((char*)pLogic + 8))[0x4a8/8])(
+        *(void**)((char*)pLogic + 8), uUser);
+    if (uR != 0)
+        g_fnCtyFwdA(
+            *(void**)((char*)pLogic + 0x50), uUser,
+            (int16_t)n, uR);
+}
+
+void CSyndicateLogic::Slot0c8RecSet9(uint32_t uUser, int32_t n) {
+    void* pLogic = this;
+    int64_t lRec = LogRecMapFind(
+        *(void**)((char*)pLogic + 0x18), uUser);
+    if (lRec == 0) {
+        int64_t lCty = g_fnCtyFind(
+            *(void**)((char*)pLogic + 0x50), uUser);
+        if (lCty != 0)
+            g_fnCtyPush((void*)lCty, uUser, 9, n);
+    } else {
+        g_fnRecSetB((void*)lRec, n);
+    }
+    uint32_t uR = ((uint32_t (*)(void*, uint32_t))
+        (*(void***)*(char***)((char*)pLogic + 8))[0x4a8/8])(
+        *(void**)((char*)pLogic + 8), uUser);
+    if (uR != 0)
+        g_fnCtyFwdB(
+            *(void**)((char*)pLogic + 0x50), uUser, n, uR);
+}
+
+void CSyndicateLogic::Slot0d0LgClearA() {
+    void* pLogic = this;
+    g_fnLgClearA(*(void**)((char*)pLogic + 0x10));
+}
+
+uint64_t CSyndicateLogic::Slot0d8LeaderSwap(
+    uint32_t uA, uint32_t uB) {
+    void* pLogic = this;
+    int64_t lRecA = LogRecMapFind(
+        *(void**)((char*)pLogic + 0x18), uA);
+    if (lRecA == 0) return 0;
+    int64_t lRecB = LogRecMapFind(
+        *(void**)((char*)pLogic + 0x18), uB);
+    if (lRecB == 0) return 0;
+    uint64_t uRank = g_fnA84GetSynId2((void*)lRecA);
+    uint32_t uRankLo = (uint32_t)uRank;
+    if (uRankLo == 0) return 0;
+    if ((uint32_t)g_fnA84GetSynId2((void*)lRecB) !=
+        uRankLo) {
+        return 0;
+    }
+    // the RAW: uVar10 = the last leader flag
+    char bLeadA = g_fnRecIsLeader((void*)lRecA);
+    char bLeadB = bLeadA;
+    if (bLeadA && (bLeadB = g_fnRecIsLeader(
+            (void*)lRecB), !bLeadB)) {
+        int64_t lLg = g_fnLgFind(
+            *(void**)((char*)pLogic + 0x10), uRankLo);
+        if (lLg == 0) return 0;
+        uint32_t uParam = ((uint32_t (*)(void*, uint32_t))
+            (*(void***)*(char***)((char*)pLogic + 8))
+                [0x328/8])(
+            *(void**)((char*)pLogic + 8), uRankLo);
+        g_fnRankSetA((void*)lLg, (void*)lRecB, 200);
+        g_fnRankSetB((void*)lLg, (void*)lRecB, 200,
+                     uParam, '\0');
+        // the verified-old chain
+        if (g_fnA84HasOldPos((void*)lRecB)) {
+            uint32_t uOld = g_fnA84GetOldId(
+                (void*)lRecB);
+            int64_t lRecO = LogRecMapFind(
+                *(void**)((char*)pLogic + 0x18), uOld);
+            if (lRecO != 0 &&
+                (char)g_fnT1IsConfirmed((void*)lRecO) &&
+                (uint32_t)g_fnA84GetSynId2(
+                    (void*)lRecO) == uRankLo) {
+                g_fnRankSetA((void*)lLg, (void*)lRecO,
+                             200);
+                g_fnLgRankUpd(
+                    *(void**)((char*)pLogic + 0x10),
+                    (void*)lRecO, (void*)lLg, uParam);
+            }
+        }
+        uint64_t uUp = g_fnLgRankUpd(
+            *(void**)((char*)pLogic + 0x10),
+            (void*)lRecB, (void*)lLg, uParam);
+        return ((uUp >> 8) & ~0xffULL) | 1;
+    }
+    return (uint64_t)(uint8_t)bLeadB << 8;
+}
+
+uint8_t CSyndicateLogic::Slot0e0LgClearB() {
+    void* pLogic = this;
+    g_fnLgClearB(*(void**)((char*)pLogic + 0x10));
+    return 1;
+}
+
+uint64_t CSyndicateLogic::Slot0f0QuitSyn(
+    uint32_t uUser, uint32_t uAmt) {
+    void* pLogic = this;
+    if (uAmt < 1000000) return 0;
+    int64_t lRec = LogRecMapFind(
+        *(void**)((char*)pLogic + 0x18), uUser);
+    if (lRec == 0) return 0;
+    uint64_t uRank = g_fnA84GetSynId2((void*)lRec);
+    int64_t lLg = g_fnLgFind(
+        *(void**)((char*)pLogic + 0x10), (uint32_t)uRank);
+    if (lLg == 0) return 0;
+    uint64_t uRk = g_fnRecGetRank((void*)lRec);
+    if ((int)uRk != 0x3de) return 0;
+    char bOk = g_fnLgTest((void*)lLg, '\x01');
+    if (!bOk) return 0;
+    uint64_t uKick = 0; g_fnRecKick((void*)lRec); uKick = 0;
+    uint64_t uX = g_fnLgGetX((void*)lLg);
+    uint64_t uRet = ((uint64_t (*)(void*, uint32_t,
+        uint64_t, char))
+        (*(void***)pLogic)[0xe8/8])(
+        pLogic, (uint32_t)uX, uKick, 1);
+    return uRet;
+}
+
+uint64_t CSyndicateLogic::Slot0f8GetRankIfLeague(
+    uint32_t uUser) {
+    void* pLogic = this;
+    if (uUser == 0) { g_fnT1LogError(0); return 0; }
+    int64_t lRec = LogRecMapFind(
+        *(void**)((char*)pLogic + 0x18), uUser);
+    if (lRec == 0) return 0;
+    uint64_t uRank = g_fnA84GetSynId2((void*)lRec);
+    int64_t lLg = g_fnLgFind(
+        *(void**)((char*)pLogic + 0x10), (uint32_t)uRank);
+    if (lLg == 0) return 0;
+    return g_fnRecGetRank((void*)lRec);
+}
+
+uint64_t CSyndicateLogic::Slot100QuitOrKick(
+    uint32_t uUser) {
+    void* pLogic = this;
+    int64_t lRec = LogRecMapFind(
+        *(void**)((char*)pLogic + 0x18), uUser);
+    if (lRec == 0) return 0;
+    char bLead = g_fnRecIsLeader((void*)lRec);
+    if (bLead) {
+        // the RAW: talk STR_NO_DISBAND via the box
+        void* pIv = g_fnStringMgrInstance();
+        const char* pc = (const char*)
+            g_fnStringMgrGetStr(pIv, "STR_NO_DISBAND");
+        uint64_t uR = ((uint64_t (*)(void*, uint32_t,
+            const void*))
+            (*(void***)*(char***)((char*)pLogic + 8))
+                [0x18/8])(
+            *(void**)((char*)pLogic + 8), uUser, pc);
+        return uR;
+    }
+    uint64_t uRank = g_fnA84GetSynId2((void*)lRec);
+    int64_t lLg = g_fnLgFind(
+        *(void**)((char*)pLogic + 0x10), (uint32_t)uRank);
+    if (lLg == 0) return 0;
+    return g_fnLeaveSyn(pLogic, (void*)lLg,
+        (void*)lRec, "LeaveSyn", '\0', '\x01', '\0');
+}
+
+uint64_t CSyndicateLogic::Slot108RecSet6(
+    uint32_t uUser, int32_t n) {
+    void* pLogic = this;
+    if (uUser == 0) { g_fnT1LogError(0); return 0; }
+    int64_t lRec = LogRecMapFind(
+        *(void**)((char*)pLogic + 0x18), uUser);
+    if (lRec == 0) {
+        int64_t lCty = g_fnCtyFind(
+            *(void**)((char*)pLogic + 0x50), uUser);
+        if (lCty == 0) return 0;
+        g_fnCtyPush((void*)lCty, uUser, 6, n);
+    } else {
+        g_fnRecSetC((void*)lRec, n);
+    }
+    uint32_t uR = ((uint32_t (*)(void*, uint32_t))
+        (*(void***)*(char***)((char*)pLogic + 8))[0x4a8/8])(
+        *(void**)((char*)pLogic + 8), uUser);
+    if (uR != 0)
+        g_fnCtyFwdC(
+            *(void**)((char*)pLogic + 0x50), uUser,
+            (int16_t)n, uR);
+    return 1;
+}
+
+uint64_t CSyndicateLogic::Slot110LgZ(uint32_t uLg, char c) {
+    void* pLogic = this;
+    if (uLg == 0) { g_fnT1LogError(0); return 0; }
+    int64_t lLg = g_fnLgFind(
+        *(void**)((char*)pLogic + 0x10), uLg);
+    if (lLg == 0) return 0;
+    return g_fnLgZ((void*)lLg, c);
+}
+
+uint64_t CSyndicateLogic::Slot128LgGetY(uint32_t uLg) {
+    void* pLogic = this;
+    int64_t lLg = g_fnLgFind(
+        *(void**)((char*)pLogic + 0x10), uLg);
+    if (lLg == 0) return 0;
+    return g_fnLgGetY((void*)lLg);
+}
+
+void CSyndicateLogic::Slot130RecClr(uint32_t uUser) {
+    void* pLogic = this;
+    int64_t lRec = LogRecMapFind(
+        *(void**)((char*)pLogic + 0x18), uUser);
+    if (lRec == 0) return;
+    g_fnRecClr((void*)lRec);
+}
+
+uint64_t CSyndicateLogic::Slot138RecChkFwd(
+    uint32_t uUser, int32_t n) {
+    void* pLogic = this;
+    int64_t lRec = LogRecMapFind(
+        *(void**)((char*)pLogic + 0x18), uUser);
+    if (lRec == 0) return 0;
+    uint64_t uOk = g_fnRecChk((void*)lRec, n);
+    char c = (char)uOk;
+    if (c != '\0') {
+        uint64_t uR = ((uint64_t (*)(void*, uint32_t,
+            int32_t))
+            (*(void***)pLogic)[0xf0/8])(
+            pLogic, uUser, n);
+        // CONCAT71((int7)(uR >> 8), c):
+        // high bytes from uR, low byte = c
+        return (uR & ~0xffULL) |
+               (uint64_t)(uint8_t)c;
+    }
+    // CONCAT71((int7)(uVar3 >> 8), cVar1)
+    return (uOk & ~0xffULL) |
+           (uint64_t)(uint8_t)c;
+}
+
+uint64_t CSyndicateLogic::Slot140RecGetX(
+    uint32_t uUser, int32_t n) {
+    void* pLogic = this;
+    int64_t lRec = LogRecMapFind(
+        *(void**)((char*)pLogic + 0x18), uUser);
+    if (lRec == 0) return 0;
+    return g_fnRecGetX((void*)lRec, n);
+}
+
 }  // namespace syndicate
