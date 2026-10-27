@@ -5518,3 +5518,63 @@ OnClose) + رجريجن **56/56 ×6** وASan/UBSan
 (OnProcess عند 109461 ثانك لجدول قفز غير
 مسترد — الجسم الحقيقي بالتفكيك الخام)،
 ماب جروب 1400f3060، العمال 14001d2d0...
+
+## المسار أ-2 — CAsyncDBThread كاملاً (من DB.dll!) [2026-10-28]
+
+**الاكتشاف الحاسم:** الجسم الحقيقي للكلاس ليس في
+MsgServer.exe أصلاً — الـ EXE يستورده كاملاً
+من **DB.dll** عبر الـ IAT (عناوين IAT
+0x1406d83c0-0x1406d83e8: OnDestroy/OnInit/
+OnProcess/dtor/UserLoginGet/
+GetWorldUserLoginSerial/ctor). الديكمبايلر
+أظهر "jumptable غير مسترد" عند 140086c28 لأنه
+thunk IAT. الحل: DB.dll.decompiled.c في
+/app/co_decomp (دوال 140c014b0-140c04120).
+
+**المنقول حرفياً (الكل من DB.dll):**
+- ctor 140c014b0 (base + vtable)
+- OnInit 140c01510: CreateEventA → فشل =
+  "CreateEvent error %u" + CloseThread(2000)؛
+  IsCrossServer → GetCrossServerConfig وإلا
+  GetGameConfig (رسائل التهيئة الحرفية)؛
+  port==0 → 0xcea (3306)؛ mysql_init →
+  options (0x14, 7, 3"wait_timeout=2880000", 3
+  "set names %s") → mysql_real_connect (فشل =
+  "mysql_real_connect returned error \"%s\"" +
+  close + null)
+- ReConnectDB 140c01860: نفس سلسلة الاتصال
+- OnProcess 140c04050: WaitForSingleObject
+  (event, 1000): 0x102 → true مباشرة؛
+  0xffffffff → "error %u" (GetLastError) →
+  true؛ غيره → "returned error %u"؛ ثم
+  mysql==0 → ReConnectDB وإلا تصريف الحلقة
+  (FUN_140c03a00) → true
+- ExecuteAsyncSQL 140c04120: لا event =
+  "cannot execute SQL: %s" + false؛ الحلقة
+  (ring cap 53ca8, head 53cb0, count 53cb8)
+  idx=count+head مع wrap، malloc+strcpy عند
+  الفتحة الفارغة، count++, SetEvent
+- UserLoginGet 140c03660 /
+  GetWorldUserLoginSerial 140c03730: نفس آلة
+  ring pop الحرفية (empty→0؛ wrap؛ count==0 →
+  head=0)
+- المصرف FUN_140c03a00: pop → copy →
+  mysql_real_query → حلقة حتى الفارغ
+- OnDestroy 140c03e50: تصريف + "unexecuted
+  async SQL: %s" لكل متبقي + CloseHandle
+
+**الاختبار msg_asyncdb_test.cpp:** 6 أقسام
+(سلسلة OnInit بالكامل مع ترتيب options، مسارات
+الانتظار الثلاثة + تصريف فعلي، إعادة الاتصال،
+دفع/التفاف ring 8 مع توازن الأقفال، حلقات
+UserLogin/Serial بترتيب FIFO والتفاف، OnDestroy
+بتسجيل المتخلفين وإغلاق الحدث). رجريجن **57/57
+×6** + ASan/UBSan نظيف (LSan مُعطل للمخصصات
+الخام في الاختبار).
+
+**فخ الوحدة:** المصرف ينفذ فقط عند mysql !=
+null — الاختبار يضبطه يدوياً.
+
+**التالي:** عمال 14001d2d0، سوكت 14002e7e0،
+ماب جروب 1400f3060 (رسالة 24134 "ProcessMsg
+returned error with packet:%d, port:%d").

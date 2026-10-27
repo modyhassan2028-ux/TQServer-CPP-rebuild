@@ -647,3 +647,26 @@ OnProcess في الديكمبايلر ثانك بجدول قفز
 سوكت 14002e7e0، ماب جروب 1400f3060
 وكالة رسائلها عند 24134 "ProcessMsg
 returned error with packet:%d, port:%d").
+
+---
+
+## المسار أ-2 — CAsyncDBThread من DB.dll [2026-10-28]
+
+**المنتهي:** الكلاس كاملاً (ctor/dtor/OnInit/
+ReConnectDB/OnProcess/ExecuteAsyncSQL/
+UserLoginGet/GetWorldUserLoginSerial/المصرف/
+OnDestroy) في
+msgserver/threads/MsgAsyncDBThread.{h,cpp}
+حرفياً من DB.dll.decompiled.c (140c014b0
+-140c04120). 6/6 + رجريجن 57/57×6 + ASan.
+
+**اكتشاف منهجي:** دوال كلاسات كثيرة قد تكون
+مستوردة من DLLs عبر IAT (thunks عند 86bxx
+"jumptable غير مسترد" = مؤشر IAT). قبل اعتبار
+أي دالة "غير مستردة" افحص جدول الاستيراد أولاً
+(سكربت python بسيط على Import Directory)،
+ثم ابحث عن الدالة في decompiled.c الخاص بذلك
+الـ DLL داخل /app/co_decomp/Native-Decompiled/.
+
+**التالي:** عمال 14001d2d0، سوكت 14002e7e0،
+ماب جروب 1400f3060.
