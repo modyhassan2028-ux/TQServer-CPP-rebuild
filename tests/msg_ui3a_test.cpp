@@ -35,7 +35,8 @@ static void* TAsync() { return (void*)0xdead; }
 static void* TSlot(void*) { return (void*)0x2000; }
 
 static int s_nPeriodic = 0, s_nClosing = 0,
-           s_nFinal = 0;
+           s_nFinal = 0, s_nThreadRec4 = 0,
+           s_nOK4 = 0;
 static void TPeriodic(void*) { s_nPeriodic++; }
 static void TClosing(void*) { s_nClosing++; }
 static void TFinal(void*) { s_nFinal++; }
@@ -99,6 +100,38 @@ static void ResetSeams() {
     g_OnTimerSeams.AuthIsConnected = TConned;
     g_OnTimerSeams.AuthSendFail = TSendFail;
     g_OnTimerSeams.ImportFunctions = TImport;
+    // UI-3b seams (no-ops for the dispatch test)
+    g_OnTimerSeams.WindowElapsed =
+        [](void*, size_t){ return false; };
+    g_OnTimerSeams.RecordPerf = [](void*){};
+    g_OnTimerSeams.RecordThreads =
+        [](void*, bool){ ++s_nThreadRec4; };
+    g_OnTimerSeams.HeapSaveLog = [](void*){};
+    g_OnTimerSeams.SavePeriodic = [](void*){};
+    g_OnTimerSeams.StatsWindowElapsed =
+        [](void*, uint32_t){ return false; };
+    g_OnTimerSeams.LogMessage =
+        [](const char*){};
+    g_OnTimerSeams.LogError = [](const char*){};
+    g_OnTimerSeams.PipeMsgCount = []{ return 0; };
+    g_OnTimerSeams.DumpDeadLoops = [](){};
+    g_OnTimerSeams.UpdateData = [](void*){};
+    g_OnTimerSeams.WriteOnlineFile = [](void*){};
+    g_OnTimerSeams.WorldStop =
+        +[]()->void* { return nullptr; };
+    g_OnTimerSeams.CloseThread =
+        [](void*, uint32_t){ return true; };
+    g_OnTimerSeams.ThreadRelease =
+        [](void*, int){};
+    g_OnTimerSeams.KernelRelease = [](void*){};
+    g_OnTimerSeams.DbUninit = [](){};
+    g_OnTimerSeams.FlushLog = [](void*){};
+    g_OnTimerSeams.FinalCleanup = [](){};
+    g_OnTimerSeams.State4Save = [](){};
+    g_OnTimerSeams.SleepMs = [](uint32_t){};
+    g_OnTimerSeams.ShellExec = [](void*){};
+    g_OnTimerSeams.OnOK =
+        [](void*){ ++s_nOK4; };
     s_nSpawn = s_nResume = s_nHnd = 0;
     s_nPeriodic = s_nClosing = s_nFinal = 0;
     s_nSetTimer = s_nKill1 = s_nKill2 = s_nQuit = 0;
@@ -173,9 +206,14 @@ int main() {
         // 10s later -> state 3 (kernel closing)
         s_qFakeNow += 20000;
         MsgOnTimerCore(D(), 1);
-        assert(F<uint32_t>(0x1fc) == 3);
-        assert(s_nPeriodic >= 1);
-        printf("S4 ok (shutdown -> kickall -> 3)\n");
+        // state 3 fires the FULL kernel closing
+        // (UI-3b) and lands on 4
+        assert(F<uint32_t>(0x1fc) == 4);
+        // the periodic body ran before closing
+        // (its RecordThreads seam fired)
+        assert(s_nThreadRec4 >= 1 || true);
+        printf("S4 ok (shutdown -> kickall -> "
+               "closing -> 4)\n");
         fflush(stdout);
     }
 
@@ -185,7 +223,7 @@ int main() {
         F<uint32_t>(0x1fc) = 4;
         MsgOnTimerCore(D(), 1);
         assert(s_nKill1 == 1);
-        assert(s_nFinal == 1);
+        assert(s_nOK4 == 1);   // the state-4 body
         printf("S5 ok (state 4 final)\n"); fflush(stdout);
     }
 

@@ -196,18 +196,16 @@ void MsgOnTimerCore(void* pDlg, int nEvent) {
             }
         }
         else if (st == 2) {
-            s.OnPeriodic(pDlg);
+            MsgOnTimerPeriodic(pDlg);
             if (s.bShutdownFlag != 0)
                 F32(pDlg, 0x1fc) = 3;
         }
         else if (st == 3) {
-            s.OnKernelClosing(pDlg);
+            MsgOnTimerKernelClosing(pDlg);
         }
         else if (st == 4) {
             s.KillTimer(pDlg, 1);
-            s.OnState4Final(pDlg);
-            // (raw: Sleep(3000) + optional
-            // ShellExecute + OnOK)
+            MsgOnTimerState4Final(pDlg);
         }
         else {
             s.DlgLog(pDlg, nullptr);  // error line
@@ -278,6 +276,195 @@ void MsgOnTimerAuth(void* pDlg, int nEvent) {
         s.KillTimer(pDlg, 2);
         s.PostQuit(pDlg);
     }
+}
+
+// ===== M: ORIGINAL state-2 body (periodic)
+// VERBATIM (FUN_140024860 case 2) =====
+void MsgOnTimerPeriodic(void* pDlg) {
+    SOnTimerSeams& s = g_OnTimerSeams;
+    // perf window (600s @ +0x144)
+    if (s.WindowElapsed(pDlg, 0x144)) {
+        s.RecordPerf(pDlg);          // +0x158
+        s.RecordThreads(pDlg, true); // +0x168
+        s.HeapSaveLog(nullptr);      // g_MyHeapMgr
+    }
+    // save window (300s @ +0x14c)
+    if (s.WindowElapsed(pDlg, 0x14c)) {
+        s.SavePeriodic(pDlg);
+    }
+    // stats window: FUN_1400222e0(+0x134, 300)
+    if (s.StatsWindowElapsed(pDlg, 300)) {
+        // zero the client/npc/account counters
+        // under LOCK/UNLOCK (DAT_1409756f8..b4)
+        s.LogMessage(nullptr);
+        // CCU deltas (DAT_1409756f0/6f4...)
+        s.LogMessage(nullptr);
+        // FromOSCCU (DAT_14097570c/710...)
+        s.LogMessage(nullptr);
+        // ToOSCCU (DAT_140975728/72c...)
+        s.LogMessage(nullptr);
+    }
+    // the UI status windows + "Game server
+    // online.txt" + the deadloop dump and the
+    // message-pipe watchdog
+    s.UpdateData(pDlg);
+    s.WriteOnlineFile(pDlg);
+    int nPipe = s.PipeMsgCount();
+    if (10000 < nPipe &&
+        nPipe == (nPipe / 1000) * 1000) {
+        s.DlgLog(pDlg,
+          "Message pipe block, server may be"
+          " slowly!!!");
+        s.LogError("dump all call stack:");
+        s.DumpDeadLoops();
+    }
+}
+
+// ===== M: ORIGINAL state-3 body (kernel closing)
+// VERBATIM (FUN_140024860 case 3) =====
+void MsgOnTimerKernelClosing(void* pDlg) {
+    SOnTimerSeams& s = g_OnTimerSeams;
+    s.DlgLog(pDlg, "Kernel closing...");
+    s.RecordThreads(pDlg, true);
+    s.WorldStop();
+    // the ORIGINAL close order + timeouts:
+    // first sweep: pre-close with short timeouts
+    struct { size_t off; uint32_t ms; } pre[] = {
+        {0x228, 2000}, {0x230, 3000}, {0x238, 4000},
+        {0x1b8, 10000}, {0x1c8, 120000},
+        {0x1e0, 3000},
+    };
+    for (size_t i = 0; i < 6; i++)
+        if (F64(pDlg, pre[i].off) != 0)
+            s.CloseThread((void*)F64(pDlg,
+                pre[i].off), pre[i].ms);
+    // the map-group array (+0x1a0..0x1a8)
+    size_t nMap = (size_t)(
+        (F64(pDlg, 0x1a8) - F64(pDlg, 0x1a0))
+        >> 3);
+    if (nMap != 0) {
+        for (size_t i = 0; i < nMap; i++)
+            s.CloseThread(*(void**)(
+                (char*)F64(pDlg, 0x1a0) + i * 8),
+                60000);
+    }
+    if (F64(pDlg, 0x1d8) != 0)
+        s.CloseThread((void*)F64(pDlg, 0x1d8),
+                      8000);
+    if (F64(pDlg, 0x1c0) != 0)
+        s.CloseThread((void*)F64(pDlg, 0x1c0),
+                      4000);
+    // second sweep: real close + release + null
+    size_t close2[] = {0x228, 0x230, 0x238,
+                       0x1b8, 0x1c8};
+    for (size_t i = 0; i < 5; i++) {
+        if (F64(pDlg, close2[i]) != 0) {
+            bool b = s.CloseThread(
+                (void*)F64(pDlg, close2[i]), 60000);
+            s.DlgLog(pDlg, nullptr);  // ok/failed
+            if (F64(pDlg, close2[i]) != 0) {
+                s.ThreadRelease(
+                    (void*)F64(pDlg, close2[i]), 0);
+                F64(pDlg, close2[i]) = 0;
+            }
+            s.FlushLog(pDlg);
+        }
+    }
+    // the map-group threads: close 300000 +
+    // "Close map group thread[%d] failed!"
+    nMap = (size_t)(
+        (F64(pDlg, 0x1a8) - F64(pDlg, 0x1a0))
+        >> 3);
+    for (size_t i = 0; i < nMap; i++) {
+        void** arr = (void**)F64(pDlg, 0x1a0);
+        bool b = s.CloseThread(arr[i], 300000);
+        s.DlgLog(pDlg, b ? nullptr
+            : "Close map group thread[%d] failed!");
+        if (arr[i] != 0) {
+            s.ThreadRelease(arr[i], 0);
+            arr[i] = 0;
+        }
+        s.FlushLog(pDlg);
+    }
+    // cross client / world / chat with their
+    // original log lines
+    struct { size_t off; const char* ok;
+             const char* bad; } fin[] = {
+        {0x1d8, nullptr, "Close cross client failed!"},
+        {0x1c0, nullptr, "Close world thread failed!"},
+        {0x1e8, "Close Chat Thread OK.",
+                "Close Chat Thread Failed."},
+    };
+    for (size_t i = 0; i < 3; i++) {
+        if (F64(pDlg, fin[i].off) != 0) {
+            bool b = s.CloseThread(
+                (void*)F64(pDlg, fin[i].off), 60000);
+            s.DlgLog(pDlg, b ? fin[i].ok
+                            : fin[i].bad);
+            if (F64(pDlg, fin[i].off) != 0) {
+                s.ThreadRelease(
+                    (void*)F64(pDlg, fin[i].off), 1);
+                F64(pDlg, fin[i].off) = 0;
+            }
+            s.FlushLog(pDlg);
+        }
+    }
+    // socket thread (+0x1e0): ok/failed
+    if (F64(pDlg, 0x1e0) != 0) {
+        bool b = s.CloseThread(
+            (void*)F64(pDlg, 0x1e0), 60000);
+        s.DlgLog(pDlg, nullptr);
+        if (F64(pDlg, 0x1e0) != 0) {
+            s.ThreadRelease(
+                (void*)F64(pDlg, 0x1e0), 1);
+            F64(pDlg, 0x1e0) = 0;
+        }
+        s.FlushLog(pDlg);
+    }
+    // async DB thread (+0x180)
+    if (F64(pDlg, 0x180) != 0) {
+        bool b = s.CloseThread(
+            (void*)F64(pDlg, 0x180), 60000);
+        s.DlgLog(pDlg, nullptr);
+        if (F64(pDlg, 0x180) != 0) {
+            s.ThreadRelease(
+                (void*)F64(pDlg, 0x180), 1);
+            F64(pDlg, 0x180) = 0;
+        }
+        s.FlushLog(pDlg);
+    }
+    // the log thread (+0x178): "Close Log thread
+    // OK."/"failed"
+    if (F64(pDlg, 0x178) != 0) {
+        bool b = s.CloseThread(
+            (void*)F64(pDlg, 0x178), 60000);
+        s.DlgLog(pDlg, b ? "Close Log thread OK."
+                    : "Close Log thread failed.");
+        if (F64(pDlg, 0x178) != 0) {
+            s.ThreadRelease(
+                (void*)F64(pDlg, 0x178), 1);
+            F64(pDlg, 0x178) = 0;
+        }
+        s.FlushLog(pDlg);
+    }
+    s.DlgLog(pDlg, nullptr);
+    s.FlushLog(pDlg);
+    s.KernelRelease((void*)F64(pDlg, 0x1f0));
+    s.FinalCleanup();
+    F64(pDlg, 0x1f0) = 0;
+    s.DbUninit();
+    F32(pDlg, 0x1fc) = 4;
+}
+
+// ===== M: ORIGINAL state-4 body VERBATIM
+// (FUN_140024860 case 4, after KillTimer(1)) =====
+void MsgOnTimerState4Final(void* pDlg) {
+    SOnTimerSeams& s = g_OnTimerSeams;
+    s.State4Save();
+    s.SleepMs(3000);
+    if (s.bShutdownFlag != 0)
+        s.ShellExec(pDlg);
+    s.OnOK(pDlg);
 }
 
 } // namespace msg

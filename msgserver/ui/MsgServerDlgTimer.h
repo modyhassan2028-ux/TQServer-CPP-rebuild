@@ -65,6 +65,32 @@ struct SOnTimerSeams {
                         uint32_t ms);
     void (*KillTimer)(void* pDlg, int id);
     void (*PostQuit)(void* pDlg);
+    // UI-3b seams (states 2/3/4 bodies)
+    bool (*WindowElapsed)(void* pDlg, size_t off);
+    void (*RecordPerf)(void* pDlg);   // +0x158
+    void (*RecordThreads)(void* pDlg, bool);
+    void (*HeapSaveLog)(void*);
+    void (*SavePeriodic)(void* pDlg); // FUN_14001f070
+    bool (*StatsWindowElapsed)(void* pDlg,
+                                uint32_t s);
+    void (*LogMessage)(const char* fmt);
+    void (*LogError)(const char* fmt);
+    int  (*PipeMsgCount)();   // FUN_14050c390
+    void (*DumpDeadLoops)();  // the callstack dump
+    void (*UpdateData)(void* pDlg);
+    void (*WriteOnlineFile)(void* pDlg);
+    void* (*WorldStop)();  // FUN_14002e300+02c6f0
+    bool (*CloseThread)(void* pThread,
+                        uint32_t ms);
+    void (*ThreadRelease)(void* pThread,int);
+    void (*KernelRelease)(void* pKernel);
+    void (*DbUninit)();    // DatabaseUnInit
+    void (*FlushLog)(void* pDlg);  // 140021bd0
+    void (*FinalCleanup)();  // 14050e8c0+02d220
+    void (*State4Save)();   // FUN_14001f070
+    void (*SleepMs)(uint32_t ms);
+    void (*ShellExec)(void* pDlg);
+    void (*OnOK)(void* pDlg);
     int nReentrancy;    // DAT_14097593c
     int bShutdownSeen;  // DAT_140975940
     int nThreadCount;   // DAT_1409757d0
@@ -79,6 +105,11 @@ void MsgOnTimerCore(void* pDlg, int nEvent);
 
 // FUN_140026a90 body: the timer-2 auth machine
 void MsgOnTimerAuth(void* pDlg, int nEvent);
+
+// UI-3b: the verbatim state bodies
+void MsgOnTimerPeriodic(void* pDlg);
+void MsgOnTimerKernelClosing(void* pDlg);
+void MsgOnTimerState4Final(void* pDlg);
 
 } // namespace msg
 #endif
