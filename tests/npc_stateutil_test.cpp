@@ -1,4 +1,4 @@
-#include "../Exe/NpcServer/NpcStateUtil.h"
+#include "../npcserver/NpcStateUtil.h"
 #include <cassert>
 #include <cstdio>
 #include <vector>

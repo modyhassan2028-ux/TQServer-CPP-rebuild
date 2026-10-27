@@ -1,13 +1,13 @@
 // syndicate_d89_test — FlyToInvadeWarning (141774500)
 // + the CMsgInvadeWarning kit (type 0xc1c).
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueInvadeWarn.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLogRemove.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueMgrNested.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeaguePlunderSignup.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueOpt.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateMsgProcess.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueCmp.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateProfferRankList.h"
+#include "modules/syndicate/src/SyndicateLeagueInvadeWarn.h"
+#include "modules/syndicate/src/SyndicateLogRemove.h"
+#include "modules/syndicate/src/SyndicateLeagueMgrNested.h"
+#include "modules/syndicate/src/SyndicateLeaguePlunderSignup.h"
+#include "modules/syndicate/src/SyndicateLeagueOpt.h"
+#include "modules/syndicate/src/SyndicateMsgProcess.h"
+#include "modules/syndicate/src/SyndicateLeagueCmp.h"
+#include "modules/syndicate/src/SyndicateProfferRankList.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

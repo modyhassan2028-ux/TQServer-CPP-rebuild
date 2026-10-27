@@ -16,10 +16,10 @@
 #include <unistd.h>
 #include <string>
 #include <vector>
-#include "../Exe/Dll/Peerage/Port/PeerageSortObj.h"
-#include "../Exe/Dll/Peerage/Port/PeerageSortMgr.h"
-#include "../Exe/Dll/Peerage/Port/PeerageSort.h"
-#include "../Exe/Dll/Peerage/Port/PeerageDonate.h"
+#include "../modules/peerage/src/PeerageSortObj.h"
+#include "../modules/peerage/src/PeerageSortMgr.h"
+#include "../modules/peerage/src/PeerageSort.h"
+#include "../modules/peerage/src/PeerageDonate.h"
 
 using namespace peerage;
 

@@ -1,6 +1,6 @@
 // MsgServer unit M4 - the kernel slot registry
 // FUN_1400084e0 + FUN_140008520 + FUN_140006fe0
-#include "../Exe/MsgServer/Port/MsgKernelSlots.h"
+#include "../msgserver/MsgKernelSlots.h"
 #include <cassert>
 #include <cstdio>
 #include <vector>

@@ -1,7 +1,7 @@
 // unit 37: the map grid data (CMapData) verbatim
 // port test - the NPC-facing vt accessors, the base
 // grid readers, the overlay walk, the refcount dance
-#include "../Exe/NpcServer/NpcMapData.h"
+#include "../npcserver/NpcMapData.h"
 #include <cassert>
 #include <cstdio>
 using namespace npc;

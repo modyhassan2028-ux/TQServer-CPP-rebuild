@@ -5,9 +5,9 @@
 // erase with the remove-rebalance, the iterator++ — all real
 // against the D32-built map, with the full red-black
 // validation after every mutation.
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueTree.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueUsers.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
+#include "../modules/syndicate/src/SyndicateLeagueTree.h"
+#include "../modules/syndicate/src/SyndicateLeagueUsers.h"
+#include "../modules/syndicate/src/SyndicateCrossMerit.h"
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>

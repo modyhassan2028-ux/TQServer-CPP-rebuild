@@ -2,7 +2,7 @@
 // (37) + the blocker grid wired into the ported
 // seams; every seam checked against the same
 // verbatim bodies called directly
-#include "../Exe/NpcServer/NpcMapBinder.h"
+#include "../npcserver/NpcMapBinder.h"
 #include <cassert>
 #include <cstdio>
 using namespace npc;

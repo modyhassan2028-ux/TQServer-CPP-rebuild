@@ -3,7 +3,7 @@
 // file), the parser, the missing-key default,
 // the singleton, and the shout finale values
 // with the documented %s ambiguity
-#include "../Exe/NpcServer/NpcStrTable.h"
+#include "../npcserver/NpcStrTable.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

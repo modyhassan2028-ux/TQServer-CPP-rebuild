@@ -1,6 +1,6 @@
 // MsgServer unit M12 - the MD5 core
 // FUN_140507260, verified against RFC 1321
-#include "../Exe/MsgServer/Port/MsgMd5.h"
+#include "../msgserver/MsgMd5.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

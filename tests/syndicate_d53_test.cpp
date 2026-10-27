@@ -8,13 +8,13 @@
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
-#include "Exe/Dll/Syndicate/Port/SyndicateMeedApply.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateMeedFlow.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateMeedInfo.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateMeedSort.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateSynMeed.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueCmp.h"
+#include "modules/syndicate/src/SyndicateMeedApply.h"
+#include "modules/syndicate/src/SyndicateMeedFlow.h"
+#include "modules/syndicate/src/SyndicateMeedInfo.h"
+#include "modules/syndicate/src/SyndicateMeedSort.h"
+#include "modules/syndicate/src/SyndicateCrossMerit.h"
+#include "modules/syndicate/src/SyndicateSynMeed.h"
+#include "modules/syndicate/src/SyndicateLeagueCmp.h"
 
 using namespace syndicate;
 

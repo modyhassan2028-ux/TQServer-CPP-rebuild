@@ -5,8 +5,8 @@
 // screenshot of the ORIGINAL binaries running
 // this same database (NPC 42235/42256/42685,
 // generator 198+4432+0/4630, SynPet 17)
-#include "../Exe/NpcServer/NpcAssembly.h"
-#include "../Exe/NpcServer/NpcManager.h"
+#include "../npcserver/NpcAssembly.h"
+#include "../npcserver/NpcManager.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

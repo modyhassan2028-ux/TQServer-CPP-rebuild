@@ -1,6 +1,6 @@
 // MsgServer unit M11 - the key.dat generator
 // FUN_140508610 / FUN_140508720
-#include "../Exe/MsgServer/Port/MsgKeyGen.h"
+#include "../msgserver/MsgKeyGen.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

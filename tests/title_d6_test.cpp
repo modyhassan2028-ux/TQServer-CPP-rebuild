@@ -1,10 +1,10 @@
 // ============================================================
 // Title.dll — Unit D6 regression: removing titles
 // Must print TITLE-D6-OK.
-#include "../Exe/Dll/Title/Port/TitleRemove.h"
-#include "../Exe/Dll/Title/Port/TitleGrant.h"
-#include "../Exe/Dll/Title/Port/TitleModule.h"
-#include "../Exe/Dll/Title/Port/TitleRecord.h"
+#include "../modules/title/src/TitleRemove.h"
+#include "../modules/title/src/TitleGrant.h"
+#include "../modules/title/src/TitleModule.h"
+#include "../modules/title/src/TitleRecord.h"
 #include <cassert>
 #include <cstdio>
 #include <string>

@@ -10,9 +10,9 @@
 #include <vector>
 #include <string>
 
-#include "Exe/Dll/Syndicate/Port/SyndicateModuleTail.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateModule.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeaveAward.h"
+#include "modules/syndicate/src/SyndicateModuleTail.h"
+#include "modules/syndicate/src/SyndicateModule.h"
+#include "modules/syndicate/src/SyndicateLeaveAward.h"
 
 using namespace syndicate;
 

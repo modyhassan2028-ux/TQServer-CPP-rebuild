@@ -14,7 +14,7 @@
 #include <cstdint>
 #include <vector>
 #include <algorithm>
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueSort.h"
+#include "../modules/syndicate/src/SyndicateLeagueSort.h"
 
 using namespace syndicate;
 

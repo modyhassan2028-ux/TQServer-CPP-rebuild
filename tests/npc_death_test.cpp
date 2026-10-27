@@ -1,4 +1,4 @@
-#include "../Exe/NpcServer/NpcDeath.h"
+#include "../npcserver/NpcDeath.h"
 #include <cassert>
 #include <cstdio>
 using namespace npc;

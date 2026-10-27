@@ -8,7 +8,7 @@
 // 141557130/141557290/141557180/141557310.
 // Must print PEERAGE-D17-OK.
 // ============================================================
-#include "../Exe/Dll/Peerage/Port/PeerageModule.h"
+#include "../modules/peerage/src/PeerageModule.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

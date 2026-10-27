@@ -9,8 +9,8 @@
 #include <array>
 #include <algorithm>
 
-#include "Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateMeedEntry.cpp"
+#include "modules/syndicate/src/SyndicateCrossMerit.h"
+#include "modules/syndicate/src/SyndicateMeedEntry.cpp"
 
 using namespace syndicate;
 using E5 = MeedEntry5;

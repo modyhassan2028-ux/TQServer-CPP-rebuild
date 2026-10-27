@@ -1,7 +1,7 @@
 // MsgServer unit M28 - the plugin
 // installer FUN_140508f60 + the
 // CreateNewMapData forwarder 1405090c0
-#include "../Exe/MsgServer/Port/MsgPluginInstall.h"
+#include "../msgserver/MsgPluginInstall.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

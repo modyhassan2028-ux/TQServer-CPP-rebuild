@@ -51,7 +51,7 @@ Outputs in `build/`:
 Core/           CQBase (Msg base, StringPacker, Timer), DB (AsyncDBThread), Root
 Exe/MsgServer   game server (net core + packet handlers)
 Exe/NpcServer   NPC server (skeleton)
-Modules/        Syndicate, Trade (DLLs)
+modules/        Syndicate, Trade (DLLs)
 Tools/          CustomGM.dll, ServerLoader.exe
 include/        shared headers (Network/MsgHead.h, ...)
 Config/         ini files (game port 5816, Blowfish key, ...)

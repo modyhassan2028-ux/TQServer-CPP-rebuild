@@ -1,4 +1,4 @@
-#include "../Exe/NpcServer/NpcClose.h"
+#include "../npcserver/NpcClose.h"
 #include <algorithm>
 #include <cassert>
 #include <cstdio>

@@ -10,12 +10,12 @@
 // self-rank CMsg family (1417d9f90/1417da210/
 // 1417da420) and the requester-id seam
 // (1417ac810).
-#include "../Exe/Dll/Syndicate/Port/SyndicateMeedInfo.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateMeedFlow.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateMeedSort.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateSynMeed.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateModule.h"
+#include "../modules/syndicate/src/SyndicateMeedInfo.h"
+#include "../modules/syndicate/src/SyndicateMeedFlow.h"
+#include "../modules/syndicate/src/SyndicateMeedSort.h"
+#include "../modules/syndicate/src/SyndicateSynMeed.h"
+#include "../modules/syndicate/src/SyndicateCrossMerit.h"
+#include "../modules/syndicate/src/SyndicateModule.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

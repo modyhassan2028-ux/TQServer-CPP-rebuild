@@ -8,8 +8,8 @@
 // transform gate -> the freed-id ring recycle
 // -> a stable long tail (no leaks, no
 // over-cap respawns).
-#include "../Exe/NpcServer/NpcAssembly.h"
-#include "../Exe/NpcServer/NpcManager.h"
+#include "../npcserver/NpcAssembly.h"
+#include "../npcserver/NpcManager.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

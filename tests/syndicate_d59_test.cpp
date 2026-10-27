@@ -1,7 +1,7 @@
 // D59 test — the CMsgLog + CMsgSynChgDomName
 // Process handlers (1417d97c0 / 1417daee0).
-#include "Exe/Dll/Syndicate/Port/SyndicateMsgProcess.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
+#include "modules/syndicate/src/SyndicateMsgProcess.h"
+#include "modules/syndicate/src/SyndicateCrossMerit.h"
 #include <cstdio>
 #include <cassert>
 #include <cstring>

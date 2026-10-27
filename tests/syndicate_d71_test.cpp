@@ -11,11 +11,11 @@
 // CopyFrom (the CHECK FATAL + the 3 has-bit merges + the
 // inline append tail), and the PB dtor's allocated-bound
 // loop with the operator delete[] elements array.
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueRobOptClass.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueBeRob.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateModule.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateCMsgCtors.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateMeedFlow.h"
+#include "modules/syndicate/src/SyndicateLeagueRobOptClass.h"
+#include "modules/syndicate/src/SyndicateLeagueBeRob.h"
+#include "modules/syndicate/src/SyndicateModule.h"
+#include "modules/syndicate/src/SyndicateCMsgCtors.h"
+#include "modules/syndicate/src/SyndicateMeedFlow.h"
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>

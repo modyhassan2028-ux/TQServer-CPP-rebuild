@@ -1,9 +1,9 @@
 // tests/syndicate_d66_test.cpp — the 12-body batch unit
 // Verbatim-behavior tests: exact call sequences, args,
 // gates, jumptable edges, out-pointers, sign-extension.
-#include "Exe/Dll/Syndicate/Port/SyndicateMsgProcess2.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueOpt.h"
+#include "modules/syndicate/src/SyndicateMsgProcess2.h"
+#include "modules/syndicate/src/SyndicateCrossMerit.h"
+#include "modules/syndicate/src/SyndicateLeagueOpt.h"
 #include <cstdio>
 #include <cstring>
 #include <string>

@@ -7,8 +7,8 @@
 // f80 sort-call wrapper.
 // Must print PEERAGE-D19-OK.
 // ============================================================
-#include "../Exe/Dll/Peerage/Port/PeerageSort.h"
-#include "../Exe/Dll/Peerage/Port/PeerageSortMgr.h"
+#include "../modules/peerage/src/PeerageSort.h"
+#include "../modules/peerage/src/PeerageSortMgr.h"
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>

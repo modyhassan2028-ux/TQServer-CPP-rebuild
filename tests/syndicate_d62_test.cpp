@@ -1,8 +1,8 @@
 // syndicate_d62_test.cpp — CMsgLeagueRobOpt::
 // Process (1417d8920) — the robopt dispatcher.
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueRobOpt.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueOpt.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
+#include "modules/syndicate/src/SyndicateLeagueRobOpt.h"
+#include "modules/syndicate/src/SyndicateLeagueOpt.h"
+#include "modules/syndicate/src/SyndicateCrossMerit.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

@@ -3,7 +3,7 @@
 // get), the cell access chain 4ac70, the
 // container getters 678b0/678a0, the region
 // bounds 49490/49440
-#include "../Exe/NpcServer/NpcCellObjects.h"
+#include "../npcserver/NpcCellObjects.h"
 #include <cassert>
 #include <cstdio>
 using namespace npc;

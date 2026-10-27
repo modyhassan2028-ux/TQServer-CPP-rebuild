@@ -2,11 +2,11 @@
 // Title.dll — Unit D12 regression: the CTitleMgr deleting
 // dtor (FUN_141974630) — the full teardown flow
 // Must print TITLE-D12-OK.
-#include "../Exe/Dll/Title/Port/TitleMap.h"
-#include "../Exe/Dll/Title/Port/TitleMgr.h"
-#include "../Exe/Dll/Title/Port/TitleGrant.h"
-#include "../Exe/Dll/Title/Port/TitleModule.h"
-#include "../Exe/Dll/Title/Port/TitleRecord.h"
+#include "../modules/title/src/TitleMap.h"
+#include "../modules/title/src/TitleMgr.h"
+#include "../modules/title/src/TitleGrant.h"
+#include "../modules/title/src/TitleModule.h"
+#include "../modules/title/src/TitleRecord.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

@@ -5,17 +5,17 @@
 // hidden snprintf varargs, /1000 (magic 0x431bde83),
 // the *1000000 rides, the 6-arg vt+0x410, the
 // bAccept ride in b4d60's JOIN.
-#include "Exe/Dll/Syndicate/Port/SyndicateInviteNotify.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateMsgProcess2.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueOpt.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueMgr.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueMember.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueCmp.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueTree.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueUsers.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateCMsgCtors.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateModule.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateMeedFlow.h"
+#include "modules/syndicate/src/SyndicateInviteNotify.h"
+#include "modules/syndicate/src/SyndicateMsgProcess2.h"
+#include "modules/syndicate/src/SyndicateLeagueOpt.h"
+#include "modules/syndicate/src/SyndicateLeagueMgr.h"
+#include "modules/syndicate/src/SyndicateLeagueMember.h"
+#include "modules/syndicate/src/SyndicateLeagueCmp.h"
+#include "modules/syndicate/src/SyndicateLeagueTree.h"
+#include "modules/syndicate/src/SyndicateLeagueUsers.h"
+#include "modules/syndicate/src/SyndicateCMsgCtors.h"
+#include "modules/syndicate/src/SyndicateModule.h"
+#include "modules/syndicate/src/SyndicateMeedFlow.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

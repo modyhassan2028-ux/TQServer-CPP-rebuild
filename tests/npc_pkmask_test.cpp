@@ -1,7 +1,7 @@
 // unit 32: FUN_14005ab20 the candidate PK-mask
 // check + the CNpcBindPkFamily seam binder test.
-#include "../Exe/NpcServer/NpcStateUtil.h"
-#include "../Exe/NpcServer/NpcTargetSearch.h"
+#include "../npcserver/NpcStateUtil.h"
+#include "../npcserver/NpcTargetSearch.h"
 #include <cassert>
 #include <cstdio>
 using namespace npc;

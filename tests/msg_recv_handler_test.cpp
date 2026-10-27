@@ -1,7 +1,7 @@
 // MsgServer unit M20 - the encrypted
 // recv handler FUN_1405002a0
-#include "../Exe/MsgServer/Port/MsgRecvHandler.h"
-#include "../Exe/MsgServer/Port/MsgSessionCipher.h"
+#include "../msgserver/MsgRecvHandler.h"
+#include "../msgserver/MsgSessionCipher.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

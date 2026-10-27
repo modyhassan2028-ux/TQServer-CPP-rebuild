@@ -11,13 +11,13 @@
 #include <string>
 #include <vector>
 
-#include "../Exe/Dll/Peerage/Port/PeerageService.h"
-#include "../Exe/Dll/Peerage/Port/PeerageModule.h"
-#include "../Exe/Dll/Peerage/Port/PeerageSortMgr.h"
-#include "../Exe/Dll/Peerage/Port/PeerageSort.h"
-#include "../Exe/Dll/Peerage/Port/PeeragePromote.h"
-#include "../Exe/Dll/Peerage/Port/PeerageMsgWire.h"
-#include "../Exe/Dll/Peerage/Port/PeerageDonate.h"
+#include "../modules/peerage/src/PeerageService.h"
+#include "../modules/peerage/src/PeerageModule.h"
+#include "../modules/peerage/src/PeerageSortMgr.h"
+#include "../modules/peerage/src/PeerageSort.h"
+#include "../modules/peerage/src/PeeragePromote.h"
+#include "../modules/peerage/src/PeerageMsgWire.h"
+#include "../modules/peerage/src/PeerageDonate.h"
 
 using namespace peerage;
 using std::string;

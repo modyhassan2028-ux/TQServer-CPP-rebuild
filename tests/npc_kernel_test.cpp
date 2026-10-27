@@ -2,7 +2,7 @@
 // (FUN_14001c1d0/1c1e0, FUN_140027a40, FUN_140038010,
 //  FUN_14001c220/230, FUN_14001c280, FUN_14001c5f0,
 //  the singleton accessors)
-#include "../Exe/NpcServer/TqKernel.h"
+#include "../npcserver/TqKernel.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

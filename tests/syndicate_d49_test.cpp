@@ -6,9 +6,9 @@
 // frozen rank; types 1/3: the SELF slot-0 path +
 // the offset window + the page fill + the self-exit
 // and the empty-vector return of 1).
-#include "../Exe/Dll/Syndicate/Port/SyndicateMeedFlow.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateSynMeed.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
+#include "../modules/syndicate/src/SyndicateMeedFlow.h"
+#include "../modules/syndicate/src/SyndicateSynMeed.h"
+#include "../modules/syndicate/src/SyndicateCrossMerit.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

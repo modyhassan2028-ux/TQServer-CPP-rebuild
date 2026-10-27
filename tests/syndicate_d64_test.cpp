@@ -2,10 +2,10 @@
 // 1417b03b0 + the price getter 14174e750 (the D61
 // case-0x33 seam's real body) — the header has the
 // full discovery notes.
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueGmName.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueNameApply.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueOpt.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
+#include "modules/syndicate/src/SyndicateLeagueGmName.h"
+#include "modules/syndicate/src/SyndicateLeagueNameApply.h"
+#include "modules/syndicate/src/SyndicateLeagueOpt.h"
+#include "modules/syndicate/src/SyndicateCrossMerit.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

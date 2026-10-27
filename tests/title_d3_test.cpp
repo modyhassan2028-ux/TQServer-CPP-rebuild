@@ -1,7 +1,7 @@
 // ============================================================
 // Title.dll — Unit D3 regression: the module skeleton
 // Must print TITLE-D3-OK.
-#include "../Exe/Dll/Title/Port/TitleModule.h"
+#include "../modules/title/src/TitleModule.h"
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>

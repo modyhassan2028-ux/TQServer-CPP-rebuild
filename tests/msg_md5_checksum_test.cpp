@@ -1,7 +1,7 @@
 // MsgServer unit M30 - the CMD5Checksum
 // Update family, verified against
 // python hashlib vectors
-#include "../Exe/MsgServer/Port/MsgMd5Checksum.h"
+#include "../msgserver/MsgMd5Checksum.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

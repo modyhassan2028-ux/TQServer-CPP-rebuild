@@ -5,11 +5,11 @@
 // (both dup gates), equal_range, iterator++, erase /
 // erase-range / erase(key) with the count, clear — all
 // storm-tested with the full red-black validation.
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueTree.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueUsers.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueMembers.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueMember.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
+#include "../modules/syndicate/src/SyndicateLeagueTree.h"
+#include "../modules/syndicate/src/SyndicateLeagueUsers.h"
+#include "../modules/syndicate/src/SyndicateLeagueMembers.h"
+#include "../modules/syndicate/src/SyndicateLeagueMember.h"
+#include "../modules/syndicate/src/SyndicateCrossMerit.h"
 #include <algorithm>
 #include <cassert>
 #include <cstdio>

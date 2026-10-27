@@ -1,6 +1,6 @@
 // MsgServer unit M8 - the CAccountClient family
 // FUN_140503610 / FUN_140506e80 / FUN_140506480
-#include "../Exe/MsgServer/Port/MsgClientSocket.h"
+#include "../msgserver/MsgClientSocket.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

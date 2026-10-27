@@ -3,9 +3,9 @@
 // +0x10 offset of FUN_140038010, the player-id
 // gate, the transform-range bypass, and the
 // type-record fallback leg
-#include "../Exe/NpcServer/NpcMapBinder.h"
-#include "../Exe/NpcServer/NpcManager.h"
-#include "../Exe/NpcServer/TqKernel.h"
+#include "../npcserver/NpcMapBinder.h"
+#include "../npcserver/NpcManager.h"
+#include "../npcserver/TqKernel.h"
 #include <cassert>
 #include <cstdio>
 using namespace npc;

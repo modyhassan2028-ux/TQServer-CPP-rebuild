@@ -4,7 +4,7 @@
 // [400001,500000] / pets [700001,800000) /
 // players [1000000,...] / transform gate
 // [400001,700000))
-#include "../Exe/NpcServer/NpcTransform.h"
+#include "../npcserver/NpcTransform.h"
 #include <cassert>
 #include <cstdio>
 using namespace npc;

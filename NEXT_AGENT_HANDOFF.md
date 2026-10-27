@@ -45,7 +45,7 @@
   وكل ملفات الـ config: `/app/co_decomp/orig_binaries/Source/`)
   (وفوق فيه `/app/co_decomp/orig_binaries/cq.sql.gz` و `/app/co_decomp/orig_binaries/patch/`)
 - الـ binary بيستخدم لاستخراج الجداول الثابتة (راجع الوحدة 30 في PORTING_LOG لطريقة الاستخراج بـ python struct + PE sections)
-- ملفات الـ NpcServer المنقولة: `Exe/NpcServer/` — الاختبارات: `tests/`
+- ملفات الـ NpcServer المنقولة: `npcserver/` — الاختبارات: `tests/`
 
 **قواعد غير قابلة للنقاش (standing instructions من مالك المشروع):**
 1. **ممنوع كود متخمَّل (guessed code)** — كل سطر من `NpcServer.exe.decompiled.c` حرفياً.
@@ -113,8 +113,8 @@
 10. مراجعة `HANDOFF.md` قسم "المتبقي" وتحديثه.
 
 ### د) MsgServer — المرحلة الجديدة (البورت الحرفي):
-- **الوحدة M1 مكتملة:** FUN_14045bc00 + FUN_14045b990 (لوجين NpcServer من جهة MsgServer): المفاتيح 0x3ade68b1/b2، كلماتا السر الحرفيتان "NpcServer Tqdig"/"skl8934##VJICW " (المسافة حرفية)، المصافحة 0xe/0x2720+0x2722/0xea65، سجل SYSTEM/ALLUSERS/ANSWER_OK بالواصف المزروع، والـ keepalive 0x9c41 بغرابة strlen+1 (الـ NUL بيركب). ملفات: Exe/MsgServer/Port/MsgNpcLogin.{h,cpp} + tests/msg_login_test.cpp.
-- **الوحدة M2 مكتملة:** عيلة CMsgTalk الحقيقية FUN_14015b240/14015b300/14015b2c0 (ctor: +0x428=this+0x10 + SetBuf(+0x2d,0x3e1)؛ Create ببوابات الأطوال len<0x10/len<0x100 — الـ idiom بيرجع len نفسه مش len-1 — والترتيب الحرفي name,to,TEXT,from + +8=0x3ec + +0xc=GetSize+0x1f؛ dtor). **تصحيح M1 موثق:** الحقول اللي كانت "واصف مزروع" هي وسائط الستاك الصادرة لـ Create (null text، 0xffffff، 0x835، 0،0،0،1). الـ CStringPacker نفسه DLL-import (seams). ملفات: Exe/MsgServer/Port/MsgTalkRecord.{h,cpp}.
+- **الوحدة M1 مكتملة:** FUN_14045bc00 + FUN_14045b990 (لوجين NpcServer من جهة MsgServer): المفاتيح 0x3ade68b1/b2، كلماتا السر الحرفيتان "NpcServer Tqdig"/"skl8934##VJICW " (المسافة حرفية)، المصافحة 0xe/0x2720+0x2722/0xea65، سجل SYSTEM/ALLUSERS/ANSWER_OK بالواصف المزروع، والـ keepalive 0x9c41 بغرابة strlen+1 (الـ NUL بيركب). ملفات: msgserver/Port/MsgNpcLogin.{h,cpp} + tests/msg_login_test.cpp.
+- **الوحدة M2 مكتملة:** عيلة CMsgTalk الحقيقية FUN_14015b240/14015b300/14015b2c0 (ctor: +0x428=this+0x10 + SetBuf(+0x2d,0x3e1)؛ Create ببوابات الأطوال len<0x10/len<0x100 — الـ idiom بيرجع len نفسه مش len-1 — والترتيب الحرفي name,to,TEXT,from + +8=0x3ec + +0xc=GetSize+0x1f؛ dtor). **تصحيح M1 موثق:** الحقول اللي كانت "واصف مزروع" هي وسائط الستاك الصادرة لـ Create (null text، 0xffffff، 0x835، 0،0،0،1). الـ CStringPacker نفسه DLL-import (seams). ملفات: msgserver/Port/MsgTalkRecord.{h,cpp}.
 - **التالي (M5+):** ~~مستلم الرسائل حول FUN_140008520~~ (خلصت في M4: سجل slots النواة 0x850 بالبوابة الحرفية 0xd — أول 14 مرفوضين — + النسخة العضوية 140006fe0)، والبوت الحرفي (CSocketKernel::Create بتاع MsgServer — "libevent method" عند السطر 988332)، ~~وبورت كائن الاتصال (+0x410 group id → ربط الـ m_fnGetKernel بالسجل)~~ (خلص في M5)، ~~البوت الحرفي CSocketKernel::Create~~ (خلص في M6: FUN_1404fc940 كاملة بسلسلة libevent/MPO/ini/listeners/clients/thread/QueryConfig بمسار الـ PDB الحرفي)، ~~وعيلة FUN_1402b5600/1402b55f0~~ (خلصت في M3: 2ba1c0 ctor الـ CNetMsg بالتنظيف المزدوج الحرفي + 2b5600 + 2b55f0 dtor chain). القاعدة نفسها: قراءة الدالة كاملة من MsgServer.exe.decompiled.c قبل أي سطر.
 
 ### حالة MsgServer — المكتمل (M7-M25، كل وحدة باختبار أخضر ومرفوعة):
@@ -152,7 +152,7 @@
 
 ## 5) وحدة M42 (الجديدة — اترفعت على GitHub)
 
-**M42 = Cheating Program Monitor كاملة** (`Exe/MsgServer/Port/MsgStdDes.{h,cpp}` + `MsgCheatMonitor.{h,cpp}` + `tests/msg_cheat_monitor_test.cpp`):
+**M42 = Cheating Program Monitor كاملة** (`msgserver/Port/MsgStdDes.{h,cpp}` + `MsgCheatMonitor.{h,cpp}` + `tests/msg_cheat_monitor_test.cpp`):
 
 - **MsgStdDes:** محرك DES القياسي (FIPS) — محاكاة libeay32 اللي بيستوردها المونيتور (مستقلة تماماً عن descore بتاع M40). كل قطعة متحققة آلياً:
   - البلوك مقابل OpenSSL (legacy provider) + pycryptodome: 500/500 عشوائي + المتجهات الكلاسيكية (3fa40e8a984d4815 / 0000000000000000 / d5d44ff720683d0d)
@@ -164,7 +164,7 @@
 
 ## 6) وحدة M43 (الجديدة — مُطبّع زمن الحدث)
 
-**M43 = FUN_140001ce0** (`Exe/MsgServer/Port/MsgCheatTime.{h,cpp}` + `tests/msg_cheat_time_test.cpp`):
+**M43 = FUN_140001ce0** (`msgserver/Port/MsgCheatTime.{h,cpp}` + `tests/msg_cheat_time_test.cpp`):
 
 - الدالة اللي بيناديها كولرَي الـ msgserverdlg (سطر 198639 و198797) لتطبيع زمن الحدث: مصدر واحد "YYMMDDHH" بيتقسم u16 لأربع خانات YY/MM/DD/HH (الكولر بيجيب بافرات مُصفّرة)
 - الحارسان: null → 0x227، نص فاضي → 0x228 — **quirk حرفي:** أي نص غير فاضي بيعدي و8 بايت بتتقرأ برضه (الأصل متكئ على بافر الكولر)
@@ -175,7 +175,7 @@
 
 ## 7) وحدة M44 (الجديدة — مُعالِج القبض)
 
-**M44 = مُعالِج القبض بتاع المونيتور** (`Exe/MsgServer/Port/MsgArrestHandler.{h,cpp}` + `tests/msg_arrest_test.cpp`)، دوال mapgroupkernel.cpp عند الكولرَي:
+**M44 = مُعالِج القبض بتاع المونيتور** (`msgserver/Port/MsgArrestHandler.{h,cpp}` + `tests/msg_arrest_test.cpp`)، دوال mapgroupkernel.cpp عند الكولرَي:
 
 - المسار الكامل: الحارسان (0x2e0/0x2e7) + رسالة القبض (0x2ec) + توزيع الساعات → STR_USE_NONLICET_TOOLS1..4 + **gmlog/cheater الحرفي** ("Cheater found.  UserID:[%u], cheat type:[%s], subtype:[%s]" مع _TYPE_CHEATING_SYSTEM)
 - **quirk حرفي:** فشل ExtractLocalTime (0x2f9) مش بيرجّع — بيكمل
@@ -187,7 +187,7 @@
 
 ## 8) وحدة M45 (الجديدة — OfflineCheatingGotoJail)
 
-**M45 = ذيل M44 المعلق اكتمل** (`Exe/MsgServer/Port/MsgJailEx.{h,cpp}` + `tests/msg_jail_ex_test.cpp`)، ORIGINAL FUN_1400e36a0:
+**M45 = ذيل M44 المعلق اكتمل** (`msgserver/Port/MsgJailEx.{h,cpp}` + `tests/msg_jail_ex_test.cpp`)، ORIGINAL FUN_1400e36a0:
 
 - **السجن بيتكتب في سجل الدخول:** "UPDATE cq_user SET recordmap_id = %u, recordx = %d, recordy = %d WHERE account_id = %u LIMIT 1" بإحداثيات بوابة ماب 6002 (map+0x58 vcall+0x10(0xb)) — فالغشاش الأوفلاين بيقع في السجن عند أولوجن
 - 6 مسارات فشل بلوجات gmlog/cheater الحرفية (0x669/**0x66e بالغلط الإملائي "palyer"**/0x679/0x67e/0x685/0x68f — الأخير بيرسل الإيميل برضه)
@@ -202,7 +202,7 @@
 - **M46:** الفرع الأونلاين-بالحساب في FUN_1400e36a0 — lookup بمعرّف المستخدم (vcall+0x98/param_2)، لوج 0x65c، بوابة الرسالة غير الفارغة، تيليبورت بعلم **3** (مقابل 1 في M44)
 - **M47+M48:** ctor الـ CMapGroupKernel (FUN_1400f0000) بتخطيطه الحرفي (أزواج الحاويات @+0x48/+0x88/+0xc8/+0x108/+0x148/+0x188 والسجن @+0x1c8) + الحارسات التلاتة بأحجامها (A=0x20 بعلم +0x1c، B=0x30 بعلم +0x28، Jail=0x80 بعلم +0x78 — والحاوية بتقفل علم size-3)
 - **M49-M54:** الحاوية = شجرة حمراء-سوداء intrusive بستايل MSVC STL مقفولة كاملة: insert (FUN_14000bfd0 بحارس max_size وthrow "map/set<T> too long")، erase (FUN_14000ab40 بفحص end() بعلم الحارس +0x1d وthrow "invalid map/set<T> iterator")، مُخصّص العقدة FUN_140009ab0 (left/right/parent/key@+0x18/color@+0x1c/end@+0x1d)، مشية السلف FUN_1400075f0، الـ splice الحرفي بتبديل الألوان، التدويرات FUN_140008940/FUN_1400089a0، حلقة الـ recolor LAB_14000ad2c، وعقد الرجوع بالـ iterator المحدّث + العدّاد المحروس `if (param_1[7] != 0)`
-- **نموذج الملفات:** Exe/MsgServer/Port/MsgMapGroupKernel.{h,cpp} (الشجرة) + MsgJailEx.{h,cpp} + MsgArrestHandler.{h,cpp} + MsgCheatTime.{h,cpp}؛ الاختبارات: tests/msg_mapgroup_ctor_test.cpp (يشمل الشجرة كلها) وmsg_jail_ex_test وmsg_arrest_test وmsg_cheat_time_test
+- **نموذج الملفات:** msgserver/Port/MsgMapGroupKernel.{h,cpp} (الشجرة) + MsgJailEx.{h,cpp} + MsgArrestHandler.{h,cpp} + MsgCheatTime.{h,cpp}؛ الاختبارات: tests/msg_mapgroup_ctor_test.cpp (يشمل الشجرة كلها) وmsg_jail_ex_test وmsg_arrest_test وmsg_cheat_time_test
 - **TBD الموثق الوحيد في الشجرة:** نصوص فرع الطفل الواحد الكاملة في erase (decompile 8648-8662، المطبق حالياً مبسّط سليم) — لو محتاجينا لدقة قصوى
 - **M55 المرشحة:** دوال mapgroupkernel الخارجية (مستهلكي الحاويات: إضافة غشاش للسجن، البحث، دوال النطاق/البث زي FUN_1400ef8d0 عند decompile ~195680) أو دوال الـ dlg المساعدة (FUN_14001f070 / FUN_140021bd0 / FUN_14001e540)
 
@@ -229,4 +229,4 @@
 
 ---
 
-*آخر صيغة للتحقق الذاتي: `cd /app/co_repo && git log --oneline -1` لازم يكون أحدث من آخر commit في السجل تحت، والرجريشن 34/34 أو أكثر (كل ملف اختبار يطبع سطر واحد فيه "OK"). أمر البناء الكامل للرجريشن: لكل `tests/npc_*_test.cpp`: `g++ -std=c++17 -O0 -I. -Wno-unused-parameter <test> $(ls Exe/NpcServer/*.cpp | grep -v main.cpp) -o /tmp/reg/<name>` ثم تشغيله والبحث عن OK (اختبارا ops_205/record_201 مش في العد — سورسات MsgServer).*
+*آخر صيغة للتحقق الذاتي: `cd /app/co_repo && git log --oneline -1` لازم يكون أحدث من آخر commit في السجل تحت، والرجريشن 34/34 أو أكثر (كل ملف اختبار يطبع سطر واحد فيه "OK"). أمر البناء الكامل للرجريشن: لكل `tests/npc_*_test.cpp`: `g++ -std=c++17 -O0 -I. -Wno-unused-parameter <test> $(ls npcserver/*.cpp | grep -v main.cpp) -o /tmp/reg/<name>` ثم تشغيله والبحث عن OK (اختبارا ops_205/record_201 مش في العد — سورسات MsgServer).*

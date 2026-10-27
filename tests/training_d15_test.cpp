@@ -5,11 +5,11 @@
 // 3aa0/3c50/3ca0/3de0/3e00/42a0/4320/4350/4170 + the
 // CMsg glue (50b0..56c0) + the dispatcher 1419e54c0.
 // Must print TRAINING-D15-OK.
-#include "../Exe/Dll/Training/Port/TrainingMapApi.h"
-#include "../Exe/Dll/Training/Port/TrainingMsgGlue.h"
-#include "../Exe/Dll/Training/Port/TrainingModule.h"
-#include "../Exe/Dll/Training/Port/TrainingMgr.h"
-#include "../Exe/Dll/Training/Port/TrainingMap.h"
+#include "../modules/training/src/TrainingMapApi.h"
+#include "../modules/training/src/TrainingMsgGlue.h"
+#include "../modules/training/src/TrainingModule.h"
+#include "../modules/training/src/TrainingMgr.h"
+#include "../modules/training/src/TrainingMap.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

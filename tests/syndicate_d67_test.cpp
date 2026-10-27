@@ -1,15 +1,15 @@
 // tests/syndicate_d67_test.cpp — CMsgSyndicate::Process
 // The 29-case dispatcher + the case-0x25 rank machine.
-#include "Exe/Dll/Syndicate/Port/SyndicateMsgSyndicate.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateMsgProcess2.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueOpt.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueSalary.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateCMsgCtors.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateModule.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateMeedFlow.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueTree.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueCmp.h"
+#include "modules/syndicate/src/SyndicateMsgSyndicate.h"
+#include "modules/syndicate/src/SyndicateMsgProcess2.h"
+#include "modules/syndicate/src/SyndicateLeagueOpt.h"
+#include "modules/syndicate/src/SyndicateCrossMerit.h"
+#include "modules/syndicate/src/SyndicateLeagueSalary.h"
+#include "modules/syndicate/src/SyndicateCMsgCtors.h"
+#include "modules/syndicate/src/SyndicateModule.h"
+#include "modules/syndicate/src/SyndicateMeedFlow.h"
+#include "modules/syndicate/src/SyndicateLeagueTree.h"
+#include "modules/syndicate/src/SyndicateLeagueCmp.h"
 #include <cstdio>
 #include <cstring>
 #include <string>

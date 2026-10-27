@@ -1,6 +1,6 @@
 // MsgServer unit M39 - the
 // serverlock family
-#include "../Exe/MsgServer/Port/MsgServerLock.h"
+#include "../msgserver/MsgServerLock.h"
 #include <cassert>
 #include <cstdio>
 #include <string>

@@ -10,23 +10,23 @@
 // the result set, the (E) walked-key inserts + type-4 sends,
 // the name-failure skip, the aggregate type-2/type-4 blocks
 // with the flush-and-restart dance, and the teardown order.
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueBeRobFlow.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueBeRob.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateModule.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateCMsgCtors.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueRobOptFlow.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueRobOptClass.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueOpt.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueSalary.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateInviteNotify.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeaguePlunderAccept.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueAddTodayPlunder.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeaguePlunderList.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeaguePlunderQuery.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeaguePlunderStatus.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeaguePlunderSignup.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueSupportPublish.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateMeedFlow.h"
+#include "modules/syndicate/src/SyndicateLeagueBeRobFlow.h"
+#include "modules/syndicate/src/SyndicateLeagueBeRob.h"
+#include "modules/syndicate/src/SyndicateModule.h"
+#include "modules/syndicate/src/SyndicateCMsgCtors.h"
+#include "modules/syndicate/src/SyndicateLeagueRobOptFlow.h"
+#include "modules/syndicate/src/SyndicateLeagueRobOptClass.h"
+#include "modules/syndicate/src/SyndicateLeagueOpt.h"
+#include "modules/syndicate/src/SyndicateLeagueSalary.h"
+#include "modules/syndicate/src/SyndicateInviteNotify.h"
+#include "modules/syndicate/src/SyndicateLeaguePlunderAccept.h"
+#include "modules/syndicate/src/SyndicateLeagueAddTodayPlunder.h"
+#include "modules/syndicate/src/SyndicateLeaguePlunderList.h"
+#include "modules/syndicate/src/SyndicateLeaguePlunderQuery.h"
+#include "modules/syndicate/src/SyndicateLeaguePlunderStatus.h"
+#include "modules/syndicate/src/SyndicateLeaguePlunderSignup.h"
+#include "modules/syndicate/src/SyndicateLeagueSupportPublish.h"
+#include "modules/syndicate/src/SyndicateMeedFlow.h"
 #include <cstdio>
 #include <cstring>
 #include <cstdio>
@@ -1579,7 +1579,7 @@ static void Prep80() {
 }
 
 // ================= D81 fixture =================
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueTokenMapPublish.h"
+#include "modules/syndicate/src/SyndicateLeagueTokenMapPublish.h"
 static uint64_t s_vtD81, s_mgrD81;
 
 static uint32_t g_war81 = 1, g_signed81 = 0;
@@ -1764,7 +1764,7 @@ static void WireD81() {
 }
 
 // ================= D82 fixture =================
-#include "Exe/Dll/Syndicate/Port/SyndicateVlmAward.h"
+#include "modules/syndicate/src/SyndicateVlmAward.h"
 #include <vector>
 static std::vector<void*> g_pool82;
 static void* P82(size_t n) { void* p = malloc(n); g_pool82.push_back(p); return p; }
@@ -1835,7 +1835,7 @@ static void BuildVec82(uint64_t* v, const uint32_t* ids, int n) {
 }
 
 // ================= D83 fixture =================
-#include "Exe/Dll/Syndicate/Port/SyndicateMsgProcess3.h"
+#include "modules/syndicate/src/SyndicateMsgProcess3.h"
 #include <vector>
 static std::vector<std::string> g_addStr83;
 static uint32_t g_packSize83;
@@ -1987,7 +1987,7 @@ static void Run83(uint32_t id = 77, uint64_t arg4 = 0xABCD) {
     syndicate::MsgSyndicateProcess((void**)s_msg83, id, arg4);
 }
 // ================= D84 fixture =================
-#include "Exe/Dll/Syndicate/Port/SyndicateAppoint3de.h"
+#include "modules/syndicate/src/SyndicateAppoint3de.h"
 #include <map>
 struct FakeUser84 { uint32_t id, synId, rank; char online, hasFlag, hasSub, hasOld; uint32_t oldId; };
 static std::vector<FakeUser84> g_users84;

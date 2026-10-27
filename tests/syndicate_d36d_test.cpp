@@ -18,14 +18,14 @@
 //     anchor-high, CToken*} pair insert, the
 //     LeagueMemberData readback, and the exists /
 //     gate-fail (the dual release) / make-fail paths
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueOps.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueMember.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueUsers.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueMembers.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueTree.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueCmp.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueEntity.h"
+#include "../modules/syndicate/src/SyndicateLeagueOps.h"
+#include "../modules/syndicate/src/SyndicateLeagueMember.h"
+#include "../modules/syndicate/src/SyndicateLeagueUsers.h"
+#include "../modules/syndicate/src/SyndicateLeagueMembers.h"
+#include "../modules/syndicate/src/SyndicateLeagueTree.h"
+#include "../modules/syndicate/src/SyndicateCrossMerit.h"
+#include "../modules/syndicate/src/SyndicateLeagueCmp.h"
+#include "../modules/syndicate/src/SyndicateLeagueEntity.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

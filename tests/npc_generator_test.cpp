@@ -1,5 +1,5 @@
 // CNpcGenerator::CreateNpc (FUN_140061040) - test
-#include "../Exe/NpcServer/NpcGenerator.h"
+#include "../npcserver/NpcGenerator.h"
 #include <cassert>
 #include <cstdio>
 #include <string>

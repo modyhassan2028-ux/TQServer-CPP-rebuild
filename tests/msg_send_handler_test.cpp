@@ -1,7 +1,7 @@
 // MsgServer unit M21 - the encrypted
 // Send FUN_140500670 + keyed getter
 // FUN_1405009f0
-#include "../Exe/MsgServer/Port/MsgSendHandler.h"
+#include "../msgserver/MsgSendHandler.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

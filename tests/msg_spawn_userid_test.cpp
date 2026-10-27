@@ -1,6 +1,6 @@
 // M69: CUserManager::SpawnNewOSUserID (FUN_1402aed50)
-#include "../Exe/MsgServer/Port/MsgSpawnUserId.h"
-#include "../Exe/MsgServer/Port/MsgMapGroupKernel.h"
+#include "../msgserver/MsgSpawnUserId.h"
+#include "../msgserver/MsgMapGroupKernel.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

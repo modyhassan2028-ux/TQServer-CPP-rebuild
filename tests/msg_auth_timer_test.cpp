@@ -1,6 +1,6 @@
 // MsgServer unit M36 - the timer-2
 // authserver/plugin branch
-#include "../Exe/MsgServer/Port/MsgAuthTimer.h"
+#include "../msgserver/MsgAuthTimer.h"
 #include <cassert>
 #include <cstdio>
 #include <string>

@@ -4,7 +4,7 @@
 // ResetStats 1460) + the vtable slots + the 41050 log.
 // Must print ANALYST-D2-OK.
 // ============================================================
-#include "../Exe/Dll/Analyst/Port/TickAnalyst.h"
+#include "../modules/analyst/src/TickAnalyst.h"
 #include <cassert>
 #include <cstdio>
 #include <string>

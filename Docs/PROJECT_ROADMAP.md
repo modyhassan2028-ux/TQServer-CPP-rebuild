@@ -16,7 +16,7 @@ AntiCheat(523), Guide(531), Totem(565), Relation(653), LeaveWord(655), Arenic(68
 Status(710), VexillumArenic(730), FrontierFlagWar(834), CrossFlagWar(835),
 FamilyArenic(850), Family(876), ElitePKArenic(928), TeamArenic(976), CQBase(1140),
 PopPKArenic(1181), ClanPKArenic(1182), DB(1377)
-(الرقم = عدد دوال المفكك؛ المجلدات: Exe/Dll/<الاسم الأصلي>/Port بنفس تنظيم v6159.)
+(الرقم = عدد دوال المفكك؛ المجلدات: modules/<الاسم الأصلي>/Port بنفس تنظيم v6159.)
 
 ## المرحلة 3: السيرفرات المتوسطة
 - CQCrossServer.exe (1616 دالة)

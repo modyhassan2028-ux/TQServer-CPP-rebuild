@@ -1,11 +1,11 @@
 // ============================================================
 // Title.dll — Unit D9 regression: the incoming title msg
 // Must print TITLE-D9-OK.
-#include "../Exe/Dll/Title/Port/TitleIncoming.h"
-#include "../Exe/Dll/Title/Port/TitleModule.h"
-#include "../Exe/Dll/Title/Port/TitleGrant.h"
-#include "../Exe/Dll/Title/Port/TitleRemove.h"
-#include "../Exe/Dll/Title/Port/TitleQuery.h"
+#include "../modules/title/src/TitleIncoming.h"
+#include "../modules/title/src/TitleModule.h"
+#include "../modules/title/src/TitleGrant.h"
+#include "../modules/title/src/TitleRemove.h"
+#include "../modules/title/src/TitleQuery.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

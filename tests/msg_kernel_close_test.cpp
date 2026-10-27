@@ -1,6 +1,6 @@
 // MsgServer unit M33 - the state-3
 // "Kernel closing" cascade
-#include "../Exe/MsgServer/Port/MsgKernelClose.h"
+#include "../msgserver/MsgKernelClose.h"
 #include <cassert>
 #include <cstdio>
 #include <string>

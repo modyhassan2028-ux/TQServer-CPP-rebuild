@@ -13,9 +13,9 @@
 #include <cstdlib>
 #include <vector>
 #include <stdexcept>
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueTree.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueCmp.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueEntity.h"
+#include "../modules/syndicate/src/SyndicateLeagueTree.h"
+#include "../modules/syndicate/src/SyndicateLeagueCmp.h"
+#include "../modules/syndicate/src/SyndicateLeagueEntity.h"
 
 using namespace syndicate;
 

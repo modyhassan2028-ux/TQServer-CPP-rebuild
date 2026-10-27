@@ -1,8 +1,8 @@
 // ============================================================
 // Title.dll — Unit D4 regression: the CTitle family
 // Must print TITLE-D4-OK.
-#include "../Exe/Dll/Title/Port/TitleRecord.h"
-#include "../Exe/Dll/Title/Port/TitleModule.h"
+#include "../modules/title/src/TitleRecord.h"
+#include "../modules/title/src/TitleModule.h"
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>

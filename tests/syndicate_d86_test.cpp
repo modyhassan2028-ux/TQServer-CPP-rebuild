@@ -1,6 +1,6 @@
 // D86 tests: FUN_1417873a0 rank-name resolver — 43 known ids
 // + STR_ERROR fallback + range boundaries.
-#include "Exe/Dll/Syndicate/Port/SyndicateRankName.h"
+#include "modules/syndicate/src/SyndicateRankName.h"
 #include <cstdio>
 #include <cstring>
 #include <cstdint>

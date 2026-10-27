@@ -2,7 +2,7 @@
 // resolver FUN_140509380 + world-kernel
 // dispatch FUN_140508f10 + channel
 // factory FUN_140509280
-#include "../Exe/MsgServer/Port/MsgExportResolver.h"
+#include "../msgserver/MsgExportResolver.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

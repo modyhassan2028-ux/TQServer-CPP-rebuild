@@ -1,5 +1,5 @@
 // M44: the arrest handler - mapgroupkernel.cpp
-#include "../Exe/MsgServer/Port/MsgArrestHandler.h"
+#include "../msgserver/MsgArrestHandler.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

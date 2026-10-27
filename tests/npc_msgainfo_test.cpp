@@ -1,5 +1,5 @@
 // CMsgAiNpcInfo (FUN_140061220/270/2a0/3a0/430/490/4f0)
-#include "../Exe/NpcServer/MsgAiNpcInfo.h"
+#include "../npcserver/MsgAiNpcInfo.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

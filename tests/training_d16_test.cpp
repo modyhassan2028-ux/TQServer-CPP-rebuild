@@ -5,13 +5,13 @@
 // 1419e44e0 / 1419e4730 — with the kernel-vt seams
 // (TrainingKernelIface.h) and the ms-div idioms
 // bit-exact. Must print TRAINING-D16-OK.
-#include "../Exe/Dll/Training/Port/TrainingMgrOps.h"
-#include "../Exe/Dll/Training/Port/TrainingKernelIface.h"
-#include "../Exe/Dll/Training/Port/TrainingMapApi.h"
-#include "../Exe/Dll/Training/Port/TrainingMsgGlue.h"
-#include "../Exe/Dll/Training/Port/TrainingModule.h"
-#include "../Exe/Dll/Training/Port/TrainingMgr.h"
-#include "../Exe/Dll/Training/Port/TrainingMap.h"
+#include "../modules/training/src/TrainingMgrOps.h"
+#include "../modules/training/src/TrainingKernelIface.h"
+#include "../modules/training/src/TrainingMapApi.h"
+#include "../modules/training/src/TrainingMsgGlue.h"
+#include "../modules/training/src/TrainingModule.h"
+#include "../modules/training/src/TrainingMgr.h"
+#include "../modules/training/src/TrainingMap.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

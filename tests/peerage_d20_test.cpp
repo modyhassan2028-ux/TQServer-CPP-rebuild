@@ -2,10 +2,10 @@
 // TQServer-CPP-rebuild — the Peerage.dll D20 test
 // (FUN_141555f80 walk + 29c0/2a60/4a0/110), 9 sections.
 // ============================================================
-#include "../Exe/Dll/Peerage/Port/PeeragePromote.h"
-#include "../Exe/Dll/Peerage/Port/PeerageSortMgr.h"
-#include "../Exe/Dll/Peerage/Port/PeerageSort.h"
-#include "../Exe/Dll/Peerage/Port/PeerageModule.h"
+#include "../modules/peerage/src/PeeragePromote.h"
+#include "../modules/peerage/src/PeerageSortMgr.h"
+#include "../modules/peerage/src/PeerageSort.h"
+#include "../modules/peerage/src/PeerageModule.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

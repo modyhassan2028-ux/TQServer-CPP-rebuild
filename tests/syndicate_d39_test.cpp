@@ -8,14 +8,14 @@
 //  (the users family / the D32 family), and the full
 //  fail-cleanup integration with the REAL walks (the
 //  D38 seams now default here) over a 3-map storm.
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueRelease.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueLife.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueTree.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueUsers.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueMembers.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueCmp.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueMgr.h"
+#include "../modules/syndicate/src/SyndicateLeagueRelease.h"
+#include "../modules/syndicate/src/SyndicateLeagueLife.h"
+#include "../modules/syndicate/src/SyndicateLeagueTree.h"
+#include "../modules/syndicate/src/SyndicateLeagueUsers.h"
+#include "../modules/syndicate/src/SyndicateLeagueMembers.h"
+#include "../modules/syndicate/src/SyndicateCrossMerit.h"
+#include "../modules/syndicate/src/SyndicateLeagueCmp.h"
+#include "../modules/syndicate/src/SyndicateLeagueMgr.h"
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>

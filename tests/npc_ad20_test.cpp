@@ -3,8 +3,8 @@
 // with the THIRD literal assert context
 // (gamemap.cpp 0x129) and the binder wiring of
 // the state's m_fnAd20 seam
-#include "../Exe/NpcServer/NpcMapBinder.h"
-#include "../Exe/NpcServer/NpcState.h"
+#include "../npcserver/NpcMapBinder.h"
+#include "../npcserver/NpcState.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

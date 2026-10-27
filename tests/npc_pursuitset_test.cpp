@@ -4,7 +4,7 @@
 // seen after the path request is what the
 // 580e0 seam wrote (the real 580e0 sets
 // +0x2c = the path count).
-#include "../Exe/NpcServer/NpcStateUtil.h"
+#include "../npcserver/NpcStateUtil.h"
 #include <cassert>
 #include <cstdio>
 #include <vector>

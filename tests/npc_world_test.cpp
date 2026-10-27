@@ -1,7 +1,7 @@
 // CNpcWorld state machine - faithful port test
 // (FUN_14001d390 CNpcWorld::OnTimer, FUN_14001c700 ConnectOK,
 //  FUN_14001c2c0 rate gate)
-#include "../Exe/NpcServer/NpcWorld.h"
+#include "../npcserver/NpcWorld.h"
 #include <cassert>
 #include <cstdio>
 #include <string>

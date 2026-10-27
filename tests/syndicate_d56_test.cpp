@@ -8,12 +8,12 @@
 #include <string>
 #include <vector>
 
-#include "Exe/Dll/Syndicate/Port/SyndicateMeedAwardOnline.h"
+#include "modules/syndicate/src/SyndicateMeedAwardOnline.h"
 // MeedEmonyType/MeedPromptGet/MeedGmLogName +
 // the log seams come via the unit's includes
-#include "Exe/Dll/Syndicate/Port/SyndicateMeedApply.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateSynMeed.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateMeedDistribute.h"
+#include "modules/syndicate/src/SyndicateMeedApply.h"
+#include "modules/syndicate/src/SyndicateSynMeed.h"
+#include "modules/syndicate/src/SyndicateMeedDistribute.h"
 // MeedAwardUser + the g_fnMeedAwardOnline seam
 
 using namespace syndicate;

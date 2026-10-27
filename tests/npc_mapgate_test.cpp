@@ -1,6 +1,6 @@
 // unit 32: FUN_140049310 / FUN_14004ab40 map gates
 // verbatim port test.
-#include "../Exe/NpcServer/NpcCellCheck.h"
+#include "../npcserver/NpcCellCheck.h"
 #include <cassert>
 #include <cstdio>
 using namespace npc;

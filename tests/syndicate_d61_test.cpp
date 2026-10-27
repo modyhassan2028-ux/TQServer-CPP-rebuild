@@ -1,7 +1,7 @@
 // syndicate_d61_test.cpp — CMsgLeagueOpt::Process
 // (1417d68d0) + the gate + the 12 wrappers.
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueOpt.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
+#include "modules/syndicate/src/SyndicateLeagueOpt.h"
+#include "modules/syndicate/src/SyndicateCrossMerit.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

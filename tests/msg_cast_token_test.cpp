@@ -1,7 +1,7 @@
 // MsgServer unit M14 - the CAST token builder
 // FUN_140503c00 (validated against hashlib)
-#include "../Exe/MsgServer/Port/MsgCastToken.h"
-#include "../Exe/MsgServer/Port/MsgMd5Service.h"
+#include "../msgserver/MsgCastToken.h"
+#include "../msgserver/MsgMd5Service.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

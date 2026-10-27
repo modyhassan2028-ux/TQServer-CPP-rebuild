@@ -7,9 +7,9 @@
 // proxy at +0x98 + the +0xb0/b8/c0 zeros + the
 // +0xc8 byte = 1). The seam g_fnMeedPoolCtor now
 // defaults to the REAL family.
-#include "../Exe/Dll/Syndicate/Port/SyndicateMeedFlow.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateSynMeed.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
+#include "../modules/syndicate/src/SyndicateMeedFlow.h"
+#include "../modules/syndicate/src/SyndicateSynMeed.h"
+#include "../modules/syndicate/src/SyndicateCrossMerit.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

@@ -9,7 +9,7 @@
 // FindById 1415548b0, heap 1415521f0.
 // Must print PEERAGE-D18-OK.
 // ============================================================
-#include "../Exe/Dll/Peerage/Port/PeerageSortMgr.h"
+#include "../modules/peerage/src/PeerageSortMgr.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

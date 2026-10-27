@@ -1,4 +1,4 @@
-#include "../Exe/NpcServer/NpcUserTick.h"
+#include "../npcserver/NpcUserTick.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

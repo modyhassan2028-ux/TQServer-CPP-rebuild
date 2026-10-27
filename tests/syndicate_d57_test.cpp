@@ -8,9 +8,9 @@
 #include <string>
 #include <vector>
 
-#include "Exe/Dll/Syndicate/Port/SyndicateCMsgCtors.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateMeedFlow.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateModule.h"
+#include "modules/syndicate/src/SyndicateCMsgCtors.h"
+#include "modules/syndicate/src/SyndicateMeedFlow.h"
+#include "modules/syndicate/src/SyndicateModule.h"
 
 using namespace syndicate;
 

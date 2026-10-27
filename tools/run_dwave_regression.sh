@@ -8,14 +8,18 @@ OBJ=/tmp/objs_wave; rm -f $OBJ/*.o; mkdir -p $OBJ
 # the d55a unit includes its port .cpp inline (to
 # reach the static sort internals) -> links with
 # NO port objects
-for f in Exe/Dll/Analyst/Port/*.cpp Exe/Dll/Title/Port/*.cpp Exe/Dll/Training/Port/*.cpp Exe/Dll/Peerage/Port/*.cpp Exe/Dll/Syndicate/Port/*.cpp modules/syndicate/src/*.cpp; do
-  g++ -std=c++17 -I. -c "$f" -o $OBJ/$(basename $f .cpp).o || { echo "OBJ-FAIL $f"; exit 1; }
+for f in modules/analyst/src/*.cpp modules/title/src/*.cpp modules/training/src/*.cpp modules/peerage/src/*.cpp modules/syndicate/src/*.cpp; do
+  # the module-entry skeletons (modules/<mod>/src/<mod>.cpp, the
+  # original module files) are separate DLL builds — excluded
+  base=$(basename $f .cpp); dir=$(basename $(dirname $(dirname $f)))
+  [ "$base" = "$dir" ] && continue
+  g++ -std=c++17 -I. -Iinclude -Imodules -c "$f" -o $OBJ/$base.o || { echo "OBJ-FAIL $f"; exit 1; }
 done
 FAIL=0
 for pass in 1 2 3 4 5 6; do
   for t in $TESTS; do
     if [ "$t" = "syndicate_d55a" ]; then
-      g++ -std=c++17 -I. tests/${t}_test.cpp -o /tmp/reg_bin 2>/tmp/reg_err.txt
+      g++ -std=c++17 -I. -Iinclude -Imodules tests/${t}_test.cpp -o /tmp/reg_bin 2>/tmp/reg_err.txt
     else
       g++ -std=c++17 -I. tests/${t}_test.cpp $OBJ/*.o -o /tmp/reg_bin 2>/tmp/reg_err.txt
     fi

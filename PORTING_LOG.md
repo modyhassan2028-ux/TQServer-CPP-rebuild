@@ -26,7 +26,7 @@
 > ```bash
 > cd /app/conversations/6ada078e9883f31f19597098/work/TQServer-CPP-rebuild
 > W=/app/conversations/6ada078e9883f31f19597098/work/.objt
-> F="-std=c++17 -O0 -I. -IExe/MsgServer -Iinclude -ICore/CQBase -ICore/DB -ICore/Root -IExe/MsgServer/CrossServer -IExe/CQCrossServer -Ivendor/lua -D__declspec(x)="
+> F="-std=c++17 -O0 -I. -IExe/MsgServer -Iinclude -ICore/CQBase -ICore/DB -ICore/Root -Imsgserver/CrossServer -IExe/CQCrossServer -Ivendor/lua -D__declspec(x)="
 > g++ $F -c <الملف المعدل> -o "$W/<اسم.o>"
 > OBJS=$(find $W -name '*.o' ! -name '*main.cpp*' ! -name '*CrossServer*' ! -name '*orig_db*' | tr '\n' ' ')
 > g++ $OBJS -o $W/dialog_test -lpthread ./build/liblua_native.a
@@ -50,7 +50,7 @@
     + false ("Transform2 can not find monstertype")، ثم SetTransform +
     SetLookface. معلق موثق: user[0x151] (ركوب/قتال) ونظام المؤقت للمُدة.
     ملاحظة بناء مهمة: أي تغيير في User.h (layout) يكسر ODR — لازم
-    **rebuild كامل** لكل .o (وسيبت من: Exe/MsgServer/CrossServer/*.cpp
+    **rebuild كامل** لكل .o (وسيبت من: msgserver/CrossServer/*.cpp
     وwinsock وكل tests_*.o ما عدا dialog_fidelity_test + stub_cross_client).
 - **شروط المستخدم:** 1073 (stc عبر skill 42 بتقسيم 30)، 1061-1066
 >   (متغيرات المستخدم int64)، 1056/1027 (Task Manager)، 1020/1021 (ماجيك/
@@ -236,7 +236,7 @@
 
 ```bash
 W=/app/conversations/6ada078e9883f31f19597098/work/.objt
-F="-std=c++17 -O0 -I. -IExe/MsgServer -Iinclude -ICore/CQBase -ICore/DB -ICore/Root -IExe/MsgServer/CrossServer -IExe/CQCrossServer -Ivendor/lua -D__declspec(x)="
+F="-std=c++17 -O0 -I. -IExe/MsgServer -Iinclude -ICore/CQBase -ICore/DB -ICore/Root -Imsgserver/CrossServer -IExe/CQCrossServer -Ivendor/lua -D__declspec(x)="
 g++ $F -c <file.cpp> -o "$W/<name>.o"
 # ربط الاختبارات:
 OBJS=$(find $W -name '*.o' ! -name '*main.cpp*' ! -name '*CrossServer*' ! -name '*orig_db*' | tr '\n' ' ')
@@ -348,7 +348,7 @@ transform عبر FUN_140172eb0)، **517** (606، %iter_var_data — محرك ا�
   الحية مباشرة.
 - **درس ODR مهم:** تعديل User.h (حقول جديدة) يكسر كل .o القديمة — علامة
   `pkts.size()==6` بتفشل في أول الاختبار. الحل: rebuild كامل مع استبعاد
-  Exe/MsgServer/CrossServer (winsock) وكل tests_*.o عدا dialog_fidelity_test
+  msgserver/CrossServer (winsock) وكل tests_*.o عدا dialog_fidelity_test
   و stub_cross_client.
 - اختبارات 513: صف حقيقي "11155 0000 5045 60" (UndeadSoldier موجود) → true
   + GetTransform/GetLookface، تكرار التحول → false، monid وهمي → false.
@@ -700,11 +700,11 @@ FUN_14013d790 وما حولها، ~3,400 صف).
   CP + FUN_1401742b0 مزامنة. **السجل يُستخرج (pop) في كل المسارات**
   (نجح → true، فشل/b_type مجهول → تحرير + false).
 - **2205 (0x89d):** GetProcess(0x13) → **موديول DetainEquip**
-  (SetProcess mode 19 — موثق أصلاً في Modules/DetainEquip)؛ vcall+0x18 =
+  (SetProcess mode 19 — موثق أصلاً في modules/DetainEquip)؛ vcall+0x18 =
   IsTarget(uid)، vcall+0x10 = IsHunter(uid)؛ الموديول مفقود → false.
   الجداول المرجعية: cq_pk_item(item, target, target_name, hunter,
   hunter_name, manhunt_time, bonus) — حرفياً من DetainEquip.dll. النقل
-  المؤقت: CDetainEquipManager (Exe/MsgServer/DetainEquip.h) يقرأ
+  المؤقت: CDetainEquipManager (msgserver/DetainEquip.h) يقرأ
   cq_pk_item مباشرة حتى منفذة الموديول الكاملة (نفس نمط TaskDetail→
   CUserTaskManager). السلاسل الحقيقية: 5005215/5005235 (DetainEquip NPC).
 - **2002 (0x7d2، 5 صفوف "4021 type 2"):** param يُجلب ويُهمل حرفياً؛
@@ -1675,7 +1675,7 @@ segfault عشوائي ABI.
   الاختبارات — مذكور في HANDOFF بتاعه
 
 ## D23 — عائلة التبرّع Peerage (مقفولة)
-**PeerageDonate.{h,cpp}** (Exe/Dll/Peerage/Port/) — 10 دوال حرفية:
+**PeerageDonate.{h,cpp}** (modules/peerage/src/) — 10 دوال حرفية:
 - **141551750/60/70**: أغلفة الخدمة (GetRank/SweepDelete/
   SendState → svc+0x10)
 - **141551780 ServiceDonate**: بوابة المستوى 0x46 (70)، بوابة
@@ -1723,7 +1723,7 @@ segfault عشوائي ABI.
   كل تشغيل
 
 ## D24 — دوال الخدمة الإدارية Peerage (مقفولة)
-**PeerageService.{h,cpp}** (Exe/Dll/Peerage/Port/) — 9 دوال حرفية:
+**PeerageService.{h,cpp}** (modules/peerage/src/) — 9 دوال حرفية:
 - **141551920** ServiceQueryRank: elem null → kernel vt+0x58 total →
   StateFromValue؛ elem → +0x10/+0x14 + rec vt+0x58 → BuildMsgPeerage →
   kernel vt+0x38
@@ -1774,7 +1774,7 @@ invalid_parameter الأصلي لا يرجع أبدًا؛ مع سِم غير م�
 كـ CRT/STL). التالي حسب REMAINING_ROADMAP: Syndicate.dll (9,862 دالة).
 
 ## D26 — Syndicate.dll بدأت: هيكل الموديول (مقفولة)
-**SyndicateModule.{h,cpp}** (Exe/Dll/Syndicate/Port/) — أول وحدة من 4,547 دالة، 22 دالة حرفية:
+**SyndicateModule.{h,cpp}** (modules/syndicate/src/) — أول وحدة من 4,547 دالة، 22 دالة حرفية:
 - **14177e290/300** tq CMsg ctor/scalar + **14177e2d0/2e0/2f0** مسجلات أخطاء Process الثلاثة
 - **14177e330/380** gs::IModule dtor/scalar + **14177e340/350/360/370** stubs الصفرية + **14177eac0** (return 1)
 - **14177e3b0/3e0 / 14177e430/460** CMsgLog وCMsgSynChgDomName (أزواج vft)
@@ -1795,7 +1795,7 @@ invalid_parameter الأصلي لا يرجع أبدًا؛ مع سِم غير م�
 التالي في Syndicate: عائلات CCrossMeritMgr (14172xxxx) / CLeague (1417xxxxx) / CLeagueMgr.
 
 ## D27 — Syndicate.dll: قشرة إدارة CCrossMeritMgr (مقفولة)
-**SyndicateCrossMerit.{h,cpp}** (Exe/Dll/Syndicate/Port/) — 7 دوال حرفية:
+**SyndicateCrossMerit.{h,cpp}** (modules/syndicate/src/) — 7 دوال حرفية:
 - **14173f3e0/14173f410** المدمّران (الموروث: tree dtor + delete[0]؛ ومتغير الـ vft: vft +
   dtor للخريطة @+8 + delete[1])
 - **14173f450** الـ deleting dtor: مسح الشجرة (ef10) + vt[0](p,1) بمسار الصفر
@@ -1835,7 +1835,7 @@ invalid_parameter الأصلي لا يرجع أبدًا؛ مع سِم غير م�
 التالي في Syndicate: عائلة الخريطة الداخلية (eb10/cb90/c470/d1e0…) أو CLeague (سطر ~37149).
 
 ## D29 — Syndicate.dll: نواة الخريطة الداخلية الحقيقية (مقفولة)
-**SyndicateMapTree.{h,cpp}** (Exe/Dll/Syndicate/Port/) — 8 دوال حرفية تحوّل سِمات الخريطة لكود فعلي:
+**SyndicateMapTree.{h,cpp}** (modules/syndicate/src/) — 8 دوال حرفية تحوّل سِمات الخريطة لكود فعلي:
 - **14173bc00** تخصيص العقدة (0x68، لون أسود، _Isnil=0)
 - **14173e1a0** تخصيص عقدة مفتاح: الحقول + نقل الـ string عبر de50 (سِم) + لون من الوسيط
 - **14173b830/14173b890** الدورانان (حالات الجذر/الابن-الأيسر/الأيمن + إصلاحات أب الـ sentinel)
@@ -1924,7 +1924,7 @@ unlink/swap (plVar8b) وليس plVar9->parent — لأن الخانة الموص
 
 ## D32 (2026-10-25) — عائلة CLeague: شجرة أعضاء العصبة (عُقد 0x30)
 
-**الملفات:** `Exe/Dll/Syndicate/Port/SyndicateLeagueTree.{h,cpp}` (13 دالة)
+**الملفات:** `modules/syndicate/src/SyndicateLeagueTree.{h,cpp}` (13 دالة)
 + `tests/syndicate_d32_test.cpp`.
 
 **الدوال (الموقع → الاسم):**
@@ -1971,7 +1971,7 @@ g_fnMeritOpDelete (عدّاد الاختبار يتحقق من كل تحرير).
 (6) هادم العضو (15 عقدة + الرأس = 16 تحريرًا + تصفير الخانات).
 
 **الرجريشن:** `bash /tmp/reg32c.sh` أو يدويًا: كل اختبار syndicate_dNN بملفات
-عائلته + peerage_dNN بكل Exe/Dll/Peerage/Port/*.cpp، أعلام `-g -O0`:
+عائلته + peerage_dNN بكل modules/peerage/src/*.cpp، أعلام `-g -O0`:
 **96/96 × 6 (d26-d32 × 7 + peerage × 9) كلها خضراء.**
 **تنبيه -O1:** MeritGrant (D28) تنهار عند -O1 (UB كامن قديم في CrossMerit،
 ليس من تعديلات D32) — الرجريشن المعتمد -g -O0.
@@ -1980,7 +1980,7 @@ g_fnMeritOpDelete (عدّاد الاختبار يتحقق من كل تحرير).
 
 ## D33 (2026-10-25) — عائلة فرز قوائم أعضاء العصبة (introsort حقيقي)
 
-**الملفات:** `Exe/Dll/Syndicate/Port/SyndicateLeagueSort.{h,cpp}` (9 دوال)
+**الملفات:** `modules/syndicate/src/SyndicateLeagueSort.{h,cpp}` (9 دوال)
 + `tests/syndicate_d33_test.cpp`.
 
 **الدوال (الموقع → الاسم):**
@@ -2024,7 +2024,7 @@ cad00 البحث في خريطة +8 عبر c8f70، 78f270/78f410 مجلِبا vt
 
 ## D34 (2026-10-25) — مخطط مقارِن فرز الأعضاء (إغلاق الحلقة مع D33)
 
-**الملفات:** `Exe/Dll/Syndicate/Port/SyndicateLeagueCmp.{h,cpp}` (6 دوال)
+**الملفات:** `modules/syndicate/src/SyndicateLeagueCmp.{h,cpp}` (6 دوال)
 + `tests/syndicate_d34_test.cpp`.
 
 **الدوال (الموقع → الاسم):**
@@ -2065,7 +2065,7 @@ cad00 البحث في خريطة +8 عبر c8f70، 78f270/78f410 مجلِبا vt
 
 ## D35 (2026-10-25) — عائلة كيان العصبة: متجهات الأعضاء + محو الأعضاء الخاصين
 
-**الملفات:** `Exe/Dll/Syndicate/Port/SyndicateLeagueEntity.{h,cpp}` (16 دالة)
+**الملفات:** `modules/syndicate/src/SyndicateLeagueEntity.{h,cpp}` (16 دالة)
 + `tests/syndicate_d35_test.cpp`.
 
 **العائلة الفرعية (أ) — آليات المتجهات:**
@@ -2116,7 +2116,7 @@ vtable + خريطة D32 حقيقية بخمسة أعضاء → المحو يحذ
 
 ## D36 جزء 1 (2026-10-25) — طبقة بحث الأعضاء والرموز في CLeague
 
-**الملفات:** `Exe/Dll/Syndicate/Port/SyndicateLeagueMember.{h,cpp}` (7 دوال)
+**الملفات:** `modules/syndicate/src/SyndicateLeagueMember.{h,cpp}` (7 دوال)
 + `tests/syndicate_d36_test.cpp`.
 
 **سياق الكيان:** تحتفظ عصبة CLeague بثلاث خرائط: المستخدمين عند
@@ -2418,7 +2418,7 @@ vt[8]/vt[0]) — الترقيع بالاختبار قبل الحذف.
   مفقود في D32). الديكومبايل فيه أسماء RTTI حقيقية
   (syndicate::CLeague/CLeagueMgr/CModule::vftable)
 
-### الوحدة الجديدة: Exe/Dll/Syndicate/Port/SyndicateLeagueLife.{h,cpp} (17 دالة)
+### الوحدة الجديدة: modules/syndicate/src/SyndicateLeagueLife.{h,cpp} (17 دالة)
 - **المُشيّد 14174d830**: vftable + بروكسي +0x28 (opnew(8) مرجع
   المالك) + أصفار +0x40..+0x50 + مُهيئات الخرائط الثلاث
   (+0x58 مستخدمين رأس 0x30/isnil@0x29، +0x98 أعضاء رأس
@@ -2479,7 +2479,7 @@ layout المُشيّد (7 تخصيصات + أحجام الرؤوس + isnil)، �
 
 **التاريخ:** 26 أكتوبر 2026 — الجلسة التالية لإغلاق D38 (c9b7ce2)
 
-### الوحدة الجديدة: Exe/Dll/Syndicate/Port/SyndicateLeagueRelease.{h,cpp} (3 دوال)
+### الوحدة الجديدة: modules/syndicate/src/SyndicateLeagueRelease.{h,cpp} (3 دوال)
 - **141748ea0 — مسار المستخدمين**: المشي من البداية على خريطة
   المستخدمين (كيان+0x58/رأس+0x88): بوابات CRT للمكرر +
   التحرير المزدوج لقيمة العقدة (عقدة+0x20 → rec->vt[0]
@@ -2547,7 +2547,7 @@ layout المُشيّد (7 تخصيصات + أحجام الرؤوس + isnil)، �
   2@+0x194، 5@+0x198، 180000@+0x26c، 1@+0x268،
   0xb4@+0x30c + DAT_141886d00 = 0 (سجلات السنجلتون)
 
-### الوحدة الجديدة: Exe/Dll/Syndicate/Port/SyndicateLeagueMgrLife.{h,cpp} (~35 دالة)
+### الوحدة الجديدة: modules/syndicate/src/SyndicateLeagueMgrLife.{h,cpp} (~35 دالة)
 - المُشيّد 141775b40 بالترتيب الحرفي، المدمر 141775800
   (المشي العكسي: wrapper العائلة + حذف الـ proxy لكل
   خريطة)، deleting dtor 141775df0
@@ -2597,7 +2597,7 @@ isnil + backrefs + الروابط + كل الـ defaults +
 
 **التاريخ:** 26 أكتوبر 2026 — الجلسة التالية لإغلاق D40a (32875c9)
 
-### الوحدة الجديدة: Exe/Dll/Syndicate/Port/SyndicateLeagueMgrErase.{h,cpp}
+### الوحدة الجديدة: modules/syndicate/src/SyndicateLeagueMgrErase.{h,cpp}
 - **الـ 9 erase-ranges حقيقية الآن** وموصّلة كـ default
   للـ seams في MgrLife (14175bda0/14175e410/14175e0b0/
   14175df00/1417742e0/14175dba0/141775470/14175d9f0/
@@ -2652,7 +2652,7 @@ isnil + backrefs + الروابط + كل الـ defaults +
 
 **التاريخ:** 26 أكتوبر 2026 — الجلسة التالية لإغلاق D41a (f97c0b0)
 
-### الوحدة الجديدة: Exe/Dll/Syndicate/Port/SyndicateLeagueMgrErOne.{h,cpp}
+### الوحدة الجديدة: modules/syndicate/src/SyndicateLeagueMgrErOne.{h,cpp}
 - **الـ 9 erase-ones حقيقية الآن** وموصّلة كـ default
   للـ g_fnMgrErOne* في MgrErase (141758050/14175a710/
   14175a300/141759ef0/141770a20/141759a90/141773e60/
@@ -2702,7 +2702,7 @@ isnil + backrefs + الروابط + كل الـ defaults +
 
 **التاريخ:** 26 أكتوبر 2026 — الجلسة التالية لإغلاق D41b (923f98d)
 
-### الوحدة الجديدة: Exe/Dll/Syndicate/Port/SyndicateLeagueMgrNested.{h,cpp}
+### الوحدة الجديدة: modules/syndicate/src/SyndicateLeagueMgrNested.{h,cpp}
 - **العائلة المتداخلة A** (داخل عقد 0x68 عائلة 470):
   عقد 0x20، isnil **+0x1d**، لون **+0x1c** (زوج اللون
   غير المحاذي للـ qword!) — الممحى العودي 141726210
@@ -2795,7 +2795,7 @@ isnil + backrefs + الروابط + كل الـ defaults +
 
 **التاريخ:** 26 أكتوبر 2026 — الجلسة التالية لإغلاق D44 (5b66668)
 
-### الوحدة الجديدة: Exe/Dll/Syndicate/Port/SyndicateSynMeed.{h,cpp}
+### الوحدة الجديدة: modules/syndicate/src/SyndicateSynMeed.{h,cpp}
 - **السنجلتون الكسول** (14177c770/DAT_141886d30):
   كائن 0x40 — بروكسي 8 بايت عند [0]، رأس شجرة 0x30
   عند +0x30 (14177ace0: لون أسود +0x28، isnil +0x29
@@ -2879,7 +2879,7 @@ isnil + backrefs + الروابط + كل الـ defaults +
 
 **التاريخ:** 26 أكتوبر 2026 — الجلسة التالية لإغلاق D46 (7e76f50)
 
-### الوحدة الجديدة: Exe/Dll/Syndicate/Port/SyndicateMeedFlow.{h,cpp}
+### الوحدة الجديدة: modules/syndicate/src/SyndicateMeedFlow.{h,cpp}
 - **FUN_14177f700** → `MeedSendMemberGrade`: التدفق
   الكامل حرفياً — بوابات النوع (1-3) والصفحة (>=1)،
   السلسلة mgr id → meed → league، العدّاد، تعبئة
@@ -3242,7 +3242,7 @@ E2E كاملاً (النوع 1 صفحة 1 مع الطلب self)
 أُصلح نداءان (`MeedMedian3(..., MeedSortCmp)` / `MeedSortDriver(..., 0,
 MeedSortCmp)`) والرجريشن 41/41 تتكرر الآن حرفياً على HEAD.
 
-### الوحدة الجديدة: `Exe/Dll/Syndicate/Port/SyndicateMeedApply.{h,cpp}`
+### الوحدة الجديدة: `modules/syndicate/src/SyndicateMeedApply.{h,cpp}`
 - **FUN_141780cb0 → `MeedSetArenic`**: التدفق الكامل — بوابة النوع
   (log "CSynArenicMeed::SetArenicMeed, Type[%d] is not found!")،
   بوابة vt+0x78، مسار النوع-3 (vt+0x388 مع الـ out + ERROR1/ERROR2
@@ -3359,7 +3359,7 @@ Insert (السلسلة/الدفع/exec والعلم)، SetSynMeed fresh، وE2E
 4cd0 نفسه + الجامعين والنقاط — قراءته جاهزة كاملة).
 
 ### الملفات
-- `Exe/Dll/Syndicate/Port/SyndicateMeedEntry.h/.cpp` (~810 أسطر، 22 دالة)
+- `modules/syndicate/src/SyndicateMeedEntry.h/.cpp` (~810 أسطر، 22 دالة)
 - `tests/syndicate_d55a_test.cpp` (5 أقسام، يتضمن الـ port .cpp مباشرة
   للوصول إلى داخليات الفرز الثابتة — يُربط بلا كائنات port)
 
@@ -3656,7 +3656,7 @@ g_aMsgCtor[17] ‏(seams وحدة Module السابقة) تُربط بالأجس
   - فحص الفائض: `if (nGainMoney != nMoney || nGainEmoney != nEMoney)` → `gmlog/award_overflow` — `"CSynArenicMeed::AwardUserOnline idUser[%u], nOldEMoney[%d], nAwardEMoney[%d], nGainEMoney[%d], nOldMoney[%I64d], nAwardMoney[%d], nGainMoney[%I64d]"` @ 0x14182e850
   - إرجاع 1.
 - فتحات mgr المستخدمة: +0x238 (الإيموني الحالي)، +0x230 (بداية المخزن)، +0x148 (DeleteRecord)، +0x1f8 (syn id)، +0x1d8 (الاسم)، +0x3e0 (نهاية المخزن)، +0x138 (إضافة فلوس).
-- الملفات: `Exe/Dll/Syndicate/Port/SyndicateLeaveAward.{h,cpp}` (seams + جسم حرفي).
+- الملفات: `modules/syndicate/src/SyndicateLeaveAward.{h,cpp}` (seams + جسم حرفي).
 
 ### D58 اختبار (9 أقسام، 62/62 × 6)
 - D58-9 الجديد: ربط SendLeaveAward الحقيقي بمسار LeaveAwardFlow E2E، مع تغطية: نوع خارج النطاق، المنح الجزئي (يسجل overflow — مطابق للتفكيك: الشرط الحرفي `r14 != ebx || r13d != edi`)، المنح الكامل، سقف سعة المخزن، فرع 0x2710، فشل DeleteRecord.
@@ -3697,7 +3697,7 @@ g_aMsgCtor[17] ‏(seams وحدة Module السابقة) تُربط بالأجس
 
 ### الوحدة
 تدفق 1417ac620 (جسم الـ seam المفتوح من D59) + 13 دالة تابعة حرفية في
-`Exe/Dll/Syndicate/Port/SyndicateLogRemove.{h,cpp}`:
+`modules/syndicate/src/SyndicateLogRemove.{h,cpp}`:
 
 | الدالة | العنوان | الدور |
 |---|---|---|
@@ -3728,7 +3728,7 @@ D60-1..8 لكل دالة (إصابات/أخطاء/فحوص invalid/فحوص ال
 ## D61 — CMsgLeagueOpt::Process (موزّع خيارات النقابة، 26-10-2026)
 
 ### الوحدة
-`Exe/Dll/Syndicate/Port/SyndicateLeagueOpt.{h,cpp}` — الموزّع 1417d68d0
+`modules/syndicate/src/SyndicateLeagueOpt.{h,cpp}` — الموزّع 1417d68d0
 (45+ حالة opt عبر *(ushort*)(PB+4)) + 13 جسماً حرفياً:
 
 | الدالة | العنوان | الدور |
@@ -3762,7 +3762,7 @@ D60-1..8 لكل دالة (إصابات/أخطاء/فحوص invalid/فحوص ال
 ## D62 — CMsgLeagueRobOpt::Process (موزّع السطو، 26-10-2026)
 
 ### الوحدة
-`Exe/Dll/Syndicate/Port/SyndicateLeagueRobOpt.{h,cpp}` — الجسم 1417d8920:
+`modules/syndicate/src/SyndicateLeagueRobOpt.{h,cpp}` — الجسم 1417d8920:
 موزّع 6 أنواع سطو عبر *(uint*)(msg+0x440)، إعادة استخدام البوابة 1417ac700 ‏(LeagueOptGate ‏من D61).
 
 ### ما حسمه التفكيك (capstone، على الديكمبايلر)
@@ -3786,7 +3786,7 @@ skip/القائمة المعكوسة/حالات 680/سقف 10/حالات 6e0+730
 ## D63 — تدفق تطبيق اسم النقابة (1417b0a40، 26-10-2026)
 
 ### الوحدة
-`Exe/Dll/Syndicate/Port/SyndicateLeagueNameApply.{h,cpp}` — الجسم الحقيقي للـ seam ‏g_fn1417b0a40 ‏(حالة 6 ‏من موزّع D61) + 6 مساعدين حرفيين:
+`modules/syndicate/src/SyndicateLeagueNameApply.{h,cpp}` — الجسم الحقيقي للـ seam ‏g_fn1417b0a40 ‏(حالة 6 ‏من موزّع D61) + 6 مساعدين حرفيين:
 - **141743cb0** ‏LeagueGetRecByIdx(entity, idx) — resolve(idx) → rec-vt+0x48; مزوّد فارغ → log سطر 322 ‏(0x142, ""/"", league.cpp) → 0
 - **141743e00** ‏LeagueGetRec4Str(entity) — مزوّد فارغ → 0 صامت (بلا log); resolve(4) → vt+0x78
 - **141744030** ‏LeagueSetFlagFlush(entity, val, flush) — resolve(8) → vt+0xd8(val); flush → provider vt+0x38(0); مزوّد فارغ → log سطر 431 ‏(0x1af, CHECK/m_pRec)
@@ -3820,7 +3820,7 @@ null name → 0; MgrLeagueFind(logic+0x50, synId)=0 → 0; LeagueGetRecByIdx(ent
 ## D64 — تغيير اسم النقابة GM (1417b03b0، 26-10-2026)
 
 ### الوحدة
-`Exe/Dll/Syndicate/Port/SyndicateLeagueGmName.{h,cpp}` — جسم seam ‏g_fn1417b03b0 ‏(حالة 0x33 من موزّع D61) + القارئ البسيط **14174e750** ‏LeagueNamePriceGet ‏= *(uint32*)(host+0x18c).
+`modules/syndicate/src/SyndicateLeagueGmName.{h,cpp}` — جسم seam ‏g_fn1417b03b0 ‏(حالة 0x33 من موزّع D61) + القارئ البسيط **14174e750** ‏LeagueNamePriceGet ‏= *(uint32*)(host+0x18c).
 
 ### ما حسمه التفكيك (capstone، على الديكمبايلر)
 1. نداء 141743cb0 الوحيد هنا بـ **edx=2** (resolve(2)) — ولا توجد بوابة sub-8 أصلاً (عكس b0a40 الذي يبدأ بها).
@@ -3844,7 +3844,7 @@ null name → 0; ‏MgrLeagueFind=0 → 0; ‏vt+0x1f8(actor) ≠ cb0(entity,2) 
 
 ## وحدة D65 (2026-10-26) — توزيع رواتب النقابة FUN_1417b4310 (جسم seam g_fn1417b4310 من حالة 0x27 بموزّع D61)
 
-الملفات: `Exe/Dll/Syndicate/Port/SyndicateLeagueSalary.{h,cpp}` (الرأس فيه ملاحظات الاستكشاف الكاملة) + `tests/syndicate_d65_test.cpp` (7 أقسام + E2E).
+الملفات: `modules/syndicate/src/SyndicateLeagueSalary.{h,cpp}` (الرأس فيه ملاحظات الاستكشاف الكاملة) + `tests/syndicate_d65_test.cpp` (7 أقسام + E2E).
 
 ### البنية
 المعالج: `(logic, actor, type)`. البوابات بالترتيب الحرفي: بوابة 0x278(mgr)≠0 → سقوط؛ synId=vt+0x510(logic, actor)=0 → سقوط؛ MgrLeagueFind(host@+0x50, synId)=0 → سقوط؛ **قراءة الرتبة vt+0x518(mgr, actor) تحدث قبل موزّع الأنواع** (كل أنواع 1-4 بتمر عليها)؛ rec موجود → MemberRecPostGet=1 وإلا LeagueMemberPostGet(entity, actor)=1 وإلا سقوط؛ esi حسب النوع: type1 = ‏الحرة (host+0x300)، type2 = المساهمة (e990: host+0x304)، type3 = **الحرة** (host+0x300 — غريبة لكن حرفية)، type4 → سقوط فوري.
@@ -3929,7 +3929,7 @@ null name → 0; ‏MgrLeagueFind=0 → 0; ‏vt+0x1f8(actor) ≠ cb0(entity,2) 
 
 **الأجسام/السلاسل الحرفية:** سطر 0x1a36 «msg.Create(OVERHEAD_USER...)» في msgsynmemberinfo.cpp بمساره الكامل + سطر 0x2415 في msgleaguesalaryinvit* + مفاتيح STR_INVALID_CHARACTER/STR_LEAGUE_REFUSE_INVITE_SYN/STR_LEAGUE_INVITE_LEAVE_SOON/STR_LEAGUE_INVITE_JOIN_LEAGUE/STR_SYN_JOIN_LEAGUE/STR_LEAGUE_JOIN_SUCESSS (خطأ إملائي حرفي في الأصل) + «CMsgSynMemberList::Process invalid action:%d».
 
-**الملفات:** Exe/Dll/Syndicate/Port/SyndicateInviteNotify.{h,cpp} + tests/syndicate_d68_test.cpp.
+**الملفات:** modules/syndicate/src/SyndicateInviteNotify.{h,cpp} + tests/syndicate_d68_test.cpp.
 
 **الاختبار:** 62 تأكيداً في 5 أقسام — كل بوابات السكوت، الرفض/المغادرة/الانضمام بكل varargs، إثبات /1000 (r=77 a=5000 b=1)، إثبات *1000000 (3000555)، القائد/البلد بالترتيب الخام، الذيل المزدوج e7f0/ca70/الإشعار، ألوان 0xffff00/0x843/0x7d5.
 
@@ -3947,7 +3947,7 @@ null name → 0; ‏MgrLeagueFind=0 → 0; ‏vt+0x1f8(actor) ≠ cb0(entity,2) 
 
 **استثناء موثّق:** 1417d58d0 (|= 4 مع assign بطول) — ليست من هذه العيلة؛ مستدعيها من Create لرسالة أخرى (السطر 149253 يمرر param+0x1b، 0x10). تُوثّق لوحدتها عند وصول عيلتها.
 
-**الملفات:** Exe/Dll/Syndicate/Port/SyndicateLeagueBeRob.{h,cpp} + tests/syndicate_d69_test.cpp (71 تأكيدًا في 8 أقسام). الاختبار ضبط خطأين حقيقيين في البورت قبل التثبيت: PB-dtor كان يفري الـ vptr بدل مصفوفة العناصر (+0x48) وحلقة حذف المدخلات كانت تقرأ +0x00 — كلاهما مصحح ومؤكد خامًا.
+**الملفات:** modules/syndicate/src/SyndicateLeagueBeRob.{h,cpp} + tests/syndicate_d69_test.cpp (71 تأكيدًا في 8 أقسام). الاختبار ضبط خطأين حقيقيين في البورت قبل التثبيت: PB-dtor كان يفري الـ vptr بدل مصفوفة العناصر (+0x48) وحلقة حذف المدخلات كانت تقرأ +0x00 — كلاهما مصحح ومؤكد خامًا.
 
 **الرجريجن: 73/73 × 6، ASan نظيف.** commit D69.
 
@@ -3969,7 +3969,7 @@ null name → 0; ‏MgrLeagueFind=0 → 0; ‏vt+0x1f8(actor) ≠ cb0(entity,2) 
 
 **الأوفستات الموثقة (حُفرت بالاختبار):** الحاويات الخمس @mgr+0x3f0 (رأسها@+0x460) و+0x430 و+0x470 و+0x370 و+0x3b0 — كل حاوية {proxy@0, head@+0x30, size@+0x38}؛ البوابات u32@mgr+0x358 وu32@mgr+0x35c (النمط). عقد المدير 0x68 بايت: المفتاح u32@+0x18، خريطة القيمة@+0x20 (proxy@+0x20, head@+0x50)، isnil@+0x61. عقد الـ kit 0x28 بايت: المفتاح@+0x18، color@+0x1c، isnil@+0x1d. المكرر {proxy@0, node@8}.
 
-**الملفات:** Exe/Dll/Syndicate/Port/SyndicateLeagueBeRobFlow.{h,cpp} + tests/syndicate_d70_test.cpp (32 تأكيدًا في 10 أقسام: البوابات، سقف الحلقة والتخطي، التداخل A/B، رسالة C وفشل الاسم، اتحاد D، مشي E، المجمّعة، الإفراغ وإعادة التشغيل، اسم البديل، رسائل الأنواع 5/6).
+**الملفات:** modules/syndicate/src/SyndicateLeagueBeRobFlow.{h,cpp} + tests/syndicate_d70_test.cpp (32 تأكيدًا في 10 أقسام: البوابات، سقف الحلقة والتخطي، التداخل A/B، رسالة C وفشل الاسم، اتحاد D، مشي E، المجمّعة، الإفراغ وإعادة التشغيل، اسم البديل، رسائل الأنواع 5/6).
 
 **أخطاء ضبطها الاختبار في وحدة الـ fake-kit نفسها (وليست في البورت):** رقصة النقل كانت تفري رأس العضو قبل السرقة، ومسح الشجرة الثنائي كان يزور عقدة الجذر الوحيدة مرتين (شجرة MSVC بعقدة واحدة: left==right==الجذر — الحل: مسح in-order)، والإدراج غير الجذري لم يُحدّث مؤشري الرأس leftmost/rightmost (ثابت MSVC) — كلها في الـ fixture فقط؛ مسار البورت نفسه سليم وكل تأكيداته خام.
 
@@ -3978,7 +3978,7 @@ null name → 0; ‏MgrLeagueFind=0 → 0; ‏vt+0x1f8(actor) ≠ cb0(entity,2) 
 ## D89 — CLeagueMgr::FlyToInvadeWarning + كيت CMsgInvadeWarning (27-10-2026)
 
 ### الوحدة
-`Exe/Dll/Syndicate/Port/SyndicateLeagueInvadeWarn.{h,cpp}` — الجسم 141774500
+`modules/syndicate/src/SyndicateLeagueInvadeWarn.{h,cpp}` — الجسم 141774500
 (299 سطراً) + الكيت الحرفي:
 - 1417d50f0 — المُشيّد: تخزين tq::CMsg::vftable + Init ثم
   syndicate::CMsgInvadeWarning::vftable (0x14183bf30) + Init ثم
@@ -4002,7 +4002,7 @@ local_538 = قيمة إرجاع إدراج الخريطة الفرعية (rax) �
 ## D90 — جدول CSyndicateLogic الموجة 1 (نمط الفئات) (27-10-2026)
 
 ### الوحدة
-`Exe/Dll/Syndicate/Port/SyndicateLogicTable1.{h,cpp}` — أول 18 جسماً حرفياً من جدول
+`modules/syndicate/src/SyndicateLogicTable1.{h,cpp}` — أول 18 جسماً حرفياً من جدول
 CSyndicateLogic (0x141835068، 232 فتحة): المدمّر المحذف (1417b61e0)، دوافع الرسائل
 (SynAttrInfo a9f20/a a170/aa280، Proffer aa320)، تدفق التدمير الوشيك (a9fc0)،
 التبرع (aa3c0)، تبديل الرتب (b6620)، بوابات الرتب (ab080..ab170)، وOnUserDelRole
@@ -4108,3 +4108,25 @@ user/who != 0، بحث سجل who، القائد، rank==0 (سجل)، بحث ا�
 تفويض 1417b8210(this, user, lg).
 
 8 seams جديدة. رجريجن 97/97 × 6.
+
+## إعادة تنظيم المستودع على الهيكل الأصلي (27-10-2026)
+
+المستودع كله أعيد تنظيمه ليطابق الهيكل الأصلي المستخرج من سلاسل
+__FILE__ الحرفية في الثنائيات (f:\version\cqserver-78.0.11-1204\...):
+- كل ملفات Exe/Dll/<X>/Port/* انتقلت إلى modules/<x>/src/ (بنفس
+  الأسماء الاصطلاحية المبنية على أسماء الكلاسات المستخرجة) — 17 ملفاً
+  وُضعت في مساراتها الأصلية الحرفية الكاملة (مثل modules/syndicate/src/
+  msg/msgleagueopt.cpp عند تطابق الاسم)
+- Modules/ القديمة (بأحرف كبيرة) دُمجت في نفس الشجرة: كل DLL في
+  modules/<الاسم-الصغير>/src/ — anticheck/arenic/booth/... (35 حزمة)
+- Exe/MsgServer → msgserver/ (الملفات المطابقة في مساراتها الأصلية
+  مثل msgserver/mapgroupkernel/gamemap.cpp)
+- Exe/NpcServer → npcserver/ (npcserver/npckernel/npcmanager.cpp...)
+- Exe/CQCrossServer → crossserver/
+- ملفات المشروع (.vcxproj) مع كل حزمة: modules/<x>/<X>.vcxproj
+- 239+ ملفاً أُعيدت كتابة مسارات الـ include فيه، والسكربتات
+  (run_dwave_regression.sh, build.sh) محدثة
+- ملفات هيكل الوحدات الأصلية (modules/<mod>/src/<mod>.cpp مثل
+  syndicate.cpp الأصلي) مستثناة من بناء الرجريجن (بناءات DLL منفصلة،
+  ModuleCreate متعارض بين الحزم — سلوك سابق محفوظ)
+- رجريجن 97/97 × 6 على البنية الجديدة

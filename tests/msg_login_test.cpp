@@ -2,7 +2,7 @@
 // FUN_14045b990 on the REAL object model (the
 // connection +0x410/+0x428, the M4 registry, the
 // vt+0x50 send / vt+0x30 broadcast virtuals)
-#include "../Exe/MsgServer/Port/MsgNpcLogin.h"
+#include "../msgserver/MsgNpcLogin.h"
 #include <array>
 #include <cassert>
 #include <cstdio>

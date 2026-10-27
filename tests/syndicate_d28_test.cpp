@@ -10,7 +10,7 @@
 #include <cstring>
 #include <vector>
 #include <cstdlib>
-#include "../Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
+#include "../modules/syndicate/src/SyndicateCrossMerit.h"
 
 using namespace syndicate;
 

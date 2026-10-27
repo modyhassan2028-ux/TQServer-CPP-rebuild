@@ -1,6 +1,6 @@
 // MsgServer unit M6 - CSocketKernel::Create
 // (FUN_1404fc940) the socket-kernel bootstrap
-#include "../Exe/MsgServer/Port/MsgSocketKernel.h"
+#include "../msgserver/MsgSocketKernel.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

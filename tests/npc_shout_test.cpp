@@ -1,6 +1,6 @@
 // unit 33: FUN_1400586b0 the NPC shout
 // broadcast verbatim port test.
-#include "../Exe/NpcServer/NpcStateUtil.h"
+#include "../npcserver/NpcStateUtil.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

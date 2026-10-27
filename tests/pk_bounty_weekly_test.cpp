@@ -1,5 +1,5 @@
 // pure logic: PK bounty math + weekly champion selection (PKBounty.h)
-#include "../Exe/MsgServer/PKBounty.h"
+#include "../msgserver/PKBounty.h"
 #include <cassert>
 #include <cstdio>
 #include <string>

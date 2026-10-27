@@ -1,6 +1,6 @@
 // MsgServer unit M31 - the WM_TIMER
 // prologue (shutdown + kickoutall)
-#include "../Exe/MsgServer/Port/MsgTimerProc.h"
+#include "../msgserver/MsgTimerProc.h"
 #include <cassert>
 #include <cstdio>
 using namespace msg;

@@ -1,6 +1,6 @@
 // MsgServer unit M15 - the DH loader
 // FUN_140505380
-#include "../Exe/MsgServer/Port/MsgDhInit.h"
+#include "../msgserver/MsgDhInit.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

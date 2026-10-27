@@ -1,8 +1,8 @@
 [1/8] MsgServer.exe (net core + packet handlers)...
-Exe/MsgServer/Npc.cpp:56:13: warning: enumeration value 'Dialog' not handled in switch [-Wswitch]
+msgserver/Npc.cpp:56:13: warning: enumeration value 'Dialog' not handled in switch [-Wswitch]
    56 |     switch (m_type) {
       |             ^~~~~~
-Exe/MsgServer/Npc.cpp:345:53: warning: unsequenced modification and access to 'dwGateId' [-Wunsequenced]
+msgserver/Npc.cpp:345:53: warning: unsequenced modification and access to 'dwGateId' [-Wunsequenced]
   345 |         auto pGate = std::make_shared<CNpc>(dwGateId++, g.name,
       |                                                     ^
   346 |             CNpc::Type::Teleporter, 1002, 330, 270 + (uint16_t)(dwGateId - NPC_ID_BASE));

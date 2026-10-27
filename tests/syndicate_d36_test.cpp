@@ -10,10 +10,10 @@
 #include <cstring>
 #include <cstdint>
 #include <cstdlib>
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueTree.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueCmp.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueEntity.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueMember.h"
+#include "../modules/syndicate/src/SyndicateLeagueTree.h"
+#include "../modules/syndicate/src/SyndicateLeagueCmp.h"
+#include "../modules/syndicate/src/SyndicateLeagueEntity.h"
+#include "../modules/syndicate/src/SyndicateLeagueMember.h"
 
 using namespace syndicate;
 

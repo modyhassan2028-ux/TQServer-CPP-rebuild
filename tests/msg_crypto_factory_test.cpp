@@ -1,8 +1,8 @@
 // MsgServer unit M38 - the crypto
 // provider factory + the salt's
 // meaning
-#include "../Exe/MsgServer/Port/MsgCryptoFactory.h"
-#include "../Exe/MsgServer/Port/MsgMd5Checksum.h"
+#include "../msgserver/MsgCryptoFactory.h"
+#include "../msgserver/MsgMd5Checksum.h"
 #include <cassert>
 #include <cstdio>
 #include <string>

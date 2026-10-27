@@ -1,6 +1,6 @@
 // MsgServer unit M23 - the license gate
 // family FUN_140508ca0/cd0/d00/eb0/b80/dc0
-#include "../Exe/MsgServer/Port/MsgGateFlags.h"
+#include "../msgserver/MsgGateFlags.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

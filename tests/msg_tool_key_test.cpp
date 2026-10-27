@@ -1,6 +1,6 @@
 // MsgServer unit M22 - the tool-key
 // loader FUN_1405087d0
-#include "../Exe/MsgServer/Port/MsgToolKey.h"
+#include "../msgserver/MsgToolKey.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

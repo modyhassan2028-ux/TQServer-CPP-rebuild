@@ -5,9 +5,9 @@
 // member-cell walk with the debug gates, the user
 // match via the vt+8 sub(2) protocol, and the
 // sub(3)/sub(4) outs.
-#include "../Exe/Dll/Syndicate/Port/SyndicateMeedFlow.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateSynMeed.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
+#include "../modules/syndicate/src/SyndicateMeedFlow.h"
+#include "../modules/syndicate/src/SyndicateSynMeed.h"
+#include "../modules/syndicate/src/SyndicateCrossMerit.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

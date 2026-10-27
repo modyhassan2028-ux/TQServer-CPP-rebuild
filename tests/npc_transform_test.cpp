@@ -1,6 +1,6 @@
 // CNpcTransform (FUN_14005a660 CheckTransform +
 // FUN_14005a3b0 Transform) - test
-#include "../Exe/NpcServer/NpcTransform.h"
+#include "../npcserver/NpcTransform.h"
 #include <cassert>
 #include <cstdio>
 using namespace npc;

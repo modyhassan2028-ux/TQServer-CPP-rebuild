@@ -1,4 +1,4 @@
-#include "../Exe/NpcServer/NpcWorldTick.h"
+#include "../npcserver/NpcWorldTick.h"
 #include <cassert>
 #include <cstdio>
 #include <string>

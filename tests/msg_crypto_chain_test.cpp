@@ -8,12 +8,12 @@
 // (M28), the key.dat generator
 // (M11) and the shell.dat loader
 // (M22 family).
-#include "../Exe/MsgServer/Port/MsgCryptoFactory.h"
-#include "../Exe/MsgServer/Port/MsgDes.h"
-#include "../Exe/MsgServer/Port/MsgMd5Checksum.h"
-#include "../Exe/MsgServer/Port/MsgPluginInstall.h"
-#include "../Exe/MsgServer/Port/MsgKeyGen.h"
-#include "../Exe/MsgServer/Port/MsgGateFlags.h"
+#include "../msgserver/MsgCryptoFactory.h"
+#include "../msgserver/MsgDes.h"
+#include "../msgserver/MsgMd5Checksum.h"
+#include "../msgserver/MsgPluginInstall.h"
+#include "../msgserver/MsgKeyGen.h"
+#include "../msgserver/MsgGateFlags.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

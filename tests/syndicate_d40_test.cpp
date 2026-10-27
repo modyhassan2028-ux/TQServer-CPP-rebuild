@@ -6,10 +6,10 @@
 // defaults — with the 9 family erase-ranges as
 // counting seams and the 0x28 family on the REAL
 // ported OwnEraseRange).
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueMgrLife.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueLife.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateEraseLayer.h"
+#include "../modules/syndicate/src/SyndicateLeagueMgrLife.h"
+#include "../modules/syndicate/src/SyndicateLeagueLife.h"
+#include "../modules/syndicate/src/SyndicateCrossMerit.h"
+#include "../modules/syndicate/src/SyndicateEraseLayer.h"
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>

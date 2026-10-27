@@ -4,7 +4,7 @@
 // registrations + the 0x16 KSet), the failure paths
 // (the dtor on KSet-false, the log on alloc-fail),
 // the 17-way GetMsg dispatch, and ProcessMsg.
-#include "../Exe/Dll/Syndicate/Port/SyndicateModule.h"
+#include "../modules/syndicate/src/SyndicateModule.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

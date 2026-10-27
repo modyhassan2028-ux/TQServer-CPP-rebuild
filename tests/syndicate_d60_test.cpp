@@ -1,7 +1,7 @@
 // D60 test — the user log-record removal flow
 // (FUN_1417ac620 + the 13 verbatim callees).
-#include "Exe/Dll/Syndicate/Port/SyndicateLogRemove.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueCmp.h"
+#include "modules/syndicate/src/SyndicateLogRemove.h"
+#include "modules/syndicate/src/SyndicateLeagueCmp.h"
 #include <cstdio>
 #include <cassert>
 #include <cstring>

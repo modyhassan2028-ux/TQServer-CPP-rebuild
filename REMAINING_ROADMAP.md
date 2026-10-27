@@ -57,7 +57,7 @@
   (1415510e0/141551150/1415510a0) والخدمة
   (141551ff0/141551640/1415516a0) والاستعلامان
   (141551520/141551550) — كلها في
-  `Exe/Dll/Peerage/Port/PeerageModule.{h,cpp}`.
+  `modules/peerage/src/PeerageModule.{h,cpp}`.
 - **D18 (T2) مقفولة:** عائلة CPeerageSort (0x30)
   وCPeerageSortMgr (0x50) والمتجه std::vector<void*>
   بنمط MSVC-debug كاملاً (push_back 141555cb0،

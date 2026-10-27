@@ -1,5 +1,5 @@
 // D88 tests: FUN_14179ba80 — lower_bound walk + sub-key insert.
-#include "Exe/Dll/Syndicate/Port/SyndicateMemberSubkeyAdd.h"
+#include "modules/syndicate/src/SyndicateMemberSubkeyAdd.h"
 #include <cstdio>
 #include <cstring>
 #include <cstdint>

@@ -3,8 +3,8 @@
 // matching (user, type) through the vt+8 sub-object
 // protocol, the debug-iterator gates, the stride-8
 // advance, and the found → sub(4).vt+0x48 grade.
-#include "../Exe/Dll/Syndicate/Port/SyndicateSynMeed.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
+#include "../modules/syndicate/src/SyndicateSynMeed.h"
+#include "../modules/syndicate/src/SyndicateCrossMerit.h"
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>

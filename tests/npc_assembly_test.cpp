@@ -1,5 +1,5 @@
 // NpcServer assembly (boot/tick composition) - unit 11
-#include "../Exe/NpcServer/NpcAssembly.h"
+#include "../npcserver/NpcAssembly.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

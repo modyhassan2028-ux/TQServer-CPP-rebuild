@@ -8,7 +8,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
-#include "../Exe/Dll/Syndicate/Port/SyndicateModule.h"
+#include "../modules/syndicate/src/SyndicateModule.h"
 
 using namespace syndicate;
 using std::string;

@@ -4,10 +4,10 @@
 // the pool lazy get, the grade-type counter
 // (141778e60) and the full page flow (the gates, the
 // empty page, the filled page, the send capture).
-#include "../Exe/Dll/Syndicate/Port/SyndicateMeedFlow.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateSynMeed.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateModule.h"
+#include "../modules/syndicate/src/SyndicateMeedFlow.h"
+#include "../modules/syndicate/src/SyndicateSynMeed.h"
+#include "../modules/syndicate/src/SyndicateCrossMerit.h"
+#include "../modules/syndicate/src/SyndicateModule.h"
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>

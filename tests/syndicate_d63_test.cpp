@@ -1,9 +1,9 @@
 // syndicate_d63_test.cpp — the league name-apply
 // flow 1417b0a40 + the 6 helpers (the D61 case-6
 // seam's real body) — see SyndicateLeagueNameApply.h
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueNameApply.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueOpt.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
+#include "modules/syndicate/src/SyndicateLeagueNameApply.h"
+#include "modules/syndicate/src/SyndicateLeagueOpt.h"
+#include "modules/syndicate/src/SyndicateCrossMerit.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

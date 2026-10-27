@@ -1,5 +1,5 @@
 // D87 tests: FUN_14179ad50 — the proffer rank-count list.
-#include "Exe/Dll/Syndicate/Port/SyndicateProfferRankList.h"
+#include "modules/syndicate/src/SyndicateProfferRankList.h"
 #include <cstdio>
 #include <cstring>
 #include <cstdint>

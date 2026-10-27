@@ -1,5 +1,5 @@
 // CNpcStepList (FUN_140086430) - test
-#include "../Exe/NpcServer/NpcStepList.h"
+#include "../npcserver/NpcStepList.h"
 #include <cassert>
 #include <cstdio>
 using namespace npc;

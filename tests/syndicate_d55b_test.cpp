@@ -9,16 +9,16 @@
 #include <cstdint>
 #include <cmath>
 
-#include "Exe/Dll/Syndicate/Port/SyndicateMeedDistribute.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateMeedEntry.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateMeedEnd.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateMeedApply.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateMeedFlow.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateMeedInfo.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueCmp.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueTree.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateSynMeed.h"
+#include "modules/syndicate/src/SyndicateMeedDistribute.h"
+#include "modules/syndicate/src/SyndicateMeedEntry.h"
+#include "modules/syndicate/src/SyndicateMeedEnd.h"
+#include "modules/syndicate/src/SyndicateMeedApply.h"
+#include "modules/syndicate/src/SyndicateMeedFlow.h"
+#include "modules/syndicate/src/SyndicateMeedInfo.h"
+#include "modules/syndicate/src/SyndicateLeagueCmp.h"
+#include "modules/syndicate/src/SyndicateCrossMerit.h"
+#include "modules/syndicate/src/SyndicateLeagueTree.h"
+#include "modules/syndicate/src/SyndicateSynMeed.h"
 
 using namespace syndicate;
 

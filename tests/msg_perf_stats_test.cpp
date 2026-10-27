@@ -1,6 +1,6 @@
 // MsgServer unit M34 - the state-2
 // performance/stats block
-#include "../Exe/MsgServer/Port/MsgPerfStats.h"
+#include "../msgserver/MsgPerfStats.h"
 #include <cassert>
 #include <cstdio>
 #include <string>

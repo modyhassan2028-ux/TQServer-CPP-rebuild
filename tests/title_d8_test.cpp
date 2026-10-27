@@ -1,11 +1,11 @@
 // ============================================================
 // Title.dll — Unit D8 regression: login/logout msgs
 // Must print TITLE-D8-OK.
-#include "../Exe/Dll/Title/Port/TitleSession.h"
-#include "../Exe/Dll/Title/Port/TitleModule.h"
-#include "../Exe/Dll/Title/Port/TitleGrant.h"
-#include "../Exe/Dll/Title/Port/TitleRemove.h"
-#include "../Exe/Dll/Title/Port/TitleQuery.h"
+#include "../modules/title/src/TitleSession.h"
+#include "../modules/title/src/TitleModule.h"
+#include "../modules/title/src/TitleGrant.h"
+#include "../modules/title/src/TitleRemove.h"
+#include "../modules/title/src/TitleQuery.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

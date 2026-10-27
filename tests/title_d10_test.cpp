@@ -2,8 +2,8 @@
 // Title.dll — Unit D10 regression: the mgr record map
 // (the MSVC-style tree kernel, mgr+0x08 base)
 // Must print TITLE-D10-OK.
-#include "../Exe/Dll/Title/Port/TitleMap.h"
-#include "../Exe/Dll/Title/Port/TitleModule.h"
+#include "../modules/title/src/TitleMap.h"
+#include "../modules/title/src/TitleModule.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

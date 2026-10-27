@@ -1,9 +1,9 @@
 // ============================================================
 // Title.dll — Unit D7 regression: title queries
 // Must print TITLE-D7-OK.
-#include "../Exe/Dll/Title/Port/TitleQuery.h"
-#include "../Exe/Dll/Title/Port/TitleGrant.h"
-#include "../Exe/Dll/Title/Port/TitleModule.h"
+#include "../modules/title/src/TitleQuery.h"
+#include "../modules/title/src/TitleGrant.h"
+#include "../modules/title/src/TitleModule.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

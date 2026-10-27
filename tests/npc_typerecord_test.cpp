@@ -3,8 +3,8 @@
 // full type-record leg of FUN_140038010 bound
 // for real: vt+0x40(id) -> the record, the
 // record's vt+0xe8 -> the shared proxy
-#include "../Exe/NpcServer/NpcMapBinder.h"
-#include "../Exe/NpcServer/NpcTypeRecord.h"
+#include "../npcserver/NpcMapBinder.h"
+#include "../npcserver/NpcTypeRecord.h"
 #include <cassert>
 #include <cstdio>
 using namespace npc;

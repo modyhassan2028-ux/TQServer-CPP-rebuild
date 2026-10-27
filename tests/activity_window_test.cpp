@@ -1,5 +1,5 @@
 // pure logic: cq_activity schedule windows and day filters
-#include "../Exe/MsgServer/Activity/ActivityWindow.h"
+#include "../msgserver/ActivityWindow.h"
 #include <cassert>
 #include <cstdio>
 

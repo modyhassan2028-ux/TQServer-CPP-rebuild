@@ -2,11 +2,11 @@
 // Title.dll — Unit D11 regression: the full RB map + the
 // mgr CRUD (find-or-create / delete user titles)
 // Must print TITLE-D11-OK.
-#include "../Exe/Dll/Title/Port/TitleMap.h"
-#include "../Exe/Dll/Title/Port/TitleMgr.h"
-#include "../Exe/Dll/Title/Port/TitleGrant.h"
-#include "../Exe/Dll/Title/Port/TitleModule.h"
-#include "../Exe/Dll/Title/Port/TitleRecord.h"
+#include "../modules/title/src/TitleMap.h"
+#include "../modules/title/src/TitleMgr.h"
+#include "../modules/title/src/TitleGrant.h"
+#include "../modules/title/src/TitleModule.h"
+#include "../modules/title/src/TitleRecord.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

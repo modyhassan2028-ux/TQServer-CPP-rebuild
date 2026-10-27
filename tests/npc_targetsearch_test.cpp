@@ -1,4 +1,4 @@
-#include "../Exe/NpcServer/NpcTargetSearch.h"
+#include "../npcserver/NpcTargetSearch.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

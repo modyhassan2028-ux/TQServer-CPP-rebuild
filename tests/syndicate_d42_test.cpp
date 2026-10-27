@@ -9,10 +9,10 @@
 // the fixup case 3/5/6 chain, the 0x69 family
 // parametrization, and the SPECIAL nested destroy via
 // a counting seam.
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueMgrErOne.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueMgrErase.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueMgrLife.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
+#include "../modules/syndicate/src/SyndicateLeagueMgrErOne.h"
+#include "../modules/syndicate/src/SyndicateLeagueMgrErase.h"
+#include "../modules/syndicate/src/SyndicateLeagueMgrLife.h"
+#include "../modules/syndicate/src/SyndicateCrossMerit.h"
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>

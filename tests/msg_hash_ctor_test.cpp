@@ -1,7 +1,7 @@
 // M71b: the hash container ctor (FUN_1400103b0)
 // and reset (FUN_140010310) VERBATIM
-#include "../Exe/MsgServer/Port/MsgHashCtor.h"
-#include "../Exe/MsgServer/Port/MsgHashEnd.h"
+#include "../msgserver/MsgHashCtor.h"
+#include "../msgserver/MsgHashEnd.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

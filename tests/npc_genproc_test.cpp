@@ -1,7 +1,7 @@
 // CNpcGenerator::Generator (FUN_14005fc90) + ClusterType
 // (FUN_14005f7e0) + restock (FUN_14005fb30) - unit 12
-#include "../Exe/NpcServer/NpcGenerator.h"
-#include "../Exe/NpcServer/MsgAiNpcInfo.h"
+#include "../npcserver/NpcGenerator.h"
+#include "../npcserver/MsgAiNpcInfo.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

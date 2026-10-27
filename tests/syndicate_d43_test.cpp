@@ -7,10 +7,10 @@
 // special mgr node (470-family) carrying a populated
 // nested map erased through MgrErOne470 with the real
 // g_fnNestedErA.
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueMgrNested.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueMgrErOne.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueMgrErase.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
+#include "../modules/syndicate/src/SyndicateLeagueMgrNested.h"
+#include "../modules/syndicate/src/SyndicateLeagueMgrErOne.h"
+#include "../modules/syndicate/src/SyndicateLeagueMgrErase.h"
+#include "../modules/syndicate/src/SyndicateCrossMerit.h"
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>

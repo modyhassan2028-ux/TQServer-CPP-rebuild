@@ -1,6 +1,6 @@
 // MsgServer unit M16 - the tm date parser
 // FUN_140508070 with the VERBATIM month table
-#include "../Exe/MsgServer/Port/MsgDateParse.h"
+#include "../msgserver/MsgDateParse.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

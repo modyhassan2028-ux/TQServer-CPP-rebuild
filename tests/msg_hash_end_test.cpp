@@ -1,5 +1,5 @@
 // M71a: FUN_140009f20 - the END sentinel creator
-#include "../Exe/MsgServer/Port/MsgHashEnd.h"
+#include "../msgserver/MsgHashEnd.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

@@ -4,7 +4,7 @@
 // platform by re-parsing them (DLGTEMPLATEEX)
 // and asserting every control/title/geometry
 // against the PE-extraction ground truth
-#include "../Exe/NpcServer/Win/NpcWinRes.h"
+#include "../npcserver/NpcWinRes.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

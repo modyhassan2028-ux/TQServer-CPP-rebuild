@@ -3,7 +3,7 @@
 // CTickAnalyst family + IAnalyst + the singleton + tick
 // globals. Must print ANALYST-D1-OK.
 // ============================================================
-#include "../Exe/Dll/Analyst/Port/TickAnalyst.h"
+#include "../modules/analyst/src/TickAnalyst.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

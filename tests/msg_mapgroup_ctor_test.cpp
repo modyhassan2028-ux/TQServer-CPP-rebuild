@@ -1,6 +1,6 @@
 // M47: FUN_1400f0000 CMapGroupKernel ctor + container family
-#include "../Exe/MsgServer/Port/MsgMapGroupKernel.h"
-#include "../Exe/MsgServer/Port/MsgHashProbe.h"
+#include "../msgserver/MsgMapGroupKernel.h"
+#include "../msgserver/MsgHashProbe.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

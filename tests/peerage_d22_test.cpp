@@ -10,9 +10,9 @@
 #include <cstring>
 #include <string>
 #include <vector>
-#include "../Exe/Dll/Peerage/Port/PeerageMsgWire.h"
-#include "../Exe/Dll/Peerage/Port/PeerageModule.h"
-#include "../Exe/Dll/Peerage/Port/PeeragePromote.h"
+#include "../modules/peerage/src/PeerageMsgWire.h"
+#include "../modules/peerage/src/PeerageModule.h"
+#include "../modules/peerage/src/PeeragePromote.h"
 
 using namespace peerage;
 

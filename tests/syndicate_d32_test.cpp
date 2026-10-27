@@ -2,8 +2,8 @@
 // (the 0x30-node family): ctor + insert/find/erase/
 // erase-range/clear/dtor, all real, with the full
 // red-black validation.
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueTree.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
+#include "../modules/syndicate/src/SyndicateLeagueTree.h"
+#include "../modules/syndicate/src/SyndicateCrossMerit.h"
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>

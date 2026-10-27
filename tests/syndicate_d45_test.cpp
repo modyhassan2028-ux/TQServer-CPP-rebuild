@@ -6,9 +6,9 @@
 // the id → meed → league → grade chain), the
 // members-index walk (the vt(5)/vt(2) chain), and the
 // <8 check pass-through.
-#include "../Exe/Dll/Syndicate/Port/SyndicateSynMeed.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateModule.h"
+#include "../modules/syndicate/src/SyndicateSynMeed.h"
+#include "../modules/syndicate/src/SyndicateCrossMerit.h"
+#include "../modules/syndicate/src/SyndicateModule.h"
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>

@@ -1,8 +1,8 @@
 // MsgServer unit M18 - the key-exchange
 // receiver FUN_140505bc0
-#include "../Exe/MsgServer/Port/MsgKeyXchg.h"
-#include "../Exe/MsgServer/Port/MsgCastToken.h"
-#include "../Exe/MsgServer/Port/MsgMd5Service.h"
+#include "../msgserver/MsgKeyXchg.h"
+#include "../msgserver/MsgCastToken.h"
+#include "../msgserver/MsgMd5Service.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

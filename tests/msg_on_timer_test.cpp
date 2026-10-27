@@ -1,6 +1,6 @@
 // MsgServer unit M37 - the OnTimer
 // ASSEMBLY: the full lifecycle
-#include "../Exe/MsgServer/Port/MsgOnTimer.h"
+#include "../msgserver/MsgOnTimer.h"
 #include <cassert>
 #include <cstdio>
 #include <string>

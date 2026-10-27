@@ -1,5 +1,5 @@
 // pure logic: upgrade cost/chance math + cumulative per-plus bonus model
-#include "../Exe/MsgServer/ItemUpgrade.h"
+#include "../msgserver/ItemUpgrade.h"
 #include <cassert>
 #include <cstdio>
 #include <map>

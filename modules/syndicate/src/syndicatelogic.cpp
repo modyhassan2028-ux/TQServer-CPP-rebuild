@@ -1,13 +1,13 @@
 // SyndicateLogicTable1.cpp — unit D90 (the header has the
 // address map + the seam list).
 #include "modules/syndicate/src/syndicatelogic.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueCmp.h"       // LeagueMemberLookup
-#include "Exe/Dll/Syndicate/Port/SyndicateLogRemove.h"        // LogRecMapFind
-#include "Exe/Dll/Syndicate/Port/SyndicateCMsgCtors.h"        // the msg ctors
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueMgr.h"        // MgrUserLeagueId/Find
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueOpt.h"        // the string mgr
-#include "Exe/Dll/Syndicate/Port/SyndicateAppoint3de.h"       // the A84 seams
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueBeRobFlow.h"  // g_fnLbrOpDelete
+#include "modules/syndicate/src/SyndicateLeagueCmp.h"       // LeagueMemberLookup
+#include "modules/syndicate/src/SyndicateLogRemove.h"        // LogRecMapFind
+#include "modules/syndicate/src/SyndicateCMsgCtors.h"        // the msg ctors
+#include "modules/syndicate/src/SyndicateLeagueMgr.h"        // MgrUserLeagueId/Find
+#include "modules/syndicate/src/SyndicateLeagueOpt.h"        // the string mgr
+#include "modules/syndicate/src/SyndicateAppoint3de.h"       // the A84 seams
+#include "modules/syndicate/src/SyndicateLeagueBeRobFlow.h"  // g_fnLbrOpDelete
 #include <cstring>
 
 namespace syndicate {

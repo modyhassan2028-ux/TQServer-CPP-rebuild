@@ -1,9 +1,9 @@
 // ============================================================
 // Title.dll — Unit D5 regression: granting titles
 // Must print TITLE-D5-OK.
-#include "../Exe/Dll/Title/Port/TitleGrant.h"
-#include "../Exe/Dll/Title/Port/TitleRecord.h"
-#include "../Exe/Dll/Title/Port/TitleModule.h"
+#include "../modules/title/src/TitleGrant.h"
+#include "../modules/title/src/TitleRecord.h"
+#include "../modules/title/src/TitleModule.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

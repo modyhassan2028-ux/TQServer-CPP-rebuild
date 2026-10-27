@@ -9,10 +9,10 @@
 // floor reserve, op_new(8*cap), the elements-store-
 // then-copy order, the entry vt[0](,1) deletes, the
 // |= 8 name has-bit and the lazy 0x28 string slot.
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueBeRob.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateModule.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateCMsgCtors.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateMeedFlow.h"
+#include "modules/syndicate/src/SyndicateLeagueBeRob.h"
+#include "modules/syndicate/src/SyndicateModule.h"
+#include "modules/syndicate/src/SyndicateCMsgCtors.h"
+#include "modules/syndicate/src/SyndicateMeedFlow.h"
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>

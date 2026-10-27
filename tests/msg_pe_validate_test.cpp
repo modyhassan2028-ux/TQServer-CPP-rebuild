@@ -1,7 +1,7 @@
 // MsgServer unit M26 - the manual PE
 // loader validation + size computation
 // FUN_140509760 + FUN_140509820
-#include "../Exe/MsgServer/Port/MsgPeValidate.h"
+#include "../msgserver/MsgPeValidate.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

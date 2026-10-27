@@ -1,6 +1,6 @@
 // MsgServer unit M17 - the server stamp
 // FUN_140508740 / FUN_1405086f0
-#include "../Exe/MsgServer/Port/MsgServerStamp.h"
+#include "../msgserver/MsgServerStamp.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

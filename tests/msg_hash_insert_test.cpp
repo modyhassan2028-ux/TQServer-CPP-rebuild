@@ -1,8 +1,8 @@
 // M71: the hash insert family (FUN_14000f880 +
 // FUN_14000fd50 + FUN_140010970) VERBATIM
-#include "../Exe/MsgServer/Port/MsgHashInsert.h"
-#include "../Exe/MsgServer/Port/MsgHashCtor.h"
-#include "../Exe/MsgServer/Port/MsgHashProbe.h"
+#include "../msgserver/MsgHashInsert.h"
+#include "../msgserver/MsgHashCtor.h"
+#include "../msgserver/MsgHashProbe.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

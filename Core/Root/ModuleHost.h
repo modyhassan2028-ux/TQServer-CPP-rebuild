@@ -1,6 +1,6 @@
 // CModuleHost + CWorldKernelHost - the module-loading side of the original ABI.
 //
-// The original MsgServer builds every game-system DLL from Modules/<System>/
+// The original MsgServer builds every game-system DLL from modules/<System>/
 // and each DLL's exported ModuleCreate(kernel, index, r1, r2) registers its
 // message types and processor with the world kernel. This host reproduces
 // that wiring: it loads the DLLs, passes the kernel, records every

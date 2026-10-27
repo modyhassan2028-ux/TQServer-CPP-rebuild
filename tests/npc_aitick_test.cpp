@@ -1,6 +1,6 @@
 // CNpcAiTick (FUN_14005ada0, vtable +0xe0) - test
-#include "../Exe/NpcServer/NpcAiTick.h"
-#include "../Exe/NpcServer/NpcTransform.h"
+#include "../npcserver/NpcAiTick.h"
+#include "../npcserver/NpcTransform.h"
 #include <cassert>
 #include <cstdio>
 using namespace npc;

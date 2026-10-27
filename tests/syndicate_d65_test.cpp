@@ -4,15 +4,15 @@
 // notes; this file asserts the literal gates, the
 // six-arg charges, the mail struct, the TimeGet
 // date math and the E2E case 0x27.
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueSalary.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"  // g_fnGetGameMgr
-#include "Exe/Dll/Syndicate/Port/SyndicateCMsgCtors.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueGmName.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueMgr.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueOpt.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLogRemove.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateMeedFlow.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateModule.h"
+#include "modules/syndicate/src/SyndicateLeagueSalary.h"
+#include "modules/syndicate/src/SyndicateCrossMerit.h"  // g_fnGetGameMgr
+#include "modules/syndicate/src/SyndicateCMsgCtors.h"
+#include "modules/syndicate/src/SyndicateLeagueGmName.h"
+#include "modules/syndicate/src/SyndicateLeagueMgr.h"
+#include "modules/syndicate/src/SyndicateLeagueOpt.h"
+#include "modules/syndicate/src/SyndicateLogRemove.h"
+#include "modules/syndicate/src/SyndicateMeedFlow.h"
+#include "modules/syndicate/src/SyndicateModule.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

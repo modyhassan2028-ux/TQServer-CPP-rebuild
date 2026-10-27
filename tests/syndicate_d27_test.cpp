@@ -9,7 +9,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
-#include "../Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
+#include "../modules/syndicate/src/SyndicateCrossMerit.h"
 
 using namespace syndicate;
 using std::string;

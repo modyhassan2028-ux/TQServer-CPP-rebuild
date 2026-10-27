@@ -31,7 +31,7 @@
 
 1. **Verbatim من الديكومبايل** — المرجع: `conquer-online-v6159-decompiled/Native-Decompiled/Syndicate.dll.decompiled.c` (repo التحليل الثاني).
 2. المُشيّدات/المدمرات تُختبر بـ counting registry (malloc tab + operator new/delete override) — القالب جاهز في `tests/syndicate_d40_test.cpp`.
-3. الوحدات في `Exe/Dll/Syndicate/Port/`، الاختبارات `tests/syndicate_dXX_test.cpp`.
+3. الوحدات في `modules/syndicate/src/`، الاختبارات `tests/syndicate_dXX_test.cpp`.
 4. بعد كل وحدة: رجريشن كامل (كل ملفات tests على O0) ثم PORTING_LOG.md + HANDOFF.md + commit + push.
 5. مسارات العمل داخل `/app/conversations/6ada078e9883f31f19597098/work/TQServer-CPP-rebuild`.
 
@@ -78,7 +78,7 @@
 ## تحديث D59 (2026-10-26)
 
 - **D59 مقفول**: أول جسدين Process حرفيين — CMsgLog (0x1417d97c0) + CMsgSynChgDomName (0x1417daee0) + نداء الذيل 1417ac7d0 منقول من التفكيك مباشرة (`rcx=[p+8]; rax=[rcx]; jmp [rax+8]` — الـ decompiler أظهره "jumptable" وهمياً؛ الحرفية: deref اثنتان فقط).
-- رجريجن **63/63 × 6** + ‏ASan نظيف. الملفات: `Exe/Dll/Syndicate/Port/SyndicateMsgProcess.{h,cpp}`، اختبار قسمين.
+- رجريجن **63/63 × 6** + ‏ASan نظيف. الملفات: `modules/syndicate/src/SyndicateMsgProcess.{h,cpp}`، اختبار قسمين.
 - **دروس مهمة**: (1) ثق بالتفكيك على الـ decompiler في النndlات القصيرة — 1417ac7d0 كان 3 تعليمات فقط. (2) ثقوب vtable الأساسية 14177e2d0/2e0/2f0 هي Process-error loggers حرفية ("tq::CMsg::Process(...) error") وليست Init. (3) tq::CMsg::Init الحقيقي @ 1417e8016 = ‏thunk للـ PB runtime (نفس عائلة 1417e8050 الـ TBD).
 - **الترتيب التالي (D60+)**: بقية أجسام Process من الجرد — LeagueOpt (0x1417d68d0) ثم LeagueRobOpt (0x1417d8920)، أو إغلاق العمق أولاً: 1417b7010 (تدفق سجل الإعلان) / 1417ac620 (إزالة السجل) / 1417afb20 (فحص الاسم) — كلها seams مفتوحة موثقة في PORTING_LOG.
 
@@ -86,7 +86,7 @@
 
 ## تحديث D60 (2026-10-26)
 
-- **D60 مقفول**: تدفق إزالة سجل المستخدم 1417ac620 (جسم الـ seam من D59) + 13 دالة تابعة حرفية في `Exe/Dll/Syndicate/Port/SyndicateLogRemove.{h,cpp}` — مشيات خريطة حمراء-سوداء حرفية (LogRecMapFind/AcctTreeFind/AcctFieldSet)، وسم+تيك (RecFlagTick عبر vt slots 2/22/7)، getters الرتبة، مقارنة الفرز، فرز الفيكتور بفحصي checked-iterator (invalid مرتان)، فرع الجلسة (+0x4f0 owner → إدراج → إرسال)، ومسح (ErasePrep).
+- **D60 مقفول**: تدفق إزالة سجل المستخدم 1417ac620 (جسم الـ seam من D59) + 13 دالة تابعة حرفية في `modules/syndicate/src/SyndicateLogRemove.{h,cpp}` — مشيات خريطة حمراء-سوداء حرفية (LogRecMapFind/AcctTreeFind/AcctFieldSet)، وسم+تيك (RecFlagTick عبر vt slots 2/22/7)، getters الرتبة، مقارنة الفرز، فرز الفيكتور بفحصي checked-iterator (invalid مرتان)، فرع الجلسة (+0x4f0 owner → إدراج → إرسال)، ومسح (ErasePrep).
 - رجريجن **64/64 × 6** + ‏ASan نظيف (اختبار 9 أقسام + تدفقان E2E).
 - **دروس مهمة**: (1) أزواج iterator في الديكمبايلر = فتحات ستاك متجاورة — حوّلها دائماً `aPair[2]` صريح (ASan يكشفها). (2) عقدة شجرة الحسابات stride 0x40 بـ isnil@+0x3d. (3) نداءات vt عبر فهرسة slot صريحة لا **(code**).
 - **المتبقي في Syndicate.dll (~20-30 دالة، ~4% من نطاق اللعبة)**: أجسام Process لفئات CMsg المتبقية (LeagueOpt 0x1417d68d0، LeagueRobOpt 0x1417d8920، وبقية الجرد)، 1417b7010 (تدفق سجل الإعلان)، 1417afb20 (فحص تغيير الاسم)، جدول CSyndicateLogic (232 فتحة)، IProvider (224)، إغلاق ModuleCreate (14177ec90)، وهدفان فك يدوي (1417ab8c0، 1417ac2d0).
@@ -114,7 +114,7 @@
 
 ## تحديث D63 (2026-10-26)
 
-- **D63 مقفولة**: تدفق تطبيق اسم النقابة 1417b0a40 (جسم seam ‏g_fn1417b0a40 من حالة 6) + 6 مساعدين حرفيين في `Exe/Dll/Syndicate/Port/SyndicateLeagueNameApply.{h,cpp}` — الفاحصات (cb0/e00/4030)، علم 1000 ‏(1417868c0)، مشيّة "الاسم مأخوذ" على خريطة العصبات (14175eb70)، ومنسّق tq::CString ‏(1417215d0).
+- **D63 مقفولة**: تدفق تطبيق اسم النقابة 1417b0a40 (جسم seam ‏g_fn1417b0a40 من حالة 6) + 6 مساعدين حرفيين في `modules/syndicate/src/SyndicateLeagueNameApply.{h,cpp}` — الفاحصات (cb0/e00/4030)، علم 1000 ‏(1417868c0)، مشيّة "الاسم مأخوذ" على خريطة العصبات (14175eb70)، ومنسّق tq::CString ‏(1417215d0).
 - **الاكتشاف الحرج (تفكيك خام)**: النداءان لـ 141743cb0 ظهرا في الديكمبايلر بلا فهرس؛ الخام أظهر `mov edx,8` ثم `mov edx,2` — الفهرس يعبر خلال الـ tail-jump إلى فتحة resolve (+0x10). الدالة ثنائية الوسائط.
 - رجريجن **67/67 × 6** + ‏ASan نظيف (9 أقسام + E2E عبر موزّع D61).
 - **دروس مهمة**: (1) سطور InlineLogERROR حرفية: 322 ‏(cb0, ""/"")، 431 ‏(4030, CHECK/m_pRec)، 1128 ‏(8c0, IF_OK/m_pRec, synattr.cpp). (2) strncmp ‏بحد 0x10 مش قص بادئة — التطابق يقع فقط إن اتفقت أول 0x10 بايت. (3) مخازن std::string ‏الحرفية في الستاك تُبنى بـ union raw + placement-ctor يدوي وإلا double-free.
@@ -124,7 +124,7 @@
 
 ## تحديث D64 (2026-10-26)
 
-- **D64 مقفولة**: تدفق تغيير اسم النقابة GM ‏1417b03b0 (جسم seam ‏g_fn1417b03b0 من حالة 0x33) + قارئ السعر 14174e750 ‏(*(uint*)(host+0x18c)) في `Exe/Dll/Syndicate/Port/SyndicateLeagueGmName.{h,cpp}`.
+- **D64 مقفولة**: تدفق تغيير اسم النقابة GM ‏1417b03b0 (جسم seam ‏g_fn1417b03b0 من حالة 0x33) + قارئ السعر 14174e750 ‏(*(uint*)(host+0x18c)) في `modules/syndicate/src/SyndicateLeagueGmName.{h,cpp}`.
 - **اكتشافات التفكيك الخام**: (1) cb0 الوحيد هنا edx=2 ولا بوابة sub-8. (2) vt+0x140 ‏ستة وسائط: (mgr, actor, 0, price, 0x43, byte 1). (3) MyLogSave ‏بخمسة varargs موثقة كاملة ("gmlog/emoney_buy", "%u\t%s\t%u\t350\t4237\t%d\t%d\t1\t") — seam كامل g_fnGmNameLogSave بخلاف TBD-LOGSAVE القديم. (4) بوابة e3f0 **معكوسة** عن b0a40 (≠ synId، الاسم وسيط خامس). (5) لا SetFlagFlush ولا rec4.
 - **تصحيح D63**: kCStrVftable ‏= 0x141824cf0 ‏(كان 0x14182cef0 خطأ حسابياً) + static_assert.
 - رجريجن **68/68 × 6** + ‏ASan نظيف (4 أقسام + E2E ‏0x33).
@@ -134,7 +134,7 @@
 
 ## تحديث D65 (2026-10-26)
 
-- **D65 مقفولة**: توزيع رواتب النقابة ‏1417b4310 ‏(جسم seam g_fn1417b4310 من حالة 0x27) في `Exe/Dll/Syndicate/Port/SyndicateLeagueSalary.{h,cpp}`: ثلاثة أنواع (مساهمة emoney / emoney / سقوط type4) بمقاطعها الحرفية، مشيتا خرائط الرواتب والأعضاء (مفاتيح u16/u32)، بنية الإيميل كاملة عبر vt+0x118، والرد CMsgLeagueOpt بعلم single-shot (0x508→0x500) أو حلقة البريد.
+- **D65 مقفولة**: توزيع رواتب النقابة ‏1417b4310 ‏(جسم seam g_fn1417b4310 من حالة 0x27) في `modules/syndicate/src/SyndicateLeagueSalary.{h,cpp}`: ثلاثة أنواع (مساهمة emoney / emoney / سقوط type4) بمقاطعها الحرفية، مشيتا خرائط الرواتب والأعضاء (مفاتيح u16/u32)، بنية الإيميل كاملة عبر vt+0x118، والرد CMsgLeagueOpt بعلم single-shot (0x508→0x500) أو حلقة البريد.
 - **اكتشافات التفكيك الخام**: (1) قراءة الرتبة vt+0x518 (فتحة **163**) قبل موزّع الأنواع. (2) ‏esi ‏النوع 3 = **الحرة** مش emoney. (3) الماجيك 0xd1b71759 ‏shr 13 = قسمة على **10000** (مش 86400) — معادلة تاريخ البريد الحرفية. (4) السلسلة المسحوبة من StringMgr هي الـ format ‏نفسه لـ _snprintf بثلاثة varargs. (5) ‏vt+0x298 ‏بياخد دلتا **int64** سالبة (-cost). (6) ‏vt+0x140 ‏بستة وسائط والوسيط الخامس **0x49** ‏(0x43 في D64) + سطر gmlog 4318.
 - رجريجن **69/69 × 6** + ‏ASan نظيف (7 أقسام + E2E ‏0x27 عبر موزّع D61). ملاحظة: UBSan بيعترض على stores غير المحاذاة في PB ‏— حرفية مقصودة، البروتوكول ASan-only.
 - **التالي (D66+)**: من الأعماق الموثقة — 1417b98e0، 1417b0680 ‏(الإعلان — AnnounceStrCheck + ‏STR_INVALID_CHARACTER + 1417ac750)، 1417b48b0، 1417b4d60، 1417b0ea0، 1417b3300، 1417bed70، 1417b3a90، أو جدول CSyndicateLogic ‏(232 فتحة)، ثم ModuleCreate ‏(14177ec90) وهدايا الفك اليدوي 1417ab8c0/1417ac2d0.
@@ -144,7 +144,7 @@
 - **الجرد المكتمل (مسح بيناري)**: نمط qword (slot2=0x14177e2f0، slot4=0x14177e2d0) → **32 جدول CMsg**؛ ربط كل فئة بـ Process عبر تفكيك المُشيّدات (lea rip-rel). ‏4 مقفولين سابقاً + ‏12 هنا + ‏CMsgSyndicate ‏(1417db7b0، 416 سطراً → D67 لوحده) + الباقي stubs.
 - **الأجسام**: SynDomain/SynProffer/SynAttrInfo/SynMemberInfo/SynMemberList/SynBaseProffer(`ret 0`)/SynProfferRank/SelfSynMemAwardRank(جدول قفز 13 خانة عند 0x1417da7d0)/SynRecruitAdvertising(نداء 11 وسطاً vt+0x3e8)/SynRecruitAdvertisingOpt/SynRecruitAdvertisingList(movsxd)/LeagueToken(vt+0x610 سبعة وسطاء / vt+0x608).
 - **كذبات الديكومبايلر المكتشفة بالخام**: (1) ‏ac6f0/ac710 بياخدوا (logic, actor) — edx عدّاي عبر mgr-thunk. (2) ‏ac810(logic, actor). (3) ‏**b2df0(logic, actor, u32* out×3)** — مؤشرات OUT حذفها الديكومبايلر. (4) ‏`cmp r12d,r12d` ‏no-op حرفي في حالة 2-7. (5) جدول القفز: 8/9 → افتراضي. (6) ‏**r9 stale** في كل نداءات ac750. (7) اسم الإعلان > 0xff → عودة صامتة بدون announce.
-- الملفات: `Exe/Dll/Syndicate/Port/SyndicateMsgProcess2.{h,cpp}` + `tests/syndicate_d66_test.cpp` (12 قسماً، 39 تأكيداً).
+- الملفات: `modules/syndicate/src/SyndicateMsgProcess2.{h,cpp}` + `tests/syndicate_d66_test.cpp` (12 قسماً، 39 تأكيداً).
 - رجريجن **70/70 × 6** + ‏ASan نظيف.
 - **التالي (D67+)**: ‏CMsgSyndicate::Process (0x1417db7b0) وحدة مستقلة، ثم الأعماق الموثقة (1417b98e0، 1417b03b0، 1417b0680، 1417b48b0، 1417b4d60، 1417b0ea0، 1417b3300، 1417bed70، 1417b3a90)، جدول CSyndicateLogic (232 فتحة)، إغلاق ModuleCreate (14177ec90)، وفك يدوي 1417ab8c0/1417ac2d0.
 
@@ -152,7 +152,7 @@
 
 - فك 3 جداول قفز (رئيسي 29 حالة + جدولا الرتب). **انتبه: r13=0x141720000 — الجداول عند 0x1417dc87c/944/95c بعد نهاية الدالة.**
 - كذبات الديكومبايلر: كل _snprintf خمسة وسائط «%d %d %d %d %d» (rank, ce0ret/1, a50ret/1, ac430ret, ثابت لكل رتبة: 0/650/320/270/100/0)؛ عائد ac430 مستخدم؛ ac7f0 بياخد الـ GetString buffer؛ r9=0x100 متقادم في 0x1b؛ r9=ac800ret في 0x1d؛ معالج 0x348 بدون memset؛ 0x25 يرد عبر CMsgSyndicate كومة-مكدس (مُشيّد D57) وac7d0 مرسالها stackMsg بينما 0x2d مرسالها الرسالة الواردة.
-- الملفات: `Exe/Dll/Syndicate/Port/SyndicateMsgSyndicate.{h,cpp}` + `tests/syndicate_d67_test.cpp` (13 قسماً، 67 تأكيداً، خريطة D34 حقيقية للسلسلة).
+- الملفات: `modules/syndicate/src/SyndicateMsgSyndicate.{h,cpp}` + `tests/syndicate_d67_test.cpp` (13 قسماً، 67 تأكيداً، خريطة D34 حقيقية للسلسلة).
 - رجريجن **71/71 × 6** + ASan نظيف.
 - **التالي (D68+)**: طبقة CMsg كلها مقفولة الآن — انتقال للأعماق: 1417b98e0، 1417b03b0، 1417b0680، 1417b48b0، 1417b4d60، 1417b0ea0، 1417b3300، 1417bed70، 1417b3a90 (التحزيم ممكن)، جدول CSyndicateLogic (232 فتحة)، إغلاق ModuleCreate (14177ec90)، وفك يدوي 1417ab8c0/1417ac2d0.
 
@@ -160,7 +160,7 @@
 
 ## تحديث D89 (2026-10-27)
 
-- **D89 مقفولة**: CLeagueMgr::FlyToInvadeWarning (141774500، 299 سطراً) + كيت CMsgInvadeWarning الحرفي (المُشيّد 1417d50f0 / Init النوع 0xc1c عبر 1417d5250 / فحص الإنشاء 1417d5170 / المدمران) في `Exe/Dll/Syndicate/Port/SyndicateLeagueInvadeWarn.{h,cpp}`.
+- **D89 مقفولة**: CLeagueMgr::FlyToInvadeWarning (141774500، 299 سطراً) + كيت CMsgInvadeWarning الحرفي (المُشيّد 1417d50f0 / Init النوع 0xc1c عبر 1417d5250 / فحص الإنشاء 1417d5170 / المدمران) في `modules/syndicate/src/SyndicateLeagueInvadeWarn.{h,cpp}`.
 - رجريجن **93/93 × 6** + ‏ASan/UBSan نظيف (اختبار 10 أقسام، 26 تأكيداً، التقاط محتوى الرسالة وقت الإرسال).
 - **دروس مهمة**: (1) بوابة vt+0x288 ‏this ‏فقط (الخام بلا edx). (2) رأس الخريطة يُقرأ من *(map+0x30) — 600 عشري في الديكمبايل = +0x258. (3) local_538 = قيمة إرجاع rax من إدراج الخريطة الفرعية. (4) 4 نداءات operator_delete حرفية في مسار الإدراج. (5) بوابة الـ pop: plVar3 != *plVar3.
 - **التالي (D90+)**: بقية نطاق Syndicate.dll ‏— أجسام Process/CMsg ‏المتبقية من الجرد، 1417b4310 ‏(237)، جدول CSyndicateLogic (232)، IProvider (224)، إغلاق ModuleCreate (14177ec90)، هدفا الفك اليدوي (1417ab8c0، 1417ac2d0).

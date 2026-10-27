@@ -12,8 +12,8 @@
 #include <cstring>
 #include <cstdlib>
 #include <vector>
-#include "../Exe/Dll/Syndicate/Port/SyndicateMapTree.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
+#include "../modules/syndicate/src/SyndicateMapTree.h"
+#include "../modules/syndicate/src/SyndicateCrossMerit.h"
 
 using namespace syndicate;
 

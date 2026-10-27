@@ -9,10 +9,10 @@
 // threshold 0x21, depth 3/4, heap fallback). The
 // invariants: lexicographic DESC by (type, grade,
 // sub0), permutation preservation, all size bands.
-#include "../Exe/Dll/Syndicate/Port/SyndicateMeedSort.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateMeedFlow.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateSynMeed.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
+#include "../modules/syndicate/src/SyndicateMeedSort.h"
+#include "../modules/syndicate/src/SyndicateMeedFlow.h"
+#include "../modules/syndicate/src/SyndicateSynMeed.h"
+#include "../modules/syndicate/src/SyndicateCrossMerit.h"
 #include <algorithm>
 #include <cassert>
 #include <cstdio>

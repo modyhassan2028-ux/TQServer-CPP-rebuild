@@ -1,7 +1,7 @@
 // MsgServer unit M29 - the CMD5Checksum
 // object family + the two REAL vftables
-#include "../Exe/MsgServer/Port/MsgMd5Object.h"
-#include "../Exe/MsgServer/Port/MsgMd5Ctor.h"
+#include "../msgserver/MsgMd5Object.h"
+#include "../msgserver/MsgMd5Ctor.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

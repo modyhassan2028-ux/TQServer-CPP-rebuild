@@ -1,4 +1,4 @@
-#include "../Exe/NpcServer/NpcCellCheck.h"
+#include "../npcserver/NpcCellCheck.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

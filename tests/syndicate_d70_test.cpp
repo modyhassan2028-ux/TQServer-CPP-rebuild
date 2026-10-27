@@ -10,11 +10,11 @@
 // the result set, the (E) walked-key inserts + type-4 sends,
 // the name-failure skip, the aggregate type-2/type-4 blocks
 // with the flush-and-restart dance, and the teardown order.
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueBeRobFlow.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueBeRob.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateModule.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateCMsgCtors.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateMeedFlow.h"
+#include "modules/syndicate/src/SyndicateLeagueBeRobFlow.h"
+#include "modules/syndicate/src/SyndicateLeagueBeRob.h"
+#include "modules/syndicate/src/SyndicateModule.h"
+#include "modules/syndicate/src/SyndicateCMsgCtors.h"
+#include "modules/syndicate/src/SyndicateMeedFlow.h"
 #include <cstdio>
 #include <cstring>
 #include <cstdio>

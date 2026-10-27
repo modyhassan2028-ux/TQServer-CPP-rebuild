@@ -1,13 +1,13 @@
 // SyndicateLeagueInvadeWarn.cpp — unit D89 (see the header
 // for the address map and the seam list).
 #include "modules/syndicate/src/league.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLogRemove.h"        // g_fnTreeFindAF0
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueMgrNested.h"  // NestedErOneB/RangeB
-#include "Exe/Dll/Syndicate/Port/SyndicateLeaguePlunderSignup.h"   // g_fnSupTimeGet
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueOpt.h"         // str mgr seams
-#include "Exe/Dll/Syndicate/Port/SyndicateMsgProcess.h"        // g_fnCMsgInitThunk
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueCmp.h"         // g_fnLeagueInvalid
-#include "Exe/Dll/Syndicate/Port/SyndicateProfferRankList.h"   // g_pvD87CMsgVft
+#include "modules/syndicate/src/SyndicateLogRemove.h"        // g_fnTreeFindAF0
+#include "modules/syndicate/src/SyndicateLeagueMgrNested.h"  // NestedErOneB/RangeB
+#include "modules/syndicate/src/SyndicateLeaguePlunderSignup.h"   // g_fnSupTimeGet
+#include "modules/syndicate/src/SyndicateLeagueOpt.h"         // str mgr seams
+#include "modules/syndicate/src/SyndicateMsgProcess.h"        // g_fnCMsgInitThunk
+#include "modules/syndicate/src/SyndicateLeagueCmp.h"         // g_fnLeagueInvalid
+#include "modules/syndicate/src/SyndicateProfferRankList.h"   // g_pvD87CMsgVft
 #include <cstring>
 
 namespace syndicate {

@@ -1,7 +1,7 @@
 // MsgServer unit M19 - the session
 // cipher pair FUN_140504b80/bf0
-#include "../Exe/MsgServer/Port/MsgSessionCipher.h"
-#include "../Exe/MsgServer/Port/MsgKeyXchg.h"
+#include "../msgserver/MsgSessionCipher.h"
+#include "../msgserver/MsgKeyXchg.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

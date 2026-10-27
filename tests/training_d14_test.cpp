@@ -7,8 +7,8 @@
 // rebalance), the rotations 1419e2000/1419e26a0,
 // IteratorNext 1419e2100.
 // Must print TRAINING-D14-OK.
-#include "../Exe/Dll/Training/Port/TrainingMap.h"
-#include "../Exe/Dll/Training/Port/TrainingMgr.h"
+#include "../modules/training/src/TrainingMap.h"
+#include "../modules/training/src/TrainingMgr.h"
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>

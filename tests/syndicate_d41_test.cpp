@@ -5,10 +5,10 @@
 // seams still null (never reached on empty maps), the
 // full ctor→dtor balance, and the fast-path output
 // iterator shape checked directly per family.
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueMgrErase.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueMgrLife.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueLife.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateCrossMerit.h"
+#include "../modules/syndicate/src/SyndicateLeagueMgrErase.h"
+#include "../modules/syndicate/src/SyndicateLeagueMgrLife.h"
+#include "../modules/syndicate/src/SyndicateLeagueLife.h"
+#include "../modules/syndicate/src/SyndicateCrossMerit.h"
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>

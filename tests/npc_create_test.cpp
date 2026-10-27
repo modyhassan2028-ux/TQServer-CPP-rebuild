@@ -1,5 +1,5 @@
 // CNpc::Create (FUN_14005e2e0) - unit 10
-#include "../Exe/NpcServer/NpcCreate.h"
+#include "../npcserver/NpcCreate.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

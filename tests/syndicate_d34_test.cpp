@@ -15,9 +15,9 @@
 #include <algorithm>
 #include <vector>
 #include <utility>
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueTree.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueSort.h"
-#include "../Exe/Dll/Syndicate/Port/SyndicateLeagueCmp.h"
+#include "../modules/syndicate/src/SyndicateLeagueTree.h"
+#include "../modules/syndicate/src/SyndicateLeagueSort.h"
+#include "../modules/syndicate/src/SyndicateLeagueCmp.h"
 
 using namespace syndicate;
 

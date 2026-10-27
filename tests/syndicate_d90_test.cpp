@@ -1,10 +1,10 @@
 // syndicate_d90_test — the CSyndicateLogic table wave 1.
-#include "Exe/Dll/Syndicate/Port/SyndicateLogicTable1.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueCmp.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLogRemove.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueOpt.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateAppoint3de.h"
-#include "Exe/Dll/Syndicate/Port/SyndicateLeagueBeRobFlow.h"  // g_fnLbrOpDelete
+#include "modules/syndicate/src/SyndicateLogicTable1.h"
+#include "modules/syndicate/src/SyndicateLeagueCmp.h"
+#include "modules/syndicate/src/SyndicateLogRemove.h"
+#include "modules/syndicate/src/SyndicateLeagueOpt.h"
+#include "modules/syndicate/src/SyndicateAppoint3de.h"
+#include "modules/syndicate/src/SyndicateLeagueBeRobFlow.h"  // g_fnLbrOpDelete
 #include <cassert>
 #include <cstdio>
 #include <cstring>

@@ -1,5 +1,5 @@
 // CNpcManager::ProcessGenerators (FUN_14002b380) - test
-#include "../Exe/NpcServer/NpcManager.h"
+#include "../npcserver/NpcManager.h"
 #include <cassert>
 #include <cstdio>
 using namespace npc;

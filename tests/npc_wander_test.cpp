@@ -1,5 +1,5 @@
 // CNpcWander (FUN_140087d50) - faithful port test
-#include "../Exe/NpcServer/NpcWander.h"
+#include "../npcserver/NpcWander.h"
 #include <cassert>
 #include <cstdio>
 using namespace npc;

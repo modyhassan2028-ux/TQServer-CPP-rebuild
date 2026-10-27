@@ -3,8 +3,8 @@
 // (CModule 0xc48, ModuleCreate, Init) + the static
 // CTrainingMgr singleton + the kernel core ctor/dtor/clear.
 // Must print TRAINING-D13-OK.
-#include "../Exe/Dll/Training/Port/TrainingMgr.h"
-#include "../Exe/Dll/Training/Port/TrainingModule.h"
+#include "../modules/training/src/TrainingMgr.h"
+#include "../modules/training/src/TrainingModule.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>
