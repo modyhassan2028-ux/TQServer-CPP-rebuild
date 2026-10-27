@@ -5658,3 +5658,55 @@ qwords — أي فهرسة متتالية هكذا تعني بايتات؛
 **التالي:** أجسام OnTimer/OnProcess لهذه
 الكلاسات (تبدأ بـ CMapGroupThread 1400f3xxx
 منطقة والسوكت 14002bxxx).
+
+## المسار أ-4 — CMapGroupThread::OnProcess (14001d530) [2026-10-28]
+
+**مصدر حاسم: التفكيك الخام** (objdump على
+MsgServer.exe الأصلي عند 14001d530-14001d7e0)
+— استُخدم كحكم نهائي حيث قصّر الديكمبايلر:
+- معاملات ERROR log: edx=packet من
+  [rsp+0x54] وr8d=port من [rsp+0x50] (بنية
+  رسالة 16 بايت: port/packet/arg58/arg5c)
+- الـ WARNING "resync ... deviation %dms"
+  يُستدعى **بالنص فقط دون أي معامل** (rcx
+  فقط) — الـ %d يقرأ قيمة غير محددة (سلوك
+  أصلي حرفي)
+- عتبة الـ resync: `cmp edx,0x2710; ja` —
+  أي resync عند diff > 10000، وإلا
+  base += 0x7d (125)
+- WaitMsg: (queue, -1, -1, 0x418, buf*,
+  &info*) — buf عند rsp+0xd0 (0x420 بايت)،
+  info عند rsp+0x50
+- PeekMsg: (queue, DAT_140949640) — يستلم
+  الـ idle المحسوب من الدورة السابقة
+- الإحصاءات عند 0x140975660: cum عند
+  +0x64 بـ **lock xadd**، cnt عند +0x78
+  بـ **lock add**، max عند +0x50 **بدون
+  lock** (cmp/mov خام)، idx = queueId - 0xe
+  مقصوص إلى <= 4
+- idle: since = t2 - base؛ إن < 0x7d →
+  idle = 0x7d - since وإلا 0
+- تسلسل CTickAnalyst الحرفي: 0x47
+  ("CMapGroupThread WaitMsg") حول PeekMsg،
+  0 حول الكل، 0xc حول kernel OnTimer، 1
+  حول ProcessMsg
+
+**المنقول في msgserver/threads/
+MsgMapGroupThread.{h,cpp}:** الجسم كاملاً
+مع الستاتيك الخام (g_MGFirstRun/g_MGResync
+Base/g_MGCum/g_MGCnt/g_MGMax/g_MGIdleMs) و
+seam للواجهتين (queue عند +0x48، kernel عند
++0x40).
+
+**الاختبار msg_mapgroup_test.cpp:** 5 أقسام
+(مسار الخمول بساعة متدرجة، الـ resync
+بالنص الحرفي، حلقة التصريف مع WaitMsg×4
+حتى false وثلاث سجلات ERROR بأزواج packet:
+port الحرفية، الإحصاءات مع idx خارج النطاق،
+انتقال الـ idle بين الدورات). رجريجن
+**59/59 ×6** + ASan/UBSan نظيف.
+
+**التالي:** باقي أجسام أ-3 (CSocketThread
+14002bxxx، CWorldThread، CUserLoginThread،
+CChatThread، CAuctionSearchThread...) بنفس
+منهجية objdump-التحقق.

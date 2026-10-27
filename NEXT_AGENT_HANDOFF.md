@@ -698,3 +698,28 @@ CrossClient/Chat/Ipad/ChangeServer/Google).
 بمنطقة 1400f3xxx (CMapGroupThread) و
 14002bxxx (CSocketThread) في
 MsgServer.exe.decompiled.c.
+
+---
+
+## المسار أ-4 — CMapGroupThread::OnProcess [2026-10-28]
+
+**المنتهي:** 14001d530 كاملاً في
+msgserver/threads/MsgMapGroupThread.{h,cpp}
+(راجع PORTING_LOG لتفاصيل objdump: بنية
+الرسالة 16 بايت، عتبة 0x2710، WARNING بلا
+معاملات، إحصاءات lock xadd/lock add/بدون
+lock، idle 0x7d). 5/5 + رجريجن 59/59×6 +
+ASan.
+
+**منهجية معتمدة للباقي:** objdump الخام
+(الملف في
+/app/co_decomp/orig_binaries/Source/
+MsgServer.exe) هو الحكم عند أي غموض في
+المعاملات؛ الديكمبايلر يفقد معاملات
+varargs وبعض عتبات المقارنة.
+
+**التالي:** CSocketThread (14002bxxx —
+OnProcess بحلقة CONNECTMSG/READMSG/
+EVENTMSG/SO_BROADCAST_MAPGROUPMSG/
+SOCKET_SENDMULTICLIENTMSG)، ثم World/
+UserLogin/Chat/Auction بنفس الطريقة.
