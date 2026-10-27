@@ -94,6 +94,21 @@ extern void*    (*g_fnStringMgrGetStr)(void*, const char*);
 extern char     (*g_fnA84HasOldPos)(void*);
 extern uint32_t (*g_fnA84GetOldId)(void*);
 
+// ---- D100 seams (+0x2d0 title flow) ----
+extern int32_t (*g_fn74E920)(void*);               // 14174e920
+extern int32_t (*g_fn74E930)(void*);               // 14174e930
+extern int*    (*g_fnCQLanguageGet)(void);          // tq::CQLanguageGet
+extern int32_t (*g_fn7B0370)(void*, uint32_t);     // 1417b0370
+extern void    (*g_fn743F90)(void*, int32_t,
+                             const char*, char);   // 141743f90
+extern uint32_t (*g_fnTimeGet)(int32_t);           // tq::TimeGet
+extern uint64_t (*g_fnCMsgInit6820)(void*, int32_t,
+    const char*, uint32_t, int32_t, int32_t);      // 1417d6820
+extern void    (*g_fnCStrFormat215d0)(void*,
+    const char*, uint64_t, uint64_t);              // 1417215d0
+extern void    (*g_fnStrCopy)(char*, const char*,
+                              unsigned long);      // tq::StrCopy
+
 // ---- wave-9 seams (D99) ----
 extern void     (*g_fnMgrCdfD0)(void*);                // 1417cdfd0
 extern int      (*g_fn647E0)(void*, uint32_t);          // 1417647e0
@@ -396,6 +411,8 @@ public:
     uint64_t Slot2B8(void);                       // 1417b1c80
     void* Slot2C0(void);                          // 1417b1cf0
     void* Slot2C8(uint32_t u);                    // 1417b1dd0
+    void Slot2D0(int32_t n, uint32_t u,
+                 const char* p4);                 // 1417b1e80
 
 
 

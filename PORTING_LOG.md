@@ -4263,3 +4263,38 @@ lg/other != 0 ثم 1417cad00 ثم 141797750/1417977d0 مباشرة.
   يرجع this+0x61
 - 20 seams جديدة. اختبار 7 أقسام.
 - رجريجن **102/102 × 6** + ‏ASan/UBSan ‏نظيف.
+
+## D100 — CSyndicateLogic +0x2d0: تدفق تعيين اللقب 1417b1e80 (29-10-2026)
+
+الجسم الكبير (6512 حرف تفكيك) منقولاً حرفياً:
+
+- **البوابات بالترتيب الحرفي**: p4==0 ← strlen ‏اليدوي
+  (lCnt != -2 ← اسم غير فارغ) ← 14174e920(p10) كحد،
+  وعند *CQLanguageGet() != 0 && != 6 ‏يستبدل بـ
+  14174e930(p10) ← فحص الحد ضد strlen الثانية
+  (عداد uVar11) — **قصارة || حرفية**: عند فشل الحد لا
+  يستدعى box vt+0x2e8 أبداً — عند نجاحه ونفي
+  vt+0x2e8(box, p4) يبث STR_INVALID_NAME عبر box
+  vt+0x18(box, p2, str)
+- **مسار النجاح**: 74e3f0 == u3 && u3 != 0 ←
+  1417630d0(lg) ← 1417b0370(this, u3) == p2 (وإلا
+  STR_LEAGUE_CAN_NOT_SET_TITLE) ← 141743f90(lg, 4,
+  name, 1) ← tq::TimeGet(3)+19000000 ← CMsg عبر
+  1417d6640 ثم 1417d6820(msg, 0x12, name, time, 0, 0)
+  — عند النجاح box vt+0xe0 ← snprintf بحرفية
+  STR_LEAGUE_SET_TITLE وبث vt+0x18(box, p2, buf) ←
+  زوج std::string ‏المؤقت (ctor(""/التهيئة، assign،
+  dtor — نمذجة سلوكية كاملة) ← box vt+0x1d8(p2)
+  وvt+0x488 ← تنسيق STR_LEAGUE_BROADCAST_TITLE عبر
+  1417215d0(tq::CString: vt+SSO) بوسيطي
+  time/10000 و(time%10000)/100 وبث الناتج عبر box
+  vt+0x438 ← tq::StrCopy(this+0x61, name, 0x20) ←
+  **strcat يدوي حرفي**: مسح strlen ‏لـ this+0x61 ثم
+  نسخ STR_LEAGUE_COUNTRY المحلولة عند نهايتها (حلقة
+  pcVar15[lVar12-1] كما في التفكيك) ← box vt+0x70
+  (box, 7, u3, 0) وvt+0x440(box, u3, name) ← dtor.
+- 9 seams جديدة (74E920/74E930/CQLanguageGet/7B0370/
+  743F90/TimeGet/CMsgInit6820/CStrFormat215d0/
+  StrCopy). اختبار 9 أقسام يغطي القصارة والمسارات
+  الستة وفرع اللغة.
+- رجريجن **103/103 × 6** + ‏ASan/UBSan ‏نظيف.

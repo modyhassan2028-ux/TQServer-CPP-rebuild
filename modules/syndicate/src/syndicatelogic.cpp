@@ -1332,6 +1332,20 @@ void CSyndicateLogic::Slot208B4b0ThenSink3(
     g_fnSink3OpC(pObj);
 }
 
+// ---- D100 seams (default null — tests bind them) ----
+int32_t  (*g_fn74E920)(void*);
+int32_t  (*g_fn74E930)(void*);
+int*     (*g_fnCQLanguageGet)(void);
+int32_t  (*g_fn7B0370)(void*, uint32_t);
+void     (*g_fn743F90)(void*, int32_t, const char*, char);
+uint32_t (*g_fnTimeGet)(int32_t);
+uint64_t (*g_fnCMsgInit6820)(void*, int32_t, const char*,
+                             uint32_t, int32_t, int32_t);
+void     (*g_fnCStrFormat215d0)(void*, const char*,
+                                uint64_t, uint64_t);
+void     (*g_fnStrCopy)(char*, const char*,
+                         unsigned long);
+
 // ---- D99 seams (default null — tests bind them) ----
 void     (*g_fnMgrCdfD0)(void*);
 int      (*g_fn647E0)(void*, uint32_t);
@@ -2042,6 +2056,181 @@ void* CSyndicateLogic::Slot2C8(uint32_t u) {
         if (lVar1 != 0) return g_fn743Dd0(lVar1);
     }
     return 0;
+}
+// +0x2d0: 1417b1e80 — the title flow monster
+void CSyndicateLogic::Slot2D0(int32_t n, uint32_t u,
+                             const char* p4) {
+    void** pp = (void**)this;
+    if (p4 == 0) return;
+    // RAW: the strlen scan gate (lVar10 != -2 =>
+    // non-empty name)
+    const char* pc = p4;
+    int64_t lCnt = -1; char c;
+    do {
+        if (lCnt == 0) break;
+        lCnt = lCnt - 1;
+        c = *pc; pc = pc + 1;
+    } while (c != '\0');
+    if (lCnt == -2) return;
+    int32_t iVar = g_fn74E920(pp[10]);
+    int* piLang = g_fnCQLanguageGet();
+    if ((*piLang != 0) &&
+        (piLang = g_fnCQLanguageGet(), *piLang != 6)) {
+        iVar = g_fn74E930(pp[10]);
+    }
+    // RAW: the second strlen (uVar11 counter)
+    pc = p4;
+    uint64_t uLen = (uint64_t)-1;
+    do {
+        if (uLen == 0) break;
+        uLen = uLen - 1;
+        c = *pc; pc = pc + 1;
+    } while (c != '\0');
+    // ~uLen - 1 = the name length
+    // RAW short-circuit: vt+0x2e8 runs only when
+    // the length check passes
+    if ((uint64_t)(int64_t)iVar < ~uLen - 1) {
+        // RAW || short-circuit: vt+0x2e8 NOT called
+        void* pIvA = g_fnStringMgrInstance();
+        uint64_t uStrA = (uint64_t)
+            g_fnStringMgrGetStr(pIvA, "STR_INVALID_NAME");
+        ((void (*)(void*, int32_t, uint64_t))
+            (*(void***)pp[1])[0x18/8])(pp[1], n, uStrA);
+    } else if (((char (*)(void*, const char*))
+        (*(void***)pp[1])[0x2e8/8])(pp[1], p4) == 0) {
+        void* pIvA2 = g_fnStringMgrInstance();
+        uint64_t uStrA2 = (uint64_t)
+            g_fnStringMgrGetStr(pIvA2, "STR_INVALID_NAME");
+        ((void (*)(void*, int32_t, uint64_t))
+            (*(void***)pp[1])[0x18/8])(pp[1], n, uStrA2);
+    } else {
+        uint32_t uVar4 = g_fn74E3F0(pp[10]);
+        if ((uVar4 == u) && (u != 0)) {
+            void* lLg = g_fn7630D0(pp[10], u);
+            if (lLg != 0) {
+                int32_t iOwner =
+                    g_fn7B0370(this, u);
+                if (iOwner == n) {
+                    g_fn743F90(lLg, 4, p4, 1);
+                    uint32_t uTime =
+                        g_fnTimeGet(3);
+                    uVar4 = uTime + 19000000;
+                    char msg[1072];
+                    g_fnCMsgCtor6640(msg);
+                    uint64_t uOk =
+                        g_fnCMsgInit6820(msg,
+                            0x12, p4, uVar4, 0, 0);
+                    if ((char)uOk != 0) {
+                        // RAW: box vt+0xe0 (no
+                        // visible args)
+                        ((void (*)(void*, void*))
+                            (*(void***)pp[1])
+                             [0xe0/8])(pp[1], msg);
+                    }
+                    char buf[512];
+                    buf[0] = 0;
+                    memset(buf + 1, 0, 0x1ff);
+                    void* pIv2 =
+                        g_fnStringMgrInstance();
+                    const char* pcTitle =
+                        (const char*)
+                        g_fnStringMgrGetStr(pIv2,
+                            "STR_LEAGUE_SET_TITLE");
+                    snprintf(buf, 0x200, pcTitle);
+                    ((void (*)(void*, int32_t,
+                               const char*))
+                        (*(void***)pp[1])
+                         [0x18/8])(pp[1], n, buf);
+                    // RAW: std::string tmp("")
+                    // + assign + dtor pair
+                    char sTmp[16];
+                    sTmp[0] = 0;
+                    char sVal[32]; sVal[0] = 0;
+                    // assign(local_280, tmp.c_str())
+                    strncpy(sVal, sTmp, 31);
+                    sVal[31] = 0;
+                    // (string1 destroyed — empty)
+                    void* pIv3 =
+                        g_fnStringMgrInstance();
+                    // RAW: box vt+0x1d8(p2), vt+0x488
+                    ((void (*)(void*, int32_t))
+                        (*(void***)pp[1])
+                         [0x1d8/8])(pp[1], n);
+                    ((uint64_t (*)(void*))
+                        (*(void***)pp[1])
+                         [0x488/8])(pp[1]);
+                    const char* pcBcast =
+                        (const char*)
+                        g_fnStringMgrGetStr(pIv3,
+                            "STR_LEAGUE_BROADCAST_TITLE");
+                    // the tq::CString object at
+                    // &local_288: vt + SSO buffer
+                    uint8_t acCStr[8 + 0x20 + 16];
+                    memset(acCStr, 0, sizeof(acCStr));
+                    g_fnCStrFormat215d0(acCStr,
+                        pcBcast,
+                        (uint64_t)(uVar4 / 10000),
+                        (uint64_t)((uVar4 % 10000)
+                            / 100));
+                    const char* pcData =
+                        (const char*)(acCStr + 8);
+                    ((void (*)(void*, const char*))
+                        (*(void***)pp[1])
+                         [0x438/8])(pp[1], pcData);
+                    g_fnStrCopy((char*)this + 0x61,
+                                p4, 0x20);
+                    void* pIv4 =
+                        g_fnStringMgrInstance();
+                    const char* pcCty =
+                        (const char*)
+                        g_fnStringMgrGetStr(pIv4,
+                            "STR_LEAGUE_COUNTRY");
+                    // RAW: the strlen scan of
+                    // this+0x61 then the manual
+                    // strcpy at the end position
+                    const char* pcS =
+                        (const char*)this + 0x61;
+                    const char* pcEnd;
+                    int64_t lC2 = -1;
+                    do {
+                        pcEnd = pcS;
+                        if (lC2 == 0) break;
+                        lC2 = lC2 - 1;
+                        pcEnd = pcS + 1;
+                        c = *pcS;
+                        pcS = pcEnd;
+                    } while (c != '\0');
+                    int64_t lJ = 0;
+                    do {
+                        c = pcCty[lJ];
+                        ((char*)pcEnd)[lJ - 1] = c;
+                        lJ = lJ + 1;
+                    } while (c != '\0');
+                    ((void (*)(void*, int32_t,
+                               uint32_t, int32_t))
+                        (*(void***)pp[1])
+                         [0x70/8])(pp[1], 7, u, 0);
+                    ((void (*)(void*, uint32_t,
+                               const char*))
+                        (*(void***)pp[1])
+                         [0x440/8])(pp[1], u, p4);
+                    // RAW: ~basic_string(local_280)
+                    // then CMsg dtor
+                    g_fnCMsgDtor66C0(msg);
+                } else {
+                    void* pIv5 =
+                        g_fnStringMgrInstance();
+                    uint64_t uStr2 = (uint64_t)
+                        g_fnStringMgrGetStr(pIv5,
+                            "STR_LEAGUE_CAN_NOT_SET_TITLE");
+                    ((void (*)(void*, int32_t,
+                               uint64_t))
+                        (*(void***)pp[1])
+                         [0x18/8])(pp[1], n, uStr2);
+                }
+            }
+        }
+    }
 }
 
 
