@@ -5754,3 +5754,47 @@ select/WSAAccept حتى 0x40 عميل) — وحدة
 CWorldThread/CUserLoginThread/CChatThread
 (نفس القالب؛ يُتوقع ProcessMsg بـ
 vt+0x18 مع أربعة معاملات، ويُتحقق خاماً).
+
+## المسار أ-6 — World/UserLogin/Chat OnProcess [2026-10-28]
+
+**الثلاثة (14002e990 / 14002e580 /
+1400011b0) منقولة حرفياً في
+msgserver/threads/MsgWorldULChatThreads
+.{h,cpp} عبر جسم مشترك تتحكم به ثوابت
+لكل كلاس — الفروق المؤكدة خاماً:**
+- **الثلاثة يستخدمون ProcessMsg الخماسي
+  مثل Socket** (vt+0x10: kernel, packet=
+  [info+4], buf, arg8=[info+8], port=
+  [info+0] خامساً) — تأكد أن MapGroup
+  (+0x18/رباعي) هو الاستثناء
+- kernel OnTimer عبر **vt+0x18** (ليس
+  +0x20)
+- عتبة resync 0x2710 كما هي؛ سحب
+  World=1000، UserLogin=2000، Chat=2000
+- تيكات: World 0x1d/0x1f/0x1e؛
+  UserLogin 0x20/0x22/0x21؛ Chat
+  0x2f/0x31/0x30 **+ تيك 0x49 حول Peek
+  للـ Chat فقط** (لا يوجد للثلاثة الآخرين
+  ولا لـ Socket)
+- إحصاءات **للـ World فقط**: cum
+  0x1409756a8 (lock xadd)، cnt
+  0x1409756ac (lock add)، max
+  0x1409756a4 — UserLogin/Chat بلا
+  إحصاءات
+- idle: World 0x1409499dc، UserLogin
+  0x1409499a8، Chat 0x140949054
+- statics: World flag 0x140975a90/
+  base 0x140975a8c؛ UserLogin
+  0x140975a88/0x140975a84؛ Chat
+  0x1409754e4/0x1409754e0
+- نصوص resync/ERROR الحرفية لكل كلاس
+
+**الاختبار msg_wulc_test.cpp:** 5 أقسام
+(سحب World بإحصاءات، UserLogin بلا
+إحصاءات، تيك 0x49 للـ Chat، الخماسي +
+أزواج ERROR، نصوص resync). رجريجن
+**61/61 ×6** + ASan/UBSan نظيف.
+
+**التالي أ-7:** CAuctionSearchThread
+(1400f3xxx — تحقق objdump لشكله) ثم
+CServerStatusMonitor (14002b2d0).

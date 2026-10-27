@@ -742,3 +742,24 @@ CChatThread بنفس قالب أ-4/أ-5 (تحقق objdump
 الإحصاءات/idle، معرفات التيكات). ثم
 CAuctionSearchThread ثم CServerStatusMonitor
 (14002b2d0، وحدة مستقلة كبيرة).
+
+---
+
+## المسار أ-6 — World/UserLogin/Chat [2026-10-28]
+
+**المنتهي:** الثلاثة OnProcess في
+msgserver/threads/MsgWorldULChatThreads
+.{h,cpp} (جسم مشترك + ثوابت خام لكل
+كلاس — التفاصيل في PORTING_LOG).
+5/5 + رجريجن 61/61×6 + ASan.
+
+**قاعدة مستخلصة:** ProcessMsg الخماسي
+(kernel, packet, buf, arg8, port) هو
+القاعدة في vt+0x10؛ MapGroup استثناء
+(vt+0x18). OnTimer vt+0x18 لهذه
+الثلاثة وvt+0x20 لـ MapGroup/Socket.
+
+**التالي أ-7:** CAuctionSearchThread
+(ابدأ بتحديد OnProcess له: منطقة
+1400f3xxx) ثم CServerStatusMonitor
+(14002b2d0، وحدة مستقلة كبيرة).
