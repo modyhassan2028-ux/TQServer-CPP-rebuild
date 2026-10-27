@@ -94,6 +94,21 @@ extern void*    (*g_fnStringMgrGetStr)(void*, const char*);
 extern char     (*g_fnA84HasOldPos)(void*);
 extern uint32_t (*g_fnA84GetOldId)(void*);
 
+// ---- D102 seams (+0x340 create flow) ----
+extern int64_t (*g_fn75EB70)(void*, const char*);   // 14175eb70
+extern void*  (*g_fn78C8E0)(void*, uint32_t);       // 14178c8e0
+extern char   (*g_fn7868C0)(void*);                 // 1417868c0
+extern uint64_t (*g_fn785EA0)(void*);               // 141785ea0
+extern int32_t (*g_fn74E740)(void*);                // 14174e740
+extern uint64_t (*g_fn78F270)(void*);               // 14178f270
+extern char*   (*g_fn787120)(void*);                // 141787120
+extern void*   (*g_fn76F7F0)(void*, uint32_t,
+                             const char*, char, uint32_t,
+                             const char*);           // 14176f7f0
+extern void    (*g_fn74DCD0)(void*, int32_t);       // 14174dcd0
+extern void    (*g_fn7903D0)(void*, int32_t);       // 1417903d0
+extern void    (*g_fn7B0EA0)(void*, uint32_t, char); // 1417b0ea0
+
 // ---- D101 seams (wave 10) ----
 extern void  (*g_fn76FE50)(void*, int32_t*);       // 14176fe50
 extern void  (*g_fn76ACE0)(void*);                 // 14176ace0
@@ -450,6 +465,8 @@ public:
     void Slot320(uint32_t u2);                     // 1417b23f0
     void Slot328(uint32_t u);                      // 1417b2400
     void Slot330(void);                           // 1417b2540
+    bool Slot340(uint32_t u2, const char* p3,
+                 char c4);                         // 1417b8940
 
 
 

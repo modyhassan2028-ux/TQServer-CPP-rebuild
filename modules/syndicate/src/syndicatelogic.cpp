@@ -1332,6 +1332,20 @@ void CSyndicateLogic::Slot208B4b0ThenSink3(
     g_fnSink3OpC(pObj);
 }
 
+// ---- D102 seams (default null — tests bind them) ----
+int64_t  (*g_fn75EB70)(void*, const char*);
+void*    (*g_fn78C8E0)(void*, uint32_t);
+char     (*g_fn7868C0)(void*);
+uint64_t (*g_fn785EA0)(void*);
+int32_t  (*g_fn74E740)(void*);
+uint64_t (*g_fn78F270)(void*);
+char*    (*g_fn787120)(void*);
+void*    (*g_fn76F7F0)(void*, uint32_t, const char*,
+                       char, uint32_t, const char*);
+void     (*g_fn74DCD0)(void*, int32_t);
+void     (*g_fn7903D0)(void*, int32_t);
+void     (*g_fn7B0EA0)(void*, uint32_t, char);
+
 // ---- D101 seams (default null — tests bind them) ----
 void     (*g_fn76FE50)(void*, int32_t*);
 void     (*g_fn76ACE0)(void*);
@@ -2365,6 +2379,142 @@ void CSyndicateLogic::Slot330(void) {
     // RAW: box vt+0xa0 (no visible args at all)
     ((void (*)(void*))
         (*(void***)pp[1])[0xa0/8])(pp[1]);
+}
+// +0x340: 1417b8940 — the create-league flow
+bool CSyndicateLogic::Slot340(uint32_t u2,
+                              const char* p3, char c4) {
+    void** pp = (void**)this;
+    if (p3 == 0) return false;
+    // RAW: the strlen counter (uVar13)
+    const char* pc = p3;
+    char c; uint64_t uCnt = (uint64_t)-1;
+    do {
+        if (uCnt == 0) break;
+        uCnt = uCnt - 1;
+        c = *pc; pc = pc + 1;
+    } while (c != '\0');
+    // RAW: 0xf < ~uCnt - 1 -> too long
+    // (short-circuit: vt+0x2e8 only if length ok)
+    if (0xf < ~uCnt - 1) {
+        void* pIv = g_fnStringMgrInstance();
+        uint64_t uStr = (uint64_t)
+            g_fnStringMgrGetStr(pIv, "STR_INVALID_NAME");
+        ((void (*)(void*, uint32_t, uint64_t))
+            (*(void***)pp[1])[0x18/8])(pp[1], u2, uStr);
+        return false;
+    }
+    if (((char (*)(void*, const char*))
+            (*(void***)pp[1])[0x2e8/8])(pp[1], p3)
+        == 0) {
+        void* pIv2 = g_fnStringMgrInstance();
+        uint64_t uStr2 = (uint64_t)
+            g_fnStringMgrGetStr(pIv2, "STR_INVALID_NAME");
+        ((void (*)(void*, uint32_t, uint64_t))
+            (*(void***)pp[1])[0x18/8])(pp[1], u2, uStr2);
+        return false;
+    }
+    if (g_fn75EB70(pp[10], p3) != 0) {
+        void* pIv3 = g_fnStringMgrInstance();
+        uint64_t uStr3 = (uint64_t)
+            g_fnStringMgrGetStr(pIv3,
+                "STR_FORBIDDEN_LEAGUE_NAME");
+        ((void (*)(void*, uint32_t, uint64_t))
+            (*(void***)pp[1])[0x18/8])(pp[1], u2, uStr3);
+        return false;
+    }
+    void* plPlayer = g_fn78C8E0(pp[3], u2);
+    if (plPlayer == 0) return false;
+    if (!g_fn7868C0(plPlayer)) return false;
+    uint64_t uSynId = g_fn785EA0(plPlayer);
+    int64_t lLg = g_fnLgFind(pp[2], (uint32_t)uSynId);
+    if (lLg == 0) return false;
+    if ((int32_t)g_fn790390((void*)lLg) != 0)
+        return false;
+    int32_t iVar5 = g_fn74E740(pp[10]);
+    if (c4 == 0) {
+        uint64_t uMoney = g_fnLgF550((void*)lLg);
+        if ((int32_t)uMoney < iVar5) return false;
+        uMoney = g_fnLgF550((void*)lLg);
+        g_fnLgFa70((void*)lLg,
+                   (int32_t)uMoney - iVar5);
+        // RAW: box vt+0x350(box, 0x42, emoney)
+        uint64_t uEm = g_fn78F270((void*)lLg);
+        ((void (*)(void*, int32_t, uint32_t))
+            (*(void***)pp[1])[0x350/8])(
+                pp[1], 0x42, (uint32_t)uEm);
+        // RAW: box vt+0x200(box, p2)
+        ((void (*)(void*, uint32_t))
+            (*(void***)pp[1])[0x200/8])(pp[1], u2);
+        ((void (*)(void*, uint32_t))
+            (*(void***)pp[1])[0x1d8/8])(pp[1], u2);
+        g_fnMyLogSave("gmlog/emoney_buy",
+            "%u\t%s\t%u\t350\t4227\t%d\t%d\t1\t");
+    }
+    const char* pcName = g_fn787120(plPlayer);
+    uint64_t uSynId2 = g_fn785EA0(plPlayer);
+    void* puNew = g_fn76F7F0(pp[10], (uint32_t)uSynId2,
+                             p3, c4, u2, pcName);
+    if (puNew != 0) {
+        uint64_t uEm2 = g_fn78F270((void*)lLg);
+        g_fn74DCD0(puNew, (int32_t)uEm2);
+        uint64_t uType = g_fn745520(puNew);
+        g_fn7903D0((void*)lLg, (int32_t)uType);
+        uint8_t ab[0x40];
+        memset(ab, 0, sizeof(ab));
+        g_fn745920(puNew, ab);
+        ((void (*)(void*, void*, int32_t))
+            (*(void***)pp[1])[0x480/8])(pp[1], ab, 0);
+        if (c4 != 0) {
+            char msg[1072];
+            g_fnCMsgCtor6640(msg);
+            uint32_t uCur = g_fn74E3F0(pp[10]);
+            uint64_t uType2 = g_fn745520(puNew);
+            uint64_t uOk = g_fnCMsgInit6790(msg, 6,
+                (uint32_t)uType2, uCur, 0);
+            if ((char)uOk != 0) {
+                ((void (*)(void*, uint32_t, void*))
+                    (*(void***)pp[1])[0x8/8])(
+                        pp[1], u2, msg);
+            }
+            g_fnCMsgDtor66C0(msg);
+        }
+        // RAW: logic vt+0x710(this, lg, type, 7)
+        uint64_t uType3 = g_fn745520(puNew);
+        ((void (*)(void*, void*, uint32_t, int32_t))
+            (*(void***)this)[0x710/8])(
+                this, (void*)lLg, (uint32_t)uType3, 7);
+        g_fn7B0EA0(this, u2, 1);
+        if ((c4 == 0) ||
+            (iVar5 = g_fn74E740(pp[10]),
+             iVar5 != 0)) {
+            char buf[512];
+            buf[0] = 0;
+            memset(buf + 1, 0, 0x1ff);
+            void* pIv4 = g_fnStringMgrInstance();
+            ((void (*)(void*, uint32_t))
+                (*(void***)pp[1])[0x1d8/8])(pp[1],
+                                            u2);
+            const char* pcTitle =
+                (const char*)
+                g_fnStringMgrGetStr(pIv4,
+                    "STR_LEAGUE_CREATE_LEAGUE");
+            snprintf(buf, 0x200, pcTitle);
+            // RAW: local_59 = 0 after buf
+            buf[512 - 2] = 0; // model local_59
+            // RAW: box vt+0x90(box, buf, 0x7d5)
+            ((void (*)(void*, const char*, uint32_t))
+                (*(void***)pp[1])[0x90/8])(
+                    pp[1], buf, 0x7d5);
+        } else {
+            uint64_t uType4 = g_fn745520(puNew);
+            ((void (*)(void*, uint32_t, int32_t))
+                (*(void***)pp[1])[0x478/8])(
+                    pp[1], (uint32_t)uType4, 6);
+            g_fn74EA30(pp[10], 1);
+        }
+        return true;
+    }
+    return false;
 }
 
 

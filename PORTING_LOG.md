@@ -4323,3 +4323,40 @@ lg/other != 0 ثم 1417cad00 ثم 141797750/1417977d0 مباشرة.
   790390/78F470/745520). اختبار 3 أقسام، أخضر من أول
   تشغيل.
 - رجريجن **104/104 × 6** + ‏ASan/UBSan ‏نظيف.
+
+## D102 — CSyndicateLogic +0x340: تدفق إنشاء التحالف 1417b8940 (27-10-2026)
+
+الجسم (4883 حرف تفكيك) منقولاً حرفياً:
+
+- **البوابات المتسلسلة**: p3==0 ← strlen ‏اليدوي (عداد
+  uVar13) — عند الطول > 0xf ‏يقصر ‏|| ‏ولا يستدعى box
+  vt+0x2e8 أبداً؛ عند نفيه STR_INVALID_NAME عبر box
+  vt+0x18 وreturn false ← 14175eb70(sub, name) != 0 →
+  STR_FORBIDDEN_LEAGUE_NAME ← 14178c8e0(p1[3], u2)
+  (بحث اللاعب) ← 1417868c0(player) ← LgFind ←
+  141790390(lg) == 0
+- **مسار المال (c4==0)**: 14178f550(lg) < 14174e740(sub)
+  → false؛ وإلا 78f550 ثانية ثم 14178fa70(lg, money -
+  cost) ثم box vt+0x350(box, 0x42, 78f270(lg)) و
+  vt+0x200(box, u2) وvt+0x1d8(box, u2) ثم السطر
+  الحرفي MyLogSave("gmlog/emoney_buy", "%u\t%s\t%u\t
+  350\t4227\t%d\t%d\t1\t")
+- **الإنشاء**: 141787120(player) و141785ea0(player) ثم
+  14176f7f0(sub, synId, name, c4, u2, playerName) — عند
+  الفشل return false (بعد مسار المال إن جرى)؛ عند
+  النجاح: 14174dcd0(new, 78f270(lg)) و1417903d0(lg,
+  745520(new)) وتعبئة بافر 0x40 عبر 141745920 وبث box
+  vt+0x480(box, buf, 0)
+- **c4 != 0**: CMsg عبر 1417d6640/6790(نوع 6،
+  745520(new)، 74e3f0(sub)) وعند النجاح box vt+8(box,
+  u2, msg) ثم dtor
+- **الختام**: logic vt+0x710(this, lg, 745520(new), 7)
+  ثم 1417b0ea0(this, u2, 1) — وعند (c4==0 ||
+  14174e740 != 0): box vt+0x1d8(box, u2) وsnprintf
+  بحرفية STR_LEAGUE_CREATE_LEAGUE وبث box vt+0x90(box,
+  buf, 0x7d5)؛ وإلا box vt+0x478(box, 745520(new), 6)
+  و14174ea30(sub, 1). return true.
+- 11 seams جديدة (75EB70/78C8E0/7868C0/785EA0/74E740/
+  78F270/787120/76F7F0/74DCD0/7903D0/7B0EA0). اختبار 12
+  قسماً.
+- رجريجن **105/105 × 6** + ‏ASan/UBSan ‏نظيف.
