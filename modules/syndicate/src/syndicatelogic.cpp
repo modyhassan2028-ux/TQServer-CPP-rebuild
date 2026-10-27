@@ -1332,6 +1332,23 @@ void CSyndicateLogic::Slot208B4b0ThenSink3(
     g_fnSink3OpC(pObj);
 }
 
+// ---- D101 seams (default null — tests bind them) ----
+void     (*g_fn76FE50)(void*, int32_t*);
+void     (*g_fn76ACE0)(void*);
+void     (*g_fn763DD0)(void*, int32_t, int32_t, const char*);
+void     (*g_fn764000)(void*, int32_t, int32_t, const char*);
+void     (*g_fn764230)(void*, int32_t, int32_t, const char*);
+void     (*g_fn764300)(void*, uint32_t, int32_t);
+void     (*g_fn76EFC0)(void*, int32_t, int32_t, int32_t);
+void     (*g_fn76F190)(void*);
+void     (*g_fn745920)(void*, void*);
+void     (*g_fn7645C0)(void*, uint32_t);
+char     (*g_fn74EA40)(void*);
+void     (*g_fn74EA30)(void*, int32_t);
+uint64_t (*g_fn790390)(void*);
+void*    (*g_fn78F470)(void*);
+uint64_t (*g_fn745520)(void*);
+
 // ---- D100 seams (default null — tests bind them) ----
 int32_t  (*g_fn74E920)(void*);
 int32_t  (*g_fn74E930)(void*);
@@ -2231,6 +2248,123 @@ void CSyndicateLogic::Slot2D0(int32_t n, uint32_t u,
             }
         }
     }
+}
+// ================= D101 wave 10 (+0x2d8..+0x330) =================
+
+// +0x2d8: 1417b22a0
+void CSyndicateLogic::Slot2D8(int32_t* p2) {
+    g_fn76FE50(((void**)this)[10], p2);
+}
+
+// +0x2e0: 1417b22b0
+void CSyndicateLogic::Slot2E0(void) {
+    g_fn76ACE0(((void**)this)[10]);
+}
+
+// +0x2e8: 1417b22c0
+void CSyndicateLogic::Slot2E8(int32_t n2, int32_t n3,
+                              const char* p4) {
+    g_fn763DD0(((void**)this)[10], n2, n3, p4);
+}
+
+// +0x2f0: 1417b22d0
+void CSyndicateLogic::Slot2F0(int32_t n2, int32_t n3,
+                              const char* p4) {
+    g_fn764000(((void**)this)[10], n2, n3, p4);
+}
+
+// +0x2f8: 1417b22e0
+void CSyndicateLogic::Slot2F8(int32_t n2, int32_t n3,
+                              const char* p4) {
+    g_fn764230(((void**)this)[10], n2, n3, p4);
+}
+
+// +0x300: 1417b22f0
+void CSyndicateLogic::Slot300(uint32_t u2, int32_t n3) {
+    g_fn764300(((void**)this)[10], u2, n3);
+}
+
+// +0x308: 1417b2300
+void CSyndicateLogic::Slot308(int32_t n2, int32_t n3,
+                              int32_t n4) {
+    g_fn76EFC0(((void**)this)[10], n2, n3, n4);
+}
+
+// +0x310: 1417b2310
+void CSyndicateLogic::Slot310(void) {
+    g_fn76F190(((void**)this)[10]);
+}
+
+// +0x318: 1417b2320
+void CSyndicateLogic::Slot318(uint16_t u2, uint32_t u3) {
+    void** pp = (void**)this;
+    void* lLg = g_fn7630D0(pp[10], u3);
+    if (lLg == 0) {
+        // RAW: local_68 = 0x1e02 (a dead store kept
+        // verbatim) + the literal log
+        volatile uint32_t local_68 = 0x1e02;
+        (void)local_68;
+        g_fnT1LogError("\xa1\xef%s(%s)\xa1\xef in %s, %d");
+    } else {
+        uint8_t ab[0x40];
+        memset(ab, 0, sizeof(ab));
+        g_fn745920(lLg, ab);
+        // RAW: box vt+0x480(box, &local_58, u2)
+        ((void (*)(void*, void*, uint16_t))
+            (*(void***)pp[1])[0x480/8])(pp[1], ab,
+                                        u2);
+    }
+}
+
+// +0x320: 1417b23f0
+void CSyndicateLogic::Slot320(uint32_t u2) {
+    g_fn7645C0(((void**)this)[10], u2);
+}
+
+// +0x328: 1417b2400
+void CSyndicateLogic::Slot328(uint32_t u) {
+    void** pp = (void**)this;
+    int32_t iVar3 = (int32_t)g_fn74E3F0(pp[10]);
+    if (iVar3 == 0 && g_fn74EA40(pp[10]) == 0) {
+        int64_t lLg = g_fnLgFind(pp[2], u);
+        if (lLg == 0) {
+            g_fnT1LogError("\xa1\xef%s(%s)\xa1\xef in %s, %d");
+            return;
+        }
+        uint64_t uVar5 = g_fn790390((void*)lLg);
+        if ((uint32_t)uVar5 == 0) {
+            void* pv = g_fn78F470((void*)lLg);
+            uint64_t uType = g_fn78F2D0((void*)lLg);
+            // RAW: logic vt+0x4e8(this, type, pv, 1)
+            ((void (*)(void*, uint32_t, void*,
+                       int32_t))
+                (*(void***)this)[0x4e8/8])(
+                    this, (uint32_t)uType, pv, 1);
+        } else {
+            void* lLg2 = g_fn7630D0(pp[10],
+                                    (uint32_t)uVar5);
+            if (lLg2 == 0) {
+                g_fnT1LogError("\xa1\xef%s(%s)\xa1\xef in %s, %d");
+            } else {
+                // RAW: box vt+0x478(box, type, 6)
+                uint64_t uType2 =
+                    g_fn745520(lLg2);
+                ((void (*)(void*, uint32_t,
+                           int32_t))
+                    (*(void***)pp[1])[0x478/8])(
+                        pp[1], (uint32_t)uType2, 6);
+                g_fn74EA30(pp[10], 1);
+            }
+        }
+    }
+}
+
+// +0x330: 1417b2540
+void CSyndicateLogic::Slot330(void) {
+    void** pp = (void**)this;
+    // RAW: box vt+0xa0 (no visible args at all)
+    ((void (*)(void*))
+        (*(void***)pp[1])[0xa0/8])(pp[1]);
 }
 
 

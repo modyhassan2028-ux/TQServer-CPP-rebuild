@@ -94,6 +94,27 @@ extern void*    (*g_fnStringMgrGetStr)(void*, const char*);
 extern char     (*g_fnA84HasOldPos)(void*);
 extern uint32_t (*g_fnA84GetOldId)(void*);
 
+// ---- D101 seams (wave 10) ----
+extern void  (*g_fn76FE50)(void*, int32_t*);       // 14176fe50
+extern void  (*g_fn76ACE0)(void*);                 // 14176ace0
+extern void  (*g_fn763DD0)(void*, int32_t, int32_t,
+                           const char*);          // 141763dd0
+extern void  (*g_fn764000)(void*, int32_t, int32_t,
+                           const char*);          // 141764000
+extern void  (*g_fn764230)(void*, int32_t, int32_t,
+                           const char*);          // 141764230
+extern void  (*g_fn764300)(void*, uint32_t, int32_t);   // 141764300
+extern void  (*g_fn76EFC0)(void*, int32_t, int32_t,
+                           int32_t);              // 14176efc0
+extern void  (*g_fn76F190)(void*);                // 14176f190
+extern void  (*g_fn745920)(void*, void*);          // 141745920
+extern void  (*g_fn7645C0)(void*, uint32_t);       // 1417645c0
+extern char  (*g_fn74EA40)(void*);                // 14174ea40
+extern void  (*g_fn74EA30)(void*, int32_t);       // 14174ea30
+extern uint64_t (*g_fn790390)(void*);              // 141790390
+extern void*  (*g_fn78F470)(void*);                // 14178f470
+extern uint64_t (*g_fn745520)(void*);              // 141745520
+
 // ---- D100 seams (+0x2d0 title flow) ----
 extern int32_t (*g_fn74E920)(void*);               // 14174e920
 extern int32_t (*g_fn74E930)(void*);               // 14174e930
@@ -413,6 +434,22 @@ public:
     void* Slot2C8(uint32_t u);                    // 1417b1dd0
     void Slot2D0(int32_t n, uint32_t u,
                  const char* p4);                 // 1417b1e80
+    void Slot2D8(int32_t* p2);                    // 1417b22a0
+    void Slot2E0(void);                           // 1417b22b0
+    void Slot2E8(int32_t n2, int32_t n3,
+                 const char* p4);                 // 1417b22c0
+    void Slot2F0(int32_t n2, int32_t n3,
+                 const char* p4);                 // 1417b22d0
+    void Slot2F8(int32_t n2, int32_t n3,
+                 const char* p4);                 // 1417b22e0
+    void Slot300(uint32_t u2, int32_t n3);        // 1417b22f0
+    void Slot308(int32_t n2, int32_t n3,
+                 int32_t n4);                     // 1417b2300
+    void Slot310(void);                           // 1417b2310
+    void Slot318(uint16_t u2, uint32_t u3);       // 1417b2320
+    void Slot320(uint32_t u2);                     // 1417b23f0
+    void Slot328(uint32_t u);                      // 1417b2400
+    void Slot330(void);                           // 1417b2540
 
 
 
