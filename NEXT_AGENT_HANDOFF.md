@@ -325,3 +325,45 @@ MsgServer التالي.
 3. إغلاق ملف syndicatelogic نهائياً
 4. الانتقال لموديول MsgServer التالي حسب
    الخطة (NpcServer أولاً ثم MsgServer)
+
+---
+
+## وحدة D114e — إغلاق syndicatelogic الكامل [2026-10-27]
+
+**المنتهي بالتفصيل:**
+- جرد خام للـ vtable أثبت أن c2470/c3230
+  فتحتا جدول فعليتان (+0x680 و+0x6e0) وليستا
+  مساعدات خارجية كما ظن وحدة d114c
+- صُحح تصريحا Slot680/Slot6e0 في الهيدر
+  (كانا 4-وسائط مؤقتين) إلى التوقيع الخام
+  الكامل 6 وسائط + إرجاع uint32_t
+- جسمان مندوبان حرفياً في syndicatelogic.cpp:
+  Slot680 → SignUpPlunderWarFromClient (بورت
+  D78) / Slot6e0 → PublishSupportTokenFromClient
+  (بورت D80)، بتمرير (this, u2, u3, pu4, c5, u6)
+- syndicate_d114e_test.cpp: قسمان (توصيل
+  680/6e0) عبر سلسلة البوابات + عدادات لكل
+  seam + النداء المزدوج الخام في 6e0
+- ASan/UBSan نظيف؛ الرجريجن الرسمي في
+  الخلفية وقت الكتابة (نتيجته في سجل الوحدة)
+
+**فخاخ وحدة D114e:**
+- في بوابات العملاقين: الصفر = مرور
+  (vt+0x278 == 0 و 14174ebd0 == 0) — لا
+  تعكسها
+- g_fnSplFindLeague ≠ g_fnSupFindLeague: كائنان
+  منفصلان (الأول معلن في PlunderList.h خاص
+  بـ c3230) — وصّل الاثنين في الاختبارات
+- أي seam غير موصل يُستدعى مباشرة = segfault
+  (لا فحوص null في الأجسام البورتة)
+- كائنات /tmp/objs_d114 أُعيد بناء
+  syndicatelogic/PlunderSignup/SupportPublish
+  فيها طازجة؛ البول القديم فيه .o ميتة إذا لم
+  تُعِد الترجمة
+
+**الخطوة القادمة (بعد الرجريجن):** ملف
+syndicatelogic مُغلق 100%. ابدأ موديول MsgServer
+حسب الخطة: جرّد دواله من /app/co_decomp/
+Native-Decompiled (الموديول التالي بعد
+NpcServer)، بنفس منهجية D-series (vtable أولاً
+بالجرد الخام ثم الموجات).

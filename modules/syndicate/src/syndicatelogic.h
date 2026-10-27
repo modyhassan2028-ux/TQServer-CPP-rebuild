@@ -1104,8 +1104,9 @@ public:
                  void*** ppp4);     // 1417b56b0
     void Slot678(void);             // 1417b56c0
     // ==== D114c (the class tail, +0x680..+0x738) ====
-    void Slot680(uint32_t u2, uint32_t u3,
-                 uint32_t u4, uint32_t u5);   // 1417c2470
+    uint32_t Slot680(uint32_t u2, uint32_t u3,
+                 uint32_t* pu4, char c5,
+                 uint32_t u6);   // 1417c2470
     void Slot688(uint32_t u2);     // 1417b56d0
     void Slot690(uint32_t u2);     // 1417b56e0
     void Slot698(uint32_t u2);     // 1417b56f0
@@ -1119,8 +1120,9 @@ public:
     char Slot6d0(uint32_t u2,
                  uint32_t u3);     // 1417b55d0
     char Slot6d8(uint32_t u2);     // 1417b5510
-    void Slot6e0(uint32_t u2, uint32_t u3,
-                 uint32_t u4);     // 1417c3230
+    uint32_t Slot6e0(uint32_t u2, uint32_t u3,
+                 uint32_t* pu4, char c5,
+                 uint32_t u6);     // 1417c3230
     void Slot6e8(uint32_t u2, uint32_t u3,
                  uint32_t u4);     // 1417b58f0
     char Slot6f0(void);            // 1417b5900

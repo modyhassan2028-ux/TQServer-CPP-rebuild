@@ -5037,3 +5037,51 @@ Create.
 
 **الحالة:** جدول CSyndicateLogic الكامل (232
 فتحة) منقول بالكامل 100%. ASan/UBSan نظيف.
+
+## D114e — توصيل العملاقين 1417c2470/1417c3230 بفتحتي الـ vtable وإغلاق ملف syndicatelogic [2026-10-27]
+
+**اكتشاف جوهري:** الجرد الخام للـ vtable
+(tools/read_vtable_slots.py) أثبت أن العملاقين
+ليسا مساعدات خارجية بل فتحتا جدول فعليتان:
+Slot+0x680 = 1417c2470 و Slot+0x6e0 =
+1417c3230 — كانتا معلنتين في الهيدر بتوقيع
+4-وسائط مؤقت خاطئ وبدون أجسام.
+
+**المنجز:**
+1. تصحيح تصريحي التواقيع في syndicatelogic.h
+   إلى الخام الكامل: (uint32_t u2, uint32_t
+   u3, uint32_t* pu4, char c5, uint32_t u6)
+   بإرجاع uint32_t
+2. جسما الفتحتين في syndicatelogic.cpp:
+   Slot680 → SignUpPlunderWarFromClient (بورت
+   D78 الكامل المُتحقق خاماً) وSlot6e0 →
+   PublishSupportTokenFromClient (بورت D80) —
+   تمرير حرفي: (this, uUser, nCount, targets,
+   bSupport, emoney)
+3. اختبار syndicate_d114e_test.cpp: قسمان
+   يثبتان التوصيل عبر سلسلة البوابات الثماني
+   (war-state/mgr-gate/user-league/find/
+   member-key/already-signed) مع عدادات نداءات
+   لكل seam، بما فيها النداء المزدوج الخام
+   في c3230 (g_fnSplMgrGate ==1||==2 —
+   يُستدعى مرتين عند إرجاع 0). المسار العميق
+   مغطى أصلاً في d78/d80.
+
+**دروس وحدة (فخاخ):**
+- منطق بوابات c2470/c3230: القيمة **الصفر
+  تعني مروراً** في vt+0x278 و14174ebd0
+  (الاختبار الأول كتبته معكوساً وفشل)
+- كائنات البول القديمة
+  (SyndicateLeaguePlunderSignup.o /
+  SupportPublish.o) أعيدت ترجمتها طازجة
+  لضمان عدم ربط جسم قديم
+- g_fnSplFindLeague (خاص بـ c3230، معلن في
+  PlunderList.h) كائن مختلف عن
+  g_fnSupFindLeague — عدم توصيله = سيجفولت
+  عند مسار البحث
+- النداء على seam غير موصل (g_fnLbrOpNew)
+  = segfault مباشر؛ لا فحص null في الأجسام
+
+**الحالة:** ASan/UBSan نظيف. بهذا يسد ملف
+syndicatelogic.{h,cpp} بالكامل (232 فتحة
++ الجسمان العملاقان موصولان بفتحتيهما).

@@ -10,7 +10,9 @@
 #include "modules/syndicate/src/SyndicateLeagueOpt.h"        // the string mgr
 #include "modules/syndicate/src/SyndicateAppoint3de.h"       // the A84 seams
 #include "modules/syndicate/src/SyndicateLeagueBeRobFlow.h"  // g_fnLbrOpDelete
-#include "modules/syndicate/src/SyndicateInviteNotify.h"      // D114a msg seams
+#include "modules/syndicate/src/SyndicateInviteNotify.h"
+#include "modules/syndicate/src/SyndicateLeaguePlunderSignup.h"  // 1417c2470 port
+#include "modules/syndicate/src/SyndicateLeagueSupportPublish.h"  // 1417c3230 port      // D114a msg seams
 #include <cstring>
 #include <vector>
 #include <string>
@@ -6256,6 +6258,30 @@ void CSyndicateLogic::Slot6f8(int32_t n2) {
         }
         g_fnCMsgDtor66C0(aMsg);
     }
+}
+
+// +0x680: 1417c2470 — the plunder signup CLIENT entry.
+// RAW: member entry (param_1 = this array); the full port
+// lives in SyndicateLeaguePlunderSignup.cpp (D78, RAW-
+// verified) — this slot forwards verbatim:
+// (this, uUser, nCount, targets, bSupport, emoney)
+uint32_t CSyndicateLogic::Slot680(uint32_t u2,
+                                  uint32_t u3,
+                                  uint32_t* pu4, char c5,
+                                  uint32_t u6) {
+    return (uint32_t)SignUpPlunderWarFromClient(
+        (void**)this, u2, (int32_t)u3, pu4, c5, u6);
+}
+
+// +0x6e0: 1417c3230 — the support-token publish CLIENT
+// entry. Full port in SyndicateLeagueSupportPublish.cpp
+// (D80, RAW-verified) — forwarded verbatim.
+uint32_t CSyndicateLogic::Slot6e0(uint32_t u2,
+                                  uint32_t u3,
+                                  uint32_t* pu4, char c5,
+                                  uint32_t u6) {
+    return (uint32_t)PublishSupportTokenFromClient(
+        (void**)this, u2, (int32_t)u3, pu4, c5, u6);
 }
 
 void CSyndicateLogic::Slot700(uint32_t u2,
