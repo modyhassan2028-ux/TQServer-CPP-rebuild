@@ -1332,6 +1332,29 @@ void CSyndicateLogic::Slot208B4b0ThenSink3(
     g_fnSink3OpC(pObj);
 }
 
+// ---- D99 seams (default null — tests bind them) ----
+void     (*g_fnMgrCdfD0)(void*);
+int      (*g_fn647E0)(void*, uint32_t);
+uint32_t (*g_fn74E3F0)(void*);
+void*    (*g_fn7630D0)(void*, uint32_t);
+void     (*g_fn743D10)(void*);
+void     (*g_fn743E60)(void*);
+void*    (*g_fn743Dd0)(void*);
+void*    (*g_fn743D70)(void*);
+uint32_t (*g_fn763C80)(void*, uint32_t);
+void     (*g_fn76EE60)(void*, uint32_t, int32_t);
+void     (*g_fn76FBF0)(void*, uint32_t, int32_t,
+                       uint64_t, char);
+uint64_t (*g_fn763680)(void*, uint32_t);
+uint64_t (*g_fn78F2D0)(void*);
+void     (*g_fn76ECF0)(void*, uint32_t, int32_t);
+uint32_t (*g_fn7B9220)(void*, uint32_t, uint32_t);
+void     (*g_fn7B52D0)(void*, uint32_t, uint32_t, void*);
+void     (*g_fnCMsgCtor6640)(void*);
+uint64_t (*g_fnCMsgInit6790)(void*, int32_t,
+                             uint32_t, uint32_t, uint32_t);
+void     (*g_fnCMsgDtor66C0)(void*);
+
 // ---- D98 seams (default null — tests bind them) ----
 void     (*g_fnInvalidParam)(void);
 void     (*g_fnMyLogSave)(const char*, const char*);
@@ -1815,6 +1838,210 @@ next_iter:
             " bCross && vecSynID.size() != "
             "vecBSelf.size()");
     }
+}
+
+// ================= D99 wave 9 (+0x260..+0x2c8) =================
+
+// +0x260: 1417ac020
+void CSyndicateLogic::Slot260Destroy(void) {
+    if (*(void**)((char*)this + 0x10) != 0)
+        g_fnMgrCdfD0(*(void**)((char*)this + 0x10));
+}
+
+// +0x268: 1417b0770
+uint64_t CSyndicateLogic::Slot268(int32_t n) {
+    void** pp = (void**)this;
+    if (n == 0) {
+        // RAW: return in_RAX & ~0xff (CONCAT71 form)
+        uint64_t uRaw = 0;
+        return uRaw & 0xffffffffffffff00ULL;
+    }
+    uint32_t uId = ((uint32_t(*)())
+        (*(void***)pp)[0x510/8])();
+    int32_t iVar = g_fn647E0(pp[10], uId);
+    return (uint64_t)(uint32_t)(n == iVar);
+}
+
+// +0x270: 1417b07c0
+uint64_t CSyndicateLogic::Slot270(int32_t n) {
+    void** pp = (void**)this;
+    if (n == 0) {
+        uint64_t uRaw = 0;
+        return uRaw & 0xffffffffffffff00ULL;
+    }
+    uint64_t uVar2 =
+        ((uint64_t(*)())(*(void***)pp)[0x510/8])();
+    if ((int32_t)uVar2 == 0) return uVar2;
+    // RAW: FUN_14174e3f0(param_1[10]) directly
+    int32_t iVar = (int32_t)g_fn74E3F0(pp[10]);
+    return (uint64_t)(uint32_t)((int32_t)uVar2 == iVar);
+}
+
+// +0x278: 1417b9650
+void CSyndicateLogic::Slot278(uint32_t u, int32_t n3,
+                              uint32_t u4, char c5) {
+    void** pp = (void**)this;
+    char* pc4 = (char*)(uint64_t)u4;
+    uint32_t uVar3 = g_fn763C80(pp[10], u);
+    g_fn76FBF0(pp[10], u, n3, (uint64_t)pc4, c5);
+    uint64_t uVar4 = g_fn763680(pp[10], u);
+    int64_t lLg = g_fnLgFind(pp[2], (uint32_t)uVar4);
+    uint32_t uType = 0;
+    if (lLg != 0) uType = (uint32_t)g_fn78F2D0(
+        (void*)lLg);
+    uint64_t uVar8 = (uint64_t)u;
+    uType = g_fn7B9220(this, uType, u);
+    g_fn7B52D0(this, uType, uVar8, pc4);
+    char msgA[1072]; char msgB[1072];
+    g_fnCMsgCtor6640(msgA);
+    g_fnCMsgInit6790(msgA, 0x11, u, 0, 0);
+    uVar4 = g_fn763680(pp[10], u);
+    lLg = g_fnLgFind(pp[2], (uint32_t)uVar4);
+    uint32_t uType2 = 0;
+    if (lLg != 0) uType2 = (uint32_t)g_fn78F2D0(
+        (void*)lLg);
+    // RAW: box vt+8(box, type, msg)
+    ((void (*)(void*, uint32_t, void*))
+        (*(void***)pp[1])[0x8/8])(pp[1], uType2, msgA);
+    g_fnCMsgCtor6640(msgB);
+    uint32_t uCur = g_fn74E3F0(pp[10]);
+    uint64_t uInit = g_fnCMsgInit6790(msgB, 0x15, u,
+                                      uCur, 0);
+    if ((char)uInit != 0) {
+        // RAW: box vt+0x98 (no visible args)
+        ((void (*)(void*, void*))
+            (*(void***)pp[1])[0x98/8])(pp[1], msgB);
+    }
+    if (((int32_t)uVar3 < n3) && (c5 == 0)) {
+        char buf[512];
+        buf[0] = c5;
+        memset(buf + 1, 0, 0x1ff);
+        void* pIv = g_fnStringMgrInstance();
+        const char* pc = (const char*)
+            g_fnStringMgrGetStr(pIv,
+                "STR_NOTIFY_NEW_COUNTRY_LEAGUE");
+        snprintf(buf, 0x200, pc);
+        // RAW: box vt+0xa0(box, u, buf, 0)
+        ((void (*)(void*, uint32_t, const char*,
+                   uint32_t))
+            (*(void***)pp[1])[0xa0/8])(pp[1], u,
+                                       buf, 0);
+        g_fnCMsgDtor66C0(msgB);
+        g_fnCMsgDtor66C0(msgA);
+    } else {
+        g_fnCMsgDtor66C0(msgB);
+        g_fnCMsgDtor66C0(msgA);
+    }
+}
+
+// +0x280: 1417b9880
+void CSyndicateLogic::Slot280(uint32_t u, int32_t n3,
+                             void* p4) {
+    void** pp = (void**)this;
+    g_fn76ECF0(pp[10], u, n3);
+    uint64_t uVar2 = g_fn763680(pp[10], u);
+    int64_t lLg = g_fnLgFind(pp[2], (uint32_t)uVar2);
+    uint32_t uType = 0;
+    if (lLg != 0) uType = (uint32_t)g_fn78F2D0(
+        (void*)lLg);
+    uint64_t uVar4 = (uint64_t)u;
+    uType = g_fn7B9220(this, uType, u);
+    g_fn7B52D0(this, uType, uVar4, p4);
+}
+
+// +0x288: 1417b1b90
+void CSyndicateLogic::Slot288(uint32_t u) {
+    g_fn763C80(*(void**)((char*)this + 0x50), u);
+}
+
+// +0x290: 1417b1ba0
+void CSyndicateLogic::Slot290(void) {
+    void** pp = (void**)this;
+    uint32_t uVar1 = g_fn74E3F0(pp[10]);
+    void* lVar2 = g_fn7630D0(pp[10], uVar1);
+    if (lVar2 == 0) return;
+    g_fn743D10(lVar2);
+}
+
+// +0x298: 1417b0360
+void CSyndicateLogic::Slot298(void) {
+    g_fn74E3F0(*(void**)((char*)this + 0x50));
+}
+
+// +0x2a0: 1417b1be0
+void CSyndicateLogic::Slot2A0(uint32_t u, int32_t n) {
+    g_fn76EE60(*(void**)((char*)this + 0x50), u, n);
+}
+
+// +0x2a8: 1417b1bf0
+void CSyndicateLogic::Slot2A8(void) {
+    void** pp = (void**)this;
+    uint32_t uVar1 = g_fn74E3F0(pp[10]);
+    void* lVar2 = g_fn7630D0(pp[10], uVar1);
+    if (lVar2 == 0) return;
+    g_fn743E60(lVar2);
+}
+
+// +0x2b0: 1417b1c30
+void* CSyndicateLogic::Slot2B0(void) {
+    void** pp = (void**)this;
+    uint32_t uVar1 = g_fn74E3F0(pp[10]);
+    if (uVar1 == 0) return (void*)"";
+    void* lVar2 = g_fn7630D0(pp[10], uVar1);
+    if (lVar2 == 0) return 0;
+    return g_fn743Dd0(lVar2);
+}
+
+// +0x2b8: 1417b1c80
+uint64_t CSyndicateLogic::Slot2B8(void) {
+    void** pp = (void**)this;
+    uint32_t uVar1 = g_fn74E3F0(pp[10]);
+    if (uVar1 != 0) {
+        void* lVar2 = g_fn7630D0(pp[10], uVar1);
+        if (lVar2 != 0)
+            return (uint64_t)(uint64_t*)
+                g_fn743D70(lVar2);
+        g_fnT1LogError("\xa1\xef%s(%s)\xa1\xef in %s, %d");
+    }
+    return 0;
+}
+
+// +0x2c0: 1417b1cf0
+void* CSyndicateLogic::Slot2C0(void) {
+    void** pp = (void**)this;
+    uint32_t uVar1 = g_fn74E3F0(pp[10]);
+    if (uVar1 == 0) return 0;
+    void* lVar2 = g_fn7630D0(pp[10], uVar1);
+    if (lVar2 == 0) {
+        g_fnT1LogError("\xa1\xef%s(%s)\xa1\xef in %s, %d");
+        return 0;
+    }
+    char* pcName = (char*)g_fn743D70(lVar2);
+    // RAW: the manual strcmp against ""
+    char* pcA = pcName; char* pcB = "";
+    char uLast = 1; int64_t lCount = 1;
+    do {
+        if (lCount == 0) break;
+        lCount = lCount - 1;
+        uLast = (*pcA == *pcB);
+        pcA = pcA + 1; pcB = pcB + 1;
+    } while (uLast);
+    if (uLast) {
+        void* puVar4 = g_fn743Dd0(lVar2);
+        if (puVar4 != 0) return puVar4;
+        return (void*)"";
+    }
+    return (void*)((char*)this + 0x61);
+}
+
+// +0x2c8: 1417b1dd0
+void* CSyndicateLogic::Slot2C8(uint32_t u) {
+    void** pp = (void**)this;
+    if (u != 0) {
+        void* lVar1 = g_fn7630D0(pp[10], u);
+        if (lVar1 != 0) return g_fn743Dd0(lVar1);
+    }
+    return 0;
 }
 
 

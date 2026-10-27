@@ -94,6 +94,31 @@ extern void*    (*g_fnStringMgrGetStr)(void*, const char*);
 extern char     (*g_fnA84HasOldPos)(void*);
 extern uint32_t (*g_fnA84GetOldId)(void*);
 
+// ---- wave-9 seams (D99) ----
+extern void     (*g_fnMgrCdfD0)(void*);                // 1417cdfd0
+extern int      (*g_fn647E0)(void*, uint32_t);          // 1417647e0
+extern uint32_t (*g_fn74E3F0)(void*);                  // 14174e3f0
+extern void*    (*g_fn7630D0)(void*, uint32_t);        // 1417630d0
+extern void     (*g_fn743D10)(void*);                  // 141743d10
+extern void     (*g_fn743E60)(void*);                  // 141743e60
+extern void*    (*g_fn743Dd0)(void*);                  // 141743dd0
+extern void*    (*g_fn743D70)(void*);                  // 141743d70
+extern uint32_t (*g_fn763C80)(void*, uint32_t);        // 141763c80
+extern void     (*g_fn76EE60)(void*, uint32_t, int32_t);   // 14176ee60
+extern void     (*g_fn76FBF0)(void*, uint32_t, int32_t,
+                               uint64_t, char);        // 14176fbf0
+extern uint64_t (*g_fn763680)(void*, uint32_t);        // 141763680
+extern uint64_t (*g_fn78F2D0)(void*);                  // 14178f2d0
+extern void     (*g_fn76ECF0)(void*, uint32_t, int32_t);    // 14176ecf0
+extern uint32_t (*g_fn7B9220)(void*, uint32_t,
+                              uint32_t);               // 1417b9220
+extern void     (*g_fn7B52D0)(void*, uint32_t, uint32_t,
+                              void*);                  // 1417b52d0
+extern void     (*g_fnCMsgCtor6640)(void*);            // 1417d6640
+extern uint64_t (*g_fnCMsgInit6790)(void*, int32_t,
+    uint32_t, uint32_t, uint32_t);                      // 1417d6790
+extern void     (*g_fnCMsgDtor66C0)(void*);            // 1417d66c0
+
 // ---- wave-8 seams (D98) ----
 extern void     (*g_fnInvalidParam)(void);               // _invalid_parameter_noinfo
 extern void     (*g_fnMyLogSave)(const char*, const char*); // tq::MyLogSave
@@ -355,6 +380,22 @@ public:
     void Slot258Sub9D3680(int32_t n);                // 1417afc90
     void Slot218AwardPrizeVlmOrCross(
         void* pvSynID, void* pvBSelf, char bCross); // 1417c3ed0
+    void Slot260Destroy(void);                    // 1417ac020
+    uint64_t Slot268(int32_t n);                  // 1417b0770
+    uint64_t Slot270(int32_t n);                  // 1417b07c0
+    void Slot278(uint32_t u, int32_t n3, uint32_t u4,
+                 char c5);                        // 1417b9650
+    void Slot280(uint32_t u, int32_t n3,
+                 void* p4);                       // 1417b9880
+    void Slot288(uint32_t u);                     // 1417b1b90
+    void Slot290(void);                           // 1417b1ba0
+    void Slot298(void);                           // 1417b0360
+    void Slot2A0(uint32_t u, int32_t n);          // 1417b1be0
+    void Slot2A8(void);                           // 1417b1bf0
+    void* Slot2B0(void);                          // 1417b1c30
+    uint64_t Slot2B8(void);                       // 1417b1c80
+    void* Slot2C0(void);                          // 1417b1cf0
+    void* Slot2C8(uint32_t u);                    // 1417b1dd0
 
 
 
