@@ -670,3 +670,31 @@ msgserver/threads/MsgAsyncDBThread.{h,cpp}
 
 **التالي:** عمال 14001d2d0، سوكت 14002e7e0،
 ماب جروب 1400f3060.
+
+---
+
+## المسار أ-3 — بناة الخيوط [2026-10-28]
+
+**المنتهي:** العشرة بناة+init في
+msgserver/threads/MsgSpawnThreads.{h,cpp}
+(راجع PORTING_LOG للموجز الحرفي الكامل:
+World/Auction/MapGroup/UserLogin/Socket/
+CrossClient/Chat/Ipad/ChangeServer/Google).
+6/6 + رجريجن 58/58×6 + ASan.
+
+**قواعد مستخلصة:**
+1. `param_1[0x48]=0; param_1[0x49]=0` في
+   Ghidra = بايتات مفردة (فهرسة بعنصر حجمه
+   1) — الفواصل المتتالية دليل البايت.
+2. حلقة GooglePayments: *(this+0x8c8) مؤشر
+   لعقدة خارجية من FUN_140019420؛ الربط
+   الذاتي node[0]/[8]/[0x10]=node بالترتيب
+   الخام مع +0x8d0=0 بين الكتابتين.
+3. CSocketThread::CreateThread يُستدعى قبل
+   إنشاء الـ core (ترتيب خام مميز).
+
+**التالي:** أجسام الدوال الأساسية لهذه
+الكلاسات (OnTimer/OnProcess/OnClose) — ابدأ
+بمنطقة 1400f3xxx (CMapGroupThread) و
+14002bxxx (CSocketThread) في
+MsgServer.exe.decompiled.c.

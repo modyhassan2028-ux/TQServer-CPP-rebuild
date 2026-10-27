@@ -5578,3 +5578,83 @@ null — الاختبار يضبطه يدوياً.
 **التالي:** عمال 14001d2d0، سوكت 14002e7e0،
 ماب جروب 1400f3060 (رسالة 24134 "ProcessMsg
 returned error with packet:%d, port:%d").
+
+## المسار أ-3 — بناة الخيوط العشرة (spawn ctors) [2026-10-28]
+
+**المنقول حرفياً في msgserver/threads/
+MsgSpawnThreads.{h,cpp} (كل بناة M32):**
+- CWorldThread 14002e7e0/60: ctor
+  (+0x40=0, +0x48=port) + init
+  (CreateThread("WorldThread") ثم
+  core->+0x40 ثم FUN_140508f10(1) dispatch)
+- CAuctionSearchThread 1400f3060/b0:
+  ctor (+0x40=port, +0x48=0) + init
+  (14036e510(port)->+0x48؛ فشل = log
+  "CreateThread failed"؛ ثم
+  CreateThread("AuctionSearchThread"))
+- CMapGroupThread 14001d2d0: ctor
+  (MYASSERT pPort
+  mapgroupthread.cpp:0x12، +0x48=port،
+  +0x40=0، +0x50=idx dword)
+- CUserLoginThread 14002e3d0/450: ctor +
+  init (1400f7ef0()->+0x40، iface+8(port)،
+  ثم CreateThread("UserLoginThread"))
+- CSocketThread 14002bb50/e0: ctor
+  (+0x40=0, +0x48=p1, +0x50=p2) + init —
+  **الترتيب الخام حرفياً: CreateThread
+  ("SocketThread") أولاً** ثم 1404ff780
+  ()->+0x40، iface+8(p1,p2)، فشل =
+  MessageBoxA("CSocketThread::
+  CreateThread failed", "Conquer Online
+  Server", 0x10)
+- CCrossClientThread 14004c0a0: ctor (بايتا
+  0x50/0x51 صفر، qwords غير متراصة 0x52/
+  0x5a، MYASSERT m_pMsgPort
+  crossclientthread.cpp:0x17، iface
+  +0x38 ثم +0x40(0x14))
+- CChatThread 140001000/80: مثل UserLogin
+  باسم "ChatThread"
+- CIPADPaymentsSocketThread 14050ff20:
+  بايتا 0x48/0x49، MYASSERT
+  ipadpaymentssocketthread.cpp:0x13،
+  +0x40(1)
+- CChangeServerSocketThread 1400319c0
+  (حجم 0xb0): الخريطة الكاملة — بايتا
+  0x48/0x49، dword 0x4c=0، dword 0x50=0،
+  word 0x54=0x1c، word 0x56=1، dword
+  0x58=0xffffffff، qword 0x5c=0، qword
+  0x64=0، dword 0x6c=0، FUN_140031940
+  (+0x70) قبل الـ MYASSERT (خط
+  changeserversocketthread.cpp:0x17)،
+  iface +0x38/+0x40(1)، FUN_140030090
+  (+0x70)
+- CGooglePaymentsThread 140019520 (حجم
+  0x8d8): MYASSERT googlepaymentsthread
+  .cpp:0x22، operator_new(8) بعنوان
+  &this+0x850 (الحقل يحمل المؤشر)،
+  memset(0x44a/0x4a, 0x400)، 300/now،
+  5/now، **عقدة الحلقة عند *(this+0x8c8)
+  مؤشر خارجي أنشأه FUN_140019420
+  (+0x898)** والـ ctor يربطها ذاتياً
+  فقط: node[0]/node[8]/node[0x10]=node
+  بترتيب الخام (+0x8d0=0 بينها)، مع
+  FUN_140016c20(+0x898, *(node+8)) قبلها
+
+**فخان مهمان اكتشفهما ASan:** (1) كتابات
+Ghidra `param_1[0x48]=0; param_1[0x49]=0`
+= **بايتات مفردة** (عنصر بحجم 1) وليست
+qwords — أي فهرسة متتالية هكذا تعني بايتات؛
+(2) حلقة GooglePayments ليست داخل الكائن.
+
+**الاختبار msg_spawn_test.cpp:** 6 أقسام (بناة
+الأعمدة الأربعة، ترتيب init الخام لكل صنف
+بالأسماء الحرفية "WorldThread"/"SocketThread"
+أولاً إلخ، مسارات الفشل مع MYASSERT
+بالملف:السطر الحرفي، خريطة ChangeServer
+كاملة، تخطيط Google 0x8d8 مع الحلقة
+الخارجية). رجريجن **58/58 ×6** + ASan/UBSan
+نظيف.
+
+**التالي:** أجسام OnTimer/OnProcess لهذه
+الكلاسات (تبدأ بـ CMapGroupThread 1400f3xxx
+منطقة والسوكت 14002bxxx).
