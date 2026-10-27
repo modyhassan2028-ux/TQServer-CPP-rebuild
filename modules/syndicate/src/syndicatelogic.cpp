@@ -991,6 +991,20 @@ uint64_t CSyndicateLogic::Slot1a0InviteGate(
     return 0;
 }
 
+// ---- D96 seams (default null — tests bind them) ----
+uint32_t (*g_fnA8940)(void*, uint32_t);
+void*    (*g_fnSink1Get)(void);
+void     (*g_fnSink1OpA)(void*, uint32_t);
+void     (*g_fnSink1OpB)(void*, uint32_t, uint32_t, uint32_t);
+void     (*g_fnSink1OpC)(void*);
+void*    (*g_fnSink2Get)(void);
+void     (*g_fnSink2OpA)(void*, int32_t);
+void*    (*g_fnSink3Get)(void);
+void     (*g_fnSink3OpA)(void*, void*);
+void     (*g_fnSink3OpB)(void*, int32_t);
+void     (*g_fnSink3OpC)(void*);
+void     (*g_fnB4B0)(void*, int32_t, const void*, const void*);
+
 // ================= D95 wave 5 (+0x1a8..+0x1c8) =================
 
 // the box vt+0x88 broadcast (RAW: (**(code**)(boxvt+0x88))(box, id, buf, 0))
@@ -1233,6 +1247,67 @@ uint64_t CSyndicateLogic::Slot1c8IsAntagGate(
                 (void*)lLg, uOther);
     }
     return 0;
+}
+
+// ================= D96 wave 6 (+0x1d0..+0x208) =================
+
+uint32_t CSyndicateLogic::Slot1d0Sub20Delegate(
+    uint32_t u) {
+    void* pLogic = this;
+    if (*(void**)((char*)pLogic + 0x20) != 0)
+        return g_fnA8940(
+            *(void**)((char*)pLogic + 0x20), u);
+    return 0;
+}
+
+void CSyndicateLogic::Slot1d8Sink1OpA(uint32_t u) {
+    void* pObj = g_fnSink1Get();
+    g_fnSink1OpA(pObj, u);
+}
+
+void CSyndicateLogic::Slot1e0Sink1OpB(
+    uint32_t u, uint32_t v, uint32_t w) {
+    void* pObj = g_fnSink1Get();
+    g_fnSink1OpB(pObj, u, v, w);
+}
+
+void CSyndicateLogic::Slot1e8Sink1OpC() {
+    void* pObj = g_fnSink1Get();
+    g_fnSink1OpC(pObj);
+}
+
+void CSyndicateLogic::Slot1f0Sink2OpA(int32_t n) {
+    void* pObj = g_fnSink2Get();
+    g_fnSink2OpA(pObj, n);
+}
+
+void CSyndicateLogic::Slot1f8Sink3Loop(
+    uint32_t u, void* p) {
+    void* pCur = p;
+    // RAW: if ((0 < (int)param_2) && (0 < (int)param_2))
+    // — the doubled check kept verbatim
+    if ((int32_t)u > 0 && (int32_t)u > 0) {
+        uint64_t uN = u;
+        do {
+            void* pObj = g_fnSink3Get();
+            g_fnSink3OpA(pObj, pCur);
+            pCur = (char*)pCur + 0x48;
+            uN--;
+        } while (uN != 0);
+    }
+}
+
+void CSyndicateLogic::Slot200Sink3OpB(int32_t n) {
+    void* pObj = g_fnSink3Get();
+    g_fnSink3OpB(pObj, n);
+}
+
+void CSyndicateLogic::Slot208B4b0ThenSink3(
+    const void* p, const void* q) {
+    void* pLogic = this;
+    g_fnB4B0(*(void**)((char*)pLogic + 0x30), 3, p, q);
+    void* pObj = g_fnSink3Get();
+    g_fnSink3OpC(pObj);
 }
 
 

@@ -94,6 +94,22 @@ extern void*    (*g_fnStringMgrGetStr)(void*, const char*);
 extern char     (*g_fnA84HasOldPos)(void*);
 extern uint32_t (*g_fnA84GetOldId)(void*);
 
+// ---- wave-6 seams (D96) ----
+extern uint32_t (*g_fnA8940)(void*, uint32_t);         // 1417a8940
+extern void*    (*g_fnSink1Get)(void);                  // 14173f9c0
+extern void     (*g_fnSink1OpA)(void*, uint32_t);       // 14173fa40
+extern void     (*g_fnSink1OpB)(void*, uint32_t,
+                    uint32_t, uint32_t);                // 14173dbc0
+extern void     (*g_fnSink1OpC)(void*);                 // 14173f4d0
+extern void*    (*g_fnSink2Get)(void);                  // 141781b60
+extern void     (*g_fnSink2OpA)(void*, int32_t);        // 141783470
+extern void*    (*g_fnSink3Get)(void);                  // 141741a30
+extern void     (*g_fnSink3OpA)(void*, void*);          // 141742810
+extern void     (*g_fnSink3OpB)(void*, int32_t);        // 141740fd0
+extern void     (*g_fnSink3OpC)(void*);                 // 141741b10
+extern void     (*g_fnB4B0)(void*, int32_t,
+                    const void*, const void*);           // 14177b4b0
+
 // ---- wave-5 seams (D95) ----
 extern int64_t  (*g_fnLgFindByName)(void*, const char*); // 1417c8aa0
 extern char     (*g_fnLgIsAlly)(void*, uint32_t);        // 141797750
@@ -243,6 +259,17 @@ public:
                                uint32_t uOther);       // 1417b6df0
     uint64_t Slot1c8IsAntagGate(uint32_t uLg,
                                 uint32_t uOther);      // 1417b6e30
+    // ---- D96 wave 6: slots +0x1d0..+0x208 ----
+    uint32_t Slot1d0Sub20Delegate(uint32_t u);    // 1417af310
+    void Slot1d8Sink1OpA(uint32_t u);             // 1417af330
+    void Slot1e0Sink1OpB(uint32_t u, uint32_t v,
+                         uint32_t w);              // 1417af350
+    void Slot1e8Sink1OpC();                        // 1417af390
+    void Slot1f0Sink2OpA(int32_t n);               // 1417af3b0
+    void Slot1f8Sink3Loop(uint32_t u, void* p);    // 1417af3d0
+    void Slot200Sink3OpB(int32_t n);               // 1417af410
+    void Slot208B4b0ThenSink3(const void* p,
+                              const void* q);      // 1417af430
 
 
 
