@@ -284,3 +284,32 @@ int CMapGroup::SendMultiOSClientMsg(const uint32_t* ids, size_t n, void* msg) {
     return 1;
 }
 } // namespace msg
+
+// 1400a7ab0 CMapGroup::ProcessQueryOSConnectStatus
+namespace msg {
+void CMapGroup::ProcessQueryOSConnectStatus(void* reply, SOsEntry* v, size_t n,
+                                            SeamsQuery& s) {
+    if (reply == nullptr) { s.LogCheck(0xe9a); return; }
+    uint8_t buf[0x430];
+    void* msg = s.Ctor(buf);
+    unsigned char val = 0;
+    if (m_Flg730 != 0) {
+        void* u = s.UserByServer(m_ServerId);
+        void* p = (u != nullptr) ? *(void**)((uint8_t*)u + 0x148) : nullptr;
+        if (p == nullptr) { s.LogCheck(0x14d); p = nullptr; }
+        val = s.GetVal(p);          // RAW calls it even when p is null
+    }
+    if (s.CreateMsg(msg, val) == 0) {
+        s.LogCreateFailed();
+        s.Destroy(msg);
+        return;
+    }
+    int appended = 1;
+    for (size_t i = 0; i < n; ++i) {
+        if (s.Append(msg, v[i].key, v[i].flag) == 0) { appended = 0; break; }
+    }
+    if (appended == 0) s.LogAppendFailed();
+    s.SendReply(reply, msg);
+    s.Destroy(msg);
+}
+} // namespace msg

@@ -115,6 +115,25 @@ public:
     int  CheckTableAutoId(const char* table, uint32_t want,
                           SMapGroupDbSeams& s);       // 1400943f0
     void LoadMonsterDropRateConfig(SMapGroupDbSeams& s);  // 1400b27a0
+    // 1400a7ab0
+    struct SeamsQuery {
+        void (*LogCheck)(unsigned line);                    // the shared check line
+        void* (*UserByServer)(uint32_t serverId);
+        unsigned char (*GetVal)(void* obj);                 // 140005850
+        void* (*Ctor)(void* buf);                           // 1402c3180
+        int  (*CreateMsg)(void* msg, unsigned char v);      // 1402c3230
+        int  (*Append)(void* msg, uint32_t k, unsigned char f); // 1402c32a0
+        void (*Destroy)(void* msg);                         // 1402c31d0
+        void (*SendReply)(void* reply, void* msg);          // reply+0x10 vt+0x350
+        void (*LogCreateFailed)(void);
+        void (*LogAppendFailed)(void);
+    };
+    struct SOsEntry { uint32_t key; uint8_t flag; };
+    void ProcessQueryOSConnectStatus(void* reply, SOsEntry* v, size_t n,
+                                     SeamsQuery& s);
+    uint8_t  m_Pad726[0x730 - 0x726];  // +0x726 .. +0x72f
+    uint8_t  m_Flg730;                 // +0x730
+    uint8_t  m_Pad731[0x738 - 0x731];
     SeamsMulti m_Multi;
     void SendChatFriendInfo(int* ids, SMapGroupChatSeams& s);
     bool IsAllowEnterOS(int action, SMapGroupChatSeams& s);
