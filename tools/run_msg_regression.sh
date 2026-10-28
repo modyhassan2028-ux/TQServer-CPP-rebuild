@@ -5,8 +5,8 @@
 # modules) are reported as SKIP, not failures.
 cd "$(dirname "$0")/.." || exit 1
 POOL=/tmp/objs_msg; mkdir -p $POOL
-INC="-I. -Imodules -Imsgserver -Imsgserver/ui"
-for f in msgserver/*.cpp msgserver/ui/*.cpp; do
+INC="-I. -Imodules -Imsgserver -Imsgserver/ui -Imsgserver/classes"
+for f in msgserver/*.cpp msgserver/ui/*.cpp msgserver/classes/*.cpp; do
   o=$POOL/$(basename "$f" .cpp).o
   [ "$o" -nt "$f" ] && [ -z "$(find msgserver -name '*.h' -newer "$o" -print -quit)" ] || g++ -std=c++17 -c $INC "$f" -o "$o" 2>/dev/null
 done

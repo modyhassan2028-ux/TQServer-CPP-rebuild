@@ -6290,3 +6290,11 @@ gmlog/ChangeServer؛ 14002f260 مفاتيح 0..9 بنصوص .rdata
 GetThreadState/GetPort)، تخطيط أعضاء الخام، وتمرير لكل وحدة موجة
 متحقَّقة بلا تكرار منطق. + إصلاح حارس تضمين مقطوع في
 MsgCheatMonitorThread.h. 22 تأكيدًا ×6، رجريجن 67/67.
+
+### أ-9س — ثمانية كلاسات كاملة في دفعة
+CServerStatusMonitor/StartWorkerThread، CChatGameBlock/QueryBlock،
+CGMTalkMgr/CreateNew، CConnectUser/SetType، CAuraMgr/SendAuraInfo،
+CCrossMsgLeagueList/Process، CMsgRoulettePlayerBet/Create،
+CBoothActor/RecordEmoney — في msgserver/classes/ بملف لكل كلاس.
++ استخراج نص الفحص المشترك من .rdata + سلوك القسمة قبل الفحص في
+QueryBlock. 79 تأكيدًا ×6، رجريجن 68/68.
