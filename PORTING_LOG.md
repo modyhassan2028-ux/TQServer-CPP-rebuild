@@ -6331,3 +6331,8 @@ ProcessLocalMsg، وفلتر مربوط بعلم +0x50 (0x3f1/0x11173/0x11174
 msgserver/logthread.cpp (مسار مُستنتج ومُعلَن): مخزن 0x800، OnTimer
 بلا وسائط، نص resync حرفي عند تجاوز 0x2711 مع فرض NUL عند +0x73f،
 وProcessMsg مُهمَل النتيجة. 17 تأكيدًا ×6، رجريجن 73/73.
+
+### أ-9م — CCrossKernel::ProcessNetMsg (140052b30)
+crossclient/crosskernel.cpp: قوائم 0..10 بالرؤوس والإزاحات حرفيًا،
+المفتاح 0xFA56EA00، حل/تبديل المعرّفات في 2/6، فرع 7/8 الخاص،
+وProcessLocalMsg لسه. 36 تأكيدًا ×6، رجريجن 74/74.
