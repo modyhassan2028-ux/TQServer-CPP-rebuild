@@ -57,6 +57,8 @@ struct SAuthSeams {
     int   (*GetLastError)();                          // 111
     int   (*CloseSocketOrd)(int64_t s);               // 3
     int   (*WsaStartup)(int ver, void* data);         // 115
+    int   (*Recv)(int64_t s, void* b, int n, int f);  // 16
+    int   (*Send)(int64_t s, const void* b, int n, int f); // 19
     uint16_t (*Htons)(uint16_t p);                    // 9
     uint32_t (*Time32)();                             // _time32(NULL)
     int   (*Sprintf2u)(char* buf, uint32_t a, uint32_t b);
@@ -73,5 +75,32 @@ void  AuthClientClose(SAuthClient* p, const SAuthSeams& s);         // 140005d20
 int   AuthClientWsaInit(const SAuthSeams& s);                       // 140005b50
 void  AuthClientSendKey(SAuthClient* p, uint32_t arg,
         const SAuthSeams& s);                                       // 14001e0b0
+// ---- the packet half of the class (wave 9e) ----
+// 140005c70 ClearPacket — the OutBufSize error log, the memmove
+//            of the remainder, szA -= n, the clamp to 0
+// 140005d60 Flush       — send(sock, bufB, szB, 0), the shift of
+//            the remainder, the negative-size noarg log, the
+//            WSAECONNRESET (0x2746) special case, then the full
+//            failure reset (sock=-1, state/szA/szB=0)
+// 140006730 GetPacket   — *pLen=0, state==2 && sock!=-1 gate, the
+//            recv into bufA+szA of (0x1000-szA), 0 -> close-be-
+//            close log, -1 -> 0x2733/0x2746 tolerated else
+//            "recv packet failed[%d].", then *pLen=szA and
+//            return bufA (even when nothing was read)
+// 140006880 SendPacket  — state==2 gate, invalid-socket log, the
+//            pre-flush when len+szB>0x1000, the memcpy append,
+//            optional flush, and the "buf full!" reset path
+// 1400062f0 ConnectStored — the 2-arg twin of Connect: name must
+//            already be set (noarg log at 0xc7), no SafeCopy, no
+//            port store, tv_sec = the argument, tv_usec = 1000
+int   AuthClientClearPacket(SAuthClient* p, int nLen,
+        const SAuthSeams& s);                                       // 140005c70
+int   AuthClientFlush(SAuthClient* p, const SAuthSeams& s);         // 140005d60
+void* AuthClientGetPacket(SAuthClient* p, uint32_t* pLen, int bRecv,
+        const SAuthSeams& s);                                       // 140006730
+int   AuthClientSendPacket(SAuthClient* p, const void* buf, int len,
+        int bFlush, const SAuthSeams& s);                           // 140006880
+int   AuthClientConnectStored(SAuthClient* p, uint32_t tvSec,
+        const SAuthSeams& s);                                       // 1400062f0
 }
 #endif

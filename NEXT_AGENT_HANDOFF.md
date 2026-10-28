@@ -982,3 +982,43 @@ PROCESSENTRY32 x64: szExeFile عند +0x2c.
   معناه closesocket(sock).
 - sockaddr_in يُبنى 16 بايت أصفارًا ثم family=2،
   port=htons(u10)، addr — لا تستخدم sockaddr_in المضغوطة.
+
+## المسار أ-9هـ — النصف الحزمي لكلاس السوكت [2026-10-28]
+
+**المنتهي:** خمسة أجسام أُضيفت لـ `msgserver/MsgAuthClient` في
+نفس الحزمة (الكلاس كامل الآن: 11 دالة):
+
+- **140005c70 ClearPacket(nLen):** لوج تجاوز الحجم
+  (`ClearPacket()  error, Getpacket OutBufSize:%d, ...`)، إزاحة
+  الباقي للرأس، `szA -= nLen`، والتثبيت على 0 عند السالب؛ لا
+  تفعل شيئًا إلا في state==2.
+- **140005d60 Flush:** `send(sock, bufB, szB, 0)`؛ عند >0 إزاحة
+  الباقي و`szB -= n` ولوج بلا وسائط لو صار سالبًا، والرجوع
+  `szB==0`؛ عند <=0: `GetLastError`، تسامح مع
+  **WSAECONNRESET (0x2746)** بلا لوج، ثم تصفير كامل.
+- **140006730 GetPacket(pLen, bRecv):** تصفير `*pLen` أولًا،
+  بوابة state==2، recv بحجم `0x1000 - szA`؛ 0 →
+  `GetPacket() connect be close.`، و-1 → 0x2733/0x2746 بلا لوج
+  وإلا `recv packet failed[%d].`؛ **وبعد الإغلاق يكمل إلى
+  LAB_140006857 فيرجّع bufA مع len=0، لا null**.
+- **140006880 SendPacket(buf,len,bFlush):** بوابة state==2،
+  لوج السوكت غير الصالح، pre-flush عند `len+szB > 0x1000`،
+  النسخ في bufB والتذييل، flush اختياري.
+- **1400062f0 ConnectStored(tvSec):** التوأم ثنائي الوسائط
+  لـ Connect: الاسم يُقرأ من الكائن (حارس `*p==0` بلوج بلا
+  وسائط عند 0xc7)، بلا SafeCopy وبلا خزن للمنفذ، و`tv_sec` من
+  الوسيط و`tv_usec=1000`.
+
+**نتيجتان من تحليل الخام (ليستا تخمينًا):**
+1. فرع `"SendPacket() buf full!"` **كود ميت**: الشرطان
+   يختبران نفس المجموع (`len+szB`)، وبعد Flush تكون szB إما 0
+   أو szB-sent، فالثاني دائمًا صحيح. موثّق في الاختبار.
+2. الخام يستدعي `memcpy` على مدى متراكب (dst < src) في
+   ClearPacket/Flush — UB؛ استُخدم `memmove` لأن ناتج MSVC
+   للنسخ الأمامي مطابق بايت-ببايت، والتعليق يوضح ذلك.
+
+**الاختبار:** 123 تأكيدًا ×6 خضراء، ASan/UBSan/LSan نظيف.
+
+**التالي:** 140006ad0 (استعلام cq_config عبر InstanceGet/DB)،
+ثم ربط `AuthClientSendKey` بـ`AuthClientSendPacket` الحقيقي،
+ثم عائلة 140005a20/140005ad0 (تحميل shell.ini).

@@ -8,8 +8,8 @@
 #include <vector>
 #include "MsgAuthClient.h"
 using namespace msg;
-static int g_fail = 0;
-#define CHECK(c, m) do { if (c) printf("  ok %s\n", m); \
+static int g_fail = 0; static int g_ok = 0;
+#define CHECK(c, m) do { if (c) { printf("  ok %s\n", m); g_ok++; } \
     else { printf("  FAIL %s\n", m); g_fail++; } } while (0)
 #define SECT(x) printf("%s\n", x)
 // ---- seam state ----
@@ -22,6 +22,8 @@ static std::string s_logs; static std::vector<std::string> s_logV;
 static int s_lvl[8], s_opt[8], s_optVal[8];
 static char s_lastName[32]; static uint16_t s_htonsIn;
 static int s_6880N; static std::string s_6880Buf; static int s_6880Mode;
+static int s_recvRet, s_recvN, s_recvLen; static int s_sendRet, s_sendN;
+static std::string s_sent; static int s_tvSec = -1, s_tvUsec = -1;
 static uint32_t s_timeVal = 1700000000u;
 static void* TNew(size_t n) { return std::calloc(1, n ? n : 1); }
 static void TDel(void* p) { std::free(p); }
@@ -54,8 +56,17 @@ static void* s_host; static int32_t s_hostAddr;
 static void* TGetHost(const char*) { return s_host; }
 static int TConnect(int64_t, const void*, int n) {
     s_connectN++; if (n != 0x10) return -98; return s_connectRet; }
-static int TSelect(int n, void*, void*, void*, void*) {
-    if (n != 0x40) return -97; return s_selectRet; }
+static int TSelect(int n, void*, void*, void*, void* tvp) {
+    if (n != 0x40) return -97;
+    if (tvp) { s_tvSec = ((int*)tvp)[0]; s_tvUsec = ((int*)tvp)[1]; }
+    return s_selectRet;
+}
+static int TRecv(int64_t, void* b, int n, int) {
+    s_recvN++; s_recvLen = n;
+    if (s_recvRet > 0) { memset(b, 0xAB, (size_t)s_recvRet); }
+    return s_recvRet; }
+static int TSend(int64_t, const void* b, int n, int) {
+    s_sendN++; s_sent.assign((const char*)b, (size_t)n); return s_sendRet; }
 static int s_gsC = 0;
 static int TGetSockOpt(int64_t, void* v) {
     ++s_gsC;
@@ -84,6 +95,7 @@ static void Wire() {
     S.GetLastError = TGetLastError; S.CloseSocketOrd = TCloseOrd;
     S.WsaStartup = TWsa; S.Htons = THtons; S.Time32 = TTime;
     S.Sprintf2u = TSprintf; S.StrLen = strlen; S.Fn6880 = TFn6880;
+    S.Recv = TRecv; S.Send = TSend;
 }
 static std::vector<void*> g_live;
 static SAuthClient* NewAC() {
@@ -96,6 +108,8 @@ static void ResetAll() {
     s_setSock[0] = 0; s_sockRet = 100; s_keepRet = s_sndRet = s_rcvRet = 0;
     s_ioctlRet = s_connectRet = 0; s_lastErr = 0;
     s_selectRet = 2; s_gsExc = 0; s_gsWrite = 1; s_gsC = 0;
+    s_recvRet = 0; s_recvN = s_sendN = 0; s_sendRet = 0; s_sent.clear();
+    s_tvSec = s_tvUsec = -1;
     s_wsaRet = 0; s_wsaVer = 2; s_logV.clear(); s_htonsIn = 0;
     s_host = nullptr;
     static char hostbuf[64];
@@ -246,8 +260,125 @@ int main() {
         CHECK(s_logV[0].find("1700000123 4242") != std::string::npos,
               "log carries the plaintext");
     }
+
+    SECT("A9e-19 ClearPacket");
+    ResetAll(); p = NewAC(); p->state = 2; p->szA = 10;
+    memset(p->bufA, 'x', 12);
+    CHECK(AuthClientClearPacket(p, 4, S) == 1, "rest > 0 -> 1");
+    CHECK(p->szA == 6, "szA 10-4");
+    CHECK(memcmp(p->bufA, "xxxx", 4) == 0 && p->bufA[6] == 'x',
+          "remainder shifted to the head");
+    CHECK(s_logV.empty(), "no log when szA >= n");
+    ResetAll(); p = NewAC(); p->state = 2; p->szA = 3;
+    CHECK(AuthClientClearPacket(p, 5, S) == 0, "over-clear -> 0");
+    CHECK(p->szA == 0, "clamped to 0");
+    CHECK(s_logV.size() == 1, "OutBufSize error logged");
+    ResetAll(); p = NewAC(); p->state = 1; p->szA = 9;
+    CHECK(AuthClientClearPacket(p, 2, S) == 0, "state!=2 -> 0");
+    CHECK(p->szA == 9, "szA untouched");
+    SECT("A9e-20 Flush");
+    ResetAll(); p = NewAC();
+    CHECK(AuthClientFlush(p, S) == 0, "state!=2 -> 0");
+    p->state = 2; p->szB = 0;
+    CHECK(AuthClientFlush(p, S) == 1, "empty -> 1");
+    ResetAll(); p = NewAC(); p->state = 2; p->sock = 9;
+    memset(p->bufB, 'a', 8); p->szB = 8; s_sendRet = 8;
+    CHECK(AuthClientFlush(p, S) == 1, "full send -> 1");
+    CHECK(s_sendN == 1 && s_sent.size() == 8, "send(sock,bufB,8,0)");
+    CHECK(p->szB == 0, "szB drained");
+    ResetAll(); p = NewAC(); p->state = 2; p->sock = 9;
+    memset(p->bufB, 'a', 8); p->szB = 8; s_sendRet = 3;
+    CHECK(AuthClientFlush(p, S) == 0, "partial -> 0");
+    CHECK(p->szB == 5 && p->bufB[0] == 'a', "5 remain");
+    ResetAll(); p = NewAC(); p->state = 2; p->sock = 9; p->szB = 4; s_sendRet = -1;
+    s_lastErr = 10054;
+    CHECK(AuthClientFlush(p, S) == 0, "send fail -> 0");
+    CHECK(p->sock == -1 && p->state == 0 && p->szA == 0 && p->szB == 0,
+          "full reset");
+    CHECK(s_logV.empty(), "WSAECONNRESET (0x2746) not logged");
+    ResetAll(); p = NewAC(); p->state = 2; p->sock = 9; p->szB = 4; s_sendRet = -1;
+    s_lastErr = 10053;
+    CHECK(AuthClientFlush(p, S) == 0, "other err -> 0");
+    CHECK(s_logV.size() == 1 && s_logV[0] == "Flush packet failed[10053].",
+          "RAW format with the error");
+    SECT("A9e-21 GetPacket");
+    ResetAll(); p = NewAC();
+    CHECK(AuthClientGetPacket(p, nullptr, 1, S) == nullptr, "null len -> 0");
+    uint32_t len = 77;
+    CHECK(AuthClientGetPacket(p, &len, 1, S) == nullptr, "state!=2 -> 0");
+    CHECK(len == 0, "*pLen zeroed first");
+    ResetAll(); p = NewAC(); p->state = 2; p->sock = -1;
+    CHECK(AuthClientGetPacket(p, &len, 1, S) == nullptr, "sock -1 -> 0");
+    CHECK(s_logV.size() == 1 &&
+          s_logV[0] == "GetPacket() invalid socket failed.", "RAW text");
+    ResetAll(); p = NewAC(); p->state = 2; p->sock = 9; p->szA = 5;
+    void* r2 = AuthClientGetPacket(p, &len, 0, S);
+    CHECK(r2 == (void*)p->bufA, "returns bufA");
+    CHECK(len == 5 && s_recvN == 0, "no recv when bRecv=0, len=szA");
+    ResetAll(); p = NewAC(); p->state = 2; p->sock = 9; s_recvRet = 6;
+    r2 = AuthClientGetPacket(p, &len, 1, S);
+    CHECK(len == 6 && p->szA == 6, "recv 6 appended");
+    CHECK(s_recvLen == 0x1000, "recv size = 0x1000 - szA");
+    ResetAll(); p = NewAC(); p->state = 2; p->sock = 9; s_recvRet = 0;
+    // RAW falls through to LAB_140006857 after the close: it still
+    // sets *pLen and returns bufA (len 0).
+    r2 = AuthClientGetPacket(p, &len, 1, S);
+    CHECK(r2 == (void*)p->bufA, "close still returns bufA (RAW)");
+    CHECK(len == 0, "len 0 after close");
+    CHECK(s_logV.size() == 1 && s_logV[0] == "GetPacket() connect be close.",
+          "RAW close text");
+    CHECK(p->sock == -1 && p->state == 0, "Close ran");
+    ResetAll(); p = NewAC(); p->state = 2; p->sock = 9; s_recvRet = -1;
+    s_lastErr = 0x2733;
+    r2 = AuthClientGetPacket(p, &len, 1, S);
+    CHECK(r2 == (void*)p->bufA && len == 0, "WOULDBLOCK -> bufA/0");
+    CHECK(s_logV.empty(), "0x2733 not logged");
+    ResetAll(); p = NewAC(); p->state = 2; p->sock = 9; s_recvRet = -1;
+    s_lastErr = 1234;
+    AuthClientGetPacket(p, &len, 1, S);
+    CHECK(s_logV.size() == 1 && s_logV[0] == "recv packet failed[1234].",
+          "RAW recv error text");
+    SECT("A9e-22 SendPacket");
+    ResetAll(); p = NewAC();
+    CHECK(AuthClientSendPacket(p, "ab", 2, 0, S) == 0, "state!=2 -> 0");
+    ResetAll(); p = NewAC(); p->state = 2; p->sock = -1;
+    CHECK(AuthClientSendPacket(p, "ab", 2, 0, S) == 0, "-1 sock -> 0");
+    CHECK(s_logV.size() == 1 &&
+          s_logV[0] == "SendPacket() invalid socket failed.", "RAW text");
+    CHECK(p->sock == -1 && p->state == 0, "reset");
+    ResetAll(); p = NewAC(); p->state = 2; p->sock = 9;
+    CHECK(AuthClientSendPacket(p, "ab", 2, 0, S) == 1, "append -> 1");
+    CHECK(p->szB == 2 && p->bufB[0] == 'a' && p->bufB[1] == 'b', "copied");
+    CHECK(s_sendN == 0, "no flush without bFlush");
+    ResetAll(); p = NewAC(); p->state = 2; p->sock = 9; s_sendRet = 2;
+    CHECK(AuthClientSendPacket(p, "ab", 2, 1, S) == 1, "bFlush -> Flush=1");
+    CHECK(s_sendN == 1 && p->szB == 0, "flushed");
+    ResetAll(); p = NewAC(); p->state = 2; p->sock = 9;
+    memset(p->bufB, 'z', 0x1000); p->szB = 0x0fff; s_sendRet = 0x0fff;
+    int rr = AuthClientSendPacket(p, "ab", 2, 0, S);
+    CHECK(s_sendN == 1, "pre-flush when len+szB > 0x1000");
+    CHECK(rr == 1 && p->szB == 2 && p->bufB[0] == 'a',
+          "after the pre-flush the append fits");
+    // NOTE (RAW analysis): the "SendPacket() buf full!" branch is
+    // DEAD CODE. Both guards test the same sum (len+szB): the first
+    // flushes above 0x1000, and after Flush szB is either 0 (reset)
+    // or szB-sent, so (szB+len < 0x1001) is always true. Proven by
+    // the identical conditions, not by guessing.
+    SECT("A9e-23 ConnectStored");
+    ResetAll(); p = NewAC();
+    CHECK(AuthClientConnectStored(p, 7, S) == 1, "happy -> 1");
+    CHECK(s_logV.size() == 1 && s_logV[0] == "<noarg>",
+          "empty name noarg log (0xc7)");
+    CHECK(s_tvSec == 7 && s_tvUsec == 1000, "select tv {7,1000}");
+    CHECK(p->state == 2, "state 2");
+    CHECK(s_sockCall == 1 && s_setSock[0] == 1, "socket + keepalive only");
+    ResetAll(); p = NewAC(); p->state = 2; p->sock = 9;
+    CHECK(AuthClientConnectStored(p, 3, S) == 1, "already -> 1");
+    CHECK(s_sockCall == 0, "no socket");
+    ResetAll(); p = NewAC(); s_sockRet = -1;
+    CHECK(AuthClientConnectStored(p, 3, S) == 0, "socket fail -> 0");
     for (void* q : g_live) TDel(q);
-    if (g_fail == 0) printf("AUTHCLIENT-OK: 67 assertions\n");
+    if (g_fail == 0) printf("AUTHCLIENT-OK: %d assertions\n", g_ok);
     else printf("AUTHCLIENT-FAIL\n");
     return g_fail ? 1 : 0;
 }

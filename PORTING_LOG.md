@@ -6229,3 +6229,9 @@ SendKey) من الخام في ملف واحد واختُبرت بـ67 تأكيد
 وsprintf هي `"%u %u"` بالوقت والوسيط، ومفتاح XOR هو
 "tqdigital\0" بعشرة بايت مؤكدة من .rdata. بوابة النجاح في
 Connect هي (getsockopt على exc == 0) ثم (على write != 0).
+
+### أ-9هـ — النصف الحزمي لكلاس السوكت
+ClearPacket/Flush/GetPacket/SendPacket/ConnectStored نُقلت من
+الخام. اكتشافان موثقان: فرع "buf full!" ميت (شرطان متطابقان)،
+وmemcpy متراكب في RAW استُبدل بـmemmove بنفس الناتج. 123
+تأكيدًا ×6.

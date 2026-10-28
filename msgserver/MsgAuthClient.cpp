@@ -186,4 +186,262 @@ void AuthClientSendKey(SAuthClient* p, uint32_t arg,
     }
     s.Fn6880(p, buf, (uint32_t)len, 1);
 }
+
+// ===== wave 9e: the packet half (RAW-verbatim) =====
+// 140005c70 — ClearPacket
+int AuthClientClearPacket(SAuthClient* p, int nLen,
+        const SAuthSeams& s) {
+    (void)s;
+    if ((int)p->szA < nLen) {
+        // RAW: "ClearPacket()  error, Getpacket OutBufSize:%d,
+        // ClearPacket nLen:%d, m_nLen:%d, unMsgType:%d at %s, %d"
+        s.LogErrFmt("ClearPacket()  error, Getpacket OutBufSize:%d,"
+                    " ClearPacket nLen:%d, m_nLen:%d, unMsgType:%d"
+                    " at %s, %d", (int)p->szA);
+    }
+    if ((int)p->state == 2) {
+        int rest = (int)p->szA - nLen;
+        if (0 < rest) {
+            // RAW calls memcpy here with overlapping ranges (dst < src):
+            // UB in C++, but MSVC's forward copy yields exactly the
+            // memmove result, so we use memmove to keep it defined.
+            memmove(p->bufA, p->bufA + nLen, (size_t)rest);
+        }
+        p->szA = (uint32_t)((int)p->szA - nLen);
+        if (-1 < (int)p->szA) {
+            return 1;
+        }
+        p->szA = 0;
+    }
+    return 0;
+}
+// 140005d60 — Flush
+int AuthClientFlush(SAuthClient* p, const SAuthSeams& s) {
+    if ((int)p->state != 2) {
+        return 0;
+    }
+    if (p->szB == 0) {
+        return 1;
+    }
+    int n = s.Send(p->sock, p->bufB, (int)p->szB, 0);
+    if (0 < n) {
+        int rest = (int)p->szB - n;
+        if (0 < rest) {
+            // RAW memcpy with overlap (dst < src) -> memmove semantics.
+            memmove(p->bufB, p->bufB + n, (size_t)rest);
+        }
+        p->szB = (uint32_t)((int)p->szB - n);
+        if ((int)p->szB < 0) {
+            s.LogErrNoArg();        // &DAT_1406d9c10
+        }
+        return p->szB == 0 ? 1 : 0;
+    }
+    int e = s.GetLastError();
+    if (e != 0x2746) {              // WSAECONNRESET tolerated
+        s.LogErrFmt("Flush packet failed[%d].", e);
+    }
+    if (p->sock != -1) {
+        s.CloseSocketOrd(p->sock);
+    }
+    p->state = 0;
+    p->szA = 0;
+    p->szB = 0;
+    p->sock = -1;
+    return 0;
+}
+// 140006730 — GetPacket
+void* AuthClientGetPacket(SAuthClient* p, uint32_t* pLen, int bRecv,
+        const SAuthSeams& s) {
+    if (pLen == nullptr) {
+        s.LogErrNoArg();
+        return nullptr;
+    }
+    *pLen = 0;
+    if ((int)p->state == 2) {
+        if (p->sock != -1) {
+            if (bRecv) {
+                int have = (int)p->szA;
+                if (have < 0x1000) {
+                    int n = s.Recv(p->sock, (char*)p->bufA + have,
+                                   0x1000 - have, 0);
+                    if (n < 1) {
+                        if (n == 0) {
+                            s.LogErrStr("GetPacket() connect be close.");
+                        } else {
+                            int e = s.GetLastError();
+                            if (e != 0x2733 && e != 0x2746) {
+                                s.LogErrFmt("recv packet failed[%d].", e);
+                            }
+                        }
+                        AuthClientClose(p, s);
+                    } else {
+                        p->szA = (uint32_t)((int)p->szA + n);
+                    }
+                }
+            }
+            *pLen = p->szA;
+            return p->bufA;
+        }
+        s.LogErrStr("GetPacket() invalid socket failed.");
+        if (p->sock != -1) {
+            s.CloseSocketOrd(p->sock);
+        }
+        p->sock = -1;
+        p->state = 0;
+        p->szA = 0;
+        p->szB = 0;
+    }
+    return nullptr;
+}
+// 140006880 — SendPacket
+int AuthClientSendPacket(SAuthClient* p, const void* buf, int len,
+        int bFlush, const SAuthSeams& s) {
+    if ((int)p->state != 2) {
+        return 0;
+    }
+    if (p->sock == -1) {
+        s.LogErrStr("SendPacket() invalid socket failed.");
+        if (p->sock != -1) {
+            s.CloseSocketOrd(p->sock);
+        }
+    } else {
+        if (0x1000 < len + (int)p->szB) {
+            AuthClientFlush(p, s);
+        }
+        if ((int)p->szB + len < 0x1001) {
+            memcpy(p->bufB + p->szB, buf, (size_t)len);
+            p->szB = (uint32_t)((int)p->szB + len);
+            if (bFlush) {
+                return AuthClientFlush(p, s);
+            }
+            return 1;
+        }
+        s.LogErrStr("SendPacket() buf full!");
+        if (p->sock != -1) {
+            s.CloseSocketOrd(p->sock);
+            p->sock = -1;
+            p->state = 0;
+            p->szA = 0;
+            p->szB = 0;
+            return 0;
+        }
+    }
+    p->sock = -1;
+    p->state = 0;
+    p->szA = 0;
+    p->szB = 0;
+    return 0;
+}
+// 1400062f0 — ConnectStored (the 2-arg twin of 140005ea0)
+int AuthClientConnectStored(SAuthClient* p, uint32_t tvSec,
+        const SAuthSeams& s) {
+    if (p->name[0] == '\0') {
+        s.LogErrNoArg();            // RAW line 199 (0xc7)
+    }
+    if ((int)p->state == 2 && p->sock != -1) {
+        return 1;
+    }
+    if ((int)p->state == 0 || p->sock == -1) {
+        if (p->sock != -1) {
+            s.LogErrNoArg();        // RAW line 0xd0
+        }
+        int64_t fd = s.Socket(2, 1);
+        p->sock = fd;
+        if (fd == -1) {
+            s.LogErrStr("Create socket() failed.");
+            return 0;
+        }
+        p->szA = 0;
+        int opt = 1;
+        if (s.SetSockOpt(fd, 0xffff, 8, &opt) != 0) {
+            s.LogErrStr("setsockopt() set SO_KEEPALIVE failed.");
+            AuthClientClose(p, s);
+            return 0;
+        }
+        opt = (int)p->u14;
+        if (opt != 0) {
+            if (s.SetSockOpt(fd, 0xffff, 0x1001, &opt) != 0) {
+                int e = s.GetLastError();
+                s.LogErrFmt("setsockopt() set SO_SNDBUF failed[%d].", e);
+                AuthClientClose(p, s);
+                return 0;
+            }
+        }
+        opt = (int)p->u18;
+        if (opt != 0) {
+            if (s.SetSockOpt(fd, 0xffff, 0x1002, &opt) != 0) {
+                int e = s.GetLastError();
+                s.LogErrFmt("setsockopt() set SO_RCVBUF failed[%d].", e);
+                AuthClientClose(p, s);
+                return 0;
+            }
+        }
+        int nb = 1;
+        if (s.IoctlSocket(fd, 0x8004667e, &nb) != 0) {
+            s.LogErrStr("Init ioctlsocket() failed.");
+            AuthClientClose(p, s);
+            return 0;
+        }
+        int32_t addr = s.InetAddr(p->name);
+        if (addr == -1) {
+            void* host = s.GetHostByName(p->name);
+            if (host == nullptr) {
+                s.LogErrStr("");
+                AuthClientClose(p, s);
+                return 0;
+            }
+            addr = *(int32_t*)*(void**)((char*)host + 0x18);
+        }
+        unsigned char sa[16];
+        memset(sa, 0, sizeof(sa));
+        uint16_t fam = 2;
+        uint16_t port = s.Htons((uint16_t)p->u10);
+        memcpy(sa + 0, &fam, 2);
+        memcpy(sa + 2, &port, 2);
+        memcpy(sa + 4, &addr, 4);
+        if (s.Connect(fd, sa, 0x10) == -1) {
+            int e = s.GetLastError();
+            if (e != 0x2733) {
+                s.LogErrFmt("connect to server failed[%d].", e);
+                AuthClientClose(p, s);
+                return 0;
+            }
+        }
+        p->state = 1;
+    }
+    if (p->sock == -1) {
+        s.LogErrStr("Init socket() failed.");
+        AuthClientClose(p, s);
+        return 0;
+    }
+    if ((int)p->state != 1) {
+        s.LogErrNoArg();
+    }
+    int wset[2] = { 1, (int)p->sock };
+    int eset[2] = { 1, (int)p->sock };
+    int tv[2] = { (int)tvSec, 1000 };
+    int r = s.Select(0x40, nullptr, wset, eset, tv);
+    if (r == -1) {
+        s.LogErrStr("select socket() failed.");
+    } else {
+        if (r < 1) {
+            return 0;
+        }
+        if (s.GetSockOpt(p->sock, &eset[0]) == 0) {
+            if (s.GetSockOpt(p->sock, &wset[0]) == 0) {
+                return 0;
+            }
+            p->state = 2;
+            return 1;
+        }
+    }
+    if (p->sock != -1) {
+        s.CloseSocketOrd(p->sock);
+    }
+    p->sock = -1;
+    p->state = 0;
+    p->szA = 0;
+    p->szB = 0;
+    return 0;
+}
 }
