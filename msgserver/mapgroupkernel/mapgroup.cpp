@@ -1,5 +1,6 @@
 // 140089140..140089660 — CMapGroup senders
 #include "mapgroup.h"
+#include <cstring>
 namespace msg {
 int CMapGroup::SendClientMsg(uint32_t ch, SMapGroupMsg* m, SMapGroupSeams& s) {
     if (m == nullptr) { s.LogNullClient(); return 0; }
@@ -68,5 +69,65 @@ int CMapGroup::BroadcastOtherServerMsg(void* msg, uint32_t a, uint16_t kind,
     int r = s.SelfSend(this, 0, talk, 10);
     s.TalkDtor(talk);
     return r;
+}
+} // namespace msg
+
+// ---------------------------------------------------------------
+// 140092b60 CMapGroup::SendChatFriendInfo
+// ---------------------------------------------------------------
+namespace msg {
+// DAT_1406f38a0, read out of .rdata: the per-level friend cap
+static const int kFriendCap[7] = { 50, 55, 60, 70, 80, 90, 100 };
+
+void CMapGroup::SendChatFriendInfo(int* ids, SMapGroupChatSeams& s) {
+    if (ids[0] != 0) {
+        void* w = s.UserWorld(m_pWorld, (uint32_t)ids[0]);
+        if (w != nullptr) {
+            void* same = s.UserWorld(m_pWorld, 0);
+            int level = s.LevelOf(same);
+            void* list = s.UserByServer(m_ServerId);
+            uint32_t flags = *(uint32_t*)((uint8_t*)list + 0x2ac);
+            if ((int)flags < 1 || (((flags >> 10) & 1) == 0) || level < 0) {
+                level = 0;
+            } else if (level > 6) {
+                level = 6;
+            }
+            uint8_t out[0x194];
+            *(int32_t*)out = 0;
+            std::memset(out + 4, 0, 400);
+            if (kFriendCap[level] != -1) {
+                int n = kFriendCap[level] + 1;
+                int* dst = (int*)(out + 4);
+                for (int i = 0; i < n; ++i) {
+                    if (ids[i] != 0) dst[i] = ids[i];
+                }
+            }
+            s.Post(m_pPort, 8, 0x15f94, 0x194, out);
+            return;
+        }
+    }
+    s.LogNoUser();
+}
+
+// ---------------------------------------------------------------
+// 140093ec0 CMapGroup::IsAllowEnterOS
+// ---------------------------------------------------------------
+bool CMapGroup::IsAllowEnterOS(int action, SMapGroupChatSeams& s) {
+    if (action == 3) {
+        int n = s.Count(s.UserList(s.UserByServer(m_ServerId)));
+        return n < *(int*)((uint8_t*)this + 0x10);
+    }
+    if (action == 4) {
+        if (*(char*)((uint8_t*)this + 0x77c) != 0) {
+            int n = s.Count(s.UserList(s.UserByServer(m_ServerId)));
+            if (n < *(int*)((uint8_t*)this + 0x10)) {
+                void* mod = s.Module(s.CurrentInstance(), 0x25);
+                if (mod != nullptr) return s.ModuleReady(mod) != 0;
+            }
+        }
+        return false;
+    }
+    s.LogWrongAction(action);
+    return false;
 }
 } // namespace msg

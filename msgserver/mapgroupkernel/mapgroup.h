@@ -32,12 +32,32 @@ struct SMapGroupSeams {
     int  (*TalkCreate)(void* t, const char* g, const char* u, void* msg); // 14015b300
     int  (*SelfSend)(void* self, uint32_t a, void* msg, uint32_t ch);      // (*this+0x20)
 };
+struct SMapGroupChatSeams {
+    void* (*UserByServer)(uint32_t serverId);            // 140008520
+    void* (*UserWorld)(void* world, uint32_t id);        // world vt+0x98
+    int   (*LevelOf)(void* user);                        // 1401649c0
+    void  (*LogNoUser)(void);
+    void  (*Post)(void* port, uint32_t ch, uint32_t msg,
+                  uint32_t len, const void* data);       // this+0x80 vt+0x50
+    void* (*UserList)(void* user);                       // 140087650
+    int   (*Count)(void* list);                          // 1402a8090
+    void* (*CurrentInstance)();                          // CurrentInstanceGet
+    void* (*Module)(void* inst, uint32_t id);            // inst vt+0x20
+    int   (*ModuleReady)(void* mod);                     // mod vt+0x40
+    void  (*LogWrongAction)(int action);
+};
 class CMapGroup {
 public:
     uint8_t m_Hdr[0x68];
     uint32_t m_ServerId;        // +0x68
     uint8_t m_Pad[4];
     void*    m_pKernel;         // +0x70
+    uint8_t  m_Pad2[8];
+    void*    m_pPort;           // +0x80
+    uint8_t  m_Pad3[8];
+    void*    m_pWorld;          // +0x90
+    uint8_t  m_Pad4[0x6e4];     // up to +0x77c
+    uint8_t  m_Flg77c;          // +0x77c
     int SendClientMsg(uint32_t ch, SMapGroupMsg* m, SMapGroupSeams& s);
     int SendCrossMsg(uint32_t userId, SMapGroupMsg* m, SMapGroupSeams& s);
     int SendCrossMsg(SMapGroupMsg* m, SMapGroupSeams& s);
@@ -49,6 +69,8 @@ public:
     int SendNpcMsg(uint32_t ch, SMapGroupMsg* m, SMapGroupSeams& s);
     int BroadcastOtherServerMsg(void* msg, uint32_t a, uint16_t kind,
                                 SMapGroupSeams& s);
+    void SendChatFriendInfo(int* ids, SMapGroupChatSeams& s);
+    bool IsAllowEnterOS(int action, SMapGroupChatSeams& s);
 };
 } // namespace msg
 #endif
