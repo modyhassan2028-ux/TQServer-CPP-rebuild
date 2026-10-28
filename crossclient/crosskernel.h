@@ -25,6 +25,24 @@ public:
     int ProcessNetMsg(int16_t type, uint32_t a, uint32_t b,
                       uint16_t c, uint16_t d, const void* data,
                       SCrossKernelSeams& s);
+    // 140054380
+    struct SeamsLocal {
+        int  (*Sscanf3)(const char* buf, int* p1, unsigned* p2, unsigned* p3);
+        int  (*Sscanf1)(const char* buf, unsigned* p);
+        void (*AddUserSocket)(void* self, unsigned a, unsigned b, unsigned c);
+        void (*SetUserSocket)(void* self, unsigned id, unsigned b);
+        void (*DelUserSocketOne)(void* self, unsigned id);
+        void (*DelUserSocket)(void* self, unsigned id);
+        void (*ClientOne)(void* client);
+        void (*ClientZero)(void* client, int v);
+        void (*ClientBlock)(void* client, const void* p, int n);
+        void (*Post)(void* self, uint32_t ch, uint32_t msg,
+                     uint32_t len, const void* hdr);
+        void (*LogNull)(void);
+        void (*LogBadAdd)(void);
+        void (*LogBadDel)(void);
+    };
+    int ProcessLocalMsg(uint32_t id, const uint32_t* buf, SeamsLocal& s);
 };
 } // namespace msg
 #endif
