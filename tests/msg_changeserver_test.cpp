@@ -3,7 +3,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
-#include "MsgChangeServer.h"
+#include "changeserversocketthread.h"
 using namespace msg;
 static int g_fail = 0, g_ok = 0;
 #define CHECK(c, m) do { if (c) { printf("  ok %s\n", m); g_ok++; } \

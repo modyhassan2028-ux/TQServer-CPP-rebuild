@@ -1,5 +1,5 @@
 // 14001e720
-#include "CAnalystProfile.h"
+#include "mainprocedure.h"
 namespace msg {
 const CAnalystProfile::SItem CAnalystProfile::kItems[] = {
     { 0, "CMapGroupThread::OnProcess" },

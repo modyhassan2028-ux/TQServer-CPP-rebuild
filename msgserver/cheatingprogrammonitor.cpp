@@ -1,7 +1,7 @@
 // ============================================================
 // CCheatingProgramMonitor — forwarding to the verified wave units.
 // ============================================================
-#include "CCheatingProgramMonitor.h"
+#include "cheatingprogrammonitor.h"
 #include <cstring>
 namespace msg {
 CCheatingProgramMonitor::CCheatingProgramMonitor() : m_Inited(false) {

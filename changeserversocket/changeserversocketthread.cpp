@@ -1,5 +1,5 @@
 // ===== Path-A wave 9m: 14002f100 + 14002f260 =====
-#include "MsgChangeServer.h"
+#include "changeserversocketthread.h"
 #include <cstring>
 namespace msg {
 // the .rdata texts, GBK-decoded verbatim
@@ -63,5 +63,14 @@ void ChangeServerOnRecResult(void* port, const void* msg,
             s.LogChangeServerText(kCsText[kind]);
             return;
     }
+}
+
+void CChangeServerSocketThread::OnRecUserChangeServerInfo(
+        const void* msg, const SChangeServerSeams& s) {
+    ChangeServerOnRecResult(m_pPort, msg, s);
+}
+void CChangeServerSocketThread::ForwardToMsgPort(
+        const void* msg, const SChangeServerSeams& s) {
+    ChangeServerForwardToMsgPort(m_pPort, msg, s);
 }
 }

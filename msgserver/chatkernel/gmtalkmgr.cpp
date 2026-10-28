@@ -1,5 +1,5 @@
 // 14003ffb0
-#include "CGMTalkMgr.h"
+#include "gmtalkmgr.h"
 namespace msg {
 CGMTalkMgr* CGMTalkMgr::CreateNew(Seams& s) {
     if (s.HeapInitOnce() == 0) {          // (DAT & 1) == 0 -> first time

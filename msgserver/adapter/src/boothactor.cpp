@@ -1,5 +1,5 @@
 // 1405935c0
-#include "CBoothActor.h"
+#include "boothactor.h"
 namespace msg {
 void CBoothActor::RecordEmoney(int type, int source, int number, int extra,
                                Seams& s) {

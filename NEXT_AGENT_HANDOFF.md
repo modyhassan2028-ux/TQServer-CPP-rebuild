@@ -1411,3 +1411,62 @@ ASan/UBSan/LSan نظيف، والرجريجن **67/67 ×6**.
 
 **الاختبار:** 44 تأكيدًا ×6 خضراء، ASan/UBSan/LSan نظيف.
 **الرجريجن:** 69/69 ×6.
+
+## تصحيح المسارات — لا يوجد `classes` في الأصل [2026-10-28]
+
+**ملاحظة المالك صحيحة:** مجلد `msgserver/classes/` كان **مخترعًا**
+مني، وهو مخالف لقاعدة «نفس مسارات الأصل».
+
+**الدليل:** استُخرج جدول `__FILE__` كاملًا من `MsgServer.exe`
+(414 ملفًا) وحُفظ في `Docs/ORIGINAL_SOURCE_TREE.md`. الشجرة
+الأصلية هي:
+
+```
+changeserversocket\changeserversocketthread.cpp
+comm\i_messageport.h        comm\source\messageport.cpp
+crossclient\crossclientthread.cpp   crossclient\crosskernel.cpp
+ipadpaymentssocket\ipadpaymentssocketthread.cpp
+lualib\luascript.cpp        mapdata\source\mapdata.cpp
+msgserver\cheatingprogrammonitor.cpp  msgserver\mapgroupthread.cpp
+msgserver\serverstatusmonitor.cpp    msgserver\mainprocedure.cpp
+msgserver\msgserverdlg.cpp           msgserver\gameconfig.cpp
+msgserver\crossconfig.cpp            msgserver\dllclientsocket.cpp
+msgserver\googlepaymentsthread.cpp   msgserver\threadrecordptrmgr.cpp
+msgserver\chatkernel\{chatkernel,chatgamemap,gmtalkmgr,chatplayer,
+        chatplayermgr,mapmgr,gmtoolcfg}.cpp
+msgserver\chatkernel\network3\{chatmsgtalk,chatmsgping,
+        chatmsgloginnotice}.cpp
+msgserver\evnet\{accountclient,changesvrclient,clientsocket,
+        crosssvrclient,ipadsvrclient,serversocket,socketkernel}.cpp
+msgserver\adapter\src\{adapter,<كل الأكتورات>}.cpp
+msgserver\mapgroupkernel\**  (magic, mail, jianghu, innerstrength,
+        luascript, network, activity, auction, roulette …)
+msgserver\worldkernel\**  + network2\
+```
+
+**ما نُقل الآن (15 وحدة) إلى مسارها الأصلي:**
+
+| الوحدة | المسار الأصلي | نوع الدليل |
+|---|---|---|
+| CCheatingProgramMonitor | msgserver/cheatingprogrammonitor.cpp | مسار مُثبت |
+| CServerStatusMonitor | msgserver/serverstatusmonitor.cpp | مُثبت |
+| CMapGroupThread | msgserver/mapgroupthread.cpp | مُثبت |
+| CGMTalkMgr | msgserver/chatkernel/gmtalkmgr.cpp | مُثبت |
+| CChatGameBlock | msgserver/chatkernel/chatgamemap.cpp | مُثبت |
+| CAuraMgr | msgserver/mapgroupkernel/auramgr.cpp | مُثبت |
+| CBoothActor | msgserver/adapter/src/boothactor.cpp | مُثبت |
+| CCrossMsgLeagueList | msgserver/mapgroupkernel/network/crossmsgleaguelist.cpp | مُثبت |
+| CChangeServerSocketThread | changeserversocket/changeserversocketthread.cpp | مُثبت |
+| CChatThread | msgserver/chatkernel/chatkernel.cpp | **مُستنتج** |
+| CAnalystProfile | msgserver/mainprocedure.cpp | **مُستنتج** |
+| CSocketThread | msgserver/evnet/socketthread.cpp | **مُستنتج** |
+| CConnectUser | msgserver/evnet/connectuser.cpp | **مُستنتج** |
+| CMsgRoulettePlayerBet | msgserver/mapgroupkernel/roulette/msg/msgroulettebet.cpp | **مُستنتج** |
+
+وحُذف `msgserver/classes/` نهائيًا، وأُضيف **القسم 11** إلى
+`AGENTS.md` يمنع اختراع أي مجلد أو اسم ملف ويوجب الإعلان عند
+استنتاج المسار. المُشغّل صار يبني الشجرة الفرعية كاملة
+(`find msgserver changeserversocket crossclient`).
+
+**الاختبار:** 79 + 44 + 22 + 41 تأكيدًا ×6 خضراء، ASan/UBSan/LSan
+نظيف، والرجريجن **69/69 ×6**.

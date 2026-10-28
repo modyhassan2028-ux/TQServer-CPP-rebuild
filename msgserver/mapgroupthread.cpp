@@ -1,5 +1,5 @@
 // 14001d530
-#include "CMapGroupThread.h"
+#include "mapgroupthread.h"
 namespace msg {
 int CMapGroupThread::OnProcess(Seams& s) {
     if ((*s.pInitFlag & 1) == 0) {

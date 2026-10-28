@@ -1,5 +1,5 @@
 // 140073740
-#include "CConnectUser.h"
+#include "connectuser.h"
 namespace msg {
 uint64_t CConnectUser::SetType(int type, Seams& s) {
     if (type == 0) {

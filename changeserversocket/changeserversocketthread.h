@@ -60,4 +60,22 @@ void ChangeServerForwardToMsgPort(void* port, const void* msg,
 void ChangeServerOnRecResult(void* port, const void* msg,
                              const SChangeServerSeams& s);
 }
+
+// ===== the original unit from the tree table:
+//   changeserversocket\\changeserversocketthread.cpp
+// RAW name proven by the log literal inside the binary:
+//   "CChangeServerSocketThread::OnRecUserChangeServerInfo. NULL ==
+//    pMsgChangeServerClient"
+namespace msg {
+class CChangeServerSocketThread {
+public:
+    void OnRecUserChangeServerInfo(const void* msg,
+                                   const SChangeServerSeams& s);  // 14002f260
+    void ForwardToMsgPort(const void* msg,
+                          const SChangeServerSeams& s);           // 14002f100
+    uint8_t m_Pad[0x40] = {};
+    void*   m_pPort = nullptr;                                    // +0x40
+};
+}
+
 #endif

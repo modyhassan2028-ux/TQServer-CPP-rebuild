@@ -1,5 +1,5 @@
 // 1404ddb30
-#include "CMsgRoulettePlayerBet.h"
+#include "msgroulettebet.h"
 namespace msg {
 int CMsgRoulettePlayerBet::Create(uint8_t seat, Seams& s) {
     if (seat > 4) {

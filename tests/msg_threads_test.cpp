@@ -6,10 +6,10 @@
 #include <cstdint>
 #include <vector>
 #include <string>
-#include "CAnalystProfile.h"
-#include "CChatThread.h"
-#include "CMapGroupThread.h"
-#include "CSocketThread.h"
+#include "mainprocedure.h"
+#include "chatkernel.h"
+#include "mapgroupthread.h"
+#include "socketthread.h"
 using namespace msg;
 static int g_fail = 0, g_ok = 0;
 #define CHECK(c, m) do { if (c) { printf("  ok %s\n", m); g_ok++; } \

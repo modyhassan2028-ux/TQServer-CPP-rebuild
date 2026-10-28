@@ -1,5 +1,5 @@
 // 14002ba80
-#include "CServerStatusMonitor.h"
+#include "serverstatusmonitor.h"
 namespace msg {
 uintptr_t CServerStatusMonitor::StartWorkerThread(Seams& s) {
     if (s.GlobalReady() == 0) { s.CheckFail(); return 0; }

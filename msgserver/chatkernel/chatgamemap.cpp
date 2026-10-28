@@ -1,5 +1,5 @@
 // 14003a8e0
-#include "CChatGameBlock.h"
+#include "chatgamemap.h"
 namespace msg {
 void* CChatGameBlock::QueryBlock(unsigned map, int x, int y, Seams& s) {
     int cx = x / 0x12;

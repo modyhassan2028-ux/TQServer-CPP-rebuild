@@ -1,5 +1,5 @@
 // 14045c0c0
-#include "CCrossMsgLeagueList.h"
+#include "crossmsgleaguelist.h"
 namespace msg {
 void CCrossMsgLeagueList::Process(Seams& s) {
     if (m_pMsg == nullptr) { s.CheckFail(); return; }

@@ -3,14 +3,14 @@
 #include <cstdio>
 #include <cstring>
 #include <cstdint>
-#include "CServerStatusMonitor.h"
-#include "CChatGameBlock.h"
-#include "CGMTalkMgr.h"
-#include "CConnectUser.h"
-#include "CAuraMgr.h"
-#include "CCrossMsgLeagueList.h"
-#include "CMsgRoulettePlayerBet.h"
-#include "CBoothActor.h"
+#include "serverstatusmonitor.h"
+#include "chatgamemap.h"
+#include "gmtalkmgr.h"
+#include "connectuser.h"
+#include "auramgr.h"
+#include "crossmsgleaguelist.h"
+#include "msgroulettebet.h"
+#include "boothactor.h"
 using namespace msg;
 static int g_fail = 0, g_ok = 0;
 #define CHECK(c, m) do { if (c) { printf("  ok %s\n", m); g_ok++; } \

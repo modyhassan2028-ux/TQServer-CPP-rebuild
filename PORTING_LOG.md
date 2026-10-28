@@ -6303,3 +6303,8 @@ QueryBlock. 79 تأكيدًا ×6، رجريجن 68/68.
 CAnalystProfile (جدول 76 صفًا مُولَّد من التفكيك)، CChatThread،
 CMapGroupThread، CSocketThread (CreateThread+OnProcess). + تثبيت
 الوتيرة كقواعد مُلزمة في AGENTS.md. 44 تأكيدًا ×6، رجريجن 69/69.
+
+### تصحيح المسارات — حذف msgserver/classes المخترع
+جدول __FILE__ الكامل (414 ملفًا) في Docs/ORIGINAL_SOURCE_TREE.md،
+ونقل 15 وحدة إلى مساراتها الأصلية، وإضافة القسم 11 في AGENTS.md
+(منع اختراع المجلدات). رجريجن 69/69 ×6.

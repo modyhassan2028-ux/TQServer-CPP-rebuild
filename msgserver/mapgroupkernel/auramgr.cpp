@@ -1,5 +1,5 @@
 // 14024e750
-#include "CAuraMgr.h"
+#include "auramgr.h"
 namespace msg {
 void CAuraMgr::SendAuraInfo(void* role, Seams& s) {
     if (role == nullptr) {
