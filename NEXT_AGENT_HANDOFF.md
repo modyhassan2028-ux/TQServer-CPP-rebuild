@@ -934,3 +934,51 @@ PROCESSENTRY32 x64: szExeFile عند +0x2c.
 بوسائط مفقودة + magic "tqdigital") ثم
 كلاس عميل المصادقة 140005ea0/5e80/5d20/
 5b50.
+
+## المسار أ-9د — كلاس عميل المصادقة (الحزمة الكاملة) [2026-10-28]
+
+**المنتهي:** `msgserver/MsgAuthClient.{h,cpp}` — ستة أجسام
+دفعة واحدة، وكلها من الخام:
+
+- **140005c10 ctor:** sock=-1، u10/14/18=0، szA/szB/state=0،
+  name[0]=0، memset(bufA,0x1000)، memset(bufB,0x1000).
+  التخطيط المؤكد: name[0x10]@0، port@0x10، snd@0x14،
+  rcv@0x18، sock@0x20، bufA@0x28 (0x1000)، szA@0x1028،
+  bufB@0x102c (0x1000)، szB@0x202c، state@0x2030 — الحجم
+  0x2034.
+- **140005ea0 Connect:** آلة الحالات الحرفية (0/1/2):
+  socket(2,1) → SO_KEEPALIVE=1 → SO_SNDBUF(0x1001) →
+  SO_RCVBUF(0x1002) → ioctlsocket(FIONBIO=0x8004667e) →
+  inet_addr وإلا gethostbyname ثم `*(int*)**(host+0x18)` →
+  connect مع السماح بـ WSAEWOULDBLOCK (0x2733) → select
+  (0x40, NULL, writeSet, excSet, tv{param_4, 1000}) →
+  **بوابتا getsockopt بالترتيب الخام: الأول على eset يجب أن
+  يكون 0، ثم الثاني على wset؛ صفر = فشل، غير صفر = state=2
+  ونجاح** — وأي مسار فشل يغلق السوكت ويصفّر 1028/202c/state
+  ويضع sock=-1.
+- **140005e80 IsConnected:** state==2 && sock!=-1.
+- **140005d20 Close:** closesocket إن != -1، ثم sock=-1،
+  state=szA=szB=0.
+- **140005b50 WsaInit:** WSAStartup(2,&wsa) + فحص version[0]==2
+  بالنصين الحرفيين.
+- **14001e0b0 SendKey:** **الوسائط المخفية فُكت من الخام**
+  (objdump 14001e0b0): الدالة وسيطان لا واحد — `mov ebx,edx`
+  عند الدخول، ثم `sprintf(buf,"%u %u", _time32(0), param_2)`
+  (r8d=edi=الوقت، r9d=ebx=الوسيط الثاني)، لوج `"%d:%s"`
+  بالطول والنص، ثم حلقة النيبّل-سواب: `c = key[i%10]^buf[i];
+  buf[i] = (c<<4)|(c>>4)` بمفتاح `"tqdigital\0"` العشرة بايت
+  (تأكيد بايت-ببايت من .rdata @1406e05b8: 74 71 64 69 67 69
+  74 61 6c 00)، وأخيرًا FUN_140006880(obj، buf، len، 1).
+
+**الاختبار:** `tests/msg_authclient_test.cpp` — 18 قسمًا/
+67 تأكيدًا، ×6 خضراء، ASan/UBSan/LSan نظيف. يغطي كل مسار
+فشل بنصه الحرفي، ومصفوفة IsConnected، وحدود الـ getsockopt،
+ومطابقة مخرج SendKey بحساب مستقل لنفس معادلة الخام.
+
+**فخاخ الوحدة:**
+- ترتيب getsockopt معكوس في الفهم السريع: **exc==0 ثم
+  write!=0 هو النجاح** (RAW: النجاح داخل `if (first == 0)`).
+- Ordinal_3 يُستدعى بلا وسيط في الديكمبايل (rcx محفوظ) —
+  معناه closesocket(sock).
+- sockaddr_in يُبنى 16 بايت أصفارًا ثم family=2،
+  port=htons(u10)، addr — لا تستخدم sockaddr_in المضغوطة.
