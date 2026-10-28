@@ -5834,3 +5834,62 @@ ASan/UBSan نظيف.
 مراقبة بمنفذ من StatusMonitor.ini،
 select/WSAAccept حتى 0x40 عميلاً،
 سجلات دخول/خروج بالنصوص الحرفية).
+
+## المسار أ-8ا — طبقة أوامر CServerStatusMonitor [2026-10-28]
+
+**المنقول في msgserver/threads/MsgStatusMonitorCmd.{h,cpp}
+من objdump الخام (البناء 140029ff0،
+الإنشاء 14002a480، الهدم 14002a510/
+14002a070، تخصيص 140029150، insert_n
+14002a1d0، insert 14002ac60، push
+14002ae40، clear 14002a0e0، المعالج
+14002aef0، فحص المؤقت 14002adc0،
+الإيقاف 14002ad90).** الحقائق الخام:
+- كائن 0x70: main@+0x00، interval@+0x08
+  (2 ثانية)، next-report@+0x0c،
+  الحاوية vector<socket> من +0x10
+  {proxy@+0x10 (malloc 8، *proxy=
+  الحاوية)، first/last/cap عند
+  +0x28/+0x30/+0x38}، CRITICAL_SECTION
+  @+0x40، event@+0x68
+- **فحوص MSVC debug-iterator مدمجة**
+  (مواقع الإجهاض الخام محفوظة عبر seam
+  InvalidParam)، ونمو 1.5x مع الفروع
+  الخمسة لـ insert_n (النمو/قريب من
+  النهاية بإزاحة [iter,last) للأعلى
+  وتعبئة الفراغ/إزاحة الذيل fb0
+  + move_backward 140029780)
+- المعالج: len<3 انتظار؛ بدون CRLF:
+  len<0x1f انتظار وإلا تصفير؛ الأوامر
+  الحرفية "get_run_info\r\n" /
+  "close_server\r\n" /
+  "reset_crash_state\r\n" /
+  "reset_dbserver_state\r\n"؛
+  الرد "OK\r\n" (4) للأوامر المعروفة
+  و"\r\n" (2) للمجهولة؛ close بلا main
+  = صمت بلا رد
+- get_run_info: dedup على السوكت داخل
+  CS، أول عميل فقط (كانت الحاوية فارغة
+  + لا crash) يضبط interval=2 وnext=
+  TimeGet()/1000 (بالقسمة السحرية
+  mul 0x10624dd3/shr 38)؛ crashed →
+  الباني مباشرة
+- reset_crash_state: xchg ذري للصفر
+  (الخام بلا LOCK — xchg ضمني الذرية)
+  ويرد OK حتى لو crash=0؛
+  reset_dbserver_state: نفس النمط على
+  0x140975998
+- فحص المؤقت: next!=0 && next+interval
+  <= TimeGet()/1000 → تصفير + الباني
+
+**الاختبار msg_statuscmd_test.cpp:** 8
+أقسام (إنشاء/تخطيط، get_run_info الأول،
+dedup + crash→builder، الأوامر الجزئية،
+كل الأوامر والردود، النمو 1.5x عبر
+المعالج، المؤقت، الإيقاف). **63/63 ×6**
++ ASan/UBSan/LSan نظيف.
+
+**التالي أ-8ب:** باني التقرير 14002a5a0
+(معاملات _snprintf الخمسة والعشرين
+مستخرجة خاماً — see PORTING_LOG أ-8ب
+عند النقل) + حلقة السوكت 14002b2d0.

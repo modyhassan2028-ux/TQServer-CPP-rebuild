@@ -785,3 +785,48 @@ msgserver/threads/MsgAuctionThread.{h,cpp}.
 +0x10، offset البايت عند +0x50...).
 راجع FUN_14001f4c0 (شرط الخروج == 2) و
 FUN_14002aef0 (معالج الرسالة).
+
+---
+
+## المسار أ-8ا — طبقة أوامر Monitor [2026-10-28]
+
+**المنتهي:** MsgStatusMonitorCmd.{h,cpp}
+(كائن 0x70، vector<socket> بفحوص
+debug-iterator خامّة، المعالج 14002aef0
+بالأوامر الأربعة والردود OK\r\n // \r\n،
+المؤقت، الإيقاف). 8/8 + 63/63×6 + ASan.
+
+**التالي أ-8ب:** (1) باني التقرير
+14002a5a0 — معاملاته الخام مستخرجة
+جاهزة: servername←&0x140975674،
+connect_account←([0x1409757c4]==0)؟1:0،
+player←[0x1409756f0]، player_limit←
+*MaxPlayerGet()، db_server←[0x140975998]،
+crash==0→"%s"←0x1406e4610
+("gameserver_crash:0\r\n")، crash≠0→
+"gameserver_crash:1\r\n"،
+pipe_amount←FUN_14050c390(0xe)،
+db_select/insert/update/delete_count←
+[0x140975968/96c/970/974]،
+db_select/insert_total_used← QWORD
+[0x140975978/980]،
+db_select/insert_max_used← QWORD
+[0x140975988/990]،
+service_total_used_per5←
+Analyst()->vt+0x18(DAT_1409759a8)→
+eax، valid_days← 0x5a - FUN_140029440
+(بعد FUN_140029310 وبناء التاريخ
+"Dec  4 2015" مرة واحدة عند
+DAT_1409759b0=0)، wallow/adult/health/
+fatigued/unhealthy←[0x140975950/954/
+958/95c/960]. يرسل النص لكل سوكت في
+الحاوية (WSASend مع فحوص iterator) ثم
+VecClear. (2) حلقة السوكت 14002b2d0:
+سوكت من StatusMonitor.ini (افتراضي
+0x16e4)، bind/select/WSAAccept حتى
+0x40 عميلاً (بنية 0x50: sock@+0،
+offset@+8، buf@+0xc، WSABUF{len@+0x10,
+buf@+0x18})، WSARecv ثم
+FUN_14002aef0(DAT_140975948، entry)،
+شرط الخروج FUN_14001f4c0(main)==2،
+closesocket عند الخروج للكل.
