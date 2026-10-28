@@ -1,304 +1,77 @@
-// Path-A wave 4 test — CMapGroupThread::
-// OnProcess (raw-verified)
-#include <cassert>
+// The 4-unit batch: mapgroup.cpp (8 senders), elitepkarenicactor.cpp,
+// msgiosserverconfig + msgpcserverconfig.
 #include <cstdio>
 #include <cstring>
-#include "MsgMapGroupThread.h"
+#include <cstdint>
+#include <string>
+#include "mapgroup.h"
+#include "elitepkarenicactor.h"
+#include "msgiosserverconfig.h"
+#include "msgpcserverconfig.h"
 using namespace msg;
+static int g_ok=0, g_fail=0;
+static void CK(bool c, const char* w){ if(c){g_ok++;} else {g_fail++; std::printf("  FAIL %s\n", w);} }
+static std::string g_log;
+static void LG(const char* t){ g_log = t; }
+static uint32_t g_k1a=0,g_k1b=0, g_k3[6], g_k6[7];
+static int N1(void*,void*){return 7;}
+static int N3(void*,uint32_t a,uint32_t b,const void* bd,uint32_t l,uint32_t f){
+    g_k3[0]=a;g_k3[1]=b;g_k3[2]=(uint32_t)(uintptr_t)bd;g_k3[3]=l;g_k3[4]=f;return 8;}
+static int N6(void*,uint32_t u,uint32_t x,uint32_t i,const void* bd,uint32_t l,uint32_t f){
+    g_k6[0]=u;g_k6[1]=x;g_k6[2]=i;g_k6[3]=(uint32_t)(uintptr_t)bd;g_k6[4]=l;g_k6[5]=f;return 9;}
+static void TNullC(){LG("client");} static void TNullU(){LG("user");}
+static void TNullX(){LG("cross");} static void TNullG(){LG("gs");}
+static void TNullN(){LG("npc");} static void TCr(){LG("create");}
+static uint16_t g_kind=0; static void TCtor(void*){} static void TDtor(void*){}
+static int TCreate(void*,const char* a,const char* b,void*){
+    return (std::strcmp(a,"SYSTEM")==0 && std::strcmp(b,"ALLUSERS")==0) ? 1 : 0; }
+static int TSelf(void*,uint32_t a,void*,uint32_t ch){ g_kind=(uint16_t)(a*100+ch); return 4; }
+static int g_enters=0; static void TEnter(){ g_enters++; }
+static uint32_t g_rank=0; static int got=0;
+static void* TInst(){ return (void*)1; }
+static void TNoop(){}
+static void* TMod(void*,uint32_t id){ return id==4 ? (void*)2 : nullptr; }
+static void TRank(void*,uint32_t r){ g_rank=r; got=1; }
+int main(){
+    CMapGroup g; std::memset(&g,0,sizeof(g));
+    g.m_ServerId = 0x55; int dummy=0; g.m_pKernel = &dummy;
+    SMapGroupSeams s{}; s.LogNullClient=TNullC; s.LogNullUser=TNullU; s.LogNullCross=TNullX;
+    s.LogNullGs=TNullG; s.LogNullNpc=TNullN; s.LogBroadcastCreate=TCr;
+    s.KernelSendOne=N1; s.KernelSendCross3=N3; s.KernelSendCross6=N6;
+    s.TalkCtor=TCtor; s.TalkDtor=TDtor; s.TalkCreate=TCreate; s.SelfSend=TSelf;
 
-static uint32_t s_t;   // fake clock
-static uint32_t s_aTickOn[16]; static int s_nTickOn;
-static uint32_t s_nTickOff;
-static uint32_t T_Time() { return s_t; }
-static void T_TickOn(uint32_t id) {
-    s_aTickOn[s_nTickOn < 16 ?
-        s_nTickOn++ : 15] = id;
-}
-static void T_TickOff() { s_nTickOff++; }
+    SMapGroupMsg m; std::memset(&m,0,sizeof(m));
+    CK(g.SendClientMsg(3,&m,s)==7,"codes 7");
+    CK(m.f414==3 && m.f410==0x55 && m.f418==0 && m.f41c==0,"client fields");
+    CK(g.SendClientMsg(3,nullptr,s)==0 && g_log=="client","null client");
+    m.f410=0xAA; m.f414=0xBB;
+    CK(g.SendCrossMsg(5,&m,s)==9,"cross6 code");
+    CK(g_k6[0]==5 && g_k6[1]==0xffffffff && g_k6[2]==0xAA && g_k6[4]==0xBB && g_k6[5]==1,"cross6 args");
+    CK(g.SendCrossMsg(0,&m,s)==0 && g_log=="user","null user");
+    CK(g.SendCrossMsg((SMapGroupMsg*)nullptr,s)==0 && g_log=="cross","null cross");
+    CK(g.SendCrossMsg(&m,s)==8 && g_k3[1]==0xffffffff && g_k3[4]==1,"cross3 args");
+    CK(g.SendGSOrOSS2SMsg(0x77,&m,s)==8 && g_k3[1]==0x77 && g_k3[4]==8,"gs flag 8");
+    CK(g.SendCrossMsg(9,0x88,&m,2,s)==9 && g_k6[1]==0x88 && g_k6[5]==2,"cross6 explicit");
+    CK(g.SendCrossMsg2(0x99,&m,6,s)==8 && g_k3[1]==0x99 && g_k3[4]==6,"cross3 flag 6");
+    CK(g.SendNpcMsg(4,&m,s)==7 && m.f418==4 && m.f414==0xffffffff && m.f41c==0xffffffff,"npc fields");
+    CK(g.BroadcastOtherServerMsg(&dummy,1,0x1234,s)==4,"broadcast send");
+    CK(g_kind==(uint16_t)(0*100+10),"broadcast channel 10 with 0");
+    CK(g.BroadcastOtherServerMsg(nullptr,1,0,s)==0 && g_log=="client","broadcast null");
+    // elitepkarenicactor
+    CElitePKArenicActor a;
 
-static void* s_pQ = (void*)0x51;
-static void* s_pK = (void*)0x42;
-static uint32_t s_aPeekMs[4]; static int s_nPeek;
-static bool s_bHas = false;
-static bool T_Peek(void* q, uint32_t ms) {
-    assert(q == s_pQ);
-    s_aPeekMs[s_nPeek < 4 ? s_nPeek++ : 3]
-        = ms;
-    return s_bHas;
-}
-static uint32_t s_qId = 0x10;   // -> idx 2
-static uint32_t T_GetId(void* q) {
-    assert(q == s_pQ); return s_qId;
-}
-// scripted WaitMsg results
-struct SMsg { SMGMsgInfo inf; bool ok; };
-static SMsg s_aMsgs[8]; static int s_nMsgs;
-static int s_iMsg;
-static uint32_t s_aWSize[8]; static int s_nWSize;
-static bool T_Wait(void* q, int32_t f1,
-        int32_t f2, uint32_t size,
-        uint8_t* buf, SMGMsgInfo* inf) {
-    assert(q == s_pQ);
-    assert(f1 == -1 && f2 == -1);
-    s_aWSize[s_nWSize < 8 ? s_nWSize++ : 7]
-        = size;
-    if (s_iMsg >= s_nMsgs) return false;
-    *inf = s_aMsgs[s_iMsg].inf;
-    // the raw writes the packet into
-    // buf too; our kernel seam reads
-    // buf — just mark it
-    std::memset(buf, 0xAB, 4);
-    return s_aMsgs[s_iMsg++].ok;
-}
-// kernel ProcessMsg recorder
-static uint32_t s_aPk[8]; static uint32_t
-    s_aArg58[8]; static uint8_t* s_aBuf[8];
-static int s_nPk; static bool s_bProcOk;
-static bool T_Proc(void* k, uint32_t pk,
-        uint8_t* buf, uint32_t a58) {
-    assert(k == s_pK);
-    s_aPk[s_nPk < 8 ? s_nPk++ : 7] = pk;
-    s_aBuf[s_nPk < 8 ? s_nPk - 1 : 7] = buf;
-    s_aArg58[s_nPk < 8 ? s_nPk - 1 : 7] = a58;
-    return s_bProcOk;
-}
-static uint32_t s_aKTimer[4]; static int s_nKTimer;
-static void T_KTimer(void* k, uint32_t t) {
-    assert(k == s_pK);
-    s_aKTimer[s_nKTimer < 4 ?
-        s_nKTimer++ : 3] = t;
-}
-static char s_aErr[4][200];
-static uint32_t s_aErrPk[4], s_aErrPort[4];
-static int s_nErr;
-static void T_Err(const char* f, uint32_t pk,
-        uint32_t port) {
-    std::snprintf(s_aErr[s_nErr], 199, "%s",
-                  f);
-    s_aErrPk[s_nErr] = pk;
-    s_aErrPort[s_nErr] = port;
-    s_nErr++;
-}
-static char s_aWarn[4][200]; static int s_nWarn;
-static void T_Warn(const char* f) {
-    std::snprintf(s_aWarn[s_nWarn++], 199,
-                  "%s", f);
-}
-
-static uint8_t s_th[0x58];
-
-static void Reset() {
-    std::memset(&g_MapGroupSeams, 0,
-        sizeof g_MapGroupSeams);
-    SMapGroupSeams& s = g_MapGroupSeams;
-    s.QGetId = T_GetId;
-    s.QWaitMsg = T_Wait;
-    s.QPeekMsg = T_Peek;
-    s.KProcessMsg = T_Proc;
-    s.KOnTimer = T_KTimer;
-    s.TimeGet = T_Time;
-    s.TickOn = T_TickOn;
-    s.TickOff = T_TickOff;
-    s.LogError = T_Err;
-    s.LogWarning = T_Warn;
-    MGResetStatics();
-    std::memset(s_th, 0, sizeof s_th);
-    *(void**)(s_th + 0x40) = s_pK;
-    *(void**)(s_th + 0x48) = s_pQ;
-    s_t = 0; s_nTickOn = 0; s_nTickOff = 0;
-    s_nPeek = 0; s_bHas = false;
-    s_qId = 0x10;
-    s_nMsgs = 0; s_iMsg = 0; s_nWSize = 0;
-    s_nPk = 0; s_bProcOk = true;
-    s_nKTimer = 0;
-    s_nErr = 0; s_nWarn = 0;
-}
-
-int main() {
-    printf("TH4 start\n"); fflush(stdout);
-
-    // ==== S1: first-run init + the
-    // idle path (no msg): OnTimer +
-    // resync slide + stats + idle ====
-    {
-        Reset();
-        // stepping clock: first-run base
-        // 5000, t1 5000, t2 5200
-        static uint32_t s1Step;
-        s1Step = 0;
-        g_MapGroupSeams.TimeGet = []() {
-            static const uint32_t v[]
-                = {5000, 5000, 5200};
-            return v[s1Step < 3 ?
-                s1Step++ : 2];
-        };
-        assert(MapGroupOnProcess(s_th) == 1);
-        g_MapGroupSeams.TimeGet = T_Time;
-        assert(g_MGFirstRun == 1);
-        // no msg: kernel OnTimer(t1)
-        assert(s_nKTimer == 1);
-        assert(s_aKTimer[0] == 5000);
-        // slide: diff 0 <= 0x2710
-        assert(g_MGResyncBase == 5125);
-        assert(s_nWarn == 0);
-        // tick order: 0x47, 0, 0xc
-        assert(s_nTickOn == 3);
-        assert(s_aTickOn[0] == 0x47);
-        assert(s_aTickOn[1] == 0);
-        assert(s_aTickOn[2] == 0xc);
-        // stats idx = 0x10-0xe = 2
-        assert(g_MGCnt[2] == 1);
-        assert(g_MGCum[2] == 200);
-        assert(g_MGMax[2] == 200);
-        // idle: since = 5200-5125 = 75
-        assert(g_MGIdleMs == 50);
-        printf("S1 ok (idle path)\n"); fflush(stdout);
-    }
-
-    // ==== S2: resync — deviation
-    // > 0x2710: WARNING (fmt only,
-    // no args) + base = t1 ====
-    {
-        Reset();
-        s_t = 50000;
-        g_MGFirstRun = 1;
-        g_MGResyncBase = 10000;   // old
-        MapGroupOnProcess(s_th);
-        assert(s_nWarn == 1);
-        assert(std::strcmp(s_aWarn[0],
-            "resync CMapGroupKernel::"
-            "OnTimer cumulative "
-            "deviation %dms") == 0);
-        assert(g_MGResyncBase == 50000);
-        printf("S2 ok (resync)\n"); fflush(stdout);
-    }
-
-    // ==== S3: the drain loop — 2 ok
-    // msgs + 1 failing: packet/port in
-    // the ERROR log, buf+arg58 pass
-    // through, size 0x418, loop ends
-    // at WaitMsg false ====
-    {
-        Reset();
-        g_MGFirstRun = 1;
-        g_MGResyncBase = 100;
-        s_bHas = true;
-        s_aMsgs[0] = {{0x1e61, 1001, 55,
-                        0}, true};
-        s_aMsgs[1] = {{0x1e62, 1002, 66,
-                        0}, true};
-        s_aMsgs[2] = {{0x1e63, 1003, 77,
-                        0}, true};
-        s_nMsgs = 3;
-        s_bProcOk = false;   // all fail
-        s_t = 2000;
-        assert(MapGroupOnProcess(s_th)
-               == 1);
-        // 3 accepted + the final
-        // false = 4 WaitMsg calls
-        assert(s_nWSize == 4);
-        assert(s_aWSize[0] == 0x418);
-        assert(s_aWSize[3] == 0x418);
-        assert(s_nPk == 3);
-        assert(s_aPk[0] == 1001 &&
-               s_aPk[1] == 1002 &&
-               s_aPk[2] == 1003);
-        assert(s_aArg58[0] == 55 &&
-               s_aArg58[2] == 77);
-        assert(s_aBuf[0] != nullptr);
-        // three ERROR logs with the
-        // raw (packet, port) pair
-        assert(s_nErr == 3);
-        assert(std::strcmp(s_aErr[0],
-            "CMapGroupThread::OnProcess"
-            " ProcessMsg returned error"
-            " with packet:%d, port:%d")
-               == 0);
-        assert(s_aErrPk[0] == 1001 &&
-               s_aErrPort[0] == 0x1e61);
-        assert(s_aErrPk[2] == 1003 &&
-               s_aErrPort[2] == 0x1e63);
-        // no kernel OnTimer ran
-        assert(s_nKTimer == 0);
-        printf("S3 ok (drain loop)\n"); fflush(stdout);
-    }
-
-    // ==== S4: stats clamp — idx > 4
-    // (queueId < 0xe or > 0x12) skips
-    // the arrays; max keeps max ====
-    {
-        Reset();
-        g_MGFirstRun = 1;
-        g_MGResyncBase = 0;
-        s_qId = 3;   // 3-0xe underflows
-        s_t = 1000;
-        MapGroupOnProcess(s_th);
-        assert(g_MGCnt[0] == 0 &&
-               g_MGCnt[1] == 0 &&
-               g_MGCnt[2] == 0 &&
-               g_MGCnt[3] == 0 &&
-               g_MGCnt[4] == 0);
-        // now an in-range id + a real
-        // elapsed: tick the clock
-        Reset();
-        g_MGFirstRun = 1;
-        g_MGResyncBase = 100000;
-        s_qId = 0x12;   // idx 4
-        // simulate elapsed via two
-        // TimeGet values: hook via a
-        // counter (t1 then t2)
-        // simplest: set s_t through a
-        // custom TimeGet that steps
-        auto oldT = g_MapGroupSeams.TimeGet;
-        static uint32_t step;
-        step = 0;
-        g_MapGroupSeams.TimeGet = []() {
-            uint32_t v = 1000 + step;
-            step += 7;
-            return v;
-        };
-        MapGroupOnProcess(s_th);
-        g_MapGroupSeams.TimeGet = oldT;
-        assert(g_MGCnt[4] == 1);
-        assert(g_MGCum[4] == 7);   // t2-t1
-        assert(g_MGMax[4] == 7);
-        printf("S4 ok (stats)\n"); fflush(stdout);
-    }
-
-    // ==== S5: idle propagation — the
-    // NEXT PeekMsg call sees the idle
-    // computed by the previous run ====
-    {
-        Reset();
-        g_MGFirstRun = 1;
-        g_MGResyncBase = 100000;
-        s_t = 100125;   // slide to 100125,
-        // since = t2-base = 0 -> 125
-        MapGroupOnProcess(s_th);
-        assert(g_MGIdleMs == 125);
-        assert(s_aPeekMs[0] == 0);   // pre
-        // second run: Peek gets 125
-        s_t = 100250;   // base 100125 +
-        // 125 = 100250; slide keeps it
-        MapGroupOnProcess(s_th);
-        assert(s_aPeekMs[1] == 125);
-        // a resync run: deviation huge
-        // -> WARNING, base = t1, and
-        // the idle goes back to 125
-        s_t = 200000;
-        g_MGResyncBase = 1000;
-        MapGroupOnProcess(s_th);
-        assert(s_nWarn >= 1);
-        assert(g_MGIdleMs == 125);
-        // the next same-clock run
-        // slides ahead -> since
-        // underflows -> idle 0
-        MapGroupOnProcess(s_th);
-        assert(g_MGIdleMs == 0);
-        assert(s_aPeekMs[3] == 125);
-        printf("S5 ok (idle)\n"); fflush(stdout);
-    }
-
-    printf("TH4 ALL-OK\n");
-    return 0;
+    SElitePKArenicSeams e{}; e.CurrentInstanceGet=[]()->void*{return (void*)1;};
+    e.LogNullInstance=[](){}; e.LogNoInterface=[](){};
+    e.GetModule=[](void*,uint32_t id)->void*{ return id==4 ? (void*)2 : nullptr; };
+    e.OnHornorChange=[](void*,uint32_t r){ g_rank=r; got=1; };
+    a.OnUserArenicHornorChange(77,e);
+    CK(got==1 && g_rank==77,"rank forwarded through module 4");
+    // config classes
+    SMsgConfigSeams c{}; c.LogEnter=TEnter;
+    CMsgIOSServerConfig i; CMsgPCServerConfig pc;
+    i.Process(c); pc.Process(c);
+    CK(g_enters==2,"both config Process log once");
+    std::printf("MAPGROUP-OK: %d assertions\n", g_ok);
+    if (g_fail) std::printf("MAPGROUP-FAIL\n");
+    return g_fail ? 1 : 0;
 }

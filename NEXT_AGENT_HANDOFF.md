@@ -1615,3 +1615,27 @@ msgserver\worldkernel\**  + network2\
 
 **الاختبار:** 55 تأكيدًا (19 منها للدالة) ×6، رجريجن **74/74 ×6**.
 **متبقٍ في الملف:** لا شيء؛ `CAsyncDBThread` ما زال غير محدد (مفتاح 0x4b).
+
+## المسار أ-9س — دفعة CMapGroup + الأكتور + رسالتا الإعداد [2026-10-29]
+
+**أربع وحدات في دفعة واحدة:**
+
+| الوحدة | الملف | الدوال | المسار |
+|---|---|---|---|
+| `CMapGroup` | `msgserver/mapgroupkernel/mapgroup.cpp` | 8 مرسلات | **مُثبت** |
+| `CElitePKArenicActor` | `msgserver/adapter/src/elitepkarenicactor.cpp` | 1 | **مُثبت** |
+| `CMsgIOSServerConfig` | `msgserver/msgiosserverconfig.h` | Process | مُستنتج |
+| `CMsgPCServerConfig` | `msgserver/msgpcserverconfig.h` | Process | مُستنتج |
+
+**تفاصيل الخام:**
+- `SendClientMsg`: يكتب `+0x414=ch, +0x410=serverId, +0x418=0, +0x41c=0` ثم
+  `kernel vt+0x08`.
+- `SendNpcMsg`: `+0x418=ch, +0x414=-1, +0x41c=-1, +0x410=serverId`.
+- `SendCrossMsg` له شكلان: `vt+0x18` (6 وسائط) و`vt+0x20` (7 وسائط،
+  وبيرمي `0xffffffff` في المكان الثاني).
+- `SendGSOrOSS2SMsg` بيستخدم راية **8** مش 1؛ `SendCrossMsg2` بتاخد الراية.
+- `BroadcastOtherServerMsg` بيبني `CMsgTalk` بـ`SYSTEM`/`ALLUSERS` ويبعت
+  بالقناة **10**؛ فشل الإنشاء → النص الحرفي ثم تدمير الكائن.
+- `OnUserArenicHornorChange`: الموديول **4** من الأداپتر، ثم `vt+0x110`.
+
+**الاختبار:** 17 تأكيدًا ×6 — **الرجريجن 75/75 ×6** (SKIP نزل لـ8).
