@@ -1496,3 +1496,26 @@ msgserver\worldkernel\**  + network2\
 **الاختبار:** 24 تأكيدًا جديدًا ×6 (مع تأكيد ترتيب النطاقات
 و`tail` = 2000 للعالم و4000 للدخول بسبب تقديم pacing)،
 والرجريجن **70/70 ×6**.
+
+## المسار أ-9ق — خيطا البحث بالمزاد ودفع IPAD [2026-10-28]
+
+كلاهما بمسار **مُثبت** من جدول `__FILE__`:
+
+| الكلاس | المسار | الدالة | الإيقاعات | الفترة |
+|---|---|---|---|---|
+| CAuctionSearchThread | msgserver/mapgroupkernel/auction/auctionsearchthread.cpp | 1400f31f0 | 0x4a / 0x32 / 0x33 / 0x34 | 2000ms |
+| CIPADPaymentsSocketThread | ipadpaymentssocket/ipadpaymentssocketthread.cpp | 140510960 | 0x35 / 0x36 / 0x37 | 1000ms |
+
+**اختلافات بنيوية عن بقية العائلة (من الخام، مُختبَرة):**
+
+- `CAuctionSearchThread`: **الكائنان مقلوبان** — الـdrainer في `+0x40`
+  والـport في `+0x48` (عكس chat/socket/world). وسلوت الانتظار
+  في `s+0x28` لا `+0x20`.
+- `CIPADPaymentsSocketThread`: الـProcessMsg **نداء مباشر** إلى
+  `1405108d0` (ليس خانة vtable)، وسلوت الانتظار متغير عام
+  `DAT_140970740`، وفرع الخمول **يفتح ويغلق 0x37 بدون أي عمل**
+  (لا OnTimer إطلاقًا).
+- تحديث pacing يحدث في **فرع الخمول فقط** — إن كانت هناك رسائل
+  لا يُلمس pacing (أُثبت باختبار: خمول + تأخّر = pacing = now).
+
+**الاختبار:** 20 تأكيدًا ×6، والرجريجن **71/71 ×6**.

@@ -1,0 +1,43 @@
+// 140510960
+#include "ipadpaymentssocketthread.h"
+namespace msg {
+int CIPADPaymentsSocketThread::OnProcess(Seams& s) {
+    if ((*s.pInitFlag & 1) == 0) {
+        *s.pInitFlag |= 1;
+        *s.pPacing = s.TimeGet(0);
+    }
+    char has = (char)(s.WaitMessage(m_pDrainer, *s.pWaitTimeout) != 0);
+    s.TickEnter(kTickBody);
+    uint32_t now = s.TimeGet(0);
+    if (has == 0) {
+        // RAW opens and closes 0x37 with no work inside
+        s.TickEnter(kTickOnTimer);
+        s.TickLeave(kTickOnTimer);
+        if (now - *s.pPacing < (uint32_t)kCatchUpMs) {
+            *s.pPacing = *s.pPacing + kPeriodMs;
+        } else {
+            *s.pPacing = now;
+        }
+    } else {
+        for (;;) {
+            if (s.GetMessage(m_pDrainer, -1, -1, kMsgBufLen,
+                             m_MsgBuf, m_Hdr) == 0) break;
+            s.TickEnter(kTickMsg);
+            char ok = (char)s.ProcessMsg(this, m_Hdr[1], m_MsgBuf,
+                                         m_Hdr[2]);
+            s.TickLeave(kTickMsg);
+            if (ok == 0) {
+                s.LogProcessError(m_Hdr[1], 0);
+            }
+        }
+    }
+    uint32_t t = s.TimeGet(0);
+    if ((int32_t)(t - *s.pPacing) < kPeriodMs) {
+        *s.pWaitTimeout = (uint32_t)(kPeriodMs - (t - *s.pPacing));
+    } else {
+        *s.pWaitTimeout = 0;
+    }
+    s.TickLeave(kTickBody);
+    return 1;
+}
+}

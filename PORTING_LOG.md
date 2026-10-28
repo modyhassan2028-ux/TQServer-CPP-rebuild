@@ -6314,3 +6314,9 @@ msgserver/worldkernel/worldkernel.cpp (مسار مُثبت): خيط العالم
 (14002e990، إيقاعات 0x1d/0x1e/0x1f، 1000ms) وخيط الدخول
 (14002e580، 0x20/0x21/0x22، 2000ms، سلوت انتظار عام مستقل).
 + تصحيح نطاقات CSocketThread. 24 تأكيدًا ×6، رجريجن 70/70.
+
+### أ-9ق — CAuctionSearchThread + CIPADPaymentsSocketThread
+مساران مُثبتان: mapgroupkernel/auction/auctionsearchthread.cpp
+(1400f31f0، drainer/port مقلوبان، سلوت +0x28) و
+ipadpaymentssocket/ipadpaymentssocketthread.cpp (140510960،
+ProcessMsg نداء مباشر، فرع خمول بلا عمل). 20 تأكيدًا ×6، رجريجن 71/71.
