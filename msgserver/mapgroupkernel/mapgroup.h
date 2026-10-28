@@ -46,6 +46,31 @@ struct SMapGroupChatSeams {
     int   (*ModuleReady)(void* mod);                     // mod vt+0x40
     void  (*LogWrongAction)(int action);
 };
+
+struct SMapGroupDbSeams {
+    void* (*UserByServer)(uint32_t serverId);
+    void* (*InstanceGet)();
+    void* (*Query)(void* db, const char* sql, int mode);
+    int   (*RowCount)(void* rs);
+    void  (*SetRow)(void* rs, int i);
+    void* (*Field)(void* rs, int col);
+    int   (*FieldInt)(void* f);
+    void  (*Destroy)(void* o);
+    void* (*NewGameData)();
+    int   (*GameDataCreate)(void* g, void* rs);
+    int   (*GameDataKey)(void* g);
+    void  (*GameDataDestroy)(void* g);
+    void  (*InsertSysData)(void* map, const void* pair);
+    void  (*InsertDropRate)(void* map, const void* pair);
+    void* (*LoadConfigTable)(int id, int mode);
+    void  (*LogCreateNewError)();
+    void  (*LogCreateError)();
+    void  (*LogLoadAutoIdFail)(const char* table);
+    void  (*LogAutoIdMore)(const char* table, uint32_t want);
+    void  (*LogAutoIdCounts)(const char* table, int counts);
+    void  (*LogMonsterRateError)(int rate, int sort, int mete);
+    void  (*LogDragonRateError)(int rate, int sort, int mete);
+};
 class CMapGroup {
 public:
     uint8_t m_Hdr[0x68];
@@ -58,6 +83,9 @@ public:
     void*    m_pWorld;          // +0x90
     uint8_t  m_Pad4[0x6e4];     // up to +0x77c
     uint8_t  m_Flg77c;          // +0x77c
+    uint8_t  m_Pad5[0x548 - 0x780 > 0 ? 0x548 - 0x780 : 0];
+    uint8_t  m_DropRateMonster[0x40];   // +0x548 container (map proxy)
+    uint8_t  m_DropRateDragon[0x40];    // +0x588 container
     int SendClientMsg(uint32_t ch, SMapGroupMsg* m, SMapGroupSeams& s);
     int SendCrossMsg(uint32_t userId, SMapGroupMsg* m, SMapGroupSeams& s);
     int SendCrossMsg(SMapGroupMsg* m, SMapGroupSeams& s);
@@ -69,6 +97,11 @@ public:
     int SendNpcMsg(uint32_t ch, SMapGroupMsg* m, SMapGroupSeams& s);
     int BroadcastOtherServerMsg(void* msg, uint32_t a, uint16_t kind,
                                 SMapGroupSeams& s);
+    uint8_t  m_SysData[0x40];          // +0x800 container (map proxy)
+    void LoadDataSysData(SMapGroupDbSeams& s);        // 1400b4420
+    int  CheckTableAutoId(const char* table, uint32_t want,
+                          SMapGroupDbSeams& s);       // 1400943f0
+    void LoadMonsterDropRateConfig(SMapGroupDbSeams& s);  // 1400b27a0
     void SendChatFriendInfo(int* ids, SMapGroupChatSeams& s);
     bool IsAllowEnterOS(int action, SMapGroupChatSeams& s);
 };

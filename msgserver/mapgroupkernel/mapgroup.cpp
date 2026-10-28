@@ -1,6 +1,12 @@
 // 140089140..140089660 — CMapGroup senders
 #include "mapgroup.h"
 #include <cstring>
+#include <cstdio>
+#if defined(_MSC_VER)
+#define RAW_SNPRINTF _snprintf
+#else
+#define RAW_SNPRINTF snprintf
+#endif
 namespace msg {
 int CMapGroup::SendClientMsg(uint32_t ch, SMapGroupMsg* m, SMapGroupSeams& s) {
     if (m == nullptr) { s.LogNullClient(); return 0; }
@@ -129,5 +135,116 @@ bool CMapGroup::IsAllowEnterOS(int action, SMapGroupChatSeams& s) {
     }
     s.LogWrongAction(action);
     return false;
+}
+} // namespace msg
+
+// 1400b4420 CMapGroup::LoadDataSysData
+namespace msg {
+void CMapGroup::LoadDataSysData(SMapGroupDbSeams& s) {
+    s.UserByServer(m_ServerId);                       // side effect only
+    void* db = s.InstanceGet();
+    void* rs = s.Query(db, "SELECT * FROM cq_dyna_global_data", 2);
+    if (rs != nullptr && s.RowCount(rs) != 0) {
+        int n = s.RowCount(rs);                       // RAW reads it twice
+        for (int i = 0; i < n; ++i) {
+            s.SetRow(rs, i);
+            void* g = s.NewGameData();
+            if (g == nullptr) { s.LogCreateNewError(); }
+            else if (s.GameDataCreate(g, rs) == 0) {
+                s.LogCreateError();
+                s.GameDataDestroy(g);
+            } else {
+                struct { int key; void* obj; } pair;
+                pair.key = s.GameDataKey(g);
+                pair.obj = g;
+                s.InsertSysData(&m_SysData, &pair);   // this + 0x800
+            }
+            n = s.RowCount(rs);                       // RAW re-reads per row
+        }
+    }
+    if (rs != nullptr) s.Destroy(rs);
+}
+
+// 1400943f0 CMapGroup::CheckTableAutoId
+int CMapGroup::CheckTableAutoId(const char* table, uint32_t want, SMapGroupDbSeams& s) {
+    char sql[0x400];
+    sql[0] = 0;
+    std::memset(&sql[1], 0, 0x3ff);
+    RAW_SNPRINTF(sql, 0x400, "SELECT max(id) from %s", table);
+    s.UserByServer(m_ServerId);
+    void* db = s.InstanceGet();
+    void* rs = s.Query(db, sql, 1);
+    if (rs == nullptr) { s.LogLoadAutoIdFail(table); return 0; }
+    int rows = s.RowCount(rs);
+    if (rows == 1) {
+        void* f = s.Field(rs, 0);
+        int v = s.FieldInt(f);
+        if ((uint32_t)v < want) { s.Destroy(rs); return 1; }
+        s.Destroy(rs);
+        s.LogAutoIdMore(table, want);
+        return 0;
+    }
+    s.Destroy(rs);
+    s.LogAutoIdCounts(table, rows);
+    return 0;
+}
+
+// 1400b27a0 CMapGroup::LoadMonsterDropRateConfig
+void CMapGroup::LoadMonsterDropRateConfig(SMapGroupDbSeams& s) {
+    int n2 = 0;
+    void* rs = s.LoadConfigTable(0x1d4c, 0);
+    if (rs != nullptr) {
+        int rows = s.RowCount(rs);
+        if (rows > 0) {
+            int i = 0;
+            do {
+                s.SetRow(rs, i);
+                void* f2 = s.Field(rs, 2);
+                int rate = s.FieldInt(f2);
+                void* f3 = s.Field(rs, 3);
+                int sort = s.FieldInt(f3);
+                void* f4 = s.Field(rs, 4);
+                int mete = s.FieldInt(f4);
+                if (mete < 0) s.LogMonsterRateError(rate, sort, mete);
+                else {
+                    struct { int a; int b; int v; } pair;
+                    pair.a = (uint32_t)rate;
+                    pair.b = (uint32_t)sort;
+                    pair.v = mete;
+                    s.InsertDropRate(&m_DropRateMonster, &pair);  // this + 0x548
+                }
+                ++i;
+                rows = s.RowCount(rs);
+            } while (i < rows);
+        }
+        s.Destroy(rs);
+    }
+    rs = s.LoadConfigTable(0x1d4d, 0);
+    int rows = 0;
+    if (rs != nullptr) {
+        rows = s.RowCount(rs);
+        if (rows > 0) {
+            do {
+                s.SetRow(rs, n2);                          // RAW uses this counter
+                void* f2 = s.Field(rs, 2);
+                int rate = s.FieldInt(f2);
+                void* f3 = s.Field(rs, 3);
+                int sort = s.FieldInt(f3);
+                void* f4 = s.Field(rs, 4);
+                int mete = s.FieldInt(f4);
+                if (mete < 0) s.LogDragonRateError(rate, sort, mete);
+                else {
+                    struct { int a; int b; int v; } pair;
+                    pair.a = (uint32_t)rate;
+                    pair.b = (uint32_t)sort;
+                    pair.v = mete;
+                    s.InsertDropRate(&m_DropRateDragon, &pair);   // this + 0x588
+                }
+                ++n2;
+                rows = s.RowCount(rs);
+            } while (n2 < rows);
+        }
+        s.Destroy(rs);
+    }
 }
 } // namespace msg
