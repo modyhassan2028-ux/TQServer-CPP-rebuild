@@ -763,3 +763,25 @@ msgserver/threads/MsgWorldULChatThreads
 (ابدأ بتحديد OnProcess له: منطقة
 1400f3xxx) ثم CServerStatusMonitor
 (14002b2d0، وحدة مستقلة كبيرة).
+
+---
+
+## المسار أ-7 — Auction OnProcess [2026-10-28]
+
+**المنتهي:** 1400f31f0 في
+msgserver/threads/MsgAuctionThread.{h,cpp}.
+الفارق الخام: queue عند +0x40 وservice
+عند +0x48 (معكوسة!)؛ تيكات 0x4a/0x32/
+0x34/0x33؛ سحب 2000؛ بلا إحصاءات؛ idle
+0x14094b944. 3/3 + رجريجن 62/62×6 + ASan.
+
+**التالي أ-8:** CServerStatusMonitor
+(14002b2d0): اقرأ الديكمبايل عند سطر
+33891 في MsgServer.exe.decompiled.c ثم
+تحقق خاماً من: Ordinal_* (WS2 imports)،
+بنية FD_SET (alStack_1c10 بحجم 65)،
+حلقة العميل 0x40، وبنية العميل
+(local_1438 stride 0x50 مع WSABuf عند
++0x10، offset البايت عند +0x50...).
+راجع FUN_14001f4c0 (شرط الخروج == 2) و
+FUN_14002aef0 (معالج الرسالة).

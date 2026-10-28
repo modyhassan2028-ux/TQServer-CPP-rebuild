@@ -5798,3 +5798,39 @@ msgserver/threads/MsgWorldULChatThreads
 **التالي أ-7:** CAuctionSearchThread
 (1400f3xxx — تحقق objdump لشكله) ثم
 CServerStatusMonitor (14002b2d0).
+
+## المسار أ-7 — CAuctionSearchThread::OnProcess (1400f31f0) [2026-10-28]
+
+**منقول حرفياً في msgserver/threads/
+MsgAuctionThread.{h,cpp} (raw-objdump
+verified). الفارق الجوهري المؤكد خاماً:**
+- **الواجهات معكوسة عن كل الخيوط
+  الأخرى**: الـ queue عند +0x40 والـ
+  service عند +0x48 — Peek/WaitMsg على
+  +0x40، بينما OnTimer (vt+0x18) و
+  ProcessMsg (vt+0x10 الخماسي مع الـ port
+  خامساً) على +0x48
+- statics: flag 0x140975cac / base
+  0x140975ca8؛ سحب 2000 وعتبة 0x2710
+- تيكات: 0x4a حول Peek
+  ("CAuctionSearchThread WaitMsg")، 0x32
+  (process)، 0x34 (service OnTimer)، 0x33
+  (ProcessMsg)
+- بلا إحصاءات؛ idle عند 0x14094b944
+  (0x14094b928+0x1c؛ كتابات بايت خام
+  [0x1c..0x1f] للحالة الصفرية)
+- ERROR (packet=[info+4], port=[info+0])
+  خام؛ نص resync حرفي
+  "CAuctionSearchService::OnTimer"
+
+**الاختبار msg_auction_test.cpp:** 3 أقسام
+(الواجهات المعكوسة + السحب 2000، الخماسي
+على +0x48 مع أزواج ERROR، نص resync مع
+انتقال الـ idle). رجريجن **62/62 ×6** +
+ASan/UBSan نظيف.
+
+**التالي أ-8:** CServerStatusMonitor
+(14002b2d0) — وحدة كبيرة مستقلة (سوكت
+مراقبة بمنفذ من StatusMonitor.ini،
+select/WSAAccept حتى 0x40 عميلاً،
+سجلات دخول/خروج بالنصوص الحرفية).
