@@ -1062,3 +1062,46 @@ u19@+0x19):
 ثم بقية 1400285e0+ (تبيّن أنها أغلفة MFC/ATL: CWnd::OnDestroy،
 MultiByteToWideChar، AfxThrow، مقارنات GUID — تُوثّق كخارج
 النطاق ولا تُنقل).
+
+## المسار أ-9ز — خيط مراقبة برامج الغش: نصف التهيئة [2026-10-28]
+
+**المنتهي:** `msgserver/MsgCheatMonitorThread.{h,cpp}` — نقل
+140003dc0 (939 سطرًا) على موجتين؛ هذه **الموجة 9g = التهيئة
+كاملة**، وكل الخطوات من الخام بالترتيب:
+
+1. `14050c340(5)` كائن المنفذ؛ null → `CHECKF("pPort", 0xff)`
+   ثم `vtable+0x38` (تصفير) **قبل** فحص الخيط.
+2. `pMainThread` null → `CHECKF("pMainThread", 0x103)`.
+3. `WSAStartup(0x202)`؛ فشلها يرجع خطأها، وفحصان للنسخة:
+   البايت 0 == 2 والبايت +1 == 2.
+4. `WSASocketA(2,1,0,0)`؛ -1 → خطأ + `WSACleanup` ورجوع الخطأ.
+5. `CIniFile("shell.ini","CheatingMonitor")`: `ListenPort`
+   (صفر → **9150 = 0x23be**)، `IPNum` **مقيّد بـ20** مع نص
+   `astrict ip number overrun max ip number!`، ثم مفاتيح
+   `IP%d` **بترقيم يبدأ من 1** وقيمة `GetString(...,0x14)` ←
+   `inet_addr`.
+6. `bind` على `{2, htons(port), INADDR_ANY}` بطول 0x10؛ الفشل:
+   `Cheating Program Monitor can not bind to (%s : %u), nErr : %d`
+   بـ`inet_ntoa(0)` والمنفذ بالترتيب المضيف، ثم closesocket +
+   WSACleanup + إغلاق الـini، ورجوع الخطأ.
+7. `listen` ≠ 0 → `... listen failed : %d` بنفس التنظيف.
+8. **٦٤ خانة × 0x8020** مصفّرة؛ الخانة 0 تحمل سوكت
+   الاستماع عند +8 والبايت 1؛ فشل التخصيص →
+   `CHECKF("pClientInfo", 0x155)` وتحرير ما سبق.
+9. `DES_string_to_key("df29duw")` + `DES_set_key_checked`.
+10. رسالة `#%u: Cheating Program Monitor thread running.` بمعرّف
+    الخيط من `vtable+8`، تُرسل بـ`vtable+0x50` بالمعرّف
+    **0x9c41**.
+
+**ملاحظة خام:** فهرسة قائمة الـIP في الخام تُكتب وتُقرأ بنفس
+الإزاحة المشوّحة (`base + i*4 - 4`) في التهيئة وفي فحص
+القبول، فاستُخدم `ips[i]` مع تعليق يوضح التكافؤ.
+
+**الاختبار:** 40 تأكيدًا ×6 خضراء، ASan/UBSan/LSan نظيف.
+
+**الموجة 9ح (التالي):** جسم الحلقة: `FUN_14001f4c0` (حالة
+الخيط)، بناء fd_set من الخانات النشطة مع حارس dead-loop
+(1000000 دورة)، `select`، `WSAAccept` مع فحص الـIP وقائمة
+الرفض `lawless ip address %s!` و`too many clients`، حلقة
+`recv` بحجم `0x8000 - used` وحارس `MYASSERT WSABuff.len > 0`،
+و`client(%s : %u) login/logout`، و`DEAD_LOOP_BREAK`.

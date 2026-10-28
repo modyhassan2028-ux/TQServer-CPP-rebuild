@@ -6241,3 +6241,9 @@ ClearPacket/Flush/GetPacket/SendPacket/ConnectStored نُقلت من
 SetFromNow/SetWindowStart/QueryCqConfig/StartWorkerThread).
 تصحيحان من الخام: وسيط type المخفي في QueryCqConfig، وقيمة
 Enable==1 حصرًا للتمكين. 44 تأكيدًا ×6.
+
+### أ-9ز — خيط مراقبة الغش (التهيئة)
+140003dc0 موجة 9g: كائن المنفذ، WSAStartup وفحصا النسخة،
+السوكت، ini (ListenPort 9150، IPNum≤20، IP%d من 1)، bind/listen
+بنصوصها، ٦٤ خانة 0x8020، مفتاح DES "df29duw"، ورسالة 0x9c41.
+40 تأكيدًا ×6. الحلقة (select/accept/recv) في الموجة 9ح.
