@@ -87,7 +87,6 @@ struct SMonThreadSeams {
 int CheatMonitorThreadInit(void* pMainThread, SMonInitResult* out,
                            const SMonThreadSeams& s);
 }
-#endif
 // ===== wave 9h: the select/accept/recv loop of 140003dc0 =====
 namespace msg {
 struct SMonFdSet {                 // mirrors the winsock fd_set
@@ -131,3 +130,4 @@ int CheatMonitorThreadLoop(void* pMainThread, SMonLoop* st,
                            const SMonThreadSeams& s,
                            const SMonLoopSeams& ls);
 }
+#endif  // MSG_CHEAT_MONITOR_THREAD_H
