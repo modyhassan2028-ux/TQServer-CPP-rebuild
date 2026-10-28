@@ -887,3 +887,25 @@ FUN_140002440، FUN_14001e0b0،
 FUN_140005ea0/5e80/5d20/5b50 (كلاس عميل
 المصادقة +0x240)، FUN_1400285e0 وما
 يليها في منطقة الديالوج.
+
+---
+
+## المسار أ-9ب — LoadConfig + monitor registry [2026-10-28]
+
+**المنتهي:** DlgLoadConfig (14001f2f0:
+MAPGROUP_SIZE/FREE_LEV + المقاطع الأربعة
+بالبول =(v==1) خام) وDlgMonitorRegInit
+(140002440: سجل m_spCheatingProgramMonitor).
+13/13 + 66/66×6 + ASan نظيف. **تنبيه
+منهجي:** وسائط لوجات الديكمبايلر
+المخفية (وسيط واحد يظهر) تُستخرج من
+الخام (rdx/r8/r9/stack) — log الأخطاء
+في 140002440 حمل 4 وسائط.
+
+**التالي أ-9ج:** FUN_140021c80 (ExtraProc.ini
+launcher — CreateProcess مع std::string
+rfind/substr) ثم 14002a480 (monitor ctor
+FUN_140029ff0) ثم 14001e0b0 (auth listen —
+sprintf بوسائط مفقودة بالديكمبايل،
+"tqdigital" magic) وكلاس عميل المصادقة
+140005ea0/5e80/5d20/5b50.

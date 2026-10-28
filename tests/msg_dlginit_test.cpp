@@ -76,13 +76,30 @@ static void T_DLIns(void* h,void* n)
 static void* T_DLHead(){ return s_deadHead; }
 static int s_iniId = 0;
 static void T_INiOpen(void*){ s_iniId++; }
+static int s_ini2N=0; static std::string s_ini2F,s_ini2S;
+static void T_INiOpen2(void*,const char* f,const char* sec)
+    { s_ini2N++; s_ini2F=f; s_ini2S=sec; }
+static std::vector<std::string> s_sections;
+static void T_INiSetSection(void*,const char* s)
+    { s_sections.push_back(s); }
+static std::vector<std::string> s_err4;
+static void T_LogErr4(const char* f,const char* a,
+        const char* b,const char* c,uint32_t d)
+    { char bb[300]; std::snprintf(bb,sizeof bb,
+        f,a,b,c,d); s_err4.push_back(bb); }
 static int s_iniStrN = 0;
 static void T_INiGetStr(void*,char* d,const char* k,int sz)
     { assert(std::strcmp(k,"SERVERNAME")==0&&sz==0x10);
       std::strcpy(d,"MyServer"); s_iniStrN++; }
+static int32_t s_mgs=2, s_freeLev=0, s_otherInt=1;
 static int32_t T_INiGetInt(void*,const char* k)
-    { assert(std::strcmp(k,"SERVE_PORT")==0);
-      return s_portFromIni; }
+    { if(std::strcmp(k,"SERVE_PORT")==0)
+        return s_portFromIni;
+      if(std::strcmp(k,"MAPGROUP_SIZE")==0)
+        return s_mgs;
+      if(std::strcmp(k,"FREE_LEV")==0)
+        return s_freeLev;
+      return s_otherInt; }
 static int s_iniClose = 0;
 static void T_INiClose(void*){ s_iniClose++; }
 static std::string s_winText;
@@ -165,7 +182,9 @@ static void Setup() {
     S.MsgCenterStart=T_MCStart; S.ThreadRecMgrNew=T_Mgr;
     S.MgrVt38=T_V38; S.MgrVt40=T_V40;
     S.DeadLoopInsert=T_DLIns; S.DeadLoopHead=T_DLHead;
-    S.IniOpen=T_INiOpen; S.IniGetStr=T_INiGetStr;
+    S.IniOpen=T_INiOpen; S.IniOpen2=T_INiOpen2;
+    S.IniSetSection=T_INiSetSection;
+    S.LogError4=T_LogErr4; S.IniGetStr=T_INiGetStr;
     S.IniGetInt=T_INiGetInt; S.IniClose=T_INiClose;
     S.SetWindowText=T_SWT; S.CreateDir=T_CDir;
     S.InitLog=T_ILog; S.LogStr=T_LogStr;
@@ -201,6 +220,13 @@ static void Setup() {
     s_langSlot=9; s_langVal=3; s_n5b50=0;
     s_n2a480=0; s_n2440=0;
     g_DlgMapGroups=2;
+    g_DlgCfg7d4=5; g_DlgCfg7d8=5;
+    g_DlgCfg7dc=5; g_DlgCfg7ec=5;
+    g_DlgCfg7f0=5; g_DlgFreeLev=7;
+    g_MonRegistry=nullptr;
+    s_mgs=2; s_freeLev=0; s_otherInt=1;
+    s_ini2N=0; s_sections.clear(); s_err4.clear();
+    s_ini2F.clear(); s_ini2S.clear();
     g_DlgInnerFlag=0; g_DlgSrvName0=0; g_DlgSrvName1=0;
 }
 
@@ -444,6 +470,89 @@ int main() {
           { printf("S9 ok (port)\n"); goto done9; }
       assert(false);
     done9:; }
+
+    // ==== S10: LoadConfig happy ====
+    { Setup();
+      uint8_t dlg[0x2400]={};
+      assert(DlgLoadConfig(dlg)==1);
+      assert(s_ini2N==1);
+      assert(s_ini2F=="shell.ini");
+      assert(s_ini2S=="System");
+      // globals zeroed then mapgroups=2
+      assert(g_DlgCfg7d4==0&&g_DlgCfg7d8==0);
+      assert(g_DlgCfg7dc==0&&g_DlgCfg7ec==0);
+      assert(g_DlgCfg7f0==0);
+      assert(g_DlgMapGroups==2);
+      // sections + bools
+      assert(s_sections.size()==4);
+      assert(s_sections[0]=="CrossClient");
+      assert(s_sections[1]=="IPADPaymentsClient");
+      assert(s_sections[2]=="GooglePaymentsClient");
+      assert(s_sections[3]=="ChangeServerClient");
+      assert(dlg[0x1d0]==1);
+      assert(dlg[0x220]==1);
+      assert(dlg[0x221]==1);
+      assert(dlg[0x222]==1);
+      printf("S10 ok (LoadConfig happy)\n"); }
+
+    // ==== S11: LoadConfig zero mapgroups ====
+    { Setup();
+      uint8_t dlg[0x2400]={};
+      s_mgs=0;
+      int r=DlgLoadConfig(dlg);
+      assert(r==0);
+      assert(g_DlgMapGroups==0);
+      // ini closed exactly once, no sections
+      assert(s_sections.size()==0);
+      printf("S11 ok (zero mapgroups)\n"); }
+
+    // ==== S12: LoadConfig section bools ====
+    { Setup();
+      uint8_t dlg[0x2400]={};
+      s_otherInt=2;  // != 1 => bools 0
+      s_freeLev=5;   // stored to global
+      assert(DlgLoadConfig(dlg)==1);
+      assert(g_DlgFreeLev==5);
+      assert(dlg[0x1d0]==0);
+      assert(dlg[0x220]==0);
+      assert(dlg[0x221]==0);
+      assert(dlg[0x222]==0);
+      printf("S12 ok (bool = (v==1))\n"); }
+
+    // ==== S13: monitor registry ====
+    { Setup();
+      uint8_t dlg[0x2400]={};
+      assert(DlgMonitorRegInit(dlg)==1);
+      assert(g_MonRegistry!=nullptr);
+      assert(g_MonRegistry[0]==dlg);
+      assert(g_MonRegistry[1]==nullptr);
+      // second call: already set, no alloc
+      void* keep=g_MonRegistry;
+      assert(DlgMonitorRegInit(dlg)==1);
+      assert(g_MonRegistry==keep);
+      // fail path
+      g_MonRegistry=nullptr;
+      std::free(keep);
+      // New fail: swap seam
+      auto saved=g_DlgInitSeams.New;
+      g_DlgInitSeams.New=[](size_t){return (void*)nullptr;};
+      assert(DlgMonitorRegInit(dlg)==0);
+      assert(g_MonRegistry==nullptr);
+      assert(s_err4.size()==1);
+      assert(s_err4[0].find("CHECKF")!=std::string::npos);
+      assert(s_err4[0].find(
+          "m_spCheatingProgramMonitor")
+          !=std::string::npos);
+      assert(s_err4[0].find(
+          "cheatingprogrammonitor.cpp")
+          !=std::string::npos);
+      assert(s_err4[0].rfind(
+          "\xa1\xef" "CHECKF")==0);
+      // line 26 rendered as ", 26"
+      assert(s_err4[0].find(", 26")
+          !=std::string::npos);
+      g_DlgInitSeams.New=saved;
+      printf("S13 ok (monitor registry)\n"); }
 
     printf("TH11 ALL-OK\n");
     return 0;

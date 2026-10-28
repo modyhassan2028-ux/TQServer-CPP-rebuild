@@ -18,6 +18,20 @@ char g_DlgSrcFile[0x40];
 uint32_t g_DlgSrcFlag;
 uint64_t g_DlgSrvName0;
 uint64_t g_DlgSrvName1;
+uint32_t g_DlgCfg7d4;
+uint32_t g_DlgCfg7d8;
+uint8_t  g_DlgCfg7dc;
+uint32_t g_DlgCfg7ec;
+uint8_t  g_DlgCfg7f0;
+uint32_t g_DlgFreeLev;
+void**   g_MonRegistry;
+// raw CHECKF error format (1406d9c10)
+static const char kCheckfFmt[] =
+    "\xa1\xef%s(%s)\xa1\xef in %s, %d";
+static const char kMonFile[] =
+    "f:\\version\\cqserver-78.0."
+    "11-1204\\msgserver\\"
+    "cheatingprogrammonitor.cpp";
 
 // raw inner-server language magics (1406e0670)
 static const uint32_t kInnerLangs[2] =
@@ -348,6 +362,89 @@ lab_fff:
     s.Run2440(dlg);
     s.IniClose(ini2);
     s.IniClose(ini1);
+    return 1;
+}
+
+
+
+// FUN_14001f2f0 — LoadConfig (raw objdump
+// verified incl. the byte-sized global
+// stores at 1409757dc/1409757f0 and the
+// second MAPGROUP_SIZE==0 guard)
+int DlgLoadConfig(void* dlg) {
+    SDlgInitSeams& s = g_DlgInitSeams;
+    uint8_t* p = (uint8_t*)dlg;
+    char ini[0x400];
+    s.IniOpen2(ini, "shell.ini",
+               "System");
+    g_DlgCfg7d4 = 0;
+    g_DlgCfg7d8 = 0;
+    g_DlgCfg7dc = 0;
+    g_DlgCfg7ec = 0;
+    g_DlgCfg7f0 = 0;
+    g_DlgMapGroups = (uint32_t)
+        s.IniGetInt(ini, "MAPGROUP_SIZE");
+    if (g_DlgMapGroups == 0) {
+        s.IniClose(ini);
+        return 0;
+    }
+    int32_t v = s.IniGetInt(ini,
+                            "FREE_LEV");
+    if (v != 0) {
+        g_DlgFreeLev = (uint32_t)v;
+    }
+    if (g_DlgMapGroups == 0) { // verbatim
+        s.IniClose(ini);
+        return 0;
+    }
+    s.IniSetSection(ini, "CrossClient");
+    p[0x1d0] = (uint8_t)
+        (s.IniGetInt(ini, "Enable") == 1);
+    s.IniSetSection(ini,
+        "IPADPaymentsClient");
+    p[0x220] = (uint8_t)
+        (s.IniGetInt(ini,
+        "IsSupportIPADPayments") == 1);
+    s.IniSetSection(ini,
+        "GooglePaymentsClient");
+    p[0x222] = (uint8_t)
+        (s.IniGetInt(ini,
+        "IsSupportGooglePayments") == 1);
+    s.IniSetSection(ini,
+        "ChangeServerClient");
+    p[0x221] = (uint8_t)
+        (s.IniGetInt(ini,
+        "IsConnectChangeServer") == 1);
+    s.IniClose(ini);
+    return 1;
+}
+
+// FUN_140002440 — m_spCheatingProgram
+// Monitor registry init (raw-verified:
+// the log takes 4 args hidden from the
+// decompile: "CHECKF",
+// "m_spCheatingProgramMonitor", the
+// source file, line 0x1a)
+int DlgMonitorRegInit(void* dlg) {
+    SDlgInitSeams& s = g_DlgInitSeams;
+    if (g_MonRegistry == nullptr) {
+        void* n = s.New(0x10);
+        if (n != nullptr) {
+            ((void**)n)[0] = dlg;
+            ((void**)n)[1] = nullptr;
+        }
+        else {
+            n = nullptr;
+        }
+        g_MonRegistry = (void**)n;
+        if (g_MonRegistry == nullptr) {
+            s.LogError4(kCheckfFmt,
+                "CHECKF",
+                "m_spCheatingProgramMonitor",
+                kMonFile, 0x1a);
+            return 0;
+        }
+    }
     return 1;
 }
 

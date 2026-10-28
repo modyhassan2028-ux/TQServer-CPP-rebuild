@@ -6129,3 +6129,50 @@ FUN_14001f4c0(main)==2 مع closesocket
 مع استمرار التنفيذ، فرع السيرفر الداخلي،
 فرع GBK مع الاحتياطي ومنفذ من ini).
 **66/66 ×6** + ASan/UBSan/LSan نظيف.
+
+## المسار أ-9ب — LoadConfig + سجل مراقب الغش [2026-10-28]
+
+**المنقول في msgserver/ui/MsgServerDlgInit.{h,cpp}
+(توسيع أ-9ا) من objdump الخام:**
+
+- **FUN_14001f2f0 (DlgLoadConfig):**
+  CIniFile("shell.ini","System")؛ أصفار
+  خامّة بالأحجام الأصلية (dword عند
+  1409757d4/1409757d8/1409757ec، بايت عند
+  1409757dc/1409757f0 — أُكّدت من mov
+  BYTE/DWORD في الخام)؛ MAPGROUP_SIZE →
+  1409757d0 (صفر = فشل)؛ FREE_LEV (إن ≠0)
+  → 140949794؛ حارس MAPGROUP_SIZE==0 ثانٍ
+  حرفي (فرع ميت لكن موجود بالخام)؛
+  المقاطع الأربعة CrossClient.Enable →
+  +0x1d0، IPADPaymentsClient.
+  IsSupportIPADPayments → +0x220،
+  GooglePaymentsClient.
+  IsSupportGooglePayments → +0x222،
+  ChangeServerClient.
+  IsConnectChangeServer → +0x221 — كلها
+  `cmp eax,1; sete al; mov BYTE` (البول =
+  (القيمة==1)) مؤكدة خاماً
+- **FUN_140002440 (DlgMonitorRegInit):**
+  init سجل m_spCheatingProgramMonitor
+  (cheatingprogrammonitor.cpp): إن كان
+  1409754e8 فارغاً → new(0x10) يخزن
+  {dlg, null}؛ الفشل → log بخطية CHECKF
+  **بأربعة وسائط مخفية عن الديكمبايلر**
+  (استخرجت من الخام 140002493-1400024af):
+  "！CHECKF(m_spCheatingProgramMonitor)！ in
+  f:\version\cqserver-78.0.11-1204\msgserver
+  \cheatingprogrammonitor.cpp, 26" مع
+  fmt الخام
+  "\xa1\xef%s(%s)\xa1\xef in %s, %d" و26=0x1a
+
+**اكتشاف منهجي:** نصا الأخطاء التي يمررها
+الديكمبايلر كوسيط واحد فقط (log(&DAT))
+تحمل وسائط إضافية في rdx/r8/r9/[rsp+0x20]
+— يجب استخراجها من الخام دائماً.
+
+**الاختبار:** 13 قسماً (LoadConfig
+بمساراته الثلاثة + السجل بمساراته
+الثلاثة + مصيدة escape سداسية
+(\xefC يلتهم الحرف C — تُفصل النصوص)).
+**66/66 ×6** + ASan/UBSan/LSan نظيف.

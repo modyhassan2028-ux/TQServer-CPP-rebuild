@@ -56,6 +56,11 @@ struct SDlgInitSeams {
         void* head, void* node);// 140027b70
     void* (*DeadLoopHead)();  // g_setDeadLoop
     void (*IniOpen)(void* buf);
+    void (*IniOpen2)(void* buf,
+        const char* file,
+        const char* section);
+    void (*IniSetSection)(void* ini,
+        const char* s);
     void (*IniGetStr)(void* ini,
         char* dst, const char* key, int sz);
     int32_t (*IniGetInt)(
@@ -76,6 +81,9 @@ struct SDlgInitSeams {
         uint32_t v);
     void (*LogError)(const char* fmt,
         const char* a);
+    void (*LogError4)(const char* fmt,
+        const char* a, const char* b,
+        const char* c, uint32_t d);
     void (*Run20570)();
     void (*Run21c80)(void* dlg);
     uint32_t* (*CQLangGet)();
@@ -122,10 +130,19 @@ extern char g_DlgSrcFile[0x40];        // 949750
 extern uint32_t g_DlgSrcFlag;          // 94978f
 extern uint64_t g_DlgSrvName0;         // 975674
 extern uint64_t g_DlgSrvName1;         // 97567c
+extern uint32_t g_DlgCfg7d4;           // 9757d4
+extern uint32_t g_DlgCfg7d8;           // 9757d8
+extern uint8_t  g_DlgCfg7dc;           // 9757dc
+extern uint32_t g_DlgCfg7ec;           // 9757ec
+extern uint8_t  g_DlgCfg7f0;           // 9757f0
+extern uint32_t g_DlgFreeLev;         // 949794
+extern void**   g_MonRegistry;         // 9754e8
 
 void DlgAuthMemberInit(void* at); // FUN_140005c10
 void* DlgCtor(void* dlg, void* parent);
 int DlgOnInitDialog(void* dlg);
+int DlgLoadConfig(void* dlg);   // 14001f2f0
+int DlgMonitorRegInit(void* dlg); // 140002440
 
 } // namespace msg
 #endif
