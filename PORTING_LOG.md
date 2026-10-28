@@ -6308,3 +6308,9 @@ CMapGroupThread، CSocketThread (CreateThread+OnProcess). + تثبيت
 جدول __FILE__ الكامل (414 ملفًا) في Docs/ORIGINAL_SOURCE_TREE.md،
 ونقل 15 وحدة إلى مساراتها الأصلية، وإضافة القسم 11 في AGENTS.md
 (منع اختراع المجلدات). رجريجن 69/69 ×6.
+
+### أ-9ف — CWorldThread + CUserLoginThread
+msgserver/worldkernel/worldkernel.cpp (مسار مُثبت): خيط العالم
+(14002e990، إيقاعات 0x1d/0x1e/0x1f، 1000ms) وخيط الدخول
+(14002e580، 0x20/0x21/0x22، 2000ms، سلوت انتظار عام مستقل).
++ تصحيح نطاقات CSocketThread. 24 تأكيدًا ×6، رجريجن 70/70.

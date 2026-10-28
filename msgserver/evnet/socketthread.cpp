@@ -19,12 +19,13 @@ int CSocketThread::OnProcess(Seams& s) {
         *s.pInitFlag |= 1;
         *s.pPacing = s.TimeGet(0);
     }
+    // RAW: the wait happens OUTSIDE any analyst scope, then tick 0x23
+    // wraps the rest of the pass
     char has = (char)(s.WaitMessage(m_pDrainer, *s.pWaitTimeout) != 0);
     s.TickEnter(kTickWait);
-    s.TickLeave(kTickWait);
     uint32_t now = s.TimeGet(0);
     if (has == 0) {
-        s.TickEnter(kTickOnTimer);
+        s.TickEnter(kTickOnTimer);            // 0x2a CMapgroup-style id
         s.OnTimer(m_pKernel, now);
         s.TickLeave(kTickOnTimer);
         if (now - *s.pPacing < (uint32_t)kCatchUpMs) {
@@ -55,6 +56,7 @@ int CSocketThread::OnProcess(Seams& s) {
     } else {
         *s.pWaitTimeout = 0;
     }
+    s.TickLeave(kTickWait);
     return 1;
 }
 }
