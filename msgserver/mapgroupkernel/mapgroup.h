@@ -4,6 +4,7 @@
 // (proven: the path is in the __FILE__ table)
 // Members from RAW: +0x68 serverId, +0x70 the kernel object.
 #include <cstdint>
+#include <cstddef>
 namespace msg {
 struct SMapGroupMsg {           // the message block the senders fill
     uint8_t  hdr[0x410];
@@ -84,6 +85,18 @@ public:
     uint8_t  m_Pad4[0x6e4];     // up to +0x77c
     uint8_t  m_Flg77c;          // +0x77c
     uint8_t  m_Pad5[0x548 - 0x780 > 0 ? 0x548 - 0x780 : 0];
+    // 1400a65b0 / 1400a6950
+    struct SeamsMulti {
+        uint32_t (*GetSize)(const void* msg);              // msg+0x0c
+        void (*SendOne)(void* self, uint32_t id, void* msg); // this vt[0]
+        void (*LogSize)(void);
+        void (*LogNull)(void);
+        void (*LogDeadLoop)(void);
+    };
+    int SendMultiClientMsg(const uint32_t* ids, size_t n, void* msg);
+    int SendMultiOSClientMsg(const uint32_t* ids, size_t n, void* msg);
+    static const size_t kMultiCap = 0x400;                 // _MAX_MSGSIZE
+    static const int    kMultiDeadLoop = 2000;
     uint8_t  m_DropRateMonster[0x40];   // +0x548 container (map proxy)
     uint8_t  m_DropRateDragon[0x40];    // +0x588 container
     int SendClientMsg(uint32_t ch, SMapGroupMsg* m, SMapGroupSeams& s);
@@ -102,6 +115,7 @@ public:
     int  CheckTableAutoId(const char* table, uint32_t want,
                           SMapGroupDbSeams& s);       // 1400943f0
     void LoadMonsterDropRateConfig(SMapGroupDbSeams& s);  // 1400b27a0
+    SeamsMulti m_Multi;
     void SendChatFriendInfo(int* ids, SMapGroupChatSeams& s);
     bool IsAllowEnterOS(int action, SMapGroupChatSeams& s);
 };

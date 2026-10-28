@@ -248,3 +248,39 @@ void CMapGroup::LoadMonsterDropRateConfig(SMapGroupDbSeams& s) {
     }
 }
 } // namespace msg
+
+// 1400a65b0 / 1400a6950 — the two multi-send paths. RAW has two iterator
+// branches (capacity < 2 and >= 2) whose bodies are identical: send through
+// this->vt[0] once per id, and stop after the 2001st send with a Dead Loop log.
+namespace msg {
+int CMapGroup::SendMultiClientMsg(const uint32_t* ids, size_t n, void* msg) {
+    if (msg == nullptr) return 0;
+    if ((int)(kMultiCap - m_Multi.GetSize(msg)) < 0) {
+        m_Multi.LogSize();                       // ", (_MAX_MSGSIZE - GetSize()) < 0."
+        return 0;
+    }
+    if (n == 0) return 0;
+    int sent = 0;
+    for (size_t i = 0; i < n; ++i) {
+        m_Multi.SendOne(this, ids[i], msg);
+        sent = sent + 1;
+        if (kMultiDeadLoop < sent) { m_Multi.LogDeadLoop(); break; }
+    }
+    return 1;
+}
+int CMapGroup::SendMultiOSClientMsg(const uint32_t* ids, size_t n, void* msg) {
+    if (msg == nullptr) { m_Multi.LogNull(); return 0; }
+    if ((int)(kMultiCap - m_Multi.GetSize(msg)) < 0) {
+        m_Multi.LogSize();
+        return 0;
+    }
+    if (n == 0) return 0;
+    int sent = 0;
+    for (size_t i = 0; i < n; ++i) {
+        m_Multi.SendOne(this, ids[i], msg);
+        sent = sent + 1;
+        if (kMultiDeadLoop < sent) { m_Multi.LogDeadLoop(); break; }
+    }
+    return 1;
+}
+} // namespace msg
