@@ -6320,3 +6320,9 @@ msgserver/worldkernel/worldkernel.cpp (مسار مُثبت): خيط العالم
 (1400f31f0، drainer/port مقلوبان، سلوت +0x28) و
 ipadpaymentssocket/ipadpaymentssocketthread.cpp (140510960،
 ProcessMsg نداء مباشر، فرع خمول بلا عمل). 20 تأكيدًا ×6، رجريجن 71/71.
+
+### أ-9ك — CCrossClientThread::OnProcess (14004c300)
+crossclient/crossclientthread.cpp (مسار مُثبت): مهلة انتظار ثابتة
+0x14، بلا pacing ولا عدّادات، فرز بالمعرّف 0x3e9 مقابل مسار
+ProcessLocalMsg، وفلتر مربوط بعلم +0x50 (0x3f1/0x11173/0x11174
+و0x3fc بشرط b0==0x9c4f). 25 تأكيدًا ×6، رجريجن 72/72.
