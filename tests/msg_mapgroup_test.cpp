@@ -9,6 +9,7 @@
 #include "msgiosserverconfig.h"
 #include "msgpcserverconfig.h"
 using namespace msg;
+using namespace adapter;
 static int g_ok=0, g_fail=0;
 static void CK(bool c, const char* w){ if(c){g_ok++;} else {g_fail++; std::printf("  FAIL %s\n", w);} }
 static std::string g_log;

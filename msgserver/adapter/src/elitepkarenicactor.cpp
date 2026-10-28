@@ -1,5 +1,5 @@
 #include "elitepkarenicactor.h"
-namespace msg {
+namespace adapter {
 void CElitePKArenicActor::OnUserArenicHornorChange(uint32_t rank,
                                                    SElitePKArenicSeams& s) {
     void* inst = s.CurrentInstanceGet();
@@ -8,4 +8,4 @@ void CElitePKArenicActor::OnUserArenicHornorChange(uint32_t rank,
     if (mod == nullptr) { s.LogNoInterface(); return; }
     s.OnHornorChange(mod, rank);
 }
-} // namespace msg
+} // namespace adapter
