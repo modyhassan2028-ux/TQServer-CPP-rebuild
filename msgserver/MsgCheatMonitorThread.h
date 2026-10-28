@@ -35,7 +35,10 @@ struct SMonClient {                 // 0x8020 RAW
     uint8_t  active;                // +0x00
     uint8_t  pad0[7];
     int64_t  sock;                  // +0x08
-    uint8_t  rest[kMonitorSlotSize - 0x10];
+    uint32_t u10;                   // +0x10
+    uint64_t u14;                   // +0x14
+    int32_t  used;                  // +0x1c (bytes buffered)
+    uint8_t  data[kMonitorSlotSize - 0x20];  // +0x20 packet area
 };
 struct SMonInitResult {
     int64_t  listenSock;
@@ -83,3 +86,46 @@ int CheatMonitorThreadInit(void* pMainThread, SMonInitResult* out,
                            const SMonThreadSeams& s);
 }
 #endif
+// ===== wave 9h: the select/accept/recv loop of 140003dc0 =====
+namespace msg {
+struct SMonFdSet {                 // mirrors the winsock fd_set
+    uint32_t count;
+    int64_t  fd[kMonitorMaxClients];
+};
+struct SMonLoop {
+    SMonClient* slots[kMonitorMaxClients];
+    int      slotCount;
+    int64_t  listenSock;
+    int      activeCount;          // RAW iVar20
+    int      ipCount;
+    int32_t  ips[kMonitorMaxIpNum];
+    uint32_t spinBuild;            // RAW local_1120 (1,000,000 guard)
+    uint32_t spinRecv;             // RAW local_110c (1,000,000 guard)
+};
+struct SMonLoopSeams {
+    void   (*LogErrStr)(const char* s);
+    void   (*LogErrFmt)(const char* fmt, ...);
+    void   (*LogWarnStr)(const char* s);
+    void   (*LogMessage)(const char* fmt, ...);
+    void   (*CheckF)(const char* what, int line, const char* file);
+    int    (*ThreadAlive)(void* mainThread);        // 14001f4c0
+    int    (*Select)(int nfds, SMonFdSet* set, int32_t* tv);
+    int    (*FdIsSet)(int64_t s, const SMonFdSet* set);
+    int64_t(*Accept)(int64_t s, void* sa, int* len);
+    int    (*GetPeerName)(int64_t s, void* sa, int* len);
+    int    (*WsaRecv)(int64_t s, void* buf, uint32_t len, uint32_t* got,
+                      uint32_t* flags);
+    int    (*Shutdown)(int64_t s, int how);
+    int    (*CloseSocket)(int64_t s);
+    int    (*GetLastError)();
+    const char* (*InetNtoa)(uint32_t ip);
+    void   (*ParsePacket)(void* data, uint32_t len);   // 140001c70
+    void   (*PostRecv)();                              // 140002510
+    void   (*WsaCleanup)();
+};
+// the peer sockaddr as the loop reads it (family, port, addr)
+struct SMonPeer { uint16_t family; uint16_t port; uint32_t addr; };
+int CheatMonitorThreadLoop(void* pMainThread, SMonLoop* st,
+                           const SMonThreadSeams& s,
+                           const SMonLoopSeams& ls);
+}

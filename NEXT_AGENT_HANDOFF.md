@@ -1105,3 +1105,43 @@ MultiByteToWideChar، AfxThrow، مقارنات GUID — تُوثّق كخارج
 الرفض `lawless ip address %s!` و`too many clients`، حلقة
 `recv` بحجم `0x8000 - used` وحارس `MYASSERT WSABuff.len > 0`،
 و`client(%s : %u) login/logout`، و`DEAD_LOOP_BREAK`.
+
+## المسار أ-9ح — خيط مراقبة الغش: جسم الحلقة [2026-10-28]
+
+**المنتهي:** `CheatMonitorThreadLoop` — الجسم الكامل
+(0x1400044f0..LAB_14000524a) من الخام:
+
+1. **بوابة الخيط:** `14001f4c0(pMainThread) != 2` → خروج.
+2. **بناء fd_set:** المستمع أولًا ثم الخانات النشطة؛ إزالة
+   التكرار بمسح مباشر؛ **حارس dead-loop عند 1,000,000 دورة**
+   برسالة `DEAD_LOOP_BREAK` وسطر 0x177.
+3. **select** بـ`tv = {0, 500}` (من `local_1070` بالخام)؛
+   -1 → `Cheating Program Monitor select failed : %d` ثم خروج،
+   و<1 → دورة جديدة.
+4. **القبول:** `Accept` بطول 0x10؛ نجاح →
+   `client(%s : %u) login`؛ ثم **فلترة الـIP** من القائمة:
+   عدم التطابق → `lawless ip address %s!` وإغلاق العميل،
+   والتطابق → **أول خانة `active == 0`** (الخانة 0 محجوزة
+   للمستمع) وتعيين `active=1`، `sock`، وتصفير `+0x10`،
+   `+0x14`، و`used@+0x1c`، وزيادة العدّاد. تجاوز 64 →
+   `CHECKF("nNewPosition < CheatingProgram::MAX_CLIENT_NUMA",
+   0x1b7)`. والعدّاد ممتلئ → `too many clients`، وفشل
+   القبول → `Accept client failed : %d`.
+5. **الاستقبال:** لكل خانة جاهزة: `len = 0x8000 - used` وحارس
+   `WSABuff.len > 0` (سطر 0x1da)، ثم `WSARecv`:
+   نجاح مع بايتات → `140001c70` (تحليل الحزمة) ثم
+   `used += bytes` ثم `140002510`؛ فشل أو صفر →
+   `GetPeerName` ناجح → `client(%s : %u) logout` وإلا
+   `one client logout`، ثم `shutdown(2)` وإغلاق وتصفير الخانة
+   وإنقاص العدّاد. حارس dead-loop ثانٍ بخط 0x208.
+6. **الخروج:** `Cheating Program Monitor Thread stop`، إغلاق
+   المستمع، ثم **تهدئة كل خانة نشطة** (shutdown + close +
+   تصفير)، ثم `WSACleanup`.
+
+**ملاحظة خام مهمة:** الخروج يغلق كل العملاء النشطين، فالتحقق
+من تعيين الخانة في الاختبار يكون عبر عدّ `shutdown` (وإلا
+لن يُرى الأثر بعد التهدئة) — موثّق في الاختبار.
+
+**الاختبار:** 28 تأكيدًا ×6 خضراء، ASan/UBSan/LSan نظيف.
+
+**بهذا اكتملت 140003dc0** (التهيئة + الحلقة) في موجتين.
