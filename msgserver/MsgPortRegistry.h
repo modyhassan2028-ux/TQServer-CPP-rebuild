@@ -12,13 +12,18 @@
 //                        GetLastError + "CMessagePort::Init() failed
 //                        with m_id=%d, error=%u" + unlock; returns
 //                        whether the handle is non-null.
-// 14050c390 Call(idx)  — invokes vtable+0x10 on the object and
-//                        returns 0xffffffff for an invalid index.
-//                        NOTE: the decompiler recovered no arguments
-//                        for that indirect call, so its arity is
-//                        unresolved; ported only as an index-checked
-//                        dispatch with the arguments supplied by the
-//                        caller (documented, not guessed).
+// 14050c390 Call(idx, a, b, c) — RESOLVED FROM THE DISASSEMBLY
+//                        (0x14050c390): after the index check it does
+//                          mov rcx,(rdx,rbx,8)  ; rcx = items[idx]
+//                          mov rax,(rcx)        ; vtable
+//                          jmp *0x10(rax)       ; TAIL JUMP
+//                        Only rcx is rewritten, so rdx/r8/r9 reach
+//                        the target untouched: it is a perfect-
+//                        forwarding dispatcher that consumes idx as
+//                        arg0 and forwards three more arguments.
+//                        Invalid index returns 0xffffffff. The
+//                        decompiler had dropped the arguments; the
+//                        asm shows there is no hidden arity.
 // 14050f520/14050f8b0  — MSVC vector insert/erase with iterator
 //                        debug checks (_invalid_parameter_noinfo):
 //                        STL glue, out of scope.
@@ -48,5 +53,15 @@ struct SPortInitSeams {
 };
 // returns 1 on success, 0 when the event could not be created
 int MessagePortInit(void* port, const SPortInitSeams& s);
+// vtable slot +0x10 of a registered port object
+typedef int (*PortVt10Fn)(void* self, void* a, void* b, void* c);
+inline int PortRegistryCall(const SPortRegistry* r, int idx,
+                            void* a, void* b, void* c) {
+    void* obj = PortRegistryGet(r, idx);
+    if (obj == nullptr) return -1;              // 0xffffffff
+    void** vt = *(void***)obj;
+    PortVt10Fn f = (PortVt10Fn)vt[2];           // byte offset 0x10
+    return f(obj, a, b, c);                     // idx replaced by self
+}
 }
 #endif

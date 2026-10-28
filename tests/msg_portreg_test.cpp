@@ -38,7 +38,36 @@ int main() {
     r.count = 0;
     CHECK(PortRegistryGet(&r, 0) == nullptr, "empty registry -> 0");
     CHECK(PortRegistryCount(&r) == 0, "count 0");
-    SECT("9k-2 message port init");
+    SECT("9k-2 dispatch (resolved from asm)");
+    static void* vt[8];
+    static int s_callN = 0;
+    static void* s_self = nullptr;
+    static unsigned s_arg[3];
+    struct Obj { void** vp; };
+    static Obj o1, o2;
+    o1.vp = vt; o2.vp = vt;
+    vt[2] = (void*)+[](void* self, void* a, void* b, void* c) -> int {
+        s_callN++; s_self = self;
+        s_arg[0] = (unsigned)(size_t)a; s_arg[1] = (unsigned)(size_t)b;
+        s_arg[2] = (unsigned)(size_t)c;
+        return 4242; };
+    void* it2[2];
+    it2[0] = &o1; it2[1] = &o2;
+    SPortRegistry r2;
+    r2.items = it2; r2.count = 2;
+    s_callN = 0;
+    CHECK(PortRegistryCall(&r2, 1, (void*)7, (void*)8, (void*)9) == 4242,
+          "return value comes from vtable+0x10");
+    CHECK(s_callN == 1 && s_self == (void*)&o2,
+          "rcx replaced by items[idx]");
+    CHECK(s_arg[0] == 7 && s_arg[1] == 8 && s_arg[2] == 9,
+          "three arguments forwarded untouched");
+    CHECK(PortRegistryCall(&r2, 5, nullptr, nullptr, nullptr) == -1,
+          "invalid index -> -1");
+    CHECK(PortRegistryCall(&r2, -2, nullptr, nullptr, nullptr) == -1,
+          "negative index -> -1");
+    CHECK(s_callN == 1, "no dispatch on an invalid index");
+    SECT("9k-3 message port init");
     unsigned char port[0x80];
     memset(port, 0, sizeof port);
     s_lockN = s_unlockN = s_logN = 0; s_evFail = 0;
