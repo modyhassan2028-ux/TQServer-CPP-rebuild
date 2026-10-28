@@ -6052,3 +6052,80 @@ FUN_14001f4c0(main)==2 مع closesocket
 
 بهذا اكتمل الكلاس CServerStatusMonitor
 بكامل طبقاته (أ-8ا/8ب/8ج).
+
+## المسار أ-9ا — CMsgServerDlg ctor + OnInitDialog [2026-10-28]
+
+**المنقول في msgserver/ui/MsgServerDlgInit.{h,cpp}
+من objdump الخام.** الحقائق الخام المؤكدة:
+- ctor 1400238a0: CDialog::CDialog(0x66)
+  (قالب الديالوج 102)؛ 5 CStringT فارغة عند
+  +0xe8..+0x108؛ CPerformanceInfo @+0x158 و
+  CThreadTimesInfo @+0x168؛ زوج عقد 8-بايت
+  يُربط ذاتياً عند +0x188؛ عضو المصادقة
+  عند +0x240 يُهيأ بـ FUN_140005c10
+  (-1 @+0x20، أصفار، وmemset منطقتين
+  0x1000)؛ LoadIconA(0x80) → +0x200؛
+  باقي الحقول أصفار حتى +0x130
+- OnInitDialog 140027dd0: قائمة About
+  (LoadStringA 0x65، فاصل 0x800 ثم
+  IDM=0x10)؛ WM_SETICON(0x80) مرتين
+  (big=1/small=0)؛ CreateEventA → +0x208
+  (فشل: "Create exit event failed!" +
+  EndDialog(-1))؛ كتلة الأداء العامة
+  0x168 أصفار + 5000/3000؛ tq::DateTime
+  @+0x120؛ LoadConfig 14001f2f0 (فشل:
+  MB فقط ثم استمرار!)؛ مركز الرسائل
+  14002e300 يُستدعى مرتين (فحص ثم
+  تمرير)؛ 14002c6b0؛ Mgr 14050c340(0) →
+  +0x1f0 + vt[7] + vt[8](1)؛ الحالة=1
+  @+0x1fc
+- deadloop: حلقة (MapGroups+0xe) مرة،
+  زوج عقد + FUN_140027b70(setDeadLoop)
+- shell.ini/AccountServer SERVERNAME
+  (0x10) → +0x110 والقيم qword تُنسخ
+  للعالميتين 140975674/14097567c؛ العنوان
+  "%s - %s - %s %s" (Conquer Online
+  Server / الاسم / "Dec  4 2015" /
+  "14:00:43")؛ syslog/gmlog؛
+  InitLog(,"syslog/cqserver","syslog/sysdb")
+  + سطرا "===" بطول 65 حرفاً
+- CQLanguage = LangValueGet؛
+  140021c80(dlg)؛ أصفار المصادقة
+  +0x227c..+0x22b8 و+0x2278=0؛
+  _snprintf للمسار الخام
+  "f:\version\cqserver-78.0.11-1204\..."
+  ثم shell.ini/System SERVE_PORT
+  (افتراضي 0x16b8) + لوج "%s[%d]"
+- لغات السيرفر الداخلي: ثابتا
+  0x060817ac/0x090b17ac (@1406e0670)
+  عبر 140508440 → True: "192.168.9.138"
+  ×2 + 0x268d + علم داخلي + "This is
+  a inner server."؛ وإلا stricmp مع
+  GBK "\xd6\xd0\xce\xc4" (@1406e0658):
+  "121.207.253.12"/"58.49.94.9" أو
+  "216.93.176.117"/"92.52.79.12" (كل
+  SafeCopy بحد 0x10)
+- **تصحيح خام مهم**: حلقة نسخ حقل
+  المصادقة هي strcpy بايت-ببايت
+  (1400283e1: movzx/النسخ حتى NUL) وليست
+  نسخ qwords كما شوهها الديكمبايلر؛
+  ووسائط 140005ea0 = (auth, ip, port,
+  0xf, 0x8000, 0x8000) — الوسيط الرابع
+  0xf كان مفقوداً في الديكمبايلر
+- فشل الاتصال → 140005d20 (هدم) ثم
+  السيرفر الاحتياطي بالحقل الثاني؛
+  140005e80: نجاح → +0x2278=1 +
+  14001e0b0(SERVE_PORT) + لوج ok للداخلي،
+  فشل → لوج ERROR للداخلي فقط
+- +0x22bc=600؛ TimeGet/1000 → +0x22c0؛
+  SetTimer(2,100)؛ SetPropA(النافذة،
+  "%s - %s"، 1)؛ 14002a480 ثم 140002440؛
+  هدم ini بترتيب (System ثم
+  AccountServer)؛ إرجاع 1
+
+**الاختبار msg_dlginit_test.cpp:** 9
+أقسام (تخطيط ctor، المسار الكامل، فشل
+الحدث=EndDialog(-1)، فشل config/intra/mgr
+مع استمرار التنفيذ، فرع السيرفر الداخلي،
+فرع GBK مع الاحتياطي ومنفذ من ini).
+**66/66 ×6** + ASan/UBSan/LSan نظيف.
