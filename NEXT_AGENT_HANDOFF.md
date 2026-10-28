@@ -830,3 +830,29 @@ buf@+0x18})، WSARecv ثم
 FUN_14002aef0(DAT_140975948، entry)،
 شرط الخروج FUN_14001f4c0(main)==2،
 closesocket عند الخروج للكل.
+
+---
+
+## المسار أ-8ج — حلقة سوكت Monitor [2026-10-28]
+
+**المنتهي:** MsgStatusMonitorSock.{h,cpp}
+(الحلقة 14002b2d0: WSAStartup/bind/
+listen/select/WSAAccept حتى 0x40
+عميلاً ببنية 0x50، WSARecv بسعة
+0x1f-offset مع back-off للـ NUL،
+استدعاء المعالج، انفصال + memmove،
+تنظيف كامل). 10/10 + 65/65×6 + ASan.
+
+**اكتمل CServerStatusMonitor كاملاً**
+(أوامر + تقرير + تاريخ + حلقة سوكت).
+
+**التالي:** الوحدات المتبقية في
+MsgServer — تحديد الهدف من جرد
+الديكمبايل (المسارات أ-9+): مرشحون
+بالأولوية: (1) دوال MsgServerDlg
+المتبقية (OnInitDialog/Fun_1400238a0
+شجرة البناء والزرار)؛ (2) طبقة
+AccountSocket/Syndicate المرتبطة
+بالـ DLLs (فحص IAT أولاً)؛ (3) جرد
+دوال غير المنقولة في 14002xxxx
+(المنطقة 14002b4a0-14002e7e0).

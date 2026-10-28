@@ -5970,3 +5970,85 @@ buf@+0xc، WSABUF len@+0x10 buf@+0x18}،
 WSARecv ثم معالج الأوامر، شرط الخروج
 FUN_14001f4c0(main)==2 مع closesocket
 لكل عميل).
+
+## المسار أ-8ج — حلقة سوكت StatusMonitor [2026-10-28]
+
+**المنقول في msgserver/threads/MsgStatusMonitorSock.{h,cpp}
+من objdump الخام (الحلقة 14002b2d0).** الحقائق الخام:
+- الترتيب: LogStart ثم حارس
+  pMainThread==NULL (CHECKF) →
+  WSAStartup(0x0202, WSADATA[0x1a0])
+  بشرط wVersion==0x0202 →
+  WSASocketA(2,1,0) — فشل:
+  WSAGetLastError ثم WSACleanup ثم
+  LogErrCode(سطر 0x17e=382)
+- CIniFile("StatusMonitor.ini",
+  "Setting").GetInt("port") — <1 →
+  0x16e4؛ sockaddr {family=2،
+  WSAHtons(port)، addr=0}؛ bind(len
+  0x10) — فشل: LogBindFail
+  "(%s : %u), error : %d" (inet_ntoa
+  للعنوان + المنفذ المعكوس htons)
+  ثم close/cleanup/IniDel؛ نجاح:
+  LogUsingPort؛ listen — فشل:
+  LogListenFail + close/cleanup +
+  LogErrCode(سطر 0x1aa=426) + IniDel
+- المصفوفة: 0x1400 على المكدس =
+  64 خانة × 0x50 {sock@+0،
+  offset@+8، buf[0x44]@+0xc}؛
+  الخانة[0] = سوكت الاستماع؛ n=1
+  ابتداءً
+- الحلقة الرئيسية بشرط
+  FUN_14001f4c0(main)==2: بناء
+  fd_set {count، fd[0x40]} بإضافة
+  المستمع أولاً ثم dedup-فحص لكل
+  عميل (حد 0x40)؛ select(0، read،
+  0، 0، tv{0،500})
+- select فشل (-1): LogSelectFail +
+  break للخروج من الحلقة الرئيسية
+- مستمع جاهز (Ordinal_151): n<0x40 →
+  WSAAccept (sockaddr 0x10) — يخزن
+  السوكت في الخانة[0x50*n] قبل فحص
+  -1 (فشل: LogLoginError؛ نجاح:
+  LogLogin(inet_ntoa:sin_port) +
+  offset=0 + n++)؛ وإلا
+  LogOverflow؛ sr--
+- عملاء جاهزون (من i=1): سعة
+  الاستقبال = 0x1f - offset — إذا
+  صفر: MYASSERT "WSABuff.len > 0"
+  (سطر 0x1fb=507)؛ WSARecv على
+  buf+offset — نجاح (rc=0 && got>0):
+  offset += got؛ إذا buf[got-1]==0
+  → offset-- (تراجع ليُكتب فوقه)
+  وإلا buf[offset]=0؛ ثم المعالج
+  14002aef0(DAT_140975948، entry)
+- فشل الاستقبال: getpeername —
+  نجاح: LogLogout "(%s : %u)"
+  وإلا LogLogoutPlain؛ shutdown(2)
+  + closesocket + memmove بإزاحة
+  بقية الخانات 0x50*n للأسفل + n--
+  + إعادة فحص نفس الخانة
+- الخروج: closesocket(المستمع) ثم
+  shutdown+closesocket للخانات
+  [1..n) — WSACleanup — LogEnd —
+  IniDel — إرجاع 0
+- كل الـ WS2_32 ordinals مؤكدة من
+  جدول الاستيراد: 115=WSAStartup،
+  116=WSACleanup، 111=WSAGetLastError،
+  2=bind، 13=listen، 18=select،
+  151=__WSAFDIsSet، 5=getpeername،
+  12=inet_ntoa، 22=shutdown،
+  3=closesocket
+
+**الاختبار msg_statussock_test.cpp:** 10
+أقسام (فحص NULL، إصدار WSA، فشل
+السوكت، فشل bind مع المنفذ المعكوس،
+فشل listen، مسار كامل بقبول عميل
+وأمر close_server ورد OK وتنظيف،
+أمر مقسوم على استقبالين مع back-off
+للـ NUL، انفصال عميل بالإزاحة،
+قبول متعدد، فشل select). **65/65 ×6**
++ ASan/UBSan/LSan نظيف.
+
+بهذا اكتمل الكلاس CServerStatusMonitor
+بكامل طبقاته (أ-8ا/8ب/8ج).
