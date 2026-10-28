@@ -6253,3 +6253,9 @@ select/accept/recv كاملة: بناء fd_set بإزالة التكرار،
 tv{0,500}، فلترة IP، أول خانة خالية، حرّاس dead-loop
 (0x177/0x208)، حارس WSABuff (0x1da)، مسارا logout، وتهدئة
 كل الخانات عند الخروج. 28 تأكيدًا ×6. اكتملت 140003dc0.
+
+### أ-9ط — طبقة حزم المراقبة
+ParsePacket (DES-CFB64 في المكان، 1..0x30) وProcessPackets
+(إطارات 0x30 للنوع 0 و0xf للأنواع 1..4، سقف 1000). ربط
+AuthClientFn6880 بـSendPacket الحقيقي. تصحيح #pragma pack(1)
+لـSMonClient. 25 تأكيدًا ×6.

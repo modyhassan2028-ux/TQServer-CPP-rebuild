@@ -187,6 +187,14 @@ void AuthClientSendKey(SAuthClient* p, uint32_t arg,
     s.Fn6880(p, buf, (uint32_t)len, 1);
 }
 
+// ===== wave 9i: the real Fn6880 for SendKey =====
+static SAuthSeams* g_lastSeams = nullptr;   // set by AuthClientUseSeams
+void AuthClientUseSeams(const SAuthSeams* s) { g_lastSeams = (SAuthSeams*)s; }
+int AuthClientFn6880(void* obj, const char* buf, uint32_t len, int mode) {
+    if (g_lastSeams == nullptr) return 0;
+    return AuthClientSendPacket((SAuthClient*)obj, buf, (int)len,
+                                mode != 0, *g_lastSeams);
+}
 // ===== wave 9e: the packet half (RAW-verbatim) =====
 // 140005c70 — ClearPacket
 int AuthClientClearPacket(SAuthClient* p, int nLen,

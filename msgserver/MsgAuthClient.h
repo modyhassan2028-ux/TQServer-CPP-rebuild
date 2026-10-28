@@ -100,6 +100,11 @@ void* AuthClientGetPacket(SAuthClient* p, uint32_t* pLen, int bRecv,
         const SAuthSeams& s);                                       // 140006730
 int   AuthClientSendPacket(SAuthClient* p, const void* buf, int len,
         int bFlush, const SAuthSeams& s);                           // 140006880
+// The REAL 140006880: pass this as SAuthSeams::Fn6880 so SendKey
+// writes through the genuine SendPacket instead of a stub.
+void  AuthClientUseSeams(const SAuthSeams* s);
+int   AuthClientFn6880(void* obj, const char* buf, uint32_t len,
+                       int mode);
 int   AuthClientConnectStored(SAuthClient* p, uint32_t tvSec,
         const SAuthSeams& s);                                       // 1400062f0
 }

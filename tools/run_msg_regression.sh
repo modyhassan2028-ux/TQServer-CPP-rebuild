@@ -8,7 +8,7 @@ POOL=/tmp/objs_msg; mkdir -p $POOL
 INC="-I. -Imodules -Imsgserver -Imsgserver/ui"
 for f in msgserver/*.cpp msgserver/ui/*.cpp; do
   o=$POOL/$(basename "$f" .cpp).o
-  [ "$o" -nt "$f" ] || g++ -std=c++17 -c $INC "$f" -o "$o" 2>/dev/null
+  [ "$o" -nt "$f" ] && [ -z "$(find msgserver -name '*.h' -newer "$o" -print -quit)" ] || g++ -std=c++17 -c $INC "$f" -o "$o" 2>/dev/null
 done
 ar rcs /tmp/libmsg.a $POOL/*.o 2>/dev/null
 OBJS=/tmp/libmsg.a

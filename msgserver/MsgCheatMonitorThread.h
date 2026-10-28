@@ -31,6 +31,7 @@ static const int kMonitorMaxClients   = 0x40;   // 64 slots
 static const int kMonitorSlotSize     = 0x8020; // per-client block
 static const int kMonitorMaxIpNum     = 0x14;   // 20
 static const uint16_t kMonitorDefPort = 0x23be; // 9150
+#pragma pack(push, 1)
 struct SMonClient {                 // 0x8020 RAW
     uint8_t  active;                // +0x00
     uint8_t  pad0[7];
@@ -40,6 +41,7 @@ struct SMonClient {                 // 0x8020 RAW
     int32_t  used;                  // +0x1c (bytes buffered)
     uint8_t  data[kMonitorSlotSize - 0x20];  // +0x20 packet area
 };
+#pragma pack(pop)
 struct SMonInitResult {
     int64_t  listenSock;
     int      ipCount;
