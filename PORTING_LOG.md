@@ -5893,3 +5893,80 @@ dedup + crash→builder، الأوامر الجزئية،
 (معاملات _snprintf الخمسة والعشرين
 مستخرجة خاماً — see PORTING_LOG أ-8ب
 عند النقل) + حلقة السوكت 14002b2d0.
+
+## المسار أ-8ب — باني تقرير StatusMonitor + عنقود التاريخ [2026-10-28]
+
+**المنقول في msgserver/threads/MsgStatusMonitorRpt.{h,cpp}
+من objdump الخام (الباني 14002a5a0
++ OleParseDateStr 140029870 + OleDateFromTime64
+140029310 + OleDateDiff 140029440).**
+الحقائق الخام المستخرجة والمتحققة:
+- حارس الباني: يفحص العام
+  DAT_140975948 (لا البارامتر) — فشل =
+  CHECKF: fmt "\xa1\xef%s(%s)\xa1\xef in
+  %s, %d" مع ("CHECK",
+  "m_pServerStatusMonitor", مسار
+  serverstatusmonitor.cpp، سطر 0x6f=111)
+- يبدأ بتصفير interval(+0x08)
+  وnext(+0x0c) ثم 23 إلحاقاً بـ
+  _snprintf تراكمي (0x400 بايت، تعقب
+  ebx للإجمالي): servername:%s←العنوان
+  المباشر 0x140975674 (buffer)؛
+  connect_account:%d← (byte[0x1409757c4]
+  ==0)؟1:0 (sete)؛ player:%d←[0x1409756f0]؛
+  player_limit:%u← *MaxPlayerGet()؛
+  db_server:%u←[0x140975998] (=g_ResetDbState)
+- gameserver_crash: crash==0 → "%s"
+  بثابت "gameserver_crash:0\r\n"؛ وإلا
+  _localtime64(&crash) — tm != NULL →
+  "gameserver_crash:1\r\n" (وإلا يُحذف
+  السطر كلياً)
+- pipe_amount:%d← FUN_14050c390(0xe)؛
+  db counts: [0x140975968/96c/970/974]؛
+  db totals: QWORD [0x140975978/980/988/
+  990] (يقرأ qword ويطبع %u = الـ 32
+  السفلى)؛ service_total_used_per5:%u←
+  Analyst()->vt+0x18(DAT_1409759a8)
+- عنقود التاريخ: تهيئة أحادية
+  (DAT_1409759c8 bit0 → تصفير الكاش
+  0x1409759b8)؛ parse مرة واحدة
+  ("Dec  4 2015"، lcid=2، flags=0x400
+  عبر VarDateFromStr/Ordinal_94 مع
+  تحويل MultiByteToWideChar(CP=3))؛
+  التاريخ الحالي عبر localtime64_s →
+  SYSTEMTIME (y+1900/mon+1/wday/mday/
+  h/m/s) → SystemTimeToVariantTime
+  (Ordinal_184) مع تحقق RoundTrip عبر
+  VariantTimeToSystemTime (Ordinal_185)
+  ومقارنة كل الحقول؛ الفرق عبر
+  OleDateDiff بانعكاس ceil للتواريخ
+  السالبة (d'=2ceil-d) وعلم حدود
+  ±3615897.0
+- valid_days = 0x5a - (int)(diff ±
+  5.787037037037037e-06) — نصف ثانية
+  بوحدات أيام للقسم إلى أقرب يوم
+  (comisd مع 0 يختار الإشارة)
+- الإرسال: داخل CS عند +0x40، حلقة
+  على vector السوكتات مع فحوص
+  debug-iterator الخامّة، WSASend
+  لكل سوكت ثم VecClear — الخروج
+  بـ LeaveCS
+- المسار الكامل للسلسلة
+  "player_limit:%u" وكل الـ 23 حقلاً
+  مطابق حرفياً في الاختبار (S2
+  يقارن النص الكامل بايت-ببايت)
+
+**الاختبار msg_statusrpt_test.cpp:** 4
+أقسام (نواة التاريخ OLE round-trip،
+التقرير الكامل مع سوكتين، crash+كاش
+التاريخ، حدود valid_days). **64/64 ×6**
++ ASan/UBSan/LSan نظيف.
+
+**التالي أ-8ج:** حلقة السوكت 14002b2d0
+(سوكت من StatusMonitor.ini افتراضي
+0x16e4، select/WSAAccept حتى 0x40
+عميلاً ببنية 0x50 {sock@+0، offset@+8،
+buf@+0xc، WSABUF len@+0x10 buf@+0x18}،
+WSARecv ثم معالج الأوامر، شرط الخروج
+FUN_14001f4c0(main)==2 مع closesocket
+لكل عميل).
