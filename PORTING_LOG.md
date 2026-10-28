@@ -6235,3 +6235,9 @@ ClearPacket/Flush/GetPacket/SendPacket/ConnectStored نُقلت من
 الخام. اكتشافان موثقان: فرع "buf full!" ميت (شرطان متطابقان)،
 وmemcpy متراكب في RAW استُبدل بـmemmove بنفس الناتج. 123
 تأكيدًا ×6.
+
+### أ-9و — CCrossConfig
+ثماني دوال (Create/InitFromIni/LoadSchedule/IsInWindow/
+SetFromNow/SetWindowStart/QueryCqConfig/StartWorkerThread).
+تصحيحان من الخام: وسيط type المخفي في QueryCqConfig، وقيمة
+Enable==1 حصرًا للتمكين. 44 تأكيدًا ×6.

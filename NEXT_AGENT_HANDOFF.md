@@ -1022,3 +1022,43 @@ PROCESSENTRY32 x64: szExeFile عند +0x2c.
 **التالي:** 140006ad0 (استعلام cq_config عبر InstanceGet/DB)،
 ثم ربط `AuthClientSendKey` بـ`AuthClientSendPacket` الحقيقي،
 ثم عائلة 140005a20/140005ad0 (تحميل shell.ini).
+
+## المسار أ-9و — CCrossConfig (نافذة عميل الكروس) [2026-10-28]
+
+**المنتهي:** `msgserver/MsgCrossConfig.{h,cpp}` — ثماني دوال
+دفعة واحدة، والكلاس كامل (0x20 بايت: vftable، wday@+8،
+hour@+0xc، minute@+0x10، window@+0x14، enabled@+0x18،
+u19@+0x19):
+
+- **140005ad0 Create:** `operator_new(0x20)` + vftable + تصفير
+  الحقول، ثم InitFromIni؛ وعند الفشل `vtable[0](p,1)`.
+- **140005a20 InitFromIni:** `CIniFile("shell.ini","CrossClient")`
+  و`GetInt("Enable")`؛ `+0x18 = (v==1)` — **القيمة 2 ليست
+  تمكينًا**؛ وعند التمكين يُحمّل الجدول ثم يُغلق الـ ini، ويرجع 1.
+- **140005900 LoadSchedule:** استعلام `0x186a1`؛ السجل 2 يفك
+  `min=v%100`, `hour=(v/100)%100`, `wday=(v/10000)%100`،
+  والافتراضي `window=0x1c20` (7200)؛ السجل 3 إن كان ≥0 يضبط
+  `window=v*0x3c`؛ ثم تحرير الـ recordset.
+- **140005680 IsInWindow:** `_time32`/`_localtime32`؛ عند تطابق
+  اليوم يبني tm (sec=0، min/hour من الجدول، mday/mon/year/yday/
+  isdst من الآن) و`_mktime32`، ويرجع 1 فقط إذا
+  `0 < now-t <= window`.
+- **140005790 SetFromNow / 1400057d0 SetWindowStart:** ضبط من
+  الآن، والثانية من `now-window` — **والنداء الثاني لـ
+  _localtime32 بلا فحص null في الخام** (محفوظ كما هو).
+- **140006ad0 QueryCqConfig(type,bLimit):** `InstanceGet()`،
+  الصيغة بـ`LIMIT 1` أو بدونها، `_snprintf(sql,0x400,fmt,type)`
+  — **الوسيط type = param_1 وهو غير ظاهر في الديكمبايل** (تحقق
+  من الخام: `mov edi,ecx` ثم r9d)، استعلام بنوع 2، والاحتفاظ
+  بالـ recordset إذا كان عدده ≠ 0 وإلا `vtable[0]`.
+- **140005550 StartWorkerThread:** فحص Global
+  (`DAT_1409754e8`) ثم `p[0]`، و`_beginthreadex(entry,p[0])`
+  وتخزين المقبض في `p[1]`، ونص فشل الخام.
+
+**الاختبار:** 44 تأكيدًا ×6 خضراء، ASan/UBSan/LSan نظيف.
+
+**التالي:** 140003dc0 (دالة خيط المراقبة نفسها، 946 سطرًا —
+أكبر وحدة متبقية في هذه العائلة)، ثم ربط SendKey بـSendPacket،
+ثم بقية 1400285e0+ (تبيّن أنها أغلفة MFC/ATL: CWnd::OnDestroy،
+MultiByteToWideChar، AfxThrow، مقارنات GUID — تُوثّق كخارج
+النطاق ولا تُنقل).
