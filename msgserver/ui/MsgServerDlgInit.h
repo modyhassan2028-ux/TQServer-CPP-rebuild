@@ -84,6 +84,15 @@ struct SDlgInitSeams {
     void (*LogError4)(const char* fmt,
         const char* a, const char* b,
         const char* c, uint32_t d);
+    // extraproc (140021c80 / 14001f4d0)
+    void (*SysLogSave)(const char* file,
+        const char* fmt, const char* a);
+    int (*CreateProc)(const char* app,
+        void* pi);          // pi: hProc,hThr
+    void (*CloseHandle)(void* h);
+    int64_t (*SnapCreate)();
+    int (*SnapFirst)(int64_t snap, void* e);
+    int (*SnapNext)(int64_t snap, void* e);
     void (*Run20570)();
     void (*Run21c80)(void* dlg);
     uint32_t* (*CQLangGet)();
@@ -143,6 +152,9 @@ void* DlgCtor(void* dlg, void* parent);
 int DlgOnInitDialog(void* dlg);
 int DlgLoadConfig(void* dlg);   // 14001f2f0
 int DlgMonitorRegInit(void* dlg); // 140002440
+void DlgLaunchExtraProcs(void* dlg); // 140021c80
+uint32_t DlgFindProcByName(void* dlg,
+    const char* name);    // 14001f4d0
 
 } // namespace msg
 #endif

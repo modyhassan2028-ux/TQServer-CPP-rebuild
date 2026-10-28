@@ -6176,3 +6176,48 @@ FUN_14001f4c0(main)==2 مع closesocket
 الثلاثة + مصيدة escape سداسية
 (\xefC يلتهم الحرف C — تُفصل النصوص)).
 **66/66 ×6** + ASan/UBSan/LSan نظيف.
+
+## المسار أ-9ج — مشغل ExtraProc + فاحص العمليات [2026-10-28]
+
+**المنقول في msgserver/ui/MsgServerDlgInit.{h,cpp}
+من الخام المؤكد:**
+
+- **FUN_14001f4d0 (DlgFindProcByName):**
+  CreateToolhelp32Snapshot(2) (فشل
+  HANDLE=-1 → 0)؛ مسح PROCESSENTRY32
+  (dwSize=0x130) عبر Process32First/Next؛
+  _stricmp(الاسم، szExeFile) — التخطيط
+  الخام x64: th32ProcessID عند +8،
+  szExeFile عند +0x2c (تطابق مع إزاحات
+  الديكمبايلر -0x148/-0x11c)؛ يعيد PID
+  المطابق أو 0
+- **FUN_140021c80 (DlgLaunchExtraProcs):**
+  CIniFile("ExtraProc.ini","Config")،
+  GetInt("Count")؛ حلقة Exe1..ExeN
+  (_snprintf "%d")؛ SetSection؛
+  GetString("ExeName", 0x80)؛
+  std::string + rfind("\\",1) + substr
+  (pos+1) — **فُكّت من الخام**: cmovae
+  عند 140021e02 هو c_str() المضمّن لـ
+  SSO (`cmp [rsp+0x130],0x10`)، وفحص
+  الوجود يتلقى الاسم المجرد بينما
+  CreateProcessA واللوجات تتلقى المسار
+  الكامل من المخزن الخام؛ STARTUPINFO
+  (cb=0x68) + PROCESS_INFORMATION أصفار؛
+  CreateProcessA(app, null, ...)؛ فشل →
+  SysLogSave("extrapro","Init exe (%s)
+  FALSE!")، نجاح → CloseHandle(hThread)
+  ثم hProcess (إزاحة +8 الخام على x64)
+  + "success!"؛ موجود → "fail becuse
+  it is exist!" (إملاء الأصل حرفياً)
+
+**ملاحظة خام:** رتب الوسائط في استدعاء
+14001f4d0 = (dlg، الاسم المجرد) —
+الديكمبايلر أخفى الوسيط الثاني كعادته.
+
+**الاختبار:** 16 قسماً (3 جديدة: فاحص
+العمليات بمساراته الثلاثة، المشغل
+بمساراته الثلاثة مع ترتيب إغلاق
+المقابض). **66/66 ×6** + ASan/UBSan/LSan
+نظيف. كوميت سابق قديم عطِل باختبار غير
+مجمّع — صُحح في هذا الكوميت.

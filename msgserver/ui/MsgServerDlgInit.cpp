@@ -448,4 +448,127 @@ int DlgMonitorRegInit(void* dlg) {
     return 1;
 }
 
+
+// FUN_14001f4d0 — walk the process
+// snapshot; return th32ProcessID of
+// the first entry whose szExeFile
+// matches the name case-insensitively
+// (raw-verified: PROCESSENTRY32 layout
+// with szExeFile at +0x2c on x64;
+// snapshot flags 2; -1 handle check)
+uint32_t DlgFindProcByName(void* dlg,
+                           const char* name) {
+    (void)dlg; // verbatim: param unused
+    SDlgInitSeams& s = g_DlgInitSeams;
+    int64_t snap = s.SnapCreate();
+    if (snap == -1) {
+        return 0;
+    }
+    uint8_t entry[0x130];
+    memset(entry, 0, 0x130);
+    *(uint32_t*)entry = 0x130;
+    int have = s.SnapFirst(snap, entry);
+    uint32_t pid = 0;
+    while (have != 0) {
+        const char* exe =
+            (const char*)(entry + 0x2c);
+        if (strcasecmp(name, exe) == 0) {
+            pid = *(uint32_t*)(entry + 8);
+            break;
+        }
+        have = s.SnapNext(snap, entry);
+    }
+    return pid;
+}
+
+// FUN_140021c80 — ExtraProc.ini
+// launcher (raw-verified: the
+// std::string rfind("\",1)/substr
+// chain resolves to the bare file
+// name; cmovae at 140021e02 is the
+// inlined SSO c_str(); the
+// exists-check gets the BARE name
+// while CreateProcessA and the logs
+// get the FULL path from ExeName)
+void DlgLaunchExtraProcs(void* dlg) {
+    SDlgInitSeams& s = g_DlgInitSeams;
+    char ini[0x400];
+    s.IniOpen2(ini, "ExtraProc.ini",
+               "Config");
+    int32_t count = s.IniGetInt(ini,
+                                "Count");
+    if (0 < count) {
+        uint32_t u = 0;
+        do {
+            u = u + 1;
+            char section[0x80];
+            snprintf(section, 0x80,
+                     "Exe%u", u);
+            s.IniSetSection(ini, section);
+            char exeName[0x80];
+            memset(exeName, 0, 0x80);
+            s.IniGetStr(ini, exeName,
+                        "ExeName", 0x80);
+            // std::string tmp(exeName)
+            char* str =
+                (char*)s.New(0x80);
+            snprintf(str, 0x80, "%s",
+                     exeName);
+            // rfind("\", 1)
+            const char* lastBs =
+                strrchr(str, '\\');
+            if (lastBs != nullptr) {
+                // substr(pos+1)
+                char* sub =
+                    (char*)s.New(0x80);
+                snprintf(sub, 0x80, "%s",
+                         lastBs + 1);
+                // operator= then dtor
+                snprintf(str, 0x80, "%s",
+                         sub);
+                s.Del(sub);
+            }
+            if (DlgFindProcByName(
+                    dlg, str) == 0) {
+                // STARTUPINFO 0x68 + PI
+                uint8_t si[0x68];
+                memset(si, 0, 0x68);
+                *(uint32_t*)si = 0x68;
+                uint8_t pi[0x18];
+                memset(pi, 0, 0x18);
+                int ok = s.CreateProc(
+                    exeName, pi);
+                if (ok == 0) {
+                    s.SysLogSave(
+                        "extrapro",
+                        "Init exe (%s) "
+                        "FALSE!",
+                        exeName);
+                }
+                else {
+                    s.CloseHandle(
+                        *(void**)(pi + 8));
+                    s.CloseHandle(
+                        *(void**)pi);
+                    s.SysLogSave(
+                        "extrapro",
+                        "Init exe (%s) "
+                        "success!",
+                        exeName);
+                }
+                s.Del(str);
+            }
+            else {
+                s.SysLogSave(
+                    "extrapro",
+                    "Init exe (%s) fail "
+                    "becuse it is exist!",
+                    exeName);
+                s.Del(str);
+            }
+        } while ((int32_t)u < count);
+    }
+    s.IniClose(ini);
+}
+
 } // namespace msg

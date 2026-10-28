@@ -909,3 +909,28 @@ FUN_140029ff0) ثم 14001e0b0 (auth listen —
 sprintf بوسائط مفقودة بالديكمبايل،
 "tqdigital" magic) وكلاس عميل المصادقة
 140005ea0/5e80/5d20/5b50.
+
+---
+
+## المسار أ-9ج — ExtraProc launcher [2026-10-28]
+
+**المنتهي:** DlgLaunchExtraProcs
+(140021c80) وDlgFindProcByName
+(14001f4d0). حلقة std::string
+فُكّت من الخام: rfind/substr = اسم
+المجرد، cmovae = c_str() SSO، والوجود
+يُفحص بالاسم المجرد بينما
+CreateProcessA/اللوجات بالمسار الكامل.
+PROCESSENTRY32 x64: szExeFile عند +0x2c.
+16/16 + 66/66×6 + ASan نظيف. **درس
+عملية:** نتيجة grep خضراء للاختبار
+المحلي قد تكون بايناري قديماً إذا فشل
+التجميع بصمت — تحقق دائماً من تاريخ
+البايناري أو أعد التجميع قبل الرجريجن.
+
+**التالي أ-9د:** FUN_14002a480 (new(0x70)
++ ctor FUN_140029ff0 → DAT_140975948)
+ثم 14001e0b0 (auth listen — sprintf
+بوسائط مفقودة + magic "tqdigital") ثم
+كلاس عميل المصادقة 140005ea0/5e80/5d20/
+5b50.

@@ -234,6 +234,42 @@ static void FreeNode(uint8_t* d){
     void* n=*(void**)(d+0x188);
     if(n) std::free(n);
 }
+static std::vector<std::string> s_elog;
+static std::vector<std::string> s_epath;
+static int s_eok;
+static int s_eCount;
+static std::vector<std::string> s_eExes;
+static std::vector<std::string> s_eSecs;
+static std::vector<std::string> s_eReads;
+static int32_t T_EGetInt(void*, const char* k)
+    { if (std::strcmp(k,"Count")==0)
+        return s_eCount;
+      return 1; }
+static void T_EGetStr(void*, char* d,
+        const char* k, int sz)
+    { if (std::strcmp(k,"ExeName")==0)
+      { std::snprintf(d,sz,"%s",
+        s_eExes[s_eReads.size()
+          %s_eExes.size()].c_str());
+        s_eReads.push_back(k); }
+      else std::strcpy(d,"MyServer"); }
+static void T_ESec(void*, const char* s)
+    { s_eSecs.push_back(s); }
+static void T_ESysLog(const char* f,
+        const char* fmt, const char* a)
+    { char b[200];
+      std::snprintf(b,sizeof b,fmt,a);
+      s_elog.push_back(std::string(f)
+        +":"+b); }
+static int T_ECreate(const char* app,
+        void* pi)
+    { s_epath.push_back(app);
+      *(void**)pi=(void*)0x11;
+      *(void**)((uint8_t*)pi+8)=(void*)0x22;
+      return s_eok; }
+static std::vector<void*> s_eclosed;
+static void T_EClose(void* h)
+    { s_eclosed.push_back(h); }
 int main() {
     setvbuf(stdout,0,_IONBF,0);
     printf("TH11 start\n");
@@ -553,6 +589,120 @@ int main() {
           !=std::string::npos);
       g_DlgInitSeams.New=saved;
       printf("S13 ok (monitor registry)\n"); }
+
+    // ==== S14: find proc by name ====
+    { Setup();
+      static const char* procs[] =
+        {"svchost.exe","MsgServer.EXE"};
+      static int s_snapIdx; static const int s_snapN = 2;
+      s_snapIdx = 0;
+      g_DlgInitSeams.SnapCreate=[]
+        { return (int64_t)77; };
+      g_DlgInitSeams.SnapFirst=[](
+          int64_t h, void* e)->int
+        { (void)h; s_snapIdx=0;
+          std::memset(e,0,0x130);
+          *(uint32_t*)e=0x130;
+          std::strcpy((char*)((uint8_t*)e+0x2c),
+            procs[0]);
+          *(uint32_t*)((uint8_t*)e+8)=111;
+          return 1; };
+      g_DlgInitSeams.SnapNext=[](
+          int64_t h, void* e)->int
+        { (void)h;
+          s_snapIdx++;
+          if (s_snapIdx>=s_snapN) return 0;
+          std::memset(e,0,0x130);
+          *(uint32_t*)e=0x130;
+          std::strcpy((char*)((uint8_t*)e+0x2c),
+            procs[s_snapIdx]);
+          *(uint32_t*)((uint8_t*)e+8)=222;
+          return 1; };
+      uint8_t dlg[0x2400]={};
+      assert(DlgFindProcByName(dlg,
+          "msgserver.exe")==222);
+      assert(DlgFindProcByName(dlg,
+          "nope.exe")==0);
+      // snapshot fail
+      g_DlgInitSeams.SnapCreate=[]
+        { return (int64_t)-1; };
+      assert(DlgFindProcByName(dlg,
+          "svchost.exe")==0);
+      printf("S14 ok (find proc)\n"); }
+
+    // ==== S15: extraproc launcher ====
+    { Setup();
+      s_elog.clear(); s_epath.clear();
+      s_eclosed.clear(); s_eSecs.clear();
+      s_eReads.clear(); s_eok=1; s_eCount=2;
+      s_eExes={"C:\\tq\\accserver.exe",
+               "simple.exe"};
+      g_DlgInitSeams.SysLogSave=T_ESysLog;
+      g_DlgInitSeams.CreateProc=T_ECreate;
+      g_DlgInitSeams.CloseHandle=T_EClose;
+      g_DlgInitSeams.IniGetInt=T_EGetInt;
+      g_DlgInitSeams.IniGetStr=T_EGetStr;
+      g_DlgInitSeams.IniSetSection=T_ESec;
+      g_DlgInitSeams.SnapCreate=[]
+        { return (int64_t)-1; };
+      uint8_t dlg[0x2400]={};
+      DlgLaunchExtraProcs(dlg);
+      assert(s_eSecs.size()==2);
+      assert(s_eSecs[0]=="Exe1");
+      assert(s_eSecs[1]=="Exe2");
+      assert(s_epath.size()==2);
+      assert(s_epath[0]=="C:\\tq\\"
+          "accserver.exe");
+      assert(s_epath[1]=="simple.exe");
+      assert(s_elog.size()==2);
+      assert(s_elog[0]=="extrapro:Init exe "
+          "(C:\\tq\\accserver.exe) "
+          "success!");
+      assert(s_eclosed.size()==4);
+      assert(s_eclosed[0]==(void*)0x22);
+      assert(s_eclosed[1]==(void*)0x11);
+      s_eCount=0; s_epath.clear();
+      s_eSecs.clear(); s_eReads.clear();
+      DlgLaunchExtraProcs(dlg);
+      assert(s_epath.size()==0);
+      s_eCount=1; s_eok=0; s_elog.clear();
+      s_eReads.clear();
+      DlgLaunchExtraProcs(dlg);
+      assert(s_elog.size()==1);
+      assert(s_elog[0]=="extrapro:Init exe "
+          "(C:\\tq\\accserver.exe) "
+          "FALSE!");
+      printf("S15 ok (extraproc)\n"); }
+
+    // ==== S16: exists -> skip ====
+    { Setup();
+      s_elog.clear(); s_eReads.clear();
+      s_eCount=1; s_eok=1;
+      s_eExes={"C:\\tq\\accserver.exe"};
+      g_DlgInitSeams.SysLogSave=T_ESysLog;
+      g_DlgInitSeams.IniGetInt=T_EGetInt;
+      g_DlgInitSeams.IniGetStr=T_EGetStr;
+      g_DlgInitSeams.IniSetSection=T_ESec;
+      g_DlgInitSeams.SnapCreate=[]
+        { return (int64_t)5; };
+      g_DlgInitSeams.SnapFirst=[](
+          int64_t, void* e)->int
+        { std::memset(e,0,0x130);
+          *(uint32_t*)e=0x130;
+          std::strcpy((char*)((uint8_t*)
+            e+0x2c),"ACCServer.exe");
+          *(uint32_t*)((uint8_t*)e+8)=9;
+          return 1; };
+      g_DlgInitSeams.SnapNext=[](
+          int64_t, void*)->int
+        { return 0; };
+      uint8_t dlg[0x2400]={};
+      DlgLaunchExtraProcs(dlg);
+      assert(s_elog.size()==1);
+      assert(s_elog[0]=="extrapro:Init exe "
+          "(C:\\tq\\accserver.exe) fail "
+          "becuse it is exist!");
+      printf("S16 ok (exists skip)\n"); }
 
     printf("TH11 ALL-OK\n");
     return 0;
