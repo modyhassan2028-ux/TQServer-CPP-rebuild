@@ -6326,3 +6326,8 @@ crossclient/crossclientthread.cpp (مسار مُثبت): مهلة انتظار �
 0x14، بلا pacing ولا عدّادات، فرز بالمعرّف 0x3e9 مقابل مسار
 ProcessLocalMsg، وفلتر مربوط بعلم +0x50 (0x3f1/0x11173/0x11174
 و0x3fc بشرط b0==0x9c4f). 25 تأكيدًا ×6، رجريجن 72/72.
+
+### أ-9ل — CLogThread::OnProcess (14001b2d0)
+msgserver/logthread.cpp (مسار مُستنتج ومُعلَن): مخزن 0x800، OnTimer
+بلا وسائط، نص resync حرفي عند تجاوز 0x2711 مع فرض NUL عند +0x73f،
+وProcessMsg مُهمَل النتيجة. 17 تأكيدًا ×6، رجريجن 73/73.
