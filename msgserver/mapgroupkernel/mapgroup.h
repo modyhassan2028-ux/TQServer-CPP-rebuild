@@ -134,6 +134,57 @@ public:
     uint8_t  m_Pad726[0x730 - 0x726];  // +0x726 .. +0x72f
     uint8_t  m_Flg730;                 // +0x730
     uint8_t  m_Pad731[0x738 - 0x731];
+    // 1400a73d0 / 1400b39e0
+    struct SeamsStat {
+        void* (*LoadTable)(uint32_t id, int mode);        // 140006ad0
+        int   (*RowCount)(void* rs);
+        void  (*SetRow)(void* rs, int i);
+        void* (*Field)(void* rs, int i);                  // rs vt+0x20
+        unsigned char (*FieldByte)(void* f);              // field vt+0x10
+        uint32_t (*FieldInt)(void* f);                    // field vt+0x50
+        void  (*DestroyRs)(void* rs);                     // rs vt[0]
+        void  (*ClearStat)(void* c);                      // 14009cf70
+        void  (*InsertStat)(void* c, void* scratch, const int* pair); // 1400a1ad0
+        void  (*LogTimeZero)(int type);
+    };
+    void LoadStatisticsKillMonsterByProCfg(SeamsStat& s);
+
+    struct SeamsOsStatus {
+        unsigned char (*FindFlag)(void* self, uint32_t serverId); // node+0x30 read
+        void  (*SetFlag)(void* self, uint32_t serverId, char v);  // node+0x30 write
+        bool  (*Found)(void* self, uint32_t serverId);
+        uint32_t (*NodeNpc)(void* self, uint32_t serverId);       // node+0x44
+        void* (*UserByServer)(uint32_t serverId);
+        void* (*UserList)(void* u);                               // 140087650
+        void  (*UserListSet)(void* l, uint32_t id, int v);        // 1402b3aa0
+        void  (*Post)(void* port, uint32_t ch, uint32_t msg, uint32_t len,
+                      const void* data);
+        void* (*CurrentInstance)();
+        void* (*Module)(void* inst, uint32_t id);
+        void  (*ModuleNotify)(void* mod, uint32_t id);
+        void* (*NpcMgr)(void* u);                                 // 1400875f0
+        void* (*NpcGet)(void* mgr, uint32_t rec);
+        int   (*NpcAttach)(void* npc, uint32_t type, void** out); // npc vt+0x298
+        uint32_t (*PosX)(void* npc);
+        uint32_t (*PosY)(void* npc);
+        uint32_t (*PosZ)(void* npc);
+        uint32_t (*SubVar)(void* o, uint32_t id);
+        int   (*ChangePos)(void* npc, uint32_t x, uint32_t y, uint32_t z);
+        void  (*LogNpcNotFound)(uint32_t rec);
+        // RAW elides the varargs; the three position values are passed
+        void  (*LogChangePosFailed)(uint32_t rec, uint32_t x, uint32_t y,
+                                    uint32_t z);
+        void  (*LogNotFound)(uint32_t serverId);
+        void  (*LogCheck)(unsigned line);
+    };
+    void SetOSConnectStatus(uint32_t serverId, char on, SeamsOsStatus& s);
+    uint8_t  m_Pad338[0x33c - 0x338];
+    uint8_t  m_StatType;               // +0x33c
+    uint8_t  m_Pad33d[3];
+    uint32_t m_StatTime;               // +0x340
+    uint8_t  m_StatFlag;               // +0x344
+    uint8_t  m_Pad345[3];
+    uint8_t  m_StatRows[0x40];         // +0x348 container proxy
     SeamsMulti m_Multi;
     void SendChatFriendInfo(int* ids, SMapGroupChatSeams& s);
     bool IsAllowEnterOS(int action, SMapGroupChatSeams& s);

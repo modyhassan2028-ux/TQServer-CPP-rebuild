@@ -313,3 +313,89 @@ void CMapGroup::ProcessQueryOSConnectStatus(void* reply, SOsEntry* v, size_t n,
     s.Destroy(msg);
 }
 } // namespace msg
+
+// 1400a73d0 CMapGroup::LoadStatisticsKillMonsterByProCfg
+namespace msg {
+void CMapGroup::LoadStatisticsKillMonsterByProCfg(SeamsStat& s) {
+    void* rs = s.LoadTable(0x1fbd3, 1);
+    if (rs == nullptr) return;                 // RAW does nothing at all
+    if (s.RowCount(rs) == 0) { s.DestroyRs(rs); return; }
+    void* f2 = s.Field(rs, 2);
+    m_StatType = s.FieldByte(f2);              // +0x33c
+    void* f3 = s.Field(rs, 3);
+    m_StatTime = s.FieldInt(f3);               // +0x340
+    void* f4 = s.Field(rs, 4);
+    m_StatFlag = s.FieldByte(f4);              // +0x344
+    if (m_StatTime == 0) {
+        s.LogTimeZero((int)m_StatType);
+        m_StatType = 0;
+    }
+    s.DestroyRs(rs);
+    if (m_StatType == 0) return;
+    void* rs2 = s.LoadTable(0x1fbd4, 0);
+    if (rs2 == nullptr) return;
+    if (s.RowCount(rs2) == 0) { s.DestroyRs(rs2); return; }
+    uint8_t scratch[24] = {0};
+    s.ClearStat(m_StatRows);                   // +0x348
+    int i = 0;
+    int n = s.RowCount(rs2);
+    while (i < n) {
+        s.SetRow(rs2, i);
+        uint32_t a = s.FieldInt(s.Field(rs2, 2));
+        uint32_t b = s.FieldInt(s.Field(rs2, 3));
+        if (a != 0 && b != 0) {
+            int pair[2] = { (int)a, (int)b };
+            s.InsertStat(m_StatRows, scratch, pair);
+        }
+        i = i + 1;
+        n = s.RowCount(rs2);                   // RAW re-reads every iteration
+    }
+    s.DestroyRs(rs2);
+}
+} // namespace msg
+
+// 1400b39e0 CMapGroup::SetOSConnectStatus
+namespace msg {
+void CMapGroup::SetOSConnectStatus(uint32_t serverId, char on, SeamsOsStatus& s) {
+    if (!s.Found(this, serverId)) { s.LogNotFound(serverId); return; }
+    s.SetFlag(this, serverId, on);             // node +0x30
+    if (on == 0) {
+        void* u = s.UserByServer(m_ServerId);
+        void* l = s.UserList(u);
+        s.UserListSet(l, serverId, 0);
+        s.Post(m_pPort, 6, 0x3f1, 4, &serverId);
+    } else {
+        void* inst = s.CurrentInstance();
+        if (inst != nullptr && m_Flg77c != 0) {
+            void* mod = s.Module(inst, 0x25);
+            if (mod != nullptr) s.ModuleNotify(mod, serverId);
+        }
+    }
+    if (m_Flg77c == 0) return;
+    uint32_t rec = s.NodeNpc(this, serverId);  // node +0x44
+    void* u2 = s.UserByServer(m_ServerId);
+    void* nm = s.NpcMgr(u2);
+    void* npc = s.NpcGet(nm, rec);
+    void* attached = nullptr;
+    if (npc == nullptr || s.NpcAttach(npc, 0x1040, &attached) == 0) {
+        s.LogNpcNotFound(rec);
+        return;
+    }
+    uint32_t x, y, z;
+    if (on == 0) {
+        x = s.PosX(attached);
+        y = s.PosY(attached);
+        z = s.PosZ(attached);
+    } else {
+        void* sub = *(void**)((uint8_t*)attached + 0xc0);   // local_res8[0xc]
+        if (sub == nullptr) s.LogCheck(0); else x = s.SubVar(sub, 0x13);
+        sub = *(void**)((uint8_t*)attached + 0xc0);
+        if (sub == nullptr) s.LogCheck(0); else y = s.SubVar(sub, 0x14);
+        sub = *(void**)((uint8_t*)attached + 0xc0);
+        if (sub == nullptr) s.LogCheck(0); else z = s.SubVar(sub, 0x15);
+    }
+    if (s.ChangePos(attached, x, y, z) == 0) {
+        s.LogChangePosFailed(rec, x, y, z);
+    }
+}
+} // namespace msg
