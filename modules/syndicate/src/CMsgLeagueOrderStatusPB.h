@@ -15,7 +15,28 @@
 #define SYNDICATE_CMSGLEAGUEORDERSTATUSPB_H
 #include <cstdint>
 #include <string>
+#include "modules/syndicate/src/CMsgLeagueOrderStatusInfoPB.h"
+#include "modules/syndicate/src/CMsgPBMemberDtors.h"
 namespace syndicate {
+
+// ---- seams ----
+extern void     (*g_pfnPbFree)(void*);
+extern uint64_t (*g_pfnPb8050)();
+extern void*     g_pPbDefaultStr;
+extern int32_t (*g_pfnPbVarintSize)(uint32_t);
+extern void (*g_pfnPbWriteVarint32)(uint32_t, uint32_t, void*);
+extern void (*g_pfnPbWriteUnknown)(void*, void*, int32_t);
+extern void (*g_pfnPb64C0)(void*, void*);
+extern void (*g_pfnPb4550)(void*, void*);
+extern uint64_t (*g_pfnPb3BC0)(void*);
+extern uint64_t (*g_pfnPb3A50)(void*, uint32_t*);
+extern void (*g_pfnPb45D0)(void*);
+extern uint64_t (*g_pfnPb6510)(void*);
+extern char (*g_pfnPbF3F50)(void*, uint32_t, void*);
+extern void (*g_pfnPbE0110)(void*, int32_t);
+extern char (*g_pfnPbECE60)(void*, void*);
+extern void (*g_pfnPbF4DC0)(uint32_t, void*, void*);
+extern void (*g_pfnPbECF80)(void*, void*);
 
 class CMsgLeagueOrderStatusPB {
 public:
@@ -32,6 +53,14 @@ public:
     static void Clear(void* self);
     // 0x1417ed450
     static bool IsInitialized(void* self);
+    // 0x1417ed620 — Merge
+    static bool Merge(void* self, void* input);
+    // 0x1417ed3b0 — ByteSize
+    static int32_t ByteSize(void* self);
+    // 0x1417ed310 — SerializeWithCachedSizes
+    static void SerializeWithCachedSizes(void* self, void* pBuf);
+    // 0x1417ed880 — MergeFrom (slot6 thunk 0x1417eda00)
+    static void MergeFrom(void* self, void* from);
     // 0x1417ed190
     static uint32_t GetCachedSize(void* self);
 };

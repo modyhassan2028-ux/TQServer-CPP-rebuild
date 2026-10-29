@@ -40,7 +40,7 @@
 | `CMsgLeagueConcubinesInfoPB` | `0x1418415e8` | 12 — **مكتملة 12/12** (D90+D91+D93) |
 | `CMsgLeagueConcubinesPB` | `0x141841748` | 12 — **6 منقولة** (dtor/نوع/New/Clear/Init/cached) |
 | `CMsgLeagueOrderStatusInfoPB` | `0x1418419c8` | 12 — **مكتملة 12/12** (D92+D94) |
-| `CMsgLeagueOrderStatusPB` | `0x141841b48` | 12 — **6 منقولة** |
+| `CMsgLeagueOrderStatusPB` | `0x141841b48` | 12 — **مكتملة 12/12** (D92+D95) |
 | `CMsgLeagueRobItemPB` | `0x141841e08` | 12 — **6 منقولة** |
 | `CMsgLeagueRobListPB` | `0x141841f68` | 12 — **6 منقولة** |
 | `CMsgOverheadLeagueInfoPB` | `0x141842828` | 12 — **6 منقولة** |
