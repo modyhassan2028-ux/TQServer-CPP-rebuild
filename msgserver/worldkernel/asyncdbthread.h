@@ -15,6 +15,10 @@ struct SAsyncDbSeams {
     void  (*Delete)(void* p);                       // operator delete
     void  (*Dtor)(CAsyncDBThread* self);            // ~CAsyncDBThread
     void* (*Ordinal19)(void* sock, void* buf, int len, int flags); // Ordinal_19
+    int   (*Ordinal16)(void* sock, void* buf, int len, int flags); // Ordinal_16 (recv)
+    int   (*Ordinal111)();                                        // Ordinal_111 (last error)
+    void  (*Ordinal3)(void* sock);                                // Ordinal_3 (closesocket)
+    void  (*Teardown)(CAsyncDBThread* self);                      // 140005d20
 };
 
 class CAsyncDBThread {
@@ -28,6 +32,10 @@ public:
                                       SAsyncDbSeams& s);
     // 140005c70 — consumes nLen bytes from the receive buffer at +0x28
     int  ClearPacket(int nLen, SAsyncDbSeams& s);
+    // 140005d60 — pushes whatever is pending at +0x102c and reports "drained"
+    bool FlushPending(SAsyncDbSeams& s);
+    // 140006730 — the packet fetch: returns +0x28 (or null) and the length out
+    void* GetPacket(uint32_t* lenOut, char fill, SAsyncDbSeams& s);
 
     // layout (bytes as used by the ported members)
     //  +0x0000 vftable
