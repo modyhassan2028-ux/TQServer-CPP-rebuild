@@ -78,5 +78,47 @@ struct SSignUpPlunderSeams {
     void     (*LogDb)(const char* fmt);           // log_InlineLogERROR
 };
 
+
+// ---------------------------------------------------------------------------
+// Phase 2 helper — id composition, verbatim from the RAW loop body:
+//   uVar9 = target; if (vt+0x3f0() == target) { own = 14174e3f0(mgr);
+//       if (own == 0 || own == league) skip;  id = vt+0x3f0()*1000000 + own; }
+//   else id = 141766950(mgr, target);
+//   insert only when id != 0 && id != memberKey.
+// ---------------------------------------------------------------------------
+struct STargetIdResult {
+    uint32_t id;       // 0 means "do not insert"
+    bool     insert;
+};
+
+STargetIdResult ComposeTargetId(void* mgr, uint32_t target, uint32_t myLeague,
+                                uint32_t userLeague, uint32_t memberKey,
+                                SSignUpPlunderSeams& s);
+
+// ---------------------------------------------------------------------------
+// Phase 5 helper — the RobOpt page message, verbatim:
+//   pages = (int)(long long)ceil((double)(cap - current) / (double)freePages);
+//   ctor 1417d8390; create(1, pages) false -> destroy + fail;
+//   for each id: append(id / 1000000) — the league part of the composed id —
+//   a false append logs "... msg over size" and breaks;
+//   count (short) != 0 -> serialize then send through vt+0x8;
+//   destroy through 1417d83e0 and report success (the RAW returns 1 here).
+// ---------------------------------------------------------------------------
+struct SRobOptSeams {
+    void*  (*MsgNew)();                                   // 1417d8390 ctor
+    bool   (*MsgCreate)(void* msg, int a, int pages);     // 1417d84d0
+    void   (*MsgDestroy)(void* msg);                      // 1417d83e0
+    bool   (*MsgAppend)(void* msg, int value);            // 1417d8810
+    int16_t(*MsgCount)(void* msg);                        // 1417d8700
+    void   (*MsgSerialize)(void* msg);                    // 1417d8570
+    void   (*SendToClient)(void* vt, uint32_t user, void* msg);  // vt+0x8
+    void   (*Log)(const char* text);                      // log_InlineLogERROR
+};
+
+// freePages < 1 makes the RAW clean up and fail before any message exists.
+bool SendRobOptPages(SRobOptSeams& s, void* vt, uint32_t user,
+                     int64_t current, int64_t cap, uint32_t freePages,
+                     const uint32_t* ids, size_t nIds);
+
 } // namespace syndicate
 #endif
