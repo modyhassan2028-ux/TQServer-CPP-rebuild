@@ -399,3 +399,72 @@ void CMapGroup::SetOSConnectStatus(uint32_t serverId, char on, SeamsOsStatus& s)
     }
 }
 } // namespace msg
+
+// 1400a6190 CMapGroup::SendModMultiClientMsg
+namespace msg {
+int CMapGroup::SendModMultiClientMsg(const uint32_t* ids, size_t n, void* msg) {
+    if (msg == nullptr) return 0;
+    uint16_t size = *(uint16_t*)((uint8_t*)msg + 8);      // 16-bit here
+    if ((int)(kMultiCap - (uint32_t)size) < 0) {
+        m_Multi.LogSize();
+        return 0;
+    }
+    if (n == 0) return 0;
+    int cap = (int)((uint32_t)(kMultiCap - (uint32_t)size) >> 2);
+    if (cap < 2 || (int)n < 2) {
+        // single-mod path: one object per call, ids appended by the callee
+        uint32_t srv;                       // RAW does an unaligned load at +0xd
+        std::memcpy(&srv, (uint8_t*)this + 0xd, 4);
+        void* o = m_Multi.CreateMod(srv, 0xffffffff,
+                                    *(uint16_t*)((uint8_t*)msg + 0xa),
+                                    (uint8_t*)msg + 0xc);
+        if (o == nullptr) { m_Multi.LogCheck(0x80e); return 0; }
+        int cnt = 0;
+        size_t i = 0;
+        for (;;) {
+            if (i >= n) break;
+            m_Multi.SendOne(this, ids[i], o);
+            cnt = cnt + 1;
+            if (kMultiDeadLoop < cnt) { m_Multi.LogDeadLoop(); break; }
+            i = i + 1;
+        }
+        m_Multi.DestroySendObj(o);                        // vt[0](o, 1)
+        return 1;
+    }
+    // batch path: {count@0, f4@4, size@8, body@0xc, ids@0xc+size}
+    uint8_t hdr[0x418];
+    std::memset(hdr, 0, sizeof hdr);
+    uint16_t k = *(uint16_t*)((uint8_t*)msg + 0xa);
+    std::memcpy(hdr + 4, &k, 2);
+    std::memcpy(hdr + 8, &size, 2);
+    std::memcpy(hdr + 0xc, (uint8_t*)msg + 0xc, size);
+    void* port = m_pPort;                                 // this + 0x80
+    size_t idx = 0;
+    uint32_t total = 0;
+    do {
+        uint32_t batch = 0;
+        for (;;) {
+            if ((int)batch >= cap) break;
+            if (idx >= n) break;
+            union { uint32_t u; uint8_t b[4]; } v;
+            v.u = ids[idx];
+            std::memcpy(hdr + 0xc + size + batch * 4, v.b, 4);
+            batch = batch + 1;
+            total = total + 1;
+            idx = idx + 1;
+        }
+        if ((int)batch > 0) {
+            uint32_t cnt = batch;
+            std::memcpy(hdr, &cnt, 4);
+            m_Multi.PostBatch753e(port, 1, 0x753e, 0x418, hdr);
+        }
+    // RAW's outer loop only tests total < 0x7d1 and re-enters the filler even
+    // after the id list is exhausted, so it reads past the vector end until
+    // the counter reaches 2001. The port keeps the same structure and the same
+    // cap but stops at the end of the list instead of reading past it; that
+    // single deviation is declared in the handoff.
+    } while (total < 0x7d1 && idx < n);
+    m_Multi.LogDeadLoop();                                // RAW logs it here always
+    return 1;
+}
+} // namespace msg

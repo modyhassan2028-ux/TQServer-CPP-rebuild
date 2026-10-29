@@ -92,8 +92,17 @@ public:
         void (*LogSize)(void);
         void (*LogNull)(void);
         void (*LogDeadLoop)(void);
+        // 1400a6190 only
+        void* (*CreateMod)(uint32_t serverId, uint32_t seat, uint16_t k,
+                           void* body);
+        void  (*LogCheck)(unsigned line);
+        void  (*DestroySendObj)(void* o);          // vt[0](o, 1)
+        void  (*PostBatch753e)(void* port, uint32_t ch, uint32_t msg,
+                               uint32_t len, const void* hdr);
     };
     int SendMultiClientMsg(const uint32_t* ids, size_t n, void* msg);
+    // 1400a6190 extras
+    int SendModMultiClientMsg(const uint32_t* ids, size_t n, void* msg);
     int SendMultiOSClientMsg(const uint32_t* ids, size_t n, void* msg);
     static const size_t kMultiCap = 0x400;                 // _MAX_MSGSIZE
     static const int    kMultiDeadLoop = 2000;
