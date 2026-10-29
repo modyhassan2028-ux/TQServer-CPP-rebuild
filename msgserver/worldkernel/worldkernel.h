@@ -287,6 +287,14 @@ struct SProcessSeams {
     void* port;                                                          // this+0x58
 };
 
+// --- 1400567f0 CWorldKernel::SendLoginPacket
+struct SLoginPacketSeams {
+    void     (*Init)(void* buf);                                  // 140077c40
+    int      (*Build)(void* buf, uint32_t a, int b);               // 140077cc0(a=+0x1fc, b=+0x208)
+    void     (*Free)(void* buf);                                   // 140077c90
+    uint8_t  (*SendMsg)(void* self, int handle, void* buf);        // (*self->vt+0x38)
+};
+
 class CWorldKernel {
 public:
     void* m_Q[0x60];
@@ -303,6 +311,7 @@ public:
     void    ClientConnect(uint32_t portIdx, int data, uint64_t tag, int handle,
                           int param6, SClientSeams& s);
     int     ProcessMsg(uint32_t msgId, int* buf, SProcessSeams& s);
+    uint8_t SendLoginPacket(int handle, SLoginPacketSeams& s);
 };
 }
 #endif

@@ -709,4 +709,19 @@ int CWorldKernel::ProcessMsg(uint32_t msgId, int* buf, SProcessSeams& s) {
     }
     return 1;
 }
+
+// 1400567f0 — builds the login packet from +0x1fc and the dword at +0x208 and
+// hands it to the kernel send. A failed build frees the buffer and reports 0.
+uint8_t CWorldKernel::SendLoginPacket(int handle, SLoginPacketSeams& s) {
+    uint8_t buf[0x430];
+    s.Init(buf);
+    if (s.Build(buf, *(uint32_t*)((uint8_t*)this + 0x1fc),
+                *(int*)((uint8_t*)this + 0x208)) == 0) {
+        s.Free(buf);
+        return 0;
+    }
+    uint8_t r = s.SendMsg(this, handle, buf);
+    s.Free(buf);
+    return r;
+}
 } // namespace msg
