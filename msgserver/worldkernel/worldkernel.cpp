@@ -261,4 +261,74 @@ int CWorldKernel::LoadIpConfig(SWorldSeams2& s) {
     }
     return 1;
 }
+// 1400651f0 — the world kernel bootstrap. Every timer pair is written as
+// (period, TimeGet(0)/1000) and the port id must be MSGPORT_WORLD (2) or the
+// MYASSERT fires at line 0x9f without aborting.
+uint8_t CWorldKernel::Create(SCreateSeams& s) {
+    s.SrandSeed(s.NowSec());
+    m_Q[0x0b] = s.port;                                    // +0x58
+    *(uint32_t*)((uint8_t*)this + 0x50) = s.PortId(s.port);
+    s.PortSetHandler(s.port);
+    s.PortSetType(s.port, 0x14);
+    if (*(int*)((uint8_t*)this + 0x50) != 2)
+        s.Assert(0x9f, "m_idProcess == MSGPORT_WORLD",
+                 "f:\\version\\cqserver-78.0.11-1204\\msgserver\\worldkernel\\worldkernel.cpp");
+    void* mem = s.Alloc(0x1d0);
+    void* part = (mem != nullptr) ? s.NewKernelPart(mem) : nullptr;
+    m_Q[0x0c] = part;                                      // +0x60
+    if (part == nullptr) return 0;
+    s.InitPart1(part, (uint8_t*)this + 8);
+    mem = s.Alloc(0x38);
+    part = (mem != nullptr) ? s.NewPart2(mem) : nullptr;
+    m_Q[0x0d] = part;                                      // +0x68
+    if (part == nullptr) return 0;
+    s.InitPart2(part);
+    void* nb = s.NewNewbieInfo();
+    m_Q[0x0e] = nb;                                        // +0x70
+    if (nb == nullptr) { s.LogNoNewbie(); return 0; }
+    s.SetSingleton(this);                                  // DAT_140975af8
+    m_Q[0x1d] = s.NewTimer01(1);                            // +0xe8
+    m_Q[0x1e] = s.NewTimer02(1);                            // +0xf0
+    void* ini = s.OpenIni("shell.ini", "Database");
+    s.IniSection(ini, "System");
+    int v = s.IniInt(ini, "SERVE_PORT");
+    if (v != 0) *(int*)((uint8_t*)this + 300) = v;           // +0x12c
+    *(uint32_t*)((uint8_t*)this + 0x78) = 0x1e;
+    *(uint32_t*)((uint8_t*)this + 0x7c) = s.NowSec();
+    s.IniSection(ini, "IPADPaymentsClient");
+    if (s.IniInt(ini, "IsSupportIPADPayments") == 1) *(uint8_t*)((uint8_t*)this + 0x200) = 1;
+    s.IniSection(ini, "GooglePaymentsClient");
+    if (s.IniInt(ini, "IsSupportGooglePayments") == 1) *(uint8_t*)((uint8_t*)this + 0x201) = 1;
+    s.IniSection(ini, "91AuthServerInfo");
+    if (s.IniInt(ini, "Is91AccountServer") == 1) *(uint8_t*)((uint8_t*)this + 0x203) = 1;
+    *(uint8_t*)((uint8_t*)this + 0x202) =
+        (*(uint8_t*)((uint8_t*)this + 0x200) != 0 ||
+         *(uint8_t*)((uint8_t*)this + 0x201) != 0 ||
+         *(uint8_t*)((uint8_t*)this + 0x203) != 0) ? 1 : 0;
+    s.IniSection(ini, "AccountServer");
+    s.IniStr(ini, (char*)((uint8_t*)this + 0xfc), "SERVERNAME", 0x10);
+    s.IniStr(ini, (char*)((uint8_t*)this + 0x10c), "LOGINNAME", 0x10);
+    s.IniStr(ini, (char*)((uint8_t*)this + 0x11c), "PASSWORD", 0x10);
+    s.LoadIpConfig(this);
+    s.BindInstance(this, s.Instance());
+    s.InitKernel(this);
+    if (!s.LoadGameVersionCfg(this)) { s.IniFree(ini); return 0; }
+    s.AfterVersion(this);
+    *(uint32_t*)((uint8_t*)this + 0x1fc) = s.ReadCfg1(this);
+    *(uint32_t*)((uint8_t*)this + 0x208) = s.ReadCfg2(this);
+    s.PostInit();
+    *(uint32_t*)((uint8_t*)this + 0x84) = 10;
+    *(uint32_t*)((uint8_t*)this + 0x88) = s.NowSec();
+    *(uint32_t*)((uint8_t*)this + 0x8c) = 0;
+    *(uint32_t*)((uint8_t*)this + 0x90) = 0x1e;
+    *(uint32_t*)((uint8_t*)this + 0x94) = s.NowSec();
+    *(uint32_t*)((uint8_t*)this + 0x178) = 300;
+    *(uint32_t*)((uint8_t*)this + 0x17c) = s.NowSec();
+    *(uint32_t*)((uint8_t*)this + 0xe0) = 0x1e;
+    *(uint32_t*)((uint8_t*)this + 0xe4) = s.NowSec();
+    *(uint32_t*)((uint8_t*)this + 0x1e4) = 10;
+    *(uint32_t*)((uint8_t*)this + 0x1e8) = s.NowSec();
+    s.IniFree(ini);
+    return 1;
+}
 } // namespace msg

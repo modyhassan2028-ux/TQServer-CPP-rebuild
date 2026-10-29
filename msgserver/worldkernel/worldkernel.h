@@ -1,3 +1,4 @@
+#include <cstddef>
 #ifndef WORLD_KERNEL_H
 #define WORLD_KERNEL_H
 // Original unit: f:\version\cqserver-78.0.11-1204\msgserver\worldkernel\
@@ -152,6 +153,43 @@ struct SWorldSeams2 {
     void  (*Post)(void* th, uint32_t ch, uint32_t msg, uint32_t len, const void* body);
 };
 
+// --- 1400651f0 CWorldKernel::Create
+#include <cstddef>
+struct SPortApi { void** m_pVt; };
+struct SCreateSeams {
+    void  (*SrandSeed)(uint32_t seed);                    // srand(_time32(0))
+    uint32_t (*NowSec)();                                 // tq::TimeGet(0)/1000
+    void* (*Alloc)(size_t n);                             // operator_new / 140068b60
+    void* (*NewKernelPart)(void* mem);                    // 140072430
+    void  (*InitPart1)(void* o, void* out);                // 140073410(o, this+8)
+    void* (*NewPart2)(void* mem);                          // 140074450
+    void  (*InitPart2)(void* o);                           // 140074a70
+    void* (*NewNewbieInfo)();                              // 14007a4f0
+    void* (*NewTimer01)(int);                              // 1400650f0
+    void* (*NewTimer02)(int);                              // 1400650f0
+    void* (*OpenIni)(const char* file, const char* section); // CIniFile ctor
+    void  (*IniSection)(void* ini, const char* name);       // SetSection
+    int   (*IniInt)(void* ini, const char* key);            // GetInt
+    void  (*IniStr)(void* ini, char* out, const char* key, int n); // GetString
+    void  (*IniFree)(void* ini);                            // ~CIniFile
+    void* (*Instance)();                                    // InstanceGet
+    void  (*BindInstance)(void* self, void* inst);           // 140062510
+    void  (*InitKernel)(void* self);                         // 140055080
+    void  (*AfterVersion)(void* self);                       // 140058610
+    uint32_t (*ReadCfg1)(void* self);                         // 140058750
+    uint32_t (*ReadCfg2)(void* self);                         // 140058800
+    void  (*PostInit)();                                      // 140072f80
+    uint8_t (*LoadGameVersionCfg)(void* self);                // 140058540
+    int   (*LoadIpConfig)(void* self);                        // 1400641b0
+    void  (*Assert)(int line, const char* expr, const char* file);
+    void  (*LogNoNewbie)();
+    struct SPortApi* port;
+    uint32_t (*PortId)(struct SPortApi*);                  // (*port->vt+8)(port)
+    void  (*PortSetHandler)(struct SPortApi*);             // (*port->vt+0x38)(port)
+    void  (*PortSetType)(struct SPortApi*, int);           // (*port->vt+0x40)(port,0x14)
+    void  (*SetSingleton)(void* self);                     // DAT_140975af8 = self
+};
+
 class CWorldKernel {
 public:
     void* m_Q[0x60];
@@ -164,6 +202,7 @@ public:
     uint8_t LoadGameVersionCfg(SWorldSeams2& s);
     uint8_t ProcessAccountMsg2(const uint16_t* m, SWorldSeams2& s);
     int     LoadIpConfig(SWorldSeams2& s);
+    uint8_t Create(SCreateSeams& s);
 };
 }
 #endif
