@@ -13,9 +13,32 @@
 //   slot 11 0x1417eea50  GetCachedSize (+0x34)
 #ifndef SYNDICATE_CMSGLEAGUEROBLISTPB_H
 #define SYNDICATE_CMSGLEAGUEROBLISTPB_H
+#include "modules/syndicate/src/CMsgLeagueRobItemPB.h"
 #include <cstdint>
 #include <string>
 namespace syndicate {
+
+// ---- seams ----
+extern void     (*g_pfnPbFree)(void*);
+extern uint64_t (*g_pfnPb8050)();
+extern void*     g_pPbDefaultStr;
+extern void*     g_pvPbInitFlag;
+extern int32_t (*g_pfnPbVarintSize)(uint32_t);
+extern void (*g_pfnPbWriteVarint32)(uint32_t, uint32_t, void*);
+extern void (*g_pfnPbWriteUnknown)(void*, void*, int32_t);
+extern void (*g_pfnPb64C0)(void*, void*);
+extern void (*g_pfnPb4550)(void*, void*);
+extern uint64_t (*g_pfnPb3BC0)(void*);
+extern uint64_t (*g_pfnPb3A50)(void*, uint32_t*);
+extern void (*g_pfnPb45D0)(void*);
+extern uint64_t (*g_pfnPb6510)(void*);
+extern char (*g_pfnPbF3F50)(void*, uint32_t, void*);
+extern void (*g_pfnPbE0110)(void*, int32_t);
+extern char (*g_pfnPbEE710)(void*, void*);
+extern void (*g_pfnPbF4DC0)(uint32_t, void*, void*);
+extern void (*g_pfnPbEE830)(void*, void*);
+extern void (*g_pfnPbInitGuard)(void*);
+extern void (*g_pfnPbCheckFail)(const char*, int, const char*);
 
 class CMsgLeagueRobListPB {
 public:
@@ -24,6 +47,14 @@ public:
 
     // 0x1417eef10
     static void* DeleteDtor(void* self, uint32_t uFlag);
+    // 0x1417eef70 — Merge
+    static bool Merge(void* self, void* input);
+    // 0x1417eec70 — ByteSize
+    static int32_t ByteSize(void* self);
+    // 0x1417eebd0 — SerializeWithCachedSizes
+    static void SerializeWithCachedSizes(void* self, void* pBuf);
+    // 0x1417ef230 — MergeFrom (slot6 thunk 0x1417ef3b0)
+    static void MergeFrom(void* self, void* from);
     // 0x1417eeaf0
     static void* New();
     // slot 1 — the type name

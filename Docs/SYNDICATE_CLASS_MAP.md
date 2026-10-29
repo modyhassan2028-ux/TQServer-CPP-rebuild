@@ -42,7 +42,7 @@
 | `CMsgLeagueOrderStatusInfoPB` | `0x1418419c8` | 12 — **مكتملة 12/12** (D92+D94) |
 | `CMsgLeagueOrderStatusPB` | `0x141841b48` | 12 — **مكتملة 12/12** (D92+D95) |
 | `CMsgLeagueRobItemPB` | `0x141841e08` | 12 — **6 منقولة** |
-| `CMsgLeagueRobListPB` | `0x141841f68` | 12 — **6 منقولة** |
+| `CMsgLeagueRobListPB` | `0x141841f68` | 12 — **مكتملة 12/12** (D92+D97) |
 | `CMsgOverheadLeagueInfoPB` | `0x141842828` | 12 — **6 منقولة** |
 
 ## مكتبات خارجية — مستثناة بقرار المشروع (21)
