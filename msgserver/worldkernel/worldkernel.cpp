@@ -1,6 +1,8 @@
 // 14002e990 CWorldThread::OnProcess + 14002e580 CUserLoginThread::OnProcess
 #include <cstdio>
 #include <cctype>
+#include <cstdarg>
+#include <vector>
 #include "worldkernel.h"
 namespace msg {
 // ---------------------------------------------------------- CWorldThread
@@ -723,5 +725,129 @@ uint8_t CWorldKernel::SendLoginPacket(int handle, SLoginPacketSeams& s) {
     uint8_t r = s.SendMsg(this, handle, buf);
     s.Free(buf);
     return r;
+}
+
+// 140064330 — the cq_ippointrecord bookkeeping. Reads lastloginip /
+// lastlogintime / initialip plus the five slots, updates the point of the
+// matched ip only when the day stamp changed, or appends / evicts a record,
+// then writes the row back.
+namespace {
+static void vfmt(char* out, const char* fmt, ...) {
+    va_list ap; va_start(ap, fmt); vsnprintf(out, 0x400, fmt, ap); va_end(ap);
+}
+static int slotv(const std::vector<SIpRec>& v, size_t i, int which) {
+    if (i >= v.size()) return 0;
+    switch (which) {
+    case 0: return (int)v[i].ip;
+    case 1: return (int)v[i].ipcode;
+    case 2: return v[i].point;
+    default: return (int)v[i].logintime;
+    }
+}
+}
+void CWorldKernel::RecordLoginIp(int id, int p4, SIpSeams& s) {
+    int key = s.AccountKey(this, id);
+    uint32_t now = s.Now();
+    int lastIp = 0, initialIp = 0, saved[2] = {0, 0};
+    uint32_t lastTime = 0;
+    std::vector<SIpRec> recs;
+    char sql[0x400];
+    void* db = s.Db();
+    vfmt(sql, "SELECT * FROM cq_ippointrecord WHERE account_id=%u", (uint32_t)id);
+    void* rs = s.Query(db, sql);
+    void* table = nullptr;
+    if (rs != nullptr) {
+        table = s.RsFields(rs);
+        s.RsRelease(rs);
+    }
+    if (table == nullptr) table = s.GetTable(db, "cq_ippointrecord");
+    if (table == nullptr) {
+        s.Assert(0xac5, "f:\\version\\cqserver-78.0.11-1204\\msgserver\\worldkernel\\worldkernel.cpp");
+    } else {
+        lastIp    = s.AsInt(s.Field(table, "lastloginip"));
+        lastTime  = (uint32_t)s.AsInt(s.Field(table, "lastlogintime"));
+        initialIp = s.AsInt(s.Field(table, "initialip"));
+        for (int i = 1; i <= 5; i++) {
+            char n1[32], n2[32], n3[32], n4[32];
+            snprintf(n1, sizeof n1, "ippoint%d", i);
+            void* f1 = s.Field(table, n1);
+            if (s.IsNull(f1) <= 0) continue;          // the RAW probe is (+0x48) > 0
+            snprintf(n2, sizeof n2, "ip%d", i);
+            snprintf(n3, sizeof n3, "ipcode%d", i);
+            snprintf(n4, sizeof n4, "iplogintime%d", i);
+            SIpRec r;
+            r.ip        = (uint32_t)s.AsInt(s.Field(table, n2));
+            r.ipcode    = (uint32_t)s.AsInt(s.Field(table, n3));
+            r.point     = s.IsNull(f1);
+            r.logintime = (uint32_t)s.AsInt(s.Field(table, n4));
+            recs.push_back(r);
+        }
+    }
+    if (recs.empty()) {
+        if (initialIp == 0) {
+            vfmt(sql, "INSERT cq_ippointrecord SET account_id=%u, ip1=%u, ipcode1=%u, ippoint1=30, "
+                      "iplogintime1=%u, lastloginip=%u, lastlogintime=%u, initialip=%u, initialipcode=%u",
+                 (uint32_t)id, (uint32_t)key, now, now, (uint32_t)id, (uint32_t)key, now, now);
+        } else {
+            vfmt(sql, "UPDATE cq_ippointrecord SET ip1=%u, ipcode1=%u, ippoint1=30, iplogintime1=%u,"
+                      "lastloginip=%u, lastlogintime=%u WHERE account_id=%u LIMIT 1",
+                 (uint32_t)id, (uint32_t)key, now, now, (uint32_t)id, (uint32_t)key);
+        }
+        s.Exec(db, sql);
+        lastIp = 0; lastTime = 0;
+    } else {
+        const uint32_t today = now / 0x15180;
+        int found = -1;
+        for (size_t i = 0; i < recs.size(); i++) {
+            if ((int)i < 2) saved[i] = (int)recs[i].ip;
+            if ((int)recs[i].ip == id) { found = (int)i; break; }
+        }
+        if (found >= 0) {
+            SIpRec& r = recs[(size_t)found];
+            if (today != r.logintime / 0x15180) {
+                int32_t np = r.point;
+                if (found < 2) np += ((int)r.ip == lastIp) ? 2 : 1;
+                else           np += ((int)r.ip == lastIp) ? 4 : 3;
+                if (np > 0x3c) np = 0x3c;
+                r.point = np;
+                r.logintime = now;
+            }
+        } else if (recs.size() < 5) {
+            SIpRec r;
+            r.ip = (uint32_t)id; r.ipcode = (uint32_t)key; r.point = 0x1e; r.logintime = now;
+            recs.push_back(r);
+        } else {
+            for (size_t i = 0; i < recs.size(); i++) {
+                if ((int)i < 2) {
+                    recs[i].point -= 2;
+                    if (recs[i].point < 0x1e) recs[i].point = 0x1e;
+                } else if ((int)i < 4) {
+                    recs[i].point -= 1;
+                    if (recs[i].point < 1) recs[i].point = 1;
+                } else {
+                    recs[i].ip = (uint32_t)id;
+                    recs[i].ipcode = (uint32_t)key;
+                    recs[i].point = 1;
+                    recs[i].logintime = now;
+                }
+            }
+        }
+        if (recs.size() > 1) s.Sort(&recs[0], &recs[0] + recs.size());
+        vfmt(sql, "UPDATE cq_ippointrecord SET ip1=%u, ipcode1=%u, ippoint1=%d, iplogintime1=%u, \t\t\t"
+                  "ip2=%u, ipcode2=%u, ippoint2=%d, iplogintime2=%u, ip3=%u, ipcode3=%u, ippoint3=%d, iplogintime3=%u, \t\t\t"
+                  "ip4=%u, ipcode4=%u, ippoint4=%d, iplogintime4=%u, ip5=%u, ipcode5=%u, ippoint5=%d, iplogintime5=%u, \t\t\t"
+                  "lastloginip=%u, lastlogintime=%u WHERE account_id=%u LIMIT 1",
+             slotv(recs, 0, 0), slotv(recs, 0, 1), slotv(recs, 0, 2), slotv(recs, 0, 3),
+             slotv(recs, 1, 0), slotv(recs, 1, 1), slotv(recs, 1, 2), slotv(recs, 1, 3),
+             slotv(recs, 2, 0), slotv(recs, 2, 1), slotv(recs, 2, 2), slotv(recs, 2, 3),
+             slotv(recs, 3, 0), slotv(recs, 3, 1), slotv(recs, 3, 2), slotv(recs, 3, 3),
+             slotv(recs, 4, 0), slotv(recs, 4, 1), slotv(recs, 4, 2), slotv(recs, 4, 3),
+             (uint32_t)id, now, (uint32_t)id);
+        s.Exec(db, sql);
+    }
+    // the "new address" flag: both remembered ips differ from lastloginip
+    int flag = (saved[0] != lastIp && saved[1] != lastIp) ? 1 : 0;
+    s.OnIpNotified(this, id, lastIp, (int)lastTime, flag, p4);
+    s.OnIpLogged(this, id, p4);
 }
 } // namespace msg

@@ -295,6 +295,27 @@ struct SLoginPacketSeams {
     uint8_t  (*SendMsg)(void* self, int handle, void* buf);        // (*self->vt+0x38)
 };
 
+// --- 140064330 CWorldKernel::RecordLoginIp
+struct SIpRec { uint32_t ip, ipcode; int32_t point; uint32_t logintime; };
+struct SIpSeams {
+    int      (*AccountKey)(void* self, int id);                    // 14005d200
+    uint32_t (*Now)();                                             // _time32(0)
+    void*    (*Db)();                                              // InstanceGet
+    void*    (*Query)(void* db, const char* sql);                   // (*db->vt+0x10)
+    void*    (*RsFields)(void* rs);                                // (*rs->vt+0x38)
+    void     (*RsRelease)(void* rs);                               // (*rs->vt)
+    void*    (*GetTable)(void* db, const char* name);               // (*db->vt+0x20)
+    void*    (*Field)(void* table, const char* name);               // (*table->vt+0x20)
+    int      (*IsNull)(void* field);                                // (*field->vt+0x48)
+    int      (*AsInt)(void* field);                                 // (*field->vt+0x50)
+    void     (*Exec)(void* db, const char* sql);                    // (*db->vt+0x30)
+    void     (*Assert)(int line, const char* file);
+    void     (*Sort)(SIpRec* first, SIpRec* last);                  // 1400603d0 + comparator
+    void     (*OnIpNotified)(void* self, int id, int lastIp, int lastTime, int flag, int p4); // 14005f7a0
+    void     (*OnIpLogged)(void* self, int id, int p4);             // 14005f900
+    void     (*Sql)(const char* text, int n);                       // capture hook for the built SQL
+};
+
 class CWorldKernel {
 public:
     void* m_Q[0x60];
@@ -312,6 +333,7 @@ public:
                           int param6, SClientSeams& s);
     int     ProcessMsg(uint32_t msgId, int* buf, SProcessSeams& s);
     uint8_t SendLoginPacket(int handle, SLoginPacketSeams& s);
+    void    RecordLoginIp(int id, int p4, SIpSeams& s);
 };
 }
 #endif
