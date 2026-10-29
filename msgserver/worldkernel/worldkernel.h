@@ -190,6 +190,50 @@ struct SCreateSeams {
     void  (*SetSingleton)(void* self);                     // DAT_140975af8 = self
 };
 
+// --- 140065e50 CWorldKernel::ClientConnect
+struct SClientNode {                 // the 0x88 object from 140073590
+    uint8_t  m_Pad0[0xc];
+    int32_t  m_Data;                 // +0x0c
+    char     m_Name[0x41];           // +0x10
+};
+struct SClientSeams {
+    void  (*Assert)(int line, const char* file);           // log_InlineLogERROR + DAT_1406d9c10
+    void* (*Instance)();                                    // InstanceGet
+    void* (*Query)(void* inst, const char* sql, int one);    // (*inst->vt+0x10)
+    int   (*RowCount)(void* rs);                             // (*rs->vt+0x40)
+    void  (*Release)(void* rs);                               // (*rs->vt)
+    void  (*LogLine)(void* inst, const char* text, int a, int b); // (*inst->vt+0x30)
+    void* (*PortObjE)(void* self);                            // this+0xf0
+    void* (*PortObjD)(void* self);                            // this+0xe8
+    void* (*FindNode)(void* obj, uint32_t portIdx);           // (*obj->vt+0x40)
+    void  (*DetachE)(void* obj, uint32_t portIdx);            // (*obj1e->vt+0x30)
+    void  (*DetachD)(void* obj, uint32_t portIdx);            // (*obj1d->vt+0x30)
+    void  (*PushNode)(void* obj, void* node);                 // (*obj1d->vt+0x28)
+    void  (*PushNodeNoArg)(void* obj);                        // (*obj1d->vt+0x28) no arg
+    int   (*IsOnline)(void* node);                            // 1400737b0
+    int   (*HasGiveBack)(void* table, uint32_t portIdx);       // 14007c950(0x98 table)
+    void* (*UnitLookup)();                                     // 140054e10
+    void  (*KickOut)(void* unit, int handle, uint32_t portIdx); // 1400674b0
+    int   (*IsBannedOrQueued)(void* unit, uint32_t portIdx);   // 14006eb00
+    int   (*HasFreeSlot)(void* self);                          // 1400561b0
+    void  (*MsgInit)(void* buf);                               // 14007a560
+    const char* (*Str)(const char* key);                       // theInstance()->GetString
+    int   (*MsgBuild)(void* buf, const char* a, const char* b, const char* text); // 14007a620
+    void  (*SendMsg)(void* self, int handle, void* buf);       // (*this->vt+0x38)
+    void  (*MsgFree)(void* buf);                               // 14007a5e0
+    void  (*SafeCopy)(char* dst, const char* src, int n);       // tq::SafeCopy
+    void* (*AllocSession)();                                    // 140054bc0
+    void* (*NewSessionArr)(size_t n);                           // 140073590
+    void* (*InitSession)(void* mem);                            // 1400736b0
+    int   (*BindSession)(void* s, uint32_t portIdx, int data, uint64_t tag); // 1400737f0
+    void  (*OnLoginOk)(void* self, int handle);                  // 1400567f0
+    void  (*OnLoginInfo)(void* self, uint32_t portIdx, int p6, int handle); // 140064330
+    int   (*InsertLogin)(void* list, void* out, void* key);       // 14005d530
+    void  (*LoginLog)(int id);                                    // 140054dc0
+};
+void ClientConnect(uint32_t portIdx, int data, uint64_t tag, int handle, int param6,
+                   SClientSeams& s);
+
 class CWorldKernel {
 public:
     void* m_Q[0x60];
@@ -203,6 +247,8 @@ public:
     uint8_t ProcessAccountMsg2(const uint16_t* m, SWorldSeams2& s);
     int     LoadIpConfig(SWorldSeams2& s);
     uint8_t Create(SCreateSeams& s);
+    void    ClientConnect(uint32_t portIdx, int data, uint64_t tag, int handle,
+                          int param6, SClientSeams& s);
 };
 }
 #endif

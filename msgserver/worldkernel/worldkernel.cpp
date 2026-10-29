@@ -1,4 +1,5 @@
 // 14002e990 CWorldThread::OnProcess + 14002e580 CUserLoginThread::OnProcess
+#include <cstdio>
 #include "worldkernel.h"
 namespace msg {
 // ---------------------------------------------------------- CWorldThread
@@ -330,5 +331,108 @@ uint8_t CWorldKernel::Create(SCreateSeams& s) {
     *(uint32_t*)((uint8_t*)this + 0x1e8) = s.NowSec();
     s.IniFree(ini);
     return 1;
+}
+// 140065e50 — a server connects to the world port. Order preserved exactly:
+// the appointment gate, the existing-node path (give-back / busy / same data /
+// data mismatch), then the fall-through that detaches twice before binding.
+void CWorldKernel::ClientConnect(uint32_t portIdx, int data, uint64_t tag, int handle,
+                                 int param6, SClientSeams& s) {
+    if (handle == -1 || param6 == 0) {
+        s.Assert(0x72c, "f:\\version\\cqserver-78.0.11-1204\\msgserver\\worldkernel\\worldkernel.cpp");
+        return;
+    }
+    if (*(uint8_t*)((uint8_t*)this + 0x1e0) != 0 && *(uint8_t*)((uint8_t*)this + 0x203) != 0) {
+        char sql[0x400];
+        // RAW passes the %s with no argument (reads r8, undefined). An empty
+        // literal keeps the same SQL text without the UB. Declared deviation.
+        snprintf(sql, 0x400, "SELECT * FROM cq_appointment_account WHERE account='%s'", "");
+        void* inst = s.Instance();
+        void* rs = s.Query(inst, sql, 1);
+        if (rs == nullptr) {
+            s.Assert(0x735, "f:\\version\\cqserver-78.0.11-1204\\msgserver\\worldkernel\\worldkernel.cpp");
+            s.KickOut(s.UnitLookup(), handle, 0);
+            return;
+        }
+        if (s.RowCount(rs) == 0) {
+            s.KickOut(s.UnitLookup(), handle, 0);
+            s.Release(rs);
+            return;
+        }
+        s.Release(rs);
+    }
+    void* objE = s.PortObjE(this);                     // +0xf0
+    void* objD = s.PortObjD(this);                     // +0xe8
+    SClientNode* node = (SClientNode*)s.FindNode(objE, portIdx);
+    if (node != nullptr) {
+        if (s.IsOnline(node)) {
+            if (s.HasGiveBack((uint8_t*)this + 0x98, portIdx)) {
+                char buf[0x400];
+                s.MsgInit(buf);
+                int ok = s.MsgBuild(buf, "SYSTEM", "ALLUSERS", s.Str("STR_ERROR_GIVE_BACK"));
+                if (ok != 0) s.SendMsg(this, handle, buf);
+                s.KickOut(s.UnitLookup(), handle, portIdx);
+                s.DetachE(objE, portIdx);
+                s.MsgFree(buf);
+                return;
+            }
+            if (s.IsBannedOrQueued(s.UnitLookup(), portIdx) == 0 && s.HasFreeSlot(this) == 0) {
+                char buf[0x400];
+                s.MsgInit(buf);
+                int ok = s.MsgBuild(buf, "SYSTEM", "ALLUSERS", s.Str("STR_ERROR_SERVER_BUSY"));
+                if (ok != 0) s.SendMsg(this, handle, buf);
+                s.KickOut(s.UnitLookup(), handle, portIdx);
+                s.DetachE(objE, portIdx);
+                s.MsgFree(buf);
+                return;
+            }
+            char name[0x41];
+            std::memset(name, 0, 0x41);
+            s.SafeCopy(name, node->m_Name, 0x41);
+            if (s.IsOnline(node) && node->m_Data == data) {
+                void* sess = s.AllocSession();              // 140054bc0
+                if (!s.BindSession(sess, portIdx, data, tag)) {
+                    s.Assert(0x771, "f:\\version\\cqserver-78.0.11-1204\\msgserver\\worldkernel\\worldkernel.cpp");
+                    return;
+                }
+                s.DetachD(objD, portIdx);
+                s.PushNodeNoArg(objD);
+                struct { uint32_t a, b, c, d, e; char n[0x41]; } info;
+                info.a = 0; info.b = 0; std::memset(info.n, 0, 0x41);
+                info.c = 2; info.d = (uint32_t)handle; info.e = (uint32_t)param6;
+                *(uint32_t*)info.n = 0;                      // local_530 before SafeCopy
+                s.SafeCopy(info.n, name, 0x41);
+                *(int*)((uint8_t*)this + 0x2c0) += 1;
+                uint32_t seq = *(uint32_t*)((uint8_t*)this + 0x2c0);
+                uint8_t key[0x58];
+                std::memcpy(key, &info, 0x58);
+                s.InsertLogin((uint8_t*)this + 0x280, nullptr, &seq);
+                char log[0x400];
+                std::memset(log, 0, 0x400);
+                // RAW also prints %u with no argument; the sequence counter is
+                // the value it means. Declared deviation.
+                snprintf(log, 0x400, " worlduserlogin****worlduserlogin [%u]", seq);
+                s.LoginLog(seq);
+                s.LogLine(s.Instance(), log, 0, 0);
+                return;
+            }
+            if (s.IsOnline(node) && node->m_Data != data) {
+                s.Assert(0x788, "f:\\version\\cqserver-78.0.11-1204\\msgserver\\worldkernel\\worldkernel.cpp");
+            }
+            s.KickOut(s.UnitLookup(), handle, portIdx);
+            s.DetachE(objE, portIdx);
+            return;
+        }
+        s.DetachE(objE, portIdx);
+    }
+    s.DetachD(objD, portIdx);       // different object (+0xe8) than the one above
+    void* mem = s.NewSessionArr(0x88);
+    void* sess = (mem != nullptr) ? s.InitSession(mem) : nullptr;
+    if (!s.BindSession(sess, portIdx, data, tag)) {
+        s.Assert(0x794, "f:\\version\\cqserver-78.0.11-1204\\msgserver\\worldkernel\\worldkernel.cpp");
+    } else {
+        s.PushNode(objD, sess);
+        s.OnLoginOk(this, handle);
+        s.OnLoginInfo(this, portIdx, param6, handle);
+    }
 }
 } // namespace msg
