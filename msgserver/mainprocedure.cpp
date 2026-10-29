@@ -125,4 +125,46 @@ void CExtraProc::CloseAll(uint64_t ctx, Seams& s) {
     }
     s.IniClose();
 }
+
+// 14001f070
+void CAnalystProfile::LoadStats(SStats& st, Seams& s) {
+    void* a = s.Analyst();
+    s.SetLogFile(a, "syslog/analyst");
+    int32_t acc46 = st.f998;
+    st.f968 = 0;
+    st.f970 = 0;
+    st.f978 = 0;
+    st.f980 = 0;
+    st.f988 = 0;
+    st.f990 = 0;
+    st.f998 = 0;
+    uint64_t v1 = 0, v2 = 0;
+    int vi = 0;
+    if (s.Query(a, 0x45, &v1, &v2, &vi)) {
+        st.f968 = (uint32_t)vi;                 // high dword of the pair untouched
+        st.f978 = v1;
+        st.f988 = v2;
+    }
+    if (s.Query(a, 0x43, &v1, &v2, &vi)) {
+        st.f96c = (uint32_t)vi;                 // the other half of the pair
+        st.f980 = v1;
+        st.f990 = v2;
+    }
+    uint32_t keep70 = st.f970;
+    if (s.Query(a, 0x40, nullptr, nullptr, &vi)) keep70 = (uint32_t)vi;
+    st.f970 = keep70;
+    if (s.Query(a, 0x41, nullptr, nullptr, &vi)) st.f974 = (uint32_t)vi;
+    if (s.Query(a, 0x46, nullptr, nullptr, &vi)) acc46 += vi;
+    st.f998 = acc46;
+    static const int kIds[8] = { 0, 0x1d, 0x20, 0x23, 0x2b, 0x2f, 0x32, 0x3e };
+    uint64_t sum = 0;
+    uint64_t slot = 0;                          // local_48: never reset per row
+    for (int i = 0; i < 8; ++i) {
+        s.Query(a, kIds[i], &slot, nullptr, nullptr);
+        sum += slot;
+    }
+    st.f9a8 = sum;
+    s.Flush(a);
+    st.f9a0 = st.f9a0 + 1;
+}
 } // namespace msg

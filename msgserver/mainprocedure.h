@@ -15,7 +15,25 @@ public:
         void* (*Analyst)();
         void (*SetLogFile)(void* a, const char* file);
         void (*AddItem)(void* a, int id, int flag, const char* text);
+        // 14001f070 additions
+        bool (*Query)(void* a, int id, uint64_t* v1, uint64_t* v2, int* vi);
+        void (*Flush)(void* a);
     };
+
+    // the counters 14001f070 fills (0x140975968..0x1409759a8)
+    struct SStats {
+        uint32_t f968, f96c;      // the low/high pair written by ids 0x45 / 0x43
+        uint32_t f970, f974;      // ids 0x40 / 0x41
+        uint64_t f978, f980;      // id 0x45 / 0x43 second and third out
+        uint64_t f988, f990;
+        int32_t  f998, f99c;      // id 0x46 accumulates into the low dword
+        uint64_t f9a0;            // tick counter, incremented once per call
+        uint64_t f9a8;            // sum of the 8 id queries
+    };
+    // 14001f070 — registers the log file, refills every counter and bumps the
+    // tick counter. The accumulator is not cleared between the eight queries,
+    // exactly like the RAW.
+    static void LoadStats(SStats& st, Seams& s);
     static void RegisterAll(Seams& s);
     static const SItem kItems[];
     static const int  kItemCount;
