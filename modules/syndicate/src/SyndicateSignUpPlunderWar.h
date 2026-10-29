@@ -120,5 +120,34 @@ bool SendRobOptPages(SRobOptSeams& s, void* vt, uint32_t user,
                      int64_t current, int64_t cap, uint32_t freePages,
                      const uint32_t* ids, size_t nIds);
 
+
+// ---------------------------------------------------------------------------
+// The function itself — phases 1 to 5 (gates, target vector, token, sign-up
+// string, the two ceilings and the param_5 / param_6 checks).
+// Phase 6-7 (the two new message families and the tail block) still needs the
+// register-passed arguments of vt+0x560 and 1417d73a0 resolved from the
+// assembly, so it stays behind FinishTails and is documented as pending.
+// ---------------------------------------------------------------------------
+struct SLogicSeams {
+    SSignUpPlunderSeams core;      // gates, vector, token, league side
+    SRobOptSeams        robOpt;    // the phase-5 page message
+    // --- vt gates and notifications ------------------------------------
+    bool     (*WarGateBlocks)(void* vt);                      // vt+0x278
+    uint32_t (*SpendablePage)(void* vt, uint32_t user);        // vt+0x238
+    bool     (*SpendMoney)(void* vt, uint32_t user, int a, uint32_t amount);  // vt+0x140
+    void     (*NotifyTokenFail)(void* vt, uint32_t user);      // STR_PLUNDER_WAR_TOKEN_USE_FAIL
+    void     (*NotifyNoMoney)(void* vt, uint32_t user);        // STR_TRAINING_GONGFU_EMONEY_NOT_ENOUGH
+    void     (*EmoneyBuyTail)(void* vt, uint32_t user);        // 0x200 + MyLogSave + i18n + 0x90
+    int64_t  (*TargetCap)(void* vt);                           // (vt+0x10)->+0x58
+    // --- phase 6-7, still pending --------------------------------------
+    void     (*FinishTails)(void* logic, uint32_t user, void* league,
+                            void* token, uint32_t tokenId, uint32_t memberKey,
+                            int64_t current, int64_t cap, void* robOptMsg);
+};
+
+uint32_t SignUpPlunderWarFromClient(void* logic, uint32_t uUser, uint32_t nCount,
+                                    const uint32_t* targets, char bSupport,
+                                    uint32_t uParam6, SLogicSeams& s);
+
 } // namespace syndicate
 #endif
