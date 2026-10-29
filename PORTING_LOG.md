@@ -6379,3 +6379,22 @@ adapter:: بدليل الباني. 15 تأكيدًا ×6، رجريجن 76/76.
   0x14182e368 (تلك هي `tq::CMsg::vftable`).
 - كما سُجلت الوحدتان المنسيتان d114d وd114e في سكربت
   الرجريجن (كانتا في الشجرة لكن غير مشغلتين).
+
+
+## D116 — CMsgLeagueConcubinesInfoPB: 8 من 12 فتحة (29-10-2026)
+
+- 0x1417eabe0 (dtor الأساس): vft الصنف، حذف حقل النص عند 0x40
+  إذا لم يكن الحارس، ~string عند +8، ثم MessageLite vft.
+- 0x1417eaab0 (ctor): vft مزدوج، placement string عند +8،
+  1417e8050، تصفير +0x34/+0x38/+0x3c/+0x40(حارس)/+0x48/+0x4c/
+  +0x50/+0x54/+0x58/+0x5c/+0x60/+0x30 (بالترتيب الحرفي).
+- 0x1417eaf70 dtor مع الحذف · 0x1417ea850 GetTypeName ·
+  0x1417eac50 New (operator_new 0x68) · 0x1417ea320 Clear ·
+  0x1417ea830 IsInitialized (HasBits&0x3ff == 0x3ff) ·
+  0x1417de5c0 نص اللايت المشترك · 0x1417eb450 **thunk**
+  (e9 0b f2 ff ff → 0x1417dd260) · 0x1417dee40 seam ·
+  0x1417eab30 GetCachedSize.
+- تصحيح حرفي: `*(undefined8 *)(this+0x5c)` مكتوبة كخزنتين
+  32-بت (محاذاة غير طبيعية في الأصل) ليبقى UBSan نظيفاً.
+- متبقٍ في هذا الصنف: slot7 0x1417eafa0 (12857 حرفاً)،
+  slot8 0x1417ea4c0 (2876)، slot9 0x1417ea380 (1626).
