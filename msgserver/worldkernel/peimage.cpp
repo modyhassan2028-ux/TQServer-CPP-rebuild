@@ -13,7 +13,7 @@ int CPEImage::AttachImage(void* base, uint32_t size) {
     if (size <= 0x3f) return 0;
     base_ = (intptr_t)base;
     if (*(uint16_t*)base != 0x5a4d) return 0;                 // 'MZ'
-    int32_t lfanew = ld<int32_t>((uint8_t*)base + 0x1e);
+    int32_t lfanew = ld<int32_t>((uint8_t*)base + 0x3c);   // e_lfanew (the RAW reaches it as short* + 0x1e)
     if ((uint64_t)((int64_t)lfanew + 0x108) > (uint64_t)size) return 0;
     intptr_t nt = (intptr_t)base + lfanew;
     nt_ = nt;
@@ -80,4 +80,59 @@ void CPEImage::ApplyRelocations(intptr_t delta) {
     }
 }
 
+
+// 1405098b0 — moves the headers (SizeOfHeaders + nsec*0x28 bytes) and each raw
+// section to the new image, then re-points base/NT/sections at that image.
+// Sections with a zero VirtualAddress or a zero size are skipped.
+void CPEImage::CopySections(void* newBase, void* fileBase) {
+    intptr_t nt = nt_;
+    uint16_t nsec = ld<uint16_t>((void*)(nt + 6));
+    int32_t hdr = ld<int32_t>((void*)(nt + 0x54));
+    size_t head = (size_t)(int)(hdr + ((uint32_t)nsec + (uint32_t)nsec * 4) * 8);
+    std::memmove(newBase, fileBase, head);
+    for (uint32_t i = 0; i < (uint32_t)nsec; i++) {
+        intptr_t s = sections_ + (intptr_t)i * 0x28;
+        int32_t va = ld<int32_t>((void*)(s + 0x0c));
+        uint32_t rsize = (uint32_t)ld<int32_t>((void*)(s + 0x10));
+        int32_t raw = ld<int32_t>((void*)(s + 0x14));
+        if (va == 0 || rsize == 0) continue;
+        std::memmove((void*)(uintptr_t)(uint32_t)(va + (int)(intptr_t)newBase),
+                     (void*)(uintptr_t)(uint32_t)(raw + (int)(intptr_t)fileBase),
+                     (size_t)rsize);
+    }
+    base_ = (intptr_t)newBase;
+    int32_t lfanew = ld<int32_t>((void*)((uint8_t*)newBase + 0x3c));
+    nt_ = (intptr_t)newBase + lfanew;
+    sections_ = nt_ + 0x108;
+}
+
+// 140509990
+int CPEImage::Load(void* fileBase, uint32_t fileSize, SLoadSeams& s) {
+    if (image_ != 0) return 0;                       // +0x10 already occupied
+    if (AttachImage(fileBase, fileSize) == 0) return 0;
+    int size = GetMaxAlignedSize();
+    if (size == 0) return 0;
+    void* img = s.Alloc((size_t)size);
+    if (img == nullptr) return 0;
+    CopySections(img, fileBase);
+    if (ld<int32_t>((void*)(nt_ + 0xb0)) != 0 && ld<int32_t>((void*)(nt_ + 0xb4)) != 0)
+        ApplyRelocations((intptr_t)img);
+    if (s.ResolveImports(this, img) == 0) {
+        s.Free(img);
+        return 0;
+    }
+    s.Protect(img, (size_t)size, 0x40);
+    st<intptr_t>((void*)(nt_ + 0x30), (intptr_t)img);
+    intptr_t entry = (intptr_t)img + ld<int32_t>((void*)(nt_ + 0x28));
+    entry_ = entry;
+    if (s.CallEntry(entry, img, 1, 0) != 0) {
+        loaded_ = 1;
+        image_ = (intptr_t)img;
+        return 1;
+    }
+    s.CallEntry(entry, img, 0, 0);
+    s.Free(img);
+    entry_ = 0;
+    return 0;
+}
 } // namespace msg
