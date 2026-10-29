@@ -37,7 +37,7 @@
 
 | الكلاس | vtable | الفتحات |
 |---|---|---|
-| `CMsgLeagueConcubinesInfoPB` | `0x1418415e8` | 12 — **8 منقولة** (0-6,10,11)، متبقٍ 7/8/9 |
+| `CMsgLeagueConcubinesInfoPB` | `0x1418415e8` | 12 — **10 منقولة** (0-6,8,9,10,11)، متبقٍ 7 فقط (Merge) |
 | `CMsgLeagueConcubinesPB` | `0x141841748` | 12 |
 | `CMsgLeagueOrderStatusInfoPB` | `0x1418419c8` | 12 |
 | `CMsgLeagueOrderStatusPB` | `0x141841b48` | 12 |
