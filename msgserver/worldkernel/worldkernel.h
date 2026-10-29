@@ -113,6 +113,45 @@ struct SWorldKernelSeams {
 };
 // RAW addresses every member as param_1[i] on a pointer array, so m_Q[i] is
 // byte offset i*8 exactly as in the disassembly.
+// --- second half of the world kernel (140055450, 140058540, 1400605b0, 1400641b0)
+class SDbRowSet {                    // pure interface: RAW uses the MFC rowset
+public:                              // COM vtable at these exact slots
+    virtual void Release() = 0;                  // vt+0x00
+    virtual void* Column(int idx) = 0;           // vt+0x20
+    virtual void SeekRow(int idx) = 0;           // vt+0x30
+    virtual int  RowCount() = 0;                 // vt+0x40
+    virtual int  Int() = 0;                      // vt+0x48
+    virtual const char* Str() = 0;               // vt+0x78
+    virtual ~SDbRowSet() {}
+};
+struct SWorldSeams2 {
+    void* (*LoadCfg)(int id, int a, void* b, void* c);          // FUN_140006ad0
+    void  (*OnLogin)(void*, uint32_t, uint32_t, uint16_t, const uint16_t*);  // 140056130
+    void  (*OnConnect)(void*, uint32_t, uint32_t, const uint16_t*, uint32_t);// 14005f320
+    void  (*OnConnectFB)(void*, uint32_t, uint32_t, uint32_t, const uint16_t*, int); // 14007e700
+    void  (*OnFee)(void*, uint32_t, char);                       // 140056240
+    void  (*OnQueryFee)(void*, uint32_t, uint32_t, uint32_t, char);// 14005e8b0
+    void  (*OnWebRequest)(void*, const uint16_t*, const uint16_t*, uint32_t, uint32_t); // 1400562c0
+    void  (*OnOfflineCheat)(void*, uint32_t, uint32_t);           // 1400563a0
+    void  (*OnTransfer)(void*, uint16_t, uint16_t, const uint16_t*); // 140058680
+    void  (*OnJailEx)(void*, uint16_t*);                          // 1400564b0
+    const char* (*BotSinName)();                                  // theInstance()->GetString
+    void  (*IpReset)(void* table);                                // 14005fa10
+    void  (*IpInsert)(void* table, const uint32_t* range);        // 140062800
+    int   (*Sscanf4x2)(const char* src, void* a, void* b);        // sscanf "%u.%u.%u.%u %u.%u.%u.%u"
+    void  (*LogNullNpcCgs)();
+    void  (*LogNpcType)(uint32_t npcId);
+    void  (*LogVersionCfgFail)();
+    void  (*LogVersion)(int v);
+    void  (*LogLoginSize)(int);      void (*LogConnectSize)(int);
+    void  (*LogConnectFBSize)(int);  void (*LogFeeSize)(int);
+    void  (*LogQueryFeeSize)(int);   void (*LogWebReqSize)(int);
+    void  (*LogOfflineSize)(int);    void (*LogTransferSize)(int);
+    void  (*LogJailSize)(int);
+    void  (*Log)(const char* fmt, unsigned v);
+    void  (*Post)(void* th, uint32_t ch, uint32_t msg, uint32_t len, const void* body);
+};
+
 class CWorldKernel {
 public:
     void* m_Q[0x60];
@@ -120,6 +159,11 @@ public:
     int     SendMsg(uint32_t msgId, int type, const void* body, int len,
                     SWorldKernelSeams& s);
     void    Destruct(SWorldKernelSeams& s);
+    int     SendNpcMsg2(uint32_t npcId, int type, const void* body, int len,
+                        SWorldSeams2& s);
+    uint8_t LoadGameVersionCfg(SWorldSeams2& s);
+    uint8_t ProcessAccountMsg2(const uint16_t* m, SWorldSeams2& s);
+    int     LoadIpConfig(SWorldSeams2& s);
 };
 }
 #endif

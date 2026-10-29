@@ -154,4 +154,111 @@ void CWorldKernel::Destruct(SWorldKernelSeams& s) {
     s.Dtor210(&m_Q[0x02]); s.Free(m_Q[0x02]);
     m_Q[0] = nullptr;
 }
+}
+namespace msg {
+// 140055450 — no length guard at all (unlike CMapGroupKernel::SendNpcMsg) and
+// the null message text still says CGameSocket::SendMsg.
+int CWorldKernel::SendNpcMsg2(uint32_t npcId, int type, const void* body, int len,
+                              SWorldSeams2& s) {
+    if (body == nullptr) { s.LogNullNpcCgs(); return 0; }
+    if (type == 0)       { s.LogNpcType(npcId); return 0; }
+    uint8_t frame[0x418];
+    *(uint32_t*)(frame + 0) = npcId;
+    *(int*)(frame + 4)      = type;
+    *(int*)(frame + 8)      = len;
+    std::memcpy(frame + 12, body, (size_t)len);
+    s.Post(m_Q[0x0a], 1, 0x7534, 0x418, frame);
+    return 1;
+}
+// 140058540 — the version lands at this+0x1f4 (500).
+uint8_t CWorldKernel::LoadGameVersionCfg(SWorldSeams2& s) {
+    SDbRowSet* rs = (SDbRowSet*)s.LoadCfg(50000, 1, nullptr, nullptr);
+    if (rs == nullptr) { s.LogVersionCfgFail(); return 0; }
+    if (rs->RowCount() == 0) {
+        s.LogVersionCfgFail();
+        rs->Release();
+        return 0;
+    }
+    void* col = rs->Column(2);
+    *(uint32_t*)((uint8_t*)this + 500) = ((SDbRowSet*)col)->Int();
+    s.LogVersion(*(uint32_t*)((uint8_t*)this + 500));
+    rs->Release();
+    return 1;
+}
+// 1400605b0 — account frame dispatcher; every branch compares the 16-bit
+// leading size against sizeof(CMsg*_A::MSG_Info) and logs its own text.
+uint8_t CWorldKernel::ProcessAccountMsg2(const uint16_t* m, SWorldSeams2& s) {
+    if (m == nullptr) return 0;
+    switch (m[1]) {
+    case 0x3ea:
+        if (m[0] == 0x20) { s.OnLogin(this, *(const uint32_t*)(m + 2),
+                                      *(const uint32_t*)(m + 4), m[6], m + 7); return 1; }
+        s.LogLoginSize((int)m[0]); return 0;
+    case 0x41c:
+        if (m[0] == 0x1c) { s.OnConnect(this, *(const uint32_t*)(m + 2),
+                                        *(const uint32_t*)(m + 4), m + 6, 0); return 1; }
+        s.LogConnectSize((int)m[0]); return 0;
+    case 0x429:
+        if (m[0] == 0xb0) { s.OnConnectFB(this, *(const uint32_t*)(m + 2),
+                                          *(const uint32_t*)(m + 4), *(const uint32_t*)(m + 6),
+                                          m + 8, 0); return 1; }
+        s.LogConnectFBSize((int)m[0]); return 0;
+    case 0x4b0:
+        if (m[0] == 0xc) { s.OnFee(this, *(const uint32_t*)(m + 2), (char)m[4]); return 1; }
+        s.LogFeeSize((int)m[0]); return 0;
+    case 0x4b1:
+        if (m[0] == 0x14) { s.OnQueryFee(this, *(const uint32_t*)(m + 2),
+                                         *(const uint32_t*)(m + 4),
+                                         *(const uint32_t*)(m + 6), (char)m[8]); return 1; }
+        s.LogQueryFeeSize((int)m[0]); return 0;
+    case 0x4b2:
+        if (m[0] == 0x1ec) { s.OnWebRequest(this, m + 2, m + 0x12,
+                                            *(const uint32_t*)(m + 0x52),
+                                            *(const uint32_t*)(m + 0x54)); return 1; }
+        s.LogWebReqSize((int)m[0]); return 0;
+    case 0x5fc:
+        if (m[0] == 0xc) { s.OnOfflineCheat(this, *(const uint32_t*)(m + 2),
+                                            *(const uint32_t*)(m + 4)); return 1; }
+        s.LogOfflineSize((int)m[0]); return 0;
+    case 0x609:
+        if (7 < m[0]) { s.OnTransfer(this, m[2], m[0], m + 3); return 1; }
+        s.LogTransferSize((int)m[0]); return 0;
+    case 0x643: {
+        if (m[0] != 0x38) { s.LogJailSize((int)m[0]); return 0; }
+        if (*(const char*)((const uint8_t*)m + 0x15) == 0)      // RAW writes into
+            std::strncpy((char*)((uint8_t*)m + 0x15), s.BotSinName(), 0x21);
+        s.OnJailEx(this, (uint16_t*)m);
+        return 1;
+    }
+    default: return 0;
+    }
+}
+// 1400641b0 — parses "a.b.c.d e.f.g.h" per record; anything else logs the
+// record's own u16 id. Returns 1 even when the config object is missing.
+int CWorldKernel::LoadIpConfig(SWorldSeams2& s) {
+    s.IpReset((uint8_t*)this + 0x1b0);
+    SDbRowSet* rs = (SDbRowSet*)s.LoadCfg(20000, 0, nullptr, nullptr);
+    if (rs != nullptr) {
+        int i = 0;
+        for (int n = rs->RowCount(); i < n; n = rs->RowCount()) {
+            rs->SeekRow(i);
+            void* col = rs->Column(7);
+            const char* src = ((SDbRowSet*)col)->Str();
+            uint32_t f[8] = {0};
+            if (s.Sscanf4x2(src, f, f + 4) == 8) {
+                uint32_t lo = ((f[0] << 8 | f[1]) << 8 | f[2]) << 8 | f[3];
+                uint32_t hi = ((f[4] << 8 | f[5]) << 8 | f[6]) << 8 | f[7];
+                uint32_t range[2] = { lo, hi };
+                s.IpInsert((uint8_t*)this + 0x1b0, range);
+            } else {
+                void* c0 = rs->Column(0);
+                s.Log("CWorldKernel::LoadIpConfig bad config record %u",
+                      (unsigned)((SDbRowSet*)c0)->Int());
+            }
+            i++;
+        }
+        rs->Release();
+    }
+    return 1;
+}
 } // namespace msg
