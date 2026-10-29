@@ -106,4 +106,41 @@ done:
     *lenOut = *(uint32_t*)(raw_ + 0x1028);
     return raw_ + 0x28;
 }
+
+// the shared reset tail: socket -1, state 0, +0x1028 0, pending length 0
+void CAsyncDBThread::ResetLink() {
+    *(intptr_t*)(raw_ + 0x20) = -1;
+    *(int32_t*)(raw_ + 0x2030) = 0;
+    *(int32_t*)(raw_ + 0x1028) = 0;
+    *(int32_t*)(raw_ + 0x202c) = 0;
+}
+
+// 140006880
+int CAsyncDBThread::SendPacket(const void* data, int size, char flush, SAsyncDbSeams& s) {
+    intptr_t* sock = (intptr_t*)(raw_ + 0x20);
+    int32_t*  pending = (int32_t*)(raw_ + 0x202c);
+    int32_t*  state = (int32_t*)(raw_ + 0x2030);
+    if (*state != 2) return 0;
+    if (*sock == -1) {
+        s.Log("SendPacket() invalid socket failed.");
+        // the RAW re-tests the handle it has just found to be -1: kept as-is
+        if (*sock != -1) s.Ordinal3((void*)*sock);
+    } else {
+        if (0x1000 < size + *pending) FlushPending(s);   // the result is ignored
+        if (*pending + size < 0x1001) {
+            std::memcpy(raw_ + 0x102c + *pending, data, (size_t)size);
+            *pending = *pending + size;
+            if (flush != '\0') return FlushPending(s) ? 1 : 0;
+            return 1;
+        }
+        s.Log("SendPacket() buf full!");
+        if (*sock != -1) {
+            s.Ordinal3((void*)*sock);
+            ResetLink();
+            return 0;
+        }
+    }
+    ResetLink();
+    return 0;
+}
 } // namespace msg

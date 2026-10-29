@@ -36,6 +36,10 @@ public:
     bool FlushPending(SAsyncDbSeams& s);
     // 140006730 — the packet fetch: returns +0x28 (or null) and the length out
     void* GetPacket(uint32_t* lenOut, char fill, SAsyncDbSeams& s);
+    // 140006880 — SendPacket: appends to the 0x1000-byte pending buffer at
+    // +0x102c and optionally flushes. Non-2 state refuses, -1 socket logs and
+    // resets, a full buffer logs, closes and resets.
+    int  SendPacket(const void* data, int size, char flush, SAsyncDbSeams& s);
 
     // layout (bytes as used by the ported members)
     //  +0x0000 vftable
@@ -47,6 +51,9 @@ public:
     //  +0x202c pending flush length
     //  +0x2030 state (2 = connected/running)
     uint8_t  raw_[0x2034];
+
+    // the shared reset tail used by SendPacket
+    void ResetLink();
 
     static CAsyncDBThread*& InstanceRef(SAsyncDbSeams& s);
 };

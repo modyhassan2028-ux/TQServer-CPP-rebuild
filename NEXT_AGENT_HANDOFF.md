@@ -2198,3 +2198,25 @@ PointerToRawData` لازم يقعوا جوه الملف.
 - **الخطوة الجاية:** نقل `CMsgServerDlg::OnTimer` كوحدة واحدة من
   `Docs/decomp_split/140024860.c` (الملف كامل بدون قص)، مع خريطة سويتش
   الـtimer ids وتجربة على الأقل لكل فرع.
+
+## أ-9ر — CAsyncDBThread::SendPacket [2026-10-29]
+
+`140006880` = `SendPacket(data, size, flush)` — منقولة كاملة:
+- `state(+0x2030) != 2` → صفر بدون أي تسجيل.
+- `sock(+0x20) == -1` → تسجيل `SendPacket() invalid socket failed.`
+  وبعدها **إعادة فحص للحظة اللي إحنا لسه متأكدين إنها -1** (فرع ميت في
+  الأصل) — محفوظ زي ما هو.
+- `0x1000 < size + pending(+0x202c)` → flush **بدون النظر للنتيجة**؛
+  وبعدها `pending + size < 0x1001` → `memcpy` عند `+0x102c+pending`،
+  زيادة الطول، و`flush` اختياري بيرجّع نتيجته.
+- غير كده: تسجيل `SendPacket() buf full!` + `closesocket` + تصفير
+  (`sock=-1`, state, `+0x1028`, pending).
+- **تحقق مهم:** مسار buf-full ما بيوصلش إلا لو الـpre-flush **جزئي**
+  (sent < pending) — الفلاش الكامل بيفرّغ الطول فالمسار بيتخطى. ده
+  اختبرناه صراحةً.
+
+**اختبار:** `msg_asyncdb3_test` 19 تأكيدًا ×6 — **الرجريجن 100/100 ×6**.
+
+**ملاحظة أدوات:** تعديل الـheader بيفصل `InstanceRef` للـprivate فيكسر
+`msg_asyncdb_test` القديم (بيتحول SKIP مش FAIL) — راجع `PASS/SKIP` بعد
+أي تعديل على `asyncdbthread.h`.
