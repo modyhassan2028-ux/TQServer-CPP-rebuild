@@ -135,4 +135,112 @@ int CPEImage::Load(void* fileBase, uint32_t fileSize, SLoadSeams& s) {
     entry_ = 0;
     return 0;
 }
+
+// 1405095a0 — resolves every import descriptor. The DLL name is copied into a
+// 256-byte buffer (a name of 0x100 or more fails the load), then each thunk is
+// resolved by name (hint byte skipped with +2) or by ordinal (high bit set).
+int CPEImage::ResolveImports(void* img, SImportSeams& s) {
+    intptr_t nt = nt_;
+    uint32_t dirRva = ld<uint32_t>((void*)(nt + 0x90));        // import directory RVA
+    if (dirRva == 0) return 1;
+    uint8_t* image = (uint8_t*)img;
+    intptr_t desc = (intptr_t)image + dirRva;
+    uint32_t oft = ld<uint32_t>((void*)desc);                  // OriginalFirstThunk
+    while (oft != 0) {
+        uint32_t nameRva = ld<uint32_t>((void*)(desc + 0x0c));
+        uint32_t firstThunk = ld<uint32_t>((void*)(desc + 0x10));
+        char dll[256];
+        const char* src = (const char*)(image + nameRva);
+        size_t n = 0;
+        dll[0] = '\0';
+        while (src[n] != '\0') {
+            dll[n] = src[n];
+            n++;
+            if (n > 0xff) return 0;
+        }
+        dll[n] = '\0';
+        void* mod = s.GetModuleHandleA(dll);
+        if (mod == nullptr) return 0;
+        intptr_t thunk = (intptr_t)image + oft;
+        for (uint32_t i = 0;; i++) {
+            uint64_t ent = ld<uint64_t>((void*)(thunk + (intptr_t)i * 8));
+            if (ent == 0) break;
+            void* fn;
+            if ((ent & 0x8000000000000000ull) == 0)
+                fn = s.GetProcAddress(mod, (const char*)(image + (uintptr_t)ent + 2));
+            else
+                fn = s.GetProcAddressOrdinal(mod, (uint16_t)(ent & 0xffff));
+            if (fn == nullptr) return 0;
+            st<uint64_t>((void*)((intptr_t)image + firstThunk + (intptr_t)i * 8),
+                         (uint64_t)(uintptr_t)fn);
+        }
+        desc += 0x14;
+        oft = ld<uint32_t>((void*)desc);
+    }
+    return 1;
+}
+
+// 140509380 — a value below 0x10000 is treated as an ordinal (the export Base
+// is subtracted, the function table is bounds-checked and the RVA must fall
+// outside the export directory itself), anything wider is a name pointer that
+// is matched against the AddressOfNames table.
+intptr_t CPEImage::LookupExport(uintptr_t nameOrOrdinal) {
+    intptr_t nt = nt_;
+    if (nt == 0) return 0;
+    intptr_t image = image_;
+    uint32_t dirRva = ld<uint32_t>((void*)(nt + 0x88));
+    uint32_t dirSize = ld<uint32_t>((void*)(nt + 0x8c));
+    if (dirRva == 0 || dirSize == 0 || loaded_ == 0) return 0;
+    intptr_t dir = image + (intptr_t)dirRva;
+    if ((nameOrOrdinal & 0xffff0000) == 0) {
+        uint32_t baseVal = ld<uint32_t>((void*)(dir + 0x10));
+        uint32_t ord = (uint32_t)(0xffff - baseVal) & (uint32_t)nameOrOrdinal;
+        if ((int32_t)ord >= 0 && (int32_t)ord < ld<int32_t>((void*)(dir + 0x14))) {
+            int32_t aof = ld<int32_t>((void*)(dir + 0x1c));
+            uint32_t rva = ld<uint32_t>((void*)(image + aof + (intptr_t)ord * 4));
+            if (rva <= dirRva || dirSize + dirRva <= rva) return image + (intptr_t)rva;
+        }
+        return 0;
+    }
+    int32_t nNames = ld<int32_t>((void*)(dir + 0x18));
+    if (nNames <= 0) return 0;
+    int32_t aon = ld<int32_t>((void*)(dir + 0x20));
+    int32_t aono = ld<int32_t>((void*)(dir + 0x24));
+    for (int32_t i = 0; i < nNames; i++) {
+        int32_t nameRva = ld<int32_t>((void*)(image + aon + (intptr_t)i * 4));
+        const char* nm = (const char*)(image + nameRva);
+        if (std::strcmp(nm, (const char*)nameOrOrdinal) != 0) continue;
+        uint16_t ord = ld<uint16_t>((void*)(image + aono + (intptr_t)i * 2));
+        if ((int32_t)ord >= 0 && (int32_t)ord < ld<int32_t>((void*)(dir + 0x14))) {
+            int32_t aof = ld<int32_t>((void*)(dir + 0x1c));
+            uint32_t rva = ld<uint32_t>((void*)(image + aof + (intptr_t)ord * 4));
+            if (rva <= dirRva || dirSize + dirRva <= rva) return image + (intptr_t)rva;
+        }
+        return 0;
+    }
+    return 0;
+}
+
+// 140508f60 — the only 3 objects the factory knows are DES (0x890) and the two
+// MD5 flavours (0x60); kind 3 leaves the out slot untouched (RAW quirk).
+int CPEImage::BootValidate(void* data, int32_t size, char decrypt,
+                           SLoaderSeams& s, CPEImage& img) {
+    if (data == nullptr || size <= 0) return 0;
+    if (((size + ((size >> 31) & 7)) & 7) != ((size >> 31) & 7)) return 0;
+    if (decrypt != 0) {
+        void* obj = s.CreateObject(0);
+        if (obj == nullptr) return 0;
+        s.CipherSetKey(obj, "*J_@'n 3");
+        s.CipherProcess(obj, data, (uint32_t)size);
+        s.CipherDestroy(obj);
+    }
+    if (s.LoadLibraryA("msvcp90.dll") == nullptr) s.Log("Cannot load msvcp90.dll");
+    if (s.LoadLibraryA("msvcr90.dll") == nullptr) s.Log("Cannot load msvcr90.dll");
+    if (s.ParseImage(&img, data, (uint32_t)size) == 0) return 0;
+    if (img.LookupExport((uintptr_t)"CreateMapGroup") == 0) return 0;
+    if (img.LookupExport((uintptr_t)"CreateWorldKernel") == 0) return 0;
+    if (img.LookupExport((uintptr_t)"CreateNewMapData") == 0) return 0;
+    if (img.LookupExport((uintptr_t)"CreateMapGroupDefaultData") == 0) return 0;
+    return 1;
+}
 } // namespace msg

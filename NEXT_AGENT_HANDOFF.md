@@ -2142,3 +2142,26 @@ PointerToRawData` لازم يقعوا جوه الملف.
 `VirtualAlloc` بالظبط؛ الاختبار بيرسم الذاكرة تحت بعنوان منخفض عشان كده.
 
 **اختبار:** 39 تأكيدًا ×6 — **الرجريجن 97/97 ×6**.
+
+## أ-9ف — Imports/Exports + مدخل اللودر (3 دوال) [2026-10-29]
+
+- `1405095a0` ResolveImports: بيلف descriptors بخطوة `0x14`، بينسخ اسم
+  الـDLL في بافر 256 (اسم ≥ `0x100` → فشل)، وكل thunk إما بالاسم
+  (`image + ent + 2`، تخطي بايت الـhint) أو بالترتيب (البت الأعلى مظبوط
+  → `ent & 0xffff`)، وبيكتب الناتج في slot الـ`FirstThunk`. أي فشل → 0.
+- `140509380` LookupExport: قيمة `< 0x10000` تعتبر ترتيب: `idx =
+  (0xffff - Base) & ord`، تشيك حدود على `NumberOfFunctions`، وبعدين
+  الـRVA **مقبول لو ≤ dirRva أو ≥ dirRva+dirSize** (يعني المرفوض هو اللي
+  جوه الدليل بس — quirk محفوظ). القيمة الأوسع = مؤشر اسم → بحث في
+  `AddressOfNames` و`AddressOfNameOrdinals`.
+- `140508f60` BootValidate: بوابة حجم موجب ومضاعف 8 (بمعاملة الإشارة
+  `size + ((size>>31)&7)`)، فك تشفير اختياري بـ DES (setkey →
+  process → destroy)، تحميل `msvcp90.dll`/`msvcr90.dll` (فشلهم **تسجيل
+  بس**)، ثم لازم الأربعة: `CreateMapGroup`, `CreateWorldKernel`,
+  `CreateNewMapData`, `CreateMapGroupDefaultData`.
+
+**نقطة متسابة:** التجميع `140509280` (مصنع DES/MD5، والنوع 3 بيسيب
+الـslot من غير لمس) لسه متغطي بـseam في الاختبار — جسمه كامل ومتاح
+للنقل في دفعة جاية مع `14050a570` (باني MD5).
+
+**اختبار:** 25 تأكيدًا ×6 — **الرجريجن 98/98 ×6**.
