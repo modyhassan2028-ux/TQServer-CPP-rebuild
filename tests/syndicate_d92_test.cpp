@@ -1,283 +1,247 @@
-// D92 — the CSyndicateLogic table wave 2 (slots
-// +0x0b0..+0x140) — the consolidated batch test.
-#include "modules/syndicate/src/syndicatelogic.h"
+// D92 — the protobuf message family (six classes, 6 slots each)
+#include "modules/syndicate/src/CMsgLeagueConcubinesPB.h"
+#include "modules/syndicate/src/CMsgLeagueOrderStatusInfoPB.h"
+#include "modules/syndicate/src/CMsgLeagueOrderStatusPB.h"
+#include "modules/syndicate/src/CMsgLeagueRobItemPB.h"
+#include "modules/syndicate/src/CMsgLeagueRobListPB.h"
+#include "modules/syndicate/src/CMsgOverheadLeagueInfoPB.h"
+#include "modules/syndicate/src/CMsgPBCommon.h"
+#include "modules/syndicate/src/CMsgPBMemberDtors.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>
+#include <new>
+#include <string>
+
 using namespace syndicate;
 
-// ---- the fixture (the same real-map shape as d90) ----
-static uint8_t abLogic[0x60];
-static void* apLogicVt[160];
-static void* apBoxVt[160];
-static void* apBox[1];
-static uint8_t abMember[0x20];
-static uint8_t abRecBox[0x20];
-static uint8_t abMemNode[0x40], abMemHead[0x40],
-    abMemAnchor[0x40];
-static void* apMemMap[8];
-static uint8_t abMemMgr[0x40];
-static uint8_t abLogNode[0x40], abLogHead[0x40],
-    abLogAnchor[0x40];
-static void* apLogMap[8];
-
-static void BuildMap(void** apMap, uint8_t* pHead,
-                     uint8_t* pNode, uint8_t* pAnchor,
-                     uint32_t uKey, void* pVal) {
-    memset(pNode, 0, 0x40);
-    *(void**)pNode = pHead;
-    *(void**)(pNode + 0x10) = pHead;
-    *(void**)(pNode + 8) = pHead;
-    *(uint32_t*)(pNode + 0x18) = uKey;
-    ((char*)pNode)[0x29] = 0;
-    *(void**)(pNode + 0x20) = pVal;
-    memset(pHead, 0, 0x40);
-    ((char*)pHead)[0x29] = 1;
-    *(void**)(pHead + 8) = pNode;
-    memset(pAnchor, 0, 0x40);
-    *(void**)pAnchor = pAnchor;
-    *(void**)(pAnchor + 0x30) = pHead;
-    apMap[0] = pAnchor;
-    apMap[6] = pHead;
-}
-
-// ---- the recording state ----
-static int s_nKick, s_nSetA, s_nSetB, s_nSetC, s_nClr;
-static int s_nRankA, s_nRankB, s_nUpd, s_nLeave;
-static int s_nCtyPush, s_nFwdA, s_nFwdB, s_nFwdC;
-static int s_nClearA, s_nClearB, s_nLgTest, s_nLgZ;
-static uint64_t s_uRetX, s_uRetY, s_uRetZ, s_uRec;
-static int s_nE8, s_nF0, s_nTalk, s_nLog;
-static uint32_t s_uCtyOp;
-static char s_acTalk[64];
-static CSyndicateLogic* pL = (CSyndicateLogic*)abLogic;
+static int s_nFree;
+static void* s_pFreed;
+static unsigned char* g_pStackObj;   // stack objects must not be freed
+static int s_n8050;
+static int s_nElemClear, s_nElemIsInit;
+static char s_cIsInitRet;
 
 static void Reset() {
-    memset(abLogic, 0, sizeof(abLogic));
-    memset(apLogicVt, 0, sizeof(apLogicVt));
-    memset(apBoxVt, 0, sizeof(apBoxVt));
-    BuildMap(apMemMap, abMemHead, abMemNode,
-             abMemAnchor, 5, abMember);
-    memset(abMemMgr, 0, sizeof(abMemMgr));
-    *(void**)(abMemMgr + 8) = apMemMap;
-    *(void**)(abMemMgr + 0x38) = apMemMap;
-    BuildMap(apLogMap, abLogHead, abLogNode,
-             abLogAnchor, 5, abRecBox);
-    apBox[0] = apBoxVt;
-    *(void**)(abLogic + 8) = apBox;
-    *(void**)(abLogic + 0) = apLogicVt;
-    *(void**)(abLogic + 0x10) = (void*)0x22;
-    *(void**)(abLogic + 0x18) = apLogMap;
-    *(void**)(abLogic + 0x50) = (void*)0x55;
-    s_nKick = s_nSetA = s_nSetB = s_nSetC = 0;
-    s_nClr = s_nRankA = s_nRankB = s_nUpd = 0;
-    s_nLeave = s_nCtyPush = s_nFwdA = s_nFwdB = 0;
-    s_nFwdC = s_nClearA = s_nClearB = 0;
-    s_nLgTest = s_nLgZ = s_nE8 = s_nF0 = 0;
-    s_nTalk = s_nLog = 0; s_uCtyOp = 0;
-    s_uRetX = s_uRetY = s_uRetZ = s_uRec = 0;
-    // the default seam binds
-    g_fnLgFind = [](void*, uint32_t) -> int64_t {
-        return 0x30; };
-    g_fnLgFindB = [](void*, uint32_t) -> char {
-        return 1; };
-    g_fnLgClearA = [](void*) { s_nClearA++; };
-    g_fnLgClearB = [](void*) { s_nClearB++; };
-    g_fnLgRankUpd = [](void*, void*, void*, uint32_t)
-        -> uint64_t { s_nUpd++; return 0x200; };
-    g_fnCtyFind = [](void*, uint32_t) -> int64_t {
-        return 0; };
-    g_fnCtyPush = [](void*, uint32_t u, int32_t op,
-                     int32_t) {
-        s_nCtyPush++; s_uCtyOp = op; (void)u; };
-    g_fnCtyFwdA = [](void*, uint32_t, int16_t, uint32_t)
-        { s_nFwdA++; };
-    g_fnCtyFwdB = [](void*, uint32_t, int32_t, uint32_t)
-        { s_nFwdB++; };
-    g_fnCtyFwdC = [](void*, uint32_t, int16_t, uint32_t)
-        { s_nFwdC++; };
-    g_fnRecKick = [](void*) { s_nKick++; };
-    g_fnRecSetA = [](void*, int32_t) { s_nSetA++; };
-    g_fnRecSetB = [](void*, int32_t) { s_nSetB++; };
-    g_fnRecSetC = [](void*, int32_t) { s_nSetC++; };
-    g_fnRecClr = [](void*) { s_nClr++; };
-    g_fnRecGetX = [](void*, int32_t)
-        -> uint64_t { return 0x77; };
-    g_fnRecChk = [](void*, int32_t)
-        -> uint64_t { return 1; };
-    g_fnRecGetRank = [](void*)
-        -> uint64_t { return 0x3de; };
-    g_fnRecIsLeader = [](void*) -> char { return 0; };
-    g_fnA84GetSynId2 = [](void*)
-        -> uint64_t { return 0x8899; };
-    g_fnRankSetA = [](void*, void*, int32_t) {
-        s_nRankA++; };
-    g_fnRankSetB = [](void*, void*, int32_t, uint32_t,
-                      char) { s_nRankB++; };
-    g_fnLgTest = [](void*, char) -> char {
-        s_nLgTest++; return 1; };
-    g_fnLgGetX = [](void*)
-        -> uint64_t { return s_uRetX; };
-    g_fnLgGetY = [](void*)
-        -> uint64_t { return s_uRetY; };
-    g_fnLgZ = [](void*, char)
-        -> uint64_t { return s_uRetZ; };
-    g_fnLeaveSyn = [](void*, void*, void*,
-                     const char* pc, char, char, char)
-        -> uint64_t {
-        s_nLeave++;
-        return strcmp(pc, "LeaveSyn") ? 0 : 0x11; };
-    g_fnT1LogError = [](const char*) { s_nLog++; };
-    g_fnStringMgrInstance =
-        []() -> void* { return (void*)0x11; };
-    g_fnStringMgrGetStr = [](void*, const char* pc)
-        -> void* {
-        return (void*)pc; };
-    g_fnA84HasOldPos = [](void*) -> char {
-        return 0; };
-    g_fnA84GetOldId = [](void*) -> uint32_t {
-        return 0; };
-    g_fnT1IsConfirmed = [](void*) -> uint64_t {
-        return 0; };
-    apBoxVt[0x4a8 / 8] = (void*)+[](void*,
-        uint32_t) -> uint32_t { return 7; };
-    apBoxVt[0x328 / 8] = (void*)+[](void*,
-        uint32_t) -> uint32_t { return 0x999; };
-    apBoxVt[0x18 / 8] = (void*)+[](void*, uint32_t,
-        const void* pc) -> uint64_t {
-        strncpy(s_acTalk, (const char*)pc, 63);
-        s_nTalk++; return 0x40; };
-    apLogicVt[0xe8 / 8] = (void*)+[](void*,
-        uint32_t, uint64_t, char) -> uint64_t {
-        s_nE8++; return 0x700; };
-    apLogicVt[0xf0 / 8] = (void*)+[](void*, uint32_t,
-        int32_t) -> uint64_t {
-        s_nF0++; return 0x300; };
+    s_nFree = 0; s_pFreed = nullptr; s_n8050 = 0;
+    s_nElemClear = s_nElemIsInit = 0;
+    s_cIsInitRet = 1;
+    g_pfnPbFree = [](void* p) {
+        s_nFree++; s_pFreed = p;
+        if (p != g_pStackObj) ::operator delete(p);
+    };
+    g_pfnPb8050 = []() -> uint64_t { s_n8050++; return 0; };
+    static std::string sEmpty;
+    g_pPbDefaultStr = (void*)&sEmpty;
+}
+
+// ---- the fake element used by the vector sweeps ----
+static void ElemClear(void*) { s_nElemClear++; }
+static uint64_t ElemIsInit(void*) { s_nElemIsInit++; return (uint64_t)(uint8_t)s_cIsInitRet; }
+static void* apElemVt[8];
+
+static void BuildElemVec(unsigned char* p, void* pData,
+                         unsigned char** apElems, int n) {
+    for (int i = 0; i < n; i++) apElems[i][0] = 0;
+    for (int i = 0; i < n; i++) *(void**)apElems[i] = (void*)apElemVt;
+    *(void**)(p + 0x38) = pData;
+    *(int32_t*)(p + 0x40) = n;
 }
 
 int main() {
-    // ---- S1: Slot0b0 the syn-id gate ----
+    apElemVt[0x18 / 8] = (void*)ElemClear;
+    apElemVt[0x20 / 8] = (void*)ElemIsInit;
+    alignas(16) static unsigned char abObj[0x80];
+    g_pStackObj = abObj;
+
+    // ================= S1: CMsgLeagueConcubinesPB =================
     Reset();
-    assert(pL->Slot0b0GetSynId(0) == 0 && s_nLog == 1);
-    assert(pL->Slot0b0GetSynId(5) == 0x8899);
-    g_fnLgFindB = [](void*, uint32_t) -> char {
-        return 0; };
+    memset(abObj, 0xAA, sizeof abObj);
+    void* pNew = CMsgLeagueConcubinesPB::New();
+    assert(pNew != nullptr);
+    CMsgLeagueConcubinesPB::DeleteDtor(pNew, 1);   // frees it again
+    {
+        // New allocated on the heap: rebuild in place to inspect the ctor
+        alignas(16) unsigned char abNew[0x80];
+        memset(abNew, 0, sizeof abNew);
+        new (abNew + 0x08) std::string();
+        CMsgLeagueConcubinesPB::Clear(abNew);   // must not crash on empty
+        assert(*(uint64_t*)(abNew + 0x38) == 0);
+        assert(*(uint32_t*)(abNew + 0x40) == 0);
+        assert(*(uint32_t*)(abNew + 0x44) == 0);
+        assert(*(uint32_t*)(abNew + 0x34) == 0);
+        assert(*(uint8_t*)(abNew + 0x50) == 0);
+        assert(*(uint32_t*)(abNew + 0x30) == 0);
+        assert(CMsgLeagueConcubinesPB::GetCachedSize(abNew) == 0);
+        *(uint32_t*)(abNew + 0x34) = 0x31;
+        assert(CMsgLeagueConcubinesPB::GetCachedSize(abNew) == 0x31);
+        assert(CMsgLeagueConcubinesPB::IsInitialized(abNew) == false);
+        *(uint8_t*)(abNew + 0x30) = 1;
+        assert(CMsgLeagueConcubinesPB::IsInitialized(abNew) == true);
+        ((std::string*)(abNew + 8))->~basic_string();
+    }
+    // the type name
+    {
+        alignas(16) unsigned char abName[64];
+        CMsgLeagueConcubinesPB::GetTypeName((std::string*)abName);
+        assert(!strcmp(((std::string*)abName)->c_str(),
+                       "CMsgLeagueConcubinesPB"));
+        ((std::string*)abName)->~basic_string();
+    }
+    // the dtor routes through the ported member body then frees
+    memset(abObj, 0, sizeof abObj);
+    new (abObj + 0x08) std::string();
+    CMsgLeagueConcubinesPB::DeleteDtor(abObj, 0);
+    // the member body ends by writing the MessageLite base vtable
+    assert(*(uintptr_t*)abObj == kMessageLiteVft);
+    CMsgLeagueConcubinesPB::DeleteDtor(abObj, 1);
+    assert(s_nFree == 2 && s_pFreed == abObj);
+
+    // ================= S2: the vector sweeps =================
     Reset();
-    g_fnLgFindB = [](void*, uint32_t) -> char {
-        return 0; };
-    assert(pL->Slot0b0GetSynId(5) == 0);
-    // ---- S2: Slot0b8 the kick ----
+    {
+        alignas(16) static unsigned char abC[0x80];
+        memset(abC, 0, sizeof abC);
+        new (abC + 0x08) std::string("x");
+        static unsigned char a1[16], a2[16];
+        void* apData[2] = { a1, a2 };
+        BuildElemVec(abC, apData, (unsigned char**)apData, 2);
+        CMsgLeagueConcubinesPB::Clear(abC);
+        assert(s_nElemClear == 2);
+        assert(*(int32_t*)(abC + 0x40) == 0);
+        CMsgLeagueConcubinesPB::IsInitialized(abC);
+        assert(s_nElemIsInit == 0);   // cleared -> bit 0 is gone
+        *(uint8_t*)(abC + 0x30) = 1;
+        BuildElemVec(abC, apData, (unsigned char**)apData, 2);
+        assert(CMsgLeagueConcubinesPB::IsInitialized(abC) == true);
+        assert(s_nElemIsInit == 2);   // last to first
+        s_cIsInitRet = 0;
+        assert(CMsgLeagueConcubinesPB::IsInitialized(abC) == false);
+        ((std::string*)(abC + 8))->~basic_string();
+    }
+
+    // ================= S3: CMsgLeagueOrderStatusInfoPB =================
     Reset();
-    pL->Slot0b8RecKick(9);
-    assert(s_nKick == 0);      // not found: silent
-    pL->Slot0b8RecKick(5);
-    assert(s_nKick == 1);
-    // ---- S3: Slot0c0 rec-found: set + fwd ----
+    {
+        alignas(16) unsigned char abI[0x80];
+        memset(abI, 0, sizeof abI);
+        new (abI + 0x08) std::string("y");
+        CMsgLeagueOrderStatusInfoPB::Clear(abI);
+        assert(*(uint32_t*)(abI + 0x38) == 0);
+        assert(*(uint32_t*)(abI + 0x3c) == 0);
+        assert(*(uint32_t*)(abI + 0x40) == 0);
+        assert(*(uint32_t*)(abI + 0x44) == 0);
+        assert(*(uint32_t*)(abI + 0x30) == 0);
+        assert(CMsgLeagueOrderStatusInfoPB::IsInitialized(abI) == false);
+        *(uint8_t*)(abI + 0x30) = 7;
+        assert(CMsgLeagueOrderStatusInfoPB::IsInitialized(abI) == true);
+        *(uint32_t*)(abI + 0x34) = 0x77;
+        assert(CMsgLeagueOrderStatusInfoPB::GetCachedSize(abI) == 0x77);
+        CMsgLeagueOrderStatusInfoPB::DeleteDtor(abI, 0);
+        assert(*(uintptr_t*)abI == kMessageLiteVft);
+    }
+
+    // ================= S4: CMsgLeagueOrderStatusPB =================
     Reset();
-    pL->Slot0c0RecSet5(5, 3);
-    assert(s_nSetA == 1 && s_nFwdA == 1);
-    // rec NOT found + cty find 0: NO push, but the
-    // fwd still fires (it is outside the if/else)
-    pL->Slot0c0RecSet5(6, 3);
-    assert(s_nCtyPush == 0 && s_nFwdA == 2);
-    g_fnCtyFind = [](void*, uint32_t) -> int64_t {
-        return 0x66; };
-    pL->Slot0c0RecSet5(6, 3);
-    assert(s_uCtyOp == 5 && s_nCtyPush == 1);
-    // ---- S4: Slot0c8 the same shape with 9 ----
+    {
+        alignas(16) static unsigned char abO[0x80];
+        memset(abO, 0, sizeof abO);
+        new (abO + 0x08) std::string("z");
+        static unsigned char b1[16];
+        void* apData[1] = { b1 };
+        BuildElemVec(abO, apData, (unsigned char**)apData, 1);
+        *(uint32_t*)(abO + 0x50) = 0x99;
+        CMsgLeagueOrderStatusPB::Clear(abO);
+        assert(*(uint32_t*)(abO + 0x50) == 0);   // dword in this class
+        assert(s_nElemClear == 1);
+        *(uint8_t*)(abO + 0x30) = 1;
+        BuildElemVec(abO, apData, (unsigned char**)apData, 1);
+        assert(CMsgLeagueOrderStatusPB::IsInitialized(abO) == true);
+        CMsgLeagueOrderStatusPB::DeleteDtor(abO, 0);
+        assert(*(uintptr_t*)abO == kMessageLiteVft);
+        ((std::string*)(abO + 8))->~basic_string();
+    }
+
+    // ================= S5: CMsgLeagueRobItemPB =================
     Reset();
-    pL->Slot0c8RecSet9(5, 4);
-    assert(s_nSetB == 1 && s_nFwdB == 1);
-    g_fnCtyFind = [](void*, uint32_t) -> int64_t {
-        return 0x66; };
-    pL->Slot0c8RecSet9(6, 4);
-    assert(s_uCtyOp == 9);
-    // ---- S5: the two clears ----
+    {
+        alignas(16) unsigned char abR[0x80];
+        memset(abR, 0, sizeof abR);
+        void* p = CMsgLeagueRobItemPB::New();   // the real ctor
+        assert(p != nullptr);
+        assert(*(uintptr_t*)p == CMsgLeagueRobItemPB::kClassVft);
+        assert(*(void**)((unsigned char*)p + 0x38) == g_pPbDefaultStr);
+        assert(*(uint32_t*)((unsigned char*)p + 0x34) == 0);
+        assert(*(uint32_t*)((unsigned char*)p + 0x40) == 0);
+        assert(*(uint32_t*)((unsigned char*)p + 0x30) == 0);
+        assert(s_n8050 == 1);   // the shared init ran
+        assert(CMsgLeagueRobItemPB::IsInitialized(p) == false);
+        *(uint8_t*)((unsigned char*)p + 0x30) = 3;
+        assert(CMsgLeagueRobItemPB::IsInitialized(p) == true);
+        *(uint32_t*)((unsigned char*)p + 0x40) = 0x5a;
+        CMsgLeagueRobItemPB::Clear(p);
+        assert(*(uint32_t*)((unsigned char*)p + 0x40) == 0);
+        assert(*(uint32_t*)((unsigned char*)p + 0x30) == 0);
+        CMsgLeagueRobItemPB::DeleteDtor(p, 1);
+        assert(s_nFree == 1 && s_pFreed == p);
+    }
+
+    // ================= S6: CMsgLeagueRobListPB =================
     Reset();
-    pL->Slot0d0LgClearA();
-    assert(s_nClearA == 1);
-    assert(pL->Slot0e0LgClearB() == 1 &&
-           s_nClearB == 1);
-    // ---- S6: Slot0d8 the leader swap ----
+    {
+        alignas(16) static unsigned char abL[0x80];
+        memset(abL, 0, sizeof abL);
+        new (abL + 0x08) std::string("w");
+        static unsigned char c1[16];
+        void* apData[1] = { c1 };
+        BuildElemVec(abL, apData, (unsigned char**)apData, 1);
+        CMsgLeagueRobListPB::Clear(abL);
+        assert(s_nElemClear == 1);
+        *(uint8_t*)(abL + 0x30) = 1;
+        BuildElemVec(abL, apData, (unsigned char**)apData, 1);
+        assert(CMsgLeagueRobListPB::IsInitialized(abL) == true);
+        CMsgLeagueRobListPB::DeleteDtor(abL, 0);
+        assert(*(uintptr_t*)abL == kMessageLiteVft);
+        ((std::string*)(abL + 8))->~basic_string();
+    }
+
+    // ================= S7: CMsgOverheadLeagueInfoPB =================
     Reset();
-    g_fnRecIsLeader = [](void*) -> char { return 0; };
-    assert(pL->Slot0d8LeaderSwap(5, 5) == 0);
-    g_fnRecIsLeader = [](void*) -> char {
-        return 1; };      // both leaders: 0x100
-    assert(pL->Slot0d8LeaderSwap(5, 5) == 0x100);
-    // A leader, B not: drive via the call order
-    // (both finds hit the same node — the RAW reads
-    // the leader flag per record; the counter
-    // distinguishes the two reads)
-    static int s_nLead = 0;
-    g_fnRecIsLeader = [](void*) -> char {
-        return ++s_nLead == 1; };
-    uint64_t uR = pL->Slot0d8LeaderSwap(5, 5);
-    assert((uR & 0xff) == 1);
-    assert(s_nRankA >= 1 && s_nRankB >= 1);
-    assert(s_nUpd >= 1);
-    // ---- S7: Slot0f0 the quit flow ----
-    Reset();
-    assert(pL->Slot0f0QuitSyn(5, 999999) == 0);
-    assert(pL->Slot0f0QuitSyn(6, 1000000) == 0);
-    s_uRetX = 0x1234;
-    assert(pL->Slot0f0QuitSyn(5, 1000000) == 0x700);
-    assert(s_nLgTest == 1 && s_nKick == 1 &&
-           s_nE8 == 1);
-    g_fnRecGetRank = [](void*) -> uint64_t {
-        return 5; };
-    assert(pL->Slot0f0QuitSyn(5, 1000000) == 0);
-    // ---- S8: Slot0f8 the rank-if-league ----
-    Reset();
-    assert(pL->Slot0f8GetRankIfLeague(0) == 0 &&
-           s_nLog == 1);
-    assert(pL->Slot0f8GetRankIfLeague(5) == 0x3de);
-    g_fnLgFind = [](void*, uint32_t) -> int64_t {
-        return 0; };
-    assert(pL->Slot0f8GetRankIfLeague(5) == 0);
-    // ---- S9: Slot100 quit-or-kick ----
-    Reset();
-    g_fnRecIsLeader = [](void*) -> char { return 1; };
-    assert(pL->Slot100QuitOrKick(5) == 0x40);
-    assert(s_nTalk == 1 &&
-           !strcmp(s_acTalk, "STR_NO_DISBAND"));
-    g_fnRecIsLeader = [](void*) -> char { return 0; };
-    assert(pL->Slot100QuitOrKick(5) == 0x11);
-    assert(s_nLeave == 1);
-    // ---- S10: Slot108 rec-set-6 ----
-    Reset();
-    assert(pL->Slot108RecSet6(0, 2) == 0 && s_nLog==1);
-    pL->Slot108RecSet6(5, 2);
-    assert(s_nSetC == 1 && s_nFwdC == 1);
-    g_fnCtyFind = [](void*, uint32_t) -> int64_t {
-        return 0x66; };
-    assert(pL->Slot108RecSet6(6, 2) == 1);
-    assert(s_uCtyOp == 6);
-    g_fnCtyFind = [](void*, uint32_t) -> int64_t {
-        return 0; };
-    assert(pL->Slot108RecSet6(6, 2) == 0);
-    // ---- S11: Slot110/128 the league getters ----
-    Reset();
-    s_uRetZ = 0x5a; s_uRetY = 0x5b;
-    assert(pL->Slot110LgZ(0, 1) == 0 && s_nLog == 1);
-    assert(pL->Slot110LgZ(5, 1) == 0x5a);
-    assert(pL->Slot128LgGetY(5) == 0x5b);
-    g_fnLgFind = [](void*, uint32_t) -> int64_t {
-        return 0; };
-    assert(pL->Slot128LgGetY(5) == 0);
-    // ---- S12: Slot130/138/140 the rec tails ----
-    Reset();
-    pL->Slot130RecClr(6);           // not found
-    assert(s_nClr == 0);
-    pL->Slot130RecClr(5);
-    assert(s_nClr == 1);
-    assert(pL->Slot138RecChkFwd(5, 8) == 0x301);
-    assert(s_nF0 == 1);
-    g_fnRecChk = [](void*, int32_t)
-        -> uint64_t { return 0; };
-    assert(pL->Slot138RecChkFwd(5, 8) == 0);
-    assert(pL->Slot140RecGetX(5, 8) == 0x77);
-    assert(pL->Slot140RecGetX(6, 8) == 0);
-    puts("SYNDICATE_D92_OK: the logic table wave 2");
+    {
+        void* p = CMsgOverheadLeagueInfoPB::New();
+        unsigned char* q = (unsigned char*)p;
+        assert(*(uintptr_t*)q == CMsgOverheadLeagueInfoPB::kClassVft);
+        assert(*(uint64_t*)(q + 0x48) == 0);
+        assert(*(uint32_t*)(q + 0x54) == 0);
+        assert(*(uint32_t*)(q + 0x58) == 0);
+        assert(*(uint8_t*)(q + 0x44) == 0);
+        assert(*(uint8_t*)(q + 0x45) == 0);
+        assert(*(uint32_t*)(q + 0x60) == 0);
+        assert(s_n8050 == 1);
+        assert(CMsgOverheadLeagueInfoPB::IsInitialized(p) == false);
+        *(uint8_t*)(q + 0x30) = 0x3f;
+        assert(CMsgOverheadLeagueInfoPB::IsInitialized(p) == true);
+        // the string-vector Clear at +0x48/+0x50
+        void* apStr[2];
+        apStr[0] = ::operator new(sizeof(std::string));
+        apStr[1] = ::operator new(sizeof(std::string));
+        new (apStr[0]) std::string("aa");
+        new (apStr[1]) std::string("bb");
+        *(void**)(q + 0x48) = apStr;
+        *(int32_t*)(q + 0x50) = 2;
+        *(uint32_t*)(q + 0x38) = 9;
+        CMsgOverheadLeagueInfoPB::Clear(p);
+        assert(*(int32_t*)(q + 0x50) == 0);
+        assert(*(uint32_t*)(q + 0x38) == 0);
+        assert(((std::string*)apStr[0])->empty());
+        assert(((std::string*)apStr[1])->empty());
+        assert(CMsgOverheadLeagueInfoPB::GetCachedSize(p) == 0);
+        ::operator delete(apStr[0]);
+        ::operator delete(apStr[1]);
+        CMsgOverheadLeagueInfoPB::DeleteDtor(p, 1);
+        assert(s_nFree == 1);
+    }
+
+    printf("SYNDICATE_D92_OK: the PB family\n");
     return 0;
 }

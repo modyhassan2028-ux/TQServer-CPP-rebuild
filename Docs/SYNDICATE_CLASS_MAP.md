@@ -38,12 +38,12 @@
 | الكلاس | vtable | الفتحات |
 |---|---|---|
 | `CMsgLeagueConcubinesInfoPB` | `0x1418415e8` | 12 — **10 منقولة** (0-6,8,9,10,11)، متبقٍ 7 فقط (Merge) |
-| `CMsgLeagueConcubinesPB` | `0x141841748` | 12 |
-| `CMsgLeagueOrderStatusInfoPB` | `0x1418419c8` | 12 |
-| `CMsgLeagueOrderStatusPB` | `0x141841b48` | 12 |
-| `CMsgLeagueRobItemPB` | `0x141841e08` | 12 |
-| `CMsgLeagueRobListPB` | `0x141841f68` | 12 |
-| `CMsgOverheadLeagueInfoPB` | `0x141842828` | 12 |
+| `CMsgLeagueConcubinesPB` | `0x141841748` | 12 — **6 منقولة** (dtor/نوع/New/Clear/Init/cached) |
+| `CMsgLeagueOrderStatusInfoPB` | `0x1418419c8` | 12 — **6 منقولة** |
+| `CMsgLeagueOrderStatusPB` | `0x141841b48` | 12 — **6 منقولة** |
+| `CMsgLeagueRobItemPB` | `0x141841e08` | 12 — **6 منقولة** |
+| `CMsgLeagueRobListPB` | `0x141841f68` | 12 — **6 منقولة** |
+| `CMsgOverheadLeagueInfoPB` | `0x141842828` | 12 — **6 منقولة** |
 
 ## مكتبات خارجية — مستثناة بقرار المشروع (21)
 

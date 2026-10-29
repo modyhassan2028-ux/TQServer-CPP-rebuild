@@ -6420,3 +6420,31 @@ adapter:: بدليل الباني. 15 تأكيدًا ×6، رجريجن 76/76.
 - 5 seams جديدة للكيت. الاختبار 12 قسماً (حدود 0x7f، النص
   المتداخل، المنطقي، الحقل 10، الحقلان inline/heap للمجهول)،
   و**124/124 × 6** أخضر مع ASan/UBSan نظيفين.
+
+
+## D92 — عائلة رسائل protobuf: ستة كلاسات بهدفة واحدة (29-10-2026)
+
+دفعة عائلية (6 كلاسات × 6 فتحات = 36 فتحة) على نفس القالب
+المولَّد من المفكك، كل كلاس بملفه الأصلي:
+
+| الكلاس | vtable | dtor | GetTypeName | New | Clear | IsInit |
+|---|---|---|---|---|---|---|
+| CMsgLeagueConcubinesPB | 0x141841748 | 0x1417ebc30 | 0x1417ea8f0 | 0x1417eb8c0 (0x58) | 0x1417eb930 | 0x1417ebac0 |
+| CMsgLeagueOrderStatusInfoPB | 0x1418419c8 | 0x1417ecae0 | 0x1417ec4f0 | 0x1417ec840 (0x48) | 0x1417ec270 | 0x1417ec4e0 |
+| CMsgLeagueOrderStatusPB | 0x141841b48 | 0x1417ed5c0 | 0x1417ec580 | 0x1417ed230 (0x58) | 0x1417ed2a0 | 0x1417ed450 |
+| CMsgLeagueRobItemPB | 0x141841e08 | 0x1417ee420 | 0x1417eded0 | 0x1417ee1d0 (0x48) | 0x1417edc50 | 0x1417edec0 |
+| CMsgLeagueRobListPB | 0x141841f68 | 0x1417eef10 | 0x1417edf60 | 0x1417eeaf0 (0x58) | 0x1417eeb60 | 0x1417eeda0 |
+| CMsgOverheadLeagueInfoPB | 0x141842828 | 0x1417f2d90 | 0x1417f1e50 | 0x1417f2490 (0x68) | 0x1417f24d0 | 0x1417f1e40 |
+
+- `CMsgPBCommon.{h,cpp}`: الـseams المشتركة (operator_delete،
+  1417e8050، حارس ‎DAT_141886ea0).
+- مدمر RobItem الأساسي 0x1417ee160 مضاف حرفياً (نص +8 + حارس
+  النص عند +0x38 + أساس MessageLite).
+- **محاذاة**: خزن `puVar1[7]` ثمانية بايتات، وخزن `+0x44/+0x45`
+  بايت واحد لكل منهما في Overhead — كُتبت بعروضها الحرفية
+  لتبقى UBSan نظيفة.
+- الاختبار 12 قسماً يغطي الستة (dtor بعلم 0/1، New، النوع،
+  Clear بعناصر، IsInitialized بالحارس والمتجه، الحجم المخبأ)،
+  و**125/125 × 6** أخضر مع ASan/UBSan نظيفين وصفر تسريبات.
+- متبقٍ في العائلة: Merge/ByteSize/Serialize لكل كلاس (18 فتحة)
+  + slot7 من ConcubinesInfoPB.

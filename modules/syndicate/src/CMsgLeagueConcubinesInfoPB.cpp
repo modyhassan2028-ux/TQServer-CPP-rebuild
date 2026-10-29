@@ -8,9 +8,7 @@ namespace syndicate {
 // the two vtable constants live in CMsgPBMemberDtors.cpp
 extern const uintptr_t kMessageLiteVft;
 
-void  (*g_pfnPbFree)(void*) = nullptr;
 uint64_t (*g_pfnPb968050)() = nullptr;
-void* g_pPbDefaultStr = nullptr;
 uint64_t (*g_pfnPb7DD260)(void*) = nullptr;
 int64_t  (*g_pfnPbDEE40)(void*, int64_t) = nullptr;
 // ---- D91 kit seams ----
