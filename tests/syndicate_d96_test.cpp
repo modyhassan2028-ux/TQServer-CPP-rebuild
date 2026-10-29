@@ -1,106 +1,127 @@
-// D96 — CSyndicateLogic wave 6 (+0x1d0..+0x208) —
-// the sink/broadcast family.
-#include "modules/syndicate/src/syndicatelogic.h"
+// D96 — CMsgLeagueRobItemPB: Merge/ByteSize/Serialize/MergeFrom
+#include "modules/syndicate/src/CMsgLeagueRobItemPB.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>
+#include <string>
+#include <new>
 using namespace syndicate;
 
-static uint8_t abLogic[0x60];
-static CSyndicateLogic* pL = (CSyndicateLogic*)abLogic;
-static void* apSub[2] = {(void*)0x40, 0};
-static void* apSub30[2] = {(void*)0x50, 0};
-
-static int s_nA8940, s_nS1OpA, s_nS1OpB, s_nS1OpC,
-    s_nS2OpA, s_nS3OpA, s_nS3OpB, s_nS3OpC, s_nB4B0,
-    s_nSink3Get;
-static uint32_t s_uA, s_uB[3], s_uA8940Ret;
-static int32_t s_nLast;
-static void* s_pLast[8]; static int s_np;
+static int s_nVar, s_nW32, s_nWStr, s_nCheck, s_nStrSeam, s_nElem;
+static uint32_t s_uField, s_uVal, s_uStrField;
+static void* s_pStr;
+static char s_chSent[32];
 
 static void Reset() {
-    memset(abLogic, 0, sizeof(abLogic));
-    *(void**)(abLogic + 0x20) = apSub[0];
-    *(void**)(abLogic + 0x30) = apSub30[0];
-    s_nA8940 = s_nS1OpA = s_nS1OpB = s_nS1OpC = 0;
-    s_nS2OpA = s_nS3OpA = s_nS3OpB = s_nS3OpC = 0;
-    s_nB4B0 = s_nSink3Get = s_np = 0;
-    s_uA = 0; s_nLast = 0; s_uA8940Ret = 7;
-    memset(s_pLast, 0, sizeof(s_pLast));
-    g_fnA8940 = [](void*, uint32_t u) -> uint32_t {
-        s_nA8940++; s_uA = u; return s_uA8940Ret; };
-    g_fnSink1Get = []() -> void* { return (void*)0x11; };
-    g_fnSink1OpA = [](void* p, uint32_t u) {
-        s_nS1OpA++; s_pLast[s_np++ % 8] = p; s_uA = u; };
-    g_fnSink1OpB = [](void* p, uint32_t a, uint32_t b,
-                      uint32_t c) {
-        s_nS1OpB++; s_pLast[s_np++ % 8] = p;
-        s_uB[0] = a; s_uB[1] = b; s_uB[2] = c; };
-    g_fnSink1OpC = [](void* p) {
-        s_nS1OpC++; s_pLast[s_np++ % 8] = p; };
-    g_fnSink2Get = []() -> void* { return (void*)0x22; };
-    g_fnSink2OpA = [](void* p, int32_t n) {
-        s_nS2OpA++; s_pLast[s_np++ % 8] = p;
-        s_nLast = n; };
-    g_fnSink3Get = []() -> void* {
-        s_nSink3Get++; return (void*)0x33; };
-    g_fnSink3OpA = [](void* p, void* q) {
-        s_nS3OpA++; s_pLast[s_np++ % 8] = p;
-        s_pLast[s_np++ % 8] = q; };
-    g_fnSink3OpB = [](void* p, int32_t n) {
-        s_nS3OpB++; s_pLast[s_np++ % 8] = p;
-        s_nLast = n; };
-    g_fnSink3OpC = [](void* p) {
-        s_nS3OpC++; s_pLast[s_np++ % 8] = p; };
-    g_fnB4B0 = [](void* p, int32_t n, const void* a,
-                  const void* b) {
-        s_nB4B0++; s_pLast[s_np++ % 8] = p;
-        s_nLast = n; s_uB[0] = (uint32_t)(uint64_t)a;
-        s_uB[1] = (uint32_t)(uint64_t)b; };
+    s_nVar = s_nW32 = s_nWStr = s_nCheck = s_nStrSeam = s_nElem = 0;
+    s_uField = s_uVal = 0; s_pStr = nullptr;
+    g_pfnPbVarintSize = [](uint32_t u) -> int32_t {
+        s_nVar++; (void)u; return 2; };
+    g_pfnPbWriteVarint32 = [](uint32_t f, uint32_t v, void*) {
+        s_nW32++; s_uField = f; s_uVal = v; };
+    g_pfnPbWriteString = [](uint32_t f, void* p, void*) {
+        s_nWStr++; s_uStrField = f; s_pStr = p; };
+    g_pfnPbWriteUnknown = [](void*, void*, int32_t) {};
+    g_pPbDefaultStr = (void*)s_chSent;
+    g_pfnPbCheckFail = [](const char* f, int l, const char* t) {
+        s_nCheck++;
+        assert(strstr(f, "msgleagueroblist.pb.cc") != nullptr);
+        assert(l == 0xfc); (void)t; };
+    g_pfnPb64C0 = [](void*, void*) {};
+    g_pfnPb4550 = [](void*, void*) {};
+    g_pfnPb45D0 = [](void*) {};
+    g_pfnPb6510 = [](void*) -> uint64_t { return 1; };
+    g_pfnPb3A50 = [](void*, uint32_t*) -> uint64_t { return 1; };
+    g_pfnPb3BC0 = [](void*) -> uint64_t { return 0; };
+    g_pfnPbF3F50 = [](void*, uint32_t, void*) -> char { return 1; };
+    g_pfnPbF51E0 = [](void*, void*) -> uint64_t { s_nStrSeam++; return 1; };
+    g_pfnPbEDA90 = [](void*, void*) { s_nElem++; };
 }
 
 int main() {
-    // ---- S1: the +0x20 delegate ----
+    alignas(16) static unsigned char abObj[0x80];
+    static unsigned char abStr[0x40];
     Reset();
-    assert(pL->Slot1d0Sub20Delegate(5) == 7 &&
-           s_nA8940 == 1 && s_uA == 5);
-    *(void**)(abLogic + 0x20) = 0;
-    assert(pL->Slot1d0Sub20Delegate(5) == 0 &&
-           s_nA8940 == 1);
-    // ---- S2: the sink-1 family ----
+    memset(abObj, 0, sizeof abObj);
+    new (abObj + 0x08) std::string();
+    *(uint64_t*)(abObj + 0x28) = 0;
+    memset(abStr, 0, sizeof abStr);
+
+    // ---- S1: empty ----
+    assert(CMsgLeagueRobItemPB::ByteSize(abObj) == 0);
+
+    // ---- S2: field 1 (varint at +0x40) ----
+    *(uint32_t*)(abObj + 0x30) = 1;
+    *(uint32_t*)(abObj + 0x40) = 0x200;
+    assert(CMsgLeagueRobItemPB::ByteSize(abObj) == 1 + 2);
+    assert(s_nVar == 1);
+
+    // ---- S3: field 1 small (no varint seam) ----
+    s_nVar = 0;
+    *(uint32_t*)(abObj + 0x40) = 5;
+    assert(CMsgLeagueRobItemPB::ByteSize(abObj) == 1 + 1);
+    assert(s_nVar == 0);
+
+    // ---- S4: field 2 (string at +0x38, len at +0x18) ----
+    *(uint32_t*)(abObj + 0x30) = 2;
+    *(void**)(abObj + 0x38) = abStr;
+    *(uint32_t*)(abStr + 0x18) = 300;   // > 0x7f -> the varint seam
+    assert(CMsgLeagueRobItemPB::ByteSize(abObj) == 1 + 300 + 2);
+    s_nVar = 0;
+    *(uint32_t*)(abStr + 0x18) = 9;
+    assert(CMsgLeagueRobItemPB::ByteSize(abObj) == 1 + 9 + 1);
+    assert(s_nVar == 0);
+
+    // ---- S5: Serialize ----
+    *(uint32_t*)(abObj + 0x30) = 3;
+    *(uint32_t*)(abObj + 0x40) = 77;
+    CMsgLeagueRobItemPB::SerializeWithCachedSizes(abObj, (void*)0x1);
+    assert(s_nW32 == 1 && s_uField == 1 && s_uVal == 77);
+    assert(s_nWStr == 1 && s_pStr == abStr && s_uStrField == 2);
+
+    // ---- S6: MergeFrom copies and calls the string helper ----
+    static unsigned char abFrom[0x80];
+    memset(abFrom, 0, sizeof abFrom);
+    new (abFrom + 0x08) std::string("z");
+    *(uint32_t*)(abFrom + 0x30) = 3;
+    *(uint32_t*)(abFrom + 0x40) = 55;
+    *(void**)(abFrom + 0x38) = abStr;
+    CMsgLeagueRobItemPB::MergeFrom(abObj, abFrom);
+    assert(*(uint32_t*)(abObj + 0x30) == 3);
+    assert(*(uint32_t*)(abObj + 0x40) == 55);
+    assert(s_nElem == 1);
+    CMsgLeagueRobItemPB::MergeFrom(abObj, abObj);
+    assert(s_nCheck == 1);
+
+    // ---- S7: Merge — tag 0x12 materialises the string first ----
+    static unsigned char abInput[0x40];
+    unsigned char abIn[] = {0x12};
+    memset(abInput, 0, sizeof abInput);
+    *(void**)(abInput + 0x08) = abIn;
+    *(void**)(abInput + 0x10) = abIn + 1;
+    *(void**)(abObj + 0x38) = g_pPbDefaultStr;   // the sentinel
+    *(uint32_t*)(abObj + 0x30) = 0;
+    assert(CMsgLeagueRobItemPB::Merge(abObj, abInput));
+    assert(*(uint32_t*)(abObj + 0x30) == 2);
+    assert(*(void**)(abObj + 0x38) != g_pPbDefaultStr);
+    assert(s_nStrSeam == 1);
+    // release the string the parser allocated
+    void* pAllocated = *(void**)(abObj + 0x38);
+    ((std::string*)pAllocated)->~basic_string();
+    ::operator delete(pAllocated);
+
+    // ---- S8: Merge — tag 8 parses the varint and then the string tag ----
     Reset();
-    pL->Slot1d8Sink1OpA(9);
-    assert(s_nS1OpA == 1 && s_pLast[0] == (void*)0x11 &&
-           s_uA == 9);
-    pL->Slot1e0Sink1OpB(1, 2, 3);
-    assert(s_nS1OpB == 1 && s_uB[0] == 1 &&
-           s_uB[1] == 2 && s_uB[2] == 3);
-    pL->Slot1e8Sink1OpC();
-    assert(s_nS1OpC == 1 &&
-           s_pLast[0] == (void*)0x11);
-    // ---- S3: the sink-2 ----
-    Reset();
-    pL->Slot1f0Sink2OpA(-4);
-    assert(s_nS2OpA == 1 && s_pLast[0] == (void*)0x22 &&
-           s_nLast == -4);
-    // ---- S4: the 0x48 loop ----
-    Reset();
-    uint8_t abItems[4][0x48] = {};
-    pL->Slot1f8Sink3Loop(3, &abItems[0][0]);
-    assert(s_nSink3Get == 3 && s_nS3OpA == 3);
-    assert(s_pLast[1] == &abItems[0][0]);
-    assert(s_pLast[3] == &abItems[1][0]);
-    assert(s_pLast[5] == &abItems[2][0]);
-    // zero and negative counts: no calls
-    pL->Slot1f8Sink3Loop(0, &abItems[0][0]);
-    assert(s_nSink3Get == 3);
-    // ---- S5: the b4b0 + sink-3 ----
-    Reset();
-    pL->Slot208B4b0ThenSink3((void*)0x61, (void*)0x62);
-    assert(s_nB4B0 == 1 && s_pLast[0] == (void*)0x50 &&
-           s_nLast == 3 && s_uB[0] == 0x61 &&
-           s_uB[1] == 0x62);
-    assert(s_nS3OpC == 1 && s_pLast[1] == (void*)0x33);
-    puts("SYNDICATE_D96_OK: the sink wave");
+    unsigned char abIn2[] = {0x08, 0x2a, 0x12};
+    memset(abInput, 0, sizeof abInput);
+    *(void**)(abInput + 0x08) = abIn2;
+    *(void**)(abInput + 0x10) = abIn2 + 3;
+    *(void**)(abObj + 0x38) = abStr;
+    *(uint32_t*)(abObj + 0x30) = 0;
+    assert(CMsgLeagueRobItemPB::Merge(abObj, abInput));
+    assert(*(uint32_t*)(abObj + 0x40) == 42);
+    assert(*(uint32_t*)(abObj + 0x30) == 3);
+
+    printf("SYNDICATE_D96_OK: RobItemPB\n");
     return 0;
 }

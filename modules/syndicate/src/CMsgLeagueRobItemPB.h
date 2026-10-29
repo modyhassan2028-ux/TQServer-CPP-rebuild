@@ -17,6 +17,25 @@
 #include <string>
 namespace syndicate {
 
+// ---- seams ----
+extern void     (*g_pfnPbFree)(void*);
+extern uint64_t (*g_pfnPb8050)();
+extern void*     g_pPbDefaultStr;
+extern int32_t (*g_pfnPbVarintSize)(uint32_t);
+extern void (*g_pfnPbWriteVarint32)(uint32_t, uint32_t, void*);
+extern void (*g_pfnPbWriteString)(uint32_t, void*, void*);
+extern void (*g_pfnPbWriteUnknown)(void*, void*, int32_t);
+extern void (*g_pfnPb64C0)(void*, void*);
+extern void (*g_pfnPb4550)(void*, void*);
+extern uint64_t (*g_pfnPb3BC0)(void*);
+extern uint64_t (*g_pfnPb3A50)(void*, uint32_t*);
+extern void (*g_pfnPb45D0)(void*);
+extern uint64_t (*g_pfnPb6510)(void*);
+extern char (*g_pfnPbF3F50)(void*, uint32_t, void*);
+extern uint64_t (*g_pfnPbF51E0)(void*, void*);
+extern void (*g_pfnPbEDA90)(void*, void*);
+extern void (*g_pfnPbCheckFail)(const char*, int, const char*);
+
 class CMsgLeagueRobItemPB {
 public:
     static constexpr uintptr_t kClassVft = 0x141841e08;
@@ -36,6 +55,14 @@ public:
     static void Clear(void* self);
     // 0x1417edec0
     static bool IsInitialized(void* self);
+    // 0x1417ee450 — Merge
+    static bool Merge(void* self, void* input);
+    // 0x1417edd10 — ByteSize
+    static int32_t ByteSize(void* self);
+    // 0x1417edca0 — SerializeWithCachedSizes
+    static void SerializeWithCachedSizes(void* self, void* pBuf);
+    // 0x1417edda0 — MergeFrom (slot6 thunk 0x1417ee620)
+    static void MergeFrom(void* self, void* from);
     // 0x1417ee0d0
     static uint32_t GetCachedSize(void* self);
 };
