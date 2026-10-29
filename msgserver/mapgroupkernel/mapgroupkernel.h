@@ -55,6 +55,8 @@ public:
     void*    m_pAdapter;    // +0x28
     void*    m_pResponder;  // +0x30
     void*    m_pGame;       // +0x38
+    uint8_t  m_Pad3c[0x4];
+    void*    m_pSocket;     // +0x18 (before +0x20 in RAW)
     uint32_t m_F40;         // +0x40
     uint32_t m_F44;         // +0x44
     int InitOnlyOnce(SMapGroupKernelSeams& s);
@@ -79,6 +81,25 @@ public:
         void  (*LogNoSerial)(uint32_t serial);
     };
     int OnTimer(uint32_t tick, SeamsTimer& s);
+    // 1400e2230 / 1400e2320 / 1400e2450 / 1400e2540
+    struct SeamsSend {
+        void (*LogNullMsg)(void);
+        void (*LogBadType)(void);
+        void (*LogOverflow)(uint32_t msgId, int len);
+        void (*LogNpcNull)(uint32_t npcId, uint32_t msgId);
+        void (*LogNpcBadType)(uint32_t npcId);
+        void (*LogCrossNull)(void);
+        void (*LogCrossBadType)(uint32_t user);
+        void (*LogCrossBadType2)(void);
+        void (*Post)(void* th, uint32_t ch, uint32_t msg, uint32_t len, const void* body);
+    };
+    int SendMsg(uint32_t msgId, int type, const void* body, int len, SeamsSend& s);
+    int SendNpcMsg(uint32_t npcId, int type, const void* body, int len, SeamsSend& s);
+    int SendCrossMsg(uint32_t msgId, uint32_t s2s, int type, const void* body,
+                     int len, uint32_t flag, SeamsSend& s);
+    int SendCrossMsg2(uint32_t msgId, uint32_t s2s, const void* body, int len,
+                      uint32_t flag, SeamsSend& s);
+
 
 };
 } // namespace msg

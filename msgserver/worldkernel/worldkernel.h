@@ -91,4 +91,35 @@ private:
     uint32_t m_Hdr[4] = {};
 };
 }
+namespace msg {
+// ------------------------------------------------- CWorldKernel (140060510…)
+// 140060510 ProcessAccountNetMsg, 1400552a0 SendMsg, 140066ae0 ~CWorldKernel
+struct SWorldKernelSeams {
+    void (*OnMobileAccount)(void* self, uint32_t a, uint32_t b, const void* p,
+                            int z, uint32_t c);              // 14005e310
+    void (*OnMobileString)(void);                            // 140055dd0
+    void (*LogAccountSize)(int size);
+    void (*LogStringSize)(int size);
+    void (*LogNullMsg)(void);
+    void (*LogBadType)(void);
+    void (*LogOverflow)(uint32_t msgId, int len);
+    void (*Post)(void* th, uint32_t ch, uint32_t msg, uint32_t len, const void* body);
+    void (*Free)(void* p);
+    void (*Dtor280)(void* p);                                // 14005fcc0
+    void (*Dtor210)(void* p);                                // 140050610
+    void (*Dtor198)(void* a, void* b, void* c, uint8_t d);   // 140066540
+    void (*Dtor138)(void* p);                                // 140018350
+    void (*Dtor098)(void* p);                                // 14007cee0
+};
+// RAW addresses every member as param_1[i] on a pointer array, so m_Q[i] is
+// byte offset i*8 exactly as in the disassembly.
+class CWorldKernel {
+public:
+    void* m_Q[0x60];
+    uint8_t ProcessAccountNetMsg(const uint16_t* msg, SWorldKernelSeams& s);
+    int     SendMsg(uint32_t msgId, int type, const void* body, int len,
+                    SWorldKernelSeams& s);
+    void    Destruct(SWorldKernelSeams& s);
+};
+}
 #endif

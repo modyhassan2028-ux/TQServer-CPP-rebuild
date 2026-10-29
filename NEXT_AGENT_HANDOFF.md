@@ -1837,3 +1837,30 @@ m_pMagicManager, g_pItemMgr...). مش قابلة للنقل كوحدة قبل ن
 كـ**hook اختبار فقط** ومُعلن.
 
 **اختبار:** 25 تأكيدًا ×6 — **الرجريجن 85/85 ×6**.
+
+## المسار أ-9ك — دفعة ٩ وحدات (طلب المستخدم: ١٠ لكل دفعة) [2026-10-29]
+
+**⚠ درس مهم:** كتبت `worldkernel.h/.cpp` بـ`cat >` فمسحت نسخة قديمة **مُلتزمة**
+فيها `CWorldThread` (14002e990) و`CUserLoginThread` (14002e580) — رجّعتها من
+git ودمجت الجديد **بإضافة**، والاختبار القديم رجع يعدّي. **قاعدة: قبل أي
+`cat >` على ملف موجود، `git show HEAD:<path>` أو `ls` أولًا.**
+
+**الوحدات المُضافة (كلها بأسماء مُثبتة من نصوص الخام):**
+- `CMapGroupKernel::SendMsg` 1400e2230 → فحص `len+4 < 0x401`، رأس 16-بت؟
+  لا: `{msgId@0,type@4,len@8,body@0xc}` وإرسال `(1, 0x7533, 0x418)`.
+- `SendNpcMsg` 1400e2320 → **بدون فحص طول**، `(1, 0x7534, 0x418)`، ونصّان
+  مختلفان: `null msg point found in CGameSocket::SendNpcMsg: NpcID:[%u] MsgID:[%u]`
+  و`invalid msg type in CMapGroupKernel::SendNpcMsg(): NpcID:[%u]`.
+- `SendCrossMsg` 1400e2450 → `{msgId@0,s2s@4,type@8,len@12,flag@16,body@0x14}`
+  وإرسال `(6, 0x3fc)` **بلا طول**.
+- `SendCrossMsg2` 1400e2540 → نفس الرأس لكن **الحقل الأول صفر** والـmsgId عند
+  `+8`، ويرفض `msgId == 0`.
+- `CWorldKernel::ProcessAccountNetMsg` 140060510 → `0x7533` يشترط الحجم 100
+  وإلا يطبع؛ `0x7531` يشترط `> 0xb`.
+- `CWorldKernel::SendMsg` 1400552a0 → `(1, 0x7533, 0x418)` من `this+0x50`.
+- `CWorldKernel::~CWorldKernel` 140066ae0 → ترتيب التحرير الحرفي وتصفير
+  ثلاثيات `0x39/0x3a/0x3b` و`0x33/0x34/0x35` و`0x4d/0x4e/0x4f`.
+- (الـctor 1400f0000 و~CMapGroupKernel 1400f00a0 مُلتقطان في الجدول، لسه
+  مش منقولين — محتاجين `FUN_14000ef40/1400ec260/1400ef850`.)
+
+**اختبار:** `msg_batch10_test.cpp` — 36 تأكيدًا ×6 — **الرجريجن 86/86 ×6**.
