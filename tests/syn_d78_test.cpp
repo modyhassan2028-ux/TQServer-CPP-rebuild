@@ -64,7 +64,31 @@ static void NTF(void*,uint32_t){ g_notifyFail++; }
 static void NTN(void*,uint32_t){ g_notifyNoMoney++; }
 static void EBT(void*,uint32_t){ g_emoney++; }
 static int64_t TC(void*){ return g_cap; }
-static void FT(void*,uint32_t,void*,void*,uint32_t,uint32_t,int64_t,int64_t,void*){ g_tails++; }
+static int g_spend3=0, g_spend4=0, g_delta=0, g_blob=0, g_attr=0;
+static int g_msgAOk=1, g_msgBReady=1, g_fill=0, g_fillFalse=0, g_vt560=0, g_serA=0, g_serB=0;
+static uint32_t g_award=0x7;
+static uint32_t TGS(){ return 1000; }
+static uint32_t TIDX(void*,int){ return 5; }
+static uint32_t TFLD(void*){ return 9; }
+static uint32_t AW(void*,uint32_t,void*){ g_tails++; return g_award; }
+static void GKN(void*,uint32_t k,uint32_t* out,char* n,size_t){ *out=k*2; n[0]='A'; }
+static void GLN(void*,uint32_t k,uint32_t* out,char* n,size_t){ *out=k*3; n[0]='B'; }
+static void* MAN(){ return malloc(16); }
+static bool MAC(void*,void*,uint32_t a,uint32_t,uint32_t,const char*,const char*){ 
+    if(a==g_award) g_attr++; return g_msgAOk!=0; }
+static void MAD(void* p){ free(p); }
+static void* MBN(){ return malloc(16); }
+static bool MBR(void*){ return g_msgBReady!=0; }
+static bool MBF(void*,uint32_t f,uint8_t id,uint32_t d){ g_fill++; return g_fillFalse? false : (f==9 && id==5 && d==0); }
+static void MBS(void*){ g_serB++; }
+static void MBD(void* p){ free(p); }
+static void V56(void*,int a,uint32_t k,void*){ if(a==1 && k==0x1234) g_vt560++; }
+static int64_t PCF(void*,int idx){ return idx==3? 900 : 0; }
+static void LGT(const char*){ g_serA++; }
+static void AD2(void*,long long d,int f){ if(f==1) g_delta++; }
+static void SLF2(void*,void*){ g_blob++; }
+static bool SP2(void*,int a,uint32_t v,int c){ if(a==3 && v==6 && c==0) g_spend3++;
+    if(a==4 && c==1) g_spend4++; return true; }
 static SLogicSeams L = []{ SLogicSeams z{};
     z.core.OwnLeagueId=OW2; z.core.TargetLeagueId=TG2; z.core.WarStartState=WS;
     z.core.WarNotStarted=nullptr; z.core.LeagueOfUser=LU; z.core.FindLeague=FL;
@@ -75,11 +99,15 @@ static SLogicSeams L = []{ SLogicSeams z{};
     z.core.ApplyDelta=AD; z.core.SetLeagueField=SLF; z.core.FreePages=FP; z.core.LogDb=LDB;
     z.robOpt = SRobOptSeams{MN,MC,MD,MA,MCNT,MS,SC,LG};
     z.WarGateBlocks=WB; z.SpendablePage=SPG; z.SpendMoney=SM;
-    z.NotifyTokenFail=NTF; z.NotifyNoMoney=NTN; z.EmoneyBuyTail=EBT; z.TargetCap=TC; z.FinishTails=FT;
+    z.NotifyTokenFail=NTF; z.NotifyNoMoney=NTN; z.EmoneyBuyTail=EBT; z.TargetCap=TC;
+    z.core.ApplyDelta=AD2; z.core.SetLeagueField=SLF2; z.core.SpendToken=SP2;
+    z.tails = STailSeams{TGS,TIDX,TFLD,AW,GKN,GLN,MAN,MAC,MAD,MBN,MBR,MBF,MBS,MBD,PCF,V56,LGT};
     return z; }();
 static void resetLogic(){ rr(); g_warBlocks=0; g_state=0; g_pending=0; g_strOk=1; g_tokenOk=1; g_rowOk=1;
   g_spendPages=9; g_money=1; g_notifyFail=0; g_notifyNoMoney=0; g_emoney=0; g_tails=0; g_robOpt=0;
-  g_freedPages=2; g_cap=10; g_current=2; g_inserted.clear(); g_userLeague=77; g_league=77; }
+  g_freedPages=2; g_cap=10; g_current=2; g_inserted.clear(); g_userLeague=77; g_league=77;
+  g_spend3=0; g_spend4=0; g_delta=0; g_blob=0; g_attr=0;
+  g_msgAOk=1; g_msgBReady=1; g_fill=0; g_fillFalse=0; g_vt560=0; g_serA=0; g_serB=0; }
 static uint32_t g_tg[10]={0,0,0,0,0,0,0,0,0,0};
 static uintptr_t g_logic[12]={0,0x1000,0,0,0,0,0,0,0,0,0x2000,0};
 int main(){
@@ -145,8 +173,12 @@ int main(){
       CK(SignUpPlunderWarFromClient(g_logic,5,1,g_tg,0,0,L)==0,"zero free pages aborts the support path"); }
     { resetLogic(); g_tg[0]=77;
       CK(SignUpPlunderWarFromClient(g_logic,5,1,g_tg,0,0,L)==1,"the support path completes");
-      CK(g_pages>=1 && g_sends==1,"the page message is built and sent once");
-      CK(g_tails==1,"the tails run"); }
+      CK(g_pages>=1 && g_sends==3,"the page message plus both league messages are sent");
+      CK(g_tails==1,"the tails run");
+      CK(g_spend3==1 && g_spend4==1,"the token is advanced on 3 and 4");
+      CK(g_delta==1 && g_blob==1,"the league delta and the blob are written");
+      CK(g_attr==1,"the award flag reaches the message");
+      CK(g_vt560==1,"vt+0x560 is called with (1, key)"); }
     { resetLogic(); g_tg[0]=77; g_current=10; g_cap=10;
       CK(SignUpPlunderWarFromClient(g_logic,5,1,g_tg,0,0,L)==1,"a full league still completes");
       CK(g_robOpt==0,"no page message when the league is full"); }
@@ -169,9 +201,22 @@ int main(){
       CK(SignUpPlunderWarFromClient(g_logic,5,1,g_tg,1,1,L)==1,"a paid page completes");
       CK(g_emoney==1,"the emoney tail runs");
       CK(g_tails==1,"the tails run");
+      CK(g_delta==1,"the league delta still runs");
       CK(g_robOpt==0,"the support path never builds the page message"); }
     { resetLogic(); g_tg[0]=77; g_current=12; g_cap=10; g_freedPages=100; 
       CK(SignUpPlunderWarFromClient(g_logic,5,1,g_tg,1,1,L)==0,"a negative cap after the pages aborts"); }
+    { resetLogic(); g_tg[0]=77; g_msgAOk=0;
+      CK(SignUpPlunderWarFromClient(g_logic,5,1,g_tg,0,0,L)==1,"a failing league message still completes");
+      CK(g_serA==1,"and logs the IF_OK line"); }
+    { resetLogic(); g_tg[0]=77; g_msgBReady=0;
+      CK(SignUpPlunderWarFromClient(g_logic,5,1,g_tg,0,0,L)==1,"a not-ready second message still completes");
+      CK(g_serB==0,"and is never serialized"); }
+    { resetLogic(); g_tg[0]=77;
+      SignUpPlunderWarFromClient(g_logic,5,1,g_tg,0,0,L);
+      CK(g_fill==1,"the second message is filled once"); }
+    { resetLogic(); g_tg[0]=77; g_fillFalse=1;
+      SignUpPlunderWarFromClient(g_logic,5,1,g_tg,0,0,L);
+      CK(g_serB==0,"a refused fill leaves the second message unsent"); }
     std::printf("D78-%s: %d assertions\n", g_fail?"FAIL":"OK", g_fail?g_fail:g_ok);
     return g_fail?1:0;
 }

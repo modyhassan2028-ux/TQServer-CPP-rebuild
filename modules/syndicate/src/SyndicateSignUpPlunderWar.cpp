@@ -164,10 +164,69 @@ uint32_t SignUpPlunderWarFromClient(void* logic, uint32_t uUser, uint32_t nCount
     }
 
     // --- phase 6-7 seam ---------------------------------------------------
-    s.FinishTails(logic, uUser, synLeague, token, tokenId, key, current, cap, nullptr);
+    RunTails(logic, uUser, vt, mgr, synLeague, token, key, current, cap, s);
     if (str) s.core.OpDelete(str);
     if (ids) s.core.OpDelete(ids);
     return 1;                                        // the RAW returns 1 here
+}
+
+
+// ---------------------------------------------------------------------------
+// Phases 6-7. Argument registers resolved from the disassembly at 1417c2f00
+// through 1417c31fd; the comments keep the RAW order so the mapping stays
+// checkable against the listing.
+// ---------------------------------------------------------------------------
+uint32_t RunTails(void* logic, uint32_t user, void* vt, void* mgr, void* league,
+                  void* token, uint32_t key, int64_t current, int64_t cap,
+                  SLogicSeams& s) {
+    STailSeams& t = s.tails;
+    s.core.ApplyDelta(league, current - cap, 1);       // 141744130(league, d, 1)
+    uint32_t tokenId = t.TokenIdIdx(token, 0);         // 1417d4ed0(token)
+    s.core.SpendToken(token, 3, tokenId + 1, 0);       // 1417d4f30(token,3,id+1,0)
+    uint32_t now = t.TimeGetSec();                     // TimeGet(1)
+    s.core.SpendToken(token, 4, now, 1);               // 1417d4f30(token,4,now,1)
+
+    uint8_t leagueBlob[0x146];
+    for (size_t i = 0; i < sizeof(leagueBlob); ++i) leagueBlob[i] = 0;
+    s.core.SetLeagueField(league, leagueBlob);         // 141745580(league, blob)
+
+    uint32_t idA = 0, idB = 0;
+    char nameA[0x10], nameB[0x10];
+    for (size_t i = 0; i < 0x10; ++i) { nameA[i] = 0; nameB[i] = 0; }
+    t.GetKeyName(mgr, key, &idA, nameA, 0x10);         // 141766b60(mgr,key,..)
+    t.GetLeagueName(mgr, key, &idB, nameB, 0x10);      // 141766d10(mgr,key,..)
+
+    void* msgA = t.MsgANew();                          // 1417d6110(&msgA)
+    if (msgA == nullptr) return 0;
+    uint32_t award = t.AwardFlag(logic, user, league); // 1417b5370
+    // 1417d61c0(&msgA, blob, award, idA/1e6, idB/1e6, nameA, nameB)
+    if (!t.MsgACreate(msgA, leagueBlob, award, idA / 1000000, idB / 1000000,
+                      nameA, nameB)) {
+        t.LogDb("msgLeagueInfo.Create(...)");          // the IF_OK line, 0x2685
+    } else {
+        s.robOpt.SendToClient(vt, user, msgA);         // vt+8(vt, user, &msgA)
+    }
+
+    void* msgB = t.MsgBNew();                          // 1417d7350(&msgB)
+    if (msgB != nullptr && t.MsgBReady(msgB)) {        // 1417d73e0
+        uint32_t tid4 = t.TokenIdIdx(token, 4);        // 1417d4ed0(token,4)
+        uint32_t clock = t.TimeGetSec();               // TimeGet(1)
+        int64_t page = t.PageCapFor(vt, 3);            // (vt+0x10)(vt,3)->+0x50
+        uint32_t delay = 0;
+        if ((uint64_t)clock < (uint64_t)(page + (int64_t)tid4))
+            delay = (uint32_t)((page - (int64_t)clock) + (int64_t)tid4);
+        uint32_t tid3 = t.TokenIdIdx(token, 3);        // 1417d4ed0(token,3)
+        uint32_t field = t.TokenField(token);          // 1417d4e70(token)
+        // 1417d7770(&msgB, field, (uint8_t)tid3, delay)
+        if (t.MsgBFill(msgB, field, (uint8_t)tid3, delay)) {
+            t.MsgBSerialize(msgB);                     // 1417d7440(&msgB)
+            s.robOpt.SendToClient(vt, user, msgB);     // vt+8(vt, user, &msgB)
+        }
+    }
+    t.Vt0560(vt, 1, key, nullptr);                     // vt+0x560(vt,1,key,&strA)
+    if (msgB != nullptr) t.MsgBDestroy(msgB);          // 1417d73a0(&msgB), one arg
+    if (msgA != nullptr) t.MsgADestroy(msgA);          // 1417d6160(&msgA)
+    return 1;                                          // mov al,1
 }
 
 } // namespace syndicate

@@ -128,6 +128,57 @@ bool SendRobOptPages(SRobOptSeams& s, void* vt, uint32_t user,
 // register-passed arguments of vt+0x560 and 1417d73a0 resolved from the
 // assembly, so it stays behind FinishTails and is documented as pending.
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Phases 6-7 — the tails, now resolved from the assembly at 1417c2f00..1417c31fd.
+// The decompiler never showed these arguments; the disassembly does:
+//   141744130(league, current - cap, 1)
+//   1417d4f30(token, 3, 1417d4ed0(token) + 1, 0)
+//   1417d4f30(token, 4, TimeGet(1), 1)
+//   memset(leagueBlob, 0, 0x146); 141745580(league, leagueBlob)
+//   141766b60(mgr, key, &idA, nameA, 0x10)     <- both lookups take the KEY
+//   141766d10(mgr, key, &idB, nameB, 0x10)
+//   1417d6110(&msgA); award = 1417b5370(logic, user, league);
+//   1417d61c0(&msgA, leagueBlob, award, idA/1000000, idB/1000000, nameA, nameB)
+//       false -> LogDb at line 0x2685, true -> vt+8(vt, user, &msgA)
+//   1417d7350(&msgB); if (1417d73e0(&msgB)) {
+//       tid4 = 1417d4ed0(token, 4); now = TimeGet(1);
+//       page = (vt+0x10)(vt, 3) then +0x50;
+//       delay = 0; if (page + tid4 > now) delay = page - now + tid4;
+//       tid3 = 1417d4ed0(token, 3);
+//       if (1417d7770(&msgB, 1417d4e70(token), (uint8_t)tid3, delay)) {
+//          1417d7440(&msgB); vt+8(vt, user, &msgB); } }
+//   vt+0x560(vt, 1, key, &strA)      <- four arguments, key in r8
+//   1417d73a0(&msgB)                 <- ONE argument, the rest was decompiler noise
+//   1417d6160(&msgA); return 1
+// ---------------------------------------------------------------------------
+struct SLogicSeams;
+
+struct STailSeams {
+    uint32_t (*TimeGetSec)();                          // tq::TimeGet(1)
+    uint32_t (*TokenIdIdx)(void* token, int idx);      // 1417d4ed0(token, idx)
+    uint32_t (*TokenField)(void* token);               // 1417d4e70
+    uint32_t (*AwardFlag)(void* logic, uint32_t user, void* league);  // 1417b5370
+    void     (*GetKeyName)(void* mgr, uint32_t key, uint32_t* outId, char* name, size_t cap);
+    void     (*GetLeagueName)(void* mgr, uint32_t key, uint32_t* outId, char* name, size_t cap);
+    void*    (*MsgANew)();                             // 1417d6110
+    bool     (*MsgACreate)(void* msg, void* leagueBlob, uint32_t award,
+                           uint32_t a, uint32_t b, const char* nameA, const char* nameB);
+    void     (*MsgADestroy)(void* msg);                // 1417d6160
+    void*    (*MsgBNew)();                             // 1417d7350
+    bool     (*MsgBReady)(void* msg);                  // 1417d73e0
+    bool     (*MsgBFill)(void* msg, uint32_t field, uint8_t id, uint32_t delay);  // 1417d7770
+    void     (*MsgBSerialize)(void* msg);              // 1417d7440
+    void     (*MsgBDestroy)(void* msg);                // 1417d73a0, one argument
+    int64_t  (*PageCapFor)(void* vt, int idx);         // (vt+0x10)(vt,idx) then +0x50
+    void     (*Vt0560)(void* vt, int a, uint32_t key, void* strOut);  // vt+0x560
+    void     (*LogDb)(const char* text);               // the IF_OK line
+};
+
+uint32_t RunTails(void* logic, uint32_t user, void* vt, void* mgr, void* league,
+                  void* token, uint32_t key, int64_t current, int64_t cap,
+                  SLogicSeams& s);
+
 struct SLogicSeams {
     SSignUpPlunderSeams core;      // gates, vector, token, league side
     SRobOptSeams        robOpt;    // the phase-5 page message
@@ -139,10 +190,7 @@ struct SLogicSeams {
     void     (*NotifyNoMoney)(void* vt, uint32_t user);        // STR_TRAINING_GONGFU_EMONEY_NOT_ENOUGH
     void     (*EmoneyBuyTail)(void* vt, uint32_t user);        // 0x200 + MyLogSave + i18n + 0x90
     int64_t  (*TargetCap)(void* vt);                           // (vt+0x10)->+0x58
-    // --- phase 6-7, still pending --------------------------------------
-    void     (*FinishTails)(void* logic, uint32_t user, void* league,
-                            void* token, uint32_t tokenId, uint32_t memberKey,
-                            int64_t current, int64_t cap, void* robOptMsg);
+    STailSeams tails;              // phases 6 and 7
 };
 
 uint32_t SignUpPlunderWarFromClient(void* logic, uint32_t uUser, uint32_t nCount,
