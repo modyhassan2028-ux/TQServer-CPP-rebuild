@@ -1,3 +1,6 @@
+#include <string>
+#include <cstdio>
+#include <cstring>
 // 14001e720
 #include "mainprocedure.h"
 namespace msg {
@@ -89,3 +92,37 @@ void CAnalystProfile::RegisterAll(Seams& s) {
     }
 }
 }
+
+// 140021f60
+namespace msg {
+void CExtraProc::CloseAll(uint64_t ctx, Seams& s) {
+    s.IniOpen("ExtraProc.ini", "Config");
+    int count = s.IniGetInt("Count");
+    uint32_t i = 0;
+    while ((int)i < count) {
+        i = i + 1;
+        char sec[0x80];
+        std::snprintf(sec, 0x80, "Exe%d", (unsigned long)i);
+        sec[0x7f] = '\0';                       // the RAW's local_19 write
+        s.IniSetSection(sec);
+        char name[0x80];
+        std::memset(name, 0, 0x80);
+        s.IniGetString(name, "ExeName", 0x80);
+        std::string exe(name);
+        size_t pos = exe.rfind('\\');
+        if (pos != std::string::npos) exe = exe.substr(pos + 1);   // discarded by the RAW
+        uint32_t pid = s.NextPid(ctx);           // the name is NOT passed in the RAW
+        if (pid != 0) {
+            void* h = s.OpenProcess(0x29, 0, pid);
+            if (h == nullptr) { s.IniClose(); return; }            // abandons the rest
+            if (s.TerminateProcess(h, 0) == 0)
+                s.SysLog("extrapro", "Close exe (%s) error(%d) FALSE!", name,
+                         (int)s.GetLastError());
+            else
+                s.SysLog("extrapro", "Close exe (%s) Success!", name, 0);
+            // the handle is never closed in the RAW: kept verbatim
+        }
+    }
+    s.IniClose();
+}
+} // namespace msg

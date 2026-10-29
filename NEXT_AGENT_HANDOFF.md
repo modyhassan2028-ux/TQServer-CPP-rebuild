@@ -2220,3 +2220,23 @@ PointerToRawData` لازم يقعوا جوه الملف.
 **ملاحظة أدوات:** تعديل الـheader بيفصل `InstanceRef` للـprivate فيكسر
 `msg_asyncdb_test` القديم (بيتحول SKIP مش FAIL) — راجع `PASS/SKIP` بعد
 أي تعديل على `asyncdbthread.h`.
+
+## أ-9س — CExtraProc::CloseAll [2026-10-29]
+
+`140021f60` → `msgserver/mainprocedure.cpp` (نفس اسم الملف الأصلي في
+الشجرة): بيقرأ `ExtraProc.ini` سكشن `Config`، `Count`، وبعدها لكل
+`Exe1..ExeN` يقرأ `ExeName` — **كويركات محفوظة**:
+1. الـbasename بيتحسب (`rfind('\\')` → `substr(pos+1)`) وبعدها **يترمي**؛
+   السجل بيكتب الاسم الكامل `local_118` مش المُقصّر.
+2. `FUN_14001f4d0(param_1)` بينادى بالسياق بس — **الاسم مش بيتبعت**،
+   فهو مصدر PID بيفضل يتنادى في كل لفة (seam `NextPid`).
+3. `OpenProcess` فاشلة → **إلغاء باقي السطور** + إغلاق الـini وreturn فورًا.
+4. `TerminateProcess` فاشلة → سجل `Close exe (%s) error(%d) FALSE!`؛
+   ناجحة → `Close exe (%s) Success!` — التاج `"extrapro"` في الحالتين.
+5. **تسريب مقصود:** الهاندل اللي رجع من `OpenProcess` **عمره ما بيتقفل**
+   في الخام — محفوظ زي ما هو.
+
+**اختبار:** `msg_mainproc_extra_test` 11 تأكيدًا ×6 — **101/101 ×6**.
+
+**الخطوة الجاية:** `140024860` = `CMsgServerDlg::OnTimer` (1016 سطر) من
+`Docs/decomp_split/140024860.c` — دفعة لوحدها.
