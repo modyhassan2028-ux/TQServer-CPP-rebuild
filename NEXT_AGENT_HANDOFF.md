@@ -1787,3 +1787,31 @@ SetOSConnectStatus 1400b39e0.
 المُرسلة قبل النهاية.
 
 **اختبار:** 12 تأكيدًا ×6 — **الرجريجن 83/83 ×6**.
+
+## المسار أ-9ص — CMapGroupKernel::InitOnlyOnce [2026-10-29]
+
+**ملف جديد بمسار مُثبت:** `match`? لا — `msgserver/mapgroupkernel/mapgroupkernel.cpp`
+(كل سلاسل `CHECKF` جوّه 1400e47b0 بتسمّي الملف ده). الحقول:
+`m_Type +0x10`, `m_pSelfThread +0x20`, `m_pAdapter +0x28`, `m_pResponder +0x30`, `m_pGame +0x38`.
+
+**قواعد محفوظة:** الجسم كله جوّه شرط `m_Type == 0xe` وبيرجع 1 لأي نوع تاني
+من غير أي عمل؛ سطرا `MYASSERT` بنصوصهما الحرفية `!"AdapterCreate"` (0x94d)
+و`!"ResponderCreate"` (0x955)؛ ترتيب التحرير عند فشل `GameCreate` =
+أدابتر ثم **ريسبوندر** بـ`vt[0](r,1)` ثم `PROCESS CRASH!` ثم `exit(1)`;
+تسجيل مزوّدَين `0x11`/`0x12` بالـsub من `p[0xb] vt+0x10(5)`؛ فشل تحميل
+المزاد **بيطبع بس** ويكمل؛ فشل موديول ٨ → `pIProider && pIProider->ProcessInit()`
+(0x985) ورجوع ٠؛ وفرعا العلم بيختاروا موديول `0x1c` (Vexillum) أو `0x25`
+(Frontier) بنصّين مختلفين؛ وبينتهي بـ`AfterInit` ثم حدث Lua
+`</F>Event_Server_Start`.
+
+**انحراف مُعلن:** RAW بينادي `exit(1)` عند فشل `GameCreate`؛ النقل بيمرّر
+`Exit` كـseam (بيستدعي `exit` فعليًا في الإنتاج) وبيرجع 0 بعدها عشان
+الاختبار يقدر يكمّل.
+
+**اختبار:** 11 تأكيدًا ×6 — **الرجريجن 84/84 ×6**.
+
+**ملاحظة مهمة عن `IsValidMapGroupProcessID`:** جسمها 912 سطر و`CHECKF`
+بتاعها بيشير لـ`mapgroup.h` (يعني **inline في الهيدر**)، وجسمها مبني على
+تحقق عناصر/سحر/مستخدم **مُضمَّن بالكامل** جوّه (CUser::CreateAllItem,
+m_pMagicManager, g_pItemMgr...). مش قابلة للنقل كوحدة قبل نقل المكوّنات
+اللي اتضمّنت فيها — مؤجلة بقرار، مش متروكة.
