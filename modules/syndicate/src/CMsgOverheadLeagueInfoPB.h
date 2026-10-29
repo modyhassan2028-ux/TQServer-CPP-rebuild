@@ -13,9 +13,33 @@
 //   slot 11 0x1417f23f0  GetCachedSize (+0x34)
 #ifndef SYNDICATE_CMSGOVERHEADLEAGUEINFOPB_H
 #define SYNDICATE_CMSGOVERHEADLEAGUEINFOPB_H
+#include <string>
 #include <cstdint>
 #include <string>
 namespace syndicate {
+
+// ---- seams ----
+extern void     (*g_pfnPbFree)(void*);
+extern uint64_t (*g_pfnPb8050)();
+extern void*     g_pPbDefaultStr;
+extern int32_t (*g_pfnPbVarintSize)(uint32_t);
+extern void (*g_pfnPbWriteVarint32)(uint32_t, uint32_t, void*);
+extern void (*g_pfnPbWriteByte)(uint32_t, char, void*);
+extern void (*g_pfnPbWriteUnknown)(void*, void*, int32_t);
+extern void (*g_pfnPb64C0)(void*, void*);
+extern void (*g_pfnPb4550)(void*, void*);
+extern uint64_t (*g_pfnPb3BC0)(void*);
+extern uint64_t (*g_pfnPb3A50)(void*, uint32_t*);
+extern void (*g_pfnPb45D0)(void*);
+extern uint64_t (*g_pfnPb6510)(void*);
+extern char (*g_pfnPbF3F50)(void*, uint32_t, void*);
+extern void (*g_pfnPbE0110)(void*, int32_t);
+extern void* (*g_pfnPbE02C0)();
+extern char (*g_pfnPbEAA40)(void*, void*);
+extern uint64_t (*g_pfnPbF51E0)(void*, void*);
+extern void (*g_pfnPbF4B00)(uint32_t, void*, void*);
+extern void (*g_pfnPbF20E0)(void*, void*);
+extern void (*g_pfnPbCheckFail)(const char*, int, const char*);
 
 class CMsgOverheadLeagueInfoPB {
 public:
@@ -34,6 +58,14 @@ public:
     static void Clear(void* self);
     // 0x1417f1e40
     static bool IsInitialized(void* self);
+    // 0x1417f2550 — Merge
+    static bool Merge(void* self, void* input);
+    // 0x1417f2a50 — ByteSize
+    static int32_t ByteSize(void* self);
+    // 0x1417f2930 — SerializeWithCachedSizes
+    static void SerializeWithCachedSizes(void* self, void* pBuf);
+    // 0x1417f2b80 — MergeFrom (slot6 thunk 0x1417f2e90)
+    static void MergeFrom(void* self, void* from);
     // 0x1417f23f0
     static uint32_t GetCachedSize(void* self);
 };

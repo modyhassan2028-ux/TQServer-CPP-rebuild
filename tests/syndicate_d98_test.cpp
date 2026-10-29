@@ -1,203 +1,146 @@
-// D98 — CSyndicateLogic +0x218 — AwardPrizeVlmOrCross,
-// the checked-iterator monster, with the literal prize
-// tables read from .rdata.
-#include "modules/syndicate/src/syndicatelogic.h"
+// D98 — CMsgOverheadLeagueInfoPB: Merge/ByteSize/Serialize/MergeFrom
+#include "modules/syndicate/src/CMsgOverheadLeagueInfoPB.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>
-#include <cstdlib>
+#include <string>
+#include <new>
 using namespace syndicate;
 
-static uint8_t abLogic[0x68];
-static CSyndicateLogic* pL = (CSyndicateLogic*)abLogic;
-static uint8_t abOwner[0x40];
-static uint8_t abInner[0x40];
-static void* apProxy1[2], *apProxy2[2];
-static uint8_t abNode[0x40];
-static uint8_t abCont[0x40];
-static uint8_t abLg[0x40];
-
-static int s_nLog, s_nInvalid, s_nRefresh, s_nIter730,
-    s_nVt350, s_nVt40;
-static char s_acLog[128], s_acBcast[128], s_acStr[64];
-static uint32_t s_uVt350Args[4];
-static uint32_t s_uBcastSyn;
-static char s_cBf80, s_cFa70;
-static uint64_t s_uBf80Val, s_uFa70Val, s_uF550Ret;
-static void* s_pvIter730[4]; static int s_nIter730Obj;
+static int s_nVar, s_nW32, s_nWByte, s_nWStr, s_nCheck, s_nStr, s_nVec, s_nAlloc;
+static uint32_t s_uF1, s_uF2, s_uFByte, s_uFStr;
+static uint32_t s_uV1, s_uVByte;
+static char s_chSent[32];
 
 static void Reset() {
-    memset(abLogic, 0, sizeof(abLogic));
-    memset(abOwner, 0, sizeof(abOwner));
-    memset(abInner, 0, sizeof(abInner));
-    // the cross-path iterator proxy chain:
-    // vecB[0] -> proxy1 -> proxy2 -> node
-    memset(apProxy1, 0, sizeof(apProxy1));
-    memset(apProxy2, 0, sizeof(apProxy2));
-    memset(abNode, 0, sizeof(abNode));
-    apProxy1[0] = apProxy2;
-    apProxy2[0] = abNode;
-    memset(abCont, 0, sizeof(abCont));
-    *(void**)abNode = abCont;   // *node = container
-    *(void**)(abCont + 0x10) = (void*)0x10000;  // size
-    // the owner chain: pSyn[0] -> owner -> *owner=inner,
-    // inner+0x20 = container begin (> the id array)
-    *(void**)abOwner = abInner;
-    *(void**)(abInner + 0x20) = (void*)0x7fff0000;
-    memset(abLg, 0, sizeof(abLg));
-    *(void**)(abLogic + 8) = (void*)0x1;  // box unused
-    ((void**)abLogic)[2] = (void*)0x22;   // lg mgr
-    s_nLog = s_nInvalid = s_nRefresh = 0;
-    s_nIter730 = s_nVt350 = s_nVt40 = 0;
-    s_nIter730Obj = 0;
-    s_acLog[0] = s_acBcast[0] = s_acStr[0] = 0;
-    s_cBf80 = 1; s_cFa70 = 1;
-    s_uBf80Val = s_uFa70Val = 0; s_uF550Ret = 0;
-    g_fnT1LogError = [](const char* s) {
-        s_nLog++; if (s) strncpy(s_acLog, s, 127); };
-    g_fnInvalidParam = []() { s_nInvalid++; };
-    g_fnMyLogSave = [](const char* f, const char* fmt) {
-        strncpy(s_acLog, f, 127);
-        (void)fmt; };
-    g_fnLgFind = [](void*, uint32_t u) -> int64_t {
-        return u >= 0x60 ? (int64_t)(uint64_t)&abLg
-                         : 0; };
-    g_fnLgBf80 = [](void*, uint64_t v) -> char {
-        s_uBf80Val = v; return s_cBf80; };
-    g_fnLgF550 = [](void*) -> uint64_t {
-        return s_uF550Ret; };
-    g_fnLgFa70 = [](void*, uint64_t v) -> char {
-        s_uFa70Val = v; return s_cFa70; };
-    g_fnLgRefresh = [](void*) -> void* {
-        s_nRefresh++; return 0; };
-    g_fnLgGetId = [](void* p) -> uint64_t {
-        return p == (void*)&abLg ? 0x60 : 0; };
-    // the C50 iterator attach marks the pair as live
-    // (pos = 1 — never equal to RAW's local_470 == 0)
-    g_fnIterC50 = [](void* p, void*) {
-        ((uint64_t*)p)[1] = 1; };
-    g_fnIter730 = [](void* p) {
-        s_nIter730++; if (s_nIter730Obj < 4)
-            s_pvIter730[s_nIter730Obj++] = p; };
-    g_fnStringMgrInstance = []() -> void* {
-        return (void*)0x99; };
-    g_fnStringMgrGetStr = [](void*, const char* k)
-        -> void* {
-        strncpy(s_acStr, k, 63);
-        return (void*)s_acStr; };
-    // the box: only vt+0x350 is used here
-    static void* apBox[1];
-    static void* apBoxVt[128]; memset(apBoxVt, 0,
-                                      sizeof(apBoxVt));
-    apBox[0] = apBoxVt;
-    apBoxVt[0x350 / 8] = (void*)+[](
-        void*, uint32_t a, uint32_t b, uint32_t c)
-        -> uint64_t {
-        s_nVt350++;
-        s_uVt350Args[0] = a; s_uVt350Args[1] = b;
-        s_uVt350Args[2] = c;
-        return 0; };
-    *(void**)(abLogic + 8) = apBox;
-    // the logic vt+0x40 broadcast (STR_*_VLM_AWARD)
-    static void* apLogicVt[128]; memset(apLogicVt, 0,
-                                        sizeof(apLogicVt));
-    apLogicVt[0x40 / 8] = (void*)+[](void*,
-        uint32_t u, const char* psz, uint32_t)
-        -> uint64_t {
-        s_nVt40++; s_uBcastSyn = u;
-        strncpy(s_acBcast, psz, 127); return 0; };
-    *(void***)abLogic = apLogicVt;
+    s_nVar = s_nW32 = s_nWByte = s_nWStr = s_nCheck = s_nStr = 0;
+    s_nVec = s_nAlloc = 0;
+    s_uF1 = s_uF2 = s_uFByte = s_uFStr = s_uV1 = s_uVByte = 0;
+    g_pfnPbVarintSize = [](uint32_t u) -> int32_t {
+        s_nVar++; (void)u; return 2; };
+    g_pfnPbWriteVarint32 = [](uint32_t f, uint32_t v, void*) {
+        s_nW32++; s_uF1 = f; s_uV1 = v; };
+    g_pfnPbWriteByte = [](uint32_t f, char v, void*) {
+        s_nWByte++; s_uFByte = f; s_uVByte = (uint32_t)(unsigned char)v; };
+    g_pfnPbF4B00 = [](uint32_t f, void*, void*) { s_nWStr++; s_uFStr = f; };
+    g_pfnPbWriteUnknown = [](void*, void*, int32_t) {};
+    g_pfnPb64C0 = [](void*, void*) {};
+    g_pfnPb4550 = [](void*, void*) {};
+    g_pfnPb45D0 = [](void*) {};
+    g_pfnPb6510 = [](void*) -> uint64_t { return 1; };
+    g_pfnPb3BC0 = [](void*) -> uint64_t { return 0; };
+    g_pfnPb3A50 = [](void*, uint32_t*) -> uint64_t { return 1; };
+    g_pfnPbF3F50 = [](void*, uint32_t, void*) -> char { return 1; };
+    g_pfnPbEAA40 = [](void* in, void* d) -> char {
+        unsigned char* c = *(unsigned char**)((unsigned char*)in + 8);
+        *(unsigned char*)d = *c;
+        *(void**)((unsigned char*)in + 8) = c + 1;
+        return 1; };
+    g_pfnPbF51E0 = [](void*, void*) -> uint64_t { s_nStr++; return 1; };
+    g_pfnPbE0110 = [](void*, int32_t) { s_nVec++; };
+    g_pfnPbE02C0 = []() -> void* { s_nAlloc++; return nullptr; };
+    g_pfnPbF20E0 = [](void*, void*) {};
+    g_pPbDefaultStr = (void*)s_chSent;
+    g_pfnPbCheckFail = [](const char* f, int l, const char* t) {
+        s_nCheck++; assert(l == 0x18d);
+        assert(strstr(f, "msgoverheadleagueinfo.pb.cc") != nullptr); (void)t; };
 }
 
-// the fixture: MSVC-style vector structs
-struct VecSynID { void* p[8]; uint32_t uIds[8]; };
-struct VecBSelf { void* p[8]; uint32_t uB[8]; };
-
 int main() {
-    // ---- S1: the size mismatch ----
+    alignas(16) static unsigned char abObj[0x80];
+    static unsigned char abStr[0x40];
+    static void* apStr[4];
     Reset();
-    VecSynID vA; memset(&vA, 0, sizeof(vA));
-    VecBSelf vB; memset(&vB, 0, sizeof(vB));
-    vA.p[0] = abOwner;   // the vector owner object
-    vB.p[0] = apProxy1;  // the checked-iterator proxy
-    vA.p[3] = vA.uIds; vA.p[4] = vA.uIds + 2; // 2 ids
-    vB.p[6] = vB.uB;  vB.p[7] = vB.uB + 2;   // 2 flags
-    vB.p[2] = (void*)2;  // the size field
-    vA.uIds[0] = 0x60; vA.uIds[1] = 0x61;
-    ((void**)abLogic)[2] = (void*)0x22;
-    pL->Slot218AwardPrizeVlmOrCross(&vA, &vB, 0);
-    assert(s_nLog == 0);  // sizes match (2==2)
-    // make them mismatch
-    vA.p[4] = vA.uIds + 3;
-    pL->Slot218AwardPrizeVlmOrCross(&vA, &vB, 0);
-    assert(s_nLog == 1);
-    assert(strstr(s_acLog, "vecSynID.size() != "
-               "vecBSelf.size()") != 0);
-    vA.p[4] = vA.uIds + 2;
-    // ---- S2: the vlm path — rank money ×10000 ----
+    memset(abObj, 0, sizeof abObj);
+    new (abObj + 0x08) std::string();
+    memset(abStr, 0, sizeof abStr);
+
+    // ---- S1: empty ----
+    assert(CMsgOverheadLeagueInfoPB::ByteSize(abObj) == 0);
+
+    // ---- S2: the three int fields, small and large ----
+    *(uint32_t*)(abObj + 0x30) = 7;
+    *(uint32_t*)(abObj + 0x38) = 5;      // small
+    *(uint32_t*)(abObj + 0x3c) = 0x300;  // large -> seam
+    *(uint32_t*)(abObj + 0x40) = 6;      // small
+    assert(CMsgOverheadLeagueInfoPB::ByteSize(abObj) == (1 + 1) + (1 + 2) + (1 + 1));
+    assert(s_nVar == 1);
+
+    // ---- S3: the two byte fields cost tag+1 each ----
+    *(uint32_t*)(abObj + 0x30) = 0x18;
+    // bits 0x18 -> only fields 4 and 5 (tag + one byte each)
+    assert(CMsgOverheadLeagueInfoPB::ByteSize(abObj) == 2 + 2);
+
+    // ---- S4: field 6 (varint at +0x60) ----
+    *(uint32_t*)(abObj + 0x30) = 0x20;
+    *(uint32_t*)(abObj + 0x60) = 0x400;
+    assert(CMsgOverheadLeagueInfoPB::ByteSize(abObj) == (1 + 2));
+
+    // ---- S5: the repeated strings ----
+    *(uint32_t*)(abStr + 0x18) = 9;
+    apStr[0] = abStr;
+    *(void**)(abObj + 0x48) = apStr;
+    *(int32_t*)(abObj + 0x50) = 1;
+    *(uint32_t*)(abObj + 0x30) = 0;
+    assert(CMsgOverheadLeagueInfoPB::ByteSize(abObj) == 1 + 9 + 1);
+
+    // ---- S6: Serialize all seven fields ----
+    *(uint32_t*)(abObj + 0x30) = 0x3f;
+    *(uint32_t*)(abObj + 0x38) = 11;
+    *(uint32_t*)(abObj + 0x3c) = 22;
+    *(uint32_t*)(abObj + 0x40) = 33;
+    *(unsigned char*)(abObj + 0x44) = 1;
+    *(unsigned char*)(abObj + 0x45) = 0;
+    *(uint32_t*)(abObj + 0x60) = 66;
+    CMsgOverheadLeagueInfoPB::SerializeWithCachedSizes(abObj, (void*)1);
+    assert(s_nW32 == 4);   // fields 1,2,3 and 6
+    assert(s_nWByte == 2 && s_uFByte == 5 && s_uVByte == 0);
+    assert(s_nWStr == 1 && s_uFStr == 7);
+
+    // ---- S7: MergeFrom ----
+    static unsigned char abFrom[0x80];
+    memset(abFrom, 0, sizeof abFrom);
+    new (abFrom + 0x08) std::string("o");
+    *(uint32_t*)(abFrom + 0x30) = 0x3f;
+    *(uint32_t*)(abFrom + 0x38) = 1;
+    *(uint32_t*)(abFrom + 0x3c) = 2;
+    *(uint32_t*)(abFrom + 0x40) = 3;
+    *(unsigned char*)(abFrom + 0x44) = 1;
+    *(unsigned char*)(abFrom + 0x45) = 0;
+    *(uint32_t*)(abFrom + 0x60) = 6;
+    CMsgOverheadLeagueInfoPB::MergeFrom(abObj, abFrom);
+    assert(*(uint32_t*)(abObj + 0x30) == 0x3f);
+    assert(*(uint32_t*)(abObj + 0x38) == 1 && *(uint32_t*)(abObj + 0x3c) == 2);
+    assert(*(uint32_t*)(abObj + 0x40) == 3);
+    assert(*(unsigned char*)(abObj + 0x44) == 1);
+    assert(*(uint32_t*)(abObj + 0x60) == 6);
+    CMsgOverheadLeagueInfoPB::MergeFrom(abObj, abObj);
+    assert(s_nCheck == 1);
+
+    // ---- S8: Merge walks 08 10 18 20 28 30 3a ----
     Reset();
-    vA.uIds[0] = 0x60; vA.uIds[1] = 0x61;
-    vB.uB[0] = 0xffffffff; vB.uB[1] = 0xffffffff;
-    pL->Slot218AwardPrizeVlmOrCross(&vA, &vB, 0);
-    // the last rank (2): 10000*10000; rank1 was
-    // 12000*10000 (checked via the tables below)
-    assert(s_uBf80Val == 10000ULL * 10000);
-    assert(s_auVlmMoney[0] == 12000 &&
-           s_auVlmEmoney[0] == 3000);
-    assert(s_nRefresh >= 1);
-    assert(strstr(s_acLog, "gmlog/synvlmaward") != 0);
-    // the emoney sum: f550 + 3000 then vt+0x350
-    assert(s_uFa70Val == 2000);  // rank2 emoney (rank1 was 3000)
-    assert(s_nVt350 == 2 && s_uVt350Args[0] == 0x2b
-           && s_uVt350Args[2] == 0x60);
-    assert(s_nVt40 == 2);   // both ranks broadcast
-    // the STR_VLM_AWARD went through the string mgr
-    assert(strstr(s_acStr, "STR_VLM_AWARD") != 0);
-    assert(s_nIter730 >= 1);
-    // ---- S3: the cross path ----
-    Reset();
-    s_nVt40 = 0;
-    // the container begin/end = the vecB storage
-    *(void**)(abCont + 0x30) = vB.uB;
-    *(void**)(abCont + 0x38) = vB.uB + 8;
-    pL->Slot218AwardPrizeVlmOrCross(&vA, &vB, 1);
-    // rank2 (the last): 80000*10000; rank1 was 100000
-    assert(s_uBf80Val == 80000ULL * 10000);
-    assert(strstr(s_acLog, "gmlog/syncrossvlmaward")
-           != 0);
-    // rank2 cross emoney = 8000 (rank1 was 10000)
-    assert(s_uFa70Val == 8000);
-    assert(strstr(s_acStr, "STR_CROSS_VLM_AWARD") != 0);
-    assert(s_nVt40 == 2 && s_uBcastSyn == 0x61);
-    // ---- S4: the 8-rank cap ----
-    Reset();
-    memset(&vA, 0, sizeof(vA)); memset(&vB, 0,
-                                       sizeof(vB));
-    vA.p[0] = abOwner;
-    vB.p[0] = apProxy1;
-    uint32_t auIds[12]; uint32_t auB[12];
-    for (int i = 0; i < 12; i++) {
-        auIds[i] = 0x60 + i; auB[i] = 0xffffffff; }
-    vA.p[3] = auIds; vA.p[4] = auIds + 12;
-    vB.p[6] = auB;   vB.p[7] = auB + 12;
-    vB.p[2] = (void*)12;
-    static uint64_t s_uSaveBf80 = 0;
-    g_fnLgBf80 = [](void*, uint64_t v) -> char {
-        s_uSaveBf80 = v; return 1; };
-    pL->Slot218AwardPrizeVlmOrCross(&vA, &vB, 0);
-    assert(s_nRefresh == 16);  // 8 awards × 2 saves
-    assert(s_uSaveBf80 == 2000ULL * 10000);  // rank 8
-    // ---- S5: the not-exist id ----
-    Reset();
-    vA.p[3] = vA.uIds; vA.p[4] = vA.uIds + 1;
-    vA.p[0] = abOwner;
-    vB.p[0] = apProxy1;
-    vA.uIds[0] = 5;   // not found
-    vB.p[6] = vB.uB;  vB.p[7] = vB.uB + 1;
-    vB.p[2] = (void*)1;
-    pL->Slot218AwardPrizeVlmOrCross(&vA, &vB, 0);
-    assert(strstr(s_acLog, "SynID[%u] is not exist")
-           != 0);
-    puts("SYNDICATE_D98_OK: the iterator monster");
+    static unsigned char abInput[0x40];
+    unsigned char abIn[] = {0x08, 0x01, 0x10, 0x02, 0x18, 0x03,
+                            0x20, 0x01, 0x28, 0x00, 0x30, 0x06, 0x3a};
+    memset(abInput, 0, sizeof abInput);
+    *(void**)(abInput + 0x08) = abIn;
+    *(void**)(abInput + 0x10) = abIn + sizeof abIn;
+    *(void**)(abObj + 0x48) = apStr;
+    *(int32_t*)(abObj + 0x50) = 0;
+    *(int32_t*)(abObj + 0x54) = 0;
+    *(int32_t*)(abObj + 0x58) = 0;
+    *(uint32_t*)(abObj + 0x30) = 0;
+    apStr[0] = abStr;
+    assert(CMsgOverheadLeagueInfoPB::Merge(abObj, abInput));
+    assert(*(uint32_t*)(abObj + 0x38) == 1);
+    assert(*(uint32_t*)(abObj + 0x3c) == 2);
+    assert(*(uint32_t*)(abObj + 0x40) == 3);
+    assert(*(unsigned char*)(abObj + 0x44) == 1);
+    assert(*(unsigned char*)(abObj + 0x45) == 0);
+    assert(*(uint32_t*)(abObj + 0x60) == 6);
+    assert(s_nStr == 1);            // one string parsed through the seam
+    assert(*(uint32_t*)(abObj + 0x30) == 0x3f);
+
+    printf("SYNDICATE_D98_OK: OverheadLeagueInfoPB\n");
     return 0;
 }
