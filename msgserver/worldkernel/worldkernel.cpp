@@ -1,5 +1,6 @@
 // 14002e990 CWorldThread::OnProcess + 14002e580 CUserLoginThread::OnProcess
 #include <cstdio>
+#include <cctype>
 #include "worldkernel.h"
 namespace msg {
 // ---------------------------------------------------------- CWorldThread
@@ -434,5 +435,278 @@ void CWorldKernel::ClientConnect(uint32_t portIdx, int data, uint64_t tag, int h
         s.OnLoginOk(this, handle);
         s.OnLoginInfo(this, portIdx, param6, handle);
     }
+}
+
+namespace {
+// the console sidebar tags from .rdata
+static const uint8_t g_tag_1406e87d0[1] = {0};
+static const uint8_t g_tag_1406ed450[1] = {1};
+static const uint8_t g_tag_1406ed478[1] = {2};
+static const uint8_t g_tag_1406ed4a0[1] = {3};
+static const uint8_t g_tag_1406ed4c8[1] = {4};
+// _stricmp equivalent (the RAW compares console commands case-insensitively)
+static int cmpi(const char* a, const char* b) {
+    for (;; a++, b++) {
+        int ca = std::tolower((unsigned char)*a), cb = std::tolower((unsigned char)*b);
+        if (ca != cb || ca == 0) return ca - cb;
+    }
+}
+}
+
+// 1400613e0 — the world port dispatcher. The id ladder is checked in order:
+// ids below 0x4e22 first (0x4e21 console text, then 0x3e9/0x3ea/0x3eb/0x3f6/
+// 0x3f7), the rest through a switch where 0x4e2d is the logged default.
+int CWorldKernel::ProcessMsg(uint32_t msgId, int* buf, SProcessSeams& s) {
+    if (msgId < 0x4e22) {
+        if (msgId == 0x4e21) {
+            char cmd[256];
+            // the RAW re-sends the command text as msg 0x9c41 with its length
+            int n = 0;
+            while (((const char*)buf)[n] != '\0') n++;
+            s.PortSend(s.port, 0, 0x9c41, (uint32_t)n);
+            std::memset(cmd, 0, sizeof cmd);
+            if (sscanf((const char*)buf, "%s", cmd) != 1) return 1;
+            if (cmpi(cmd, "setmaxplayer") == 0) {
+                int v = 0;
+                if (sscanf((const char*)buf, "%s %d", cmd, &v) != 2) return 1;
+                *(uint32_t*)s.MaxPlayerGet() = (uint32_t)v;      // LOCK/UNLOCK in RAW
+                char out[256];
+                std::memset(out, 0, sizeof out);
+                snprintf(out, 0xff, "Set max player limit to %d", *(int*)s.MaxPlayerGet());
+                s.PortSend(s.port, 0, 0x9c41, (uint32_t)std::strlen(out));
+                return 1;
+            }
+            if (cmpi(cmd, "kickoutall") == 0) {
+                s.PortSend(s.port, 1, 0x753b, 0xea65);
+                return 1;
+            }
+            if (cmpi(cmd, "broadcast") == 0) {
+                const char* text = (const char*)buf + std::strlen(cmd);
+                if (*text == ' ') text++;
+                s.ConsoleBroadcast(s.World(), &g_tag_1406e87d0, text, 0);
+                return 1;
+            }
+            if (cmpi(cmd, "shutdown") == 0) {
+                s.ConsoleBroadcast(s.World(), &g_tag_1406e87d0, s.Str("STR_SHUTDOWN_NOTIFY"), 0);
+                s.PortSend(s.port, 0, 0x9c41, (uint32_t)std::strlen("Send shut down broadcast message."));
+                return 1;
+            }
+            if (cmpi(cmd, "restartserver") == 0) {
+                if (s.RestartServerAllowed()) { s.SetGlobal(0, 1); return 1; }
+                s.PortSend(s.port, 0, 0x9c41,
+                           (uint32_t)std::strlen("Please <kickoutall> before <restartserver>!"));
+                return 1;
+            }
+            if (cmpi(cmd, "restartwindows") == 0) {
+                if (s.RestartServerAllowed()) {
+                    if (!s.RestartWindows()) s.Log("ExitWindowsEx");
+                    return 1;
+                }
+                s.PortSend(s.port, 0, 0x9c41,
+                           (uint32_t)std::strlen("Please <kickoutall> before <restartserver>!"));
+                return 1;
+            }
+            return 1;
+        }
+        if (msgId == 0x3e9) { s.OnClientLogin(this, buf[0], buf[1], buf + 3); return 1; }
+        if (msgId == 0x3ea) { s.OnClientLogout(this, buf[0], buf[1], buf + 3); return 1; }
+        if (msgId == 0x3eb) {
+            int id = buf[0];
+            if (s.IsChatUser(s.Unit(), id)) {
+                int count = s.PortCount(s.port);
+                for (uint32_t i = 0xe; i < (uint32_t)count; i++)
+                    s.PortSend(s.port, i & 0xffffffff, 0x3eb, 0xea65);
+                return 1;
+            }
+            s.KickChat(s.Unit(), id);
+            s.DropUser(s.World(), id);
+            return 1;
+        }
+        if (msgId == 0x3f6) {
+            int a = buf[0], b = buf[1];
+            if (b != 0) { s.ChatMsg1(s.World(), a, b); return 1; }
+            s.ChatMsg2(s.World(), a);
+            return 1;
+        }
+        if (msgId == 0x3f7) {
+            s.ChatMsg3(s.World(), buf[0], buf[1], buf[3]);
+            return 1;
+        }
+        s.Log("CWorldKernel::ProcessMsg default");
+        return 1;
+    }
+    switch (msgId) {
+    case 0x4e22: s.Offline1(s.Unit(), buf[0], buf[1]); break;
+    case 0x4e23:
+        s.KickChat(s.Unit(), buf[0]);
+        s.DropUser(s.World(), buf[0]);
+        break;
+    case 0x4e24: {
+        int a = buf[0], b = buf[1];
+        void* n = s.FindByPtr(s.Unit(), buf + 3);
+        if (n == nullptr) {
+            if (b == 0x3ec && a != -1) {
+                void* u = s.FindById(s.Unit(), a);
+                if (u != nullptr) {
+                    char msg[1024];
+                    s.MsgInit(msg);
+                    s.MsgBuild(msg, "SYSTEM", (char*)u + 4, s.Str("STR_TARGET_OFFLINE"));
+                    s.SendToUnit(u, msg);
+                    s.MsgFree(msg);
+                }
+            }
+        } else {
+            s.CallVt8((uint8_t*)this + 8, *(uint32_t*)((uint8_t*)n + 0x60), b, buf + 7);
+        }
+        break;
+    }
+    case 0x4e25: {
+        void* n = s.FindById2(s.Unit(), buf[3]);
+        if (n != nullptr)
+            s.CallVt8((uint8_t*)this + 8, *(uint32_t*)((uint8_t*)n + 0x60), buf[1], buf + 4);
+        break;
+    }
+    case 0x4e26: {
+        void* n = s.FindById2(s.World(), buf[0]);
+        if (n == nullptr) s.Log("CWorldKernel::ProcessMsg 0x4e26 node");
+        else s.SetNodeTime(n);
+        break;
+    }
+    case 0x4e27:
+        if (*(int*)((uint8_t*)this + 0xf8) == 3) s.ChangeServer(this, buf[0], 0, 0);
+        break;
+    case 0x4e28:
+        if (buf[0] == -1) s.Log("CWorldKernel::ProcessMsg 0x4e28 id");
+        else s.SetOffline(s.Unit(), buf[0]);
+        break;
+    case 0x4e29:
+        if (buf[0] == -1) s.OnClientLogout(this, buf[1], 0, nullptr);
+        else s.OnClientLogin(this, buf[0], buf[2], buf + 5);
+        break;
+    case 0x4e2a: {
+        int key = 0; uint32_t value = 0;
+        if (sscanf((const char*)buf, "%d %u", &key, &value) == 2)
+            s.MapSet((uint8_t*)this + 0x10, key, value);
+        break;
+    }
+    case 0x4e2b:
+        if (!s.DbReconnect(s.Db())) s.Log("Worldkernel reconnect database failed at %s, %d");
+        else s.LogMsg("Worldkernel reconnect database success.");
+        break;
+    case 0x4e2c: {
+        struct { int id; uint32_t when; int val; } rec;
+        rec.id = buf[0];
+        rec.when = s.NowSec();
+        rec.val = buf[1];
+        s.AddRecord((uint8_t*)this + 0x98, rec.id, &rec);
+        break;
+    }
+    case 0x4e2e: {
+        int a = buf[0], id = buf[1];
+        if (*(int*)((uint8_t*)this + 0xf8) == 3) {
+            if (buf[2] == 0) {
+                s.DropAndLog(this, id, 1);
+                s.ChangeServer(this, id, 0, 0);
+                s.LogFile("gmlog/ChangeServer", &g_tag_1406ed4c8);
+            } else if (s.ChangeServer(this, id, 0, 0) == 0) {
+                int key = id;
+                s.MapInsert((uint8_t*)this + 0x138, &key, a);
+                s.LogFile("gmlog/ChangeServer", &g_tag_1406ed478);
+            } else {
+                s.LogFile("gmlog/ChangeServer", &g_tag_1406ed4a0);
+            }
+        } else {
+            s.LogFile("gmlog/ChangeServer", &g_tag_1406ed450);
+        }
+        break;
+    }
+    case 0x4e2f: {
+        uint8_t first[0x420];
+        std::memset(first, 0, sizeof first);
+        uint16_t* len = (uint16_t*)first;                  // local_468
+        int32_t*  a   = (int32_t*)(first + 2);              // local_464
+        int32_t*  b   = (int32_t*)(first + 6);              // local_460
+        *len = 0; *a = buf[0]; *b = buf[1];
+        if ((uint32_t)buf[2] > 0x409) return 0;
+        std::memcpy(first + 10, buf + 3, (size_t)(uint32_t)buf[2]);   // local_45c
+        uint8_t out[0x420];
+        std::memset(out, 0, sizeof out);
+        *(uint16_t*)(out + 0) = (uint16_t)(buf[2] + 0x16);
+        *(uint16_t*)(out + 2) = 0x608;
+        *(uint16_t*)(out + 4) = 2;
+        // RAW copies 0xf + len bytes from the first buffer, i.e. 5 bytes past it
+        std::memcpy(out + 6, first, (size_t)(uint16_t)(buf[2] + 0xf));
+        s.SendPort(this, out, *(uint16_t*)out);
+        break;
+    }
+    case 0x4e30: {
+        uint8_t first[0x420];
+        std::memset(first, 0, sizeof first);
+        *(uint16_t*)(first + 0) = 6;
+        *(int32_t*)(first + 2) = buf[0];
+        *(int32_t*)(first + 6) = buf[1];
+        if ((uint32_t)buf[2] > 0x409) return 0;
+        std::memcpy(first + 10, buf + 3, (size_t)(uint32_t)buf[2]);
+        uint8_t out[0x420];
+        std::memset(out, 0, sizeof out);
+        *(uint16_t*)(out + 0) = (uint16_t)(buf[2] + 0x16);
+        *(uint16_t*)(out + 2) = 0x608;
+        *(uint16_t*)(out + 4) = 2;
+        std::memcpy(out + 6, first, (size_t)(uint16_t)(buf[2] + 0xf));
+        s.SendPort(this, out, *(uint16_t*)out);
+        break;
+    }
+    case 0x4e31: {
+        int key = buf[0];
+        s.MapErase((uint8_t*)this + 0x10, &key);
+        break;
+    }
+    case 0x4e32: {
+        uint8_t m[12];
+        std::memset(m, 0, sizeof m);
+        *(uint16_t*)(m + 0) = 0xc;   // local_1778
+        *(uint16_t*)(m + 2) = 0x640; // local_1776
+        *(int32_t*)(m + 4) = buf[0]; // local_1774
+        m[8] = (uint8_t)buf[1];      // local_1770
+        s.SendPort2(this, m);
+        break;
+    }
+    case 0x4e33:
+        if (buf[0] == 1) {
+            *(int*)((uint8_t*)this + 0xf8) = 2;
+            if (*(uint8_t*)((uint8_t*)this + 0x203) == 0) s.OnAccountConnected(this);
+            else s.OnAccountAlt(this);
+        } else {
+            *(int*)((uint8_t*)this + 0xf8) = 0;
+            s.SetGlobal(1, 0);
+            s.PortSend(s.port, 0, 0x9c41, (uint32_t)std::strlen("Account server connection broken."));
+        }
+        break;
+    case 0x4e34:
+        if (buf != nullptr) {
+            if (*(uint8_t*)((uint8_t*)this + 0x203) == 0) s.ProcessAccountMsg(this, buf + 1);
+            else s.ProcessAccountMsg91(this, buf + 1);
+        }
+        break;
+    case 0x4e35:
+        if (buf == nullptr) {
+            s.Log("CWorldKernel::ProcessMsg, WORLD_M91_RECHARGE_QUERY, buf is NULL, type:%d, from:%d");
+            return 0;
+        }
+        if (buf[2] == 0) {
+            *(uint32_t*)((uint8_t*)this + 0x1ec) = 0;
+        } else {
+            if (buf[2] != 1) {
+                s.Log("CWorldKernel::WORLD_M91_RECHARGE_QUERY, RECHARGE_91QUERY, case[%d] error. User[%u], type:%d, from:%d");
+                return 0;
+            }
+            s.RechargeQuery(this, buf[0], buf[1]);
+        }
+        break;
+    default:
+        s.Log("CWorldKernel::ProcessMsg default");
+        break;
+    }
+    return 1;
 }
 } // namespace msg

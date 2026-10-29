@@ -1954,3 +1954,28 @@ ef850@0x1c8 — والـdtor بيهدّها **بالعكس**، وبعد كل ه�
 مع نفس نص الرسالة.
 
 **اختبار:** 21 تأكيدًا ×6 — **الرجريجن 90/90 ×6**.
+
+## المسار أ-9ع — CWorldKernel::ProcessMsg (1400613e0) [2026-10-29]
+
+مُوزِّع بورت العالم (545 سطر خام). السلم بالترتيب: أقل من 0x4e22 →
+`0x4e21` (أوامر الكونسول) ثم 0x3e9/0x3ea/0x3eb/0x3f6/0x3f7؛ وما فوقها
+switch من 0x4e22 لـ0x4e35 و**0x4e2d = default** بطبع نص.
+
+**أوامر الكونسول (0x4e21)** بـ`_stricmp` بالترتيب: `setmaxplayer` (sscanf
+`%s %d`، كتابة مع LOCK/UNLOCK، ورد `Set max player limit to %d`)،
+`kickoutall` → `(1,0x753b,0xea65)`، `broadcast` (الباقي بعد أول مسافة)،
+`shutdown` (`STR_SHUTDOWN_NOTIFY` + "Send shut down broadcast message.")،
+`restartserver` و`restartwindows` الاتنين بيتحققوا من `DAT_1409758f4`
+وبيطبعوا **نفس** رسالة "Please <kickoutall> before <restartserver>!".
+`restartwindows` بيعمل OpenProcessToken/AdjustTokenPrivileges/
+`ExitWindowsEx(0x12,0)` وبيسجّل اسم الـAPI الفاشل.
+
+**باقي الحالات:** 0x3eb بيلف من 0xe لحد `(*port->vt+0x18)()` ويبعت
+`(i,0x3eb,0xea65)`؛ 0x4e24 بيبني `STR_TARGET_OFFLINE` **بس** لما
+`+0x0c == 0x3ec` والمستخدم ≠ -1؛ 0x4e2f/0x4e30 بيبنوا باكيت
+`[len=p[2]+0x16][0x608][2]` ثم ينسخوا **0xf+p[2]** بايت من البافر الداخلي
+(يعني 5 بايت زيادة عن محتواه — quirk أصلي)، وحد 0x409 بيرجع 0؛
+0x4e33 بيحوّل الحالة لـ2 أو 0 ويطبع "Account server connection broken."؛
+0x4e35 (`WORLD_M91_RECHARGE_QUERY`) بيرجع 0 لو البافر null أو النوع ≠ 0/1.
+
+**اختبار:** 58 تأكيدًا ×6 — **الرجريجن 91/91 ×6**.

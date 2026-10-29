@@ -234,6 +234,59 @@ struct SClientSeams {
 void ClientConnect(uint32_t portIdx, int data, uint64_t tag, int handle, int param6,
                    SClientSeams& s);
 
+// --- 1400613e0 CWorldKernel::ProcessMsg
+struct SProcessSeams {
+    int   (*PortCount)(void* port);                                   // (*port->vt+0x18)
+    void  (*PortSend)(void* port, uint32_t idx, uint32_t msg, uint32_t arg); // vt+0x50
+    void  (*Log)(const char* text);                                    // DAT_1406d9c10
+    void  (*LogMsg)(const char* text);                                  // log_InlineLogMessage
+    void  (*LogFile)(const char* path, const void* tag);                // tq::MyLogSave
+    void* (*Unit)();                                                    // 140054e10
+    void* (*World)();                                                   // DAT_140975af8
+    void  (*MsgInit)(void* buf);                                        // 14007a560
+    void  (*MsgFree)(void* buf);                                        // 14007a5e0
+    const char* (*Str)(const char* key);                                // theInstance()
+    int   (*MsgBuild)(void* buf, const char* a, const char* b, const char* text);
+    void  (*SendToUnit)(void* unit, void* buf);                         // 140067420
+    void* (*Db)();                                                      // InstanceGet
+    int   (*DbReconnect)(void* db);                                     // (*db->vt+0x38)
+    void* (*MaxPlayerGet)();                                            // MaxPlayerGet
+    void  (*OnClientLogin)(void* self, int a, int b, int* p3);           // 1400551c0
+    void  (*OnClientLogout)(void* self, int a, int b, int* p3);          // 140055390
+    int   (*IsChatUser)(void* unit, int id);                             // 140070750
+    void  (*KickChat)(void* unit, int id);                               // 1400715e0
+    void  (*DropUser)(void* self, int id);                               // 14005f600
+    void  (*ChatMsg1)(void* world, int a, int b);                        // 1400814b0
+    void  (*ChatMsg2)(void* world, int a);                               // 14007f870
+    void  (*ChatMsg3)(void* world, int a, int b, int c);                 // 14007f970
+    void  (*Offline1)(void* unit, int a, int b);                         // 140070620
+    void* (*FindByPtr)(void* unit, int* p);                              // 14006e250
+    void* (*FindById)(void* unit, int id);                               // 140070520
+    void* (*FindById2)(void* unit, int id);                              // 14006e3a0
+    void  (*CallVt8)(void* obj, uint32_t a, int b, int* c);               // (*(this+8)->vt)(...)
+    void  (*SetNodeTime)(void* node);                                    // *(node+0x78)=DAT_140949794
+    int   (*ChangeServer)(void* self, int id, int msg, int arg);          // 1400558e0
+    void  (*SetOffline)(void* unit, int id);                             // 140067580
+    void  (*MapSet)(void* map, int key, uint32_t value);                  // 140053460
+    void  (*AddRecord)(void* table, int key, void* rec);                  // 14007cf20
+    void  (*MapInsert)(void* map, void* key, int value);                  // 140018880
+    void  (*DropAndLog)(void* self, int id, int flag);                    // 140055820
+    void  (*SendPort)(void* self, const void* msg, uint32_t len);          // 140055600
+    void  (*SendPort2)(void* self, const void* msg);                      // 140055600 (2 args)
+    void  (*MapErase)(void* map, void* key);                              // 140050de0
+    void  (*OnAccountConnected)(void* self);                              // 1400556a0
+    void  (*OnAccountAlt)(void* self);                                    // 140055d00
+    void  (*ProcessAccountMsg)(void* self, int* p);                       // 1400605b0
+    void  (*ProcessAccountMsg91)(void* self, int* p);                     // 140060510
+    void  (*RechargeQuery)(void* self, int a, int b);                     // 140077000
+    void  (*ConsoleBroadcast)(void* world, const void* tag, const char* text, int f); // 14006e8e0
+    int   (*RestartServerAllowed)();                                      // DAT_1409758f4 != 0
+    int   (*RestartWindows)();                                            // token + ExitWindowsEx(0x12,0)
+    void  (*SetGlobal)(int which, int value);                             // DAT_1409758f0 / 7c4
+    uint32_t (*NowSec)();                                                 // _time32(0)
+    void* port;                                                          // this+0x58
+};
+
 class CWorldKernel {
 public:
     void* m_Q[0x60];
@@ -249,6 +302,7 @@ public:
     uint8_t Create(SCreateSeams& s);
     void    ClientConnect(uint32_t portIdx, int data, uint64_t tag, int handle,
                           int param6, SClientSeams& s);
+    int     ProcessMsg(uint32_t msgId, int* buf, SProcessSeams& s);
 };
 }
 #endif
