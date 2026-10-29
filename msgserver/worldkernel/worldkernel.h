@@ -316,6 +316,18 @@ struct SIpSeams {
     void     (*Sql)(const char* text, int n);                       // capture hook for the built SQL
 };
 
+// --- 14005f7a0 / 14005f900 IP notices
+struct SIpNoticeSeams {
+    void    (*IpToString)(void* self, int ip, char* out, int max);   // 14005d300
+    void    (*NoticeInit)(void* buf);                                 // 14007d5f0
+    int     (*NoticeBuild)(void* buf, int a, int b, int sameIp);       // 14007d670
+    void    (*NoticeFree)(void* buf);                                 // 14007d640
+    void    (*LoginInit)(void* buf);                                  // 14007d770
+    int     (*LoginBuild)(void* buf, const char* ipText);              // 14007d7f0
+    void    (*LoginFree)(void* buf);                                  // 14007d7c0
+    uint8_t (*SendMsg)(void* self, int handle, void* buf);             // (*self->vt+0x38)
+};
+
 class CWorldKernel {
 public:
     void* m_Q[0x60];
@@ -334,6 +346,9 @@ public:
     int     ProcessMsg(uint32_t msgId, int* buf, SProcessSeams& s);
     uint8_t SendLoginPacket(int handle, SLoginPacketSeams& s);
     void    RecordLoginIp(int id, int p4, SIpSeams& s);
+    uint8_t SendIpChangedNotice(int p2, int p3, int p4, uint8_t p5, int p6,
+                                SIpNoticeSeams& s);
+    bool    SendIpLoggedNotice(int p2, int p3, SIpNoticeSeams& s);
 };
 }
 #endif

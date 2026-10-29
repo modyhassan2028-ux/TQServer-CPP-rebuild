@@ -850,4 +850,50 @@ void CWorldKernel::RecordLoginIp(int id, int p4, SIpSeams& s) {
     s.OnIpNotified(this, id, lastIp, (int)lastTime, flag, p4);
     s.OnIpLogged(this, id, p4);
 }
+
+// 14005f7a0 — sends the "your login ip changed" notice. When +0x1f8 is set the
+// RAW reports success without building or sending anything; otherwise it
+// renders both addresses to text, compares them and feeds the result into the
+// builder as a flag, and only a successful build is sent.
+uint8_t CWorldKernel::SendIpChangedNotice(int p2, int p3, int p4, uint8_t p5,
+                                          int p6, SIpNoticeSeams& s) {
+    if (*(char*)((uint8_t*)this + 0x1f8) != 0) return 1;
+    char oldIp[256], newIp[256];
+    oldIp[0] = '\0';
+    newIp[0] = '\0';
+    s.IpToString(this, p2, oldIp, 0xff);
+    s.IpToString(this, p3, newIp, 0xff);
+    int same = 1;
+    for (int i = 0;; i++) {
+        if (oldIp[i] != newIp[i]) { same = 0; break; }
+        if (oldIp[i] == '\0') break;
+    }
+    uint8_t buf[0x430];
+    s.NoticeInit(buf);
+    if (s.NoticeBuild(buf, p4, p5, same) == 0) {
+        s.NoticeFree(buf);
+        return 0;
+    }
+    s.SendMsg(this, p6, buf);
+    s.NoticeFree(buf);
+    return 1;
+}
+
+// 14005f900 — the login-ip notice: render the address, build, and send only
+// when the builder reports success. The buffer is released on both branches.
+bool CWorldKernel::SendIpLoggedNotice(int p2, int p3, SIpNoticeSeams& s) {
+    char ipText[256];
+    ipText[0] = '\0';
+    s.IpToString(this, p2, ipText, 0xff);
+    uint8_t buf[0x430];
+    s.LoginInit(buf);
+    int ok = s.LoginBuild(buf, ipText);
+    if (ok != 0) {
+        s.SendMsg(this, p3, buf);
+        s.LoginFree(buf);
+    } else {
+        s.LoginFree(buf);
+    }
+    return ok != 0;
+}
 } // namespace msg
