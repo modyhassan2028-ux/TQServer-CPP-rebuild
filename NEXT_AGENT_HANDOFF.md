@@ -2093,3 +2093,27 @@ iplogintime%d` من 1 لـ5، حساب نقاط اليوم (`/0x15180`) بزيا
 الطول صفر.
 
 **اختبار:** 23 تأكيدًا ×6 — **الرجريجن 96/96 ×6**.
+
+## المسار أ-9س — CPEImage (عائلة 140509**) [2026-10-29]
+
+عائلة `140509**` اللي كانت منسوبة لـ`CAsyncDBThread` **مش منها**: دي شغّالة
+على رأس PE (LoadLibrary / GetProcAddress / `CreateMapGroup` /
+`CreateNewMapData`). اتسمّت `CPEImage` **بالاستنتاج من السلوك** (مفيش RTTI
+اسم للكلاس) والحقول مطابقة للخام: `+0x18` base، `+0x20` NT، `+0x28` أول
+section.
+
+المنقول:
+- `140509760` AttachImage: أقل من `0x40` → رفض قبل أي تخزين؛ الـbase
+  بيتخزن حتى لو الـMZ غلط، والـNT بعد فحص حدود e_lfanew بس؛ فحص
+  `0x2000`/`0x2`/`0xf0` بالترتيب.
+- `140509820` GetMaxAlignedSize: `((SizeOfHeaders+align-1)/align)*align`
+  كأرضية، ولكل section `((max(VirtualSize,SizeOfRawData)+VirtualAddress+
+  align-1)/align)*align` والأكبر يفوز.
+- `1405094d0` ApplyRelocations: بيلف بلوكات الإزاحة ويعدّل مدخلات
+  `0xA000` بس (`slot += delta - ImageBase`).
+
+**ملاحظة مفتوحة (متسابة عمدًا):** حلقة فحص حدود الـsections بتقرأ dwords
+عند `nt+0x118` بينما المشي بيبدأ من `nt+0x108` — نفس البايتات بإزاحة 0x10.
+الحالات المعتمدة على الـsection table اتشالت من الاختبار لحد ما يتأكد التراكب.
+
+**اختبار:** 19 تأكيدًا ×6 — **الرجريجن 97/97 ×6**.
