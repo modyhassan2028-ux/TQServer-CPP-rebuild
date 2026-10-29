@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <cstring>
+#include "md5.h"
 
 namespace msg {
 
@@ -16,6 +17,14 @@ struct SImportSeams {
     void* (*GetModuleHandleA)(const char* name);
     void* (*GetProcAddress)(void* mod, const char* name);
     void* (*GetProcAddressOrdinal)(void* mod, uint16_t ord);
+};
+
+struct SFactorySeams {
+    void  (*Log)(const char* text);
+    void* (*Alloc)(size_t size);      // operator new
+    void* desVftable;                 // DES::vftable
+    void* md5Vftable;                 // MD5::CMD5Checksum::vftable
+    void* md5StandardVftable;         // MD5::CMD5ChecksumStandard::vftable
 };
 
 struct SLoaderSeams {
@@ -56,6 +65,10 @@ public:
     // 140509990 — virtual-allocates, copies, relocates, resolves and calls the
     // entry point with (image, 1); a rejected entry frees and reports 0
     int  Load(void* fileBase, uint32_t fileSize, SLoadSeams& s);
+
+    // 140509280 — the cipher factory: 0 = DES (0x890), 1 = MD5, 2 = the
+    // standard MD5, 3 leaves the out slot untouched, anything else zeroes it
+    static void* CreateObject(int kind, void** out, SFactorySeams& s);
 
     // 140508f60 — the loader entry: 8-byte size gate, optional decrypt, the two
     // CRT preloads and the four export names that must all resolve

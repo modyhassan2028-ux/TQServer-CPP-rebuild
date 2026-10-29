@@ -243,4 +243,35 @@ int CPEImage::BootValidate(void* data, int32_t size, char decrypt,
     if (img.LookupExport((uintptr_t)"CreateMapGroupDefaultData") == 0) return 0;
     return 1;
 }
+
+// 140509280 — the factory behind the decrypt step. Kind 3 is a hole in the RAW:
+// the else-if chain only zeroes the slot for anything that is not 0, 1, 2 or 3,
+// so a 3 leaves the caller's pointer alone.
+void* CPEImage::CreateObject(int kind, void** out, SFactorySeams& s) {
+    if (kind == 0) {
+        void* obj = s.Alloc(0x890);
+        if (obj == nullptr) return nullptr;
+        *(void**)obj = s.desVftable;
+        *out = obj;
+        return obj;
+    }
+    if (kind == 1) {
+        void* obj = s.Alloc(0x60);
+        void* made = nullptr;
+        if (obj != nullptr) made = CMD5Checksum::Init((CMD5Checksum*)obj, s.md5Vftable);
+        *out = made;
+        return made;
+    }
+    if (kind == 2) {
+        void* obj = s.Alloc(0x60);
+        if (obj != nullptr) {
+            CMD5Checksum::Init((CMD5Checksum*)obj, s.md5Vftable);
+            *(void**)obj = s.md5StandardVftable;
+        }
+        *out = obj;
+        return obj;
+    }
+    if (kind != 3) *out = nullptr;
+    return nullptr;
+}
 } // namespace msg
