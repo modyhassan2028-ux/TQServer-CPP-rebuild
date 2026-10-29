@@ -28,6 +28,10 @@ static void Reset() {
 }
 
 static int s_nElemDtor;
+static int s_nW2;
+static int s_nStr2;
+static int s_nMsg2;
+static int s_nCheck;
 static void ElemClear(void*) { s_nElemClear++; }
 static void* ElemDtor(void* p, int) { s_nElemDtor++; return p; }
 static uint64_t ElemInit(void*) {
@@ -119,6 +123,75 @@ int main() {
     assert(s_nElemDtor == 2);
     assert(s_nDel == 1 && s_pDel == (void*)apVec);
     assert(s_nFree == 1 && s_pFreed == p);
+
+    // ---- S8: ByteSize over the five fields ----
+    Reset();
+    unsigned char* r = (unsigned char*)CMsgLeagueBeRobPB::New();
+    void* pObj = (void*)r;
+    g_pfnPbVarintSize = [](uint32_t) -> int32_t { return 2; };
+    *(int32_t*)(r + 0x20) = 0;   // the unknown-block length
+    *(uint64_t*)(r + 0x28) = 0;
+    assert(CMsgLeagueBeRobPB::ByteSize(pObj) == 0);
+    *(uint32_t*)(r + 0x30) = 0xf;
+    *(uint32_t*)(r + 0x38) = 5;      // 1+1
+    *(uint32_t*)(r + 0x3c) = 0x300;  // 1+2
+    *(uint32_t*)(r + 0x60) = 7;      // 1+1
+    static unsigned char abS2[0x40];
+    memset(abS2, 0, sizeof abS2);
+    // the RAW reads the length as a 64-bit at +0x18 of the string object
+    *(uint64_t*)(abS2 + 0x18) = 4;
+    *(void**)(r + 0x40) = (void*)abS2;
+    assert(CMsgLeagueBeRobPB::ByteSize(pObj) == (1 + 1) + (1 + 2) + (1 + 1) + (1 + 4 + 1));
+
+    // ---- S9: Serialize writes all five fields ----
+    s_nW2 = s_nStr2 = s_nMsg2 = 0;
+    g_pfnPbWriteVarint32 = [](uint32_t, uint32_t, void*) { s_nW2++; };
+    g_pfnPbWriteString = [](uint32_t, void*, void*) { s_nStr2++; };
+    g_pfnPbWriteUnknown = [](void*, void*, int32_t) {};
+    g_pfnPbF4DC0 = [](uint32_t, void*, void*) { s_nMsg2++; };
+    static void* apEl[1]; apEl[0] = nullptr;
+    *(void**)(r + 0x48) = apEl;
+    *(int32_t*)(r + 0x50) = 1;
+    CMsgLeagueBeRobPB::SerializeWithCachedSizes(pObj, (void*)1);
+    assert(s_nW2 == 3 && s_nStr2 == 1 && s_nMsg2 == 1);
+
+    // ---- S10: MergeFrom copies ints and delegates the string ----
+    alignas(16) static unsigned char abFrom[0x68];
+    memset(abFrom, 0, sizeof abFrom);
+    new (abFrom + 8) std::string("z");
+    *(uint32_t*)(abFrom + 0x30) = 0xf;
+    *(uint32_t*)(abFrom + 0x38) = 11;
+    *(uint32_t*)(abFrom + 0x3c) = 22;
+    *(uint32_t*)(abFrom + 0x60) = 33;
+    *(void**)(abFrom + 0x40) = (void*)abS2;
+    g_pfnPbE9200 = [](void*, void*) { };
+    // the RAW helper 1417e81e0 sets bit3 itself after copying the string
+    g_pfnPbE81E0 = [](void* self, void*) {
+        *(uint32_t*)((unsigned char*)self + 0x30) |= 8; };
+    g_pfnPbCheckFail = [](const char*, int l, const char* t) {
+        s_nCheck++; assert(l == 0x223); (void)t; };
+    *(uint32_t*)(r + 0x30) = 0;
+    CMsgLeagueBeRobPB::MergeFrom(pObj, abFrom);
+    assert(*(uint32_t*)(r + 0x38) == 11 && *(uint32_t*)(r + 0x3c) == 22);
+    assert(*(uint32_t*)(r + 0x60) == 33);
+    assert(*(uint32_t*)(r + 0x30) == 0xf);
+    CMsgLeagueBeRobPB::MergeFrom(pObj, pObj);
+    assert(s_nCheck == 1);
+    (void)apVec;
+
+    // release the two objects New() allocated (the element arrays too)
+    for (void* pvObj : {p, (void*)r}) {
+        unsigned char* o = (unsigned char*)pvObj;
+        if (o == nullptr) continue;
+        *(int32_t*)(o + 0x50) = 0;
+        *(int32_t*)(o + 0x54) = 0;
+        g_pfnPbDelArray(*(void**)(o + 0x48));
+        ((std::string*)(o + 0x08))->~basic_string();
+        if (*(void**)(o + 0x40) != g_pPbDefaultStr &&
+            *(void**)(o + 0x40) != nullptr)
+            ((std::string*)*(void**)(o + 0x40))->~basic_string();
+        ::operator delete(o);
+    }
 
     printf("SYNDICATE_D99_OK: BeRobPB skeleton\n");
     return 0;

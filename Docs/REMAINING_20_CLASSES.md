@@ -7,7 +7,7 @@
 
 | الكلاس | vtable | الحالة |
 |---|---|---|
-| `CMsgLeagueBeRobPB` | `0x141841318` | **6/12** (D99) |
+| `CMsgLeagueBeRobPB` | `0x141841318` | **12/12 مكتملة** (D99) |
 | `CMsgLeagueBeRobRePB` | `0x141841130` | 0/12 |
 | `CMsgLeagueRobOptPB` | `0x1418423d8` | 0/12 |
 | `CMsgLeagueRobOptServerPB` | `0x141842278` | 0/12 |
