@@ -6,23 +6,19 @@
 #include <string>
 using namespace syndicate;
 
-static int s_nFree, s_nInit, s_nSlot6;
-static uint64_t s_lSlot6Ret;
 static int64_t s_lDEE40Ret;
+static int s_nFree, s_nInit;
 static char s_chBuf[0x68];
 static char s_chSentinel[64];
 
 static void Reset() {
-    s_nFree = s_nInit = s_nSlot6 = 0;
-    s_lSlot6Ret = 0x51;
     s_lDEE40Ret = 0x52;
+    s_nFree = s_nInit = 0;
     memset(s_chBuf, 0xEE, sizeof(s_chBuf));
     g_pfnPbFree = [](void* p) {
         s_nFree++; ::operator delete(p); };
     g_pfnPb968050 = []() -> uint64_t { s_nInit++; return 0; };
     g_pPbDefaultStr = (void*)s_chSentinel;
-    g_pfnPb7DD260 = [](void*) -> uint64_t {
-        s_nSlot6++; return s_lSlot6Ret; };
     g_pfnPbDEE40 = [](void*, int64_t l) -> int64_t {
         return l == 0x99 ? s_lDEE40Ret : 0; };
 }
@@ -93,9 +89,7 @@ int main() {
         // back to the sentinel for the dtor
         *(void**)(s_chBuf + 0x40) = (void*)s_chSentinel;
     }
-    // ---- S6: slot6 thunk + slot10 seam ----
-    assert(CMsgLeagueConcubinesInfoPB::Slot6(s_chBuf) == 0x51);
-    assert(s_nSlot6 == 1);
+    // ---- S6: slot10 seam (slot6 is MergeFrom, tested by d93) ----
     assert(CMsgLeagueConcubinesInfoPB::ParseFromString(
                s_chBuf, 0x99) == 0x52);
     // ---- S7: New ----

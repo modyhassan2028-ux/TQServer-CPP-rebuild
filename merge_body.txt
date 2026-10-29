@@ -1,0 +1,126 @@
+
+// 0x1417eafa0 — Merge (the tag-by-tag fall-through chain)
+namespace {
+// peek the next byte: RAW inline "if (pCur < pEnd && *pCur == tag)"
+inline bool NextTag(void* in, unsigned char cTag) {
+    unsigned char* pCur = *(unsigned char**)((unsigned char*)in + 0x08);
+    unsigned char* pEnd = *(unsigned char**)((unsigned char*)in + 0x10);
+    if (pCur < pEnd && *pCur == cTag) {
+        *(unsigned char**)((unsigned char*)in + 0x08) = pCur + 1;
+        return true;
+    }
+    return false;
+}
+// a varint field: the inline single-byte fast path, else 1417e3a50
+inline bool ReadVarint(void* in, unsigned char* pDst) {
+    unsigned char* pCur = *(unsigned char**)((unsigned char*)in + 0x08);
+    unsigned char* pEnd = *(unsigned char**)((unsigned char*)in + 0x10);
+    if (pCur < pEnd && *pCur < 0x80) {
+        *(uint32_t*)pDst = *pCur;
+        *(unsigned char**)((unsigned char*)in + 0x08) = pCur + 1;
+        return true;
+    }
+    return (char)g_pfnPb3A50(in, (uint32_t*)pDst) != 0;
+}
+}  // namespace
+bool CMsgLeagueConcubinesInfoPB::Merge(void* self, void* input) {
+    unsigned char* p = (unsigned char*)self;
+    unsigned char* in = (unsigned char*)input;
+    alignas(8) unsigned char aReader[16] = {0};
+    alignas(8) unsigned char aUnknown[40] = {0};
+    uint32_t uTag = 0;
+    g_pfnPb64C0(aReader, p + 0x08);
+    g_pfnPb4550(aUnknown, aReader);
+    for (;;) {
+        unsigned char* pCur = *(unsigned char**)(in + 0x08);
+        unsigned char* pEnd = *(unsigned char**)(in + 0x10);
+        bool bInline = false;
+        if (pCur < pEnd && (char)*pCur > 0) {
+            uTag = *pCur;
+            *(uint32_t*)(in + 0x20) = uTag;
+            *(unsigned char**)(in + 0x08) = pCur + 1;
+            bInline = true;
+        } else {
+            uint64_t u = g_pfnPb3BC0(input);
+            uTag = (uint32_t)u;
+            *(uint32_t*)(in + 0x20) = uTag;
+            bInline = ((uTag - 1) < 0x7f);
+        }
+        if (!bInline) {
+            if (uTag == 0 || ((unsigned char)uTag & 7) == 4) goto done;
+            if (g_pfnPbF3F50(input, uTag, aUnknown) == 0) goto fail;
+            continue;
+        }
+        switch ((int)(uTag >> 3)) {
+        case 1:
+            if (uTag != 8) break;
+            if (!ReadVarint(in, p + 0x38)) goto fail;
+            *(uint32_t*)(p + 0x30) |= 1;
+            if (!NextTag(input, 0x10)) continue;
+            /* fall through to field 2 */
+        case 2:
+            if (uTag != 0x10 && uTag != 8) break;
+            if (!ReadVarint(in, p + 0x3c)) goto fail;
+            *(uint32_t*)(p + 0x30) |= 2;
+            if (!NextTag(input, 0x1a)) continue;
+            /* fall through */
+        case 3:
+            if (uTag != 0x1a && uTag != 8 && uTag != 0x10) break;
+            if ((char)g_pfnPbF51E0(input, g_pfnPbEA0D0(self)) == 0) goto fail;
+            if (!NextTag(input, 0x20)) continue;
+            /* fall through */
+        case 4:
+            if (!ReadVarint(in, p + 0x48)) goto fail;
+            *(uint32_t*)(p + 0x30) |= 8;
+            if (!NextTag(input, 0x28)) continue;
+            /* fall through */
+        case 5:
+            if (!ReadVarint(in, p + 0x4c)) goto fail;
+            *(uint32_t*)(p + 0x30) |= 0x10;
+            if (!NextTag(input, 0x30)) continue;
+            /* fall through */
+        case 6:
+            if (!ReadVarint(in, p + 0x50)) goto fail;
+            *(uint32_t*)(p + 0x30) |= 0x20;
+            if (!NextTag(input, 0x38)) continue;
+            /* fall through */
+        case 7:
+            if (!ReadVarint(in, p + 0x54)) goto fail;
+            *(uint32_t*)(p + 0x30) |= 0x40;
+            if (!NextTag(input, 0x40)) continue;
+            /* fall through */
+        case 8:
+            if (!ReadVarint(in, p + 0x58)) goto fail;
+            *(uint32_t*)(p + 0x30) |= 0x80;
+            if (!NextTag(input, 0x48)) continue;
+            /* fall through */
+        case 9:
+            if ((char)g_pfnPbEAA40(input, p + 0x5c) == 0) goto fail;
+            *(uint32_t*)(p + 0x30) |= 0x100;
+            if (!NextTag(input, 0x50)) continue;
+            /* fall through */
+        case 10:
+            if (!ReadVarint(in, p + 0x60)) goto fail;
+            *(uint32_t*)(p + 0x30) |= 0x200;
+            if (*(void**)(in + 0x08) == *(void**)(in + 0x10) &&
+                (*(int*)(in + 0x2c) != 0 ||
+                 *(int*)(in + 0x18) == *(int*)(in + 0x28))) {
+                *(uint32_t*)(in + 0x20) = 0;
+                *(unsigned char*)(in + 0x24) = 1;
+                goto done;
+            }
+            continue;
+        default:
+            continue;
+        }
+        continue;
+    done:
+        g_pfnPb45D0(aUnknown);
+        g_pfnPb6510(aReader);
+        return true;   // RAW: CONCAT71(..,1)
+    fail:
+        g_pfnPb45D0(aUnknown);
+        g_pfnPb6510(aReader);
+        return false;  // RAW: value & ~0xff
+    }
+}

@@ -1,100 +1,148 @@
-// D93 — the CSyndicateLogic table wave 3 (slots
-// +0x148..+0x188) — the rec-delegate family.
-#include "modules/syndicate/src/syndicatelogic.h"
+// D93 — CMsgLeagueConcubinesInfoPB MergeFrom (0x1417ea660) + Merge (0x1417eafa0)
+#include "modules/syndicate/src/CMsgLeagueConcubinesInfoPB.h"
+#include "modules/syndicate/src/CMsgPBCommon.h"
+#include "modules/syndicate/src/CMsgPBMemberDtors.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>
+#include <string>
+
 using namespace syndicate;
 
-static uint8_t abLogic[0x60];
-static uint8_t abRecBox[0x20];
-static uint8_t abLogNode[0x40], abLogHead[0x40],
-    abLogAnchor[0x40];
-static void* apLogMap[8];
-static CSyndicateLogic* pL = (CSyndicateLogic*)abLogic;
-
-static void BuildMap(void** apMap, uint8_t* pHead,
-                     uint8_t* pNode, uint8_t* pAnchor,
-                     uint32_t uKey, void* pVal) {
-    memset(pNode, 0, 0x40);
-    *(void**)pNode = pHead;
-    *(void**)(pNode + 0x10) = pHead;
-    *(void**)(pNode + 8) = pHead;
-    *(uint32_t*)(pNode + 0x18) = uKey;
-    ((char*)pNode)[0x29] = 0;
-    *(void**)(pNode + 0x20) = pVal;
-    memset(pHead, 0, 0x40);
-    ((char*)pHead)[0x29] = 1;
-    *(void**)(pHead + 8) = pNode;
-    memset(pAnchor, 0, 0x40);
-    *(void**)pAnchor = pAnchor;
-    *(void**)(pAnchor + 0x30) = pHead;
-    apMap[0] = pAnchor;
-    apMap[6] = pHead;
-}
-
-static void* s_pLast; static int s_nA, s_nE, s_nI;
-static int32_t s_nLast; static uint64_t s_uA, s_uB;
-static char s_cLast; static void* s_pC;
-
-static void Reset() {
-    memset(abLogic, 0, sizeof(abLogic));
-    BuildMap(apLogMap, abLogHead, abLogNode,
-             abLogAnchor, 5, abRecBox);
-    *(void**)(abLogic + 0x18) = apLogMap;
-    s_nA = s_nE = s_nI = 0;
-    s_nLast = 0; s_uA = s_uB = 0; s_cLast = 0;
-    s_pLast = nullptr; s_pC = nullptr;
-    g_fnRecA = [](void* p, int32_t n) -> uint64_t {
-        s_pLast = p; s_nLast = n; s_nA++;
-        return 0xA1; };
-    g_fnRecB = [](void* p, int32_t n, uint64_t a,
-                  uint64_t b) -> uint64_t {
-        s_pLast = p; s_nLast = n; s_uA = a; s_uB = b;
-        return 0xB2; };
-    g_fnRecC = [](void* p, int32_t n, void* pc,
-                  char c) -> uint64_t {
-        s_pLast = p; s_nLast = n; s_pC = pc;
-        s_cLast = c; return 0xC3; };
-    g_fnRecD = [](void* p, int32_t n,
-                  char c) -> uint64_t {
-        s_pLast = p; s_nLast = n; s_cLast = c;
-        return 0xD4; };
-    g_fnRecE = [](void* p) { s_pLast = p; s_nE++; };
-    g_fnRecF = [](void*) -> uint64_t { return 0xF5; };
-    g_fnRecG = [](void*) -> uint64_t { return 0xF6; };
-    g_fnRecH = [](void*) -> uint64_t { return 0xF7; };
-    g_fnRecI = [](void*) -> int32_t {
-        s_nI++; return 0x99; };
-}
+static int s_nCheckFail;
+static char s_szCheckFile[512];
+static int s_nStrSeam;
+static int s_nBoolSeam;
+static uint64_t s_uUnknownAdd;
+static int s_nUnknownDone;
+static int s_nReaderOpen, s_nReaderDone;
 
 int main() {
-    // ---- S1: the not-found gates ----
-    Reset();
-    assert(pL->Slot148RecA(9, 3) == 0);
-    assert(pL->Slot150RecB(9, 3, 1, 2) == 0);
-    assert(pL->Slot158RecC(9, 3) == 0);
-    assert(pL->Slot160RecD(9, 3) == 0);
-    pL->Slot168RecE(9);
-    assert(pL->Slot170RecF(9) == 0);
-    assert(pL->Slot178RecG(9) == 0);
-    assert(pL->Slot180RecH(9) == 0);
-    assert(pL->Slot188RecI(9) == 0);
-    // ---- S2: the found delegates ----
-    assert(pL->Slot148RecA(5, 3) == 0xA1 &&
-           s_nLast == 3 && s_pLast == (void*)abRecBox);
-    assert(pL->Slot150RecB(5, 4, 0x11, 0x22) == 0xB2);
-    assert(s_nLast == 4 && s_uA == 0x11 && s_uB == 0x22);
-    assert(pL->Slot158RecC(5, 5) == 0xC3);
-    assert(s_pC == (void*)0x1418347c0 && s_cLast == 1);
-    assert(pL->Slot160RecD(5, 6) == 0xD4 &&
-           s_cLast == 1);
-    pL->Slot168RecE(5);
-    assert(s_nE == 1 && s_pLast == (void*)abRecBox);
-    assert(pL->Slot170RecF(5) == 0xF5);
-    assert(pL->Slot178RecG(5) == 0xF6);
-    assert(pL->Slot180RecH(5) == 0xF7);
-    assert(pL->Slot188RecI(5) == 0x99 && s_nI == 1);
-    puts("SYNDICATE_D93_OK: the logic table wave 3");
+    unsigned char abSelf[0x80];
+    unsigned char abFrom[0x80];
+    unsigned char abIn[0x80];
+
+    g_pfnPbCheckFail = [](const char* f, int32_t n,
+                          const char* t) {
+        s_nCheckFail++;
+        snprintf(s_szCheckFile, sizeof s_szCheckFile, "%s|%d|%s", f, n, t); };
+    g_pfnPb64C0 = [](void* out, void* src) { (void)src;
+        s_nReaderOpen++; return out; };
+    g_pfnPb4550 = [](void* out, void* in) { (void)in; return out; };
+    g_pfnPb6510 = [](void*) { s_nReaderDone++;
+        return (uint64_t)0; };
+    g_pfnPb45D0 = [](void*) { s_nUnknownDone++; return (void*)0; };
+    // 1417ea0d0/1417ea060 are the field-3 setters: they raise HasBit 2
+    g_pfnPbEA0D0 = [](void* self) {
+        *(uint32_t*)((unsigned char*)self + 0x30) |= 4;
+        return self; };
+    g_pfnPbF51E0 = [](void*, void* s) { s_nStrSeam++;
+        (void)s; return (uint64_t)1; };
+    g_pfnPbEAA40 = [](void* in, void* dst) {
+        unsigned char* c = *(unsigned char**)((unsigned char*)in + 8);
+        *(unsigned char*)dst = *c;
+        *(unsigned char**)((unsigned char*)in + 8) = c + 1;
+        s_nBoolSeam++; return (uint64_t)1; };
+    g_pfnPbEA060 = [](void* self, void* src) {
+        *(uint32_t*)((unsigned char*)self + 0x30) |= 4;
+        *(void**)((unsigned char*)self + 0x40) = src; };
+    g_pfnPb3A50 = [](void*, uint32_t*) { return (uint64_t)0; };
+
+    // ---- S1: MergeFrom copies every set field and its flag bit ----
+    memset(abSelf, 0, sizeof abSelf);
+    memset(abFrom, 0, sizeof abFrom);
+    new (abSelf + 8) std::string();
+    new (abFrom + 8) std::string("from");
+    *(uint32_t*)(abFrom + 0x30) = 0x3ff;
+    *(uint32_t*)(abFrom + 0x38) = 11;
+    *(uint32_t*)(abFrom + 0x3c) = 12;
+    *(uint32_t*)(abFrom + 0x48) = 14;
+    *(uint32_t*)(abFrom + 0x4c) = 15;
+    *(uint32_t*)(abFrom + 0x50) = 16;
+    *(uint32_t*)(abFrom + 0x54) = 17;
+    *(uint32_t*)(abFrom + 0x58) = 18;
+    *(unsigned char*)(abFrom + 0x5c) = 1;
+    *(uint32_t*)(abFrom + 0x60) = 20;
+    CMsgLeagueConcubinesInfoPB::MergeFrom(abSelf, abFrom);
+    assert(*(uint32_t*)(abSelf + 0x30) == 0x3ff);
+    assert(*(uint32_t*)(abSelf + 0x38) == 11 &&
+           *(uint32_t*)(abSelf + 0x3c) == 12);
+    assert(*(uint32_t*)(abSelf + 0x48) == 14 &&
+           *(uint32_t*)(abSelf + 0x4c) == 15 &&
+           *(uint32_t*)(abSelf + 0x50) == 16 &&
+           *(uint32_t*)(abSelf + 0x54) == 17 &&
+           *(uint32_t*)(abSelf + 0x58) == 18);
+    assert(*(unsigned char*)(abSelf + 0x5c) == 1);
+    assert(*(uint32_t*)(abSelf + 0x60) == 20);
+    assert(*(std::string*)(abSelf + 8) == "from");
+    assert(s_nCheckFail == 0);
+
+    // ---- S2: self == from fires the protobuf CHECKF literal ----
+    CMsgLeagueConcubinesInfoPB::MergeFrom(abSelf, abSelf);
+    assert(s_nCheckFail == 1);
+    assert(strstr(s_szCheckFile,
+                  "msgleagueconcubines.pb.cc|499|"
+                  "CHECK failed: (&from) != (this): ") != nullptr);
+
+    // ---- S3: Merge walks the tag chain 1..10 ----
+    *(std::string*)(abSelf + 8) = std::string();
+    memset(abSelf, 0, 0x30);   // clear everything below the flags
+    *(uint32_t*)(abSelf + 0x30) = 0;
+    unsigned char abStream[] = {
+        0x08, 0x05,              // field 1
+        0x10, 0x07,              // field 2
+        0x1a,                    // field 3 (the seam consumes
+                                 // the length byte itself)
+        0x20, 0x01,              // field 4
+        0x28, 0x02,              // field 5
+        0x30, 0x03,              // field 6
+        0x38, 0x04,              // field 7
+        0x40, 0x05,              // field 8
+        0x48, 0x01,              // field 9 (bool seam)
+        0x50, 0x09               // field 10
+    };
+    memset(abIn, 0, sizeof abIn);
+    *(unsigned char**)(abIn + 0x08) = abStream;
+    *(unsigned char**)(abIn + 0x10) = abStream + sizeof abStream;
+    *(uint64_t*)(abIn + 0x28) = 0x50;
+    g_pfnPb3BC0 = [](void*) { return (uint64_t)0; };
+    bool bOk = CMsgLeagueConcubinesInfoPB::Merge(abSelf, abIn);
+    assert(bOk);
+    assert(*(uint32_t*)(abSelf + 0x38) == 5);
+    assert(*(uint32_t*)(abSelf + 0x3c) == 7);
+    assert(s_nStrSeam == 1);
+    assert(*(uint32_t*)(abSelf + 0x48) == 1);
+    assert(*(uint32_t*)(abSelf + 0x4c) == 2);
+    assert(*(uint32_t*)(abSelf + 0x50) == 3);
+    assert(*(uint32_t*)(abSelf + 0x54) == 4);
+    assert(*(uint32_t*)(abSelf + 0x58) == 5);
+    assert(s_nBoolSeam == 1 && *(unsigned char*)(abSelf + 0x5c) == 1);
+    assert(*(uint32_t*)(abSelf + 0x60) == 9);
+    assert(*(uint32_t*)(abSelf + 0x30) == 0x3ff);
+    assert(s_nUnknownDone == 1 && s_nReaderDone == 1);
+    (void)s_nReaderOpen; (void)s_uUnknownAdd;
+
+    // ---- S4: an unknown tag goes through the skipper ----
+    memset(abSelf, 0, 0x30);
+    *(uint32_t*)(abSelf + 0x30) = 0;
+    unsigned char abS4[] = { 0x58, 0x01 };   // field 11 (unknown)
+    memset(abIn, 0, sizeof abIn);
+    *(unsigned char**)(abIn + 0x08) = abS4;
+    *(unsigned char**)(abIn + 0x10) = abS4 + 2;
+    g_pfnPbF3F50 = [](void*, uint32_t, void*) { return (char)1; };
+    assert(CMsgLeagueConcubinesInfoPB::Merge(abSelf, abIn));
+    assert(*(uint32_t*)(abSelf + 0x30) == 0);
+
+    // ---- S5: a failing skipper returns false ----
+    memset(abSelf, 0, 0x30);
+    *(uint32_t*)(abSelf + 0x30) = 0;
+    *(unsigned char**)(abIn + 0x08) = abS4;
+    *(unsigned char**)(abIn + 0x10) = abS4 + 2;
+    g_pfnPbF3F50 = [](void*, uint32_t, void*) { return (char)0; };
+    assert(!CMsgLeagueConcubinesInfoPB::Merge(abSelf, abIn));
+
+    (*(std::string*)(abSelf + 8)).~basic_string();
+    (*(std::string*)(abFrom + 8)).~basic_string();
+    printf("SYNDICATE_D93_OK: MergeFrom + Merge\n");
     return 0;
 }

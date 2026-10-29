@@ -9,7 +9,18 @@ namespace syndicate {
 extern const uintptr_t kMessageLiteVft;
 
 uint64_t (*g_pfnPb968050)() = nullptr;
-uint64_t (*g_pfnPb7DD260)(void*) = nullptr;
+void     (*g_pfnPbCheckFail)(const char*, int32_t, const char*) = nullptr;
+void*    (*g_pfnPb64C0)(void*, void*) = nullptr;
+void*    (*g_pfnPb4550)(void*, void*) = nullptr;
+uint64_t (*g_pfnPb3BC0)(void*) = nullptr;
+uint64_t (*g_pfnPb3A50)(void*, uint32_t*) = nullptr;
+void*    (*g_pfnPbEA0D0)(void*) = nullptr;
+uint64_t (*g_pfnPbF51E0)(void*, void*) = nullptr;
+uint64_t (*g_pfnPbEAA40)(void*, void*) = nullptr;
+char     (*g_pfnPbF3F50)(void*, uint32_t, void*) = nullptr;
+void*    (*g_pfnPb45D0)(void*) = nullptr;
+uint64_t (*g_pfnPb6510)(void*) = nullptr;
+void     (*g_pfnPbEA060)(void*, void*) = nullptr;
 int64_t  (*g_pfnPbDEE40)(void*, int64_t) = nullptr;
 // ---- D91 kit seams ----
 int32_t (*g_pfnPbVarintSize)(uint32_t) = nullptr;
@@ -112,9 +123,73 @@ void CMsgLeagueConcubinesInfoPB::MissingFieldsLite(
         "(cannot determine missing fields for lite message)");
 }
 
-// 0x1417eb450 — jmp 0x1417dd260
-uint64_t CMsgLeagueConcubinesInfoPB::Slot6(void* self) {
-    return g_pfnPb7DD260(self);
+// 0x1417ea660 — MergeFrom (slot6 thunk target)
+void CMsgLeagueConcubinesInfoPB::MergeFrom(void* self, void* from) {
+    unsigned char* d = (unsigned char*)self;
+    unsigned char* s = (unsigned char*)from;
+    // RAW: if (from == self) the protobuf CHECKF fires with the
+    // source file literal below and line 499
+    if (from == self) {
+        g_pfnPbCheckFail(
+            "f:\\version\\cqserver-78.0.11-1204\\protobuf"
+            "\\msgleagueconcubines.pb.cc", 499,
+            "CHECK failed: (&from) != (this): ");
+    }
+    if (*(unsigned char*)(s + 0x30) != 0) {
+        if ((*(unsigned char*)(s + 0x30) & 1) != 0) {
+            uint32_t u = *(uint32_t*)(s + 0x38);
+            *(uint32_t*)(d + 0x30) = *(uint32_t*)(d + 0x30) | 1;
+            *(uint32_t*)(d + 0x38) = u;
+        }
+        if ((*(uint32_t*)(s + 0x30) >> 1 & 1) != 0) {
+            uint32_t u = *(uint32_t*)(s + 0x3c);
+            *(uint32_t*)(d + 0x30) = *(uint32_t*)(d + 0x30) | 2;
+            *(uint32_t*)(d + 0x3c) = u;
+        }
+        if ((*(uint32_t*)(s + 0x30) >> 2 & 1) != 0)
+            g_pfnPbEA060(self, *(void**)(s + 0x40));
+        if ((*(uint32_t*)(s + 0x30) >> 3 & 1) != 0) {
+            uint32_t u = *(uint32_t*)(s + 0x48);
+            *(uint32_t*)(d + 0x30) = *(uint32_t*)(d + 0x30) | 8;
+            *(uint32_t*)(d + 0x48) = u;
+        }
+        if ((*(uint32_t*)(s + 0x30) >> 4 & 1) != 0) {
+            uint32_t u = *(uint32_t*)(s + 0x4c);
+            *(uint32_t*)(d + 0x30) = *(uint32_t*)(d + 0x30) | 0x10;
+            *(uint32_t*)(d + 0x4c) = u;
+        }
+        if ((*(uint32_t*)(s + 0x30) >> 5 & 1) != 0) {
+            uint32_t u = *(uint32_t*)(s + 0x50);
+            *(uint32_t*)(d + 0x30) = *(uint32_t*)(d + 0x30) | 0x20;
+            *(uint32_t*)(d + 0x50) = u;
+        }
+        if ((*(uint32_t*)(s + 0x30) >> 6 & 1) != 0) {
+            uint32_t u = *(uint32_t*)(s + 0x54);
+            *(uint32_t*)(d + 0x30) = *(uint32_t*)(d + 0x30) | 0x40;
+            *(uint32_t*)(d + 0x54) = u;
+        }
+        if ((*(uint32_t*)(s + 0x30) >> 7 & 1) != 0) {
+            uint32_t u = *(uint32_t*)(s + 0x58);
+            *(uint32_t*)(d + 0x30) = *(uint32_t*)(d + 0x30) | 0x80;
+            *(uint32_t*)(d + 0x58) = u;
+        }
+    }
+    if ((*(uint32_t*)(s + 0x30) & 0xff00) != 0) {
+        if ((*(uint32_t*)(s + 0x30) >> 8 & 1) != 0) {
+            unsigned char c = *(unsigned char*)(s + 0x5c);
+            *(uint32_t*)(d + 0x30) = *(uint32_t*)(d + 0x30) | 0x100;
+            *(unsigned char*)(d + 0x5c) = c;
+        }
+        if ((*(uint32_t*)(s + 0x30) >> 9 & 1) != 0) {
+            uint32_t u = *(uint32_t*)(s + 0x60);
+            *(uint32_t*)(d + 0x30) = *(uint32_t*)(d + 0x30) | 0x200;
+            *(uint32_t*)(d + 0x60) = u;
+        }
+    }
+    // RAW tail carries a jumptable warning; the decompiler kept only
+    // this append of the +8 string
+    reinterpret_cast<std::string*>(d + 0x08)->append(
+        *reinterpret_cast<std::string*>(s + 0x08));
 }
 
 // 0x1417dee40
@@ -218,6 +293,135 @@ void CMsgLeagueConcubinesInfoPB::SerializeWithCachedSizes(
     void* pv = (*(uint64_t*)(p + 0x28) < 0x10)
         ? (void*)(p + 0x10) : *(void**)(p + 0x10);
     g_pfnPbWriteUnknown(pBuf, pv, *(int32_t*)(p + 0x20));
+}
+
+
+// 0x1417eafa0 — Merge (the tag-by-tag fall-through chain)
+namespace {
+// peek the next byte: RAW inline "if (pCur < pEnd && *pCur == tag)"
+inline bool NextTag(void* in, unsigned char cTag) {
+    unsigned char* pCur = *(unsigned char**)((unsigned char*)in + 0x08);
+    unsigned char* pEnd = *(unsigned char**)((unsigned char*)in + 0x10);
+    if (pCur < pEnd && *pCur == cTag) {
+        *(unsigned char**)((unsigned char*)in + 0x08) = pCur + 1;
+        return true;
+    }
+    return false;
+}
+// a varint field: the inline single-byte fast path, else 1417e3a50
+inline bool ReadVarint(void* in, unsigned char* pDst) {
+    unsigned char* pCur = *(unsigned char**)((unsigned char*)in + 0x08);
+    unsigned char* pEnd = *(unsigned char**)((unsigned char*)in + 0x10);
+    if (pCur < pEnd && *pCur < 0x80) {
+        *(uint32_t*)pDst = *pCur;
+        *(unsigned char**)((unsigned char*)in + 0x08) = pCur + 1;
+        return true;
+    }
+    return (char)g_pfnPb3A50(in, (uint32_t*)pDst) != 0;
+}
+}  // namespace
+bool CMsgLeagueConcubinesInfoPB::Merge(void* self, void* input) {
+    unsigned char* p = (unsigned char*)self;
+    unsigned char* in = (unsigned char*)input;
+    alignas(8) unsigned char aReader[16] = {0};
+    alignas(8) unsigned char aUnknown[40] = {0};
+    uint32_t uTag = 0;
+    g_pfnPb64C0(aReader, p + 0x08);
+    g_pfnPb4550(aUnknown, aReader);
+    for (;;) {
+        unsigned char* pCur = *(unsigned char**)(in + 0x08);
+        unsigned char* pEnd = *(unsigned char**)(in + 0x10);
+        bool bInline = false;
+        if (pCur < pEnd && (char)*pCur > 0) {
+            uTag = *pCur;
+            *(uint32_t*)(in + 0x20) = uTag;
+            *(unsigned char**)(in + 0x08) = pCur + 1;
+            bInline = true;
+        } else {
+            uint64_t u = g_pfnPb3BC0(input);
+            uTag = (uint32_t)u;
+            *(uint32_t*)(in + 0x20) = uTag;
+            bInline = ((uTag - 1) < 0x7f);
+        }
+        if (!bInline) {
+            if (uTag == 0 || ((unsigned char)uTag & 7) == 4) goto done;
+            if (g_pfnPbF3F50(input, uTag, aUnknown) == 0) goto fail;
+            continue;
+        }
+        switch ((int)(uTag >> 3)) {
+        case 1:
+            if (uTag != 8) break;
+            if (!ReadVarint(in, p + 0x38)) goto fail;
+            *(uint32_t*)(p + 0x30) |= 1;
+            if (!NextTag(input, 0x10)) continue;
+            /* fall through to field 2 */
+        case 2:
+            if (uTag != 0x10 && uTag != 8) break;
+            if (!ReadVarint(in, p + 0x3c)) goto fail;
+            *(uint32_t*)(p + 0x30) |= 2;
+            if (!NextTag(input, 0x1a)) continue;
+            /* fall through */
+        case 3:
+            if (uTag != 0x1a && uTag != 8 && uTag != 0x10) break;
+            if ((char)g_pfnPbF51E0(input, g_pfnPbEA0D0(self)) == 0) goto fail;
+            if (!NextTag(input, 0x20)) continue;
+            /* fall through */
+        case 4:
+            if (!ReadVarint(in, p + 0x48)) goto fail;
+            *(uint32_t*)(p + 0x30) |= 8;
+            if (!NextTag(input, 0x28)) continue;
+            /* fall through */
+        case 5:
+            if (!ReadVarint(in, p + 0x4c)) goto fail;
+            *(uint32_t*)(p + 0x30) |= 0x10;
+            if (!NextTag(input, 0x30)) continue;
+            /* fall through */
+        case 6:
+            if (!ReadVarint(in, p + 0x50)) goto fail;
+            *(uint32_t*)(p + 0x30) |= 0x20;
+            if (!NextTag(input, 0x38)) continue;
+            /* fall through */
+        case 7:
+            if (!ReadVarint(in, p + 0x54)) goto fail;
+            *(uint32_t*)(p + 0x30) |= 0x40;
+            if (!NextTag(input, 0x40)) continue;
+            /* fall through */
+        case 8:
+            if (!ReadVarint(in, p + 0x58)) goto fail;
+            *(uint32_t*)(p + 0x30) |= 0x80;
+            if (!NextTag(input, 0x48)) continue;
+            /* fall through */
+        case 9:
+            if ((char)g_pfnPbEAA40(input, p + 0x5c) == 0) goto fail;
+            *(uint32_t*)(p + 0x30) |= 0x100;
+            if (!NextTag(input, 0x50)) continue;
+            /* fall through */
+        case 10:
+            if (!ReadVarint(in, p + 0x60)) goto fail;
+            *(uint32_t*)(p + 0x30) |= 0x200;
+            if (*(void**)(in + 0x08) == *(void**)(in + 0x10) &&
+                (*(int*)(in + 0x2c) != 0 ||
+                 *(int*)(in + 0x18) == *(int*)(in + 0x28))) {
+                *(uint32_t*)(in + 0x20) = 0;
+                *(unsigned char*)(in + 0x24) = 1;
+                goto done;
+            }
+            continue;
+        default:
+            break;      // unknown field number -> the skipper below
+        }
+        if (uTag == 0 || ((unsigned char)uTag & 7) == 4) goto done;
+        if (g_pfnPbF3F50(input, uTag, aUnknown) == 0) goto fail;
+        continue;
+    done:
+        g_pfnPb45D0(aUnknown);
+        g_pfnPb6510(aReader);
+        return true;   // RAW: CONCAT71(..,1)
+    fail:
+        g_pfnPb45D0(aUnknown);
+        g_pfnPb6510(aReader);
+        return false;  // RAW: value & ~0xff
+    }
 }
 
 }  // namespace syndicate
