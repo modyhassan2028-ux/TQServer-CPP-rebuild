@@ -177,3 +177,56 @@ int CMapGroupKernel::SendCrossMsg2(uint32_t msgId, uint32_t s2s, const void* bod
     return 0;
 }
 } // namespace msg
+
+// ---------------------------------------- CMapGroupKernel list sub-objects
+namespace msg {
+void MapListCtor(SIntrusiveList* l, uint8_t sentinelFlag, SListSeams& s) {
+    void* node = s.NewNode();
+    if (node != nullptr) *(void**)node = l;
+    else                 node = nullptr;
+    l->m_pNode = node;
+    void* sent = s.AllocSentinel(l);
+    l->m_pSentinel = sent;
+    *(uint8_t*)((uint8_t*)sent + sentinelFlag) = 1;
+    *(void**)((uint8_t*)sent + 8)  = sent;
+    *(void**)sent                  = sent;
+    *(void**)((uint8_t*)sent + 0x10) = sent;
+    l->m_pCount = nullptr;
+}
+void MapListDone(SIntrusiveList* l, SListSeams& s) {
+    uint8_t local18[16];
+    void* a = l->m_pNode;
+    void* sent = l->m_pSentinel;
+    void* b = *(void**)sent;
+    void* c = a;
+    s.EraseAll(a, local18, &c, &a);
+    s.Free(l->m_pSentinel);
+    l->m_pSentinel = nullptr;
+    l->m_pCount = nullptr;
+}
+} // namespace msg
+namespace msg {
+void CMapGroupKernel::Construct(SCtorSeams& s) {
+    m_pVtbl0 = (void*)1;              // IMapGroup then CMapGroupKernel
+    m_pVtbl1 = (void*)1;              // CMapGroupKernel
+    *(uint32_t*)((uint8_t*)this + 0x40) = 0;
+    *(uint32_t*)((uint8_t*)this + 0x44) = 0;
+    MapListCtor(&m_List[0], 0x1d, s.listEf);   // +0x48  14000ef40
+    MapListCtor(&m_List[1], 0x29, s.listEc);   // +0x88  1400ec260
+    MapListCtor(&m_List[2], 0x1d, s.listEf);   // +0xc8  14000ef40
+    MapListCtor(&m_List[3], 0x29, s.listEc);   // +0x108 1400ec260
+    MapListCtor(&m_List[4], 0x1d, s.listEf);   // +0x148 14000ef40
+    MapListCtor(&m_List[5], 0x29, s.listEc);   // +0x188 1400ec260
+    MapListCtor(&m_List[6], 0x79, s.list85);   // +0x1c8 1400ef850
+}
+void CMapGroupKernel::Destroy(SCtorSeams& s) {
+    MapListDone(&m_List[6], s.list85); s.list85.Free(m_List[6].m_pNode);
+    MapListDone(&m_List[5], s.listEc); s.listEc.Free(m_List[5].m_pNode);
+    MapListDone(&m_List[4], s.listEf); s.listEf.Free(m_List[4].m_pNode);
+    MapListDone(&m_List[3], s.listEc); s.listEc.Free(m_List[3].m_pNode);
+    MapListDone(&m_List[2], s.listEf); s.listEf.Free(m_List[2].m_pNode);
+    MapListDone(&m_List[1], s.listEc); s.listEc.Free(m_List[1].m_pNode);
+    MapListDone(&m_List[0], s.listEf); s.listEf.Free(m_List[0].m_pNode);
+    m_pVtbl0 = nullptr;              // IMapGroup
+}
+} // namespace msg

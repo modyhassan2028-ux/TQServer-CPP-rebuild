@@ -46,19 +46,55 @@ struct SMapGroupKernelSeams {
     void* (*LuaState)();                                // 140087e30
     int   (*CallLua)(void* lua, const char* fn, int a, int b, int c, int d);
 };
+
+// CMapGroupKernel sub-objects: the same intrusive list is built seven times,
+// three times by 14000ef40, three by 1400ec260 and once by 1400ef850, and torn
+// down by 14000c310 / 1400e8d70 / 1400ea7d0. The three constructors and the
+// three destructors are byte-identical apart from the sentinel allocator, the
+// sentinel flag offset and the erase-all helper, so they share one body with
+// those three values as arguments (declared deviation: RAW has six copies).
+struct SListSeams {
+    void* (*NewNode)();                        // operator_new(8)
+    void* (*AllocSentinel)(void* owner);       // 140009e80 | 1400e4f40 | 1400e50b0
+    void  (*EraseAll)(void* v, void* out, void* a, void* b);  // bd50|e71c0|e8e30
+    void  (*Free)(void* p);
+};
+struct SIntrusiveList {
+    void*    m_pNode;      // +0x00 (*node = &list)
+    uint8_t  m_Pad8[0x28];
+    void*    m_pSentinel;  // +0x30
+    void*    m_pCount;     // +0x38
+};
+void MapListCtor(SIntrusiveList* l, uint8_t sentinelFlag, SListSeams& s);
+void MapListDone(SIntrusiveList* l, SListSeams& s);
+}
+namespace msg {
+// 1400f0000 CMapGroupKernel::CMapGroupKernel and 1400f00a0 ~CMapGroupKernel.
+// Construction order and the destroy order are the exact RAW sequence; the
+// list at +0x39 uses the third ctor (1400ef850, sentinel flag +0x79).
+struct SCtorSeams {
+    SListSeams listEf;   // 14000ef40 / 14000c310  (flag +0x1d)
+    SListSeams listEc;   // 1400ec260 / 1400e8d70  (flag +0x29)
+    SListSeams list85;   // 1400ef850 / 1400ea7d0  (flag +0x79)
+};
+void Construct(SCtorSeams& s);
+void Destroy(SCtorSeams& s);
+
 class CMapGroupKernel {
 public:
-    uint8_t  m_Pad0[0x10];
+    void*    m_pVtbl0;    // +0x00
+    void*    m_pVtbl1;    // +0x08
+    uint8_t  m_Pad0[0x0];
     uint32_t m_Type;        // +0x10
-    uint8_t  m_Pad14[0xc];
-    void*    m_pSelfThread; // +0x20
+    uint8_t  m_Pad14[4];
+    void*    m_pSocket;     // +0x18 (send path)
+    void*    m_pSelfThread; // +0x20 (timer path)
     void*    m_pAdapter;    // +0x28
     void*    m_pResponder;  // +0x30
     void*    m_pGame;       // +0x38
-    uint8_t  m_Pad3c[0x4];
-    void*    m_pSocket;     // +0x18 (before +0x20 in RAW)
     uint32_t m_F40;         // +0x40
     uint32_t m_F44;         // +0x44
+    SIntrusiveList m_List[7]; // +0x48 .. +0x208
     int InitOnlyOnce(SMapGroupKernelSeams& s);
     struct SLoginEntry { uint8_t hdr[0x18]; uint32_t serial; uint8_t body[0x40]; };
     struct SeamsTimer {
@@ -93,6 +129,8 @@ public:
         void (*LogCrossBadType2)(void);
         void (*Post)(void* th, uint32_t ch, uint32_t msg, uint32_t len, const void* body);
     };
+    void Construct(SCtorSeams& s);
+    void Destroy(SCtorSeams& s);
     int SendMsg(uint32_t msgId, int type, const void* body, int len, SeamsSend& s);
     int SendNpcMsg(uint32_t npcId, int type, const void* body, int len, SeamsSend& s);
     int SendCrossMsg(uint32_t msgId, uint32_t s2s, int type, const void* body,
@@ -103,4 +141,5 @@ public:
 
 };
 } // namespace msg
+
 #endif
