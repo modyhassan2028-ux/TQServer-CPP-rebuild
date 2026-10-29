@@ -474,3 +474,19 @@
   الجداول أولاً بـ tools/read_vtable_slots.py
   للأحجام)، ثم +0x560..+0x738 (48 فتحة) ثم
   IProvider/ModuleCreate.
+
+---
+
+## تحديث D98 (2026-10-30) — عائلة رسائل msgleague اكتملت
+
+- **7 كلاسات × 12 فتحة = 84 فتحة** مكتملة حرفياً:
+  ConcubinesInfoPB، ConcubinesPB، OrderStatusInfoPB،
+  OrderStatusPB، RobItemPB، RobListPB، OverheadLeagueInfoPB.
+- الوحدات: D90/D91 (ConcubinesInfoPB) → D92 (العائلة: 6 كلاسات
+  × 6 فتحات) → D93 (Merge+MergeFrom Correction) → D94 → D95 →
+  D96 → D97 → D98.
+- تصحيح مهم: slot6 في ConcubinesInfoPB كان مسجلاً خطأً كـ
+  0x1417dd260؛ الصحيح أنه thunk لـ MergeFrom 0x1417ea660.
+- رجريجن **131/131 × 6** مع ASan/UBSan نظيفين.
+- **التالي**: العودة لجدول NpcServerModule (D112) من نقطة
+  +0x2e0..+0x370، ثم +0x560..+0x738.
