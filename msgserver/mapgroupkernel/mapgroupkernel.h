@@ -55,7 +55,31 @@ public:
     void*    m_pAdapter;    // +0x28
     void*    m_pResponder;  // +0x30
     void*    m_pGame;       // +0x38
+    uint32_t m_F40;         // +0x40
+    uint32_t m_F44;         // +0x44
     int InitOnlyOnce(SMapGroupKernelSeams& s);
+    struct SLoginEntry { uint8_t hdr[0x18]; uint32_t serial; uint8_t body[0x40]; };
+    struct SeamsTimer {
+        void  (*UserTick)(void* users, uint32_t tick);   // 1400c0b80
+        uint32_t (*LoginGet)();                          // UserLoginGet
+        void  (*GameTick)(void* game);                   // game vt+8
+        uint32_t (*TimeSeconds)();                       // TimeGet()/1000
+        void  (*TimerWork)(void* self);                  // 1400e9a90
+        void  (*GlobalTick)();                           // 14013b0c0
+        void* (*LuaState)();
+        void  (*LogCheck)(unsigned line);                // mapgroup.h CHECKF
+        void  (*LuaTick)(void* lua);                     // 140283410
+        void* (*UserByServer)(uint32_t id);
+        void  (*MagicTick)(void* m);                     // 1402f20d0
+        void* (*MagicOf)(void* u);                       // 1400877e0
+        SLoginEntry* (*FindLogin)(void* self, uint32_t serial);
+        void  (*Post)(void* th, uint32_t ch, uint32_t msg, uint32_t len,
+                      const void* body);                 // th vt+0x50
+        void  (*EraseLogin)(void* self, const SLoginEntry* e);
+        void  (*LogNoSerial)(uint32_t serial);
+    };
+    int OnTimer(uint32_t tick, SeamsTimer& s);
+
 };
 } // namespace msg
 #endif

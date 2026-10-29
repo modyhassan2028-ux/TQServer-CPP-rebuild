@@ -64,3 +64,46 @@ int CMapGroupKernel::InitOnlyOnce(SMapGroupKernelSeams& s) {
     return 1;
 }
 } // namespace msg
+
+// 1400eb590 CMapGroupKernel::OnTimer
+namespace msg {
+static int g_TimerTick = 0;                     // DAT_140975ca4
+// test hook only: the RAW counter is a file-level global, so tests reset it here
+void ResetOnTimerCounter() { g_TimerTick = 0; }
+int CMapGroupKernel::OnTimer(uint32_t tick, SeamsTimer& s) {
+    g_TimerTick = g_TimerTick + 1;
+    if (g_TimerTick < 4) {
+        if (0 < g_TimerTick) {
+            s.UserTick(s.UserByServer(m_Type), tick);
+            return 1;
+        }
+    } else {
+        g_TimerTick = 0;
+    }
+    for (;;) {
+        uint32_t serial = s.LoginGet();
+        if (serial == 0) break;
+        SLoginEntry* e = s.FindLogin(this, serial);
+        if (e == nullptr) {
+            s.LogNoSerial(serial);              // falls through to the tick work
+            break;
+        }
+        s.Post(m_pSelfThread, 4, 0xc351, 0x5c, &e->body[1]);
+        s.EraseLogin(this, e);
+    }
+    if (m_pGame != nullptr && m_Type == 0xe) s.GameTick(m_pGame);
+    uint32_t now = s.TimeSeconds();
+    if ((uint32_t)((int)m_F40 + (int)m_F44) <= now) {
+        m_F44 = s.TimeSeconds();
+        s.TimerWork(this);
+        s.GlobalTick();
+        void* lua = s.LuaState();
+        if (lua == nullptr) s.LogCheck(0x3cd);
+        else s.LuaTick(lua);
+        void* users = s.UserByServer(m_Type);
+        if (*(void**)((uint8_t*)users + 0x100) == nullptr) s.LogCheck(0x144);
+        else s.MagicTick(s.MagicOf(users));
+    }
+    return 1;
+}
+} // namespace msg
