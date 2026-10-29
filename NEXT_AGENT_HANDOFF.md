@@ -1751,3 +1751,18 @@ SetOSConnectStatus 1400b39e0.
 فحوص صفرية منفصلة لكل إحداثي.
 
 **الاختبار:** 14 تأكيدًا ×6 — **الرجريجن 81/81 ×6**.
+
+## المسار أ-9ن — CStrCheckKey::LoadForbiddenNameFromUnifiedDB [2026-10-29]
+
+**دليل مسار جديد من الخام:** الدالة 1400fd190 فيها `CHECKF` بالوسائط
+`("CStrCheckKey::pvecNameForbidden", "f:\\version\\...\\msgserver\\mapgroupkernel\\strcheckkey.cpp")`
+→ يعني الدالة **بتاعة `CStrCheckKey`** في **`mapgroupkernel/strcheckkey.cpp`**
+(مسار مُثبت)، مش `CMapGroup` زي ما نص السجل بيوحي. الحقل `m_hdbc` عند `+0x58`.
+
+**قواعد محفوظة:** خطأ `CHECKF` بـ0x30a لغياب الكائن العام و0x30b لغياب
+مقبض القاعدة؛ SQL حرفي `SELECT * FROM tbl_str_check_key LIMIT 10000`؛
+ثلاث رسائل `SysLogSave` مختلفة (فشل استعلام / نتيجة صفرية / صفر صفوف)؛
+**الصف الأول بيتخطى** بفحص العدّاد؛ والتقطيع بـ`_` مع `_strlwr` قبل الإدراج؛
+وسقف حماية **1,000,000** دورة برسالة `DEAD_LOOP_BREAK/uLoopCount` (0x33b).
+
+**الاختبار:** 21 تأكيدًا ×6 — **الرجريجن 82/82 ×6**.
