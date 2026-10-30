@@ -80,6 +80,16 @@ void* NodeSelfAllocE(void** pSelf);                              // 0x140d95ec0
 // 0x140d955e0 — the erase with its rebalancing
 void* TreeErase(void** pTree, void** pOut, void** pIter);
 
+// the container of today-flower records: its set, its two cursors and its
+// lookups
+void* ContainerInitA(void** pVec);                            // 0x140d96020
+void* ContainerBegin(void** pVec, void** pOut);               // 0x140d96080
+void* ContainerEnd(void** pVec, void** pOut);                 // 0x140d960d0
+void* TreeFind(void** pTree, void** pOut, uint32_t* pKey);     // 0x140d95a00
+void* TreeFindWrap(void** pTree, void** pOut, uint32_t* pKey); // 0x140d963e0
+void* TreeInitSelf(void** pTree);                             // 0x140d97b10
+void* ContainerInitB(void** pVec);                            // 0x140d97b90
+
 }  // namespace stl
 }  // namespace flower
 #endif

@@ -659,5 +659,125 @@ void* TreeErase(void** pTree, void** pOut, void** pIter) {
     return pOut;
 }
 
+// 0x140d96020 — a cursor owner: an eight byte node pointing at itself, and the
+// three slots at +0x18/+0x20/+0x28 cleared
+void* ContainerInitA(void** pVec) {
+    void** pNode = (void**)::operator new(8);
+    void** pStore = nullptr;
+    if (pNode != nullptr) {
+        *pNode = pVec;
+        pStore = pNode;
+    }
+    *pVec = pStore;
+    pVec[3] = nullptr;
+    pVec[4] = nullptr;
+    pVec[5] = nullptr;
+    return pVec;
+}
+
+// 0x140d96080 — the first cursor: its offset is the one at +0x18 and the
+// size at +0x20 must not be under it
+void* ContainerBegin(void** pVec, void** pOut) {
+    const uint64_t uOffset = (uint64_t)pVec[3];
+    pOut[0] = nullptr;
+    if ((uint64_t)pVec[4] < uOffset) InvalidParameter();
+    void* pContainer = pVec[0];
+    pOut[1] = (void*)uOffset;
+    pOut[0] = pContainer;
+    return pOut;
+}
+
+// 0x140d960d0 — the second cursor: its offset is the one at +0x20
+void* ContainerEnd(void** pVec, void** pOut) {
+    const uint64_t uOffset = (uint64_t)pVec[4];
+    pOut[0] = nullptr;
+    if (uOffset < (uint64_t)pVec[3]) InvalidParameter();
+    void* pContainer = pVec[0];
+    pOut[1] = (void*)uOffset;
+    pOut[0] = pContainer;
+    return pOut;
+}
+
+// 0x140d95a00 — look a key up in the record set: the lower bound and the upper
+// bound come back as two iterator pairs, each carrying the container
+void* TreeFind(void** pTree, void** pOut, uint32_t* pKey) {
+    char* pHead = (char*)pTree[6];
+    void** pHi = (void**)pHead;
+    void** pLow = (void**)pHead;
+    if (*(char*)(*(uint64_t*)(pHead + 8) + 0x29) == '\0') {
+        void** p = *(void***)(pHead + 8);
+        void** pNext;
+        do {
+            if (*(uint32_t*)((char*)p + 0x18) < *pKey) {
+                pNext = (void**)p[2];
+            } else {
+                if (*(char*)(pHead + 0x29) != '\0' &&
+                    *pKey < *(uint32_t*)((char*)p + 0x18)) {
+                    pHi = p;
+                }
+                pNext = (void**)*p;
+                pLow = p;
+            }
+            p = pNext;
+        } while (*(char*)((char*)pNext + 0x29) == '\0');
+    }
+    void** pStart;
+    if (*(char*)((char*)pHi + 0x29) == '\0') {
+        pStart = (void**)*pHi;
+    } else {
+        pStart = *(void***)((char*)pTree[6] + 8);
+    }
+    if (*(char*)((char*)pStart + 0x29) == '\0') {
+        void** pNext;
+        do {
+            if (*pKey < *(uint32_t*)((char*)pStart + 0x18)) {
+                pNext = (void**)*pStart;
+                pHi = pStart;
+            } else {
+                pNext = (void**)pStart[2];
+            }
+            pStart = pNext;
+        } while (*(char*)((char*)pNext + 0x29) == '\0');
+    }
+    void* pContainer = pTree[0];
+    pOut[0] = pContainer;
+    pOut[1] = pLow;
+    pOut[2] = pContainer;
+    pOut[3] = pHi;
+    return pOut;
+}
+
+// 0x140d963e0 — the same lookup as the standard wrapper returns it
+void* TreeFindWrap(void** pTree, void** pOut, uint32_t* pKey) {
+    TreeFind(pTree, pOut, pKey);
+    return pOut;
+}
+
+// 0x140d97b10 — a cursor owner plus a standing record set: the eight byte node
+// at the front, then the head from 0x140d95170 marked at +0x29 with all three
+// links to itself and the size cleared at +0x38
+void* TreeInitSelf(void** pTree) {
+    void** pNode = (void**)::operator new(8);
+    if (pNode == nullptr) pNode = nullptr;
+    else *pNode = pTree;
+    *pTree = pNode;
+    char* pHead = (char*)TreeHeadAlloc();
+    pTree[6] = pHead;
+    *(uint8_t*)(pHead + 0x29) = 1;
+    *(char**)((char*)pTree[6] + 8) = (char*)pTree[6];
+    *(char**)((char*)pTree[6]) = (char*)pTree[6];
+    *(char**)((char*)pTree[6] + 0x10) = (char*)pTree[6];
+    pTree[7] = nullptr;
+    return pTree;
+}
+
+// 0x140d97b90 — the same container without the cursors: slot 0 cleared, then
+// the set stood up at +8
+void* ContainerInitB(void** pVec) {
+    pVec[0] = nullptr;
+    TreeInitSelf(pVec + 1);
+    return pVec;
+}
+
 }  // namespace stl
 }  // namespace flower
