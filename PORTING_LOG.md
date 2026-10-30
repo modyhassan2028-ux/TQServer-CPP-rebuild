@@ -6859,3 +6859,38 @@ Create للمLeagueRobOpt/Token: تحقق النوع ثم `ParseFromArray(slot+0
 عند الفشل: `vf[+0x20]` (IsInitialized) ⇒ إن كانت غير مهيّأة يُسجل النص
 `"...failed ,error：%s"` (0x14183cd30 / 0x14183d050) وإلا النص القصير
 `"...failed."` (0x14183ccf0 / 0x14183d018).
+
+## D128 — tq::CMsg (base) · gs::IModule · syndicate::CModule (2026-10-30)
+
+الملف الأصلي: `modules/syndicate/src/module.cpp` (المسار مقروء من نصوص CHECKF).
+
+| الكلاس | الفتبل | الفتحات |
+|---|---|---|
+| `tq::CMsg` | 0x14182e368 | 0x14177e300 dtor · 0x1417e7fda Create (IAT 0x141823000) · 0x14177e2f0 · 0x14177e2e0 · 0x14177e2d0 |
+| `gs::IModule` | 0x14182e428 | 0x14177e380 dtor · 4×0x1417f3374 (purecall) · 0x14177e340/350/360/370 |
+| `syndicate::CModule` | 0x14182e5a8 | 0x14177ec00 dtor → 0x14177e4c0 · 0x14177e600 · 0x14177e620 · 0x14177eaa0 · 0x14177ec30 → 0x14177e6c0 · 4 stubs |
+
+**0x14177e4c0** سلسلة مدمرات الأعضاء (رقم = إزاحة العضو، والدالة المنادى عليها):
+0x41a8→0x1417d83e0 · 0x3d50→0x1417d9050 · 0x3928→0x1417d66c0 · 0x3518→0x1417ddfa0 ·
+0x3108→0x1417de290 · 0x2cf8→0x1417ddcb0 · 0x28e8→0x1417d9eb0 · 0x24d8→0x1417dda40 ·
+0x20c8→0x1417dac80 · 0x1cb8→0x1417dd280 · 0x18a8→0x1417dd0a0 · (0x1498: 0x14182e520 ثم
+0x14182e368) · 0x1088→0x1417da8b0 · 0xc78→0x1417dd730 · 0x850→0x1417dcaf0 ·
+0x428→0x1417db330 · (0x10: 0x14182e4a0 ثم 0x14182e368) · ثم [0]=0x14182e428.
+
+**0x14177e6c0** مصنع الرسائل: يقرأ `uLen=*(u16*)pkt` ويرفض إن `uCount<uLen`، ثم
+`uType=*(u16*)(pkt+2)` ويحوّلها إلى عضو الرسالة، يكتب `*(u16*)(msg+0x0a)=uType`،
+ثم ينادي `vt[1](msg, pkt, uLen)` ويرجع `msg` أو null.
+0x3ea/0x3eb→0x10 · 0x422→0xc78 · 0x425→0x20c8 · 0x427→0x28e8 · 0x452→0x1088 ·
+0x453→0x428 · 0x458→0x18a8 · 0x836→0x1cb8 · 0x837→0x1498 · 0x8b1→0x2cf8 ·
+0x8b2→0x3518 · 0x8b3→0x3108 · 0x9ce→0x850 · 0xa3e→0x3928 · 0xa49→0x3d50 · 0xa52→0x41a8.
+**0x14177e620**: `pConsumer=*(this+0x420)` → `vt[6](pConsumer,0x16)` → CHECKF `pConsumer`
+(سطر 0x1e) → `rProvider.Init(pConsumer)` (سطر 0x22) عبر 0x1417a96f0 على 0x1417b6210.
+
+اختبار: `tests/syndicate_d128_test.cpp` — 146/146 × 6 نظيف.
+
+## الأصول الثنائية الكاملة (2026-10-30)
+تم تنزيل حزمة المصدر الكاملة واستخراج 50 DLL + exes إلى
+`/app/co_decomp/orig_binaries/Source`. ملاحظة مثبتة بالفحص: **Flower.dll (وباقي
+الوحدات الصغيرة) بُنيت بدون RTTI** — لا يوجد `.?AV…@@` فيها، لذلك خرائط الفتبل
+تلك تُستخرج من الـdecompiled (أنماط dtor + offsets) وليس من RTTI؛
+`tools/dll_class_map.py` يعمل فقط على الوحدات المبنية بـRTTI (Syndicate).

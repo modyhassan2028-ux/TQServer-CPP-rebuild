@@ -618,3 +618,9 @@ CMsgLeagueRobOpt، CMsgLeagueToken — كل واحدة بفتحات فتبلها
 في `SyndicateMsgSyndicate.cpp` / `SyndicateMsgProcess2.cpp` /
 `SyndicateLeagueOpt.cpp` / `SyndicateLeagueRobOpt.cpp`.
 **145/145 × 6 نظيف**. قائمة الـ20 كلاس المتبقية صفرت.
+
+## D128 (2026-10-30)
+`module.cpp` منقول: `tq::CMsg` (5) + `gs::IModule` (9) + `syndicate::CModule` (9)
+بما فيها سلسلة مدمرات الأعضاء الـ15 ومصنع `CreateMsgCore` بالـ17 نوع.
+**146/146 × 6 نظيف**. الأصول الثنائية لكل الـDLLs موجودة الآن في
+`/app/co_decomp/orig_binaries/Source` (Flower.dll بدون RTTI ⇒ لا خرائط فتبل آلية لها).

@@ -20,32 +20,8 @@ void (*g_fnModMem0c78)(void*) = nullptr;
 void (*g_fnModMem0850)(void*) = nullptr;
 void (*g_fnModMem0428)(void*) = nullptr;
 void (*g_fnModPureCall)() = nullptr;
-void (*g_fnModuleLog1)(const char*) = nullptr;
 bool (*g_fnModProviderInit)(void*, void*) = nullptr;
 void* (*g_fnModSlotAA0Tail)(void*) = nullptr;
-
-// ============================ tq::CMsg ==================================
-// 0x14177e300
-void* CMsgBase::DeleteDtor(void* self, uint32_t uFlag) {
-    *reinterpret_cast<uintptr_t*>(self) = kClassVft;
-    if ((uFlag & 1) != 0) ::operator delete(self);
-    return self;
-}
-// 0x14177e2d0 — "tq::CMsg::Process(void* pInfo) error"
-void CMsgBase::ProcessInfo(void* self) {
-    (void)self;
-    g_fnModuleLog1(reinterpret_cast<const char*>(kFmtProcessInfo));
-}
-// 0x14177e2e0 — "tq::CMsg::Process(OBJID idActor) error"
-void CMsgBase::ProcessActor(void* self, uint32_t idActor) {
-    (void)self; (void)idActor;
-    g_fnModuleLog1(reinterpret_cast<const char*>(kFmtProcessActor));
-}
-// 0x14177e2f0 — "tq::CMsg::Process(OBJID idActor, void* pInfo) error"
-void CMsgBase::ProcessBoth(void* self, uint32_t idActor, void* pInfo) {
-    (void)self; (void)idActor; (void)pInfo;
-    g_fnModuleLog1(reinterpret_cast<const char*>(kFmtProcessBoth));
-}
 
 // ============================ gs::IModule ===============================
 // 0x14177e380

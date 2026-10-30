@@ -146,3 +146,7 @@ vt+0x4a8 بلا وسائط في ثلاثة أجسام. الجدول الآن
 CMsgSelfSynMemAwardRank (0x14183d558)، CMsgSynRecruitAdvertising (0x14183e3f8)،
 ...List (0x14183e508)، ...Opt (0x14183e620)، CMsgLeagueOpt (0x14183c5a8، 6 فتحات)،
 CMsgLeagueRobOpt (0x14183cc78)، CMsgLeagueToken (0x14183cfa0).
+
+## D128 (2026-10-30)
++3 كلاسات أساس: tq::CMsg (0x14182e368)، gs::IModule (0x14182e428)،
+syndicate::CModule (0x14182e5a8) — 23 فتحة.

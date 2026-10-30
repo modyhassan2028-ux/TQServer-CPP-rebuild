@@ -11,23 +11,8 @@
 #define SYNDICATE_MODULE_H
 #include <cstdint>
 #include "modules/syndicate/src/msg/msgseams.h"
+#include "modules/syndicate/src/msg/cmsgbase.h"
 namespace syndicate {
-
-// ---- tq::CMsg — the message base (slots 2/3/4 are the error stubs)
-class CMsgBase {
-public:
-    static constexpr uintptr_t kClassVft = 0x14182e368;
-    static constexpr uint32_t kOffMsgType = 0x0A;
-    static constexpr uintptr_t kFmtProcessInfo = 0x14182e390;   // Process(void*)
-    static constexpr uintptr_t kFmtProcessActor = 0x14182e3b8;  // Process(OBJID)
-    static constexpr uintptr_t kFmtProcessBoth = 0x14182e3e0;   // (OBJID, void*)
-
-    static void* DeleteDtor(void* self, uint32_t uFlag);  // 0x14177e300
-    static void ProcessInfo(void* self);                  // 0x14177e2d0
-    static void ProcessActor(void* self, uint32_t idActor);   // 0x14177e2e0
-    static void ProcessBoth(void* self, uint32_t idActor,
-                            void* pInfo);                 // 0x14177e2f0
-};
 
 // ---- gs::IModule — the module interface
 class IModule {
@@ -80,8 +65,6 @@ extern void (*g_fnModMem0c78)(void*);         // 0x1417dd730
 extern void (*g_fnModMem0850)(void*);         // 0x1417dcaf0
 extern void (*g_fnModMem0428)(void*);         // 0x1417db330
 extern void (*g_fnModPureCall)();             // 0x1418232b8 (the purecall slot)
-// the same 0x141823030 import, called with the format pointer only
-extern void (*g_fnModuleLog1)(const char* pFmt);
 extern bool (*g_fnModProviderInit)(void* pMgr, void* pProvider);  // 0x1417a96f0
 extern void* (*g_fnModSlotAA0Tail)(void* pMgr);  // 0x1417ac5e0
 

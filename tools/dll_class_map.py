@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""tools/dll_class_map.py — build the full RTTI class map of any original DLL.
+"""tools/dll_class_map.py — full RTTI class map of any original binary.
 
-Chain (no guessing — every address is read out of the binary):
-  name string ".?AV<Class>@<ns>@@"  -> TypeDescriptor (name ptr at +0x10)
-  -> Complete Object Locator (TD RVA at +0x0c)
-  -> vtable (the qword just before slot 0 is the COL address)
+Same chain as find_vtables.py, applied to every ".?AV<Class>@<ns>@@" string:
+  name string -> TypeDescriptor (name ptr right before it)
+  -> Complete Object Locator (32-bit TD RVA at +0x0c)
+  -> vtable (the qword just before slot 0 holds the COL VA)
 
-Usage: python3 tools/dll_class_map.py <dll-path> [out-json] [out-md]
+Usage: python3 tools/dll_class_map.py <binary> [out.json] [out.md]
 """
 import json
 import struct
@@ -47,24 +47,33 @@ def in_text(secs, base, addr):
     rva = addr - base
     for va, vs, ra, rs, ch in secs:
         if va <= rva < va + max(vs, rs):
-            return bool(ch & 0x20000000)      # IMAGE_SCN_MEM_EXECUTE
+            return bool(ch & 0x20000000)
     return False
 
 
-def name_strings(d, base, secs):
-    out = []
-    i = d.find(b'.?AV')
-    while i >= 0:
-        if i == 0 or d[i - 1] == 0:
-            j = d.find(b'@@', i)
-            if j > 0:
-                s = d[i:j + 2]
-                if all(32 < c < 127 for c in s):
-                    va = f2v(secs, base, i)
-                    if va:
-                        out.append((va, s.decode('ascii')))
-        i = d.find(b'.?AV', i + 1)
-    return out
+def resolve(d, base, secs, i, td_str):
+    pack = struct.pack('<Q', td_str)
+    for j in range(max(0, i - 0x40), i):
+        if d[j:j + 8] != pack or j % 8 != 0:
+            continue
+        td = f2v(secs, base, j - 0x10)
+        if td is None:
+            continue
+        rva_td = struct.pack('<I', td - base)
+        k = d.find(rva_td)
+        while k >= 0:
+            col = f2v(secs, base, k - 12)
+            if col is not None:
+                need = struct.pack('<Q', col)
+                m = d.find(need)
+                while m >= 0:
+                    if m % 8 == 0:
+                        vt = f2v(secs, base, m + 8)
+                        if vt is not None:
+                            return vt, td, col
+                    m = d.find(need, m + 1)
+            k = d.find(rva_td, k + 1)
+    return None, None, None
 
 
 def main():
@@ -73,54 +82,32 @@ def main():
     out_md = sys.argv[3] if len(sys.argv) > 3 else None
     d, base, secs = load(path)
     res = {}
-    for va, s in name_strings(d, base, secs):
-        name = s[4:].replace('@@', '').replace('@', '::')
-        # TypeDescriptor: { vftable, spare, &name }
-        pack = struct.pack('<Q', va)
-        td = None
-        for j in range(0, len(d) - 8):
-            pass
-        # index the name-pointer occurrences
-        idx = []
-        k = d.find(pack)
-        while k >= 0:
-            idx.append(k)
-            k = d.find(pack, k + 1)
-        best = None
-        for k in idx:
-            tdv = f2v(secs, base, k - 0x10)
-            if tdv is None:
-                continue
-            rva = tdv - base
-            col = struct.pack('<I', rva)
-            c = d.find(col)
-            while c >= 0:
-                colv = f2v(secs, base, c - 12)
-                if colv is not None:
-                    p = struct.pack('<Q', colv)
-                    v = d.find(p)
-                    while v >= 0:
-                        vt = f2v(secs, base, v + 8)
+    seen = set()
+    i = d.find(b'.?AV')
+    while i >= 0:
+        if i == 0 or d[i - 1] == 0:
+            e = d.find(b'@@', i)
+            if e > 0:
+                s = d[i:e + 2]
+                if all(32 < c < 127 for c in s):
+                    name = s[4:].decode('ascii')[:-2].replace('@', '::')
+                    td_str = f2v(secs, base, i)
+                    if td_str and name not in seen:
+                        vt, td, col = resolve(d, base, secs, i, td_str)
                         if vt is not None:
-                            best = (tdv, colv, vt, v + 8)
-                            break
-                        v = d.find(p, v + 1)
-                if best:
-                    break
-                c = d.find(col, c + 1)
-            if best:
-                break
-        if not best:
-            continue
-        tdv, colv, vt, vt_off = best
-        fns = []
-        for i in range(32):
-            raw = struct.unpack_from('<Q', d, vt_off + i * 8)[0]
-            if not in_text(secs, base, raw):
-                break
-            fns.append('0x%x' % raw)
-        res['0x%x' % vt] = {'name': name, 'td': '0x%x' % tdv,
-                            'col': '0x%x' % colv, 'fns': fns}
+                            seen.add(name)
+                            off = v2f(secs, base, vt)
+                            fns = []
+                            for k in range(32):
+                                raw = struct.unpack_from('<Q', d, off + k * 8)[0]
+                                if not in_text(secs, base, raw):
+                                    break
+                                fns.append('0x%x' % raw)
+                            res['0x%x' % vt] = {'name': name,
+                                                'td': '0x%x' % td,
+                                                'col': '0x%x' % col,
+                                                'fns': fns}
+        i = d.find(b'.?AV', i + 1)
     if out_json:
         json.dump(res, open(out_json, 'w'), indent=1, sort_keys=True)
     if out_md:
@@ -128,11 +115,12 @@ def main():
             f.write('# %s — RTTI class map\n\n' % path.split('/')[-1])
             f.write('| vtable | class | slots |\n|---|---|---|\n')
             for vt, v in sorted(res.items()):
-                f.write('| `%s` | `%s` | %d |\n' % (vt, v['name'],
-                                                    len(v['fns'])))
-    print('classes: %d' % len(res))
-    for vt, v in sorted(res.items())[:40]:
-        print(vt, v['name'], v['fns'])
+                f.write('| `%s` | `%s` | %d |\n'
+                        % (vt, v['name'], len(v['fns'])))
+    print('%s: classes %d' % (path.split('/')[-1], len(res)))
+    for vt, v in sorted(res.items())[:12]:
+        print(' ', vt, v['name'], len(v['fns']))
 
 
-main()
+if __name__ == '__main__':
+    main()
