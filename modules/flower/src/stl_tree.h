@@ -68,6 +68,15 @@ void* TreeIncrementWrap2(void** pIter);                  // 0x140d95360
 void VectorReleaseB(void** pVec);                        // 0x140d95380
 void DeleteSlotE(void** pSlot);                          // 0x140d953e0
 
+// third batch
+void* IterOffsetBack(void** pOut, void** pIter, uint64_t n);   // 0x140d954f0
+void* IterCopyFromNode(void** pOut, void** pIter, void* pNode); // 0x140d95590
+void OutOfRangeCopyCtor(void* pSelf, const void* pOther);       // 0x140d959a0
+void TreeInit(void* pTree);                                     // 0x140d95ae0
+void* IterFromNodeChecked(void** pOut, void** pNode,
+                          void* pFrom);                          // 0x140d95e60
+void* NodeSelfAllocE(void** pSelf);                              // 0x140d95ec0
+
 }  // namespace stl
 }  // namespace flower
 #endif

@@ -411,5 +411,76 @@ void VectorReleaseB(void** pVec) {
 // 0x140d953e0 — the slot release again
 void DeleteSlotE(void** pSlot) { ::operator delete(*pSlot); }
 
+// 0x140d954f0 — an iterator n elements back from another: the same two bounds
+// at +0x18 and +0x20, and the head/container is copied through
+void* IterOffsetBack(void** pOut, void** pIter, uint64_t n) {
+    void* pRoot = pIter[0];
+    const uint64_t uCur = (uint64_t)pIter[1];
+    uint64_t uHead = 0;
+    uint64_t uBegin = 0;
+    if (pRoot == nullptr) {
+        InvalidParameter();
+    } else {
+        uHead = *reinterpret_cast<uint64_t*>(pRoot);
+    }
+    const uint64_t uNew = uCur + n * (uint64_t)-8;
+    bool bOk = false;
+    if (uNew <= *reinterpret_cast<uint64_t*>(uHead + 0x20)) {
+        if (pRoot != nullptr) uBegin = *reinterpret_cast<uint64_t*>(pRoot);
+        if (*reinterpret_cast<uint64_t*>(uBegin + 0x18) <= uNew) bOk = true;
+    }
+    if (!bOk) InvalidParameter();
+    pOut[0] = (void*)pRoot;
+    pOut[1] = (void*)uNew;
+    return pOut;
+}
+
+// 0x140d95590 — the container and the offset are taken from the iterator and
+// the node's +0x08
+void* IterCopyFromNode(void** pOut, void** pIter, void* pNode) {
+    void* pOffset = *(void**)((char*)pNode + 8);
+    if (pIter == nullptr) InvalidParameter();
+    pOut[0] = pIter[0];
+    pOut[1] = pOffset;
+    return pOut;
+}
+
+// 0x140d959a0 — copy construction of an out_of_range
+void OutOfRangeCopyCtor(void* pSelf, const void* pOther) {
+    LogicErrorCopyCtor(pSelf, pOther);
+    *reinterpret_cast<uintptr_t*>(pSelf) = g_uOutOfRangeVft;
+}
+
+// 0x140d95ae0 — stand the container up: a fresh head marked at +0x29, all
+// three links back to itself and the size cleared
+void TreeInit(void* pTree) {
+    char* p = (char*)pTree;
+    char* pHead = (char*)TreeHeadAlloc();
+    *(char**)(p + 0x30) = pHead;
+    *(uint8_t*)(pHead + 0x29) = 1;
+    *(char**)(*(char**)(p + 0x30) + 8) = *(char**)(p + 0x30);
+    *(uint64_t*)*(uint64_t**)(p + 0x30) = *(uint64_t*)(p + 0x30);
+    *(char**)(*(char**)(p + 0x30) + 0x10) = *(char**)(p + 0x30);
+    *(uint64_t*)(p + 0x38) = 0;
+}
+
+// 0x140d95e60 — an iterator from a node, offset taken from +0x08 of a third
+// object, bounded by the node's +0x18 and +0x20
+void* IterFromNodeChecked(void** pOut, void** pNode, void* pFrom) {
+    const uint64_t uOffset = *(uint64_t*)((char*)pFrom + 8);
+    pOut[0] = nullptr;
+    if (pNode == nullptr || uOffset < (uint64_t)pNode[3] ||
+        (uint64_t)pNode[4] < uOffset) {
+        InvalidParameter();
+    }
+    void* pContainer = pNode[0];
+    pOut[1] = (void*)uOffset;
+    pOut[0] = pContainer;
+    return pOut;
+}
+
+// 0x140d95ec0 — the self-allocating node once more
+void* NodeSelfAllocE(void** pSelf) { return TreeNodeSelfAlloc(pSelf); }
+
 }  // namespace stl
 }  // namespace flower
