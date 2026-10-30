@@ -1,32 +1,20 @@
-// ============================================================================
-// CMsgSynCompete.cpp — ported from 0x1417db260 and 0x1417dafe0
+// msgsyncompete.cpp — RAW Syndicate.dll v6159
 #include "modules/syndicate/src/msg/msgsyncompete.h"
-
 namespace syndicate {
 
-bool (*g_pfnCMsgSynCompeteBaseCreate)(void* self, const char* buf, uint16_t len) = nullptr;
-void (*g_pfnCMsgSynCompeteDelete)(void* p) = nullptr;
-void (*g_pfnCMsgSynCompeteLogError)(const char* text) = nullptr;
-
-// 0x1417db260: store the class vtable, store the base vtable, then delete on flag bit 0.
-void CMsgSynCompete::Destruct(unsigned char flag) {
-    *reinterpret_cast<uintptr_t*>(this) = kClassVft;
-    *reinterpret_cast<uintptr_t*>(this) = kBaseVft;
-    if ((flag & 1u) != 0) {
-        if (g_pfnCMsgSynCompeteDelete) g_pfnCMsgSynCompeteDelete(this);
-    }
+// 0x1417db260
+void* CMsgSynCompete::DeleteDtor(void* self, uint32_t uFlag) {
+    *reinterpret_cast<uintptr_t*>(self) = kClassVft;
+    *reinterpret_cast<uintptr_t*>(self) = kBaseCMsgVft;
+    if ((uFlag & 1) != 0) ::operator delete(self);
+    return self;
 }
 
-// 0x1417dafe0: base create, then the id gate at +0xa.
-bool CMsgSynCompete::Create(void* self, const char* buf, uint16_t len) {
-    if (g_pfnCMsgSynCompeteBaseCreate == nullptr) return false;
-    if (!g_pfnCMsgSynCompeteBaseCreate(self, buf, len)) return false;
-    return *reinterpret_cast<uint16_t*>(reinterpret_cast<char*>(self) + 0x0a) == kMsgId;
+// 0x1417dafe0 — base Create, then the single accepted message type
+bool CMsgSynCompete::Create(void* self, char* pData, uint16_t uType) {
+    if (!g_pfnCMsgCreate(self, pData, uType)) return false;
+    return *reinterpret_cast<uint16_t*>((unsigned char*)self + kOffMsgType)
+           == kMsgType;
 }
 
-// the three shared loggers (14177e2f0 / 14177e2e0 / 14177e2d0)
-void CMsgSynCompete::ProcessActorInfoError() { if (g_pfnCMsgSynCompeteLogError) g_pfnCMsgSynCompeteLogError("tq::CMsg::Process(OBJID idActor, void* pInfo) error"); }
-void CMsgSynCompete::ProcessActorError()     { if (g_pfnCMsgSynCompeteLogError) g_pfnCMsgSynCompeteLogError("tq::CMsg::Process(OBJID idActor) error"); }
-void CMsgSynCompete::ProcessInfoError()      { if (g_pfnCMsgSynCompeteLogError) g_pfnCMsgSynCompeteLogError("tq::CMsg::Process(void* pInfo) error"); }
-
-} // namespace syndicate
+}  // namespace syndicate

@@ -602,3 +602,10 @@ SynRecruitAdvertising ×3).
 `[mgr->vft+0x28]`. **142/142 × 6 نظيف**. المتبقي 10 كلاسات، أكبرها
 `CMsgSyndicate` (Process بحجم 0x630 + CHECK سطر 180) و`CMsgSelfSynMemAwardRank`
 (Process بجدول قفز 13 حالة، سطرا 223/228) والثلاثة `CMsgSynRecruitAdvertising*`.
+
+## D125 (2026-10-30)
+`CMsgSynProfferRank` (vtable 0x14183e2b0، نوع 0x835): Process يمرّر بايتَي
+الرُتب `payload+4/+5` إلى `0x1417ae720`. `CMsgSynCompete` (vtable 0x14183dad0،
+نوع 0x426): لا Process خاص (فتحة الخطأ المشتركة). **143/143 × 6 نظيف**.
+المتبقي 8 كلاسات: CMsgSyndicate، CMsgSelfSynMemAwardRank، CMsgLeagueOpt،
+CMsgLeagueRobOpt، CMsgLeagueToken، وثلاثة CMsgSynRecruitAdvertising*.

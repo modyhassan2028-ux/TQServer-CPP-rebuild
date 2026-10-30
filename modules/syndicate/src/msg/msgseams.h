@@ -29,6 +29,9 @@ extern void (*g_pfnMgrVf28)(void* pMgr, uint32_t idActor);
 // 0x1417e9440 — in-module destructor of the pInfo block at +0x408
 extern void (*g_fn_1417e9440)(void* pSub);
 extern void (*g_fn_1417ac7d0)(void* pMgr, uint32_t idActor, void* pMsg);
+// 0x1417ae720 — SyndicateMgr proffer-rank apply (mgr, idActor, uA, uB)
+extern void (*g_fn_1417ae720)(void* pMgr, uint32_t idActor,
+                              uint8_t uA, uint8_t uB);
 // 0x1417ae790 — SyndicateMgr domain apply (mgr, idActor, uValue)
 extern void (*g_fn_1417ae790)(void* pMgr, uint32_t idActor, uint32_t uValue);
 // the CRT memcpy-ish import at 0x141823098 (dst, src)

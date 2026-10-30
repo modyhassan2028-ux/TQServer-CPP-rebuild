@@ -6826,3 +6826,12 @@ vtable `0x14182e520` · type `0x837` · المسار الأصلي `msg/msgsynchg
 - مسار `CMsgSynProffer` مؤكد من `__FILE__`؛ أما `CMsgLeagueBeRob` فليس له
   نص `__FILE__` في هذا البايناري، فاسم ملفه يتبع القاعدة المثبتة فقط (موثّق
   في ترويسة الملف).
+
+## D125 — CMsgSynProfferRank + CMsgSynCompete (2026-10-30)
+
+الفتحات من الفتبل: `0x14183e2b0` و`0x14183dad0`.
+- `CMsgSynProfferRank` · نوع `0x835`: Process `0x1417ddbb0` =
+  `mgr=SyndicateMgr()`؛ إن نجحت `0x1417ac6f0` ⇒
+  `0x1417ae720(mgr,idActor, byte[payload+4], byte[payload+5])`.
+- `CMsgSynCompete` · نوع `0x426`: الفتحة 3 هي هيكل الخطأ المشترك `0x14177e2e0`
+  ⇒ لا Process خاص، والوحيد dtor + Create.
