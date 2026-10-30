@@ -20,9 +20,9 @@ static void LogFn(const char* fmt, ...) {
 int main() {
     g_pfnCMsgCreate = [](void*, char*, uint16_t t) -> bool {
         s_nCreate++; s_uCreateType = t; return s_bCreateRet; };
-    g_fn_1417e8016 = [](void*, uint32_t, uint32_t, uint32_t) { s_nInit++; };
-    g_fn_141823098 = [](char* d, const char* s) -> char* {
-        s_nStrcpy++; strcpy(s_szCopied, s); strcpy(d, s); return d; };
+    g_fn_1417e8016 = [](void*, const void*, uint32_t, uint32_t) { s_nInit++; };
+    g_fn_141823098 = [](void* d, const void* s) -> void* {
+        s_nStrcpy++; strcpy(s_szCopied, (const char*)s); strcpy((char*)d, (const char*)s); return d; };
     g_pfnInlineLogError = LogFn;
 
     static unsigned char abObj[0x420];

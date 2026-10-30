@@ -6701,3 +6701,17 @@ New، Clear، IsInit، مشترك، thunk، Merge، ByteSize، Serialize،
 - `CMsgSeams.{h,cpp}`: تعريف واحد للـseams المشتركة (إصلاح
   multiple definition بين CMsgLog وCMsgInvadeWarning).
 - `136/136 × 6` أخضر، ASan/UBSan نظيفان.
+
+## D119 — CMsgSynMemberInfo [2026-10-30]
+
+- vtable `0x14183df00` · القاعدة `0x14182d368` (من `lea` في الـdtor).
+- Create يقبل `word [+0xa] == 0x458` فقط.
+- Process `0x1417dd1c0`: `0x1417b6210()` ثم `jmp 0x1417ae9b0`.
+- المرسل `0x1417dd100`: عند `rdx == 0` → `0x141823030(fmt, "CHECKF",
+  "<path msgsynmemberinfo.cpp>", "szName", 0x2f)` ثم `ret 0`.
+  التنسيق الحرفي: `\xa1\xef%s(%s)\xa1\xef in %s, %d`.
+- حمولة `+0x408` (0x1c بايت): `u16 0x1c`@0، `u16 0x458`@2،
+  `u32 arg4`@4، `u32 arg3`@8، `char[16]`@0xC عبر
+  `0x141823098(dst, src)`.
+- `CMsgSeams` توسّعت إلى 6 نقاط تعريف مشتركة.
+- `137/137 × 6` أخضر، ASan/UBSan نظيفان.

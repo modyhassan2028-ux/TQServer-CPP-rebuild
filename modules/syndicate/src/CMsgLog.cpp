@@ -2,7 +2,6 @@
 #include "modules/syndicate/src/CMsgLog.h"
 namespace syndicate {
 
-void* (*g_pfnGetSyndicateMgr)() = nullptr;
 void (*g_pfnLogProcessA)(void*, uint32_t) = nullptr;
 void (*g_pfnLogProcessB)(void*, uint32_t) = nullptr;
 

@@ -3,8 +3,6 @@
 #include <cstring>
 namespace syndicate {
 
-void (*g_fn_1417e8016)(void*, uint32_t, uint32_t, uint32_t) = nullptr;
-char* (*g_fn_141823098)(char*, const char*) = nullptr;
 
 // 0x1417d52f0 — class vftable, then the tq::CMsg base, then delete when bit 0
 void* CMsgInvadeWarning::DeleteDtor(void* self, uint32_t uFlag) {
@@ -25,7 +23,7 @@ bool CMsgInvadeWarning::Create(void* self, char* pData, uint16_t uType) {
 bool CMsgInvadeWarning::Send(void* self, uint32_t uA, uint32_t uB, uint32_t uC,
                              const char* pszName) {
     unsigned char* p = (unsigned char*)self;
-    g_fn_1417e8016(self, uA, uB, uC);
+    g_fn_1417e8016(self, nullptr, uA, uB);
     unsigned char* pPay = *reinterpret_cast<unsigned char**>(p + kOffPayload);
     *reinterpret_cast<uint16_t*>(pPay + 0x02) = kMsgType;
     pPay = *reinterpret_cast<unsigned char**>(p + kOffPayload);

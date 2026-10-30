@@ -16,8 +16,6 @@
 #include "modules/syndicate/src/CMsgSeams.h"
 namespace syndicate {
 
-extern void (*g_fn_1417e8016)(void* self, uint32_t a, uint32_t b, uint32_t c);
-extern char* (*g_fn_141823098)(char* pDst, const char* pSrc);              // import at 0x141823098
 
 class CMsgInvadeWarning {
 public:

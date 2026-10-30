@@ -16,8 +16,6 @@
 namespace syndicate {
 
 
-// 0x1417b6210 — the SyndicateMgr accessor
-extern void* (*g_pfnGetSyndicateMgr)();
 // 0x1417b7010 — the type-0 handler (this, uint32_t idActor)
 extern void (*g_pfnLogProcessA)(void* mgr, uint32_t idActor);
 // 0x1417ac620 — the type-1 handler (this, uint32_t idActor)
