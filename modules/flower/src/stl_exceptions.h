@@ -29,6 +29,7 @@ struct MsString {
     uint64_t uCap;      // +0x38
 
     void CopyFrom(const std::string& s);   // basic_string copy ctor
+    void Assign(const MsString& o);        // basic_string copy, from another
     const char* Text() const { return uCap > 0xf ? pszHeap : szSso; }
     void Release();                        // basic_string dtor
 };

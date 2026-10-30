@@ -25,6 +25,20 @@ void MsString::CopyFrom(const std::string& s) {
     }
 }
 
+void MsString::Assign(const MsString& o) {
+    uSize = o.uSize;
+    if (uSize > 0xf) {
+        pszHeap = (char*)::operator new(uSize + 1);
+        ::memcpy(pszHeap, o.pszHeap, uSize);
+        pszHeap[uSize] = '\0';
+        uCap = uSize;
+    } else {
+        ::memcpy(szSso, o.szSso, uSize);
+        szSso[uSize] = '\0';
+        uCap = 0xf;
+    }
+}
+
 void MsString::Release() {
     if (uCap > 0xf) ::operator delete(pszHeap);
     uCap = 0xf;
