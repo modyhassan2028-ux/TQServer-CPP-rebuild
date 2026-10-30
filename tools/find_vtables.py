@@ -12,7 +12,9 @@ Usage: python3 tools/find_vtables.py [Name ...]
 import struct
 import sys
 
-DLL = '/app/co_decomp/orig_binaries/Source/Syndicate.dll'
+import os
+DLL = os.environ.get('TQ_DLL',
+    '/app/co_decomp/orig_binaries/Source/Syndicate.dll')
 
 
 def load():
