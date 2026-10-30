@@ -8,10 +8,10 @@
 | الكلاس | vtable | الحالة |
 |---|---|---|
 | `CMsgLeagueBeRobPB` | `0x141841318` | **12/12 مكتملة** (D99) |
-| `CMsgLeagueBeRobRePB` | `0x141841130` | 0/12 |
+| `CMsgLeagueBeRobRePB` | `0x141841118` | **12/12 مكتملة** (D101) |
 | `CMsgLeagueRobOptPB` | `0x1418423d8` | **12/12 مكتملة** (D100) |
 | `CMsgLeagueRobOptServerPB` | `0x141842278` | **12/12 مكتملة** (D100) |
-| `CMsgLeagueTokenPB` | `0x141842670` | 0/12 |
+| `CMsgLeagueTokenPB` | `0x141842658` | **12/12 مكتملة** (D101) |
 | `CMsgInvadeWarning` | TBD | 0/12 |
 | `CMsgLeagueBeRob` | TBD | 0/12 |
 | `CMsgLeagueOpt` | TBD | 0/12 |

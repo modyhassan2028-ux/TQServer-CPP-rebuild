@@ -6630,3 +6630,32 @@ adapter:: بدليل الباني. 15 تأكيدًا ×6، رجريجن 76/76.
 
 **الحصيلة:** عائلة msgleague عند **9 كلاسات مكتملة** (108 فتحة).
 رجريجن 133/133 × 6، ASan/UBSan نظيف.
+
+## D101 — CMsgLeagueBeRobRePB + CMsgLeagueTokenPB (12/12 لكلٍّ) [2026-10-30]
+
+**تصحيح مهم:** ‏vtables الصنفين كانت مسجّلة خطأً بإزاحة +0x18؛
+الجدول الكامل 12 فتحة يبدأ عند **BeRobRePB = 0x141841118** و
+**TokenPB = 0x141842658** (الفتحة 5 = 1417de5c0 والفتحة 10 =
+1417dee40 تأكيداً على المحاذاة). أدوار الفتحات: dtor، النوع،
+New، Clear، IsInit، مشترك، thunk، Merge، ByteSize، Serialize،
+مشترك، الحجم المخبأ.
+
+**CMsgLeagueBeRobRePB** (حقل واحد عند +0x38، حجم 0x40)
+- dtor 0x1417e8e40 (vft + ~string(+8) + 1417de5a0 + حذف بالعلم)
+- Clear 0x1417e8460 بلا بوابة · IsInit 0x1417e8620 = (bits&1)==1
+- ByteSize 0x1417e84d0 — سلوك RAW المميز: على المسار القصير
+  يكتب `+0x20 + 2` ثم يعود
+- Merge 0x1417e8ea0 (وسم 8 فقط، do/while مع فحص بنيوي)
+- MergeFrom 0x1417e8520 عبر thunk 0x1417e8ff0: CHECKF
+  **msgleagueberob.pb.cc:0xd5**
+
+**CMsgLeagueTokenPB** (4 حقول varint + نص، حجم 0x50)
+- dtor 0x1417f1710 · Clear 0x1417f1220 (بوابة (bits&0x1f))
+- IsInit 0x1417f1590 = (bits&0x1f)==0x1f
+- ByteSize 0x1417f1330 (iVar6=1 للحقل النصي عند len ≤ 0x7f)
+- Serialize 0x1417f1270 · Merge 0x1417f19a0 بسلسلة
+  8 → 0x10 → 0x18 → 0x20 → 0x2a
+- MergeFrom 0x1417f1430: CHECKF **msgleaguetoken.pb.cc:0x15d**
+
+**الحصيلة:** عائلة msgleague عند **11 كلاساً مكتملاً** (132 فتحة).
+رجريجن 134/134 × 6، ASan/UBSan نظيف.
