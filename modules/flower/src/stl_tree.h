@@ -49,6 +49,25 @@ void VectorRelease(void* pVec);                  // 0x140d95000
 void* IteratorFromContainer(void** pOut, void* pContainer,
                             void** pNode);       // 0x140d95040
 
+// the second family of instantiations, same bodies
+void* IterCopyThenNext(void** pDst, void** pSrc);        // 0x140d95080
+void* NodeSelfAllocB(void** pSelf);                      // 0x140d950b0
+void* NodeSelfAllocC(void** pSelf);                      // 0x140d95250
+void* NodeSelfAllocD(void** pSelf);                      // 0x140d95440
+void* IterAdvanceBack(void** pIter, uint64_t n);         // 0x140d950f0
+void* IteratorFromNodeA(void** pOut, uint64_t uOffset,
+                        void** pNode);                   // 0x140d95110
+void* IteratorFromNodeB(void** pOut, uint64_t uOffset,
+                        void** pNode);                   // 0x140d95490
+void* TreeHeadAlloc();                                   // 0x140d95170
+void* TreeNodeAlloc(void* pLeft, void* pParent, void* pRight,
+                    const uint64_t* pElem, uint8_t cColor);   // 0x140d951d0
+void* MoveBlockB(void* pFirst, void* pLast, void* pDest);     // 0x140d952a0
+void TreeClear(void* pTree);                             // 0x140d952e0
+void* TreeIncrementWrap2(void** pIter);                  // 0x140d95360
+void VectorReleaseB(void** pVec);                        // 0x140d95380
+void DeleteSlotE(void** pSlot);                          // 0x140d953e0
+
 }  // namespace stl
 }  // namespace flower
 #endif

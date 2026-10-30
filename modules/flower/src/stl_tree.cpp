@@ -293,5 +293,123 @@ void* IteratorFromContainer(void** pOut, void* pContainer, void** pNode) {
     return pOut;
 }
 
+// 0x140d95080 — copy the pair, then step the source forward
+void* IterCopyThenNext(void** pDst, void** pSrc) {
+    pDst[0] = pSrc[0];
+    pDst[1] = pSrc[1];
+    TreeIncrement(pSrc);
+    return pDst;
+}
+
+// 0x140d950b0 / 0x140d95250 / 0x140d95440 — the self-allocating node again
+void* NodeSelfAllocB(void** pSelf) { return TreeNodeSelfAlloc(pSelf); }
+void* NodeSelfAllocC(void** pSelf) { return TreeNodeSelfAlloc(pSelf); }
+void* NodeSelfAllocD(void** pSelf) { return TreeNodeSelfAlloc(pSelf); }
+
+// 0x140d950f0 — the advance with a negated count
+void* IterAdvanceBack(void** pIter, uint64_t n) {
+    IterAdvance((CheckedIterator*)pIter, (uint64_t)(-(int64_t)n));
+    return pIter;
+}
+
+// 0x140d95110 — an iterator from a node and an offset, kept inside the
+// head's +0x18 begin and +0x20 size
+void* IteratorFromNodeA(void** pOut, uint64_t uOffset, void** pNode) {
+    pOut[0] = nullptr;
+    if (pNode == nullptr || uOffset < (uint64_t)pNode[3] ||
+        (uint64_t)pNode[4] < uOffset) {
+        InvalidParameter();
+    }
+    void* pContainer = pNode[0];
+    pOut[1] = (void*)uOffset;
+    pOut[0] = pContainer;
+    return pOut;
+}
+
+// 0x140d95490 — the same body, a second instantiation
+void* IteratorFromNodeB(void** pOut, uint64_t uOffset, void** pNode) {
+    pOut[0] = nullptr;
+    if (pNode == nullptr || uOffset < (uint64_t)pNode[3] ||
+        (uint64_t)pNode[4] < uOffset) {
+        InvalidParameter();
+    }
+    void* pContainer = pNode[0];
+    pOut[1] = (void*)uOffset;
+    pOut[0] = pContainer;
+    return pOut;
+}
+
+// 0x140d95170 — a fresh 0x30 byte head: left/parent/right zeroed, +0x28 = 1
+// and the colour at +0x29 cleared
+void* TreeHeadAlloc() {
+    char* p = (char*)::operator new(0x30);
+    if (p != nullptr) {
+        *(uint64_t*)(p + 0x00) = 0;
+        *(uint64_t*)(p + 0x08) = 0;
+        *(uint64_t*)(p + 0x10) = 0;
+        *(uint8_t*)(p + 0x28) = 1;
+        *(uint8_t*)(p + 0x29) = 0;
+    }
+    return p;
+}
+
+// 0x140d951d0 — a node carrying the three links, the 16 byte element and the
+// colour, colour at +0x29 cleared
+void* TreeNodeAlloc(void* pLeft, void* pParent, void* pRight,
+                    const uint64_t* pElem, uint8_t cColor) {
+    char* p = (char*)::operator new(0x30);
+    if (p != nullptr) {
+        *(void**)(p + 0x00) = pLeft;
+        *(void**)(p + 0x08) = pParent;
+        *(void**)(p + 0x10) = pRight;
+        *(uint64_t*)(p + 0x18) = pElem[0];
+        *(uint64_t*)(p + 0x20) = pElem[1];
+        *(uint8_t*)(p + 0x28) = cColor;
+        *(uint8_t*)(p + 0x29) = 0;
+    }
+    return p;
+}
+
+// 0x140d952a0 — the block move again
+void* MoveBlockB(void* pFirst, void* pLast, void* pDest) {
+    return MoveBlock(pFirst, pLast, pDest);
+}
+
+// 0x140d952e0 — empty the tree: free every node from the head's left child,
+// then point the head at itself on all three links and clear the size
+void TreeClear(void* pTree) {
+    char* p = (char*)pTree;
+    char* pHead = *(char**)(p + 0x30);
+    char* pNode = *(char**)(pHead + 8);
+    while (*(char*)(pNode + 0x29) == '\0') {
+        TreeFreeNodes(pTree, *(void***)(pNode + 0x10));
+        char* pNext = *(char**)pNode;
+        ::operator delete(pNode);
+        pNode = pNext;
+    }
+    *(char**)(*(char**)(p + 0x30) + 8) = *(char**)(p + 0x30);
+    *(uint64_t*)(p + 0x38) = 0;
+    *(uint64_t*)*(uint64_t**)(p + 0x30) = *(uint64_t*)(p + 0x30);
+    *(char**)(*(char**)(p + 0x30) + 0x10) = *(char**)(p + 0x30);
+}
+
+// 0x140d95360 — another increment wrapper
+void* TreeIncrementWrap2(void** pIter) {
+    TreeIncrement(pIter);
+    return pIter;
+}
+
+// 0x140d95380 — release a vector then free the block its first slot points at
+void VectorReleaseB(void** pVec) {
+    if (pVec[3] != nullptr) ::operator delete(pVec[3]);
+    pVec[3] = nullptr;
+    pVec[4] = nullptr;
+    pVec[5] = nullptr;
+    ::operator delete(pVec[0]);
+}
+
+// 0x140d953e0 — the slot release again
+void DeleteSlotE(void** pSlot) { ::operator delete(*pSlot); }
+
 }  // namespace stl
 }  // namespace flower
