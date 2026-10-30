@@ -14,6 +14,8 @@ bool (*g_fn_1417afb20)(void*, uint32_t, uint32_t, const void*) = nullptr;
 void (*g_fn_1417ac7d0)(void*, uint32_t, void*) = nullptr;
 void (*g_pfnMgrVf28)(void*, uint32_t) = nullptr;
 void (*g_fn_1417e9440)(void*) = nullptr;
+bool (*g_fnPbVf20IsInit)(void*) = nullptr;
+void* (*g_fnPbVf28InitErr)(void*, void*) = nullptr;
 void (*g_fn_1417ae720)(void*, uint32_t, uint8_t, uint8_t) = nullptr;
 void (*g_fn_1417ae790)(void*, uint32_t, uint32_t) = nullptr;
 }  // namespace syndicate

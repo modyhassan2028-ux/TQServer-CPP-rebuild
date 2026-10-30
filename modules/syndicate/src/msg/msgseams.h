@@ -26,6 +26,9 @@ extern bool (*g_fn_1417afb20)(void* pMgr, uint32_t idActor,
 // 0x1417ac7d0 — syndicate send helper (mgr, idActor, pMsg)
 // the manager's virtual slot at vtable+0x28 (mgr, idActor)
 extern void (*g_pfnMgrVf28)(void* pMgr, uint32_t idActor);
+// the ported PB object's own virtuals, reached through its real vtable
+extern bool (*g_fnPbVf20IsInit)(void* pPb);            // vtable +0x20
+extern void* (*g_fnPbVf28InitErr)(void* pPb, void* pOutStr);  // +0x28
 // 0x1417e9440 — in-module destructor of the pInfo block at +0x408
 extern void (*g_fn_1417e9440)(void* pSub);
 extern void (*g_fn_1417ac7d0)(void* pMgr, uint32_t idActor, void* pMsg);

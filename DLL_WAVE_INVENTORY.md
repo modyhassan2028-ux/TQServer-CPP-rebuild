@@ -140,3 +140,9 @@ vt+0x4a8 بلا وسائط في ثلاثة أجسام. الجدول الآن
 ## D111 — موجة 16 (مكتملة 27-10-2026)
 العمالقة +0x038/+0x0e8/+0x118. **151/232**.
 رجريجن 114/114 × 6.
+
+## D126 / D127 (2026-10-30) — آخر 8 كلاسات CMsg
++8 كلاسات، 38 فتحة فتبل إضافية: CMsgSyndicate (0x14183dc10)،
+CMsgSelfSynMemAwardRank (0x14183d558)، CMsgSynRecruitAdvertising (0x14183e3f8)،
+...List (0x14183e508)، ...Opt (0x14183e620)، CMsgLeagueOpt (0x14183c5a8، 6 فتحات)،
+CMsgLeagueRobOpt (0x14183cc78)، CMsgLeagueToken (0x14183cfa0).

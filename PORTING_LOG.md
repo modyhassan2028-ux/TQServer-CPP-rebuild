@@ -6835,3 +6835,27 @@ vtable `0x14182e520` · type `0x837` · المسار الأصلي `msg/msgsynchg
   `0x1417ae720(mgr,idActor, byte[payload+4], byte[payload+5])`.
 - `CMsgSynCompete` · نوع `0x426`: الفتحة 3 هي هيكل الخطأ المشترك `0x14177e2e0`
   ⇒ لا Process خاص، والوحيد dtor + Create.
+
+## D126 — CMsgSyndicate + CMsgSelfSynMemAwardRank + 3× CMsgSynRecruitAdvertising* (2026-10-30)
+
+الملفات في `modules/syndicate/src/msg/` بأسماء المسارات الأصلية.
+| الكلاس | الفتبل | النوع | dtor | Create | Process |
+|---|---|---|---|---|---|
+| CMsgSyndicate | 0x14183dc10 | 0x453 | 0x1417dca00 (يدمّر +0x410 عبر IAT 0x1418230a0) | 0x1417db370 | 0x1417db7b0 |
+| CMsgSelfSynMemAwardRank | 0x14183d558 | 0x427 | 0x1417da810 | 0x1417d9ee0 | 0x1417da570 |
+| CMsgSynRecruitAdvertising | 0x14183e3f8 | 0x8b1 | 0x1417ddf00 | 0x1417ddce0 | 0x1417ddd90 |
+| CMsgSynRecruitAdvertisingList | 0x14183e508 | 0x8b2 | 0x1417de1f0 | 0x1417ddfd0 | 0x1417de120 |
+| CMsgSynRecruitAdvertisingOpt | 0x14183e620 | 0x8b3 | 0x1417de410 | 0x1417de2c0 | 0x1417de2f0 |
+
+## D127 — CMsgLeagueOpt + CMsgLeagueRobOpt + CMsgLeagueToken (2026-10-30)
+
+| الكلاس | الفتبل | النوع | dtor | Create | Process |
+|---|---|---|---|---|---|
+| CMsgLeagueOpt | 0x14183c5a8 (6 فتحات) | 0xa3e (slot 5 CreateBufMsg) | 0x1417d7260 (CStringPacker +0x410) | فتحة القاعدة 0x1417e7fda | 0x1417d68d0 |
+| CMsgLeagueRobOpt | 0x14183cc78 | 0xa52 | 0x1417d86a0 (PB +0x408) | 0x1417d8420 | 0x1417d8920 |
+| CMsgLeagueToken | 0x14183cfa0 | 0xa49 | 0x1417d93b0 (PB +0x408) | 0x1417d9090 | 0x1417d92d0 |
+
+Create للمLeagueRobOpt/Token: تحقق النوع ثم `ParseFromArray(slot+0x408, pData+4, uType-4)`.
+عند الفشل: `vf[+0x20]` (IsInitialized) ⇒ إن كانت غير مهيّأة يُسجل النص
+`"...failed ,error：%s"` (0x14183cd30 / 0x14183d050) وإلا النص القصير
+`"...failed."` (0x14183ccf0 / 0x14183d018).

@@ -609,3 +609,12 @@ SynRecruitAdvertising ×3).
 نوع 0x426): لا Process خاص (فتحة الخطأ المشتركة). **143/143 × 6 نظيف**.
 المتبقي 8 كلاسات: CMsgSyndicate، CMsgSelfSynMemAwardRank، CMsgLeagueOpt،
 CMsgLeagueRobOpt، CMsgLeagueToken، وثلاثة CMsgSynRecruitAdvertising*.
+
+## D126 + D127 (2026-10-30)
+آخر 8 كلاسات CMsg نُقلت إلى `modules/syndicate/src/msg/`: CMsgSyndicate،
+CMsgSelfSynMemAwardRank، CMsgSynRecruitAdvertising{,List,Opt}، CMsgLeagueOpt،
+CMsgLeagueRobOpt، CMsgLeagueToken — كل واحدة بفتحات فتبلها الحقيقية
+(dtor + Create + Process)، وProcess تُفوَّض إلى الأجسام المنقولة حرفياً
+في `SyndicateMsgSyndicate.cpp` / `SyndicateMsgProcess2.cpp` /
+`SyndicateLeagueOpt.cpp` / `SyndicateLeagueRobOpt.cpp`.
+**145/145 × 6 نظيف**. قائمة الـ20 كلاس المتبقية صفرت.

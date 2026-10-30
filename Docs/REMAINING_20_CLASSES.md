@@ -14,11 +14,11 @@
 | `CMsgLeagueTokenPB` | `0x141842658` | **12/12 مكتملة** (D101) |
 | `CMsgInvadeWarning` | `0x14183bf30` | **5/5 مكتملة** (D118) |
 | `CMsgLeagueBeRob` | TBD | 0/12 |
-| `CMsgLeagueOpt` | TBD | 0/12 |
-| `CMsgLeagueRobOpt` | TBD | 0/12 |
-| `CMsgLeagueToken` | TBD | 0/12 |
+| `CMsgLeagueOpt` | — | **منقولة** (D126/D127) |
+| `CMsgLeagueRobOpt` | — | **منقولة** (D126/D127) |
+| `CMsgLeagueToken` | — | **منقولة** (D126/D127) |
 | `CMsgLog` | `0x14182e4a0` | **5/5 مكتملة** (D117) |
-| `CMsgSelfSynMemAwardRank` | TBD | 0/12 |
+| `CMsgSelfSynMemAwardRank` | — | **منقولة** (D126/D127) |
 | `CMsgSynAttrInfo` | TBD | 0/12 |
 | `CMsgSynBaseProffer` | TBD | 0/12 |
 | `CMsgSynChgDomName` | TBD | 0/12 |
@@ -28,7 +28,7 @@
 | `CMsgSynProffer` | TBD | 0/12 |
 | `CMsgSynProfferRank` | TBD | 0/12 |
 | `CMsgSynRecruitAdvertising*` (3) | TBD | 0/12 |
-| `CMsgSyndicate` | TBD | 0/12 |
+| `CMsgSyndicate` | — | **منقولة** (D126/D127) |
 | `CrossMeritMgr` · `CLeague` · `CToken` | TBD | غير PB |
 
 > أرقام الـvtable غير المعروفة (TBD) تُستخرج بالأداة:
