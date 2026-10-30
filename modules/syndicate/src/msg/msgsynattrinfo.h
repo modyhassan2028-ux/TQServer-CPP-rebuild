@@ -11,7 +11,7 @@
 #ifndef SYNDICATE_MSGSYNATTRINFO_H
 #define SYNDICATE_MSGSYNATTRINFO_H
 #include <cstdint>
-#include "modules/syndicate/src/CMsgSeams.h"
+#include "modules/syndicate/src/msg/msgseams.h"
 namespace syndicate {
 
 class CMsgSynAttrInfo {

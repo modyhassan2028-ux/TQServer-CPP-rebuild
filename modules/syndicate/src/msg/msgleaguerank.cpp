@@ -1,6 +1,6 @@
 // ============================================================================
 // CMsgLeagueRank.cpp — ported from 0x1417d7ce0 and 0x1417d7b30
-#include "CMsgLeagueRank.h"
+#include "modules/syndicate/src/msg/msgleaguerank.h"
 
 namespace syndicate {
 

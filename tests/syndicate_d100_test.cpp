@@ -1,6 +1,6 @@
 // D100 — CMsgLeagueRobOptPB + CMsgLeagueRobOptServerPB (12 slots each)
-#include "modules/syndicate/src/CMsgLeagueRobOptPB.h"
-#include "modules/syndicate/src/CMsgLeagueRobOptServerPB.h"
+#include "modules/syndicate/src/msg/msgleagueroboptpb.h"
+#include "modules/syndicate/src/msg/msgleagueroboptserverpb.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

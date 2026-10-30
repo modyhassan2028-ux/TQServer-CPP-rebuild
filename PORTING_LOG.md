@@ -6773,3 +6773,10 @@ syndicate.cpp، leaguemgr.cpp، leaguetokenmgr.cpp، synattrmgr.cpp، …)
   Process `0x1417dadb0` جسمه فارغ (`ret`).
 - صُحّح ترتيب وسائط `g_fn_141823030` إلى (fmt, expr, func, file, line)
   مطابقةً لـ rcx/rdx/r8/r9 + السطر على المكدس.
+
+## توحيد الشجرة: كل وحدات الرسائل في modules/syndicate/src/msg/ (2026-10-30)
+
+نُقلت 54 ملفاً (27 كلاس) من جذر `modules/syndicate/src/` إلى `msg/`،
+بالقاعدة المثبتة من مسارات `__FILE__`: `CMsg<Name>` ⇒ `msg<name>.cpp`.
+الملفات غير الرسائلية (Syndicate.cpp، CSynManager، SyndicateCMsgCtors …)
+بقيت في الجذر كما هي في البايناري. الرجريجن بعد النقل: 139/139 × 6.

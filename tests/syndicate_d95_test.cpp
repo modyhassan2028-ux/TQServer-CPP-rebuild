@@ -1,6 +1,6 @@
 // D95 — CMsgLeagueOrderStatusPB: Merge/ByteSize/Serialize/MergeFrom
-#include "modules/syndicate/src/CMsgLeagueOrderStatusPB.h"
-#include "modules/syndicate/src/CMsgLeagueOrderStatusInfoPB.h"
+#include "modules/syndicate/src/msg/msgleagueorderstatuspb.h"
+#include "modules/syndicate/src/msg/msgleagueorderstatusinfopb.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

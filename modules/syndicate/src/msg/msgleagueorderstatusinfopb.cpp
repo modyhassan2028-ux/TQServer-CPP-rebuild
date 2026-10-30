@@ -1,7 +1,7 @@
 // CMsgLeagueOrderStatusInfoPB.cpp — RAW Syndicate.dll v6159
-#include "modules/syndicate/src/CMsgLeagueOrderStatusInfoPB.h"
-#include "modules/syndicate/src/CMsgPBCommon.h"
-#include "modules/syndicate/src/CMsgPBMemberDtors.h"
+#include "modules/syndicate/src/msg/msgleagueorderstatusinfopb.h"
+#include "modules/syndicate/src/msg/msgpbcommon.h"
+#include "modules/syndicate/src/msg/msgpbmemberdtors.h"
 #include <new>
 namespace syndicate {
 

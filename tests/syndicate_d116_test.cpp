@@ -1,5 +1,5 @@
 // D116 — CMsgLeagueConcubinesInfoPB (8 of 12 slots + ctor/dtor)
-#include "modules/syndicate/src/CMsgLeagueConcubinesInfoPB.h"
+#include "modules/syndicate/src/msg/msgleagueconcubinesinfopb.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

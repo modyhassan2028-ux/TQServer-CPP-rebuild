@@ -1,6 +1,6 @@
 // D101 — CMsgLeagueBeRobRePB + CMsgLeagueTokenPB (12 slots each)
-#include "modules/syndicate/src/CMsgLeagueBeRobRePB.h"
-#include "modules/syndicate/src/CMsgLeagueTokenPB.h"
+#include "modules/syndicate/src/msg/msgleagueberobrepb.h"
+#include "modules/syndicate/src/msg/msgleaguetokenpb.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

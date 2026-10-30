@@ -1,6 +1,6 @@
 // CMsgLeagueTokenPB.cpp — RAW Syndicate.dll v6159
-#include "modules/syndicate/src/CMsgLeagueTokenPB.h"
-#include "modules/syndicate/src/CMsgPBMemberDtors.h"
+#include "modules/syndicate/src/msg/msgleaguetokenpb.h"
+#include "modules/syndicate/src/msg/msgpbmemberdtors.h"
 namespace syndicate {
 
 void (*g_pfnPbF10A0)(void*, void*) = nullptr;

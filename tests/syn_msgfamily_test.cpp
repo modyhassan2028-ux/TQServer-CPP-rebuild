@@ -3,14 +3,14 @@
 #include <cstdio>
 #include <cstdint>
 #include <cstring>
-#include "CMsgLeagueInfo.h"
-#include "CMsgLeagueList.h"
-#include "CMsgLeagueSynList.h"
-#include "CMsgLeagueUserMemberList.h"
-#include "CMsgLeagueRank.h"
-#include "CMsgLeaguePalaceGuardsList.h"
-#include "CMsgLeagueImperialCourtList.h"
-#include "CMsgSynCompete.h"
+#include "modules/syndicate/src/msg/msgleagueinfo.h"
+#include "modules/syndicate/src/msg/msgleaguelist.h"
+#include "modules/syndicate/src/msg/msgleaguesynlist.h"
+#include "modules/syndicate/src/msg/msgleagueusermemberlist.h"
+#include "modules/syndicate/src/msg/msgleaguerank.h"
+#include "modules/syndicate/src/msg/msgleaguepalaceguardslist.h"
+#include "modules/syndicate/src/msg/msgleagueimperialcourtlist.h"
+#include "modules/syndicate/src/msg/msgsyncompete.h"
 #include "CSynManager.h"
 using namespace syndicate;
 static int ok=0, bad=0;

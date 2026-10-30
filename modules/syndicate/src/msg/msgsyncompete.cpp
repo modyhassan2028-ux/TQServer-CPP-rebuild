@@ -1,6 +1,6 @@
 // ============================================================================
 // CMsgSynCompete.cpp — ported from 0x1417db260 and 0x1417dafe0
-#include "CMsgSynCompete.h"
+#include "modules/syndicate/src/msg/msgsyncompete.h"
 
 namespace syndicate {
 

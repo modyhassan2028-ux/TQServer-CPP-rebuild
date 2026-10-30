@@ -1,6 +1,6 @@
 // ============================================================================
 // CMsgLeagueUserMemberList.cpp — ported from 0x1417d96c0 and 0x1417d9490
-#include "CMsgLeagueUserMemberList.h"
+#include "modules/syndicate/src/msg/msgleagueusermemberlist.h"
 
 namespace syndicate {
 

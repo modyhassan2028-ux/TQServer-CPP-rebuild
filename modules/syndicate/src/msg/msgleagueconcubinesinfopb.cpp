@@ -1,5 +1,5 @@
 // CMsgLeagueConcubinesInfoPB.cpp — verbatim bodies, RAW Syndicate.dll v6159
-#include "CMsgLeagueConcubinesInfoPB.h"
+#include "modules/syndicate/src/msg/msgleagueconcubinesinfopb.h"
 #include <new>
 #include <cstring>
 

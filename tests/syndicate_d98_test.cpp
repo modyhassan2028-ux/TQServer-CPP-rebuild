@@ -1,5 +1,5 @@
 // D98 — CMsgOverheadLeagueInfoPB: Merge/ByteSize/Serialize/MergeFrom
-#include "modules/syndicate/src/CMsgOverheadLeagueInfoPB.h"
+#include "modules/syndicate/src/msg/msgoverheadleagueinfopb.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

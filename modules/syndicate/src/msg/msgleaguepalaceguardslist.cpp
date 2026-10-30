@@ -1,6 +1,6 @@
 // ============================================================================
 // CMsgLeaguePalaceGuardsList.cpp — ported from 0x1417d7a60 and 0x1417d7880
-#include "CMsgLeaguePalaceGuardsList.h"
+#include "modules/syndicate/src/msg/msgleaguepalaceguardslist.h"
 
 namespace syndicate {
 

@@ -1,7 +1,7 @@
 // D93 — CMsgLeagueConcubinesInfoPB MergeFrom (0x1417ea660) + Merge (0x1417eafa0)
-#include "modules/syndicate/src/CMsgLeagueConcubinesInfoPB.h"
-#include "modules/syndicate/src/CMsgPBCommon.h"
-#include "modules/syndicate/src/CMsgPBMemberDtors.h"
+#include "modules/syndicate/src/msg/msgleagueconcubinesinfopb.h"
+#include "modules/syndicate/src/msg/msgpbcommon.h"
+#include "modules/syndicate/src/msg/msgpbmemberdtors.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

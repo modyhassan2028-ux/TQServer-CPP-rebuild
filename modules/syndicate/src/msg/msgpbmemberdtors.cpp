@@ -1,6 +1,6 @@
 // ============================================================================
 // CMsgPBMemberDtors.cpp — ported verbatim from the four member-dtor bodies
-#include "CMsgPBMemberDtors.h"
+#include "modules/syndicate/src/msg/msgpbmemberdtors.h"
 #include <new>
 #include <string>
 

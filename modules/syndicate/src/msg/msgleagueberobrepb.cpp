@@ -1,6 +1,6 @@
 // CMsgLeagueBeRobRePB.cpp — RAW Syndicate.dll v6159
-#include "modules/syndicate/src/CMsgLeagueBeRobRePB.h"
-#include "modules/syndicate/src/CMsgPBMemberDtors.h"
+#include "modules/syndicate/src/msg/msgleagueberobrepb.h"
+#include "modules/syndicate/src/msg/msgpbmemberdtors.h"
 namespace syndicate {
 
 // 0x1417e8e40 — deleting dtor

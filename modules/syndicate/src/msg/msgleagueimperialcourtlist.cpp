@@ -1,6 +1,6 @@
 // ============================================================================
 // CMsgLeagueImperialCourtList.cpp — ported from 0x1417d60c0 and 0x1417d5ed0
-#include "CMsgLeagueImperialCourtList.h"
+#include "modules/syndicate/src/msg/msgleagueimperialcourtlist.h"
 
 namespace syndicate {
 

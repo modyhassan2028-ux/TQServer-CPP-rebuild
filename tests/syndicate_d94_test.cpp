@@ -1,5 +1,5 @@
 // D94 — CMsgLeagueOrderStatusInfoPB Merge/ByteSize/Serialize/MergeFrom
-#include "modules/syndicate/src/CMsgLeagueOrderStatusInfoPB.h"
+#include "modules/syndicate/src/msg/msgleagueorderstatusinfopb.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

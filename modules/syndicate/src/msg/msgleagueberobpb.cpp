@@ -1,6 +1,6 @@
 // CMsgLeagueBeRobPB.cpp — RAW Syndicate.dll v6159
-#include "modules/syndicate/src/CMsgLeagueBeRobPB.h"
-#include "modules/syndicate/src/CMsgPBMemberDtors.h"
+#include "modules/syndicate/src/msg/msgleagueberobpb.h"
+#include "modules/syndicate/src/msg/msgpbmemberdtors.h"
 namespace syndicate {
 
 void     (*g_pfnPbDelArray)(void*) = nullptr;

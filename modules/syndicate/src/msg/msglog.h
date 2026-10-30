@@ -12,7 +12,7 @@
 #ifndef SYNDICATE_CMSGLOG_H
 #define SYNDICATE_CMSGLOG_H
 #include <cstdint>
-#include "modules/syndicate/src/CMsgSeams.h"
+#include "modules/syndicate/src/msg/msgseams.h"
 namespace syndicate {
 
 

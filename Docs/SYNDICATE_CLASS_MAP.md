@@ -26,7 +26,7 @@
 | `CMsgOverheadLeagueInfo` | `0x14183d3d8` | 5 | `0x1417d99a0` → `0x1417f2400` |
 
 أجسام مدمرات الأعضاء نفسها منقولة حرفياً في
-`modules/syndicate/src/CMsgPBMemberDtors.cpp`: ‏0x1417eb830،
+`modules/syndicate/src/msg/msgpbmemberdtors.cpp`: ‏0x1417eb830،
 0x1417ed1a0، 0x1417eea60 (متجه مؤشرات عند +0x38/+0x44) و
 0x1417f2400 (متجه نصوص عند +0x48/+0x54 يمر بـ 0x1417e0320)،
 والأساس المشترك 0x1417de5a0 الذي يكتب

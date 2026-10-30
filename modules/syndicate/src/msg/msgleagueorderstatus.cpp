@@ -1,6 +1,6 @@
 // ============================================================================
 // CMsgLeagueOrderStatus.cpp — ported from 0x1417d7550 (verbatim)
-#include "CMsgLeagueOrderStatus.h"
+#include "modules/syndicate/src/msg/msgleagueorderstatus.h"
 
 namespace syndicate {
 

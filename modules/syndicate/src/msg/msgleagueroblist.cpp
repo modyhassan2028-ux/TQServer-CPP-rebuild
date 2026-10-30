@@ -1,6 +1,6 @@
 // ============================================================================
 // CMsgLeagueRobList.cpp — ported from 0x1417d8050 (verbatim)
-#include "CMsgLeagueRobList.h"
+#include "modules/syndicate/src/msg/msgleagueroblist.h"
 
 namespace syndicate {
 

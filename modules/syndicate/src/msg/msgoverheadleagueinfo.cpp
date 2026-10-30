@@ -1,6 +1,6 @@
 // ============================================================================
 // CMsgOverheadLeagueInfo.cpp — ported from 0x1417d99a0 (verbatim)
-#include "CMsgOverheadLeagueInfo.h"
+#include "modules/syndicate/src/msg/msgoverheadleagueinfo.h"
 
 namespace syndicate {
 

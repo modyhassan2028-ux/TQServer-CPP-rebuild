@@ -1,6 +1,6 @@
 // D91 — CMsgLeagueConcubinesInfoPB ByteSize + SerializeWithCachedSizes
 // (0x1417ea4c0 / 0x1417ea380) in the project's own unit numbering (D26..D88 +)
-#include "modules/syndicate/src/CMsgLeagueConcubinesInfoPB.h"
+#include "modules/syndicate/src/msg/msgleagueconcubinesinfopb.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

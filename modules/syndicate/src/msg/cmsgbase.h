@@ -13,7 +13,7 @@
 #ifndef SYNDICATE_CMSGBASE_H
 #define SYNDICATE_CMSGBASE_H
 #include <cstdint>
-#include "modules/syndicate/src/CMsgSeams.h"
+#include "modules/syndicate/src/msg/msgseams.h"
 namespace syndicate {
 
 class CMsgBase {

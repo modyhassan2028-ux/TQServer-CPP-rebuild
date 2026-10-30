@@ -1,12 +1,12 @@
 // D92 — the protobuf message family (six classes, 6 slots each)
-#include "modules/syndicate/src/CMsgLeagueConcubinesPB.h"
-#include "modules/syndicate/src/CMsgLeagueOrderStatusInfoPB.h"
-#include "modules/syndicate/src/CMsgLeagueOrderStatusPB.h"
-#include "modules/syndicate/src/CMsgLeagueRobItemPB.h"
-#include "modules/syndicate/src/CMsgLeagueRobListPB.h"
-#include "modules/syndicate/src/CMsgOverheadLeagueInfoPB.h"
-#include "modules/syndicate/src/CMsgPBCommon.h"
-#include "modules/syndicate/src/CMsgPBMemberDtors.h"
+#include "modules/syndicate/src/msg/msgleagueconcubinespb.h"
+#include "modules/syndicate/src/msg/msgleagueorderstatusinfopb.h"
+#include "modules/syndicate/src/msg/msgleagueorderstatuspb.h"
+#include "modules/syndicate/src/msg/msgleaguerobitempb.h"
+#include "modules/syndicate/src/msg/msgleagueroblistpb.h"
+#include "modules/syndicate/src/msg/msgoverheadleagueinfopb.h"
+#include "modules/syndicate/src/msg/msgpbcommon.h"
+#include "modules/syndicate/src/msg/msgpbmemberdtors.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

@@ -1,5 +1,5 @@
 // D97 — CMsgLeagueRobListPB: Merge/ByteSize/Serialize/MergeFrom
-#include "modules/syndicate/src/CMsgLeagueRobListPB.h"
+#include "modules/syndicate/src/msg/msgleagueroblistpb.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

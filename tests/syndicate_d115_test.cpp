@@ -1,11 +1,11 @@
 // D115 — the four member-destructor message wrappers
 // (CMsgLeagueConcubines / CMsgLeagueOrderStatus / CMsgLeagueRobList /
 //  CMsgOverheadLeagueInfo) and the PB member-destructor bodies.
-#include "modules/syndicate/src/CMsgLeagueConcubines.h"
-#include "modules/syndicate/src/CMsgLeagueOrderStatus.h"
-#include "modules/syndicate/src/CMsgLeagueRobList.h"
-#include "modules/syndicate/src/CMsgOverheadLeagueInfo.h"
-#include "modules/syndicate/src/CMsgPBMemberDtors.h"
+#include "modules/syndicate/src/msg/msgleagueconcubines.h"
+#include "modules/syndicate/src/msg/msgleagueorderstatus.h"
+#include "modules/syndicate/src/msg/msgleagueroblist.h"
+#include "modules/syndicate/src/msg/msgoverheadleagueinfo.h"
+#include "modules/syndicate/src/msg/msgpbmemberdtors.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

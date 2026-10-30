@@ -1,6 +1,6 @@
 // ============================================================================
 // CMsgLeagueSynList.cpp — ported from 0x1417d8e80 and 0x1417d8ca0
-#include "CMsgLeagueSynList.h"
+#include "modules/syndicate/src/msg/msgleaguesynlist.h"
 
 namespace syndicate {
 

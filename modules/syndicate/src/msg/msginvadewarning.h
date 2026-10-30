@@ -13,7 +13,7 @@
 #ifndef SYNDICATE_CMSGINVADEWARNING_H
 #define SYNDICATE_CMSGINVADEWARNING_H
 #include <cstdint>
-#include "modules/syndicate/src/CMsgSeams.h"
+#include "modules/syndicate/src/msg/msgseams.h"
 namespace syndicate {
 
 

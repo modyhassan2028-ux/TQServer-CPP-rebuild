@@ -1,6 +1,6 @@
 // ============================================================================
 // CMsgLeagueConcubines.cpp — ported from 0x1417d5c60 (verbatim)
-#include "CMsgLeagueConcubines.h"
+#include "modules/syndicate/src/msg/msgleagueconcubines.h"
 
 namespace syndicate {
 

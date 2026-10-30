@@ -14,7 +14,7 @@
 #ifndef SYNDICATE_CMSGSYNMEMBERINFO_H
 #define SYNDICATE_CMSGSYNMEMBERINFO_H
 #include <cstdint>
-#include "modules/syndicate/src/CMsgSeams.h"
+#include "modules/syndicate/src/msg/msgseams.h"
 namespace syndicate {
 
 // 0x1417ae9b0 — the member-info handler (mgr, idActor), tail-called

@@ -1,5 +1,5 @@
 // D99 — CMsgLeagueBeRobPB skeleton (dtor/ctor/New/type/Clear/IsInit/cached)
-#include "modules/syndicate/src/CMsgLeagueBeRobPB.h"
+#include "modules/syndicate/src/msg/msgleagueberobpb.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>
