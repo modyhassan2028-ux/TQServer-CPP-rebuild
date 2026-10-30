@@ -12,6 +12,7 @@
 #ifndef FLOWER_MSGS_FLOWER_H
 #define FLOWER_MSGS_FLOWER_H
 #include <cstdint>
+#include <cstring>
 #include "modules/syndicate/src/msg/cmsgbase.h"
 
 namespace flower {
@@ -24,6 +25,13 @@ public:
     static constexpr uint32_t kOffPayloadPtr = 0x408;
 
     static void* Ctor(void* self);                        // 0x140d97cb0
+    static void BaseDtor(void* self);                     // 0x140d97d00
+    // 0x140d97d30 — build the 0x3c/0x047e record into the payload buffer:
+    //   +0  u16 0x3c · +2 u16 0x047e · +4 u16 child
+    //   +0x10 two 16-byte names · +0x30 u32 · +0x34 u32 · +0x38 u8
+    static bool Build(void* self, uint16_t uChild, const char* pSender,
+                      const char* pReceiver, uint32_t uValue, uint32_t uSlot,
+                      uint8_t uFlag);
     static void* DeleteDtor(void* self, uint32_t uFlag);  // 0x140d97fc0
     static bool Create(void* self, char* pData,
                        uint16_t uType);                   // 0x140d97ec0

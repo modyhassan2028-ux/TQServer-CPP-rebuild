@@ -74,4 +74,34 @@ void CMsgFlower::ProcessInfo(void* self, void* pInfo) {
     syndicate::g_pfnInlineLogError("tq::CMsg::Process(void* pInfo) error");
 }
 
+// 0x140d97d00 — the member dtor: class vftable back to the base one
+void CMsgFlower::BaseDtor(void* self) {
+    unsigned char* p = (unsigned char*)self;
+    *reinterpret_cast<uintptr_t*>(p) = kClassVft;
+    *reinterpret_cast<uintptr_t*>(p) = kBaseVft;
+}
+
+// 0x140d97d30 — writes straight through the payload pointer, both names are
+// zero-padded to 16 bytes before the strncpy, exactly as the original does
+bool CMsgFlower::Build(void* self, uint16_t uChild, const char* pSender,
+                       const char* pReceiver, uint32_t uValue, uint32_t uSlot,
+                       uint8_t uFlag) {
+    if (pSender == nullptr || pReceiver == nullptr) return false;
+    unsigned char* pay = *reinterpret_cast<unsigned char**>(
+        (unsigned char*)self + kOffPayloadPtr);
+    *reinterpret_cast<uint16_t*>(pay + 4) = uChild;
+    *reinterpret_cast<uint16_t*>(pay + 2) = kMsgType;
+    *reinterpret_cast<uint16_t*>(pay + 0) = 0x3c;
+    *reinterpret_cast<uint64_t*>(pay + 0x10) = 0;
+    *reinterpret_cast<uint64_t*>(pay + 0x18) = 0;
+    ::strncpy((char*)(pay + 0x10), pSender, 0x10);
+    *reinterpret_cast<uint64_t*>(pay + 0x20) = 0;
+    *reinterpret_cast<uint64_t*>(pay + 0x28) = 0;
+    ::strncpy((char*)(pay + 0x20), pReceiver, 0x10);
+    *reinterpret_cast<uint32_t*>(pay + 0x30) = uValue;
+    *reinterpret_cast<uint32_t*>(pay + 0x34) = uSlot;
+    *reinterpret_cast<uint8_t*>(pay + 0x38) = uFlag;
+    return true;
+}
+
 }  // namespace flower

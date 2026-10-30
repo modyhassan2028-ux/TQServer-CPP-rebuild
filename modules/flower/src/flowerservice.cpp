@@ -1,5 +1,6 @@
 // flowerservice.cpp — RAW Flower.dll v6159
 #include "modules/flower/src/flowerservice.h"
+#include <ctime>
 
 namespace flower {
 
@@ -115,6 +116,75 @@ uint8_t CFlowerService::Attach(void* pOwned, void* pSecond) {
     }
     return g_pfnFlowerAttachInit(pHelper,
                                  *reinterpret_cast<void**>(p + 0x08));
+}
+
+// 0x140d91050 — (year*100 + 0x2e631 + month)*100 + day on the local clock
+int CFlowerService::TodayStamp() {
+    std::time_t t = std::time(nullptr);
+    struct tm* pTm = std::localtime(&t);
+    if (pTm == nullptr) {
+        CTodayFlowerMgr_LogCheck();
+        return 0;
+    }
+    return (pTm->tm_year * 100 + 0x2e631 + pTm->tm_mon) * 100 + pTm->tm_mday;
+}
+
+// 0x140d910c0 — rebuild the stamp as a local tm and compare with the clock
+uint8_t CFlowerService::IsExpiredDate(uint32_t dwDate) {
+    struct tm t;
+    t.tm_sec = 0x3b;
+    t.tm_min = 0x3b;
+    t.tm_hour = 0x17;
+    t.tm_isdst = 0;
+    t.tm_mday = (int)(uint16_t)((int16_t)dwDate +
+                                (int16_t)((uint64_t)dwDate / 100) * -100);
+    t.tm_mon = (int)(dwDate % 10000) / 100 - 1;
+    t.tm_year = (int)(dwDate / 10000 & 0xffff) - 0x76c;
+    std::time_t built = std::mktime(&t);
+    std::time_t now = std::time(nullptr);
+    return built < now ? 1 : 0;
+}
+
+// 0x140d91980
+//   *(ctx+8) == 0 or nArg == 0 -> both outputs zero (the original then falls
+//   through, so the slot query decides the answer anyway)
+//   raw = (*(*(ctx+8))+0xa0)(ctx+8)      (no arguments are passed)
+//   raw/1000: 0x2ef -> type 0, 0x2f0 -> 1, 0x2f1 -> 2, 0x2f2 -> 3, else 0
+//   count = raw - {0xb7598, 0xb7980, 0xb7d68, 0xb8150} or zero
+uint32_t CFlowerService::ResolveFlowerSlot(void* pCtx, int nArg,
+                                           uint32_t* pOutType, int* pOutCount) {
+    unsigned char* p = (unsigned char*)pCtx;
+    if (*reinterpret_cast<void**>(p + 8) == nullptr || nArg == 0) {
+        *pOutType = 0;
+        *pOutCount = 0;
+    }
+    unsigned char* pSession = *reinterpret_cast<unsigned char**>(p + 8);
+    void** vt = *reinterpret_cast<void***>(pSession);
+    uint32_t raw = ((uint32_t (*)(void*))vt[0xa0 / 8])(pSession);
+    const uint32_t uSlot = raw / 1000;
+    if (uSlot == 0x2ef) {
+        *pOutType = 0;
+        *pOutCount = (int)(raw - 0xb7598);
+        return raw - 0xb7598;
+    }
+    if (uSlot == 0x2f0) {
+        *pOutType = 1;
+        *pOutCount = (int)(raw - 0xb7980);
+        return raw - 0xb7980;
+    }
+    if (uSlot != 0x2f1) {
+        if (uSlot != 0x2f2) {
+            *pOutType = 0;
+            *pOutCount = 0;
+            return raw * 0x10624dd3u;   // the original's leftover multiply
+        }
+        *pOutType = 3;
+        *pOutCount = (int)(raw - 0xb8150);
+        return raw - 0xb8150;
+    }
+    *pOutType = 2;
+    *pOutCount = (int)(raw - 0xb7d68);
+    return raw - 0xb7d68;
 }
 
 }  // namespace flower

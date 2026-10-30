@@ -7024,3 +7024,22 @@ thunk استيراد/CRT، الدوال التي تناديها، والنصوص
 والسلاسل `STR_FLOWER_SENDER_NOT_ALIVE` و`STR_FLOWER_LEVEL_TOO_LOW`
 و`STR_FLOWER_HAVE_SENT_TODAY`، و`DAT_140da2008` (حد المستوى)،
 و`DAT_140da2470` (كوكي الأمان).
+
+## D134 — مساعدات التواريخ والفتحات + بناء رسالة الزهرة (2026-10-30)
+`0x140d91050` (`CFlowerService::TodayStamp`): `_time32`/`_localtime32` ثم
+`(tm_year*100 + 0x2e631 + tm_mon)*100 + tm_mday`، وعند فشل `_localtime32`
+يُسجل CHECKF ويرجع 0.
+`0x140d910c0` (`IsExpiredDate`): tm بـ`sec=0x3b min=0x3b hour=0x17 isdst=0`،
+`mday = date%100`، `mon = (date%10000)/100 - 1`، `year = date/10000 - 0x76c`،
+ثم `_mktime32` ويقارن بالوقت الحالي (يرجع 1 إن كان في الماضي).
+`0x140d91980` (`ResolveFlowerSlot`): لو `*(ctx+8)==0` أو `nArg==0` يصفّر
+الخرجين **ثم يكمل** (فينهار على جلسة صفرية كما في الأصل)؛
+`raw = (*(*(ctx+8))+0xa0)(ctx+8)` بلا وسائط؛ `raw/1000`: `0x2ef→0`,
+`0x2f0→1`, `0x2f1→2`, `0x2f2→3`, غير ذلك `0`؛ والعدد
+`raw-{0xb7598,0xb7980,0xb7d68,0xb8150}` أو صفر.
+`0x140d97d00` (`CMsgFlower::BaseDtor`): فتبل الصنف ثم فتبل `tq::CMsg`.
+`0x140d97d30` (`CMsgFlower::Build`): يكتب في حزمة `+0x408`:
+`+0 u16 0x3c`, `+2 u16 0x047e`, `+4 u16 child`, اسمان بطول 16 عند
+`+0x10` و`+0x20` (تصفير الزوجين قبل `strncpy`)، ثم `+0x30 u32`،
+`+0x34 u32`، `+0x38 u8`؛ ويرفض أي مؤشر نص صفري.
+اختبار `tests/flower_d134_test.cpp` غطى كل ذلك — **152/152 × 6** نظيف.

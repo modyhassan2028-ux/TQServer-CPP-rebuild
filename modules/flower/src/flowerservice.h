@@ -40,6 +40,15 @@ public:
     static void* Lookup(void* self, uint16_t* pRecord,
                         uint16_t uCount);             // 0x140d93460
     static uint8_t Attach(void* pOwned, void* pSecond);  // 0x140d91490
+
+    // 0x140d91050 — today as itymmdd
+    static int TodayStamp();
+    // 0x140d910c0 — true when the yyyymmdd stamp is already behind the clock
+    static uint8_t IsExpiredDate(uint32_t dwDate);
+    // 0x140d91980 — the session's +0xa0 value / 1000 selects flower slot 0..3
+    // and the remainder becomes the count; returns the raw value
+    static uint32_t ResolveFlowerSlot(void* pCtx, int nArg, uint32_t* pOutType,
+                                      int* pOutCount);
 };
 
 }  // namespace flower
