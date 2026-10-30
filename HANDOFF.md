@@ -594,3 +594,11 @@ SynRecruitAdvertising ×3).
 الدومين عبر `0x1417afb20` ثم يبني إطار الرد (`word[+0x18]=flag`، `word[+2]=0x837`،
 `word[+0]=0x1c`) عبر الدالة المحلية `0x1417dae90` ثم يرسل عبر `0x1417ac7d0`.
 **141/141 × 6 نظيف**. المتبقي 11 كلاس.
+
+## D124 (2026-10-30)
+`CMsgLeagueBeRob` (vtable 0x14183c008) لا يعيد تعريف أي فتحة سوى dtor
+`0x1417d5710` (يدمر كتلة +0x408 عبر `0x1417e9440`). `CMsgSynProffer`
+(vtable 0x14183e180، نوع 0x422): Process يتحقق من الاتصال ثم ينادي الافتراضي
+`[mgr->vft+0x28]`. **142/142 × 6 نظيف**. المتبقي 10 كلاسات، أكبرها
+`CMsgSyndicate` (Process بحجم 0x630 + CHECK سطر 180) و`CMsgSelfSynMemAwardRank`
+(Process بجدول قفز 13 حالة، سطرا 223/228) والثلاثة `CMsgSynRecruitAdvertising*`.
