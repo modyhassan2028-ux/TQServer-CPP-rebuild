@@ -629,3 +629,11 @@ CMsgLeagueRobOpt، CMsgLeagueToken — كل واحدة بفتحات فتبلها
 `iprovider.h/.cpp`: واجهة IProvider كاملة الشكل (224 فتحة، 223 pure). بكده
 **كل كلاسات Syndicate الحقيقية مغلقة**؛ المتبقي في الخريطة كلاسات protobuf/STL
 المغطاة ببدائلها. **147/147 × 6**.
+
+## D130 (2026-10-30)
+Flower.dll بدأت فعليًا: `msgflower.cpp` و`msglog.cpp` منقولان حرفيًا
+(`tq::CMsg` 5 فتحات لكل منهما + بوابة النوع 0x47e/0x3ea/0x3eb + توجيه
+payload+4/payload+8). الفتبلات مستخرجة بدون RTTI عبر `tools/recover_vtables.py`
+(4 فتبلات في `Docs/FLOWER_VTABLES.md`). **148/148 × 6**.
+التالي: `todayflower.cpp` (CTodayFlower) و`todayflowermgr.cpp` و`module.cpp`
++ CModule (0x140d9bcb8، 9 فتحات).

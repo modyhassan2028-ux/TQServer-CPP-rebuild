@@ -6900,3 +6900,38 @@ Create للمLeagueRobOpt/Token: تحقق النوع ثم `ParseFromArray(slot+0
 0x1417a9640 (dtor يكتب 0x141834928 ثم delete عند البت 0)، والفتحات 1..223
 كلها 0x1417f3374 (thunk الـpurecall) ⇒ الواجهة مجردة بالكامل.
 الاختبار: `tests/syndicate_d129_test.cpp` — 147/147 × 6 نظيف.
+
+## D130 — flower::CMsgFlower · flower::CMsgLog (2026-10-30)
+Flower.dll بُنيت **بدون RTTI للكلاسات** لكن بها أسماء `. ?AV…@flower@@`؛ استُخرجت
+الفتبلات هيكليًا بأداة جديدة `tools/recover_vtables.py` (سلاسل مؤشرات + dtor يكتب
+عنوان الفتبل في `[rcx]`). النتيجة في `Docs/FLOWER_VTABLES.md`:
+
+| الفتبل | dtor | الفتحات | الكلاس |
+|---|---|---|---|
+| 0x140d9bcb8 | 0x140d93290 | 9 | flower::CModule |
+| 0x140d9da28 | 0x140d97c80 | 5 | flower::CMsgLog القديم/CTodayFlower |
+| 0x140d9db08 | 0x140d97fc0 | 5 | flower::CMsgFlower |
+| 0x140d9dc60 | 0x140d98170 | 5 | flower::CMsgLog |
+
+**flower::CMsgFlower** (الملف `modules/flower/src/msg/msgflower.cpp`):
+ctor 0x140d97cb0 (Init مرتين + `*(this+0x408)=this+8`) · dtor 0x140d97fc0 (يكتب
+`0x140d9db08` ثم `0x140d9bcb8`-base `tq::CMsg::vftable` ثم delete) ·
+Create 0x140d97ec0 (`tq::CMsg::Create` ثم `*(u16*)(this+0x0a)==0x47e`) ·
+Process 0x140d97ef0: `pInfo==0` → `log_InlineLogERROR("\xA1\xEF%s(%s)\xA1\xEF in %s")`
+(0x140d9b368)؛ وإلا `payload=*(this+0x408)` و`sub=*(i16*)(payload+4)`:
+2→vt+0x20 · 3→vt+0x28 · 0→(إذا `*(i32*)(payload+8)`) vt+0x30(actor,pInfo,
+payload+8,payload+0xc) · 1→نفسه عبر vt+0x38 · غير ذلك لا شيء.
+stub 0x140d97c60 = "tq::CMsg::Process(OBJID idActor) error" ·
+stub 0x140d97c50 = "tq::CMsg::Process(void* pInfo) error".
+
+**flower::CMsgLog** (`msglog.cpp`): ctor 0x140d98010 · dtor 0x140d98170 ·
+Create 0x140d98090 (0x3ea→payload[8]=0، 0x3eb→payload[8]=1، وإلا false) ·
+Process 0x140d980f0 (payload[8]==0 → vt+0x08، ==1 → vt+0x10).
+
+أُضيفت وصلة `g_pfnCMsgInit` (استيراد `tq::CMsg::Init`) إلى `CMsgSeams` لأن كلا
+الـDLLين يستوردها. ملفات Flower الأصلية الستة:
+`flowerservice.cpp · module.cpp · msg/msgflower.cpp · msg/msglog.cpp ·
+todayflower.cpp · todayflowermgr.cpp`.
+اختبار `tests/flower_d130_test.cpp` — **148/148 × 6** نظيف.
+ملاحظة أدوات: أسماء الكائنات في سكربت الاختبار صارت مبنية على المسار لأن
+`syndicate/msg/msglog.cpp` و`flower/msg/msglog.cpp` يتشاركان الاسم.

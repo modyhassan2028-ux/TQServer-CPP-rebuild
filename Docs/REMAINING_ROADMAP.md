@@ -9,3 +9,8 @@ FatalException, bad_alloc…) مكتبات مغطاة ببدائلها القي�
 IProvider مغلق ⇒ لا كلاسات حقيقية متبقية في Syndicate.dll. المرحلة التالية:
 الوحدات الصغيرة (Flower, Sponsor, DetainEquip, …) من الـdecompiled + البايناري
 الجديد (بدون RTTI ⇒ الاستخراج بأنماط dtor/offset).
+
+## D130 (2026-10-30)
+Flower.dll: مغلق 2/5 ملفات (msg/msgflower.cpp، msg/msglog.cpp). المتبقي:
+todayflower.cpp (CTodayFlower)، todayflowermgr.cpp (CTodayFlowerMgr)،
+flowerservice.cpp (CFlowerService)، module.cpp (flower::CModule 0x140d9bcb8).

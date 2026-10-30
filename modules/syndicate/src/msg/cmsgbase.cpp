@@ -9,6 +9,9 @@ void* CMsgBase::DeleteDtor(void* self, uint32_t uFlag) {
     return self;
 }
 
+// the imported tq::CMsg::Init (this)
+void CMsgBase::Init(void* self) { g_pfnCMsgInit(self); }
+
 // 0x1417e7fda — a pure import thunk into IAT 0x141823000
 bool CMsgBase::Create(void* self, char* pData, uint16_t uType) {
     return g_pfnCMsgCreate(self, pData, uType);

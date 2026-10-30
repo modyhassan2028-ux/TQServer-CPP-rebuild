@@ -23,6 +23,7 @@ public:
     static constexpr uint32_t kOffPayload = 0x408;
 
     static void* DeleteDtor(void* self, uint32_t uFlag);           // 0x14177e300
+    static void Init(void* self);                                   // imported tq::CMsg::Init
     static bool Create(void* self, char* pData, uint16_t uType);   // 0x1417e7fda
     static void ProcessActorInfo(void*, uint32_t, void*);          // 0x14177e2f0
     static void ProcessActor(void*, uint32_t);                     // 0x14177e2e0

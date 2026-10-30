@@ -9,6 +9,8 @@ namespace syndicate {
 
 // 0x1417e7fda — the imported tq::CMsg::Create thunk (this, pData, uType)
 extern bool (*g_pfnCMsgCreate)(void* self, char* pData, uint16_t uType);
+// the imported tq::CMsg::Init (this) — called by the message ctors
+extern void (*g_pfnCMsgInit)(void* self);
 // InlineLogERROR, resolved through the import at 0x141827030
 extern void (*g_pfnInlineLogError)(const char* fmt, ...);
 // 0x1417b6210 — the SyndicateMgr accessor
