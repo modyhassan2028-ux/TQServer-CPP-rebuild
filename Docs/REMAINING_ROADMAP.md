@@ -22,3 +22,9 @@ Flower.dll: 3/6 ملفات (msg/msgflower.cpp، msg/msglog.cpp، todayflowermgr.
 ## D132 (2026-10-30)
 Flower.dll: 4/6 ملفات (msg/msgflower، msg/msglog، todayflowermgr، module).
 المتبقي: todayflower.cpp، flowerservice.cpp.
+
+## D133 (2026-10-30)
+Flower.dll: 5/6 ملفات. المتبقي فقط بقية دوال todayflower.cpp.
+بعدها: البايناريهات الأخرى حسب الجرد الكامل في Docs/DLL_FULL_INVENTORY.md
+(48 بايناري، 128,853 دالة) — الأولوية للـDLLs متوسطة الحجم المكتملة الأطر
+(Family 2,039 · LeaveWord 1,803 · Status 1,559 · Totem 1,152 · Competion 1,088).

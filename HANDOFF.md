@@ -652,3 +652,10 @@ payload+4/payload+8). الفتبلات مستخرجة بدون RTTI عبر `tool
 0x140d932f0 وdtor محذوف 0x140d93290. **150/150 × 6**.
 التالي: `flowerservice.cpp` (0x140d93630/0x140d93360/0x140d93380/0x140d934e0/
 0x140d93660 بخمس فتحات حقيقية) ثم `todayflower.cpp` (بقية دوال CTodayFlower).
+
+## D133 (2026-10-30)
+`flowerservice.cpp`: flower::CFlowerService (فتبل 0x140d9be08، 5 فتحات) +
+Lookup + Attach. **151/151 × 6**. Flower.dll اكتملت إلا بقية دوال
+`todayflower.cpp`.
+جرد كامل لكل البايناريهات في `Docs/DLL_FULL_INVENTORY.md` (48 بايناري،
+128,853 دالة، ~1,000 مسار مصدري) — أداة `tools/dll_inventory.py`.

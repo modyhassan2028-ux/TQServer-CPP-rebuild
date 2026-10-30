@@ -162,3 +162,6 @@ Flower.dll: +CTodayFlower (0x10 بايت) +CTodayFlowerMgr::OnUserLogin 0x140d97
 
 ## D132 (2026-10-30)
 Flower.dll: +flower::CModule (0x848 بايت، 9 فتحات، فتبل 0x140d9bcb8).
+
+## D133 (2026-10-30)
+Flower.dll: +flower::CFlowerService (فتبل 0x140d9be08، 5 فتحات).
