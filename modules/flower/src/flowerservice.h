@@ -31,8 +31,9 @@ extern void* (*g_pfnFlowerCreateHelper)();
 // FUN_140d94020 (pAttached, pSecond) -> bool
 extern uint8_t (*g_pfnFlowerAttachInit)(void* pAttached, void* pSecond);
 // 0x140d91a70 — gift slot/count resolve: (pThis, nArg, &slot, &count)
-extern void (*g_pfnResolveGift)(void* pThis, int nArg, uint32_t* pSlot,
-                                int* pCount);
+// defaults to CFlowerService::ResolveGiftSlot; tests may swap it out
+extern uint32_t (*g_pfnResolveGift)(void* pThis, int nArg,
+                                    uint32_t* pSlot, int* pCount);
 
 class CFlowerService {
 public:
@@ -56,6 +57,12 @@ public:
     //   slot 0); otherwise the resolve at 0x140d91980 supplies slot and count
     static uint8_t Send(void* pThis, uint32_t idSender, uint32_t idReceiver,
                         int nArg);
+
+    // 0x140d91a70 — packed raw -> gift slot (4..7) and count
+    //   raw / 1000 selects the band: 0x2f3..0x2f6 -> slots 4..7,
+    //   count = raw - 755000 / 756000 / 757000 / 758000
+    static uint32_t ResolveGiftSlot(void* pThis, int nArg, uint32_t* pSlot,
+                                    int* pCount);
 
     // 0x140d926c0 — the gift path (message type 2, male receiver)
     static uint8_t SendGift(void* pThis, uint32_t idSender, uint32_t idReceiver,

@@ -49,6 +49,10 @@ static void Finish(void*, uint32_t) { s_finish++; }
 
 static const char* StrById(void*, const char* k) { return k; }
 
+// the packed raw the session reports at +0xa0
+static uint32_t s_raw = 755003;
+static uint32_t RawPack(void*) { return s_raw; }
+
 int main() {
     g_pfnFlowerLog = LogF;
     syndicate::g_pfnCMsgInit = [](void*) {};
@@ -154,8 +158,9 @@ int main() {
     assert(s_nTell == 0);
 
     // ================= D138: the gift path (mode 2, male receiver) ==========
-    g_pfnResolveGift = [](void*, int, uint32_t* pSlot, int* pCount) {
+    g_pfnResolveGift = [](void*, int, uint32_t* pSlot, int* pCount) -> uint32_t {
         *pSlot = 5; *pCount = 3;          // gift B, three of them
+        return 3;
     };
     s_modeNoArg = 2; s_modeWithArg = 1;   // receiver must be male
     s_grade = 0; s_level = 60; s_date = 20200101; s_alive = 1; s_exists = 1;
@@ -196,13 +201,41 @@ int main() {
     assert(s_storeCount == 0 && s_nLog == 0 && s_gmNotice == 0);
 
     // ---- a resolve that yields no count leaves everything untouched
-    g_pfnResolveGift = [](void*, int, uint32_t* pSlot, int* pCount) {
+    g_pfnResolveGift = [](void*, int, uint32_t* pSlot, int* pCount) -> uint32_t {
         *pSlot = 4; *pCount = 0;
+        return 0;
     };
     s_modeCalls = 0; s_storeValue = 0; s_recordAdd = 0; s_nTell = 0;
     assert(CFlowerService::SendGift(&ctx, 11, 22, 3) == 0);
     assert(s_storeValue == 0 && s_recordAdd == 0 && s_nTell == 0);
 
-    printf("FLOWER_D137_OK: CFlowerService::Send + SendGift\n");
+    // ================= D139: the gift slot resolve (0x140d91a70) ============
+    uint32_t uSlotOut = 0, uRawOut = 0;
+    int iCountOut = 0;
+    SessVt[0xa0 / 8] = (uintptr_t)RawPack;
+    assert(CFlowerService::ResolveGiftSlot(&ctx, 1, &uSlotOut, &iCountOut) == 3);
+    s_raw = 755003; uSlotOut = 0; iCountOut = 0;
+    uRawOut = CFlowerService::ResolveGiftSlot(&ctx, 1, &uSlotOut, &iCountOut);
+    assert(uSlotOut == 4 && iCountOut == 3 && uRawOut == 3);
+    s_raw = 756001; uSlotOut = 0; iCountOut = 0;
+    uRawOut = CFlowerService::ResolveGiftSlot(&ctx, 2, &uSlotOut, &iCountOut);
+    assert(uSlotOut == 5 && iCountOut == 1 && uRawOut == 1);
+    s_raw = 757007; uSlotOut = 0; iCountOut = 0;
+    uRawOut = CFlowerService::ResolveGiftSlot(&ctx, 3, &uSlotOut, &iCountOut);
+    assert(uSlotOut == 6 && iCountOut == 7 && uRawOut == 7);
+    s_raw = 758009; uSlotOut = 0; iCountOut = 0;
+    uRawOut = CFlowerService::ResolveGiftSlot(&ctx, 4, &uSlotOut, &iCountOut);
+    assert(uSlotOut == 7 && iCountOut == 9 && uRawOut == 9);
+    // an unknown band answers slot 4 and no count, and returns the raw
+    // multiplied by the original's magic constant
+    s_raw = 123; uSlotOut = 9; iCountOut = 9;
+    uRawOut = CFlowerService::ResolveGiftSlot(&ctx, 1, &uSlotOut, &iCountOut);
+    assert(uSlotOut == 4 && iCountOut == 0 && uRawOut == 123u * 0x10624dd3u);
+    // nArg == 0 primes slot 4 / count 0 but the query still runs
+    s_raw = 755005; uSlotOut = 0; iCountOut = 0;
+    CFlowerService::ResolveGiftSlot(&ctx, 0, &uSlotOut, &iCountOut);
+    assert(uSlotOut == 4 && iCountOut == 5);
+
+    printf("FLOWER_D137_OK: Send + SendGift + ResolveGiftSlot\n");
     return 0;
 }

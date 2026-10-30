@@ -8,7 +8,6 @@
 
 namespace flower {
 void* (*g_pfnTheInstance)() = nullptr;
-void (*g_pfnResolveGift)(void*, int, uint32_t*, int*) = nullptr;
 // the string manager answers a literal by key from its slot 0
 const char* StrGet(const char* szKey) {
     void* pMgr = g_pfnTheInstance ? g_pfnTheInstance() : nullptr;
@@ -638,5 +637,48 @@ uint32_t CFlowerService::ResolveFlowerSlot(void* pCtx, int nArg,
     *pOutCount = (int)(raw - 0xb7d68);
     return raw - 0xb7d68;
 }
+
+// 0x140d91a70 — the raw value the session reports at +0xa0 packs the gift
+// band and the count: raw = band * 1000 + count, bands 0x2f3..0x2f6 being
+// the four gift slots 4..7.
+uint32_t CFlowerService::ResolveGiftSlot(void* pThis, int nArg,
+                                         uint32_t* pSlot, int* pCount) {
+    void* pSess = *reinterpret_cast<void**>((unsigned char*)pThis + 8);
+    if (pSess == nullptr || nArg == 0) {
+        *pSlot = 4;
+        *pCount = 0;
+        // the original keeps going here rather than returning
+    }
+    const uint32_t uRaw = ((uint32_t (*)(void*))SessSlot(pSess, 0xa0))(pSess);
+    const uint32_t uBand = uRaw / 1000;
+    if (uBand == 0x2f3) {                     // 755000 — gift A
+        *pSlot = 4;
+        *pCount = (int)(uRaw - 0xb8538);
+        return uRaw - 0xb8538;
+    }
+    if (uBand == 0x2f4) {                     // 756000 — gift B
+        *pSlot = 5;
+        *pCount = (int)(uRaw - 0xb8920);
+        return uRaw - 0xb8920;
+    }
+    if (uBand == 0x2f5) {                     // 757000 — gift C
+        *pSlot = 6;
+        *pCount = (int)(uRaw - 0xb8d08);
+        return uRaw - 0xb8d08;
+    }
+    if (uBand == 0x2f6) {                     // 758000 — gift D
+        *pSlot = 7;
+        *pCount = (int)(uRaw - 0xb90f0);
+        return uRaw - 0xb90f0;
+    }
+    *pSlot = 4;
+    *pCount = 0;
+    // the decompiler shows the original computing uRaw * 0x10624dd3 here,
+    // the magic-multiply residue of a division it could not resolve
+    return uRaw * 0x10624dd3u;
+}
+
+uint32_t (*g_pfnResolveGift)(void*, int, uint32_t*, int*) =
+    &CFlowerService::ResolveGiftSlot;
 
 }  // namespace flower
