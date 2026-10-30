@@ -6600,3 +6600,33 @@ adapter:: بدليل الباني. 15 تأكيدًا ×6، رجريجن 76/76.
 - الاختبار صار 10 أقسام (شمل الحساب والتسلسل والنسخ والتحرير).
 
 **CMsgLeagueBeRobPB: 12/12.** رجريجن 132/132 × 6.
+
+## D100 — CMsgLeagueRobOptPB + CMsgLeagueRobOptServerPB (12/12 لكلٍّ) [2026-10-30]
+
+**CMsgLeagueRobOptPB — vtable 0x1418423d8**
+- slot0 0x1417f0ad0 → 0x1417f0660 (المتجه +0x40/+0x4c، تحرير
+  النص، ~string(+8)، 1417de5a0)
+- slot1 النوع · slot2 0x1417f06f0 (New 0x58 — الباني inline في RAW)
+- slot3 0x1417f0760 (Clear **بلا بوابة**) · slot4 0x1417f0950
+  ((bits&3)==3) · slot11 0x1417f0650
+- slot8 0x1417f0890: حقلان varint (+0x38/+0x3c) + بايت لكل عنصر
+  + **حجم العنصر من صنف الشقيق 1417ef830** مباشرة
+- slot9 0x1417f07d0: 1417f4580 ×2 ثم 1417f4dc0 للعناصر
+- slot7 0x1417f0b30: سلسلة 8 → 0x10 → 0x1a؛ العنصر
+  CMsgLeagueRobOptServerPB يُبنى inline (0x50، vft مزدوج، string،
+  حارس DAT_141886ea8، +0x34، +0x48، +0x38/+0x40 = الحارس) ثم
+  1417f0330 للتحليل
+- slot6 0x1417f1000 → 0x1417f0e60: CHECKF msgleaguerobopt.pb.cc:0x231
+
+**CMsgLeagueRobOptServerPB — vtable 0x141842278**
+- slot0 0x1417effe0 → 0x1417efce0 (نصان +0x38/+0x40) · slot1
+  0x1417efa30 · slot2 0x1417efd70 (0x50 → 0x1417efbd0)
+- slot3 0x1417ef730 (بوابة (bits&7)، تنظيف النصين بالحارس)
+- slot4 0x1417efa20 = `(bits & 1) == 1` · slot11 0x1417efc40
+- slot8 0x1417ef830 (iVar6=1 عندما len ≤ 0x7f — سلوك RAW)
+- slot9 0x1417ef7a0 (1417f4580 ثم 1417f4c20 للنصين)
+- slot7 0x1417f0010: 8 → 0x12 → 0x1a بمادّة النصين من الحارس
+- slot6 0x1417f0260 → 0x1417ef8f0: CHECKF msgleaguerobopt.pb.cc:0x120
+
+**الحصيلة:** عائلة msgleague عند **9 كلاسات مكتملة** (108 فتحة).
+رجريجن 133/133 × 6، ASan/UBSan نظيف.

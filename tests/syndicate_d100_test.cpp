@@ -1,218 +1,213 @@
-// D100 — CSyndicateLogic +0x2d0: 1417b1e80 the title flow
-#include "modules/syndicate/src/syndicatelogic.h"
+// D100 — CMsgLeagueRobOptPB + CMsgLeagueRobOptServerPB (12 slots each)
+#include "modules/syndicate/src/CMsgLeagueRobOptPB.h"
+#include "modules/syndicate/src/CMsgLeagueRobOptServerPB.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>
+#include <string>
+#include <new>
 using namespace syndicate;
 
-static uint8_t abLogic[0x90];
-static CSyndicateLogic* pL = (CSyndicateLogic*)abLogic;
-static uint8_t abSub[0x40];
-
-static int s_nVt18, s_nVt70, s_nVtE0, s_nVt1d8,
-    s_nVt488, s_nVt438, s_nVt440, s_nVt2e8;
-static char s_cVt2e8Ret;
-static int32_t s_i74E920, s_i74E930, s_i7B0370;
-static int s_aiLang[1];
-static void* s_pv7630D0;
-static char s_acVt18Str[3][128]; static int s_iVt18;
-static uint32_t s_uVt70Args[3], s_uVt440Args[2];
-static const char* s_pcVt440Arg;
-static uint32_t s_uTime;
-static char s_acCStrFmt[256];
-static char s_acStrCopyDst[64];
-static int s_nF90, s_nCtor, s_nDtor, s_n6820;
-static uint64_t s_u6820Args[6]; static char s_c6820Ret;
-static uint32_t s_u74E3F0;
+static int s_nVar, s_nW32, s_nWStr, s_nMsg, s_nCheck, s_nVec, s_nElem, s_nSib;
+static uint32_t s_uField, s_uVal, s_uStrField;
+static char s_chSent[32];
 
 static void Reset() {
-    memset(abLogic, 0, sizeof(abLogic));
-    memset(abSub, 0, sizeof(abSub));
-    s_nVt18 = s_nVt70 = s_nVtE0 = s_nVt1d8 = 0;
-    s_nVt488 = s_nVt438 = s_nVt440 = s_nVt2e8 = 0;
-    s_cVt2e8Ret = 1;
-    s_i74E920 = 100; s_i74E930 = 100; s_i7B0370 = 42;
-    s_aiLang[0] = 0;
-    s_pv7630D0 = (void*)0x77;
-    s_iVt18 = 0; s_uTime = 5;
-    memset(s_acCStrFmt, 0, sizeof(s_acCStrFmt));
-    memset(s_acStrCopyDst, 0, sizeof(s_acStrCopyDst));
-    s_nF90 = s_nCtor = s_nDtor = s_n6820 = 0;
-    s_c6820Ret = 1; s_u74E3F0 = 9;
-    static void* apBox[1]; static void* apBoxVt[160];
-    memset(apBoxVt, 0, sizeof(apBoxVt));
-    apBox[0] = apBoxVt;
-    apBoxVt[0x18 / 8] = (void*)+[](void*,
-        int32_t n, uint64_t u) -> uint64_t {
-        s_nVt18++;
-        assert(n == 42);
-        strncpy(s_acVt18Str[s_iVt18 % 3],
-                (const char*)(uintptr_t)u, 127);
-        s_iVt18++; return 0; };
-    apBoxVt[0x70 / 8] = (void*)+[](void*, int32_t a,
-        uint32_t b, int32_t c) -> uint64_t {
-        s_nVt70++; s_uVt70Args[0] = a;
-        s_uVt70Args[1] = b; s_uVt70Args[2] = c;
-        return 0; };
-    apBoxVt[0xe0 / 8] = (void*)+[](void*, void*)
-        -> uint64_t { s_nVtE0++; return 0; };
-    apBoxVt[0x1d8 / 8] = (void*)+[](void*, int32_t)
-        -> uint64_t { s_nVt1d8++; return 0; };
-    apBoxVt[0x488 / 8] = (void*)+[](void*)
-        -> uint64_t { s_nVt488++; return 0; };
-    apBoxVt[0x438 / 8] = (void*)+[](void*,
-        const char* s) -> uint64_t {
-        s_nVt438++;
-        strncpy(s_acCStrFmt, s, 255); return 0; };
-    apBoxVt[0x440 / 8] = (void*)+[](void*,
-        uint32_t a, const char* b) -> uint64_t {
-        s_nVt440++; s_uVt440Args[0] = a;
-        s_pcVt440Arg = b; return 0; };
-    apBoxVt[0x2e8 / 8] = (void*)+[](void*,
-        const char*) -> char {
-        s_nVt2e8++; return s_cVt2e8Ret; };
-    ((void**)abLogic)[1] = apBox;
-    ((void**)abLogic)[10] = abSub;
-    g_fn74E920 = [](void* p) -> int32_t {
-        assert(p == abSub); return s_i74E920; };
-    g_fn74E930 = [](void* p) -> int32_t {
-        assert(p == abSub); return s_i74E930; };
-    g_fnCQLanguageGet = []() -> int* {
-        return s_aiLang; };
-    g_fn7B0370 = [](void* p, uint32_t u)
-        -> int32_t {
-        assert(p == (void*)abLogic); (void)u;
-        return s_i7B0370; };
-    g_fn743F90 = [](void* p, int32_t a,
-                    const char* b, char c) {
-        s_nF90++; assert(p == (void*)0x77);
-        assert(a == 4 && c == 1); (void)b; };
-    g_fnTimeGet = [](int32_t t) -> uint32_t {
-        assert(t == 3); return s_uTime; };
-    g_fnCMsgCtor6640 = [](void*) { s_nCtor++; };
-    g_fnCMsgDtor66C0 = [](void*) { s_nDtor++; };
-    g_fnCMsgInit6820 = [](void* p, int32_t a,
-                          const char* b, uint32_t c,
-                          int32_t d, int32_t e)
-        -> uint64_t {
-        s_n6820++;
-        s_u6820Args[0] = (uint64_t)a;
-        s_u6820Args[1] = (uintptr_t)b;
-        s_u6820Args[2] = c;
-        s_u6820Args[3] = (uint64_t)d;
-        s_u6820Args[4] = (uint64_t)e;
-        return s_c6820Ret; };
-    g_fnCStrFormat215d0 = [](void* p,
-                             const char* f,
-                             uint64_t a, uint64_t b) {
-        // model the format: "%s %u.%02u"-ish
-        sprintf((char*)s_acCStrFmt, "%s %llu.%llu",
-                f, (unsigned long long)a,
-                (unsigned long long)b);
-        strcpy((char*)p + 8, s_acCStrFmt); };
-    g_fnStrCopy = [](char* d, const char* s,
-                     size_t n) {
-        strncpy(d, s, n - 1); d[n - 1] = 0; };
-    g_fnStringMgrInstance = []() -> void* {
-        return (void*)0x99; };
-    g_fnStringMgrGetStr = [](void*,
-                            const char* k) -> void* {
-        return (void*)k; };
-    g_fn74E3F0 = [](void* p) -> uint32_t {
-        assert(p == abSub); return s_u74E3F0; };
-    g_fn7630D0 = [](void* p, uint32_t u)
-        -> void* {
-        assert(p == abSub); (void)u;
-        return s_pv7630D0; };
+    s_nVar = s_nW32 = s_nWStr = s_nMsg = s_nCheck = s_nVec = s_nElem = 0;
+    s_nSib = 0; s_uField = s_uVal = s_uStrField = 0;
+    g_pfnPb8050 = []() -> uint64_t { return 0; };
+    g_pfnPbDelArray = [](void*) {};
+    g_pfnPbVarintSize = [](uint32_t) -> int32_t { s_nVar++; return 2; };
+    g_pfnPbWriteVarint32 = [](uint32_t f, uint32_t v, void*) {
+        s_nW32++; s_uField = f; s_uVal = v; };
+    g_pfnPbWriteString = [](uint32_t f, void*, void*) {
+        s_nWStr++; s_uStrField = f; };
+    g_pfnPbWriteUnknown = [](void*, void*, int32_t) {};
+    g_pfnPb64C0 = [](void*, void*) {};
+    g_pfnPb4550 = [](void*, void*) {};
+    g_pfnPb45D0 = [](void*) {};
+    g_pfnPb6510 = [](void*) -> uint64_t { return 1; };
+    g_pfnPb3BC0 = [](void*) -> uint64_t { return 0; };
+    g_pfnPb3A50 = [](void*, uint32_t*) -> uint64_t { return 1; };
+    g_pfnPbF3F50 = [](void*, uint32_t, void*) -> char { return 1; };
+    g_pfnPbE0110 = [](void*, int32_t) { s_nVec++; };
+    g_pfnPbF4DC0 = [](uint32_t f, void*, void*) { s_nMsg++; s_uField = f; };
+    g_pfnPbF51E0 = [](void*, void*) -> uint64_t { s_nElem++; return 1; };
+    g_pfnPbEF430 = [](void*, void*) { s_nElem++; };
+    g_pfnPbEF520 = [](void*, void*) { s_nElem++; };
+    g_pfnPbEF830 = [](void*) -> int32_t { s_nSib++; return 4; };
+    g_pfnPbF0330 = [](void*, void*) -> char { return 1; };
+    g_pfnPbF0450 = [](void*, void*) { s_nVec++; };
+    g_pfnPbInitGuard = [](void*) {};
+    g_pPbDefaultStr = (void*)s_chSent;
+    g_pfnPbCheckFail = [](const char* f, int, const char* t) {
+        s_nCheck++;
+        assert(strstr(f, "msgleaguerobopt.pb.cc") != nullptr); (void)t; };
 }
 
 int main() {
-    // ---- S1: the null and empty gates ----
     Reset();
-    pL->Slot2D0(42, 9, 0);
-    assert(s_nVt2e8 == 0 && s_nVt18 == 0);
-    pL->Slot2D0(42, 9, "");
-    assert(s_nVt2e8 == 0 && s_nVt18 == 0);
-    // ---- S2: too long -> STR_INVALID_NAME ----
+    static unsigned char abS[0x40];
+    memset(abS, 0, sizeof abS);
+    *(uint64_t*)(abS + 0x18) = 5;
+
+    // ================= RobOptPB =================
+    void* pOpt = CMsgLeagueRobOptPB::New();
+    unsigned char* q = (unsigned char*)pOpt;
+    assert(pOpt && *(uintptr_t*)q == CMsgLeagueRobOptPB::kClassVft);
+    assert(*(uint32_t*)(q + 0x34) == 0 && *(uint32_t*)(q + 0x30) == 0);
+    assert(*(uint32_t*)(q + 0x38) == 0 && *(uint32_t*)(q + 0x3c) == 0);
+    assert(*(uint64_t*)(q + 0x40) == 0);
+    assert(*(uint32_t*)(q + 0x48) == 0 && *(uint32_t*)(q + 0x4c) == 0);
+    assert(*(uint32_t*)(q + 0x50) == 0);
+
+    // IsInitialized needs bits 0 and 1
+    *(uint8_t*)(q + 0x30) = 1;
+    assert(CMsgLeagueRobOptPB::IsInitialized(pOpt) == false);
+    *(uint8_t*)(q + 0x30) = 3;
+    assert(CMsgLeagueRobOptPB::IsInitialized(pOpt) == true);
+
+    // ByteSize: two ints + one element whose size comes from the sibling
+    *(int32_t*)(q + 0x20) = 0;
+    *(uint32_t*)(q + 0x38) = 5;       // 1+1
+    *(uint32_t*)(q + 0x3c) = 0x300;   // 1+2
+    static void* apEl[2];
+    static unsigned char aEl[0x50];
+    static void* apElVt[8];
+    apElVt[0x18 / 8] = (void*)+[](void*) { s_nElem++; };
+    memset(aEl, 0, sizeof aEl);
+    *(void**)aEl = (void*)apElVt;
+    apEl[0] = aEl;
+    *(void**)(q + 0x40) = apEl;
+    *(int32_t*)(q + 0x48) = 1;
+    assert(CMsgLeagueRobOptPB::ByteSize(pOpt) == (1 + 1) + (1 + 2) + 1 + 1 + 4);
+    assert(s_nSib == 1);
+
+    // Serialize
+    s_nW32 = s_nMsg = 0;
+    CMsgLeagueRobOptPB::SerializeWithCachedSizes(pOpt, (void*)1);
+    assert(s_nW32 == 2 && s_nMsg == 1);
+
+    // Clear drops the count and the bits
+    CMsgLeagueRobOptPB::Clear(pOpt);
+    assert(*(int32_t*)(q + 0x48) == 0);
+    assert(*(uint32_t*)(q + 0x30) == 0);
+
+    // MergeFrom
+    static unsigned char abFrom[0x58];
+    memset(abFrom, 0, sizeof abFrom);
+    new (abFrom + 8) std::string("m");
+    *(uint32_t*)(abFrom + 0x30) = 3;
+    *(uint32_t*)(abFrom + 0x38) = 7;
+    *(uint32_t*)(abFrom + 0x3c) = 8;
+    s_nVec = 0;
+    CMsgLeagueRobOptPB::MergeFrom(pOpt, abFrom);
+    assert(s_nVec == 1);
+    assert(*(uint32_t*)(q + 0x38) == 7 && *(uint32_t*)(q + 0x3c) == 8);
+    assert(*(uint32_t*)(q + 0x30) == 3);
+    CMsgLeagueRobOptPB::MergeFrom(pOpt, pOpt);
+    assert(s_nCheck == 1);
+
+    // Merge: tag 8 then 0x10 then 0x1a allocates the element
     Reset();
-    s_i74E920 = 2;   // limit 2 < strlen("abc") 3
-    pL->Slot2D0(42, 9, "abc");
-    assert(s_nVt2e8 == 0);   // short-circuit!
-    assert(s_nVt18 == 1);
-    assert(strcmp(s_acVt18Str[0], "STR_INVALID_NAME")
-           == 0);
-    // ---- S3: rejected by the box vt+0x2e8 ----
+    static unsigned char abIn[0x40];
+    unsigned char aBytes[] = {0x08, 0x01, 0x10, 0x02, 0x1a};
+    memset(abIn, 0, sizeof abIn);
+    *(void**)(abIn + 0x08) = aBytes;
+    *(void**)(abIn + 0x10) = aBytes + 5;
+    *(void**)(q + 0x40) = apEl;
+    *(int32_t*)(q + 0x48) = 0;
+    *(int32_t*)(q + 0x4c) = 0;
+    *(int32_t*)(q + 0x50) = 0;
+    *(uint32_t*)(q + 0x30) = 0;
+    apEl[0] = nullptr;
+    assert(CMsgLeagueRobOptPB::Merge(pOpt, abIn));
+    assert(*(uint32_t*)(q + 0x38) == 1 && *(uint32_t*)(q + 0x3c) == 2);
+    assert(*(int32_t*)(q + 0x48) == 1);
+    void* pElem = apEl[0];
+    assert(pElem && *(uintptr_t*)pElem == g_uRobOptServerVft);
+    if (pElem) {
+        ((std::string*)((unsigned char*)pElem + 8))->~basic_string();
+        ::operator delete(pElem);
+        apEl[0] = nullptr;
+    }
+
+    // ================= RobOptServerPB =================
     Reset();
-    s_cVt2e8Ret = 0;
-    pL->Slot2D0(42, 9, "abc");
-    assert(s_nVt2e8 == 1);
-    assert(strcmp(s_acVt18Str[0], "STR_INVALID_NAME")
-           == 0);
-    // ---- S4: valid, but cur != u -> silent ----
+    void* pSrv = CMsgLeagueRobOptServerPB::New();
+    unsigned char* s = (unsigned char*)pSrv;
+    assert(pSrv && *(uintptr_t*)s == CMsgLeagueRobOptServerPB::kClassVft);
+    assert(*(void**)(s + 0x38) == g_pPbDefaultStr);
+    assert(*(void**)(s + 0x40) == g_pPbDefaultStr);
+    assert(*(uint32_t*)(s + 0x30) == 0 && *(uint32_t*)(s + 0x48) == 0);
+    assert(CMsgLeagueRobOptServerPB::IsInitialized(pSrv) == false);
+    *(uint8_t*)(s + 0x30) = 1;
+    assert(CMsgLeagueRobOptServerPB::IsInitialized(pSrv) == true);
+
+    // ByteSize with both strings
+    *(int32_t*)(s + 0x20) = 0;
+    *(uint32_t*)(s + 0x48) = 6;
+    *(void**)(s + 0x38) = (void*)abS;
+    *(void**)(s + 0x40) = (void*)abS;
+    *(uint32_t*)(s + 0x30) = 7;
+    assert(CMsgLeagueRobOptServerPB::ByteSize(pSrv) == (1 + 1) + (1 + 5 + 1) + (1 + 5 + 1));
+
+    // Serialize
+    s_nW32 = s_nWStr = 0;
+    CMsgLeagueRobOptServerPB::SerializeWithCachedSizes(pSrv, (void*)1);
+    assert(s_nW32 == 1 && s_nWStr == 2 && s_uStrField == 3);
+
+    // MergeFrom + the CHECKF source
+    static unsigned char abFrom2[0x50];
+    memset(abFrom2, 0, sizeof abFrom2);
+    new (abFrom2 + 8) std::string("n");
+    *(uint32_t*)(abFrom2 + 0x30) = 7;
+    *(uint32_t*)(abFrom2 + 0x48) = 9;
+    *(void**)(abFrom2 + 0x38) = (void*)abS;
+    *(void**)(abFrom2 + 0x40) = (void*)abS;
+    s_nElem = 0;
+    CMsgLeagueRobOptServerPB::MergeFrom(pSrv, abFrom2);
+    assert(s_nElem == 2 && *(uint32_t*)(s + 0x48) == 9);
+    CMsgLeagueRobOptServerPB::MergeFrom(pSrv, pSrv);
+    assert(s_nCheck == 1);
+
+    // Merge: 08 / 12 / 1a with both strings materialised from the sentinel
     Reset();
-    pL->Slot2D0(42, 8, "abc");   // 74e3f0=9 != 8
-    assert(s_nVt2e8 == 1 && s_nVt18 == 0);
-    assert(s_nF90 == 0);
-    // ---- S5: lg lookup fail -> silent ----
-    Reset();
-    s_pv7630D0 = 0;
-    pL->Slot2D0(42, 9, "abc");
-    assert(s_nVt18 == 0 && s_nF90 == 0);
-    // ---- S6: not the owner ----
-    Reset();
-    s_i7B0370 = 41;   // != 42
-    pL->Slot2D0(42, 9, "abc");
-    assert(s_nVt18 == 1);
-    assert(strcmp(s_acVt18Str[0],
-                  "STR_LEAGUE_CAN_NOT_SET_TITLE") == 0);
-    // ---- S7: the full success path ----
-    Reset();
-    pL->Slot2D0(42, 9, "abc");
-    assert(s_nVt18 == 1);
-    assert(strcmp(s_acVt18Str[0],
-                  "STR_LEAGUE_SET_TITLE") == 0);
-    assert(s_nF90 == 1 && s_nCtor == 1);
-    assert(s_n6820 == 1);
-    // 5 + 19000000 = 19000005
-    assert(s_u6820Args[0] == 0x12);
-    assert(strcmp((const char*)
-            (uintptr_t)s_u6820Args[1], "abc") == 0);
-    assert(s_u6820Args[2] == 19000005);
-    assert(s_nVtE0 == 1);      // 6820 ok -> e0
-    assert(s_nVt1d8 == 1 && s_nVt488 == 1);
-    assert(s_nVt438 == 1);
-    // (19000005/10000)=1900, (19000005%10000)/100=0
-    assert(strstr(s_acCStrFmt,
-                  "STR_LEAGUE_BROADCAST_TITLE") != 0);
-    assert(strstr(s_acCStrFmt, "1900.0") != 0);
-    // StrCopy wrote "abc" at this+0x61, then the
-    // manual strcat appended the resolved country
-    assert(strcmp((char*)abLogic + 0x61,
-                  "abcSTR_LEAGUE_COUNTRY") == 0);
-    assert(s_nVt70 == 1 && s_uVt70Args[0] == 7);
-    assert(s_uVt70Args[1] == 9 &&
-           s_uVt70Args[2] == 0);
-    assert(s_nVt440 == 1 && s_uVt440Args[0] == 9);
-    assert(strcmp(s_pcVt440Arg, "abc") == 0);
-    assert(s_nDtor == 1);
-    // ---- S8: 6820 fails -> no vt+0xe0 ----
-    Reset();
-    s_c6820Ret = 0;
-    pL->Slot2D0(42, 9, "abc");
-    assert(s_nVtE0 == 0 && s_nVt18 == 1);
-    assert(s_nVt70 == 1);   // flow continues
-    // ---- S9: the language branch ----
-    Reset();
-    s_aiLang[0] = 3; s_i74E930 = 2;
-    pL->Slot2D0(42, 9, "abc");  // 2 < 3 -> invalid
-    assert(s_nVt18 == 1);
-    assert(strcmp(s_acVt18Str[0], "STR_INVALID_NAME")
-           == 0);
-    s_aiLang[0] = 6;   // == 6 -> keeps 74e920
-    pL->Slot2D0(42, 9, "abc");   // limit 100 -> ok
-    assert(s_nVt18 == 2);
-    assert(strcmp(s_acVt18Str[1],
-                  "STR_LEAGUE_SET_TITLE") == 0);
-    puts("SYNDICATE_D100_OK: the title monster");
+    unsigned char aB2[] = {0x08, 0x21, 0x12, 0x1a};
+    memset(abIn, 0, sizeof abIn);
+    *(void**)(abIn + 0x08) = aB2;
+    *(void**)(abIn + 0x10) = aB2 + 4;
+    *(void**)(s + 0x38) = g_pPbDefaultStr;
+    *(void**)(s + 0x40) = g_pPbDefaultStr;
+    *(uint32_t*)(s + 0x30) = 0;
+    assert(CMsgLeagueRobOptServerPB::Merge(pSrv, abIn));
+    assert(*(uint32_t*)(s + 0x48) == 0x21);
+    assert(*(void**)(s + 0x38) != g_pPbDefaultStr);
+    assert(*(void**)(s + 0x40) != g_pPbDefaultStr);
+    assert(*(uint32_t*)(s + 0x30) == 7);
+
+    // release everything
+    {
+        unsigned char* u = (unsigned char*)pOpt;
+        *(int32_t*)(u + 0x48) = 0;
+        *(int32_t*)(u + 0x4c) = 0;
+        g_pfnPbDelArray(*(void**)(u + 0x40));
+        ((std::string*)(u + 8))->~basic_string();
+        ::operator delete(u);
+    }
+    {
+        unsigned char* u = (unsigned char*)pSrv;
+        for (int i = 0; i < 2; i++) {
+            void* pStr = *(void**)(u + 0x38 + i * 8);
+            if (pStr && pStr != g_pPbDefaultStr) {
+                ((std::string*)pStr)->~basic_string();
+                ::operator delete(pStr);
+            }
+        }
+        ((std::string*)(u + 8))->~basic_string();
+        ::operator delete(u);
+    }
+
+    printf("SYNDICATE_D100_OK: RobOptPB + RobOptServerPB\n");
     return 0;
 }

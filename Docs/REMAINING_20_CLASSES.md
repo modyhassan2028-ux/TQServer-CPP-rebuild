@@ -9,8 +9,8 @@
 |---|---|---|
 | `CMsgLeagueBeRobPB` | `0x141841318` | **12/12 مكتملة** (D99) |
 | `CMsgLeagueBeRobRePB` | `0x141841130` | 0/12 |
-| `CMsgLeagueRobOptPB` | `0x1418423d8` | 0/12 |
-| `CMsgLeagueRobOptServerPB` | `0x141842278` | 0/12 |
+| `CMsgLeagueRobOptPB` | `0x1418423d8` | **12/12 مكتملة** (D100) |
+| `CMsgLeagueRobOptServerPB` | `0x141842278` | **12/12 مكتملة** (D100) |
 | `CMsgLeagueTokenPB` | `0x141842670` | 0/12 |
 | `CMsgInvadeWarning` | TBD | 0/12 |
 | `CMsgLeagueBeRob` | TBD | 0/12 |
