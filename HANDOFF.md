@@ -588,3 +588,9 @@
 المتبقي: 12 كلاس (CMsgLeagueBeRob، LeagueOpt، LeagueRobOpt، LeagueToken،
 SelfSynMemAwardRank، SynChgDomName، SynProffer، SynProfferRank، Syndicate،
 SynRecruitAdvertising ×3).
+
+## D123 (2026-10-30)
+`CMsgSynChgDomName` (vtable 0x14182e520, type 0x837): Process يطبّق تغيير اسم
+الدومين عبر `0x1417afb20` ثم يبني إطار الرد (`word[+0x18]=flag`، `word[+2]=0x837`،
+`word[+0]=0x1c`) عبر الدالة المحلية `0x1417dae90` ثم يرسل عبر `0x1417ac7d0`.
+**141/141 × 6 نظيف**. المتبقي 11 كلاس.

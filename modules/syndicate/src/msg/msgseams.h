@@ -20,6 +20,11 @@ extern void (*g_fn_1417e8016)(void* self, const void* pArg,
 extern bool (*g_fn_1417ac6f0)(void* pMgr, uint32_t idActor);
 // 0x1417ae640 — SyndicateMgr member-list apply (mgr, idActor, uValue)
 extern void (*g_fn_1417ae640)(void* pMgr, uint32_t idActor, uint32_t uValue);
+// 0x1417afb20 — SyndicateMgr domain-name apply (mgr, idActor, uId, pName)
+extern bool (*g_fn_1417afb20)(void* pMgr, uint32_t idActor,
+                             uint32_t uId, const void* pName);
+// 0x1417ac7d0 — syndicate send helper (mgr, idActor, pMsg)
+extern void (*g_fn_1417ac7d0)(void* pMgr, uint32_t idActor, void* pMsg);
 // 0x1417ae790 — SyndicateMgr domain apply (mgr, idActor, uValue)
 extern void (*g_fn_1417ae790)(void* pMgr, uint32_t idActor, uint32_t uValue);
 // the CRT memcpy-ish import at 0x141823098 (dst, src)

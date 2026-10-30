@@ -6798,3 +6798,15 @@ syndicate.cpp، leaguemgr.cpp، leaguetokenmgr.cpp، synattrmgr.cpp، …)
 - تغيير الـseam: `g_fn_141823030` صار `(fmt, ...)` لأنه يخدم ASSERT خماسي
   الوسائط ورسالة `invalid action:%d` معاً في نفس الاستيراد.
 - اختبار موحّد `tests/syndicate_d122_test.cpp` يغطي 10 فتحات.
+
+## D123 — CMsgSynChgDomName (2026-10-30)
+
+vtable `0x14182e520` · type `0x837` · المسار الأصلي `msg/msgsynchgdomname.cpp`.
+- Process `0x1417daee0`: `mgr=SyndicateMgr()`؛
+  `b=0x1417afb20(mgr,idActor,dword[payload+4],payload+8)`؛
+  `BuildReply(this, b?1:0)` (`0x1417dae90`)؛ ثم `0x1417ac7d0(mgr,idActor,this)`.
+- BuildReply `0x1417dae90`: يمرّر القيمة إلى `0x1417e8016`، ثم يكتب في الإطار:
+  `word[payload+0x18]=uFlag`، `word[payload+2]=0x837`، `word[payload+0]=0x1c`.
+  (الـseam يستقبل الوسيط كقيمة 64-بت خام كما في الأصل، لأن نفس الاستيراد
+  يُستدعى مرة بعنوان نص ومرة بعلم صغير.)
+- seams جديدة: `0x1417afb20` و`0x1417ac7d0`.
