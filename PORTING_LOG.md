@@ -6659,3 +6659,17 @@ New، Clear، IsInit، مشترك، thunk، Merge، ByteSize، Serialize،
 
 **الحصيلة:** عائلة msgleague عند **11 كلاساً مكتملاً** (132 فتحة).
 رجريجن 134/134 × 6، ASan/UBSan نظيف.
+
+## D102 — مسح RTTI كامل: الكلاسات الباقية رسائل tq::CMsg [2026-10-30]
+
+- ماسح COL جديد (TypeDescriptor عند `td+16`، `pTypeDescriptor` عند
+  `col+12`) أعاد **75 كلاساً** بعناوينها؛ الجداول ذات نمط PB
+  (فتحة 5 = `0x1417de5c0`، فتحة 10 = `0x1417dee40`) = **12 فقط**
+  = المنقولة كلها.
+- الباقي رسائل `tq::CMsg` بـ5 فتحات: dtor، Create،
+  `Process(OBJID,void*)` هيكل `0x14177e2f0`، Process الخاص،
+  `Process(void*)` هيكل `0x14177e2d0`.
+- 17 vtable مؤكَّدة بفحص أن الفتحة 0 تكتب `<Class>::vftable`
+  (الجدول في `Docs/REMAINING_20_CLASSES.md`).
+- `tools/find_vtables.py` يرجع MISS لهذه الكلاسات (لا COL لها)،
+  فالمصدر المعتمد هو مسح مؤشرات COL + تحقّق الفتحة 0.
