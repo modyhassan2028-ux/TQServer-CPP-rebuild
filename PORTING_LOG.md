@@ -6935,3 +6935,25 @@ todayflower.cpp · todayflowermgr.cpp`.
 اختبار `tests/flower_d130_test.cpp` — **148/148 × 6** نظيف.
 ملاحظة أدوات: أسماء الكائنات في سكربت الاختبار صارت مبنية على المسار لأن
 `syndicate/msg/msglog.cpp` و`flower/msg/msglog.cpp` يتشاركان الاسم.
+
+## D131 — flower::CTodayFlowerMgr::OnUserLogin (2026-10-30)
+الملف `modules/flower/src/todayflowermgr.cpp`.
+`flower::CTodayFlower` = `{u32 idUser@+0; void* pData@+8}`، ctor 0x140d93750
+(`*this=idUser; *(this+8)=pData`)، كومة `0x140da2490` باسم "CTodayFlower"
+(alloc 0x140d93a10 → CMyHeap::Alloc، free 0x140d93a70 → CMyHeap::Free،
+و 0x140d939b0 هو الـgetter الذي يبني الكومة مرة واحدة + atexit).
+
+`CTodayFlowerMgr::OnUserLogin` 0x140d97710:
+- `pSession==0` → `log_InlineLogERROR("\xA1\xEF%s(%s)\xA1\xEF in %s")` (0x140d9b368).
+- استعلام عبر `(*(vt+0xa8))(pSession, &list, idUser, 0x21)`.
+- 0 صفوف → تفريغ القائمة والخروج.
+- 1 صف → يُستخدم الصف نفسه (0x140d96120 = back()).
+- أكثر من صف → حذف كل الصفوف ما عدا الأخير (0x140d96a60 = erase/compact)
+  ثم `"CTodayFlowerMgr::OnUserLogin,player(%u) data not only."` (لاحظ الفاصلة
+  بلا مسافة قبل player، كما في الاصل).
+- `FUN_140d96fb0` = find-or-insert في `map<u32, CTodayFlower*>` عند mgr+8:
+  الفتحة فاضية → `Alloc(0x10)` + ctor، وإلا
+  `"CTodayFlowerMgr::OnUserLogin, player(%u) data already exist."`.
+  ملكية الصف المحفوظ تنتقل للموديول عبر `pData`.
+اختبار `tests/flower_d131_test.cpp` يغطي الخمسة مسارات (session فارغ، صفر،
+واحد، مكرر، ثلاثة) — **149/149 × 6** نظيف.

@@ -637,3 +637,11 @@ payload+4/payload+8). الفتبلات مستخرجة بدون RTTI عبر `tool
 (4 فتبلات في `Docs/FLOWER_VTABLES.md`). **148/148 × 6**.
 التالي: `todayflower.cpp` (CTodayFlower) و`todayflowermgr.cpp` و`module.cpp`
 + CModule (0x140d9bcb8، 9 فتحات).
+
+## D131 (2026-10-30)
+`todayflowermgr.cpp`: CTodayFlower + CTodayFlowerMgr::OnUserLogin بكامل
+الفروع ونصوص اللوج الثلاثة، وكومة "CTodayFlower" (0x140da2490). **149/149 × 6**.
+التالي: `todayflower.cpp` (بقية دوال CTodayFlower)، ثم `module.cpp`
+(flower::CModule 0x140d9bcb8، 9 فتحات: dtor 0x140d93290 يكتب
+`gs::IModule::vftable`، أربع فتحات 0x140d982ac = thunk استيراد، والأربع
+الباقية 0x140d93250/60/70/80 ترجع 0)، ثم `flowerservice.cpp`.

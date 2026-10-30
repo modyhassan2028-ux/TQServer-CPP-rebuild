@@ -156,3 +156,6 @@ syndicate::CModule (0x14182e5a8) — 23 فتحة.
 
 ## D130 (2026-10-30)
 Flower.dll: +2 كلاس رسائل (CMsgFlower 0x140d9db08، CMsgLog 0x140d9dc60) = 10 فتحات.
+
+## D131 (2026-10-30)
+Flower.dll: +CTodayFlower (0x10 بايت) +CTodayFlowerMgr::OnUserLogin 0x140d97710.
