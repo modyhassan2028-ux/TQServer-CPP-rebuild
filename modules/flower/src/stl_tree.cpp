@@ -3,6 +3,7 @@
 #include "modules/flower/src/stl_exceptions.h"
 #include <cstring>
 #include <new>
+#include <stdexcept>
 
 namespace flower {
 namespace stl {
@@ -481,6 +482,182 @@ void* IterFromNodeChecked(void** pOut, void** pNode, void* pFrom) {
 
 // 0x140d95ec0 — the self-allocating node once more
 void* NodeSelfAllocE(void** pSelf) { return TreeNodeSelfAlloc(pSelf); }
+
+// 0x140d955e0 — erase one node: a nil iterator is out_of_range("invalid
+// map/set<T> iterator"), otherwise the node is unlinked, its successor
+// rebalanced and the size stepped down. Colours live at +0x28, the nil mark
+// at +0x29, the head at +0x30 and the size at +0x38.
+void* TreeErase(void** pTree, void** pOut, void** pIter) {
+    char* pT = (char*)pTree;
+    (void)pT;
+    int64_t* pNode = (int64_t*)pIter[1];
+    if (*(char*)((char*)pNode + 0x29) != '\0') {
+        throw std::out_of_range("invalid map/set<T> iterator");
+    }
+    TreeIncrement(pIter);
+    int64_t* x = (int64_t*)*pNode;
+    int64_t* y;
+    int64_t* z;
+    bool bSkip = false;
+    if (*(char*)((char*)x + 0x29) == '\0') {
+        y = x;
+        if (*(char*)(pNode[2] + 0x29) == '\0') {
+            int64_t* pSucc = (int64_t*)pIter[1];
+            y = (int64_t*)pSucc[2];
+            if (pSucc != pNode) {
+                x[1] = (int64_t)pSucc;
+                *pSucc = *pNode;
+                x = pSucc;
+                if (pSucc != (int64_t*)pNode[2]) {
+                    x = (int64_t*)pSucc[1];
+                    if (*(char*)((char*)y + 0x29) == '\0') {
+                        y[1] = (int64_t)x;
+                    }
+                    *x = (int64_t)y;
+                    pSucc[2] = pNode[2];
+                    *(int64_t*)(pNode[2] + 8) = (int64_t)pSucc;
+                }
+                if (*(int64_t**)(pT + 0x30) != nullptr &&
+                    *(int64_t**)(*(int64_t*)(pT + 0x30) + 8) == pNode) {
+                    *(int64_t**)(*(int64_t*)(pT + 0x30) + 8) = pSucc;
+                } else {
+                    int64_t* pParent = (int64_t*)pNode[1];
+                    if ((int64_t*)*pParent == pNode) {
+                        *pParent = (int64_t)pSucc;
+                    } else {
+                        pParent[2] = (int64_t)pSucc;
+                    }
+                }
+                pSucc[1] = pNode[1];
+                char* a = (char*)(pNode + 5);
+                char* b = (char*)(pSucc + 5);
+                if (b != a) {
+                    const char cTmp = *b;
+                    *b = *a;
+                    *a = cTmp;
+                }
+                bSkip = true;
+            }
+        }
+    } else {
+        y = (int64_t*)pNode[2];
+    }
+    if (!bSkip) {
+        x = (int64_t*)pNode[1];
+        if (*(char*)((char*)y + 0x29) == '\0') {
+            y[1] = (int64_t)x;
+        }
+        if (*(int64_t**)(pT + 0x30) != nullptr &&
+            *(int64_t**)(*(int64_t*)(pT + 0x30) + 8) == pNode) {
+            *(int64_t**)(*(int64_t*)(pT + 0x30) + 8) = y;
+        } else if ((int64_t*)*x == pNode) {
+            *x = (int64_t)y;
+        } else {
+            x[2] = (int64_t)y;
+        }
+        if (*(int64_t**)*(int64_t**)(pT + 0x30) == pNode) {
+            z = x;
+            if (*(char*)((char*)y + 0x29) == '\0') {
+                char cColor = *(char*)(*y + 0x29);
+                int64_t* pLeft = (int64_t*)*y;
+                z = y;
+                while (cColor == '\0') {
+                    int64_t* pCur = pLeft;
+                    pLeft = (int64_t*)*pCur;
+                    cColor = *(char*)((char*)pLeft + 0x29);
+                    z = pCur;
+                }
+            }
+            *(int64_t**)*(int64_t**)(pT + 0x30) = z;
+        }
+        if (*(int64_t**)(*(int64_t*)(pT + 0x30) + 0x10) == pNode) {
+            z = x;
+            if (*(char*)((char*)y + 0x29) == '\0') {
+                char cColor = *(char*)(y[2] + 0x29);
+                int64_t* pRight = (int64_t*)y[2];
+                z = y;
+                while (cColor == '\0') {
+                    int64_t* pCur = pRight;
+                    pRight = (int64_t*)pCur[2];
+                    cColor = *(char*)((char*)pRight + 0x29);
+                    z = pCur;
+                }
+            }
+            *(int64_t**)(*(int64_t*)(pT + 0x30) + 0x10) = z;
+        }
+    }
+    if ((char)pNode[5] == '\x01') {
+        int64_t* pRootParent = *(int64_t**)(*(int64_t*)(pT + 0x30) + 8);
+        if (y != pRootParent) {
+            do {
+                z = x;
+                if ((char)y[5] != '\x01') break;
+                x = (int64_t*)*z;
+                if (y == x) {
+                    x = (int64_t*)z[2];
+                    if ((char)x[5] == '\0') {
+                        *(char*)((char*)x + 0x28) = '\x01';
+                        *(char*)((char*)z + 0x28) = '\0';
+                        TreeRotateLeft(pTree, z);
+                        x = (int64_t*)z[2];
+                    }
+                    if (*(char*)((char*)x + 0x29) == '\0') {
+                        if ((*(char*)(*x + 0x28) != '\x01') ||
+                            (*(char*)(x[2] + 0x28) != '\x01')) {
+                            if (*(char*)(x[2] + 0x28) == '\x01') {
+                                *(char*)(*x + 0x28) = '\x01';
+                                *(char*)((char*)x + 0x28) = '\0';
+                                TreeRotateRight(pTree, x);
+                                x = (int64_t*)z[2];
+                            }
+                            *(char*)((char*)x + 0x28) = (char)z[5];
+                            *(char*)((char*)z + 0x28) = '\x01';
+                            *(char*)(x[2] + 0x28) = '\x01';
+                            TreeRotateLeft(pTree, z);
+                            break;
+                        }
+                        *(char*)((char*)x + 0x28) = '\0';
+                    }
+                } else {
+                    if ((char)x[5] == '\0') {
+                        *(char*)((char*)x + 0x28) = '\x01';
+                        *(char*)((char*)z + 0x28) = '\0';
+                        TreeRotateRight(pTree, z);
+                        x = (int64_t*)*z;
+                    }
+                    if (*(char*)((char*)x + 0x29) == '\0') {
+                        if ((*(char*)(x[2] + 0x28) != '\x01') ||
+                            (*(char*)(*x + 0x28) != '\x01')) {
+                            if (*(char*)(*x + 0x28) == '\x01') {
+                                *(char*)(x[2] + 0x28) = '\x01';
+                                *(char*)((char*)x + 0x28) = '\0';
+                                TreeRotateLeft(pTree, x);
+                                x = (int64_t*)*z;
+                            }
+                            *(char*)((char*)x + 0x28) = (char)z[5];
+                            *(char*)((char*)z + 0x28) = '\x01';
+                            *(char*)(*x + 0x28) = '\x01';
+                            TreeRotateRight(pTree, z);
+                            break;
+                        }
+                        *(char*)((char*)x + 0x28) = '\0';
+                    }
+                }
+                x = (int64_t*)z[1];
+                y = z;
+            } while (z != *(int64_t**)(*(int64_t*)(pT + 0x30) + 8));
+        }
+        *(char*)((char*)y + 0x28) = '\x01';
+    }
+    ::operator delete(pNode);
+    if (*(uint64_t*)(pT + 0x38) != 0) {
+        *(uint64_t*)(pT + 0x38) = *(uint64_t*)(pT + 0x38) - 1;
+    }
+    const int64_t uKept = (int64_t)pIter[1];
+    pOut[0] = pTree[0];
+    pOut[1] = (void*)uKept;
+    return pOut;
+}
 
 }  // namespace stl
 }  // namespace flower

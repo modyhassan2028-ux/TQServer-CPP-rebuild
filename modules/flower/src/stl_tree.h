@@ -77,6 +77,9 @@ void* IterFromNodeChecked(void** pOut, void** pNode,
                           void* pFrom);                          // 0x140d95e60
 void* NodeSelfAllocE(void** pSelf);                              // 0x140d95ec0
 
+// 0x140d955e0 — the erase with its rebalancing
+void* TreeErase(void** pTree, void** pOut, void** pIter);
+
 }  // namespace stl
 }  // namespace flower
 #endif
