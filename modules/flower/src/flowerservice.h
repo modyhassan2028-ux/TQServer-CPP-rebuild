@@ -22,6 +22,10 @@ extern void (*g_pfnFlowerLog)(const char* fmt, ...);
 extern const char kCheckFormat[];
 inline void CTodayFlowerMgr_LogCheck() { g_pfnFlowerLog(kCheckFormat); }
 
+// theInstance() -> the string manager; its slot 0 answers a literal by key
+extern void* (*g_pfnTheInstance)();
+const char* StrGet(const char* szKey);
+
 // FUN_140d97bc0 () -> the object attached at +0x18
 extern void* (*g_pfnFlowerCreateHelper)();
 // FUN_140d94020 (pAttached, pSecond) -> bool
@@ -40,6 +44,19 @@ public:
     static void* Lookup(void* self, uint16_t* pRecord,
                         uint16_t uCount);             // 0x140d93460
     static uint8_t Attach(void* pOwned, void* pSecond);  // 0x140d91490
+
+    // 0x140d91be0 — the flower gift itself
+    //   this+0x08 session · this+0x18 todayflower map
+    //   idSender 0 or idReceiver 0 -> CHECKF
+    //   session mode != 1 -> nothing happens
+    //   nArg == 0 is the self path (level gate, one-per-day gate, count 1,
+    //   slot 0); otherwise the resolve at 0x140d91980 supplies slot and count
+    static uint8_t Send(void* pThis, uint32_t idSender, uint32_t idReceiver,
+                        int nArg);
+
+    static constexpr uint32_t kMinSendLevel = 50;    // 0x140da2008
+    static constexpr uint32_t kGmCount99 = 99;       // 0x140da2018
+    static constexpr uint32_t kGmCount999 = 999;     // 0x140da201c
 
     // 0x140d91050 — today as itymmdd
     static int TodayStamp();

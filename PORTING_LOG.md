@@ -7075,3 +7075,39 @@ thunk استيراد/CRT، الدوال التي تناديها، والنصوص
 سيمان جديد: `flower::g_pfnInstanceGet` و`kFlowerMgrName = "flower"`
 (`0x140da22f8`). اختبار `tests/flower_d136_test.cpp` يغطي كل التفرعات —
 **154/154 × 6** نظيف.
+
+## D137 — معالج إرسال الزهرة (2026-10-30)
+`0x140d91be0` (`CFlowerService::Send`) — 325 سطرًا منقولة فرعًا بفرع:
+- `this+8` الجلسة، `this+0x18` خريطة `CTodayFlowerMgr`.
+- `idSender==0 || idReceiver==0` → CHECKF.
+- بوابة الوضع: `(vt+0x18)()` بلا وسائط، ولازم تساوي 1 (الأصل يرجع بايت
+  غير مهيّأ إن اختلف، فنرجع 0 ونوثّق ذلك).
+- `(vt+0x50)(idSender)` فشل → `STR_FLOWER_SENDER_NOT_ALIVE`.
+- مسار `nArg==0` (إرسال ذاتي): `byFlag=1`، `bSelf`،
+  `(vt+0x40)` < `0x140da2008`=50 → `STR_FLOWER_LEVEL_TOO_LOW`؛
+  ثم `(vt+0x20)` تاريخ آخر إرسال، وإن لم يكن منتهيًا (0x140d910c0)
+  يُرسل `STR_FLOWER_HAVE_SENT_TODAY` وينتهي؛ وإلا الفتحة 0 والعدد 1.
+- مسار `nArg!=0`: `0x140d91980` يعطي الفتحة والعدد، والعدد 0 يخرج.
+- `(vt+0x58)(idReceiver)` ثم `(vt+0x18)(idReceiver)==2` وإلا
+  `STR_FLOWER_RECEIVER_NOT_FEMALE`.
+- غير الذاتي: `(vt+0)(pSess,idSender,nArg)` شرطًا.
+- `(vt+0x30)` القيمة الحالية؛ `(vt+0x90)(3)` + جدول الرتبة عبر
+  `(vt+0x48)`: 0→لا شيء، 1→2، 2→3، 3→5، 4→10، 5→15، 6/غير ذلك→30
+  مع رفع علم VIP.
+- `(vt+0x38)(idReceiver,slot,iOld+add)` ثم `0x140d97430` للكتابة، ثم
+  بناء `0x140d97cb0` + `0x140d97d30` (اسم المرسل/المستلم، العدد، الفتحة،
+  العلم).
+- `uCount < 99` → `(vt+0x68)`/`(vt+0x70)`؛ وإلا نفس النداءين ثم بلوك GM:
+  نص 99/999 حسب الفتحة (RED/WHITE/LILY/TULIP) عبر `_snprintf` بسعة 0x200،
+  ثم `(vt+0x78)(buf,0xfc00d5,0x7db)`، ثم `STR_FLOWER_GM_PROMPT_ALL`
+  للمرسل و`STR_FLOWER_RECEIVER_PROMPT` للمستلم.
+- `byFlag` → لو VIP `STR_FLOWER_VIP_SYS_SEND`، ثم `0x140d91050` و
+  `(vt+0x28)(idSender,اليوم)`.
+- `0x140d97400` ثم `(vt+0x88)(idReceiver,slot&0xff,القيمة)` و
+  `(vt+0xb0)(idSender)` و`0x140d97d00`، والنتيجة 1.
+- ثوابت من البيانات: `0x140da2008`=50، `0x140da2018`=99،
+  `0x140da201c`=999 (قُرئت من Flower.dll).
+سيمان جديد: `g_pfnTheInstance` + `StrGet` (مدير النصوص، فتحته 0).
+استنتاج موثّق: نداء `(vt+8)` الثاني في سطر البناء فقد وسيطه في التفكيك،
+والأرجح `idSender` لأن بلوك GM يستعمل الزوج نفسه (مرسل، مستلم).
+اختبار `tests/flower_d137_test.cpp` — **155/155 × 6** نظيف.
