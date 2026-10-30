@@ -94,6 +94,12 @@ void* ContainerInitB(void** pVec);                            // 0x140d97b90
 void* TreeInsert(void** pTree, void** pOut, char cLeft, void** pParent,
                  void** pValue);
 
+// 0x140d961f0 — erase the range [first, last)
+int64_t* TreeEraseRange(int64_t* pTree, int64_t* pOut, int64_t* pFirst,
+                        int64_t* pLast);
+// 0x140d96400 — the teardown: the whole range, then the head is freed
+void TreeDestroy(int64_t* pTree);
+
 }  // namespace stl
 }  // namespace flower
 #endif

@@ -928,5 +928,80 @@ void* TreeInsert(void** pTree, void** pOut, char cLeft, void** pParent,
     return pOut;
 }
 
+// 0x140d961f0 — erase the range [first, last). An iterator that belongs to
+// another container is refused, an empty range collapses to the clear, and
+// every step advances the first iterator inline (the same walk as
+// 0x140d94b10) before handing the pair to the erase.
+int64_t* TreeEraseRange(int64_t* pTree, int64_t* pOut, int64_t* pFirst,
+                        int64_t* pLast) {
+    int64_t lVar2 = *(int64_t*)pTree[6];
+    if ((*pFirst == 0) || (*pFirst != *pTree)) InvalidParameter();
+    if (pFirst[1] == lVar2) {
+        lVar2 = pTree[6];
+        if ((*pLast == 0) || (*pLast != *pTree)) InvalidParameter();
+        if (pLast[1] == lVar2) {
+            TreeClear((void*)pTree);
+            pOut[1] = *(int64_t*)pTree[6];
+            pOut[0] = *pTree;
+            return pOut;
+        }
+    }
+    for (;;) {
+        if ((*pFirst == 0) || (*pFirst != *pLast)) InvalidParameter();
+        lVar2 = *pFirst;
+        if (pFirst[1] == pLast[1]) break;
+        const int64_t lVar3 = pFirst[1];
+        if (*pFirst == 0) InvalidParameter();
+        const int64_t lVar4 = pFirst[1];
+        if (*(char*)(lVar4 + 0x29) == '\0') {
+            int64_t* plVar6 = *(int64_t**)(lVar4 + 0x10);
+            if (*(char*)((char*)plVar6 + 0x29) == '\0') {
+                char cVar1 = *(char*)(*plVar6 + 0x29);
+                int64_t* plVar5 = (int64_t*)*plVar6;
+                while (cVar1 == '\0') {
+                    cVar1 = *(char*)(*plVar5 + 0x29);
+                    plVar6 = plVar5;
+                    plVar5 = (int64_t*)*plVar5;
+                }
+            } else {
+                plVar6 = *(int64_t**)(lVar4 + 8);
+                char cVar1 = *(char*)((char*)plVar6 + 0x29);
+                while ((cVar1 == '\0') && (pFirst[1] == plVar6[2])) {
+                    pFirst[1] = (int64_t)plVar6;
+                    plVar6 = (int64_t*)plVar6[1];
+                    cVar1 = *(char*)((char*)plVar6 + 0x29);
+                }
+            }
+            pFirst[1] = (int64_t)plVar6;
+        } else {
+            InvalidParameter();
+        }
+        int64_t local_28[2];
+        int64_t local_18[2];
+        local_28[0] = lVar2;
+        local_28[1] = lVar3;
+        TreeErase((void**)pTree, (void**)local_18, (void**)local_28);
+    }
+    const int64_t lVar2b = pFirst[1];
+    pOut[0] = *pTree;
+    pOut[1] = lVar2b;
+    return pOut;
+}
+
+// 0x140d96400 — the teardown of a record set: erase from the begin to the end
+// iterator, then free the head and clear +0x30 and +0x38
+void TreeDestroy(int64_t* pTree) {
+    int64_t local_38[4];
+    int64_t local_18[2];
+    local_38[0] = *pTree;                     // the container
+    local_38[1] = pTree[6];                   // the head, as the end iterator
+    local_38[2] = *pTree;                     // the begin iterator's container
+    local_38[3] = *(int64_t*)pTree[6];        // head->left, the begin iterator's node
+    TreeEraseRange(pTree, local_18, &local_38[2], &local_38[0]);
+    ::operator delete((void*)pTree[6]);
+    pTree[6] = 0;
+    pTree[7] = 0;
+}
+
 }  // namespace stl
 }  // namespace flower

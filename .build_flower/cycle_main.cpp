@@ -14,6 +14,7 @@ int flower_d144_main();
 int flower_d145_main();
 int flower_d146_main();
 int flower_d147_main();
+int flower_d148_main();
 int main(){int rc=0;
   rc += (flower_d130_main() != 0);
   rc += (flower_d131_main() != 0);
@@ -31,4 +32,5 @@ int main(){int rc=0;
   rc += (flower_d145_main() != 0);
   rc += (flower_d146_main() != 0);
   rc += (flower_d147_main() != 0);
+  rc += (flower_d148_main() != 0);
   return rc; }
