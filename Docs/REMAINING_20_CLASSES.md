@@ -12,18 +12,18 @@
 | `CMsgLeagueRobOptPB` | `0x1418423d8` | **12/12 مكتملة** (D100) |
 | `CMsgLeagueRobOptServerPB` | `0x141842278` | **12/12 مكتملة** (D100) |
 | `CMsgLeagueTokenPB` | `0x141842658` | **12/12 مكتملة** (D101) |
-| `CMsgInvadeWarning` | TBD | 0/12 |
+| `CMsgInvadeWarning` | `0x14183bf30` | **5/5 مكتملة** (D118) |
 | `CMsgLeagueBeRob` | TBD | 0/12 |
 | `CMsgLeagueOpt` | TBD | 0/12 |
 | `CMsgLeagueRobOpt` | TBD | 0/12 |
 | `CMsgLeagueToken` | TBD | 0/12 |
-| `CMsgLog` | TBD | 0/12 |
+| `CMsgLog` | `0x14182e4a0` | **5/5 مكتملة** (D117) |
 | `CMsgSelfSynMemAwardRank` | TBD | 0/12 |
 | `CMsgSynAttrInfo` | TBD | 0/12 |
 | `CMsgSynBaseProffer` | TBD | 0/12 |
 | `CMsgSynChgDomName` | TBD | 0/12 |
 | `CMsgSynDomain` | TBD | 0/12 |
-| `CMsgSynMemberInfo` | TBD | 0/12 |
+| `CMsgSynMemberInfo` | `0x14183df00` | **5/5 مكتملة** (D119) |
 | `CMsgSynMemberList` | TBD | 0/12 |
 | `CMsgSynProffer` | TBD | 0/12 |
 | `CMsgSynProfferRank` | TBD | 0/12 |
@@ -85,3 +85,15 @@
 **متطلب سابق للوحدة التالية:** تخطيط `tq::CMsg` الأساسي
 (`tq::CMsg::vftable`, `Create`, `Init`, وحقول `+0x50` و`+0x2040`)
 لازم يُنقل قبل معالجات الرسائل.
+
+## ملاحظات التحقق (2026-10-30)
+
+- الأدوات `find_vtables.py` تعيد MISS للأسماء
+  `CMsgSynAttrInfo`, `CMsgSynBaseProffer`, `CMsgSynDomain`, `CMsgSyndicate`,
+  `CMsgSynMemberList`, `CMsgSynProffer`, `CMsgSynRecruitAdvertising*`
+  بصيغتها المجرّدة — يلزم تمرير الاسم المؤهّل (`syndicate::…`) أو البحث
+  عن نوع RTTI البديل قبل بناء الوحدات التالية.
+- بقية أسماء هذا المستند بصيغة `tq::CMsg` بـ5 فتحات، وليست 12.
+- مسار المصدر الأصلي للرسائل: `modules/syndicate/src/msg/`
+  (مؤكَّد من نص CHECKF في D119) — نقل ملفات الرسائل إلى المجلد ده
+  مطلوب لمطابقة الشجرة الأصلية.
