@@ -30,6 +30,9 @@ const char* StrGet(const char* szKey);
 extern void* (*g_pfnFlowerCreateHelper)();
 // FUN_140d94020 (pAttached, pSecond) -> bool
 extern uint8_t (*g_pfnFlowerAttachInit)(void* pAttached, void* pSecond);
+// 0x140d91a70 — gift slot/count resolve: (pThis, nArg, &slot, &count)
+extern void (*g_pfnResolveGift)(void* pThis, int nArg, uint32_t* pSlot,
+                                int* pCount);
 
 class CFlowerService {
 public:
@@ -54,7 +57,12 @@ public:
     static uint8_t Send(void* pThis, uint32_t idSender, uint32_t idReceiver,
                         int nArg);
 
+    // 0x140d926c0 — the gift path (message type 2, male receiver)
+    static uint8_t SendGift(void* pThis, uint32_t idSender, uint32_t idReceiver,
+                            int nArg);
     static constexpr uint32_t kMinSendLevel = 50;    // 0x140da2008
+    static constexpr uint32_t kGiftGm99 = 99;        // 0x140da2020
+    static constexpr uint32_t kGiftGm999 = 999;      // 0x140da2024
     static constexpr uint32_t kGmCount99 = 99;       // 0x140da2018
     static constexpr uint32_t kGmCount999 = 999;     // 0x140da201c
 

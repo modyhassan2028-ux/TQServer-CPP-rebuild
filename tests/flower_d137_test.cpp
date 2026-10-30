@@ -1,4 +1,4 @@
-// D137 — the gift path: CFlowerService::Send (0x140d91be0)
+// D137/D138 — CFlowerService::Send (0x140d91be0) and SendGift (0x140d926c0)
 #include "modules/flower/src/flowerservice.h"
 #include "modules/flower/src/todayflowermgr.h"
 #include <cassert>
@@ -153,6 +153,56 @@ int main() {
     assert(CFlowerService::Send(&ctx, 11, 22, 3) == 0);
     assert(s_nTell == 0);
 
-    printf("FLOWER_D137_OK: CFlowerService::Send\n");
+    // ================= D138: the gift path (mode 2, male receiver) ==========
+    g_pfnResolveGift = [](void*, int, uint32_t* pSlot, int* pCount) {
+        *pSlot = 5; *pCount = 3;          // gift B, three of them
+    };
+    s_modeNoArg = 2; s_modeWithArg = 1;   // receiver must be male
+    s_grade = 0; s_level = 60; s_date = 20200101; s_alive = 1; s_exists = 1;
+    s_iOld = 4; s_modeCalls = 0; s_nTell = 0; s_recordAdd = 0; s_storeValue = 0;
+    s_storeDate = 0; s_storeCount = 0xdead; s_finish = 0; s_nLog = 0;
+    s_gmNotice = 0;
+
+    // ---- guards
+    s_nLog = 0;
+    assert(CFlowerService::SendGift(&ctx, 0, 22, 1) == 0 && s_nLog == 1);
+    // ---- mode gate (session must be 2 for the gift path)
+    s_modeCalls = 0; s_modeNoArg = 1;
+    assert(CFlowerService::SendGift(&ctx, 11, 22, 0) == 0);
+    s_modeCalls = 0; s_modeNoArg = 2;
+
+    // ---- the neighbouring self gate uses the gift level text
+    s_modeCalls = 0; s_level = 10; s_nTell = 0;
+    assert(CFlowerService::SendGift(&ctx, 11, 22, 0) == 0);
+    assert(s_nTell == 1 && std::strcmp(s_tells[0], "STR_GIFT_LEVEL_TOO_LOW") == 0);
+
+    s_modeCalls = 0; s_level = 60; s_date = 20991231; s_nTell = 0;
+    assert(CFlowerService::SendGift(&ctx, 11, 22, 0) == 0);
+    assert(s_nTell == 1 && std::strcmp(s_tells[0], "STR_GIFT_HAVE_SENT_TODAY") == 0);
+
+    // ---- receiver must be male
+    s_modeCalls = 0; s_date = 20200101; s_modeWithArg = 2; s_nTell = 0;
+    assert(CFlowerService::SendGift(&ctx, 11, 22, 0) == 0);
+    assert(s_nTell == 1 && std::strcmp(s_tells[0], "STR_GIFT_RECEIVER_NOT_MALE") == 0);
+
+    // ---- happy non-self path: gift slot 5, count 3, no scaling
+    s_modeCalls = 0; s_modeWithArg = 1; s_nTell = 0; s_recordAdd = 0;
+    s_storeValue = 0; s_storeDate = 0; s_finish = 0; s_gmNotice = 0;
+    s_nLog = 0; s_iOld = 4; s_grade = 0;
+    assert(CFlowerService::SendGift(&ctx, 11, 22, 3) == 1);
+    assert(s_storeValue == 1 && s_storeVal == 4 + 3);
+    assert(s_recordAdd == 2 && s_finish == 1);
+    assert(s_storeDate == 0);            // only the self path stamps the day
+    assert(s_storeCount == 0 && s_nLog == 0 && s_gmNotice == 0);
+
+    // ---- a resolve that yields no count leaves everything untouched
+    g_pfnResolveGift = [](void*, int, uint32_t* pSlot, int* pCount) {
+        *pSlot = 4; *pCount = 0;
+    };
+    s_modeCalls = 0; s_storeValue = 0; s_recordAdd = 0; s_nTell = 0;
+    assert(CFlowerService::SendGift(&ctx, 11, 22, 3) == 0);
+    assert(s_storeValue == 0 && s_recordAdd == 0 && s_nTell == 0);
+
+    printf("FLOWER_D137_OK: CFlowerService::Send + SendGift\n");
     return 0;
 }

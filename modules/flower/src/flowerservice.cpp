@@ -2,11 +2,13 @@
 #include "modules/flower/src/flowerservice.h"
 #include <ctime>
 #include <cstdio>
+#include <cstring>
 #include "modules/flower/src/todayflowermgr.h"
 #include "modules/flower/src/msg/msgflower.h"
 
 namespace flower {
 void* (*g_pfnTheInstance)() = nullptr;
+void (*g_pfnResolveGift)(void*, int, uint32_t*, int*) = nullptr;
 // the string manager answers a literal by key from its slot 0
 const char* StrGet(const char* szKey) {
     void* pMgr = g_pfnTheInstance ? g_pfnTheInstance() : nullptr;
@@ -235,6 +237,218 @@ uint8_t CFlowerService::Send(void* pThis, uint32_t idSender, uint32_t idReceiver
         }
     }
     (void)uLast;
+    return uRet;
+}
+
+
+// 0x140d926c0 — the gift path. Same session contract as Send; the gift slot
+// comes out of 0x140d91a70 (4..7) and the receiver must be male.
+uint8_t CFlowerService::SendGift(void* pThis, uint32_t idSender,
+                                 uint32_t idReceiver, int nArg) {
+    unsigned char* p = (unsigned char*)pThis;
+    if (idSender == 0 || idReceiver == 0) {
+        g_pfnFlowerLog(kCheckFormat, "", "SendGift", "");
+        return 0;
+    }
+    void* pSess = *reinterpret_cast<void**>(p + 8);
+    if (pSess == nullptr) return 0;
+    std::map<uint32_t, CTodayFlower*>* pMap =
+        *reinterpret_cast<std::map<uint32_t, CTodayFlower*>**>(p + 0x18);
+    uint8_t uRet = 0;
+    const uint32_t uReceiverIn = idReceiver;   // local_c78
+
+    if (((int (*)(void*))SessSlot(pSess, 0x18))(pSess) != 2) return 0;
+
+    bool bSelf = false;
+    uint8_t byFlag = 0;
+    if (((uint8_t (*)(void*, uint32_t))SessSlot(pSess, 0x50))(pSess, idSender) ==
+        0) {
+        SessTell(pSess, idSender, StrGet("STR_GIFT_SENDER_NOT_ALIVE"));
+        return 0;
+    }
+    uint32_t uSlot = 4;      // local_c80
+    uint32_t uCount = 0;     // local_c7c
+    if (nArg == 0) {
+        uSlot = 4;
+        uCount = 1;
+        bSelf = true;
+        byFlag = 1;
+        const uint32_t uLevel =
+            ((uint32_t (*)(void*, uint32_t))SessSlot(pSess, 0x40))(pSess,
+                                                                  idSender);
+        if (uLevel < kMinSendLevel) {
+            SessTell(pSess, idSender, StrGet("STR_GIFT_LEVEL_TOO_LOW"));
+            return 0;
+        }
+        const uint32_t uDate =
+            ((uint32_t (*)(void*, uint32_t))SessSlot(pSess, 0x20))(pSess,
+                                                                  idSender);
+        if (IsExpiredDate(uDate) == 0) {
+            const std::time_t tNow = std::time(nullptr);
+            struct tm* pTm = std::localtime(&tNow);
+            if (pTm == nullptr) {
+                g_pfnFlowerLog(kCheckFormat, "", "SendGift", "");
+                return 0;
+            }
+            char szBuf[0x400];
+            std::snprintf(szBuf, sizeof szBuf, "%s",
+                          StrGet("STR_GIFT_HAVE_SENT_TODAY"));
+            SessTell(pSess, idSender, szBuf);
+            return 0;
+        }
+        uCount = 1;
+        uSlot = 4;
+    } else {
+        uint32_t uResolved = 4;
+        int iCount = 0;
+        if (g_pfnResolveGift) g_pfnResolveGift(pThis, nArg, &uResolved, &iCount);
+        uSlot = uResolved;
+        uCount = (uint32_t)iCount;
+        if (uCount == 0) return 0;
+    }
+
+    if (((uint8_t (*)(void*, uint32_t))SessSlot(pSess, 0x58))(pSess,
+                                                             idReceiver) == 0) {
+        return 0;   // uRet stays 0
+    }
+    if (((int (*)(void*, uint32_t))SessSlot(pSess, 0x18))(pSess, idReceiver) !=
+        1) {
+        SessTell(pSess, idSender, StrGet("STR_GIFT_RECEIVER_NOT_MALE"));
+        return 0;
+    }
+    if (!bSelf) {
+        if (nArg == 0) return 0;
+        if (((uint8_t (*)(void*, uint32_t, int))SessSlot(pSess, 0))(
+                pSess, idSender, nArg) == 0) {
+            return 0;
+        }
+    }
+    const int iOld = ((int (*)(void*, uint32_t, uint32_t))SessSlot(pSess,
+                                                                  0x30))(
+        pSess, idReceiver, uSlot);
+    bool bVip = false;
+    uint32_t uAdd = uCount;
+    if (byFlag != 0 &&
+        ((uint8_t (*)(void*, uint32_t))SessSlot(pSess, 0x90))(pSess, 3) != 0) {
+        const uint32_t uGrade =
+            ((uint32_t (*)(void*, uint32_t))SessSlot(pSess, 0x48))(pSess,
+                                                                  idSender);
+        switch (uGrade) {
+            case 0: break;
+            case 1: bVip = true; uAdd = 2; break;
+            case 2: bVip = true; uAdd = 3; break;
+            case 3: bVip = true; uAdd = 5; break;
+            case 4: bVip = true; uAdd = 10; break;
+            case 5: bVip = true; uAdd = 0xf; break;
+            case 6: bVip = true; uAdd = 0x1e; break;
+            default: bVip = true; uAdd = 0x1e; break;
+        }
+    }
+    const int iNew = iOld + (int)uAdd;
+    ((void (*)(void*, uint32_t, uint32_t, int))SessSlot(pSess, 0x38))(
+        pSess, idReceiver, uSlot, iNew);
+    CTodayFlowerMgr::SetValue(pMap, idReceiver, uSlot, (int32_t)uAdd);
+
+    unsigned char oMsg[0x410];
+    CTodayFlowerMgr_LogCheck;   // placeholder keeps the CHECKF blob unreferenced
+    std::memset(oMsg, 0, sizeof oMsg);
+    CMsgFlower::Ctor(oMsg);
+    const char* szReceiver =
+        ((const char* (*)(void*, uint32_t))SessSlot(pSess, 8))(pSess,
+                                                              idReceiver);
+    const char* szSender =
+        ((const char* (*)(void*, uint32_t))SessSlot(pSess, 8))(pSess, idSender);
+    if (!CMsgFlower::Build(oMsg, 1, szSender, szReceiver, uAdd, uSlot,
+                           byFlag)) {
+        g_pfnFlowerLog(kCheckFormat, "", "SendGift", "");
+    } else if (uCount < kGiftGm99) {
+        ((void (*)(void*, uint32_t, void*))SessSlot(pSess, 0x68))(
+            pSess, idSender, oMsg);
+        ((void (*)(void*, uint32_t, void*, uint32_t))SessSlot(pSess, 0x70))(
+            pSess, idReceiver, oMsg, idSender);
+    } else {
+        ((void (*)(void*, uint32_t, void*))SessSlot(pSess, 0x68))(
+            pSess, idSender, oMsg);
+        ((void (*)(void*, uint32_t, void*, uint32_t))SessSlot(pSess, 0x70))(
+            pSess, idReceiver, oMsg, idSender);
+
+        char szGm[0x200];
+        szGm[0] = '\0';
+        const char* szFmt = nullptr;
+        const char* szA = nullptr;
+        const char* szB = nullptr;
+        // the four gift slots, each with its own 99 and 999 prompt; the
+        // argument order differs per literal and is kept exactly
+        if (uSlot == 4) {
+            if (uCount == kGiftGm99) {
+                szFmt = StrGet("STR_GIFT_GM_PROMPT_A_99");
+                szA = szReceiver; szB = szSender;
+            } else if (uCount == kGiftGm999) {
+                szFmt = StrGet("STR_GIFT_GM_PROMPT_A_999");
+                szA = szReceiver; szB = szSender;
+            }
+        } else if (uSlot == 5) {
+            if (uCount == kGiftGm99) {
+                szFmt = StrGet("STR_GIFT_GM_PROMPT_B_99");
+                szA = szSender; szB = szReceiver;
+            } else if (uCount == kGiftGm999) {
+                szFmt = StrGet("STR_GIFT_GM_PROMPT_B_999");
+                szA = szReceiver; szB = szSender;
+            }
+        } else if (uSlot == 6) {
+            if (uCount == kGiftGm99) {
+                szFmt = StrGet("STR_GIFT_GM_PROMPT_C_99");
+                szA = szSender; szB = szReceiver;
+            } else if (uCount == kGiftGm999) {
+                szFmt = StrGet("STR_GIFT_GM_PROMPT_C_999");
+                szA = szSender; szB = szReceiver;
+            }
+        } else if (uSlot == 7) {
+            if (uCount == kGiftGm99) {
+                szFmt = StrGet("STR_GIFT_GM_PROMPT_D_99");
+                szA = szSender; szB = szReceiver;
+            } else if (uCount == kGiftGm999) {
+                szFmt = StrGet("STR_GIFT_GM_PROMPT_D_999");
+                szA = szSender; szB = szReceiver;
+            }
+        }
+        if (szFmt != nullptr) std::snprintf(szGm, sizeof szGm, szFmt, szA, szB);
+        ((void (*)(void*, const char*, uint32_t, uint32_t))SessSlot(pSess,
+                                                                    0x78))(
+            pSess, szGm, 0xfc00d5, 0x7db);
+
+        // the service object's own slot +0x48 takes the gift slot here
+        if (*(void***)pThis != nullptr) {
+            ((void (*)(void*, uint32_t))(*reinterpret_cast<void***>(pThis))
+                 [0x48 / 8])(pThis, uSlot);
+        }
+        std::snprintf(szGm, sizeof szGm, "%s",
+                      StrGet("STR_GIFT_GM_PROMPT_ALL"));
+        SessTell(pSess, idSender, szGm);
+        std::snprintf(szGm, sizeof szGm, "%s",
+                      StrGet("STR_GIFT_RECEIVER_PROMPT"));
+        idReceiver = uReceiverIn;
+        SessTell(pSess, uReceiverIn, szGm);
+        uSlot = uSlot;
+    }
+
+    if (byFlag != 0) {
+        if (bVip) {
+            char szBuf[0x200];
+            std::snprintf(szBuf, sizeof szBuf, "%s",
+                          StrGet("STR_GIFT_VIP_SYS_SEND"), szSender);
+            SessTell(pSess, idReceiver, szBuf);
+        }
+        const int iToday = TodayStamp();
+        ((void (*)(void*, uint32_t, int))SessSlot(pSess, 0x28))(pSess, idSender,
+                                                               iToday);
+    }
+    const uint32_t uValue = CTodayFlowerMgr::GetValue(pMap, idReceiver, uSlot);
+    ((void (*)(void*, uint32_t, uint32_t, uint32_t))SessSlot(pSess, 0x88))(
+        pSess, idReceiver, uSlot & 0xff, uValue);
+    ((void (*)(void*, uint32_t))SessSlot(pSess, 0xb0))(pSess, idSender);
+    CMsgFlower::BaseDtor(oMsg);
+    uRet = 1;
     return uRet;
 }
 
