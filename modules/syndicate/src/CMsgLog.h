@@ -12,10 +12,9 @@
 #ifndef SYNDICATE_CMSGLOG_H
 #define SYNDICATE_CMSGLOG_H
 #include <cstdint>
+#include "modules/syndicate/src/CMsgSeams.h"
 namespace syndicate {
 
-// the imported tq::CMsg layer (0x1417e7fda is its Create thunk)
-extern bool (*g_pfnCMsgCreate)(void* self, char* pData, uint16_t uType);
 
 // 0x1417b6210 — the SyndicateMgr accessor
 extern void* (*g_pfnGetSyndicateMgr)();
@@ -24,7 +23,6 @@ extern void (*g_pfnLogProcessA)(void* mgr, uint32_t idActor);
 // 0x1417ac620 — the type-1 handler (this, uint32_t idActor)
 extern void (*g_pfnLogProcessB)(void* mgr, uint32_t idActor);
 // InlineLogERROR, resolved through the import at 0x141827030
-extern void (*g_pfnInlineLogError)(const char* fmt, ...);
 
 class CMsgLog {
 public:

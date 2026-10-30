@@ -6687,3 +6687,17 @@ New، Clear، IsInit، مشترك، thunk، Merge، ByteSize، Serialize،
   CSyndicateLogic (`+0x350` join-league)؛ أُعيد من git وأُعيد ترقيم
   وحدة اليوم إلى D117.
 - `135/135 × 6` أخضر، ASan/UBSan نظيفان.
+
+## D118 — CMsgInvadeWarning + CMsgSeams [2026-10-30]
+
+- vtable `0x14183bf30` · القاعدة `0x14182d368` (من `lea` في الـdtor).
+- الفتحة 1 `0x1417d5170`: `Create` ثم `word [rbx+0xa] == 0xc1c`.
+- الفتحات 2/3/4 = ثلاثة هياكل قاعدة، الثالث
+  `0x14177e2e0` نصه `"tq::CMsg::Process(OBJID idActor) error"`.
+- المرسل `0x1417d51a0`: `0x1417e8016(self,a,b,c)` ثم
+  `[+0x408]+2 = 0xc1c`، `+0` = `0x22`، `+4` = 0،
+  `memcpy(+6,a)`، `(+0xa,b)`، `(+0xe,c)`،
+  ثم `g_fn_141823098([+0x408]+0x12, pszName)` (استيراد 0x141823098).
+- `CMsgSeams.{h,cpp}`: تعريف واحد للـseams المشتركة (إصلاح
+  multiple definition بين CMsgLog وCMsgInvadeWarning).
+- `136/136 × 6` أخضر، ASan/UBSan نظيفان.

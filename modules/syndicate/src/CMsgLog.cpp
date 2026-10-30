@@ -2,11 +2,9 @@
 #include "modules/syndicate/src/CMsgLog.h"
 namespace syndicate {
 
-bool (*g_pfnCMsgCreate)(void*, char*, uint16_t) = nullptr;
 void* (*g_pfnGetSyndicateMgr)() = nullptr;
 void (*g_pfnLogProcessA)(void*, uint32_t) = nullptr;
 void (*g_pfnLogProcessB)(void*, uint32_t) = nullptr;
-void (*g_pfnInlineLogError)(const char*, ...) = nullptr;
 
 // 0x14177e3e0 — deleting dtor: class vftable, then the tq::CMsg base
 // vftable, then operator delete (0x1417f2fdc) when bit 0 is set.
