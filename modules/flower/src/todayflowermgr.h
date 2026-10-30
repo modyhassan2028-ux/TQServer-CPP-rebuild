@@ -23,6 +23,12 @@ struct CTodayFlower {
     static constexpr const char* kHeapName = "CTodayFlower";  // 0x140da2490
 
     static CTodayFlower* Ctor(void* pMem, void* pData, uint32_t idUser);  // 0x140d93750
+    // 0x140d937b0 — slots 0/4, 1/5, 2/6, 3/7 map to the manager's properties
+    // 2..5, and the value comes from that property's slot +0x40
+    static uint32_t GetSlot(CTodayFlower* pSelf, uint32_t dwSlot);
+    // 0x140d93850 — add to the same property through its slot +0xa8, then
+    // let the manager settle with slot +0x38(0)
+    static void SetSlot(CTodayFlower* pSelf, uint32_t dwSlot, int32_t nAdd);
 };
 
 // the CHECKF blob behind every bare InlineLogERROR call in this file
@@ -39,6 +45,13 @@ class CTodayFlowerMgr {
 public:
     void* pSession;                                   // +0x00
     std::map<uint32_t, CTodayFlower*> mapFlower;      // +0x08
+
+    // 0x140d96eb0 — the map lookup the original walks as an rb-tree
+    static CTodayFlower* Find(std::map<uint32_t, CTodayFlower*>* pMap,
+                              uint32_t idUser);
+    // 0x140d97400 — lookup then the slot read, zero when the key is absent
+    static uint32_t GetValue(std::map<uint32_t, CTodayFlower*>* pMap,
+                             uint32_t idUser, uint32_t dwSlot);
 
     // 0x140d97710
     void OnUserLogin(uint32_t idUser);

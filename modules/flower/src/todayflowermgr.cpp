@@ -71,4 +71,60 @@ void CTodayFlowerMgr::OnUserLogin(uint32_t idUser) {
     }
 }
 
+// 0x140d937b0 — the property index is 2..5, the read goes through its +0x40
+uint32_t CTodayFlower::GetSlot(CTodayFlower* pSelf, uint32_t dwSlot) {
+    if (pSelf->pData == nullptr) return 0;
+    uint32_t uProp;
+    switch (dwSlot) {
+        case 0: case 4: uProp = 2; break;
+        case 1: case 5: uProp = 3; break;
+        case 2: case 6: uProp = 4; break;
+        case 3: case 7: uProp = 5; break;
+        default: return 0;
+    }
+    void** vtMgr = *reinterpret_cast<void***>(pSelf->pData);
+    void* pProp = ((void* (*)(void*, uint32_t))vtMgr[0x10 / 8])(pSelf->pData,
+                                                                uProp);
+    void** vtProp = *reinterpret_cast<void***>(pProp);
+    return ((uint32_t (*)(void*))vtProp[0x40 / 8])(pProp);
+}
+
+// 0x140d93850 — write back value + the current one, then the manager's
+// slot +0x38(0); every branch is guarded by the data pointer
+void CTodayFlower::SetSlot(CTodayFlower* pSelf, uint32_t dwSlot, int32_t nAdd) {
+    if (pSelf->pData == nullptr) return;
+    const uint32_t uOld = GetSlot(pSelf, dwSlot);
+    uint32_t uProp;
+    switch (dwSlot) {
+        case 0: case 4: uProp = 2; break;
+        case 1: case 5: uProp = 3; break;
+        case 2: case 6: uProp = 4; break;
+        case 3: case 7: uProp = 5; break;
+        default: return;
+    }
+    void** vtMgr = *reinterpret_cast<void***>(pSelf->pData);
+    void* pProp = ((void* (*)(void*, uint32_t))vtMgr[0x10 / 8])(pSelf->pData,
+                                                                uProp);
+    void** vtProp = *reinterpret_cast<void***>(pProp);
+    ((void (*)(void*, uint32_t))vtProp[0xa8 / 8])(pProp,
+                                                  (uint32_t)(nAdd + (int)uOld));
+    ((void (*)(void*, uint32_t))vtMgr[0x38 / 8])(pSelf->pData, 0);
+}
+
+// 0x140d96eb0 — the equal-range walk of the original is exactly a find here
+CTodayFlower* CTodayFlowerMgr::Find(std::map<uint32_t, CTodayFlower*>* pMap,
+                                    uint32_t idUser) {
+    if (pMap == nullptr) return nullptr;
+    auto it = pMap->find(idUser);
+    return it == pMap->end() ? nullptr : it->second;
+}
+
+// 0x140d97400
+uint32_t CTodayFlowerMgr::GetValue(std::map<uint32_t, CTodayFlower*>* pMap,
+                                   uint32_t idUser, uint32_t dwSlot) {
+    CTodayFlower* pEntry = Find(pMap, idUser);
+    if (pEntry == nullptr) return 0;
+    return CTodayFlower::GetSlot(pEntry, dwSlot);
+}
+
 }  // namespace flower
