@@ -1003,5 +1003,235 @@ void TreeDestroy(int64_t* pTree) {
     pTree[7] = 0;
 }
 
+// 0x140d96560 — insert a value without a hint. The set is walked from the root
+// keeping the last direction, the duplicate test compares the neighbour at
+// +0x18, and the insert goes through 0x140d95b20 with that direction. The
+// third slot of the output is the inserted flag at +0x10.
+void* TreeInsertValue(int64_t* pTree, int64_t* pOut, uint32_t* pKey) {
+    int64_t* plVar6 = (int64_t*)pTree[6];
+    bool bVar7 = true;
+    if (*(char*)(plVar6[1] + 0x29) == '\0') {
+        int64_t* plVar5 = (int64_t*)plVar6[1];
+        do {
+            plVar6 = plVar5;
+            bVar7 = *pKey < *(uint32_t*)((char*)plVar6 + 0x18);
+            if (bVar7) {
+                plVar5 = (int64_t*)*plVar6;
+            } else {
+                plVar5 = (int64_t*)plVar6[2];
+            }
+        } while (*(char*)((char*)plVar5 + 0x29) == '\0');
+    }
+    const int64_t lVar2 = *pTree;
+    int64_t* plVar5 = plVar6;
+    int64_t local_38[2];
+    int64_t* plVar4 = plVar6;
+    int64_t* local_30 = nullptr;
+    local_38[0] = lVar2;
+    if (bVar7 == false) {
+LAB_966bd:
+        local_30 = plVar4;
+        if (*pKey <= *(uint32_t*)((char*)plVar5 + 0x18)) {
+            *(uint8_t*)((char*)pOut + 0x10) = 0;
+            pOut[0] = local_38[0];
+            goto LAB_966ec;
+        }
+    } else {
+        plVar5 = *(int64_t**)pTree[6];
+        local_30 = plVar6;
+        if (lVar2 == 0) InvalidParameter();
+        if (plVar6 != plVar5) {
+            if (lVar2 == 0) InvalidParameter();
+            if (*(char*)((char*)plVar6 + 0x29) == '\0') {
+                plVar5 = (int64_t*)*plVar6;
+                if (*(char*)((char*)plVar5 + 0x29) == '\0') {
+                    char cVar1 = *(char*)(plVar5[2] + 0x29);
+                    int64_t* plVar3 = (int64_t*)plVar5[2];
+                    while ((plVar4 = plVar5), cVar1 == '\0') {
+                        cVar1 = *(char*)(plVar3[2] + 0x29);
+                        plVar5 = plVar3;
+                        plVar3 = (int64_t*)plVar3[2];
+                    }
+                } else {
+                    char cVar1 = *(char*)(plVar6[1] + 0x29);
+                    plVar4 = (int64_t*)plVar6[1];
+                    int64_t* plVar3 = plVar6;
+                    for (;;) {
+                        plVar5 = plVar4;
+                        if (!((cVar1 == '\0') && (plVar3 == (int64_t*)*plVar5))) break;
+                        cVar1 = *(char*)(plVar5[1] + 0x29);
+                        plVar4 = (int64_t*)plVar5[1];
+                        plVar3 = plVar5;
+                        local_30 = plVar5;
+                    }
+                    plVar4 = plVar5;
+                    if (*(char*)((char*)plVar3 + 0x29) != '\0') {
+                        InvalidParameter();
+                        plVar5 = plVar3;
+                        plVar4 = local_30;
+                    }
+                }
+            } else {
+                plVar5 = (int64_t*)plVar6[2];
+                plVar4 = plVar5;
+                if (*(char*)((char*)plVar5 + 0x29) != '\0') {
+                    local_30 = plVar5;
+                    InvalidParameter();
+                    plVar4 = local_30;
+                }
+            }
+            goto LAB_966bd;
+        }
+        bVar7 = true;
+    }
+    plVar6 = (int64_t*)TreeInsert((void**)pTree, (void**)local_38, bVar7 ? 1 : 0,
+                                  (void**)plVar6, (void**)pKey);
+    *(uint8_t*)((char*)pOut + 0x10) = 1;
+    local_30 = (int64_t*)plVar6[1];
+    pOut[0] = *plVar6;
+LAB_966ec:
+    pOut[1] = (int64_t)local_30;
+    return pOut;
+}
+
+// 0x140d96b40 — insert with a hint. An empty set goes straight to the insert
+// with the head as the parent; otherwise the hint is checked against the
+// leftmost, the rightmost and the neighbour on either side, and only when the
+// hint is useless does the plain insert at 0x140d96560 run.
+void* TreeInsertHint(int64_t* pTree, int64_t* pOut, int64_t* pHint,
+                     uint32_t* pKey) {
+    if (pTree[7] == 0) {
+        TreeInsert((void**)pTree, (void**)pOut, 1, (void**)pTree[6], (void**)pKey);
+    } else {
+        void** puVar2 = *(void***)pTree[6];
+        if ((*pHint == 0) || (*pHint != *pTree)) InvalidParameter();
+        void* puVar3 = (void*)pHint[1];
+        if (puVar3 == puVar2) {
+            if (*pKey < *(uint32_t*)((char*)puVar3 + 0x18)) {
+                TreeInsert((void**)pTree, (void**)pOut, 1, (void**)puVar3, (void**)pKey);
+                return pOut;
+            }
+        } else {
+            const int64_t lVar4 = pTree[6];
+            if ((*pHint == 0) || (*pHint != *pTree)) InvalidParameter();
+            if (pHint[1] == lVar4) {
+                if (*(uint32_t*)(*(void**)((char*)pTree[6] + 0x10) + 0x18) < *pKey) {
+                    TreeInsert((void**)pTree, (void**)pOut, 0,
+                               *(void***)((char*)pTree[6] + 0x10), (void**)pKey);
+                    return pOut;
+                }
+            } else {
+                uint32_t uVar8 = *pKey;
+                if (uVar8 < *(uint32_t*)(pHint[1] + 0x18)) {
+                    int64_t local_38[2];
+                    int64_t* local_30;
+                    local_38[0] = *pHint;
+                    local_30 = (int64_t*)pHint[1];
+                    if (local_38[0] == 0) InvalidParameter();
+                    if (*(char*)((char*)local_30 + 0x29) == '\0') {
+                        int64_t* plVar7 = (int64_t*)*local_30;
+                        if (*(char*)((char*)plVar7 + 0x29) == '\0') {
+                            char cVar1 = *(char*)(plVar7[2] + 0x29);
+                            int64_t* plVar9 = (int64_t*)plVar7[2];
+                            while ((local_30 = plVar7), cVar1 == '\0') {
+                                cVar1 = *(char*)(plVar9[2] + 0x29);
+                                plVar7 = plVar9;
+                                plVar9 = (int64_t*)plVar9[2];
+                            }
+                        } else {
+                            char cVar1 = *(char*)(local_30[1] + 0x29);
+                            int64_t* plVar5 = (int64_t*)local_30[1];
+                            int64_t* plVar9 = local_30;
+                            for (;;) {
+                                plVar7 = plVar5;
+                                if (!((cVar1 == '\0') && (plVar9 == (int64_t*)*plVar7))) break;
+                                cVar1 = *(char*)(plVar7[1] + 0x29);
+                                plVar5 = (int64_t*)plVar7[1];
+                                plVar9 = plVar7;
+                            }
+                            local_30 = plVar7;
+                            if (*(char*)((char*)plVar9 + 0x29) != '\0') {
+                                local_30 = plVar9;
+                                InvalidParameter();
+                                plVar7 = plVar9;
+                            }
+                        }
+                    } else {
+                        int64_t* plVar7 = (int64_t*)local_30[2];
+                        local_30 = plVar7;
+                        if (*(char*)((char*)plVar7 + 0x29) != '\0') {
+                            InvalidParameter();
+                        }
+                    }
+                    uVar8 = *pKey;
+                    int64_t* plVar7b = (int64_t*)local_30;
+                    if (*(uint32_t*)((char*)plVar7b + 0x18) < uVar8) {
+                        if (*(char*)(plVar7b[2] + 0x29) != '\0') {
+                            TreeInsert((void**)pTree, (void**)pOut, 0,
+                                       (void**)plVar7b, (void**)pKey);
+                            return pOut;
+                        }
+                        TreeInsert((void**)pTree, (void**)pOut, 1,
+                                   (void**)pHint[1], (void**)pKey);
+                        return pOut;
+                    }
+                }
+                if (*(uint32_t*)(pHint[1] + 0x18) < uVar8) {
+                    int64_t local_38[2];
+                    local_38[0] = *pHint;
+                    int64_t* plVar7 = (int64_t*)pTree[6];
+                    int64_t* local_30 = (int64_t*)pHint[1];
+                    const int64_t lVar4b = *pTree;
+                    if (local_38[0] == 0) InvalidParameter();
+                    int64_t* plVar9 = local_30;
+                    if (*(char*)((char*)local_30 + 0x29) == '\0') {
+                        plVar9 = (int64_t*)local_30[2];
+                        if (*(char*)((char*)plVar9 + 0x29) == '\0') {
+                            char cVar1 = *(char*)(*plVar9 + 0x29);
+                            int64_t* plVar5 = (int64_t*)*plVar9;
+                            while (cVar1 == '\0') {
+                                cVar1 = *(char*)(*plVar5 + 0x29);
+                                plVar9 = plVar5;
+                                plVar5 = (int64_t*)*plVar5;
+                            }
+                        } else {
+                            char cVar1 = *(char*)(local_30[1] + 0x29);
+                            int64_t* plVar6 = (int64_t*)local_30[1];
+                            int64_t* plVar5 = local_30;
+                            for (;;) {
+                                plVar9 = plVar6;
+                                if (!((cVar1 == '\0') && (plVar5 == (int64_t*)plVar9[2]))) break;
+                                cVar1 = *(char*)(plVar9[1] + 0x29);
+                                plVar6 = (int64_t*)plVar9[1];
+                                plVar5 = plVar9;
+                            }
+                        }
+                    } else {
+                        InvalidParameter();
+                    }
+                    if ((local_38[0] == 0) || (local_38[0] != lVar4b)) InvalidParameter();
+                    if ((plVar9 == plVar7) || (*pKey < *(uint32_t*)((char*)plVar9 + 0x18))) {
+                        if (*(char*)(((void**)pHint[1])[2] + 0x29) != '\0') {
+                            TreeInsert((void**)pTree, (void**)pOut, 0,
+                                       (void**)pHint[1], (void**)pKey);
+                            return pOut;
+                        }
+                        TreeInsert((void**)pTree, (void**)pOut, 1,
+                                   (void**)plVar9, (void**)pKey);
+                        return pOut;
+                    }
+                }
+            }
+        }
+        // the decompiled slot is one qword; 0x140d96560 also writes the
+        // inserted flag at +0x10, so the slot is widened to three
+        int64_t local_38[3];
+        int64_t* plVar7 = (int64_t*)TreeInsertValue(pTree, local_38, pKey);
+        pOut[0] = *plVar7;
+        pOut[1] = plVar7[1];
+    }
+    return pOut;
+}
+
 }  // namespace stl
 }  // namespace flower

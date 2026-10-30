@@ -100,6 +100,13 @@ int64_t* TreeEraseRange(int64_t* pTree, int64_t* pOut, int64_t* pFirst,
 // 0x140d96400 — the teardown: the whole range, then the head is freed
 void TreeDestroy(int64_t* pTree);
 
+// 0x140d96560 — insert by value: the walk, the duplicate test, then the
+// insert; the output is {container, node, inserted}
+void* TreeInsertValue(int64_t* pTree, int64_t* pOut, uint32_t* pKey);
+// 0x140d96b40 — insert with a hint, honouring the four hint cases
+void* TreeInsertHint(int64_t* pTree, int64_t* pOut, int64_t* pHint,
+                     uint32_t* pKey);
+
 }  // namespace stl
 }  // namespace flower
 #endif
