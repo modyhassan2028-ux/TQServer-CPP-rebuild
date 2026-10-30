@@ -6780,3 +6780,21 @@ syndicate.cpp، leaguemgr.cpp، leaguetokenmgr.cpp، synattrmgr.cpp، …)
 بالقاعدة المثبتة من مسارات `__FILE__`: `CMsg<Name>` ⇒ `msg<name>.cpp`.
 الملفات غير الرسائلية (Syndicate.cpp، CSynManager، SyndicateCMsgCtors …)
 بقيت في الجذر كما هي في البايناري. الرجريجن بعد النقل: 139/139 × 6.
+
+## D122 — CMsgSynMemberList + CMsgSynDomain (2026-10-30)
+
+- `CMsgSynMemberList` vtable `0x14183e010` · type `0x836`:
+  - Create `0x1417dd2b0` = قاعدة Create ثم `[+0xa]==0x836`.
+  - Process `0x1417dd610`: `mgr=SyndicateMgr()` ← `0x1417b6210`؛ إن
+    `0x1417ac6f0(mgr,idActor)` نجحت: `action=[[this+0x408]+4]`؛ إن
+    `action != 0` ⇒ تقرير `"CMsgSynMemberList::Process invalid action:%d"`
+    عبر IAT `0x141823030` (نفس استيراد ASSERT، متغيّر الوسائط)؛ وإلا
+    `0x1417ae640(mgr,idActor, dword[[this+0x408]+8])`.
+- `CMsgSynDomain` vtable `0x14183de00` · type `0x9ce`:
+  - dtor `0x1417dcff0` يدمر الكائن الفرعي في `this+0x410` عبر IAT `0x1418230a0`
+    (أي يُمرَّر **العنوان** `this+0x410` وليس قيمته).
+  - Process `0x1417dcf90`: إن نجحت `0x1417ac6f0` وكان
+    `word[[this+0x408]+4] == 0` ⇒ `0x1417ae790(mgr,idActor,dword[[this+0x408]+8])`.
+- تغيير الـseam: `g_fn_141823030` صار `(fmt, ...)` لأنه يخدم ASSERT خماسي
+  الوسائط ورسالة `invalid action:%d` معاً في نفس الاستيراد.
+- اختبار موحّد `tests/syndicate_d122_test.cpp` يغطي 10 فتحات.

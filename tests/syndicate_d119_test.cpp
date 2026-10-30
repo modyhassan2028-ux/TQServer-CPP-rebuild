@@ -5,11 +5,23 @@
 #include <cstdio>
 #include <cstring>
 using namespace syndicate;
+static int s_nAssert;
+static char s_szAssert[256];
+static void ReportFn(const char* f, ...) {
+    s_nAssert++;
+    va_list ap; va_start(ap, f);
+    const char* e = va_arg(ap, const char*);
+    const char* fn = va_arg(ap, const char*);
+    const char* fl = va_arg(ap, const char*);
+    int line = va_arg(ap, int);
+    va_end(ap);
+    snprintf(s_szAssert, sizeof s_szAssert, "%s|%s|%s|%d", e, fn, fl, line);
+    (void)f;
+}
 
-static int s_nCreate, s_nInit, s_nCopy, s_nAssert, s_nHandler, s_nMgr;
+static int s_nCreate, s_nInit, s_nCopy, s_nHandler, s_nMgr;
 static uint16_t s_uCreateType;
 static bool s_bCreateRet;
-static char s_szAssert[256];
 static uint32_t s_uHandlerActor;
 static void QuietLog(const char*, ...) {}
 
@@ -22,11 +34,7 @@ int main() {
     g_fn_1417e8016 = [](void*, const void*, uint32_t, uint32_t) { s_nInit++; };
     g_fn_141823098 = [](void* d, const void* s) -> void* {
         s_nCopy++; memcpy(d, s, 16); return d; };
-    g_fn_141823030 = [](const char* f, const char* e, const char* fn,
-                        const char* fl, int line) {
-        s_nAssert++;
-        snprintf(s_szAssert, sizeof s_szAssert, "%s|%s|%s|%d", e, fn, fl, line);
-        (void)f; };
+    g_fn_141823030 = ReportFn;
     g_pfnInlineLogError = QuietLog;
 
     static unsigned char abObj[0x420];

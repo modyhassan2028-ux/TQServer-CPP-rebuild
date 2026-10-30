@@ -5,20 +5,30 @@
 #include <cstdio>
 #include <cstring>
 using namespace syndicate;
-
-static int s_nCreate, s_nAssert;
+#include <cstdarg>
+static int s_nAssert;
 static char s_szA[320];
+static void ReportFn(const char* f, ...) {
+    s_nAssert++;
+    va_list ap; va_start(ap, f);
+    const char* e = va_arg(ap, const char*);
+    const char* fn = va_arg(ap, const char*);
+    const char* fl = va_arg(ap, const char*);
+    int line = va_arg(ap, int);
+    va_end(ap);
+    snprintf(s_szA, sizeof s_szA, "%s|%s|%s|%d", e, fn, fl, line);
+    (void)f;
+}
+
+static int s_nCreate;
+
 static bool s_bCreate;
 static void QuietFn(const char*, ...) {}
 
 int main() {
     g_pfnCMsgCreate = [](void*, char*, uint16_t) -> bool {
         s_nCreate++; return s_bCreate; };
-    g_fn_141823030 = [](const char* f, const char* e, const char* fn,
-                        const char* fl, int line) {
-        s_nAssert++;
-        snprintf(s_szA, sizeof s_szA, "%s|%s|%s|%d", e, fn, fl, line);
-        (void)f; };
+    g_fn_141823030 = ReportFn;
     g_pfnInlineLogError = QuietFn;
 
     static unsigned char ab[0x420];

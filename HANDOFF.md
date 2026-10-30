@@ -578,3 +578,13 @@
   CMsgSelfSynMemAwardRank، CMsgSynChgDomName، CMsgSynCompete، CMsgSynDomain،
   CMsgSynMemberList، CMsgSynProffer، CMsgSynProfferRank،
   CMsgSynRecruitAdvertising{,List,Opt}، CMsgSyndicate.
+
+## D122 (2026-10-30)
+`CMsgSynMemberList` (vtable 0x14183e010, type 0x836, Process يطبّق عبر
+`0x1417ae640` أو يبلّغ `invalid action:%d`) و`CMsgSynDomain`
+(vtable 0x14183de00, type 0x9ce، dtor يدمر الكائن الفرعي عند +0x410 عبر IAT
+0x1418230a0، Process يطبّق عبر `0x1417ae790`). مساراهما الأصليان مؤكدان من
+`__FILE__`. `g_fn_141823030` صار متغيّر الوسائط. **140/140 × 6 نظيف**.
+المتبقي: 12 كلاس (CMsgLeagueBeRob، LeagueOpt، LeagueRobOpt، LeagueToken،
+SelfSynMemAwardRank، SynChgDomName، SynProffer، SynProfferRank، Syndicate،
+SynRecruitAdvertising ×3).
