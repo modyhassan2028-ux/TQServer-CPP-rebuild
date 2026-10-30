@@ -1,5 +1,5 @@
 // CMsgLog.cpp — RAW Syndicate.dll v6159
-#include "modules/syndicate/src/CMsgLog.h"
+#include "modules/syndicate/src/msg/msglog.h"
 namespace syndicate {
 
 void (*g_pfnLogProcessA)(void*, uint32_t) = nullptr;

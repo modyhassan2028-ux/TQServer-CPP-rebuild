@@ -560,3 +560,21 @@
   `0x141823098` (memcpy)، و`0x141823030` (مُبلّغ الفحص).
 - رجريجن **137/137 × 6** نظيف (ASan/UBSan).
 - **التالي:** بقية رسائل tq::CMsg من `Docs/REMAINING_20_CLASSES.md`.
+
+## تحديث (2026-10-30) — الشجرة الأصلية + D120/D121
+
+- **الشجرة الأصلية:** استُخرجت 41 مسار `__FILE__` من البايناري. الرسائل كلها في
+  `modules/syndicate/src/msg/` بأسماء `msg<lowercase>.cpp`. نُقلت وحدات D117–D121
+  إلى مساراتها الحرفية (msglog, msginvadewarning, msgsynmemberinfo,
+  msgsynattrinfo, msgsynbaseproffer).
+- **D120** `tq::CMsg` قاعدة الرسائل (`0x14182e368`) بـ5 فتحات؛ ملفها
+  `msg/cmsgbase.cpp` مؤقتاً لأن الكلاس من وحدة `tq` ولا مسار `__FILE__` له.
+- **D121** `CMsgSynAttrInfo` (`0x14183d768`, Create→`0x452`, Process=فخ ASSERT)
+  و`CMsgSynBaseProffer` (`0x14183d888`, Create→`0x425`, Process فارغ).
+- تصحيح وسائط `g_fn_141823030` إلى (fmt, expr, func, file, line).
+- رجريجن **139/139 × 6** نظيف.
+- **المتبقي 14 كلاس** tq::CMsg، كلها بفتبلاتها في الخريطة:
+  CMsgLeagueBeRob/LeagueOpt/LeagueRobOpt/LeagueToken (فيها ParseFromArray)،
+  CMsgSelfSynMemAwardRank، CMsgSynChgDomName، CMsgSynCompete، CMsgSynDomain،
+  CMsgSynMemberList، CMsgSynProffer، CMsgSynProfferRank،
+  CMsgSynRecruitAdvertising{,List,Opt}، CMsgSyndicate.

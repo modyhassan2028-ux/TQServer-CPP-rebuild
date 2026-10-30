@@ -1,5 +1,5 @@
 // D118 — CMsgInvadeWarning (tq::CMsg message, payload builder)
-#include "modules/syndicate/src/CMsgInvadeWarning.h"
+#include "modules/syndicate/src/msg/msginvadewarning.h"
 #include <cassert>
 #include <cstdarg>
 #include <cstdio>

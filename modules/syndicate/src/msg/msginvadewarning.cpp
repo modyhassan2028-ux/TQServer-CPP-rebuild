@@ -1,5 +1,5 @@
 // CMsgInvadeWarning.cpp — RAW Syndicate.dll v6159
-#include "modules/syndicate/src/CMsgInvadeWarning.h"
+#include "modules/syndicate/src/msg/msginvadewarning.h"
 #include <cstring>
 namespace syndicate {
 

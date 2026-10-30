@@ -18,9 +18,9 @@ extern void (*g_fn_1417e8016)(void* self, const void* pArg,
                               uint32_t uA, uint32_t uB);
 // the CRT memcpy-ish import at 0x141823098 (dst, src)
 extern void* (*g_fn_141823098)(void* pDst, const void* pSrc);
-// the assert reporter at 0x141823030 (fmt, expr, file, func, line)
+// the assert reporter at 0x141823030 (fmt, expr, func, file, line)
 extern void (*g_fn_141823030)(const char* fmt, const char* pExpr,
-                              const char* pFile, const char* pFunc, int nLine);
+                              const char* pFunc, const char* pFile, int nLine);
 
 }  // namespace syndicate
 #endif

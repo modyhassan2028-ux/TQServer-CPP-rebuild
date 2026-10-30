@@ -6726,3 +6726,50 @@ New، Clear، IsInit، مشترك، thunk، Merge، ByteSize، Serialize،
   - الوحدات الأقدم (CMsgLeagueInfo/List/OrderStatus/Concubines/
     ImperialCourtList) تستخدم `0x14182e368` أصلاً.
 - صُحّح في الكلاسات الثلاثة والوثائق. `137/137 × 6` أخضر بعد التصحيح.
+
+## الشجرة الأصلية — مسارات مستخرجة من نصوص __FILE__ (2026-10-30)
+
+استُخرجت 41 مساراً حرفياً من البايناري، وأهمها تأكيد أن رسائل syndicate
+تعيش في `modules/syndicate/src/msg/` بأسماء `msg<lowercase>.cpp`:
+
+```
+modules/syndicate/src/msg/msgleagueopt.cpp
+modules/syndicate/src/msg/msgleaguetoken.cpp
+modules/syndicate/src/msg/msglog.cpp
+modules/syndicate/src/msg/msgselfsynmemawardrank.cpp
+modules/syndicate/src/msg/msgsynattrinfo.cpp
+modules/syndicate/src/msg/msgsynbaseproffer.cpp
+modules/syndicate/src/msg/msgsynchgdomname.cpp
+modules/syndicate/src/msg/msgsyncompete.cpp
+modules/syndicate/src/msg/msgsyndicate.cpp
+modules/syndicate/src/msg/msgsyndomain.cpp
+modules/syndicate/src/msg/msgsynmemberinfo.cpp
+modules/syndicate/src/msg/msgsynmemberlist.cpp
+modules/syndicate/src/msg/msgsynproffer.cpp
+modules/syndicate/src/msg/msgsynprofferrank.cpp
+modules/syndicate/src/msg/msgsynrecruitadvertising.cpp
+modules/syndicate/src/msg/msgsynrecruitadvertisinglist.cpp
+modules/syndicate/src/msg/msgsynrecruitadvertisingopt.cpp
+```
+(+ 24 مساراً في جذر `modules/syndicate/src/`: syndicatelogic.cpp،
+syndicate.cpp، leaguemgr.cpp، leaguetokenmgr.cpp، synattrmgr.cpp، …)
+
+نُقلت الوحدات D117–D120 إلى هذه المسارات حرفياً، وD121 كذلك.
+
+## D120 — tq::CMsg (قاعدة الرسائل) [2026-10-30]
+
+- vtable `0x14182e368` · الفتحات: dtor `0x14177e300`، Create `0x1417e7fda`
+  (thunk استيراد إلى IAT `0x141823000`)، ثم `0x14177e2f0`/`0x14177e2e0`/
+  `0x14177e2d0` (ثلاث دالات Process خطأ).
+- الملف في `modules/syndicate/src/msg/cmsgbase.cpp` مؤقتاً: الكلاس `tq::CMsg`
+  ولا يوجد مسار `__FILE__` له في هذا البايناري ⇒ موقعه الأصلي غير مثبت.
+
+## D121 — CMsgSynAttrInfo + CMsgSynBaseProffer [2026-10-30]
+
+- `CMsgSynAttrInfo` vtable `0x14183d768`: Create = قاعدة ثم `[+0xa]==0x452`؛
+  Process `0x1417daba0` عبارة عن فخ ASSERT: `ASSERT` / `"CMsgSynAttrInfo::Process()"`
+  / `msgsynattrinfo.cpp` / سطر `0x79` (121).
+- `CMsgSynBaseProffer` vtable `0x14183d888`: Create = قاعدة ثم `[+0xa]==0x425`؛
+  Process `0x1417dadb0` جسمه فارغ (`ret`).
+- صُحّح ترتيب وسائط `g_fn_141823030` إلى (fmt, expr, func, file, line)
+  مطابقةً لـ rcx/rdx/r8/r9 + السطر على المكدس.

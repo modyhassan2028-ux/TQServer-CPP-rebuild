@@ -1,5 +1,5 @@
 // D119 — CMsgSynMemberInfo (tq::CMsg message + CHECKF sender)
-#include "modules/syndicate/src/CMsgSynMemberInfo.h"
+#include "modules/syndicate/src/msg/msgsynmemberinfo.h"
 #include <cassert>
 #include <cstdarg>
 #include <cstdio>
@@ -22,8 +22,8 @@ int main() {
     g_fn_1417e8016 = [](void*, const void*, uint32_t, uint32_t) { s_nInit++; };
     g_fn_141823098 = [](void* d, const void* s) -> void* {
         s_nCopy++; memcpy(d, s, 16); return d; };
-    g_fn_141823030 = [](const char* f, const char* e, const char* fl,
-                        const char* fn, int line) {
+    g_fn_141823030 = [](const char* f, const char* e, const char* fn,
+                        const char* fl, int line) {
         s_nAssert++;
         snprintf(s_szAssert, sizeof s_szAssert, "%s|%s|%s|%d", e, fn, fl, line);
         (void)f; };

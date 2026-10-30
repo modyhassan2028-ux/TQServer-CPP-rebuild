@@ -1,5 +1,5 @@
 // D117 — CMsgLog (5-slot tq::CMsg message class)
-#include "modules/syndicate/src/CMsgLog.h"
+#include "modules/syndicate/src/msg/msglog.h"
 #include <cassert>
 #include <cstdarg>
 #include <cstdio>

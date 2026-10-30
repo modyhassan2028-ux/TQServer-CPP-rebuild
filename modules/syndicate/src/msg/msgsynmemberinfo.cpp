@@ -1,5 +1,5 @@
 // CMsgSynMemberInfo.cpp — RAW Syndicate.dll v6159
-#include "modules/syndicate/src/CMsgSynMemberInfo.h"
+#include "modules/syndicate/src/msg/msgsynmemberinfo.h"
 #include <cstring>
 namespace syndicate {
 
@@ -32,7 +32,7 @@ bool CMsgSynMemberInfo::Send(void* self, const char* pszName,
                              uint32_t uA, uint32_t uB) {
     unsigned char* p = (unsigned char*)self;
     if (pszName == nullptr) {
-        g_fn_141823030(kAssertFmt, kAssertExpr, kAssertFile, kAssertFunc,
+        g_fn_141823030(kAssertFmt, kAssertExpr, kAssertFunc, kAssertFile,
                        kAssertLine);
         return false;
     }
