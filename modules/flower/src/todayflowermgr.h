@@ -29,6 +29,15 @@ struct CTodayFlower {
     // 0x140d93850 — add to the same property through its slot +0xa8, then
     // let the manager settle with slot +0x38(0)
     static void SetSlot(CTodayFlower* pSelf, uint32_t dwSlot, int32_t nAdd);
+    // 0x140d93760 — release the link the record keeps at +0x08
+    static void DetachData(CTodayFlower* pSelf);
+    // 0x140d93a70 — delete the record (it owns nothing else here)
+    static void DeleteDtor(CTodayFlower* pSelf);
+    // 0x140d93ff0 — DetachData, then free when the flag asks for it
+    static void* DeleteRecordDtor(void* self, uint64_t uFlag, void* pB,
+                                  void* pC);
+    // 0x140d93910 — zero the four properties 2..5 through the data object
+    static void ResetSlots(CTodayFlower* pSelf);
 };
 
 // the CHECKF blob behind every bare InlineLogERROR call in this file
@@ -62,6 +71,14 @@ public:
                                      uint32_t idUser);
     // 0x140d97430 — the write path: an existing record takes SetSlot, an
     // absent one is created through the "flower" data manager first
+    // 0x140d976f0 — find the user's record and reset its four slots
+    static void RemoveUser(std::map<uint32_t, CTodayFlower*>* pMap,
+                           uint32_t idUser);
+    // 0x140d97aa0 — erase the user's record, detaching and deleting it
+    static void EraseUser(std::map<uint32_t, CTodayFlower*>* pMap,
+                          uint32_t idUser);
+    // 0x140d97190 — empty the whole tree, detaching and deleting every record
+    static void ClearAll(std::map<uint32_t, CTodayFlower*>& map);
     static void SetValue(std::map<uint32_t, CTodayFlower*>* pMap,
                          uint32_t idUser, uint32_t dwSlot, int32_t nValue);
 

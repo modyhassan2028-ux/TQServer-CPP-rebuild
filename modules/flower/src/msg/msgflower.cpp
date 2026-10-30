@@ -104,4 +104,26 @@ bool CMsgFlower::Build(void* self, uint16_t uChild, const char* pSender,
     return true;
 }
 
+// 0x140d97e20 — the query record. Same 0x3c/0x047e header as Build but the
+// eight dwords land at +0x10..+0x2c and the call always answers 1.
+uint8_t CMsgFlower::BuildQuery(void* self, uint16_t uChild, uint32_t uA,
+                               uint32_t uB, uint32_t uC, uint32_t uD,
+                               uint32_t uE, uint32_t uF, uint32_t uG,
+                               uint32_t uH) {
+    unsigned char* pay = *reinterpret_cast<unsigned char**>(
+        (unsigned char*)self + kOffPayloadPtr);
+    *reinterpret_cast<uint16_t*>(pay + 4) = uChild;
+    *reinterpret_cast<uint16_t*>(pay + 2) = kMsgType;
+    *reinterpret_cast<uint16_t*>(pay + 0) = 0x3c;
+    *reinterpret_cast<uint32_t*>(pay + 0x10) = uA;
+    *reinterpret_cast<uint32_t*>(pay + 0x14) = uB;
+    *reinterpret_cast<uint32_t*>(pay + 0x18) = uC;
+    *reinterpret_cast<uint32_t*>(pay + 0x1c) = uD;
+    *reinterpret_cast<uint32_t*>(pay + 0x20) = uE;
+    *reinterpret_cast<uint32_t*>(pay + 0x24) = uF;
+    *reinterpret_cast<uint32_t*>(pay + 0x28) = uG;
+    *reinterpret_cast<uint32_t*>(pay + 0x2c) = uH;
+    return 1;
+}
+
 }  // namespace flower

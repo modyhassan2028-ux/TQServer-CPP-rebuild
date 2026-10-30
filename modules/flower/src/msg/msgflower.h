@@ -32,6 +32,12 @@ public:
     static bool Build(void* self, uint16_t uChild, const char* pSender,
                       const char* pReceiver, uint32_t uValue, uint32_t uSlot,
                       uint8_t uFlag);
+    // 0x140d97e20 — build the 0x3c/0x047e query record:
+    //   +4 u16 child · +0x10..+0x2c eight u32 (slot pairs then totals)
+    static uint8_t BuildQuery(void* self, uint16_t uChild, uint32_t uA,
+                              uint32_t uB, uint32_t uC, uint32_t uD,
+                              uint32_t uE, uint32_t uF, uint32_t uG,
+                              uint32_t uH);
     static void* DeleteDtor(void* self, uint32_t uFlag);  // 0x140d97fc0
     static bool Create(void* self, char* pData,
                        uint16_t uType);                   // 0x140d97ec0

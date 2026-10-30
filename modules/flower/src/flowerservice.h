@@ -49,6 +49,26 @@ public:
                         uint16_t uCount);             // 0x140d93460
     static uint8_t Attach(void* pOwned, void* pSecond);  // 0x140d91490
 
+    // 0x140d91530 — answer the five flower slots to the asking user
+    static uint8_t QueryFlower(void* pThis, uint32_t idUser);
+    // 0x140d91710 — answer the four gift slots
+    static uint8_t QueryGift(void* pThis, uint32_t idUser);
+    // 0x140d91290 — a sex change drops the other set of records
+    static uint64_t DelFlowerDataByChangeSex(void* pThis, uint32_t idUser,
+                                             int nSex);
+    // 0x140d931c0 / 0x140d91b70 / 0x140d93210 — 0x20 byte service object
+    static void* CreateObject();
+    static void CompleteObject(void* self);
+    static void* DeleteObject(void* self, uint32_t uFlag);
+    // 0x140d91460 — deleting dtor that first empties the record map
+    static void* ClearMapDtor(void* self, uint64_t uFlag, void* pB, void* pC);
+    // 0x140d91020 / 0x140d91920
+    static void CheckFailed();
+    static void NoOperation();
+    // 0x140d91970 — drop one user's record
+    static void ForwardRecord(void* pThis, uint32_t idUser, void* pB,
+                              void* pC);
+
     // 0x140d91be0 — the flower gift itself
     //   this+0x08 session · this+0x18 todayflower map
     //   idSender 0 or idReceiver 0 -> CHECKF

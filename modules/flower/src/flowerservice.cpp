@@ -681,4 +681,224 @@ uint32_t CFlowerService::ResolveGiftSlot(void* pThis, int nArg,
 uint32_t (*g_pfnResolveGift)(void*, int, uint32_t*, int*) =
     &CFlowerService::ResolveGiftSlot;
 
+// 0x140d91020 — the bare CHECKF at the top of several paths
+void CFlowerService::CheckFailed() { g_pfnFlowerLog(kCheckFormat); }
+
+// 0x140d91920 — an empty body in the original
+void CFlowerService::NoOperation() {}
+
+// 0x140d91970 — the record is erased through the manager at +0x18
+void CFlowerService::ForwardRecord(void* pThis, uint32_t idUser, void* pB,
+                                   void* pC) {
+    (void)pB;
+    (void)pC;
+    std::map<uint32_t, CTodayFlower*>* pMap =
+        *reinterpret_cast<std::map<uint32_t, CTodayFlower*>**>(
+            (unsigned char*)pThis + 0x18);
+    CTodayFlowerMgr::EraseUser(pMap, idUser);
+}
+
+// 0x140d931c0 — 0x20 bytes: vftable, session at +0x08, a dword at +0x10 and
+// the record map at +0x18
+void* CFlowerService::CreateObject() {
+    void* p = ::operator new(0x20);
+    if (p == nullptr) return nullptr;
+    void** slots = reinterpret_cast<void**>(p);
+    slots[0] = (void*)kClassVft;
+    slots[1] = nullptr;
+    slots[3] = nullptr;
+    *reinterpret_cast<uint32_t*>((unsigned char*)p + 0x10) = 0;
+    return p;
+}
+
+// 0x140d91b70 — reset the vftable, then empty and free the record map
+void CFlowerService::CompleteObject(void* self) {
+    void** slots = reinterpret_cast<void**>(self);
+    slots[0] = (void*)kClassVft;
+    if (slots[3] != nullptr) {
+        void* pMap = slots[3];
+        if (pMap != nullptr) {
+            CTodayFlowerMgr::ClearAll(
+                *reinterpret_cast<std::map<uint32_t, CTodayFlower*>*>(pMap));
+            ::operator delete(pMap);
+        }
+        slots[3] = nullptr;
+        slots[3] = nullptr;
+    }
+}
+
+// 0x140d93210 — Complete, then free when the flag asks for it
+void* CFlowerService::DeleteObject(void* self, uint32_t uFlag) {
+    CompleteObject(self);
+    if ((uFlag & 1) != 0) ::operator delete(self);
+    return self;
+}
+
+// 0x140d91460 — the same, for the object that only owns the map
+void* CFlowerService::ClearMapDtor(void* self, uint64_t uFlag, void* pB,
+                                   void* pC) {
+    (void)pB;
+    (void)pC;
+    CTodayFlowerMgr::ClearAll(
+        *reinterpret_cast<std::map<uint32_t, CTodayFlower*>*>(self));
+    if ((uFlag & 1) != 0) ::operator delete(self);
+    return self;
+}
+
+// 0x140d91530 — CFlowerService::QueryFlower
+//   male askers get the five flower slots, everyone else the four live
+//   values paired with their stored totals. The original's fourth read in
+//   each set is emitted without an index; the sibling QueryGift shows the
+//   same shape with explicit 4..7, so the flower set closes with 3.
+uint8_t CFlowerService::QueryFlower(void* pThis, uint32_t idUser) {
+    unsigned char* p = (unsigned char*)pThis;
+    void* pSess = *reinterpret_cast<void**>(p + 8);
+    std::map<uint32_t, CTodayFlower*>* pMap =
+        *reinterpret_cast<std::map<uint32_t, CTodayFlower*>**>(p + 0x18);
+    if (((uint8_t (*)(void*))SessSlot(pSess, 0x10))(pSess) == 0) {
+        g_pfnFlowerLog("CFlowerService::QueryFlower role is not exist, user id:%u.",
+                       idUser);
+        return 0;
+    }
+    uint32_t uLive0 = 0, uLive1 = 0, uLive2 = 0, uLive3 = 0;
+    uint32_t uHave0 = 0, uHave1 = 0, uHave2 = 0, uHave3 = 0;
+    if (((int (*)(void*, uint32_t))SessSlot(pSess, 0x18))(pSess, idUser) ==
+        1) {
+        const uint32_t uDate = ((uint32_t (*)(void*, uint32_t))SessSlot(
+            pSess, 0x20))(pSess, idUser);
+        if (IsExpiredDate(uDate) == 0) return 0;
+        const uint32_t uLevel = ((uint32_t (*)(void*, uint32_t))SessSlot(
+            pSess, 0x40))(pSess, idUser);
+        if (uLevel < kMinSendLevel) return 0;
+        uLive0 = 1;
+    } else {
+        uLive0 = ((uint32_t (*)(void*, uint32_t, uint32_t))SessSlot(pSess,
+                                                                   0x30))(
+            pSess, idUser, 0);
+        uLive1 = ((uint32_t (*)(void*, uint32_t, uint32_t))SessSlot(pSess,
+                                                                   0x30))(
+            pSess, idUser, 1);
+        uLive2 = ((uint32_t (*)(void*, uint32_t, uint32_t))SessSlot(pSess,
+                                                                   0x30))(
+            pSess, idUser, 2);
+        uLive3 = ((uint32_t (*)(void*, uint32_t, uint32_t))SessSlot(pSess,
+                                                                   0x30))(
+            pSess, idUser, 3);
+        uHave0 = CTodayFlowerMgr::GetValue(pMap, idUser, 0);
+        uHave1 = CTodayFlowerMgr::GetValue(pMap, idUser, 1);
+        uHave2 = CTodayFlowerMgr::GetValue(pMap, idUser, 2);
+        uHave3 = CTodayFlowerMgr::GetValue(pMap, idUser, 3);
+    }
+    unsigned char oMsg[0x410];
+    CMsgFlower::Ctor(oMsg);
+    if (CMsgFlower::BuildQuery(oMsg, 2, uLive0, uHave0, uLive1, uHave1, uLive2,
+                               uHave2, uLive3, uHave3) != 0) {
+        ((void (*)(void*, uint32_t, void*))SessSlot(pSess, 0x68))(pSess, idUser,
+                                                                 oMsg);
+    }
+    CMsgFlower::BaseDtor(oMsg);
+    return 1;
+}
+
+// 0x140d91710 — CFlowerService::QueryGift, the same shape over 4..7 and only
+// for female askers
+uint8_t CFlowerService::QueryGift(void* pThis, uint32_t idUser) {
+    unsigned char* p = (unsigned char*)pThis;
+    void* pSess = *reinterpret_cast<void**>(p + 8);
+    std::map<uint32_t, CTodayFlower*>* pMap =
+        *reinterpret_cast<std::map<uint32_t, CTodayFlower*>**>(p + 0x18);
+    if (((uint8_t (*)(void*))SessSlot(pSess, 0x10))(pSess) == 0) {
+        g_pfnFlowerLog("CFlowerService::QueryGift role is not exist, user id:%u.",
+                       idUser);
+        return 0;
+    }
+    uint32_t uLive4 = 0, uLive5 = 0, uLive6 = 0, uLive7 = 0;
+    uint32_t uHave4 = 0, uHave5 = 0, uHave6 = 0, uHave7 = 0;
+    if (((int (*)(void*, uint32_t))SessSlot(pSess, 0x18))(pSess, idUser) ==
+        2) {
+        const uint32_t uDate = ((uint32_t (*)(void*, uint32_t))SessSlot(
+            pSess, 0x20))(pSess, idUser);
+        if (IsExpiredDate(uDate) == 0) return 0;
+        const uint32_t uLevel = ((uint32_t (*)(void*, uint32_t))SessSlot(
+            pSess, 0x40))(pSess, idUser);
+        if (uLevel < kMinSendLevel) return 0;
+        uLive4 = 1;
+    } else {
+        uLive4 = ((uint32_t (*)(void*, uint32_t, uint32_t))SessSlot(pSess,
+                                                                   0x30))(
+            pSess, idUser, 4);
+        uLive5 = ((uint32_t (*)(void*, uint32_t, uint32_t))SessSlot(pSess,
+                                                                   0x30))(
+            pSess, idUser, 5);
+        uLive6 = ((uint32_t (*)(void*, uint32_t, uint32_t))SessSlot(pSess,
+                                                                   0x30))(
+            pSess, idUser, 6);
+        uLive7 = ((uint32_t (*)(void*, uint32_t, uint32_t))SessSlot(pSess,
+                                                                   0x30))(
+            pSess, idUser, 7);
+        uHave4 = CTodayFlowerMgr::GetValue(pMap, idUser, 4);
+        uHave5 = CTodayFlowerMgr::GetValue(pMap, idUser, 5);
+        uHave6 = CTodayFlowerMgr::GetValue(pMap, idUser, 6);
+        uHave7 = CTodayFlowerMgr::GetValue(pMap, idUser, 7);
+    }
+    unsigned char oMsg[0x410];
+    CMsgFlower::Ctor(oMsg);
+    if (CMsgFlower::BuildQuery(oMsg, 3, uLive4, uHave4, uLive5, uHave5, uLive6,
+                               uHave6, uLive7, uHave7) != 0) {
+        ((void (*)(void*, uint32_t, void*))SessSlot(pSess, 0x68))(pSess, idUser,
+                                                                 oMsg);
+    }
+    CMsgFlower::BaseDtor(oMsg);
+    return 1;
+}
+
+// 0x140d91290 — CFlowerService::DelFlowerDataByChangeSex
+//   sex 2 clears the flower slots 0..3, sex 1 the gift slots 4..7. The three
+//   leading clears are emitted with the value 0 and the closing one without
+//   its index, which closes each set the same way the queries open it.
+uint64_t CFlowerService::DelFlowerDataByChangeSex(void* pThis,
+                                                  uint32_t idUser, int nSex) {
+    unsigned char* p = (unsigned char*)pThis;
+    void* pSess = *reinterpret_cast<void**>(p + 8);
+    std::map<uint32_t, CTodayFlower*>* pMap =
+        *reinterpret_cast<std::map<uint32_t, CTodayFlower*>**>(p + 0x18);
+    if (!((nSex == 1 || nSex == 2) && idUser != 0)) {
+        g_pfnFlowerLog(
+            "CFlowerService::DelFlowerDataByChangeSex sex err, user id:%u, sex:%d.",
+            idUser, nSex);
+        return 0;
+    }
+    CTodayFlowerMgr::RemoveUser(pMap, idUser);
+    unsigned char oMsg[0x410];
+    CMsgFlower::Ctor(oMsg);
+    uint8_t uChild = 0;
+    if (nSex == 2) {
+        ((void (*)(void*, uint32_t, uint32_t, uint32_t))SessSlot(pSess, 0x38))(
+            pSess, idUser, 0, 0);
+        ((void (*)(void*, uint32_t, uint32_t, uint32_t))SessSlot(pSess, 0x38))(
+            pSess, idUser, 1, 0);
+        ((void (*)(void*, uint32_t, uint32_t, uint32_t))SessSlot(pSess, 0x38))(
+            pSess, idUser, 2, 0);
+        ((void (*)(void*, uint32_t, uint32_t, uint32_t))SessSlot(pSess, 0x38))(
+            pSess, idUser, 3, 0);
+        uChild = 2;
+    } else {
+        ((void (*)(void*, uint32_t, uint32_t, uint32_t))SessSlot(pSess, 0x38))(
+            pSess, idUser, 4, 0);
+        ((void (*)(void*, uint32_t, uint32_t, uint32_t))SessSlot(pSess, 0x38))(
+            pSess, idUser, 5, 0);
+        ((void (*)(void*, uint32_t, uint32_t, uint32_t))SessSlot(pSess, 0x38))(
+            pSess, idUser, 6, 0);
+        ((void (*)(void*, uint32_t, uint32_t, uint32_t))SessSlot(pSess, 0x38))(
+            pSess, idUser, 7, 0);
+        uChild = 3;
+    }
+    if (CMsgFlower::BuildQuery(oMsg, uChild, 0, 0, 0, 0, 0, 0, 0, 0) != 0) {
+        ((void (*)(void*, uint32_t, void*))SessSlot(pSess, 0x68))(pSess, idUser,
+                                                                 oMsg);
+    }
+    CMsgFlower::BaseDtor(oMsg);
+    return 1;
+}
+
 }  // namespace flower

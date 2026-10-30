@@ -194,4 +194,84 @@ void CTodayFlowerMgr::SetValue(std::map<uint32_t, CTodayFlower*>* pMap,
     *InsertSlot(pMap, idUser) = pRec;
 }
 
+// 0x140d93760 — the record's +0x08 link is released through its own slot 0
+// with the flag 1 and the 0xfffffffffffffffe marker, then cleared twice as
+// the original does.
+void CTodayFlower::DetachData(CTodayFlower* pSelf) {
+    if (pSelf == nullptr) return;
+    void* pLink = *(void**)((unsigned char*)pSelf + 8);
+    if (pLink == nullptr) return;
+    ((void (*)(void*, int, void*, void*, uint64_t))(*(void***)pLink)[0])(
+        pLink, 1, nullptr, nullptr, 0xfffffffffffffffeull);
+    *(void**)((unsigned char*)pSelf + 8) = nullptr;
+    *(void**)((unsigned char*)pSelf + 8) = nullptr;
+}
+
+// 0x140d93a70 — the record's deleting dtor goes to DetachData and frees
+void CTodayFlower::DeleteDtor(CTodayFlower* pSelf) {
+    if (pSelf == nullptr) return;
+    DetachData(pSelf);
+    ::operator delete(pSelf);
+}
+
+// 0x140d93910 — the data object answers properties 2,3,4,5 and each one is
+// cleared with its slot +0xb0(0); the manager then settles with +0x38(0)
+void CTodayFlower::ResetSlots(CTodayFlower* pSelf) {
+    if (pSelf == nullptr) return;
+    void* pData = *(void**)((unsigned char*)pSelf + 8);
+    if (pData == nullptr) return;
+    void** vt = *(void***)pData;
+    for (uint32_t i = 2; i <= 5; ++i) {
+        void* pProp = ((void* (*)(void*, uint32_t))vt[0x10 / 8])(pData, i);
+        ((void (*)(void*, uint32_t))(*(void***)pProp)[0xb0 / 8])(pProp, 0);
+    }
+    ((void (*)(void*, uint32_t))vt[0x38 / 8])(pData, 0);
+}
+
+// 0x140d976f0 — the lookup answers the record itself, then its slots reset
+void CTodayFlowerMgr::RemoveUser(std::map<uint32_t, CTodayFlower*>* pMap,
+                                 uint32_t idUser) {
+    CTodayFlower* pRec = Find(pMap, idUser);
+    if (pRec != nullptr) CTodayFlower::ResetSlots(pRec);
+}
+
+// 0x140d97aa0 — the node is taken by key, its record released and deleted,
+// and the node erased
+void CTodayFlowerMgr::EraseUser(std::map<uint32_t, CTodayFlower*>* pMap,
+                                uint32_t idUser) {
+    if (pMap == nullptr) return;
+    auto it = pMap->find(idUser);
+    if (it == pMap->end()) return;
+    CTodayFlower* pRec = it->second;
+    if (pRec != nullptr) {
+        CTodayFlower::DetachData(pRec);
+        CTodayFlower::DeleteDtor(pRec);
+    }
+    pMap->erase(it);
+}
+
+// 0x140d97190 — walk every node, detach and delete its record, then drop the
+// tree. The original frees the nodes through the allocator and resets the
+// head/size pair, which std::map::clear performs.
+void CTodayFlowerMgr::ClearAll(std::map<uint32_t, CTodayFlower*>& map) {
+    for (auto& kv : map) {
+        if (kv.second != nullptr) {
+            CTodayFlower::DetachData(kv.second);
+            CTodayFlower::DeleteDtor(kv.second);
+        }
+    }
+    map.clear();
+}
+
+// 0x140d93ff0 — DetachData and, when the flag has bit 0, the free that
+// 0x140d93a70 performs
+void* CTodayFlower::DeleteRecordDtor(void* self, uint64_t uFlag, void* pB,
+                                     void* pC) {
+    (void)pB;
+    (void)pC;
+    DetachData((CTodayFlower*)self);
+    if ((uFlag & 1) != 0) ::operator delete(self);
+    return self;
+}
+
 }  // namespace flower

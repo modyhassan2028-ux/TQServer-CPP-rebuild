@@ -38,12 +38,20 @@ public:
     static void Complete(void* self, uint64_t uA, void* pB,
                          void* pC);                                  // 0x140d932f0
     static void* DeleteDtor(void* self, uint32_t uFlag);             // 0x140d93290
+    static uint64_t Slot4();                                         // 0x140d935a0
+    // 0x140d934f0 — create the owned service, register 0x47e/0x3ea/0x3eb and
+    // attach it with kernel mode 9
+    static bool Initialize(void* self);
     static uint64_t Slot5();                                         // 0x140d93250
     static uint64_t Slot6();                                         // 0x140d93260
     static uint64_t Slot7();                                         // 0x140d93270
     static uint64_t Slot8();                                         // 0x140d93280
     static void PureCall();                                          // 0x140d982ac
 };
+
+// 0x140d936d0 — the exported factory: 0x848 bytes, Ctor, then Initialize;
+// a failure releases the object through its own slot 1 and answers null
+CModule* ModuleCreate(void* pKernel, uint32_t dwIndex);
 
 }  // namespace flower
 #endif
