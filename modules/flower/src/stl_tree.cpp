@@ -779,5 +779,154 @@ void* ContainerInitB(void** pVec) {
     return pVec;
 }
 
+// 0x140d95b20 — insert one node under the hint and rebalance. The decompiled
+// names are kept so the two rotation shapes can be checked line for line:
+// plVar2 is the parent, plVar3 the grandparent, lVar4 the uncle (or the node
+// being rotated), plVar5 the fresh node, plVar6 the walker and plVar7 the
+// pointer to the parent slot. Colours at +0x28, the nil mark at +0x29.
+void* TreeInsert(void** pTree, void** pOut, char cLeft, void** pParent,
+                 void** pValue) {
+    if (0x0ffffffffffffffdULL < (uint64_t)pTree[7]) {
+        throw std::length_error("map/set<T> too long");
+    }
+    char* const pHead = (char*)pTree[6];
+    int64_t* plVar5 = (int64_t*)TreeNodeAlloc(pTree[6], pParent, pTree[6],
+                                              (const uint64_t*)pValue, 0);
+    pTree[7] = (void*)((uint64_t)pTree[7] + 1);
+    if (pParent == (void**)pHead) {
+        *(int64_t**)(pHead + 8) = plVar5;
+        *(int64_t**)pHead = plVar5;
+        *(int64_t**)(pHead + 0x10) = plVar5;
+    } else if (cLeft == '\0') {
+        pParent[2] = plVar5;
+        if (pParent == *(void***)(pHead + 0x10)) {
+            *(int64_t**)(pHead + 0x10) = plVar5;
+        }
+    } else {
+        *pParent = plVar5;
+        if (pParent == *(void***)pHead) {
+            *(int64_t**)pHead = plVar5;
+        }
+    }
+    int64_t* plVar7 = plVar5 + 1;
+    char cVar1 = *(char*)(*plVar7 + 0x28);
+    int64_t* plVar6 = plVar5;
+    while (cVar1 == '\0') {
+        int64_t* plVar2 = (int64_t*)*plVar7;
+        int64_t* plVar3 = (int64_t*)plVar2[1];
+        if (plVar2 == (int64_t*)*plVar3) {
+            int64_t lVar4 = plVar3[2];
+            if (*(char*)(lVar4 + 0x28) == '\0') {
+                *(uint8_t*)((char*)plVar2 + 0x28) = 1;
+                *(uint8_t*)(lVar4 + 0x28) = 1;
+                *(uint8_t*)(*(int64_t*)(*plVar7 + 8) + 0x28) = 0;
+                plVar6 = *(int64_t**)(*plVar7 + 8);
+            } else {
+                if (plVar6 == (int64_t*)plVar2[2]) {
+                    plVar6 = (int64_t*)plVar2[2];
+                    plVar2[2] = *plVar6;
+                    if (*(char*)(*plVar6 + 0x29) == '\0') {
+                        *(int64_t**)(*plVar6 + 8) = plVar2;
+                    }
+                    plVar7 = plVar2 + 1;
+                    plVar6[1] = *plVar7;
+                    if (plVar2 == *(int64_t**)(pHead + 8)) {
+                        *(int64_t**)(pHead + 8) = plVar6;
+                    } else {
+                        plVar3 = (int64_t*)*plVar7;
+                        if (plVar2 == (int64_t*)*plVar3) {
+                            *plVar3 = (int64_t)plVar6;
+                        } else {
+                            plVar3[2] = (int64_t)plVar6;
+                        }
+                    }
+                    *plVar6 = (int64_t)plVar2;
+                    *plVar7 = (int64_t)plVar6;
+                    plVar6 = plVar2;
+                }
+                *(uint8_t*)(*plVar7 + 0x28) = 1;
+                *(uint8_t*)(*(int64_t*)(*plVar7 + 8) + 0x28) = 0;
+                plVar7 = *(int64_t**)(*plVar7 + 8);
+                int64_t lVar4b = *plVar7;
+                *plVar7 = *(int64_t*)(lVar4b + 0x10);
+                if (*(char*)(*(int64_t*)(lVar4b + 0x10) + 0x29) == '\0') {
+                    *(int64_t**)(*(int64_t*)(lVar4b + 0x10) + 8) = plVar7;
+                }
+                *(int64_t*)(lVar4b + 8) = plVar7[1];
+                if (plVar7 == *(int64_t**)(pHead + 8)) {
+                    *(int64_t**)(pHead + 8) = (int64_t*)lVar4b;
+                } else {
+                    plVar2 = (int64_t*)plVar7[1];
+                    if (plVar7 == (int64_t*)plVar2[2]) {
+                        plVar2[2] = lVar4b;
+                    } else {
+                        *plVar2 = lVar4b;
+                    }
+                }
+                *(int64_t**)(lVar4b + 0x10) = plVar7;
+                plVar7[1] = lVar4b;
+            }
+        } else {
+            int64_t lVar4 = *plVar3;
+            if (*(char*)(lVar4 + 0x28) == '\0') {
+                *(uint8_t*)((char*)plVar2 + 0x28) = 1;
+                *(uint8_t*)(lVar4 + 0x28) = 1;
+                *(uint8_t*)(*(int64_t*)(*plVar7 + 8) + 0x28) = 0;
+                plVar6 = *(int64_t**)(*plVar7 + 8);
+            } else {
+                if (plVar6 == (int64_t*)*plVar2) {
+                    int64_t lVar4b = *plVar2;
+                    *plVar2 = *(int64_t*)(lVar4b + 0x10);
+                    if (*(char*)(*(int64_t*)(lVar4b + 0x10) + 0x29) == '\0') {
+                        *(int64_t**)(*(int64_t*)(lVar4b + 0x10) + 8) = plVar2;
+                    }
+                    plVar7 = plVar2 + 1;
+                    *(int64_t*)(lVar4b + 8) = *plVar7;
+                    if (plVar2 == *(int64_t**)(pHead + 8)) {
+                        *(int64_t*)(pHead + 8) = lVar4b;
+                    } else {
+                        plVar6 = (int64_t*)*plVar7;
+                        if (plVar2 == (int64_t*)plVar6[2]) {
+                            plVar6[2] = lVar4b;
+                        } else {
+                            *plVar6 = lVar4b;
+                        }
+                    }
+                    *(int64_t**)(lVar4b + 0x10) = plVar2;
+                    *plVar7 = lVar4b;
+                    plVar6 = plVar2;
+                }
+                *(uint8_t*)(*plVar7 + 0x28) = 1;
+                *(uint8_t*)(*(int64_t*)(*plVar7 + 8) + 0x28) = 0;
+                int64_t lVar4c = *(int64_t*)(*plVar7 + 8);
+                plVar7 = *(int64_t**)(lVar4c + 0x10);
+                *(int64_t*)(lVar4c + 0x10) = *plVar7;
+                if (*(char*)(*plVar7 + 0x29) == '\0') {
+                    *(int64_t*)(*plVar7 + 8) = lVar4c;
+                }
+                plVar7[1] = *(int64_t*)(lVar4c + 8);
+                if (lVar4c == *(int64_t*)(pHead + 8)) {
+                    *(int64_t**)(pHead + 8) = plVar7;
+                } else {
+                    plVar2 = *(int64_t**)(lVar4c + 8);
+                    if (lVar4c == *plVar2) {
+                        *plVar2 = (int64_t)plVar7;
+                    } else {
+                        plVar2[2] = (int64_t)plVar7;
+                    }
+                }
+                *plVar7 = lVar4c;
+                *(int64_t**)(lVar4c + 8) = plVar7;
+            }
+        }
+        plVar7 = plVar6 + 1;
+        cVar1 = *(char*)(*plVar7 + 0x28);
+    }
+    *(uint8_t*)(*(int64_t*)(pHead + 8) + 0x28) = 1;
+    pOut[1] = plVar5;
+    pOut[0] = pTree[0];
+    return pOut;
+}
+
 }  // namespace stl
 }  // namespace flower

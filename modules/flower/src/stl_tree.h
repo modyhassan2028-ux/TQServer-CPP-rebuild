@@ -90,6 +90,10 @@ void* TreeFindWrap(void** pTree, void** pOut, uint32_t* pKey); // 0x140d963e0
 void* TreeInitSelf(void** pTree);                             // 0x140d97b10
 void* ContainerInitB(void** pVec);                            // 0x140d97b90
 
+// 0x140d95b20 — insertion with the hint and the full rebalancing
+void* TreeInsert(void** pTree, void** pOut, char cLeft, void** pParent,
+                 void** pValue);
+
 }  // namespace stl
 }  // namespace flower
 #endif
