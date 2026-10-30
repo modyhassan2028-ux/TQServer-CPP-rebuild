@@ -497,7 +497,7 @@
   (فتحة 5 = `0x1417de5c0`، فتحة 10 = `0x1417dee40`) عددها 12 فقط
   = المنقولة كلها. الباقي رسائل `tq::CMsg` بـ5 فتحات.
 - **CMsgLog منقولة كاملة** (`modules/syndicate/src/CMsgLog.{h,cpp}`):
-  vtable `0x14182e4a0` · قاعدة `tq::CMsg::vftable` = `0x14182d368`
+  vtable `0x14182e4a0` · قاعدة `tq::CMsg::vftable` = `0x14182e368`
   (مُشتقة من `lea` في الـdtor لا مأخوذة من الرمز).
   الفتحات: 0 dtor `0x14177e3e0`، 1 Create `0x1417d9760`،
   2 هيكل `0x14177e2f0`، 3 Process `0x1417d97c0`، 4 هيكل `0x14177e2d0`.

@@ -1,7 +1,7 @@
 // ============================================================================
 // CMsgSynMemberInfo.h — RAW Syndicate.dll v6159 · tq::CMsg message
 //   original path: modules/syndicate/src/msg/msgsynmemberinfo.cpp
-//   vtable 0x14183df00 · base tq::CMsg::vftable 0x14182d368
+//   vtable 0x14183df00 · base tq::CMsg::vftable 0x14182e368
 //     slot 0  0x1417dd1e0 deleting dtor
 //     slot 1  0x1417dd0d0 Create (msg type 0x458)
 //     slot 2  0x14177e2f0 base Process(OBJID idActor, void* pInfo) stub
@@ -23,7 +23,7 @@ extern void (*g_fn_1417ae9b0)(void* pMgr, uint32_t idActor);
 class CMsgSynMemberInfo {
 public:
     static constexpr uintptr_t kClassVft = 0x14183df00;
-    static constexpr uintptr_t kBaseCMsgVft = 0x14182d368;
+    static constexpr uintptr_t kBaseCMsgVft = 0x14182e368;
     static constexpr uint32_t kOffMsgType = 0x0A;
     static constexpr uint32_t kOffPayload = 0x408;
     static constexpr uint16_t kMsgType = 0x458;

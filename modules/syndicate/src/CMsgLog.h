@@ -1,6 +1,6 @@
 // ============================================================================
 // CMsgLog.h — RAW Syndicate.dll v6159 · tq::CMsg-derived message class
-//   vtable 0x14182e4a0 (5 slots) · base tq::CMsg::vftable 0x14182d368
+//   vtable 0x14182e4a0 (5 slots) · base tq::CMsg::vftable 0x14182e368
 //     slot 0  0x14177e3e0 deleting dtor
 //     slot 1  0x1417d9760 Create(this, char* pData, uint16_t type)
 //     slot 2  0x14177e2f0 tq::CMsg::Process(OBJID, void*) error stub
@@ -25,7 +25,7 @@ extern void (*g_pfnLogProcessB)(void* mgr, uint32_t idActor);
 class CMsgLog {
 public:
     static constexpr uintptr_t kClassVft = 0x14182e4a0;
-    static constexpr uintptr_t kBaseCMsgVft = 0x14182d368;
+    static constexpr uintptr_t kBaseCMsgVft = 0x14182e368;
     static constexpr uint32_t kOffMsgType = 0x0A;
     static constexpr uint32_t kOffPayload = 0x408;
     static constexpr uint16_t kTypeA = 0x3ea;

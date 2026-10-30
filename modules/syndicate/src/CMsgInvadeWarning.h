@@ -1,6 +1,6 @@
 // ============================================================================
 // CMsgInvadeWarning.h — RAW Syndicate.dll v6159 · tq::CMsg message
-//   vtable 0x14183bf30 · base tq::CMsg::vftable 0x14182d368
+//   vtable 0x14183bf30 · base tq::CMsg::vftable 0x14182e368
 //     slot 0  0x1417d52f0 deleting dtor
 //     slot 1  0x1417d5170 Create  (msg type 0xc1c)
 //     slot 2  0x14177e2f0 base Process(OBJID idActor, void* pInfo) stub
@@ -20,7 +20,7 @@ namespace syndicate {
 class CMsgInvadeWarning {
 public:
     static constexpr uintptr_t kClassVft = 0x14183bf30;
-    static constexpr uintptr_t kBaseCMsgVft = 0x14182d368;
+    static constexpr uintptr_t kBaseCMsgVft = 0x14182e368;
     static constexpr uint32_t kOffMsgType = 0x0A;
     static constexpr uint32_t kOffPayload = 0x408;
     static constexpr uint16_t kMsgType = 0xc1c;
