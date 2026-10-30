@@ -36,6 +36,11 @@ extern const char kCheckFormat[];   // 0x140d9b368
 // log_InlineLogERROR of this module
 extern void (*g_pfnFlowerLog)(const char* fmt, ...);
 
+// InstanceGet: () -> the world/interface registry whose +0x20 returns the
+// named data manager (PTR_s_flower_140da22f8)
+extern void* (*g_pfnInstanceGet)();
+extern const char kFlowerMgrName[];   // 0x140da22f8 "flower"
+
 // the actor query behind the vtable call at +0xa8 (pSelf, pList, idUser, 0x21)
 extern void (*g_pfnQueryTodayFlowerList)(void* pSelf,
                                          std::vector<CTodayFlower*>* pList,
@@ -52,6 +57,13 @@ public:
     // 0x140d97400 — lookup then the slot read, zero when the key is absent
     static uint32_t GetValue(std::map<uint32_t, CTodayFlower*>* pMap,
                              uint32_t idUser, uint32_t dwSlot);
+    // 0x140d96fb0 — find-or-insert and answer the address of the value cell
+    static CTodayFlower** InsertSlot(std::map<uint32_t, CTodayFlower*>* pMap,
+                                     uint32_t idUser);
+    // 0x140d97430 — the write path: an existing record takes SetSlot, an
+    // absent one is created through the "flower" data manager first
+    static void SetValue(std::map<uint32_t, CTodayFlower*>* pMap,
+                         uint32_t idUser, uint32_t dwSlot, int32_t nValue);
 
     // 0x140d97710
     void OnUserLogin(uint32_t idUser);
