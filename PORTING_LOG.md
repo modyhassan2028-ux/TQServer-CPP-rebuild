@@ -6673,3 +6673,17 @@ New، Clear، IsInit، مشترك، thunk، Merge، ByteSize، Serialize،
   (الجدول في `Docs/REMAINING_20_CLASSES.md`).
 - `tools/find_vtables.py` يرجع MISS لهذه الكلاسات (لا COL لها)،
   فالمصدر المعتمد هو مسح مؤشرات COL + تحقّق الفتحة 0.
+
+## D117 — CMsgLog: أول رسالة tq::CMsg (5 فتحات) [2026-10-30]
+
+- vtable `0x14182e4a0`؛ الفتحة 0 `0x14177e3e0` (dtor يكتب
+  `syndicate::CMsgLog::vftable` ثم `tq::CMsg::vftable` = `0x14182d368`)،
+  الفتحة 1 `0x1417d9760` (Create)، الفتحة 3 `0x1417d97c0` (Process)،
+  الفتحتان 2/4 هما هيكل القاعدة `0x14177e2f0` و`0x14177e2d0`.
+- الحقول من disasm: `+0x0A` نوع `uint16`، `+0x408` مؤشر الحمولة،
+  الحمولة `+0x8` نوع `int`. الأنواع `0x3ea`/`0x3eb` فقط.
+- السجلات الحرفية الثلاثة منقولة كما هي (Process + هيكلا القاعدة).
+- **إصلاح عملية:** `tests/syndicate_d103_test.cpp` كان تابعاً لوحدة
+  CSyndicateLogic (`+0x350` join-league)؛ أُعيد من git وأُعيد ترقيم
+  وحدة اليوم إلى D117.
+- `135/135 × 6` أخضر، ASan/UBSan نظيفان.

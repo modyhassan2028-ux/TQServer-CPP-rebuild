@@ -490,3 +490,30 @@
 - رجريجن **131/131 × 6** مع ASan/UBSan نظيفين.
 - **التالي**: العودة لجدول NpcServerModule (D112) من نقطة
   +0x2e0..+0x370، ثم +0x560..+0x738.
+
+## تحديث D117 (2026-10-30) — أول رسالة tq::CMsg: CMsgLog
+
+- **السبب:** مسح RTTI الكامل (D102) أثبت أن الجداول ذات بصمة PB
+  (فتحة 5 = `0x1417de5c0`، فتحة 10 = `0x1417dee40`) عددها 12 فقط
+  = المنقولة كلها. الباقي رسائل `tq::CMsg` بـ5 فتحات.
+- **CMsgLog منقولة كاملة** (`modules/syndicate/src/CMsgLog.{h,cpp}`):
+  vtable `0x14182e4a0` · قاعدة `tq::CMsg::vftable` = `0x14182d368`
+  (مُشتقة من `lea` في الـdtor لا مأخوذة من الرمز).
+  الفتحات: 0 dtor `0x14177e3e0`، 1 Create `0x1417d9760`،
+  2 هيكل `0x14177e2f0`، 3 Process `0x1417d97c0`، 4 هيكل `0x14177e2d0`.
+- **التخطيط (من disasm):** نوع الرسالة `uint16` عند `+0x0A`،
+  مؤشر الحمولة `+0x408`، نوع الحمولة `int` عند `+0x8`.
+  المقبول: `0x3ea` → 0، `0x3eb` → 1، غيرهما `false`.
+- **Process:** `0x1417b6210` (مدير) ← نوع 0 → `0x1417b7010`،
+  نوع 1 → `0x1417ac620`، وإلا InlineLogERROR بـ
+  `"syndicate::CMsgLog::Process(idActor), idActor:%d, Type:%d, MsgType:%d"`
+  (الوسائط r9 = msgType من `+0x0A`).
+- **5 seams** خارجية: `g_pfnCMsgCreate`, `g_pfnGetSyndicateMgr`,
+  `g_pfnLogProcessA`, `g_pfnLogProcessB`, `g_pfnInlineLogError`.
+- **تحذير رقمي:** كان `tests/syndicate_d103_test.cpp` مستخدماً من
+  وحدة CSyndicateLogic سابقاً — الوحدة الجديدة مرقمة **D117**
+  (أعلى موجود D116) وملف d103 أُعيد من git.
+- رجريجن **135/135 × 6** مع ASan/UBSan نظيفين.
+- **التالي:** `CMsgInvadeWarning` (`0x14183bf30`) ثم
+  `CMsgSynMemberInfo` (`0x14183df00`)، والجدول الكامل في
+  `Docs/REMAINING_20_CLASSES.md`.
