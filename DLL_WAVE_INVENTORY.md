@@ -150,3 +150,6 @@ CMsgLeagueRobOpt (0x14183cc78)، CMsgLeagueToken (0x14183cfa0).
 ## D128 (2026-10-30)
 +3 كلاسات أساس: tq::CMsg (0x14182e368)، gs::IModule (0x14182e428)،
 syndicate::CModule (0x14182e5a8) — 23 فتحة.
+
+## D129 (2026-10-30)
++1 واجهة: IProvider (0x141834928، 224 فتحة، 223 pure).

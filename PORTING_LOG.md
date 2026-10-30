@@ -6894,3 +6894,9 @@ Create للمLeagueRobOpt/Token: تحقق النوع ثم `ParseFromArray(slot+0
 الوحدات الصغيرة) بُنيت بدون RTTI** — لا يوجد `.?AV…@@` فيها، لذلك خرائط الفتبل
 تلك تُستخرج من الـdecompiled (أنماط dtor + offsets) وليس من RTTI؛
 `tools/dll_class_map.py` يعمل فقط على الوحدات المبنية بـRTTI (Syndicate).
+
+## D129 — syndicate::IProvider (2026-10-30)
+فتبل 0x141834928، **224 فتحة** مقروءة من البايناري: الفتحة 0 =
+0x1417a9640 (dtor يكتب 0x141834928 ثم delete عند البت 0)، والفتحات 1..223
+كلها 0x1417f3374 (thunk الـpurecall) ⇒ الواجهة مجردة بالكامل.
+الاختبار: `tests/syndicate_d129_test.cpp` — 147/147 × 6 نظيف.

@@ -624,3 +624,8 @@ CMsgLeagueRobOpt، CMsgLeagueToken — كل واحدة بفتحات فتبلها
 بما فيها سلسلة مدمرات الأعضاء الـ15 ومصنع `CreateMsgCore` بالـ17 نوع.
 **146/146 × 6 نظيف**. الأصول الثنائية لكل الـDLLs موجودة الآن في
 `/app/co_decomp/orig_binaries/Source` (Flower.dll بدون RTTI ⇒ لا خرائط فتبل آلية لها).
+
+## D129 (2026-10-30)
+`iprovider.h/.cpp`: واجهة IProvider كاملة الشكل (224 فتحة، 223 pure). بكده
+**كل كلاسات Syndicate الحقيقية مغلقة**؛ المتبقي في الخريطة كلاسات protobuf/STL
+المغطاة ببدائلها. **147/147 × 6**.
