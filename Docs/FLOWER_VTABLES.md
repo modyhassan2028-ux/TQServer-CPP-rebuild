@@ -10,7 +10,7 @@
 ## Mapping to source (2026-10-30)
 | vtable | class | original file |
 |---|---|---|
-| `0x140d9bcb8` | `flower::CModule` | `modules/flower/src/module.cpp` |
+| `0x140d9bcb8` | `flower::CModule` (9 slots: 4 `_purecall`, 4 × `return 0`) | `modules/flower/src/module.cpp` |
 | `0x140d9db08` | `flower::CMsgFlower` | `modules/flower/src/msg/msgflower.cpp` |
 | `0x140d9dc60` | `flower::CMsgLog` | `modules/flower/src/msg/msglog.cpp` |
 | `0x140d9da28` | `flower::CMsgLog` (earlier ctor variant) | `modules/flower/src/msg/msglog.cpp` |

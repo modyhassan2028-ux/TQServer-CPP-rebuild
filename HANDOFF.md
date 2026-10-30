@@ -645,3 +645,10 @@ payload+4/payload+8). الفتبلات مستخرجة بدون RTTI عبر `tool
 (flower::CModule 0x140d9bcb8، 9 فتحات: dtor 0x140d93290 يكتب
 `gs::IModule::vftable`، أربع فتحات 0x140d982ac = thunk استيراد، والأربع
 الباقية 0x140d93250/60/70/80 ترجع 0)، ثم `flowerservice.cpp`.
+
+## D132 (2026-10-30)
+`module.cpp`: flower::CModule بحجم 0x848 وفتبل 0x140d9bcb8 (9 فتحات، منها
+4 `_purecall` عبر `g_pfnPureCall` و4 ترجع 0)، مع ctor 0x140d935b0 وdtor كامل
+0x140d932f0 وdtor محذوف 0x140d93290. **150/150 × 6**.
+التالي: `flowerservice.cpp` (0x140d93630/0x140d93360/0x140d93380/0x140d934e0/
+0x140d93660 بخمس فتحات حقيقية) ثم `todayflower.cpp` (بقية دوال CTodayFlower).

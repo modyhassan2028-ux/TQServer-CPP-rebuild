@@ -6957,3 +6957,25 @@ todayflower.cpp · todayflowermgr.cpp`.
   ملكية الصف المحفوظ تنتقل للموديول عبر `pData`.
 اختبار `tests/flower_d131_test.cpp` يغطي الخمسة مسارات (session فارغ، صفر،
 واحد، مكرر، ثلاثة) — **149/149 × 6** نظيف.
+
+## D132 — flower::CModule (module.cpp) (2026-10-30)
+الشكل الحقيقي للكائن **0x848** بايت، فتبل **0x140d9bcb8** بتسع فتحات:
+`0: 0x140d93290` (dtor محذوف)، `1..4: 0x140d982ac` = **`_purecall`**،
+`5..8: 0x140d93250/60/70/80` وكلها `xor eax,eax` (ترجع 0).
+
+ctor **0x140d935b0**: يضبط `gs::IModule::vftable` ثم `flower::CModule::vftable`،
+`*(u32*)(this+0x008)=dwModuleIndex`، ثم `CMsgLog::Ctor(this+0x010)` و
+`CMsgFlower::Ctor(this+0x428)`، ثم `*(u32*)(this+0x838)=0`،
+`*(void**)(this+0x840)=pKernel`، `*(void**)(this+0x420)=0`.
+
+dtor الكامل **0x140d932f0**: يعيد تثبيت فتبل الصنف، فإن كان `*(this+0x420)`
+غير صفري نادى فتحته `+0x58` بالوسائط `(obj, 1, p3, p4, -2)`، ثم جسمَي dtor
+العضوين (0x140d97d00 لـCMsgFlower و0x140d98060 لـCMsgLog، وكلاهما يكتب فتبل
+الصنف ثم فتبل `tq::CMsg`)، ثم `gs::IModule::vftable`.
+
+تخطيط الأعضاء المؤكد من الأوفستات: `CMsgLog` = 0x410 بايت (0x010→0x420)
+و`CMsgFlower` = 0x410 بايت (0x428→0x838) — لا حشو بينهما. الفتحات الأربع
+`_purecall` مُمثلة في الشجرة بـ`CModule::PureCall()` عبر وصلة
+`g_pfnPureCall` (لا يمكن تمثيلها كدوال نقية مع إمكانية إنشاء الكائن).
+اختبار `tests/flower_d132_test.cpp` يتحقق من الحجم والأوفستات والـctor
+والتدمير الكامل مع استدعاء الفتحة 0x58 — **150/150 × 6** نظيف.

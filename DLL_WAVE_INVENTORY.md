@@ -159,3 +159,6 @@ Flower.dll: +2 كلاس رسائل (CMsgFlower 0x140d9db08، CMsgLog 0x140d9dc60
 
 ## D131 (2026-10-30)
 Flower.dll: +CTodayFlower (0x10 بايت) +CTodayFlowerMgr::OnUserLogin 0x140d97710.
+
+## D132 (2026-10-30)
+Flower.dll: +flower::CModule (0x848 بايت، 9 فتحات، فتبل 0x140d9bcb8).

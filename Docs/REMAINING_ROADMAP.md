@@ -18,3 +18,7 @@ flowerservice.cpp (CFlowerService)، module.cpp (flower::CModule 0x140d9bcb8).
 ## D131 (2026-10-30)
 Flower.dll: 3/6 ملفات (msg/msgflower.cpp، msg/msglog.cpp، todayflowermgr.cpp).
 المتبقي: todayflower.cpp، module.cpp، flowerservice.cpp.
+
+## D132 (2026-10-30)
+Flower.dll: 4/6 ملفات (msg/msgflower، msg/msglog، todayflowermgr، module).
+المتبقي: todayflower.cpp، flowerservice.cpp.
