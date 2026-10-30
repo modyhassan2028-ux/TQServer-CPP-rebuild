@@ -659,3 +659,9 @@ Lookup + Attach. **151/151 × 6**. Flower.dll اكتملت إلا بقية دو�
 `todayflower.cpp`.
 جرد كامل لكل البايناريهات في `Docs/DLL_FULL_INVENTORY.md` (48 بايناري،
 128,853 دالة، ~1,000 مسار مصدري) — أداة `tools/dll_inventory.py`.
+
+## كتالوج Flower (2026-10-30)
+`tools/function_catalog.py` + `Docs/FLOWER_REMAINING.md`: 366 دالة متبقية في
+Flower.dll (30,375 بايت) — 333 جسمًا حقيقيًا و33 thunk. الأكبر
+`0x140d926c0` و`0x140d91be0` (مساري الإرسال للأوضاع 2 و1). الشجرة الحالية
+**151/151 × 6** سليمة.
