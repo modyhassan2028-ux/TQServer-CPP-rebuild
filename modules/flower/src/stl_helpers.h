@@ -44,6 +44,9 @@ uint64_t MemMagicCheckB(void** p);                                       // 0x14
 
 // ---- the CMyHeap singleton named "CTodayFlower"
 void* TodayFlowerHeap();                                                 // 0x140d939b0
+// 0x140d93ad0 — the same singleton, then IsValidPt on the argument
+void TodayFlowerHeapValidate(void* p);
+extern void (*g_pfnHeapIsValidPt)(void*, void*);
 
 // ---- the seams the raw code calls into
 extern void (*g_pfnHelperTerminate)();

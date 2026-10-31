@@ -221,5 +221,14 @@ void* TodayFlowerHeap() {
     return s_abTodayFlowerHeap;
 }
 
+// 0x140d93ad0 — the singleton is built first, then the heap answers whether
+// the pointer it was given belongs to it.
+static void DefHeapIsValid(void*, void*) {}
+void (*g_pfnHeapIsValidPt)(void*, void*) = DefHeapIsValid;
+void TodayFlowerHeapValidate(void* p) {
+    void* pHeap = TodayFlowerHeap();
+    g_pfnHeapIsValidPt(pHeap, p);
+}
+
 }  // namespace stl
 }  // namespace flower

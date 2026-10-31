@@ -901,4 +901,42 @@ uint64_t CFlowerService::DelFlowerDataByChangeSex(void* pThis,
     return 1;
 }
 
+// 0x140d91170 — four names, then null. The instance lookup goes through the
+// same StrGet the rest of the module uses.
+const char* GetFlowerName(int iType) {
+    if (iType == 0) return StrGet("STR_FLOWER_NAME_RED");
+    if (iType == 1) return StrGet("STR_FLOWER_NAME_WHITE");
+    if (iType == 2) return StrGet("STR_FLOWER_NAME_LILY");
+    if (iType == 3) return StrGet("STR_FLOWER_NAME_TULIP");
+    return nullptr;
+}
+
+// 0x140d91200 — the gift names start at 4, and the miss answers the empty
+// literal at 0x140d9b478 rather than null.
+const char* GetGiftName(int iType) {
+    if (iType == 4) return StrGet("STR_GIFT_NAME_A");
+    if (iType == 5) return StrGet("STR_GIFT_NAME_B");
+    if (iType == 6) return StrGet("STR_GIFT_NAME_C");
+    if (iType != 7) return "";
+    return StrGet("STR_GIFT_NAME_D");
+}
+
+// 0x140d91900 — the disassembly is a test on r9b: the flag path tail-jumps
+// 0x140d97400 with the map from +0x18 and the two parameters, the other path
+// loads the object at +0x8 and tail-jumps its slot 0x30 with the same
+// registers, so the callee sees (this, param_2, param_3).
+void (*g_pfnNotifyVt30)(void*, uint32_t, uint32_t) = nullptr;
+void NotifySlotChange(void** pObj, uint32_t uParam2, uint32_t uParam3,
+                      char cFlag) {
+    if (cFlag != '\0') {
+        CTodayFlowerMgr::GetValue(
+            (std::map<uint32_t, CTodayFlower*>*)pObj[0x18 / 8], uParam2, uParam3);
+        return;
+    }
+    void* pTarget = pObj[1];
+    if (g_pfnNotifyVt30 != nullptr) {
+        g_pfnNotifyVt30(pTarget, uParam2, uParam3);
+    }
+}
+
 }  // namespace flower

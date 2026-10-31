@@ -757,3 +757,9 @@ Flower.dll (30,375 بايت) — 333 جسمًا حقيقيًا و33 thunk. ال�
 الخروج). المولّد بقى يفصل ثلاث سلال (لعبة / thunk / CRT-SEH): **0 جسم لعبة
 باقٍ**، والباقي 228 = 30 thunk استيراد + 198 CRT/SEH. الحزمة صارت 167 وحدة،
 والدورة 20 وحدة × 6.
+
+## D152 (2026-10-31)
+`GetFlowerName`, `GetGiftName`, `NotifySlotChange` (وسائطها الثلاثة مثبتة من
+الـdisassembly)، `TodayFlowerHeapValidate`. أُضيف `tools/import_map.py` +
+`Docs/FLOWER_IMPORTS.md` (21 trampoline مربوط بأسماء CQBase/MSVCR). الحزمة 168
+وحدة، والدورة 21 × 6.

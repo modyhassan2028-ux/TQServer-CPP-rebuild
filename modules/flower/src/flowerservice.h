@@ -35,6 +35,19 @@ extern uint8_t (*g_pfnFlowerAttachInit)(void* pAttached, void* pSecond);
 extern uint32_t (*g_pfnResolveGift)(void* pThis, int nArg,
                                     uint32_t* pSlot, int* pCount);
 
+// 0x140d91170 — the flower name of a type 0..3; anything else answers null
+const char* GetFlowerName(int iType);
+// 0x140d91200 — the gift name of a type 4..7; a miss answers the empty literal
+// that sits at 0x140d9b478 (verified zero bytes in .rdata)
+const char* GetGiftName(int iType);
+// 0x140d91900 — the flag picks the slot write at +0x18 or the vtable notify at
+// +0x30 on the object at +0x8. The registers were read from the disassembly:
+// the else branch is a tail jump with rcx, rdx and r8 intact.
+void NotifySlotChange(void** pObj, uint32_t uParam2, uint32_t uParam3,
+                      char cFlag);
+extern void (*g_pfnNotifyVt30)(void* pTarget, uint32_t uParam2,
+                               uint32_t uParam3);
+
 class CFlowerService {
 public:
     static constexpr uintptr_t kClassVft = 0x140d9be08;

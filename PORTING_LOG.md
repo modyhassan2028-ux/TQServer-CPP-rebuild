@@ -7426,3 +7426,27 @@ thunk استيراد/CRT، الدوال التي تناديها، والنصوص
 حتى النهاية)، مؤشر السجل، حارسا السحر، المفرد (اسم + مرة واحدة + atexit)،
 إنشاءات الأساس الأربعة، تمريرا initterm، وكلمة حالة الخروج، ثم التفكيك.
 دورة الزهرة **20 وحدة × 6** خضراء.
+
+## D152 — النوتيفاي والأسماء وخريطة الاستيراد (2026-10-31)
+أربع دوال كانت مصنّفة thunk وطلعت منطقًا:
+- `0x140d91170` → `GetFlowerName`: أسماء 0..3 (`STR_FLOWER_NAME_RED`,
+  `_WHITE`, `_LILY`, `_TULIP`) وغيرها صفر.
+- `0x140d91200` → `GetGiftName`: 4..7 (`STR_GIFT_NAME_A..D`)، والإخفاق يعيد
+  الحرفي الفارغ عند `0x140d9b478` — تحقّقت من البايت في `.rdata` فطلع صفر.
+- `0x140d91900` → `NotifySlotChange`: **الـdisassembly** حسم الغموض:
+  `test r9b,r9b` ثم `mov 0x18(%rcx),%rcx; jmp 0x140d97400` (إسناد الفتحة)،
+  أو `mov 0x8(%rcx),%rcx; mov (%rcx),%rax; jmp *0x30(%rax)` — أي نداء ذيلي
+  بالوسائط الثلاثة نفسها (this, param_2, param_3). سابقًا كانت تُقرأ بلا وسائط.
+- `0x140d93ad0` → `TodayFlowerHeapValidate`: نفس مفرد `CTodayFlower` ثم
+  `IsValidPt(pHeap, p)`.
+
+**أدوات جديدة:** `tools/import_map.py` يبني `Docs/FLOWER_IMPORTS.md` من دليل
+الاستيراد في الـPE نفسه: يفكّ `jmp *disp32(%rip)` في كل trampoline ويقرأ
+الفتحة التي يهبط عليها. النتيجة **21 trampoline مربوط** ومنها دليل قاطع أن
+`tq::CMsg::Init/Create` تأتي من **CQBase.dll** بالأسماء المزخرفة
+(`?Init@CMsg@tq@@IEAAXXZ`, `?Create@CMsg@tq@@UEAA_NPEBDG@Z`)، لا من MSVCR.
+
+اختبار `tests/flower_d152_test.cpp` (21 وحدة × 6): الأسماء الأربعة لكل عائلة
+مع الإخفاق، النوتيفاي بفرعيه مع فحص الوسائط الثلاث، وحارس الكومة.
+**درس اختباري:** `StrGet` يقرأ أول كلمة من كائن المدير كـvtable، فلا يصح تمرير
+`std::string` كمدير وهمي.
