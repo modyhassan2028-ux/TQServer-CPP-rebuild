@@ -23,6 +23,7 @@ def main():
     idx = [l.split("\t") for l in
            open(os.path.join(DEC, binf + ".index.tsv")).read().splitlines()[1:]
            if l.strip()]
+    idxname = {r[1].lower(): r[0] for r in idx if len(r) > 1}
     port_txt = ""
     for f in glob.glob(os.path.join(REPO, "modules", pkg, "**", "*.*"),
                        recursive=True) + \
@@ -46,7 +47,23 @@ def main():
         callees = sorted({c for c in re.findall(r"FUN_([0-9a-f]{8,})", body)
                           if c.lower() != addr})
         strings = sorted(set(re.findall(r'"([ -~]{3,60})"', body)))
-        rows.append(dict(addr=addr, size=size, thunk=thunk, callees=callees,
+        # The runtime bucket: the index names the compiler-generated helpers,
+        # so the classification comes from the name and the body markers rather
+        # than from a guess.  A thunk is a jump into the import table; CRT and
+        # SEH entries are code the toolchain emits, not game logic.
+        name = (idxname.get(addr) or fname or "")
+        seh = (name.startswith(("Unwind@", "Catch@", "filt$", "fin$"))
+               or "Unwind@" in name)
+        crt = (name.startswith("_") or name in ("entry", "atexit")
+               or "Library Function" in body
+               or "_unlock(" in body or "__CppXcptFilter" in body
+               or "_eh_vector_destructor_iterator_" in body
+               or "atexit(" in body and "operator_new" not in body
+               or "_malloc_crt" in body or "_encode_pointer" in body
+               or "__security_init_cookie" in body
+               or "__GSHandlerCheckCommon" in body)
+        runtime = seh or crt
+        rows.append(dict(addr=addr, size=size, thunk=thunk, runtime=runtime, callees=callees,
                          strings=strings, inport=addr in port_txt,
                          head=body.strip().split("\n")[0][:90]))
     done = [r for r in rows if r["inport"]]
@@ -59,20 +76,27 @@ def main():
         o.write(f"total **{len(rows)}** · referenced by the port **{len(done)}** "
                 f"· remaining **{len(left)}** · remaining bytes "
                 f"{sum(r['size'] for r in left):,}\n\n")
-        o.write(f"of the remaining: import/CRT thunks **{sum(1 for r in left if r['thunk'])}** "
-                f"· real bodies **{sum(1 for r in left if not r['thunk'])}**\n\n")
-        o.write("## Real bodies still to port (largest first)\n\n")
+        game = [r for r in left if not r["thunk"] and not r["runtime"]]
+        o.write(f"of the remaining: game bodies **{len(game)}** · "
+                f"import thunks **{sum(1 for r in left if r['thunk'])}** · "
+                f"CRT/SEH runtime **{sum(1 for r in left if r['runtime'] and not r['thunk'])}**\n\n")
+        o.write("## Game bodies still to port (largest first)\n\n")
         o.write("| address | bytes | callees | strings |\n|---|---:|---:|---|\n")
-        for r in sorted([r for r in left if not r["thunk"]],
-                        key=lambda r: -r["size"]):
+        for r in sorted(game, key=lambda r: -r["size"]):
             o.write(f"| `0x{r['addr']}` | {r['size']} | {len(r['callees'])} | "
                     f"{', '.join('`' + s + '`' for s in r['strings'][:3])} |\n")
+        o.write("\n## CRT / SEH runtime left (not game logic)\n\n")
+        for r in sorted([r for r in left if r["runtime"] and not r["thunk"]],
+                        key=lambda r: r["addr"]):
+            o.write(f"- `0x{r['addr']}` ({r['size']} B) `{r['head'][:60]}`\n")
         o.write("\n## Import / CRT thunks still to wire\n\n")
         for r in sorted([r for r in left if r["thunk"]], key=lambda r: r["addr"]):
             o.write(f"- `0x{r['addr']}` ({r['size']} B) `{r['head']}`\n")
+    game = [r for r in left if not r["thunk"] and not r["runtime"]]
     print(f"wrote {out}: {len(left)} remaining "
           f"({sum(1 for r in left if r['thunk'])} thunks, "
-          f"{sum(1 for r in left if not r['thunk'])} real)")
+          f"{sum(1 for r in left if r['runtime'] and not r['thunk'])} runtime, "
+          f"{len(game)} game)")
 
 
 if __name__ == "__main__":
