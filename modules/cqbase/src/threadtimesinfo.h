@@ -27,32 +27,48 @@ namespace tq {
 
 constexpr uint32_t kThreadTimesInfoBaseSize = 0x50;
 
-// One sample in the list the measuring object keeps. Evidence from the binary:
-// the element stride is 0x10 (`>> 4` in the iterator distance at 0x140bb3b30) and
-// an element copy moves exactly two qwords (0x140bb51c0). What each qword holds is
-// settled by Init, Start and RecordThreadTimesInfo, which are not ported yet, so
-// they are positional names rather than invented meanings.
+// One sample in the list the measuring object keeps: sixteen bytes, settled by the
+// Init body at 0x140bb4750, which walks the list as pairs of qwords, reads the first
+// qword as a thread handle, asks twice for its times and stores the two results as
+// 32 bit values at +0x08 and +0x0c. The element stride of 0x10 is visible in the
+// iterator distance at 0x140bb3b30 and in the copy at 0x140bb51c0.
 struct CThreadTimesSample {
-    uint64_t uField00;
-    uint64_t uField08;
+    void* hThread;        // +0x00
+    uint32_t uKernelMs;   // +0x08  thread kernel time, FILETIME / 10000
+    uint32_t uUserMs;     // +0x0c  thread user time,   FILETIME / 10000
 };
+
+// The clock and process calls the measuring object needs. Defaults are inert and
+// every test injects its own, so the order of the calls and the exact numbers the
+// fields end up holding can be pinned.
+struct ThreadTimesApi {
+    void* (*pfnGetCurrentProcess)();
+    bool (*pfnGetProcessTimes)(void* hProcess, uint64_t* puCreation, uint64_t* puExit,
+                               uint64_t* puKernel, uint64_t* puUser);
+    uint32_t (*pfnGetTickCount)();
+    uint32_t (*pfnGetThreadId)(void* hThread);
+    bool (*pfnGetThreadTimes)(void* hThread, uint64_t* puCreation, uint64_t* puExit,
+                              uint64_t* puKernel, uint64_t* puUser);
+};
+extern ThreadTimesApi g_ThreadTimesApi;
 
 class CThreadTimesInfoBase {
 public:
     CThreadTimesInfoBase();     // 0x140bb5590
     ~CThreadTimesInfoBase();    // 0x140bb5800
+    bool Init();                // 0x140bb4750 (the process half of that body)
 
     static const void* const* Table();   // 0x140bce3c8, slot 0 is the deleting dtor
 
     const void* pVt;                           // +0x00
     std::vector<CThreadTimesSample> vSamples;  // +0x08, a debug level STL vector
-    uint64_t uField28;                         // +0x28
-    uint64_t uField30;                         // +0x30
-    uint64_t uField38;                         // +0x38
-    uint32_t uField40;                         // +0x40
-    uint32_t uField44;                         // +0x44
-    uint32_t uField48;                         // +0x48
-    uint8_t uField4C;                          // +0x4c
+    uint64_t uField28;                         // +0x28  not touched by Init
+    uint64_t uField30;                         // +0x30  not touched by Init
+    void* hProcess;                            // +0x38
+    uint32_t uProcessUserMs;                   // +0x40  process user time,   FILETIME / 10000
+    uint32_t uProcessKernelMs;                 // +0x44  process kernel time, FILETIME / 10000
+    uint32_t uTickCount;                       // +0x48
+    uint8_t uInited;                           // +0x4c
 };
 
 // 0x140bb5800 — the object's first table slot: it destroys, and frees only when the

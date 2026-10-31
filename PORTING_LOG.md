@@ -7806,3 +7806,17 @@ thunk استيراد/CRT، الدوال التي تناديها، والنصوص
   معاني الحقلين تُثبت من Init/Start/RecordThreadTimesInfo لاحقًا فلا تُخمَّن.
 - باقي الملف (Init، Start، التقرير، RecordThreadTimesInfo) لم يُنقل، ودوال
   `FUN_140bb39e0..140bb4750` كلها STL debug.
+
+### D15c — `CThreadTimesInfoBase::Init` (2026-10-31)
+- الجسم 0x140bb4750: `GetCurrentProcess` → +0x38، ثم `GetProcessTimes`، ثم
+  **يقسّم دائمًا**: kernel→+0x44 و user→+0x40 بالقسمة على 10000 ثم قصّ لـint؛
+  وبعدها `GetTickCount` → +0x48.
+- **عارض خام:** لو فشل `GetProcessTimes` بيسجل الخطأ **وبرضه بيخزّن** اللي في
+  الـout params (في الأصل = كومة غير مهيّأة).
+- الحلقة على العينات: المقبض 0 أو -1 يُتخطى بصمت، و`GetThreadId` بيرجّع 0 يُتخطى
+  كمان، وفشل `GetThreadTimes` يسجل بالـthread id وبيسيب العينة زي ما هي؛ والنجاح
+  يكتب kernel→+0x08 و user→+0x0c (عكس ترتيب العملية).
+- آخر الدالة: تسجيل `"ThreadTimesInfo Init ok."` ثم +0x4c = 1، وترجع true.
+- اعتُمد `FUN_140bb3880` كمُسجّل الملف: format في بافر 0x740 ثم
+  `log_Save("syslog/thread", buf, 0)` — بلا بادئة مستوى.
+- **العينة صارت معروفة:** `{hThread, uKernelMs, uUserMs}` بـ16 بايت.
