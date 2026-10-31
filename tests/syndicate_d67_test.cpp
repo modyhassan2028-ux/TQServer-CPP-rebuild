@@ -10,6 +10,7 @@
 #include "modules/syndicate/src/SyndicateMeedFlow.h"
 #include "modules/syndicate/src/SyndicateLeagueTree.h"
 #include "modules/syndicate/src/SyndicateLeagueCmp.h"
+#include <cctype>
 #include <cstdio>
 #include <cstring>
 #include <string>
@@ -330,9 +331,28 @@ static void WIRE() {
     SeedMap();
 }
 
+// A recording prints the pointer it was handed, and raw pointer hex can spell a call
+// name by accident (0x55af7d5cb6c0 contains b6c0). Pointer text is masked before a
+// name is looked for, so a lucky address cannot fake a call.
+static std::string MaskPointers(const std::string& strIn) {
+    std::string strOut;
+    for (size_t i = 0; i < strIn.size(); ) {
+        if (strIn[i] == '0' && i + 2 < strIn.size() &&
+            (strIn[i + 1] == 'x' || strIn[i + 1] == 'X') &&
+            std::isxdigit((unsigned char)strIn[i + 2])) {
+            i += 2;
+            while (i < strIn.size() &&
+                   std::isxdigit((unsigned char)strIn[i])) ++i;
+            strOut += "<ptr>";
+        } else {
+            strOut += strIn[i++];
+        }
+    }
+    return strOut;
+}
 static int HasCall(const char* sub) {
     for (auto& s : g_calls)
-        if (s.find(sub) != std::string::npos) return 1;
+        if (MaskPointers(s).find(sub) != std::string::npos) return 1;
     return 0;
 }
 

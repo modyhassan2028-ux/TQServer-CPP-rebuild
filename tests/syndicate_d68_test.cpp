@@ -17,6 +17,7 @@
 #include "modules/syndicate/src/SyndicateModule.h"
 #include "modules/syndicate/src/SyndicateMeedFlow.h"
 #include <cassert>
+#include <cctype>
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
@@ -36,9 +37,28 @@ static int g_fail = 0;
 // ================= the recorders =================
 static std::vector<std::string> g_calls;
 static void C(const std::string& s) { g_calls.push_back(s); }
+// A recording prints the pointer it was handed, and a raw pointer's hex digits can
+// happen to spell a call name: 0x55af7d5cb6c0 contains b6c0. Pointer text is not a
+// call, so it is masked out before a name is looked for.
+static std::string MaskPointers(const std::string& strIn) {
+    std::string strOut;
+    for (size_t i = 0; i < strIn.size(); ) {
+        if (strIn[i] == '0' && i + 2 < strIn.size() &&
+            (strIn[i + 1] == 'x' || strIn[i + 1] == 'X') &&
+            std::isxdigit((unsigned char)strIn[i + 2])) {
+            i += 2;
+            while (i < strIn.size() &&
+                   std::isxdigit((unsigned char)strIn[i])) ++i;
+            strOut += "<ptr>";
+        } else {
+            strOut += strIn[i++];
+        }
+    }
+    return strOut;
+}
 static bool Has(const std::string& s) {
-    for (auto& x : g_calls) if (x.find(s) != std::string::npos)
-        return true;
+    for (auto& x : g_calls)
+        if (MaskPointers(x).find(s) != std::string::npos) return true;
     return false;
 }
 static void Reset() { g_calls.clear(); }
