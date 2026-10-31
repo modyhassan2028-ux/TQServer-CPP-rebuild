@@ -65,11 +65,11 @@ def main():
         o.write("| address | bytes | callees | strings |\n|---|---:|---:|---|\n")
         for r in sorted([r for r in left if not r["thunk"]],
                         key=lambda r: -r["size"]):
-            o.write(f"| `0x14{r['addr']}` | {r['size']} | {len(r['callees'])} | "
+            o.write(f"| `0x{r['addr']}` | {r['size']} | {len(r['callees'])} | "
                     f"{', '.join('`' + s + '`' for s in r['strings'][:3])} |\n")
         o.write("\n## Import / CRT thunks still to wire\n\n")
         for r in sorted([r for r in left if r["thunk"]], key=lambda r: r["addr"]):
-            o.write(f"- `0x14{r['addr']}` ({r['size']} B) `{r['head']}`\n")
+            o.write(f"- `0x{r['addr']}` ({r['size']} B) `{r['head']}`\n")
     print(f"wrote {out}: {len(left)} remaining "
           f"({sum(1 for r in left if r['thunk'])} thunks, "
           f"{sum(1 for r in left if not r['thunk'])} real)")

@@ -1115,7 +1115,7 @@ void* TreeInsertHint(int64_t* pTree, int64_t* pOut, int64_t* pHint,
             const int64_t lVar4 = pTree[6];
             if ((*pHint == 0) || (*pHint != *pTree)) InvalidParameter();
             if (pHint[1] == lVar4) {
-                if (*(uint32_t*)(*(void**)((char*)pTree[6] + 0x10) + 0x18) < *pKey) {
+                if (*(uint32_t*)((char*)*(void**)((char*)pTree[6] + 0x10) + 0x18) < *pKey) {
                     TreeInsert((void**)pTree, (void**)pOut, 0,
                                *(void***)((char*)pTree[6] + 0x10), (void**)pKey);
                     return pOut;
@@ -1211,7 +1211,7 @@ void* TreeInsertHint(int64_t* pTree, int64_t* pOut, int64_t* pHint,
                     }
                     if ((local_38[0] == 0) || (local_38[0] != lVar4b)) InvalidParameter();
                     if ((plVar9 == plVar7) || (*pKey < *(uint32_t*)((char*)plVar9 + 0x18))) {
-                        if (*(char*)(((void**)pHint[1])[2] + 0x29) != '\0') {
+                        if (*((char*)((void**)pHint[1])[2] + 0x29) != '\0') {
                             TreeInsert((void**)pTree, (void**)pOut, 0,
                                        (void**)pHint[1], (void**)pKey);
                             return pOut;
