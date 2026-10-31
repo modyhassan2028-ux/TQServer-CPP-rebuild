@@ -7792,3 +7792,17 @@ thunk استيراد/CRT، الدوال التي تناديها، والنصوص
   `std::vector` بمستوى debug (`_invalid_parameter_noinfo`, "vector<T> too long")
   → كود مكتبة لا منطق لعبة.
 - الدورة: **15 وحدة × 6** خضراء.
+
+### D15b — النصف القياسي (2026-10-31)
+`CThreadTimesInfoBase` ctor (0x140bb5590) + deleting dtor (0x140bb5800) = وحدتان
+إضافيتان، والـseam بقى يشير للـctor الحقيقي.
+- الجدول 0x140bce3c8، خانته الأولى هي الـdeleting dtor فقط.
+- ctor: الجدول، قائمة عينات فارغة، ثم تصفير كل حقول القياس (+0x28، +0x30، +0x38،
+  +0x40، +0x44، +0x48، +0x4c) — والخام يبني كائن proxy بـ`operator new(8)` لأن
+  الـvector بمستوى debug، وده اللي يعمله `std::vector` تلقائيًا عندنا.
+- dtor: يعيد الجدول، ويحرّر فقط لو `(flag & 1) != 0`، ويرجّع المؤشر في الحالتين.
+- **دليل على شكل العينة:** خطوة العنصر 0x10 (`>> 4` في 0x140bb3b30) ونسخ العنصر
+  بيتحرك قيمتين qword (0x140bb51c0) → `CThreadTimesSample {uField00,uField08}`؛
+  معاني الحقلين تُثبت من Init/Start/RecordThreadTimesInfo لاحقًا فلا تُخمَّن.
+- باقي الملف (Init، Start، التقرير، RecordThreadTimesInfo) لم يُنقل، ودوال
+  `FUN_140bb39e0..140bb4750` كلها STL debug.

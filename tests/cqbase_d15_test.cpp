@@ -26,6 +26,32 @@ static void* FakeNew() {
 static void* FakeNewFails() { ++g_nNews; return nullptr; }
 
 int main() {
+    // ---- the real measuring object: table, zeroed fields, 16 byte samples
+    {
+        g_pfnNewThreadTimesInfoBase = CThreadTimesInfoBaseNew;
+        assert(sizeof(CThreadTimesSample) == 16);
+        assert(CThreadTimesInfoBase::Table()[0] ==
+               (const void*)&CThreadTimesInfoBaseDeletingDtor);
+        CThreadTimesInfo obj;
+        assert(obj.pBase != nullptr);
+        CThreadTimesInfoBase* pB = (CThreadTimesInfoBase*)obj.pBase;
+        assert(pB->pVt == (const void*)CThreadTimesInfoBase::Table());
+        assert(pB->vSamples.empty());
+        assert(pB->uField28 == 0 && pB->uField30 == 0 && pB->uField38 == 0);
+        assert(pB->uField40 == 0 && pB->uField44 == 0 && pB->uField48 == 0);
+        assert(pB->uField4C == 0);
+        pB->vSamples.push_back(CThreadTimesSample{11, 22});
+        assert(pB->vSamples.size() == 1 && pB->vSamples[0].uField08 == 22);
+        // flag 0 destroys without freeing, so the table can be read back
+        void* pRaw = obj.pBase;
+        assert(CThreadTimesInfoBaseDeletingDtor(pRaw, 0) == pRaw);
+        assert(((CThreadTimesInfoBase*)pRaw)->pVt ==
+               (const void*)CThreadTimesInfoBase::Table());
+        obj.pBase = nullptr;            // the handle must not destroy it a second time
+        operator delete(pRaw);          // the caller frees what flag 0 left behind
+        // flag 1 frees as well, and the pointer is not touched afterwards
+        CThreadTimesInfoBaseDeletingDtor(CThreadTimesInfoBaseNew(), 1);
+    }
     // ---- an empty seam behaves like a failed allocation
     {
         g_pfnNewThreadTimesInfoBase = FakeNewFails;
@@ -102,6 +128,6 @@ int main() {
         a.pBase = nullptr;
         b.pBase = nullptr;
     }
-    printf("CQBASE_D15_OK: CThreadTimesInfo handle, 4 units, 18 checks\n");
+    printf("CQBASE_D15_OK: CThreadTimesInfo handle and measuring object, 6 units, 33 checks\n");
     return 0;
 }

@@ -21,10 +21,45 @@
 #define CQBASE_THREADTIMESINFO_H
 
 #include <cstdint>
+#include <vector>
 
 namespace tq {
 
 constexpr uint32_t kThreadTimesInfoBaseSize = 0x50;
+
+// One sample in the list the measuring object keeps. Evidence from the binary:
+// the element stride is 0x10 (`>> 4` in the iterator distance at 0x140bb3b30) and
+// an element copy moves exactly two qwords (0x140bb51c0). What each qword holds is
+// settled by Init, Start and RecordThreadTimesInfo, which are not ported yet, so
+// they are positional names rather than invented meanings.
+struct CThreadTimesSample {
+    uint64_t uField00;
+    uint64_t uField08;
+};
+
+class CThreadTimesInfoBase {
+public:
+    CThreadTimesInfoBase();     // 0x140bb5590
+    ~CThreadTimesInfoBase();    // 0x140bb5800
+
+    static const void* const* Table();   // 0x140bce3c8, slot 0 is the deleting dtor
+
+    const void* pVt;                           // +0x00
+    std::vector<CThreadTimesSample> vSamples;  // +0x08, a debug level STL vector
+    uint64_t uField28;                         // +0x28
+    uint64_t uField30;                         // +0x30
+    uint64_t uField38;                         // +0x38
+    uint32_t uField40;                         // +0x40
+    uint32_t uField44;                         // +0x44
+    uint32_t uField48;                         // +0x48
+    uint8_t uField4C;                          // +0x4c
+};
+
+// 0x140bb5800 — the object's first table slot: it destroys, and frees only when the
+// flag asks. It returns the pointer it was handed either way.
+void* CThreadTimesInfoBaseDeletingDtor(void* pBase, int nFlag);
+// operator new(0x50) then the constructor
+void* CThreadTimesInfoBaseNew();
 
 // The measuring object is built by the other half of threadtimesinfo.cpp, which
 // is not ported yet. Until it is, this seam stands in for "new 0x50 bytes and
