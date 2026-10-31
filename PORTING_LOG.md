@@ -7498,3 +7498,25 @@ thunk استيراد/CRT، الدوال التي تناديها، والنصوص
 
 أيضًا: `_localtime64` غير موجود على Linux، فأُضيف `LocalTime64` يُوجّه إلى
 `localtime_r` خارج Windows بنفس الشكل. دورة CQBase: **2 وحدة × 6** بالـsanitizers.
+
+## CQBase D3 — الحزم والسدادات (2026-10-31)
+**16 جسمًا**: `tq::CStringPacker` (7، `0x140bb0b00..0x140bb0d90`) +
+`CMyCriticalSection::Lock/Unlock` + `CMutexLock::Lock/Unlock` + `CMyEvent::Signal/Wait`
++ `CMyMultiEvent::Signal/Wait` + `CMySingleLock::Unlock` (9، `0x140ba0060..0x140ba0390`).
+- المخزن: بايت عدد النصوص ثم لكل نص بايت طول + الحروف. `GetStrAmount` تقرأ
+  بايت العدّ مباشرة، و`GetSize` تمشي 1 + (1+طول) لكل مدخل. `AddString(nullptr)`
+  تزيد العدّ وتكتب مُنهيًا وترجّع true، والنص ≥ 0x100 بايت يُرفض قبل النظر للمخزن.
+- `GetString`: الشرط `nOutSize <= len` يرفض **الملاءمة التامة** (لازم حجم أكبر
+  من الطول)، والحجم يُصفّر قبل أي قرار.
+- الأقفال: `CMyEvent::Signal` ترجّع 0 مهما كانت نتيجة `SetEvent`، و`CMyEvent::Wait`
+  تحوّل 0x102 إلى 0x7fffffff وأي شيء آخر إلى -1. `CMyMultiEvent::Wait` يرجّع
+  -1 لأي قيمة ≥ العدّ إلا 0x102. `CMyCriticalSection::Lock/Unlock` تمرّ على
+  `+0x08` (جسم 40 بايت)، و`CMutexLock` تتجاوز المقبض الفارغ بهدوء.
+- Win32 عبر seam (`SyncApi`) حتى تعمل الاختبارات خارج Windows.
+
+**دروس اختبارية (2):** حجم المخزن بعد نص فارغ هو 6 لا 7 (النص الفارغ مدخل
+بايت واحد)؛ و`CMyMultiEvent::Wait` عند قيمة ≥ العدّ ترجع -1 لا القيمة نفسها.
+
+ملاحظة مسار: `modules/cqbase/src/{msg,time,str,sync}` مؤكَّدة على GitHub عبر
+واجهة الـAPI — العرض الذي يدمج السلسلة (`cqbase/src/msg`) هو طيّ GitHub
+للأب ذي الابن الواحد، لا مجلد باسم فيه شرطة.
