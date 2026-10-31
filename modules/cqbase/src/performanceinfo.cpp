@@ -1,6 +1,12 @@
 // CQBase.dll v6159 — CPerformanceInfo handle (0x140ba03b0..0x140ba5ef0)
 #include "modules/cqbase/src/performanceinfo.h"
 
+#include <cstdarg>
+#include <cstdio>
+#include <string>
+
+#include "modules/cqbase/src/logkernel.h"
+
 namespace tq {
 
 static const void* const kCPerformanceInfoVt[1] = { nullptr };
@@ -14,29 +20,17 @@ static void* DefaultAlloc(size_t nBytes) { return ::operator new(nBytes); }
 static void DefaultFree(void* p) { ::operator delete(p); }
 static int DefaultFreeLibrary(void*) { return 0; }
 static int DefaultPdhCloseQuery(void*) { return 0; }
-// The two teardown bodies a list goes through are part of the half of the file that is
-// still unported (0x140ba2d50 and 0x140ba42d0 for A, 0x140ba1f20 and 0x140ba4340 for B).
-// Until they are here the clear step releases the list's sentinel node, which is the only
-// allocation a list holds at this point, so the object can be destroyed without leaving
-// memory behind; the final step has nothing to do yet.
-static void DefaultListClear(void* pList) {
-    CPerformanceList* pL = (CPerformanceList*)pList;
-    if (pL->pHead != nullptr) {
-        g_PerformanceInfoApi.pfnFree(pL->pHead);
-        pL->pHead = nullptr;
-    }
-}
-static void DefaultListFinal(void*) {}
+
 static void* DefaultLoadLibraryA(const char*) { return nullptr; }
 static void* DefaultGetProcAddress(void*, const char*) { return nullptr; }
 static void DefaultGetSystemInfo(uint32_t* pCount) { *pCount = 1; }
 static void DefaultSetupCounters(void*) {}
-static void DefaultPerfLog(void*, const char*) {}
+
 
 PerformanceInfoApi g_PerformanceInfoApi = {
-    DefaultAlloc, DefaultFree, DefaultFreeLibrary, DefaultPdhCloseQuery, DefaultListClear,
-    DefaultListFinal, DefaultLoadLibraryA, DefaultGetProcAddress, DefaultGetSystemInfo,
-    DefaultSetupCounters, DefaultPerfLog,
+    DefaultAlloc, DefaultFree, DefaultFreeLibrary, DefaultPdhCloseQuery,
+    DefaultLoadLibraryA, DefaultGetProcAddress, DefaultGetSystemInfo,
+    DefaultSetupCounters, CPerformanceInfoLog,
 };
 
 const void* const* CPerformanceInfoBase::Table() { return kCPerformanceInfoBaseVt; }
@@ -123,15 +117,84 @@ CPerformanceInfoBase::~CPerformanceInfoBase() {
         hModule2 = nullptr;
     }
     g_PerformanceInfoApi.pfnPdhCloseQuery(hQuery);
-    g_PerformanceInfoApi.pfnListClear(&listB);
-    g_PerformanceInfoApi.pfnListFinal(&listB);
+    CPerformanceInfoListClearB(&listB);
+    CPerformanceInfoListFinalB(&listB);
     g_PerformanceInfoApi.pfnFree(listB.pProxy);
-    g_PerformanceInfoApi.pfnListClear(&listA);
-    g_PerformanceInfoApi.pfnListFinal(&listA);
+    CPerformanceInfoListClearA(&listA);
+    CPerformanceInfoListFinalA(&listA);
     g_PerformanceInfoApi.pfnFree(listA.pProxy);
 }
 
 void* CPerformanceInfoBaseNew() { return new CPerformanceInfoBase(); }
+
+// 0x140ba2d50 — the smaller list goes down the right side first, then destroys the name a
+// node keeps at +0x18, then releases the node, and only then takes the next one.
+static void CPerformanceInfoNodeClearA(CPerformanceNode50* pNode) {
+    while (pNode->uFlag49 == 0) {
+        CPerformanceInfoNodeClearA((CPerformanceNode50*)pNode->p2);   // right side first
+        CPerformanceNode50* pNext = (CPerformanceNode50*)pNode->p0;
+        g_PerformanceInfoApi.pfnNodeNameDtor((void*)((uint8_t*)pNode + 0x18));
+        g_PerformanceInfoApi.pfnFree(pNode);
+        pNode = pNext;
+    }
+}
+
+// the destructor hands this the sentinel's first node, not the sentinel itself
+void CPerformanceInfoListClearA(CPerformanceList* pList) {
+    CPerformanceInfoNodeClearA((CPerformanceNode50*)((CPerformanceNode50*)pList->pHead)->p1);
+}
+
+// 0x140ba1f20 — the larger list walks from the sentinel's first node, tells the list to
+// let go of the node, releases it, and moves to the next. The sentinel's three links are
+// then pointed back at itself and the count cleared.
+void CPerformanceInfoListClearB(CPerformanceList* pList) {
+    CPerformanceNode278* pSentinel = (CPerformanceNode278*)pList->pHead;
+    CPerformanceNode278* pNode = (CPerformanceNode278*)pSentinel->p1;
+    while (pNode->uFlag271 == 0) {
+        g_PerformanceInfoApi.pfnNodeDetachB(pList, pNode);
+        CPerformanceNode278* pNext = (CPerformanceNode278*)pNode->p0;
+        g_PerformanceInfoApi.pfnFree(pNode);
+        pNode = pNext;
+    }
+    pSentinel->p1 = pSentinel;
+    pList->nCount = 0;
+    pSentinel->p0 = pSentinel;
+    pSentinel->p2 = pSentinel;
+}
+
+// 0x140ba42d0 — one erase step for the smaller list, then the sentinel itself goes and
+// the head and count are cleared.
+void CPerformanceInfoListFinalA(CPerformanceList* pList) {
+    g_PerformanceInfoApi.pfnTreeEraseA(pList, pList->pHead);
+    g_PerformanceInfoApi.pfnFree(pList->pHead);
+    pList->pHead = nullptr;
+    pList->nCount = 0;
+}
+
+// 0x140ba4340 — the larger list's last step ends the same way. Its rebalancing loop runs
+// over the tree the clear step has already emptied, and is not ported yet.
+void CPerformanceInfoListFinalB(CPerformanceList* pList) {
+    g_PerformanceInfoApi.pfnFree(pList->pHead);
+    pList->pHead = nullptr;
+    pList->nCount = 0;
+}
+
+// 0x140ba04e0 — a line is only saved when the object was given a name and a name that
+// holds a slash: the slash is looked for and an absent one skips the save entirely.
+void CPerformanceInfoLog(void* pBase, const char* pszFormat, ...) {
+    CPerformanceInfoBase* pThis = (CPerformanceInfoBase*)pBase;
+    if (pThis == nullptr || pThis->u148 == 0 || pszFormat == nullptr) return;
+    char szLine[0x740];
+    for (size_t i = 0; i < sizeof(szLine); ++i) szLine[i] = 0;
+    va_list args;
+    va_start(args, pszFormat);
+    vsnprintf(szLine, 0x740, pszFormat, args);   // the raw calls the same MSVC entry
+    va_end(args);
+    std::string strName((const char*)(uintptr_t)pThis->u148);
+    if (strName.find('/') != std::string::npos) {
+        log_Save((char*)(uintptr_t)pThis->u148, szLine, 0);
+    }
+}
 
 // 0x140ba11c0 — the name is stored as the caller's pointer, never copied, and it goes in
 // before any of the loading. Ntdll is asked for the system information call, Kernel32 for

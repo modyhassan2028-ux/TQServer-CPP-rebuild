@@ -49,7 +49,7 @@ struct CPerformanceNode50 {
     void* p0;              // +0x00
     void* p1;              // +0x08
     void* p2;              // +0x10
-    uint8_t unknown18[0x30];
+    uint8_t szName[0x30];  // +0x18  a std::string in the original, destroyed on clear
     uint8_t uFlag48;       // +0x48
     uint8_t uFlag49;       // +0x49
     uint8_t tail[0x06];
@@ -80,13 +80,22 @@ struct PerformanceInfoApi {
     void (*pfnFree)(void*);                 // operator delete
     int (*pfnFreeLibrary)(void* hModule);
     int (*pfnPdhCloseQuery)(void* hQuery);
-    void (*pfnListClear)(void* pList);      // 0x140ba2d50 for A, 0x140ba1f20 for B
-    void (*pfnListFinal)(void* pList);      // 0x140ba42d0 for A, 0x140ba4340 for B
     void* (*pfnLoadLibraryA)(const char*);  // LoadLibraryA
     void* (*pfnGetProcAddress)(void* hModule, const char* pszName);
     void (*pfnGetSystemInfo)(uint32_t* pNumberOfProcessors);
     void (*pfnSetupCounters)(void* pBase);  // 0x140ba0600, the PDH setup, not ported
-    void (*pfnLog)(void* pBase, const char* pszText);   // 0x140ba04e0, this file's reporter
+    void (*pfnLog)(void* pBase, const char* pszFormat, ...);  // 0x140ba04e0
+    // 0x140ba3c90 erases one node from the smaller list's tree and 0x140ba1a90 is what
+    // the larger list calls before it deletes a node; both belong to the counter setup
+    // that is still unported, so their hooks start empty.
+    void (*pfnTreeEraseA)(void* pList, void* pNode) = DefaultTreeSteps;
+    void (*pfnNodeDetachB)(void* pList, void* pNode) = DefaultTreeSteps;
+    // the raw destroys the string a fifty byte node keeps at +0x18; no ported code
+    // builds that string yet
+    void (*pfnNodeNameDtor)(void* pNode) = DefaultNodeNameDtor;
+
+    static void DefaultTreeSteps(void*, void*) {}
+    static void DefaultNodeNameDtor(void*) {}
 };
 extern PerformanceInfoApi g_PerformanceInfoApi;
 
@@ -113,6 +122,17 @@ public:
     CPerformanceList listB;       // +0x108
     uint64_t u148;                // +0x148  cleared last, then Init stores a borrowed name
 };
+
+// 0x140ba2d50 — the smaller list is emptied from the top down
+void CPerformanceInfoListClearA(CPerformanceList* pList);
+// 0x140ba1f20 — the larger list is walked from its first node
+void CPerformanceInfoListClearB(CPerformanceList* pList);
+// 0x140ba42d0 — the smaller list's last step
+void CPerformanceInfoListFinalA(CPerformanceList* pList);
+// 0x140ba4340 — the larger list's last step (its rebalancing loop is not ported)
+void CPerformanceInfoListFinalB(CPerformanceList* pList);
+// 0x140ba04e0 — this file's reporter: a formatted line saved under the name it was given
+void CPerformanceInfoLog(void* pBase, const char* pszFormat, ...);
 
 // 0x140ba5cf0 and 0x140ba5d70 — a list's proxy plus its circular sentinel
 void CPerformanceListInitA(CPerformanceList* pList);   // nodes of 0x50

@@ -1,4 +1,5 @@
 // D16 (CQBase) — CPerformanceInfo: the handle, its quirks and its one forwarder
+#include "modules/cqbase/src/logkernel.h"
 #include "modules/cqbase/src/performanceinfo.h"
 #include <cassert>
 #include <cstddef>
@@ -58,18 +59,9 @@ int main() {
             static void Free(void* p) { ++nFreeCalls; ::operator delete(p); }
             static int FreeLibrary(void*) { ++nFreedLibrary; return 1; }
             static int CloseQuery(void*) { ++nClosed; return 0; }
-            static void Clear(void* p) {
-                ++nClear;
-                pFreedList = p;
-                // stands in for the unported teardown: release the sentinel node
-                CPerformanceList* pL = (CPerformanceList*)p;
-                if (pL->pHead != nullptr) { Free(pL->pHead); pL->pHead = nullptr; }
-            }
-            static void Final(void* p) { ++nFinal; pFreedList = p; }
         };
         PerformanceInfoApi saved = g_PerformanceInfoApi;
-        g_PerformanceInfoApi = {&Api::Alloc, &Api::Free, &Api::FreeLibrary, &Api::CloseQuery,
-                                &Api::Clear, &Api::Final};
+        g_PerformanceInfoApi = {&Api::Alloc, &Api::Free, &Api::FreeLibrary, &Api::CloseQuery};
         {
             CPerformanceInfoBase base;
             assert(base.pVt == (const void*)CPerformanceInfoBase::Table());
@@ -91,20 +83,18 @@ int main() {
             base.hModule1 = (void*)0x1;
             base.hModule2 = (void*)0x2;
             base.hQuery = (void*)0x3;
-            nFreedLibrary = nClosed = nClear = nFinal = nFreeCalls = 0;
+            nFreedLibrary = nClosed = nFreeCalls = 0;
         }
         // FreeLibrary twice, then the query, then B before A, two steps each
         assert(nFreedLibrary == 2 && nClosed == 1);
-        assert(nClear == 2 && nFinal == 2);
-        assert(nFreeCalls == 4);        // two sentinel nodes then two proxies
+        assert(nFreeCalls == 4);        // two sentinels then two proxies
         // the object's table slot frees only when the flag asks
         {
             void* pRaw = CPerformanceInfoBaseNew();
             assert(pRaw != nullptr);
             nClear = nFinal = nFreeCalls = 0;
             assert(CPerformanceInfoBaseDeletingDtor(pRaw, 0) == pRaw);
-            assert(nClear == 2 && nFinal == 2);
-        assert(nFreeCalls == 4);        // two sentinel nodes then two proxies   // proxies only
+            assert(nFreeCalls == 4);        // two sentinels then two proxies   // proxies only
             operator delete(pRaw);                                    // flag 0 left it alive
             nFreeCalls = 0;
             CPerformanceInfoBaseDeletingDtor(CPerformanceInfoBaseNew(), 1);
@@ -204,11 +194,6 @@ int main() {
             static void Free(void* p) { ::operator delete(p); }
             static int FreeLibrary(void*) { return 1; }
             static int CloseQuery(void*) { return 0; }
-            static void Clear(void* p) {
-                CPerformanceList* pL = (CPerformanceList*)p;
-                if (pL->pHead) { Free(pL->pHead); pL->pHead = nullptr; }
-            }
-            static void Final(void*) {}
             static void* LoadLibraryA(const char* psz) {
                 g_sLibs += psz; g_sLibs += '|';
                 if (nLoadFails && std::string(psz) == "Ntdll.dll") return nullptr;
@@ -224,13 +209,12 @@ int main() {
             }
             static void GetSystemInfo(uint32_t* pCount) { *pCount = 8; }
             static void Setup(void* p) { g_pSetup = p; }
-            static void Log(void*, const char* psz) { g_sLogs += psz; }
+            static void Log(void*, const char* psz, ...) { g_sLogs += psz; }
         };
         PerformanceInfoApi saved = g_PerformanceInfoApi;
         g_PerformanceInfoApi = {&Api::Alloc, &Api::Free, &Api::FreeLibrary, &Api::CloseQuery,
-                                &Api::Clear, &Api::Final, &Api::LoadLibraryA,
-                                &Api::GetProcAddress, &Api::GetSystemInfo, &Api::Setup,
-                                &Api::Log};
+                                &Api::LoadLibraryA, &Api::GetProcAddress, &Api::GetSystemInfo,
+                                &Api::Setup, &Api::Log};
         const char szName[] = "server";
         CPerformanceInfoBase base;
         nLoadFails = 0; g_sLibs.clear(); g_sProcs.clear(); g_sLogs.clear();
@@ -263,22 +247,16 @@ int main() {
             static void Free(void* p) { ::operator delete(p); }
             static int FreeLibrary(void*) { return 1; }
             static int CloseQuery(void*) { return 0; }
-            static void Clear(void* p) {
-                CPerformanceList* pL = (CPerformanceList*)p;
-                if (pL->pHead) { Free(pL->pHead); pL->pHead = nullptr; }
-            }
-            static void Final(void*) {}
             static void* LoadLibraryA(const char*) { return nullptr; }
             static void* GetProcAddress(void*, const char*) { return nullptr; }
             static void GetSystemInfo(uint32_t*) {}
             static void Setup(void*) {}
-            static void Log(void*, const char* psz) { g_sName = psz; }
+            static void Log(void*, const char* psz, ...) { g_sName = psz; }
         };
         PerformanceInfoApi saved = g_PerformanceInfoApi;
         g_PerformanceInfoApi = {&Api::Alloc, &Api::Free, &Api::FreeLibrary, &Api::CloseQuery,
-                                &Api::Clear, &Api::Final, &Api::LoadLibraryA,
-                                &Api::GetProcAddress, &Api::GetSystemInfo, &Api::Setup,
-                                &Api::Log};
+                                &Api::LoadLibraryA, &Api::GetProcAddress, &Api::GetSystemInfo,
+                                &Api::Setup, &Api::Log};
         // a handle that never got an object stays silent
         g_pfnNewPerformanceInfoBase = FakeNewFails;
         CPerformanceInfo none;
@@ -296,6 +274,44 @@ int main() {
         CPerformanceInfoBaseDeletingDtor(pReal, 1);
     }
 
-    printf("CQBASE_D16_OK: CPerformanceInfo handle, measuring object and Init, 14 units, 53 checks + 14 layout\n");
+    // ---- the reporter: a line is saved only when the name holds a slash
+    {
+        static std::string g_sFile, g_sText;
+        static int g_nLevel = -1;
+        struct Hook {
+            static bool Running() { return false; }
+            static void WriteDirect(const char* pszFile, const char* pszText, int nLevel) {
+                g_sFile = pszFile; g_sText = pszText; g_nLevel = nLevel;
+            }
+            static void Post(void*, const char*, const char*, int) {}
+            static unsigned Current() { return 1; }
+        };
+        LogApi savedLog = g_LogApi;
+        g_LogApi = {&Hook::Running, &Hook::WriteDirect, &Hook::Post, &Hook::Current};
+        CPerformanceInfoBase base;
+        char szName[] = "syslog/perf";
+        base.u148 = (uint64_t)(uintptr_t)szName;
+        g_sFile.clear(); g_sText.clear(); g_nLevel = -1;
+        CPerformanceInfoLog(&base, "Handle Count:    %10ld", 42L);
+        assert(g_sFile == "syslog/perf");
+        assert(g_sText == "Handle Count:            42");
+        assert(g_nLevel == 0);
+        // no slash in the name: the line is built and then dropped
+        char szPlain[] = "perf";
+        base.u148 = (uint64_t)(uintptr_t)szPlain;
+        g_sFile.clear(); g_sText.clear();
+        CPerformanceInfoLog(&base, "dropped %d", 7);
+        assert(g_sFile.empty() && g_sText.empty());
+        // no name at all, or no format: nothing happens
+        base.u148 = 0;
+        CPerformanceInfoLog(&base, "dropped %d", 7);
+        assert(g_sFile.empty());
+        base.u148 = (uint64_t)(uintptr_t)szName;
+        CPerformanceInfoLog(&base, nullptr);
+        assert(g_sFile.empty());
+        g_LogApi = savedLog;
+    }
+
+    printf("CQBASE_D16_OK: CPerformanceInfo handle, object, Init, teardown and report, 19 units, 53 checks + 14 layout\n");
     return 0;
 }
