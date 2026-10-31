@@ -146,6 +146,24 @@ public:
     uint64_t u148;                // +0x148  cleared last, then Init stores a borrowed name
 };
 
+// A key node from the other container: a string at the front and one dword at 0x140.
+struct CPerformanceKeyNode {
+    std::string strKey;                              // +0x00
+    uint8_t padKey[0x140 - sizeof(std::string)];      // up to the value
+    uint32_t uValue;                                 // +0x140
+};
+
+// 0x140ba0a80 — a key node built from a string and a dword
+void CPerformanceKeyNodeBuild(CPerformanceKeyNode* pNode, const std::string& strKey,
+                              const uint32_t* pValue);
+// 0x140ba0ee0 — and the pair copied from another node
+void CPerformanceKeyNodeCopy(CPerformanceKeyNode* pDst, const CPerformanceKeyNode* pSrc);
+
+// 0x140ba0e90 — the larger node is built from three links, a six hundred byte payload
+// and one flag byte, with the byte after it cleared
+void CPerformanceNode278Build(CPerformanceNode278* pNode, void* p0, void* p1, void* p2,
+                              const void* pPayload, uint8_t uFlag270);
+
 // 0x140ba2d50 — the smaller list is emptied from the top down
 void CPerformanceInfoListClearA(CPerformanceList* pList);
 // 0x140ba1f20 — the larger list is walked from its first node

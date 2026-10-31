@@ -3,6 +3,7 @@
 
 #include <cstdarg>
 #include <cstdio>
+#include <cstring>
 #include <string>
 
 #include "modules/cqbase/src/logkernel.h"
@@ -337,6 +338,31 @@ CPerformanceInfo::~CPerformanceInfo() {
 // 0x140ba1270 — the name is spelled this way in the original
 void CPerformanceInfo::Init(const char* pszName) {
     if (pBase != nullptr) ((CPerformanceInfoBase*)pBase)->Init(pszName);
+}
+
+// 0x140ba0a80 — the string comes first, then the dword the caller points at
+void CPerformanceKeyNodeBuild(CPerformanceKeyNode* pNode, const std::string& strKey,
+                              const uint32_t* pValue) {
+    new (&pNode->strKey) std::string(strKey);
+    pNode->uValue = *pValue;
+}
+
+// 0x140ba0ee0 — the copy takes the string from the source and then its dword
+void CPerformanceKeyNodeCopy(CPerformanceKeyNode* pDst, const CPerformanceKeyNode* pSrc) {
+    new (&pDst->strKey) std::string(pSrc->strKey);
+    pDst->uValue = pSrc->uValue;
+}
+
+// 0x140ba0e90 — three links, six hundred bytes of payload at 0x18, then the flag pair in
+// the order the raw writes them: the byte after the flag is cleared first.
+void CPerformanceNode278Build(CPerformanceNode278* pNode, void* p0, void* p1, void* p2,
+                              const void* pPayload, uint8_t uFlag270) {
+    pNode->p0 = p0;
+    pNode->p1 = p1;
+    pNode->p2 = p2;
+    memcpy((uint8_t*)pNode + 0x18, pPayload, 600);
+    pNode->uFlag271 = 0;
+    pNode->uFlag270 = uFlag270;
 }
 
 // 0x140ba5cd0 — the name is spelled this way in the original

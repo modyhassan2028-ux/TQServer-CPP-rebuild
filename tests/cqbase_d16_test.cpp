@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstdarg>
+#include <cstring>
 #include <string>
 #include <vector>
 
@@ -443,6 +444,43 @@ int main() {
         g_PerformanceInfoApi = saved;
     }
 
-    printf("CQBASE_D16_OK: CPerformanceInfo handle, object, Init, teardown and report, 23 units, 73 checks + 14 layout\n");
+    // ---- the larger node's builder and the key node pair
+    {
+        static_assert(offsetof(CPerformanceKeyNode, strKey) == 0x00, "key at 0");
+        static_assert(offsetof(CPerformanceKeyNode, uValue) == 0x140, "value at 0x140");
+        alignas(16) uint8_t abNode[0x278];
+        memset(abNode, 0xAA, sizeof(abNode));
+        CPerformanceNode278* pNode = (CPerformanceNode278*)abNode;
+        pNode->uFlag271 = 1;
+        pNode->uFlag270 = 0x55;
+        uint8_t abPayload[600];
+        for (int i = 0; i < 600; ++i) abPayload[i] = (uint8_t)(i * 7 + 3);
+        CPerformanceNode278Build(pNode, (void*)0x1111, (void*)0x2222, (void*)0x3333, abPayload, 7);
+        assert(pNode->p0 == (void*)0x1111 && pNode->p1 == (void*)0x2222 &&
+               pNode->p2 == (void*)0x3333);
+        assert(memcmp(abNode + 0x18, abPayload, 600) == 0);      // exactly six hundred bytes
+        assert(abNode[0x18 + 599] == abPayload[599]);            // the copy ends at 0x26F
+        assert(abNode[0x272] == 0xAA);                           // nothing past the flags
+        assert(pNode->uFlag271 == 0);                            // cleared by the builder
+        assert(pNode->uFlag270 == 7);                            // then the caller's flag
+        // the key node pair
+        alignas(16) uint8_t abKeyNode[sizeof(CPerformanceKeyNode)];
+        alignas(16) uint8_t abKeyNode2[sizeof(CPerformanceKeyNode)];
+        memset(abKeyNode2, 0, sizeof(abKeyNode2));
+        CPerformanceKeyNode* pKey = (CPerformanceKeyNode*)abKeyNode;
+        uint32_t uValue = 0xDEADBEEF;
+        CPerformanceKeyNodeBuild(pKey, std::string("Commit Limit"), &uValue);
+        assert(pKey->strKey == "Commit Limit");
+        assert(pKey->uValue == 0xDEADBEEF);
+        CPerformanceKeyNode* pCopy = (CPerformanceKeyNode*)abKeyNode2;
+        CPerformanceKeyNodeCopy(pCopy, pKey);
+        assert(pCopy->strKey == pKey->strKey);
+        assert(pCopy->strKey.data() != pKey->strKey.data());   // its own copy
+        assert(pCopy->uValue == 0xDEADBEEF);
+        pKey->strKey.~basic_string();
+        pCopy->strKey.~basic_string();
+    }
+
+    printf("CQBASE_D16_OK: CPerformanceInfo handle, object, Init, teardown and report, 26 units, 84 checks + 16 layout\n");
     return 0;
 }
