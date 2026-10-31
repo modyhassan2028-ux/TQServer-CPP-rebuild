@@ -7520,3 +7520,28 @@ thunk استيراد/CRT، الدوال التي تناديها، والنصوص
 ملاحظة مسار: `modules/cqbase/src/{msg,time,str,sync}` مؤكَّدة على GitHub عبر
 واجهة الـAPI — العرض الذي يدمج السلسلة (`cqbase/src/msg`) هو طيّ GitHub
 للأب ذي الابن الواحد، لا مجلد باسم فيه شرطة.
+
+## CQBase D4 — عائلة basefunc (2026-10-31)
+**17 جسمًا** من `0x140b82fb0..0x140b883f0`: `RandGet`, `RandomRateGet`, `StrCopy`,
+`StrStrCh`, `CQLanguageGet` + عائلة الطوابع الزمنية كاملة (`IsTimeRange`, `DateTime`,
+`SysTimeGet`, `DateStamp`, `TimeStampGet`, `DateStampPass`, `DateStampDiff`,
+`SysTimeGetEx`, `DateTimeStamp`, `IsActiveTime`, `TimeStampGetEx`, `TurnStampToTime`).
+- ثوابت `.rdata` مقروءة من الـDLL الأصلي: `0x45ee0`=1.0، `0x45ee8`=1000.0،
+  `0x45ef0`=3.1415926 (باى المستخدمة في `sin`).
+- **قواعد خام محفوظة:** `RandGet` يلفّ `int` في الضرب (تجاوز 32-بت) وبالتالي
+  الباقي يأخذ إشارة المقسوم فيقدر يكون سالبًا؛ و`RandomRateGet` مع نقطة سالبة
+  يعطي `sin` سالبًا و`sqrt(sqrt())` يعطي **NaN** — محفوظ كما هو بلا حماية.
+- `StrStrCh`: مشية البايت المزدوج (`0x81..0xFF` تتقدّم خطوتين) وتوقفان في الأصل
+  يقرآن بايتًا بعد المُنهي؛ النسخة تتوقف عند المُنهي بدلًا من القراءة.
+- `StrCopy`: إذا كان الحجم يحتمل المصدر → `strncpy` + مُنهي قسري، وإلا نسخة كاملة
+  غير محدودة (الفرع الغريب محفوظ).
+- `SysTimeGetEx` يأخذ `tm_mon` **بدون +1** (بخلاف `TimeStampGet` و`TurnStampToTime`).
+- `DateStamp` = `(tm_year*100 + 190001 + tm_mon)*100 + tm_mday`.
+- `DateStampPass` يوم غير موجود يُطبّعه `mktime` (20260229 → 20260301) لا يرفضه.
+- `IsTimeRange`: نافذة ملتفة (النهاية قبل البداية) تُطابق خارج المدى فقط،
+  والساعة بين الطرفين تكون خارجها.
+- `TimeStampGetEx` من `GetLocalTime` عبر seam (`SysLocalTime`).
+
+**دروس اختبارية (3):** توقّع `RandGet` موجب كان خطأ (الالتفاف يسمح بالسالب)؛
+`DateStampPass(20260229)` يطبّع لا يرفض؛ ونافذة `IsTimeRange` الملتفة تستثني
+الساعة الواقعة بين الطرفين.
