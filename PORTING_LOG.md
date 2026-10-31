@@ -7878,3 +7878,17 @@ ctor افتراضي (يبني كائن 0x150 على الكومة)، ctor نسخ�
   0x140ba1f20/0x140ba4340 للقائمة B) لسه مش منقولين، فالخطوة الافتراضية تحرّر العقدة
   الحارسة فقط (وهي الاستهلاك الوحيد للقائمة هنا) عشان الكائن يتدمر بلا تهريب.
 - الـseam الافتراضي للمقبض بقى يبني الكائن الحقيقي بدل nullptr.
+
+### D16c — `CPerformanceInfo::Init` + `CPerformanceInfoBase::Init` (2026-10-31)
+وحدتان (المجموع 14 في الملف):
+- `CPerformanceInfo::Init(char const*)` (0x140ba1270): تمرير للكائن إذا +0x08 != 0.
+- `CPerformanceInfoBase::Init` (0x140ba11c0): 
+  - **الاسم يُخزَّن كمؤشر المستدعي عند +0x148 بلا نسخ** (عارض ملكية محفوظ) وقبل أي تحميل.
+  - `LoadLibraryA("Ntdll.dll")` → +0xB0؛ لو نجح `GetProcAddress("NtQuerySystemInformation")` → +0xA0.
+  - `LoadLibraryA("Kernel32.dll")` → +0xB8؛ لو نجح `GetProcAddress("GlobalMemoryStatusEx")` → +0xA8.
+    (لو فشل التحميل، التصدير القديم **يبقى كما هو** ولا يُصفّر — مفحوص.)
+  - `GetSystemInfo` → +0xC0 = dwNumberOfProcessors (بيستبدل الـ1 اللي كتبه الـctor).
+  - ثم `FUN_140ba0600` (إعداد عدادات PDH — غير منقول) ثم سجل
+    `"Performance initialize success !"` عبر `FUN_140ba04e0`.
+- أثبتت الاختبارات تخطيط الكائن بالكامل: 0x150 بكل الحقول في مواضعها (14 static_assert)،
+  0x40 للقائمة، 0x50/0x278 للعقدتين.

@@ -27,10 +27,16 @@ static void DefaultListClear(void* pList) {
     }
 }
 static void DefaultListFinal(void*) {}
+static void* DefaultLoadLibraryA(const char*) { return nullptr; }
+static void* DefaultGetProcAddress(void*, const char*) { return nullptr; }
+static void DefaultGetSystemInfo(uint32_t* pCount) { *pCount = 1; }
+static void DefaultSetupCounters(void*) {}
+static void DefaultPerfLog(void*, const char*) {}
 
 PerformanceInfoApi g_PerformanceInfoApi = {
     DefaultAlloc, DefaultFree, DefaultFreeLibrary, DefaultPdhCloseQuery, DefaultListClear,
-    DefaultListFinal,
+    DefaultListFinal, DefaultLoadLibraryA, DefaultGetProcAddress, DefaultGetSystemInfo,
+    DefaultSetupCounters, DefaultPerfLog,
 };
 
 const void* const* CPerformanceInfoBase::Table() { return kCPerformanceInfoBaseVt; }
@@ -127,6 +133,28 @@ CPerformanceInfoBase::~CPerformanceInfoBase() {
 
 void* CPerformanceInfoBaseNew() { return new CPerformanceInfoBase(); }
 
+// 0x140ba11c0 — the name is stored as the caller's pointer, never copied, and it goes in
+// before any of the loading. Ntdll is asked for the system information call, Kernel32 for
+// the memory status call, and each export is kept only when its library loaded. The
+// processor count replaces the one the constructor wrote. The counter setup at
+// 0x140ba0600 and the reporter at 0x140ba04e0 follow, both still unported.
+void CPerformanceInfoBase::Init(const char* pszName) {
+    u148 = (uint64_t)(uintptr_t)pszName;
+    hModule1 = g_PerformanceInfoApi.pfnLoadLibraryA("Ntdll.dll");
+    if (hModule1 != nullptr) {
+        pA0 = g_PerformanceInfoApi.pfnGetProcAddress(hModule1, "NtQuerySystemInformation");
+    }
+    hModule2 = g_PerformanceInfoApi.pfnLoadLibraryA("Kernel32.dll");
+    if (hModule2 != nullptr) {
+        pA8 = g_PerformanceInfoApi.pfnGetProcAddress(hModule2, "GlobalMemoryStatusEx");
+    }
+    uint32_t uProcessors = 0;
+    g_PerformanceInfoApi.pfnGetSystemInfo(&uProcessors);
+    uC0 = uProcessors;
+    g_PerformanceInfoApi.pfnSetupCounters(this);
+    g_PerformanceInfoApi.pfnLog(this, "Performance initialize success !");
+}
+
 // 0x140ba5ec0
 void* CPerformanceInfoBaseDeletingDtor(void* pBase, int nFlag) {
     CPerformanceInfoBase* pObj = (CPerformanceInfoBase*)pBase;
@@ -166,6 +194,11 @@ CPerformanceInfo::~CPerformanceInfo() {
         void** ppVt = *(void***)pBase;
         ((PfnDeletingDtor)ppVt[0])(pBase, 1);
     }
+}
+
+// 0x140ba1270 — the name is spelled this way in the original
+void CPerformanceInfo::Init(const char* pszName) {
+    if (pBase != nullptr) ((CPerformanceInfoBase*)pBase)->Init(pszName);
 }
 
 // 0x140ba5cd0 — the name is spelled this way in the original

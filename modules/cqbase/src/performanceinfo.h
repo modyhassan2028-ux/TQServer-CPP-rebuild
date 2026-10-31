@@ -82,12 +82,18 @@ struct PerformanceInfoApi {
     int (*pfnPdhCloseQuery)(void* hQuery);
     void (*pfnListClear)(void* pList);      // 0x140ba2d50 for A, 0x140ba1f20 for B
     void (*pfnListFinal)(void* pList);      // 0x140ba42d0 for A, 0x140ba4340 for B
+    void* (*pfnLoadLibraryA)(const char*);  // LoadLibraryA
+    void* (*pfnGetProcAddress)(void* hModule, const char* pszName);
+    void (*pfnGetSystemInfo)(uint32_t* pNumberOfProcessors);
+    void (*pfnSetupCounters)(void* pBase);  // 0x140ba0600, the PDH setup, not ported
+    void (*pfnLog)(void* pBase, const char* pszText);   // 0x140ba04e0, this file's reporter
 };
 extern PerformanceInfoApi g_PerformanceInfoApi;
 
 class CPerformanceInfoBase {
 public:
     CPerformanceInfoBase();       // 0x140ba5df0
+    void Init(const char* pszName);   // 0x140ba11c0
     ~CPerformanceInfoBase();      // 0x140ba50b0
     static const void* const* Table();   // 0x140bcbb30, slot 0 is the deleting dtor
 
@@ -105,7 +111,7 @@ public:
     uint32_t uC4;                 // +0xC4
     CPerformanceList listA;       // +0xC8
     CPerformanceList listB;       // +0x108
-    uint64_t u148;                // +0x148  cleared last
+    uint64_t u148;                // +0x148  cleared last, then Init stores a borrowed name
 };
 
 // 0x140ba5cf0 and 0x140ba5d70 — a list's proxy plus its circular sentinel
@@ -118,6 +124,7 @@ void* CPerformanceInfoBaseNew();
 class CPerformanceInfo {
 public:
     CPerformanceInfo();                                    // 0x140ba5ef0
+    void Init(const char* pszName);                        // 0x140ba1270 (forwards)
     CPerformanceInfo(const CPerformanceInfo& rOther);      // 0x140ba03b0
     CPerformanceInfo& operator=(const CPerformanceInfo&);  // 0x140ba03d0
     ~CPerformanceInfo();                                   // 0x140ba07e0
