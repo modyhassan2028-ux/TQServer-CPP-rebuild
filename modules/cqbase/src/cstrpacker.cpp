@@ -1,5 +1,5 @@
 // CQBase.dll v6159 — tq::CStringPacker (0x140bb0b00..0x140bb0d90)
-#include "modules/cqbase/src/str/cstrpacker.h"
+#include "modules/cqbase/src/cstrpacker.h"
 
 #include <cstring>
 

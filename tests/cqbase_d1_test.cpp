@@ -1,5 +1,5 @@
 // D1 (CQBase) — tq::CMsg and tq::MsgHead, 0x140b9d3a0..0x140b9d650
-#include "modules/cqbase/src/msg/cmsg.h"
+#include "modules/cqbase/src/cmsg.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

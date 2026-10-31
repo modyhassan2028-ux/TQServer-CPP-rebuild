@@ -1,6 +1,6 @@
 // D2 (CQBase) — tq::TimeGet, tq::CTimer and tq::CTimerMS
 // 0x140b82df0, 0x140bb59f0..0x140bb5ed0, 0x140b8b460/0x140b8b470
-#include "modules/cqbase/src/time/ctimer.h"
+#include "modules/cqbase/src/ctimer.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

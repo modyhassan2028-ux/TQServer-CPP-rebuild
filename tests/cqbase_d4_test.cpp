@@ -1,6 +1,6 @@
 // D4 (CQBase) — basefunc.cpp: random, string helpers, the date stamp family
-#include "modules/cqbase/src/util/basefunc.h"
-#include "modules/cqbase/src/time/ctimer.h"
+#include "modules/cqbase/src/basefunc.h"
+#include "modules/cqbase/src/ctimer.h"
 #include <cassert>
 #include <cmath>
 #include <cstdio>

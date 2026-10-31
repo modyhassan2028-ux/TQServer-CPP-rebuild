@@ -1,5 +1,5 @@
 // CQBase.dll v6159 — the tq locking primitives (0x140ba0060..0x140ba0390)
-#include "modules/cqbase/src/sync/csync.h"
+#include "modules/cqbase/src/csync.h"
 
 #if defined(_WIN32)
 #include <windows.h>

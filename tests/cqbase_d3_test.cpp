@@ -1,6 +1,6 @@
 // D3 (CQBase) — tq::CStringPacker and the locking primitives
-#include "modules/cqbase/src/str/cstrpacker.h"
-#include "modules/cqbase/src/sync/csync.h"
+#include "modules/cqbase/src/cstrpacker.h"
+#include "modules/cqbase/src/csync.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>

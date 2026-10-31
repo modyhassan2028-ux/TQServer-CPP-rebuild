@@ -1,11 +1,11 @@
 // CQBase.dll v6159 — basefunc.cpp helpers (0x140b82fb0..0x140b883f0)
-#include "modules/cqbase/src/util/basefunc.h"
+#include "modules/cqbase/src/basefunc.h"
 
 #include <cmath>
 #include <cstdio>
 #include <cstring>
 
-#include "modules/cqbase/src/time/ctimer.h"
+#include "modules/cqbase/src/ctimer.h"
 
 namespace tq {
 

@@ -1,5 +1,5 @@
 // CQBase.dll v6159 — TimeGet, CTimer and CTimerMS (0x140b82df0, 0x140bb59f0..)
-#include "modules/cqbase/src/time/ctimer.h"
+#include "modules/cqbase/src/ctimer.h"
 
 #include <ctime>
 #include <new>
