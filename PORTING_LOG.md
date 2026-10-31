@@ -7595,3 +7595,28 @@ thunk استيراد/CRT، الدوال التي تناديها، والنصوص
 **دروس اختبارية (4):** قيم `ReadLine` تُقارن كـ`0xFFFFFFFF` لا `-1`؛ السطر الأخير
 بلا `\n` يُفقد؛ `ParseQuotedStr("A \"x\" B")` يرجّع `x" ` (كل شيء إلا آخر حرف)؛
 والعدّاد قبل المصفوفة في الحاذف المتجهي هو `int` بأربع بايتات لا ثمانية.
+
+## CQBase D7 — ini.cpp: الاستعلامات (2026-10-31)
+**9 أجسام** تحمل `ini.cpp` في مسار الـlog: `IniIsKeyLine` (0x140b91170)،
+`IniParseSectionLine` (0x140b91260)، قلب `CIniBase` (`HasSection` 0x140b93d80،
+`GetInt` 0x140b93e10، `GetStr` 0x140b94030)، وواجهة `tq::CIni`
+(`SearchSection` 0x140b946a0، `GetData` 0x140b946f0، `GetString` 0x140b94740)،
+مع `FormatKey` (0x140b90f30) لبناء المفاتيح.
+- **منهجية معلنة لا تخمين:** `tq::CString` = vftable + `std::string` (المُفكِّك يظهر
+  كتابة `tq::CString::vftable` عند `+0` وبناء `std::string` عند `+8`)، لذلك يرث
+  `CString` من `std::string`. وإزاحات العُقد التي يطبعها المُفكِّك (`node+0x48`,
+  `+0x58`, `+0x70`) هي تخطيط عقدة `_Tree` لنفس الـ`std::map` لا بيانات لعبة.
+- `HasSection` **بلا فحص null** في الأصل (اسم فارغ = مفتاح فارغ) — محفوظ.
+- `GetInt`/`GetStr`: رسالتان مختلفتان للنقص — `section[%s] not found in %s!` و
+  `section[%s], index[%s] not found in %s!` — ولا تُسجَّل إلا إذا كان
+  `m_bLogMissing` (+0x48) مفتوحًا. القيمة عبر `strtoul(...,10)` فيتوقف عند أول
+  غير رقم، والنص السالب يصير ضخمًا (unsigned).
+- مفتاح الفهرس يُبنى بـ`FormatKey(pszIndex, &sectionKey)` — أي أن مفتاح القسم
+  يُمرَّر كوسيط أول لصيغة الفهرس (قاعدة خام محفوظة).
+- `IniIsKeyLine`: الطول > 2، وأول حرف ليس `\t \n \r space / ; = \`.
+- `IniParseSectionLine`: يقطع عند `]` ويكتبه منهيًا ثم ينسخ بعد `[`؛ سطر بلا
+  `[` أو بلا `]` مرفوض، و`[]` يعطي اسمًا فارغًا.
+
+**دروس اختبارية (2):** `GetInt` على `"42abc"` يعطي 42 (توقف `strtoul`) وعلى
+`"Name"` يعطي 0؛ و`HasSection("NoSuch")` صامت بلا log بينما `GetInt` على قسم
+ناقص يسجّل عندما يكون العلم مفتوحًا فقط.
