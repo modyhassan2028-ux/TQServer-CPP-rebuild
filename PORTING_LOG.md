@@ -7848,3 +7848,16 @@ thunk استيراد/CRT، الدوال التي تناديها، والنصوص
 - تصحيح تسمية: 0x140bb5610 هو جسم الـdtor (تحرير فقط)، و0x140bb5800 نفس الجسم
   + تحرير اختياري، وهو خانة الجدول الأولى.
 - الملف كله انتهى: 10 وحدات.
+
+## CQBase D16 (2026-10-31)
+`CPerformanceInfo` — نصف الملف الأول (`performanceinfo.cpp`)، 5 وحدات:
+ctor افتراضي (يبني كائن 0x150 على الكومة)، ctor نسخ، `operator=`، الـdtor،
+و`RecrodPerformanceInfo` (الاسم مكتوب كده في الأصل — خطأ إملائي أصيل محفوظ).
+- نفس نمط `CThreadTimesInfo`: جدول في +0x00 (0x140bcb008) ومؤشر للكائن في +0x08.
+- **فرق مهم محفوظ:** الـdtor هنا **لا يصفّر** +0x08 بعد الحذف (عكس ملف الـtimes).
+- `operator=` بينسخ المؤشر بس (بلا كتابة جدول) ولا يحرّر القديم، والنسخ يشترك في
+  نفس الكائن — العارضين محفوظين ومفحوصين.
+- الـforwarder بيمرّر لـ`FUN_140ba51c0` (جسم التسجيل = `0x140ba51c0`) عبر seam.
+- **دليل المسار:** `...\modules\cqbase\src\performanceinfo.cpp` من هاندلري catch.
+- المتبقي في الملف: `CPerformanceInfoBase` (0x150: حاويتان STL بـdebug proxy +
+  Init(char const*) + RecrodPerformanceInfo + RefreshPerformanceInfo).
