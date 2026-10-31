@@ -22,6 +22,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <ctime>
 #include <string>
 
 namespace tq {
@@ -77,6 +78,19 @@ struct CPerformanceList {
     uint64_t nCount;       // +0x38
 };
 
+// What PdhGetFormattedCounterValue leaves behind: the status word, then the value. The
+// 32 bits of padding keep the value's low dword where the raw reads it.
+struct PdhCounterValue {
+    uint32_t uStatus;   // +0
+    uint32_t uPad;      // +4
+    union {
+        int32_t  nLong;     // +8   the type 0x100 reads
+        int64_t  nLarge;    // +8   the type 0x400 reads
+        double   dDouble;   // +8
+    };
+};
+static_assert(offsetof(PdhCounterValue, nLong) == 8, "the value sits eight bytes in");
+
 struct PerformanceInfoApi {
     void* (*pfnAlloc)(size_t);              // operator new
     void (*pfnFree)(void*);                 // operator delete
@@ -92,6 +106,15 @@ struct PerformanceInfoApi {
         DefaultPdhOpenQueryA;
     uint32_t (*pfnPdhAddCounterA)(void* hQuery, const char* pszPath, uintptr_t uUserData,
                                  void** ppCounter) = DefaultPdhAddCounterA;
+    uint32_t (*pfnPdhCollectQueryData)(void* hQuery) = DefaultPdhCollectQueryData;
+    uint32_t (*pfnPdhGetFormattedCounterValue)(void* hCounter, uint32_t uType, void* pType,
+                                               PdhCounterValue* pValue) =
+        DefaultPdhGetFormattedCounterValue;
+    void (*pfnSleepMs)(uint32_t uMs) = DefaultSleepMs;
+    void (*pfnTime)(int32_t* pTime) = DefaultTime;
+    struct tm* (*pfnLocaltime)(const int32_t* pTime) = DefaultLocaltime;
+    void (*pfnLogSecond)(void* pBase, const char* pszFormat, const char* pszStamp) =
+        DefaultLogSecond;               // 0x140ba4560, the second reporter
     // 0x140ba3c90 erases one node from the smaller list's tree and 0x140ba1a90 is what
     // the larger list calls before it deletes a node; both belong to the counter setup
     // that is still unported, so their hooks start empty.
@@ -101,6 +124,18 @@ struct PerformanceInfoApi {
     static void DefaultTreeSteps(void*, void*) {}
     static uint32_t DefaultPdhOpenQueryA(const char*, void*, void**) { return 1; }
     static uint32_t DefaultPdhAddCounterA(void*, const char*, uintptr_t, void**) { return 1; }
+    static uint32_t DefaultPdhCollectQueryData(void*) { return 1; }
+    static uint32_t DefaultPdhGetFormattedCounterValue(void*, uint32_t, void*,
+                                                       PdhCounterValue* pValue) {
+        if (pValue != nullptr) { pValue->uStatus = 1; pValue->uPad = 0; pValue->nLarge = 0; }
+        return 1;
+    }
+    static void DefaultSleepMs(uint32_t) {}
+    static void DefaultTime(int32_t* pTime) { if (pTime) *pTime = (int32_t)::time(nullptr); }
+    static struct tm* DefaultLocaltime(const int32_t* pTime) {
+        return ::localtime((const time_t*)pTime);
+    }
+    static void DefaultLogSecond(void*, const char*, const char*) {}
 };
 extern PerformanceInfoApi g_PerformanceInfoApi;
 
@@ -109,6 +144,8 @@ public:
     CPerformanceInfoBase();       // 0x140ba5df0
     void Init(const char* pszName);    // 0x140ba11c0
     void SetupCounters();              // 0x140ba0600, sixteen counter paths on one query
+    void RecordSystemCounters();       // 0x140ba51c0 up to the process table
+    void RecordProcessTable();         // 0x140ba51c0 from the table header on, not ported
     ~CPerformanceInfoBase();      // 0x140ba50b0
     static const void* const* Table();   // 0x140bcbb30, slot 0 is the deleting dtor
 

@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstdarg>
+#include <vector>
 #include <cstring>
 #include <string>
 #include <vector>
@@ -481,6 +482,179 @@ int main() {
         pCopy->strKey.~basic_string();
     }
 
-    printf("CQBASE_D16_OK: CPerformanceInfo handle, object, Init, teardown and report, 26 units, 84 checks + 16 layout\n");
+    // ---- the system report: guard, stamp, one collect, and the eight summary lines
+    {
+        static std::vector<std::string> g_Lines;
+        static int g_nSecond = 0, g_nSleep = 0, g_nCollect = 0, g_uCollectStatus = 0,
+                   g_uSecondStatus = 0;
+        static void* g_pSysFill = nullptr;
+        struct Api {
+            static void* Alloc(size_t n) { return ::operator new(n); }
+            static void Free(void* p) { ::operator delete(p); }
+            static int FreeLibrary(void*) { return 1; }
+            static int CloseQuery(void*) { return 0; }
+            static void* LoadLibraryA(const char*) { return nullptr; }
+            static void* GetProcAddress(void*, const char*) { return nullptr; }
+            static void GetSystemInfo(uint32_t*) {}
+            static void Setup(void*) {}
+            static void Log(void*, const char* pszFormat, ...) {
+                // the shipped text is MSVC flavoured; translate the length modifier for the host
+                std::string fmt;
+                for (const char* p = pszFormat; *p; ) {
+                    if (*p == '%') {
+                        const char* q = p + 1;
+                        while (*q && strchr("-+ #0123456789.", *q)) ++q;   // flags and width
+                        if (q[0] == 'I' && q[1] == '6' && q[2] == '4' && q[3] == 'd') {
+                            fmt.append(p, q - p); fmt += "lld"; p = q + 4; continue;
+                        }
+                    }
+                    fmt += *p++;
+                }
+                char buf[512];
+                va_list a; va_start(a, pszFormat);
+                vsnprintf(buf, sizeof(buf), fmt.c_str(), a);
+                va_end(a);
+                g_Lines.push_back(buf);
+            }
+            static void LogSecond(void*, const char*, const char*) { ++g_nSecond; }
+            static uint32_t Collect(void*) { ++g_nCollect; return g_nCollect == 2 ? g_uSecondStatus : g_uCollectStatus; }
+            static uint32_t Formatted(void* hCounter, uint32_t uType, void*,
+                                      tq::PdhCounterValue* pValue) {
+                (void)uType;
+                pValue->uStatus = 0;
+                pValue->nLarge = (int64_t)(uintptr_t)hCounter;
+                return 0;
+            }
+            static void Sleep(uint32_t uMs) { if (uMs == 100) ++g_nSleep; else g_nSleep = -1000; }
+            static void Time(int32_t* pTime) { *pTime = 0; }
+            static struct tm* Localtime(const int32_t*) {
+                static struct tm tм;
+                memset(&tм, 0, sizeof(tм));
+                tм.tm_year = 126; tм.tm_mon = 9; tм.tm_mday = 31;
+                tм.tm_hour = 23; tм.tm_min = 40; tм.tm_sec = 5;
+                return &tм;
+            }
+        };
+        PerformanceInfoApi saved = g_PerformanceInfoApi;
+        g_PerformanceInfoApi = {&Api::Alloc, &Api::Free, &Api::FreeLibrary, &Api::CloseQuery,
+                                &Api::LoadLibraryA, &Api::GetProcAddress, &Api::GetSystemInfo,
+                                &Api::Setup, &Api::Log};
+        g_PerformanceInfoApi.pfnLogSecond = &Api::LogSecond;
+        g_PerformanceInfoApi.pfnPdhCollectQueryData = &Api::Collect;
+        g_PerformanceInfoApi.pfnPdhGetFormattedCounterValue = &Api::Formatted;
+        g_PerformanceInfoApi.pfnSleepMs = &Api::Sleep;
+        g_PerformanceInfoApi.pfnTime = &Api::Time;
+        g_PerformanceInfoApi.pfnLocaltime = &Api::Localtime;
+
+        // a memory status block that answers with two byte counts, and a system block with a peak
+        static int64_t g_nTotalPhys = 8589934592LL, g_nAvailPhys = 4294967296LL;
+        static uint32_t g_uPeak = 0x12345;
+        struct Host {
+            static void Memory(void* pBlock) {
+                assert(*(uint32_t*)pBlock == 0x40);
+                *(int64_t*)((uint8_t*)pBlock + 0x08) = g_nTotalPhys;
+                *(int64_t*)((uint8_t*)pBlock + 0x10) = g_nAvailPhys;
+            }
+            static uint32_t SysInfo(int32_t iClass, void* pBuffer, uint32_t uSize, uint32_t*) {
+                assert(iClass == 2 && uSize == 0x138);
+                *(uint32_t*)((uint8_t*)pBuffer + 0x38) = g_uPeak;
+                return 0;
+            }
+        };
+
+        CPerformanceInfoBase base;
+        base.hQuery = (void*)0x900;
+        base.hModule1 = (void*)0x1; base.hModule2 = (void*)0x2;
+        base.uC0 = 4;
+        base.pA8 = (void*)&Host::Memory;
+        base.pA0 = (void*)&Host::SysInfo;
+        // every counter answers with the number it is named by
+        base.hHandleCount = (void*)42; base.hThreads = (void*)7; base.hProcesses = (void*)123;
+        base.hCacheBytes = (void*)12288; base.hCacheBytesPeak = (void*)20480;
+        base.hPoolPaged = (void*)1048576; base.hPoolNonpaged = (void*)524288;
+        base.hCommittedBytes = (void*)2097152; base.hCommitLimit = (void*)4194304;
+        base.hPageFaults = (void*)11; base.hPageReads = (void*)22; base.hPageWrites = (void*)33;
+        base.hContextSwitches = (void*)44; base.hIoRead = (void*)55; base.hIoWrite = (void*)66;
+        base.hIoOther = (void*)77;
+
+        auto Reset = [&]() { g_Lines.clear(); g_nSecond = 0; g_nSleep = 0; g_nCollect = 0;
+                             g_uCollectStatus = 0; g_uSecondStatus = 0; };
+
+        // the guard: four pointers and a positive count, or nothing at all
+        for (int i = 0; i < 4; ++i) {
+            Reset();
+            void* pKeep = nullptr;
+            switch (i) {
+                case 0: pKeep = base.hModule1; base.hModule1 = nullptr; break;
+                case 1: pKeep = base.hModule2; base.hModule2 = nullptr; break;
+                case 2: { uint32_t u = base.uC0; base.uC0 = 0; base.RecordSystemCounters();
+                          base.uC0 = u; break; }
+                default: pKeep = base.hQuery; base.hQuery = nullptr; break;
+            }
+            if (i != 2) { base.RecordSystemCounters(); }
+            if (i == 0) base.hModule1 = pKeep;
+            if (i == 1) base.hModule2 = pKeep;
+            if (i == 3) base.hQuery = pKeep;
+            assert(g_Lines.empty() && g_nSecond == 0 && g_nCollect == 0);
+        }
+
+        // a stamp, then the lines, then a hundred milliseconds and a second collect
+        Reset();
+        base.RecordSystemCounters();
+        assert(g_nSleep == 1 && g_nCollect == 2 && g_nSecond == 1);
+        assert(g_Lines.size() == 8);      // the collect failure line is the only absent one
+        assert(g_Lines[0] ==
+               "*********************************PerformanceInfo [2026-10-31 23:40:05]*********************************");
+        char szRef[512];
+        snprintf(szRef, sizeof szRef,
+                 "Handle Count:    %10ld     Thread Count:       %10ld     Process Count:           %6ld",
+                 42L, 7L, 123L);
+        assert(g_Lines[1] == szRef);
+        snprintf(szRef, sizeof szRef,
+                 "Physical Total:  %10lld K   Physical Available: %10lld K   System Cache(Physical):%8lld K   System Cache Peak(Physical):   %10lld K",
+                 8388608LL, 4194304LL, 12LL, 20LL);
+        assert(g_Lines[2] == szRef);
+        snprintf(szRef, sizeof szRef,
+                 "Kernel Total:    %10lld K   Kernel Paged:       %10lld K   Kernel Nonpaged:     %10lld K",
+                 1536LL, 1024LL, 512LL);
+        assert(g_Lines[3] == szRef);
+        snprintf(szRef, sizeof szRef,
+                 "Commit Total:    %10lld K   Commit Limit:       %10lld K   Commit Peak:         %10ld K",
+                 2048LL, 4096LL, (long)((0x12345u & 0xfffff) << 2));
+        assert(g_Lines[4] == szRef);
+        snprintf(szRef, sizeof szRef,
+                 "Page Fault(s):   %10ld     Page Reads(s):      %10ld     Page Writes(s):      %10ld",
+                 11L, 22L, 33L);
+        assert(g_Lines[5] == szRef);
+        snprintf(szRef, sizeof szRef,
+                 "Context Switch(s):%9ld     IO Read Operations(s):%8ld     IO Write Operations(s):%8ld     IO Other Operations(s):    %10ld",
+                 44L, 55L, 66L, 77L);
+        assert(g_Lines[6] == szRef);
+        assert(g_Lines[7].empty());        // the empty format the raw sends the last two values to
+
+        // a failed first collect stops everything with its status
+        Reset();
+        g_uCollectStatus = 5;
+        base.RecordSystemCounters();
+        assert(g_nCollect == 1 && g_nSleep == 0);
+        assert(g_Lines.size() == 2);
+        assert(g_Lines[1] == "PdhCollectQueryData fail. status: 5");
+        // a failed second collect says nothing at all
+        Reset();
+        g_uSecondStatus = 9;
+        base.RecordSystemCounters();
+        assert(g_nCollect == 2 && g_Lines.size() == 1);
+        // the division by a thousand and twenty four rounds toward zero
+        Reset();
+        g_nTotalPhys = -1025; g_nAvailPhys = -1;
+        base.RecordSystemCounters();
+        snprintf(szRef, sizeof szRef,
+                 "Physical Total:  %10lld K   Physical Available: %10lld K   System Cache(Physical):%8lld K   System Cache Peak(Physical):   %10lld K",
+                 -1LL, 0LL, 12LL, 20LL);
+        assert(g_Lines[2] == szRef);
+        g_PerformanceInfoApi = saved;
+    }
+
+    printf("CQBASE_D16_OK: CPerformanceInfo handle, object, Init, teardown and report, 27 units, 102 checks + 16 layout\n");
     return 0;
 }

@@ -340,6 +340,128 @@ void CPerformanceInfo::Init(const char* pszName) {
     if (pBase != nullptr) ((CPerformanceInfoBase*)pBase)->Init(pszName);
 }
 
+// 0x140ba51c0 — the system half of the report. The raw divides every byte count by one
+// thousand and twenty four, rounding toward zero, which it does by adding 1023 to a
+// negative value before the arithmetic shift.
+static int64_t KbFromBytes(int64_t nValue) {
+    return (int64_t)((uint64_t)nValue + (((uint64_t)nValue >> 63) & 1023)) >> 10;
+}
+
+// 0x140ba51c0 — four pointers have to be in place before anything is read, and the count
+// of processes has to be positive, because every per process figure is divided by it
+void CPerformanceInfoBase::RecordSystemCounters() {
+    if (hModule1 == nullptr || hModule2 == nullptr || (int32_t)uC0 <= 0 || hQuery == nullptr) {
+        return;
+    }
+    int32_t tNow = 0;
+    g_PerformanceInfoApi.pfnTime(&tNow);
+    struct tm* pTm = g_PerformanceInfoApi.pfnLocaltime(&tNow);
+    // no stamp, no report: everything past this point is inside the timestamp check
+    if (pTm == nullptr) return;
+    char szStamp[100];
+    strftime(szStamp, sizeof(szStamp), "%Y-%m-%d %H:%M:%S", pTm);
+    g_PerformanceInfoApi.pfnLog(this,
+        "*********************************PerformanceInfo [%s]*********************************",
+        szStamp);
+    g_PerformanceInfoApi.pfnLogSecond(this,
+        "*********************************PerformanceInfo [%s]*********************************",
+        szStamp);
+
+    // the memory status block is cleared first, its length set second, then it is asked for
+    uint8_t abMemStatus[0x40] = {0};
+    if (pA8 != nullptr) {
+        *(uint32_t*)abMemStatus = 0x40;
+        ((void (*)(void*))pA8)(abMemStatus);
+    }
+    // the system information buffer is not cleared: a failed query leaves whatever was there
+    uint8_t abSysPerf[0x138];
+    if (pA0 != nullptr) {
+        ((uint32_t (*)(int32_t, void*, uint32_t, uint32_t*))pA0)(2, abSysPerf, 0x138, nullptr);
+    }
+
+    // the first collect must report success or the whole report stops with its status; the
+    // second one is asked again after a hundred milliseconds and a failure there is silent
+    uint32_t uStatus = g_PerformanceInfoApi.pfnPdhCollectQueryData(hQuery);
+    if (uStatus != 0) {
+        g_PerformanceInfoApi.pfnLog(this, "PdhCollectQueryData fail. status: %ld", (long)uStatus);
+        return;
+    }
+    g_PerformanceInfoApi.pfnSleepMs(100);
+    if (g_PerformanceInfoApi.pfnPdhCollectQueryData(hQuery) != 0) return;
+
+    auto ReadLong = [](void* hCounter) -> int64_t {
+        PdhCounterValue value = {};
+        if (g_PerformanceInfoApi.pfnPdhGetFormattedCounterValue(hCounter, 0x100, nullptr,
+                                                                &value) != 0) {
+            return 0;
+        }
+        return (int64_t)value.nLong;
+    };
+    auto ReadLarge = [](void* hCounter) -> int64_t {
+        PdhCounterValue value = {};
+        if (g_PerformanceInfoApi.pfnPdhGetFormattedCounterValue(hCounter, 0x400, nullptr,
+                                                                &value) != 0) {
+            return 0;
+        }
+        return value.nLarge;
+    };
+
+    int64_t nHandleCount = ReadLong(hHandleCount);
+    int64_t nThreadCount = ReadLong(hThreads);
+    int64_t nProcessCount = ReadLong(hProcesses);
+    g_PerformanceInfoApi.pfnLog(this,
+        "Handle Count:    %10ld     Thread Count:       %10ld     Process Count:           %6ld",
+        (long)nHandleCount, (long)nThreadCount, (long)nProcessCount);
+
+    int64_t nCache = KbFromBytes(ReadLarge(hCacheBytes));
+    int64_t nCachePeak = KbFromBytes(ReadLarge(hCacheBytesPeak));
+    int64_t nTotalPhys = *(int64_t*)(abMemStatus + 0x08);
+    int64_t nAvailPhys = *(int64_t*)(abMemStatus + 0x10);
+    g_PerformanceInfoApi.pfnLog(this,
+        "Physical Total:  %10I64d K   Physical Available: %10I64d K   System Cache(Physical):%8I64d K   System Cache Peak(Physical):   %10I64d K",
+        (long long)KbFromBytes(nTotalPhys), (long long)KbFromBytes(nAvailPhys),
+        (long long)nCache, (long long)nCachePeak);
+
+    int64_t nPoolPaged = KbFromBytes(ReadLarge(hPoolPaged));
+    int64_t nPoolNonpaged = KbFromBytes(ReadLarge(hPoolNonpaged));
+    g_PerformanceInfoApi.pfnLog(this,
+        "Kernel Total:    %10I64d K   Kernel Paged:       %10I64d K   Kernel Nonpaged:     %10I64d K",
+        (long long)(nPoolNonpaged + nPoolPaged), (long long)nPoolPaged,
+        (long long)nPoolNonpaged);
+
+    int64_t nCommitted = KbFromBytes(ReadLarge(hCommittedBytes));
+    int64_t nCommitLimit = KbFromBytes(ReadLarge(hCommitLimit));
+    // the peak comes out of the system information buffer, not from a counter: twenty bits,
+    // in pages, four kilobytes each
+    uint32_t uPeakCommit = *(uint32_t*)(abSysPerf + 0x38);
+    int64_t nCommitPeak = (int64_t)(uint32_t)((uPeakCommit & 0xfffff) << 2);
+    g_PerformanceInfoApi.pfnLog(this,
+        "Commit Total:    %10I64d K   Commit Limit:       %10I64d K   Commit Peak:         %10ld K",
+        (long long)nCommitted, (long long)nCommitLimit, (long)nCommitPeak);
+
+    int64_t nPageFaults = ReadLong(hPageFaults);
+    int64_t nPageReads = ReadLong(hPageReads);
+    int64_t nPageWrites = ReadLong(hPageWrites);
+    g_PerformanceInfoApi.pfnLog(this,
+        "Page Fault(s):   %10ld     Page Reads(s):      %10ld     Page Writes(s):      %10ld",
+        (long)nPageFaults, (long)nPageReads, (long)nPageWrites);
+
+    int64_t nContextSwitches = ReadLong(hContextSwitches);
+    int64_t nIoRead = ReadLong(hIoRead);
+    int64_t nIoWrite = ReadLong(hIoWrite);
+    int64_t nIoOther = ReadLong(hIoOther);
+    g_PerformanceInfoApi.pfnLog(this,
+        "Context Switch(s):%9ld     IO Read Operations(s):%8ld     IO Write Operations(s):%8ld     IO Other Operations(s):    %10ld",
+        (long)nContextSwitches, (long)nIoRead, (long)nIoWrite, (long)nIoOther);
+    // the raw hands the last two values it read to a call with an empty format, where they
+    // are never formatted; kept because it is what the binary does
+    g_PerformanceInfoApi.pfnLog(this, "", (long)nContextSwitches, (long)nIoRead);
+}
+
+// 0x140ba51c0 — the per process table: eleven label pointers, a header, then a row per node
+// from the larger list. Not ported yet; the seam keeps the ordering of the raw visible.
+void CPerformanceInfoBase::RecordProcessTable() {}
+
 // 0x140ba0a80 — the string comes first, then the dword the caller points at
 void CPerformanceKeyNodeBuild(CPerformanceKeyNode* pNode, const std::string& strKey,
                               const uint32_t* pValue) {
