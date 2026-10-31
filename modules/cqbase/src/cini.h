@@ -54,6 +54,12 @@ public:
     uint32_t GetInt(const char* pszSection, const char* pszIndex, ...);
     // 0x140b94030 — the value itself, null when the section or index is absent
     const char* GetStr(const char* pszSection, const char* pszIndex, ...);
+    // 0x140b944f0 — how many indices the section holds, 0 when it is absent
+    uint32_t GetAmount(const char* pszSection, ...);
+    // 0x140b94240 — the index and value at a position inside the section, in
+    // the map's own order; false when the section is absent or the position is
+    // past the end
+    bool GetStringByIndex(const char* pszSection, int nIndex, CString& rKey, CString& rValue);
     // 0x140b96ed0 — reads the file and fills the section map
     bool Open(const char* pszIniFile);
     std::map<CString, CIniSection> m_sections;   // +8
@@ -73,6 +79,9 @@ public:
     int GetData(char* pszSection, char* pszIndex);     // 0x140b946f0
     const char* GetString(char* pszSection, char* pszIndex);  // 0x140b94740
     bool Open(char* pszIniFile);                              // 0x140b97510
+    int GetAmount(char* pszSection);                          // 0x140b947f0
+    bool GetStringByIndex(char* pszSection, int nIndex, CString& rKey,
+                          CString& rValue);                   // 0x140b94790
     CIni(bool bLogMissing);                                   // 0x140b97840
     CIni(char* pszIniFile, bool bLogMissing);                 // 0x140b97900
     static CIni* CreateNew(char* pszIniFile, bool bLogMissing);  // 0x140b979d0

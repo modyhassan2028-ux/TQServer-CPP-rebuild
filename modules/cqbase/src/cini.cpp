@@ -118,6 +118,40 @@ const char* CIniBase::GetStr(const char* pszSection, const char* pszIndex, ...) 
     return itValue->second.c_str();
 }
 
+// 0x140b944f0 — the count is read straight out of the found section, so a name
+// that is not there answers zero rather than logging.
+uint32_t CIniBase::GetAmount(const char* pszSection, ...) {
+    CString strSection = FormatKey(pszSection);
+    std::map<CString, CIniSection>::iterator itSection = m_sections.find(strSection);
+    if (itSection == m_sections.end()) return 0;
+    return (uint32_t)(itSection->second.m_values.size() & 0xffffffff);
+}
+
+// 0x140b94240 — walks the section's own order to the wanted position. The
+// position is compared as a signed int against the count, and the walk only
+// advances while it is above zero, so a negative position answers the first
+// entry instead of refusing.
+bool CIniBase::GetStringByIndex(const char* pszSection, int nIndex, CString& rKey,
+                                CString& rValue) {
+    if (pszSection == nullptr) return false;
+    CString strSection = FormatKey(pszSection);
+    std::map<CString, CIniSection>::iterator itSection = m_sections.find(strSection);
+    if (itSection == m_sections.end()) return false;
+    std::map<CString, CString>& rValues = itSection->second.m_values;
+    int nCount = (int)rValues.size();
+    if (nCount == 0) return false;
+    if (!(nIndex < nCount)) return false;
+    std::map<CString, CString>::iterator it = rValues.begin();
+    for (int i = 0; i < nIndex; ++i) {
+        if (it == rValues.end()) return false;
+        ++it;
+    }
+    if (it == rValues.end()) return false;
+    rKey.assign(it->first);
+    rValue.assign(it->second);
+    return true;
+}
+
 // 0x140b96ed0 — the parser. A line shorter than three characters is skipped
 // outright, a trailing newline is stripped, a "[name]" line closes the section
 // that is open and starts a new one, and any other line is a key/value pair that
@@ -328,6 +362,24 @@ CIni* CIni::CreateNew(char* pszIniFile, bool bLogMissing) {
         return nullptr;
     }
     return pIni;
+}
+
+// 0x140b947f0 — the wrapper refuses while it has no base
+int CIni::GetAmount(char* pszSection) {
+    if (m_pIniBase == nullptr) {
+        LogPrintf("%s", "IF_OK m_pIniBase ini.cpp:0x1bb");
+        return 0;
+    }
+    return (int)m_pIniBase->GetAmount(pszSection);
+}
+
+// 0x140b94790
+bool CIni::GetStringByIndex(char* pszSection, int nIndex, CString& rKey, CString& rValue) {
+    if (m_pIniBase == nullptr) {
+        LogPrintf("%s", "IF_OK m_pIniBase ini.cpp:0x1b1");
+        return false;
+    }
+    return m_pIniBase->GetStringByIndex(pszSection, nIndex, rKey, rValue);
 }
 
 // 0x140b946a0 — the wrapper refuses while it has no base
