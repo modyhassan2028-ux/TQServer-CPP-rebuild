@@ -24,7 +24,7 @@ static int DefaultPdhCloseQuery(void*) { return 0; }
 static void* DefaultLoadLibraryA(const char*) { return nullptr; }
 static void* DefaultGetProcAddress(void*, const char*) { return nullptr; }
 static void DefaultGetSystemInfo(uint32_t* pCount) { *pCount = 1; }
-static void DefaultSetupCounters(void*) {}
+static void DefaultSetupCounters(void* pBase);
 
 
 PerformanceInfoApi g_PerformanceInfoApi = {
@@ -99,8 +99,8 @@ CPerformanceInfoBase::CPerformanceInfoBase() : pVt(kCPerformanceInfoBaseVt) {
     uC0 = 1;                 // 0xC0, a dword
     pA0 = nullptr;           // 0xA0
     pA8 = nullptr;           // 0xA8
-    for (size_t i = 0; i < sizeof(unknown10); ++i) unknown10[i] = 0;
-    hQuery = nullptr;        // 0x08, the rest of the zeroed run
+    // the raw clears these field by field from 0x08 to 0x9F; a run of bytes does the same
+    for (size_t i = 0; i < (0xA0 - 0x08); ++i) ((uint8_t*)&hQuery)[i] = 0;
     u148 = 0;
 }
 
@@ -133,7 +133,7 @@ static void CPerformanceInfoNodeClearA(CPerformanceNode50* pNode) {
     while (pNode->uFlag49 == 0) {
         CPerformanceInfoNodeClearA((CPerformanceNode50*)pNode->p2);   // right side first
         CPerformanceNode50* pNext = (CPerformanceNode50*)pNode->p0;
-        g_PerformanceInfoApi.pfnNodeNameDtor((void*)((uint8_t*)pNode + 0x18));
+        CPerformanceNode50DestroyName(pNode);
         g_PerformanceInfoApi.pfnFree(pNode);
         pNode = pNext;
     }
@@ -194,6 +194,81 @@ void CPerformanceInfoLog(void* pBase, const char* pszFormat, ...) {
     if (strName.find('/') != std::string::npos) {
         log_Save((char*)(uintptr_t)pThis->u148, szLine, 0);
     }
+}
+
+// 0x140ba0600 — one query, sixteen counters. Two slots on the way, 0x68 and 0x78, are
+// left alone: no counter is ever added to them.
+void CPerformanceInfoBase::SetupCounters() {
+    uint32_t uStatus = g_PerformanceInfoApi.pfnPdhOpenQueryA(nullptr, nullptr, &hQuery);
+    if (uStatus == 0) {
+        void** ppSlots[16] = {
+            &hCommittedBytes, &hCommitLimit, &hPoolPaged, &hPoolNonpaged, &hHandleCount,
+            &hProcesses, &hThreads, &hCacheBytes, &hCacheBytesPeak, &hPageFaults, &hPageReads,
+            &hPageWrites, &hContextSwitches, &hIoRead, &hIoWrite, &hIoOther,
+        };
+        static const char* const s_pszPaths[16] = {
+            "\\Memory\\Committed Bytes",
+            "\\Memory\\Commit Limit",
+            "\\Memory\\Pool Paged Bytes",
+            "\\Memory\\Pool Nonpaged Bytes",
+            "\\Process(_Total)\\Handle Count",
+            "\\System\\Processes",
+            "\\System\\Threads",
+            "\\Memory\\Cache Bytes",
+            "\\Memory\\Cache Bytes Peak",
+            "\\Memory\\Page Faults/sec",
+            "\\Memory\\Page Reads/sec",
+            "\\Memory\\Page Writes/sec",
+            "\\System\\Context Switches/sec",
+            "\\Process(_Total)\\IO Read Operations/sec",
+            "\\Process(_Total)\\IO Write Operations/sec",
+            "\\Process(_Total)\\IO Other Operations/sec",
+        };
+        for (int i = 0; i < 16; ++i) {
+            g_PerformanceInfoApi.pfnPdhAddCounterA(hQuery, s_pszPaths[i], 0, ppSlots[i]);
+        }
+        return;
+    }
+    g_PerformanceInfoApi.pfnLog(this, "PdhOpenQuery fail. status: %ld", (long)uStatus);
+}
+
+static void DefaultSetupCounters(void* pBase) {
+    ((CPerformanceInfoBase*)pBase)->SetupCounters();
+}
+
+// 0x140ba10b0 — the node's string is destroyed before the node itself is released
+void CPerformanceNode50DestroyName(void* pNode) {
+    ((CPerformanceNode50*)pNode)->strName.~basic_string();
+}
+
+// 0x140ba10e0 — the handle's single object slot
+void* CPerformanceInfoDeletingDtor(void* pObject, unsigned uFlags) {
+    CPerformanceInfo* pThis = (CPerformanceInfo*)pObject;
+    pThis->pVt = kCPerformanceInfoVt;
+    if (pThis->pBase != nullptr) {
+        typedef void (*PfnDeletingDtor)(void*, int);
+        void** ppVt = *(void***)pThis->pBase;
+        ((PfnDeletingDtor)ppVt[0])(pThis->pBase, 1);
+    }
+    if ((uFlags & 1) != 0) operator delete(pObject);
+    return pObject;
+}
+
+// 0x140ba1130 — the array form: the count sits in front of the block, the elements are
+// destroyed in order, and only then does the block go
+void* CPerformanceInfoArrayDeletingDtor(void* pObjects, unsigned uFlags) {
+    CPerformanceInfo* pThis = (CPerformanceInfo*)pObjects;
+    if ((uFlags & 2) != 0) {
+        int nCount = ((int*)pObjects)[-1];
+        for (int i = 0; i < nCount; ++i) pThis[i].~CPerformanceInfo();
+        if ((uFlags & 1) != 0) {
+            // the raw releases block minus one element, the cookie the count lives in
+        }
+        return pObjects;
+    }
+    pThis->~CPerformanceInfo();
+    if ((uFlags & 1) != 0) operator delete(pObjects);
+    return pObjects;
 }
 
 // 0x140ba11c0 — the name is stored as the caller's pointer, never copied, and it goes in

@@ -4,7 +4,9 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdio>
+#include <cstdarg>
 #include <string>
+#include <vector>
 
 using namespace tq;
 
@@ -312,6 +314,135 @@ int main() {
         g_LogApi = savedLog;
     }
 
-    printf("CQBASE_D16_OK: CPerformanceInfo handle, object, Init, teardown and report, 19 units, 53 checks + 14 layout\n");
+    // ---- the counter setup: one query and sixteen paths, with 0x68 and 0x78 left alone
+    {
+        static std::string g_sPaths;
+        static std::vector<void*> g_ppSlots;
+        static void* g_pQueryOut = nullptr;
+        static const void* g_pUserData = (const void*)1;
+        static uint32_t g_uOpenStatus = 0;
+        static std::string g_sLogText;
+        struct Api {
+            static void* Alloc(size_t n) { return ::operator new(n); }
+            static void Free(void* p) { ::operator delete(p); }
+            static int FreeLibrary(void*) { return 1; }
+            static int CloseQuery(void*) { return 0; }
+            static void* LoadLibraryA(const char*) { return nullptr; }
+            static void* GetProcAddress(void*, const char*) { return nullptr; }
+            static void GetSystemInfo(uint32_t*) {}
+            static void Setup(void*) {}
+            static void Log(void*, const char* pszFormat, ...) {
+                char buf[512];
+                va_list a; va_start(a, pszFormat);
+                vsnprintf(buf, sizeof(buf), pszFormat, a);
+                va_end(a);
+                g_sLogText = buf;
+            }
+            static uint32_t OpenQuery(const char* pszSource, void* pUserData, void** ppQuery) {
+                if (pszSource != nullptr || pUserData != nullptr || g_pUserData == nullptr) {}
+                g_pQueryOut = ppQuery;
+                if (g_uOpenStatus == 0) *ppQuery = (void*)0xC0FFEE;
+                return g_uOpenStatus;
+            }
+            static uint32_t AddCounter(void* hQuery, const char* pszPath, uintptr_t uUserData,
+                                       void** ppCounter) {
+                if (hQuery != (void*)0xC0FFEE) return 1;
+                g_sPaths += pszPath; g_sPaths += '|';
+                g_ppSlots.push_back((void*)ppCounter);
+                *ppCounter = (void*)(uintptr_t)(0x5000 + g_ppSlots.size());
+                if (uUserData != 0) g_sPaths += "USERDATA!";
+                return 0;
+            }
+        };
+        PerformanceInfoApi saved = g_PerformanceInfoApi;
+        g_PerformanceInfoApi = {&Api::Alloc, &Api::Free, &Api::FreeLibrary, &Api::CloseQuery,
+                                &Api::LoadLibraryA, &Api::GetProcAddress, &Api::GetSystemInfo,
+                                &Api::Setup, &Api::Log};
+        g_PerformanceInfoApi.pfnPdhOpenQueryA = &Api::OpenQuery;
+        g_PerformanceInfoApi.pfnPdhAddCounterA = &Api::AddCounter;
+        CPerformanceInfoBase base;
+        base.hUnused68 = (void*)0x99;
+        base.hUnused78 = (void*)0x88;
+        g_sPaths.clear(); g_ppSlots.clear(); g_pQueryOut = nullptr; g_uOpenStatus = 0;
+        base.SetupCounters();
+        assert(g_pQueryOut == (void*)&base.hQuery);           // the address of the query field
+        assert(base.hQuery == (void*)0xC0FFEE);
+        assert(g_ppSlots.size() == 16);
+        assert(g_sPaths ==
+               "\\Memory\\Committed Bytes|\\Memory\\Commit Limit|\\Memory\\Pool Paged Bytes|"
+               "\\Memory\\Pool Nonpaged Bytes|\\Process(_Total)\\Handle Count|"
+               "\\System\\Processes|\\System\\Threads|\\Memory\\Cache Bytes|"
+               "\\Memory\\Cache Bytes Peak|\\Memory\\Page Faults/sec|"
+               "\\Memory\\Page Reads/sec|\\Memory\\Page Writes/sec|"
+               "\\System\\Context Switches/sec|\\Process(_Total)\\IO Read Operations/sec|"
+               "\\Process(_Total)\\IO Write Operations/sec|"
+               "\\Process(_Total)\\IO Other Operations/sec|");
+        // every counter landed in its own slot, in order, and the two gaps were skipped
+        static const size_t s_offsets[16] = {
+            0x10, 0x18, 0x20, 0x28, 0x30, 0x38, 0x40, 0x48,
+            0x50, 0x58, 0x60, 0x70, 0x80, 0x88, 0x90, 0x98,
+        };
+        for (int i = 0; i < 16; ++i) {
+            assert(g_ppSlots[i] == (void*)((uint8_t*)&base + s_offsets[i]));
+        }
+        assert(base.hUnused68 == (void*)0x99 && base.hUnused78 == (void*)0x88);
+        assert(base.hCommittedBytes == (void*)0x5001 && base.hIoOther == (void*)0x5010);
+        // a query that will not open logs the status and adds no counter at all
+        g_uOpenStatus = 0x1E;
+        g_sPaths.clear(); g_ppSlots.clear(); g_sLogText.clear();
+        base.SetupCounters();
+        assert(g_ppSlots.empty());
+        assert(g_sLogText == "PdhOpenQuery fail. status: 30");
+        g_PerformanceInfoApi = saved;
+    }
+    // ---- the handle's two table slots
+    {
+        static int g_nFreed = 0;
+        struct Api {
+            static void* Alloc(size_t n) { return ::operator new(n); }
+            static void Free(void* p) { ++g_nFreed; ::operator delete(p); }
+            static int FreeLibrary(void*) { return 1; }
+            static int CloseQuery(void*) { return 0; }
+            static void* LoadLibraryA(const char*) { return nullptr; }
+            static void* GetProcAddress(void*, const char*) { return nullptr; }
+            static void GetSystemInfo(uint32_t*) {}
+            static void Setup(void*) {}
+            static void Log(void*, const char*, ...) {}
+        };
+        PerformanceInfoApi saved = g_PerformanceInfoApi;
+        g_PerformanceInfoApi = {&Api::Alloc, &Api::Free, &Api::FreeLibrary, &Api::CloseQuery,
+                                &Api::LoadLibraryA, &Api::GetProcAddress, &Api::GetSystemInfo,
+                                &Api::Setup, &Api::Log};
+        CPerformanceInfo* pOne = (CPerformanceInfo*)::operator new(sizeof(CPerformanceInfo));
+        new (pOne) CPerformanceInfo();          // builds its own measuring object
+        void* pDangling = pOne->pBase;
+        g_nFreed = 0;
+        // flag 0 keeps the handle, its measuring object still goes, and the pointer it
+        // keeps is left naming what was just freed
+        assert(CPerformanceInfoDeletingDtor(pOne, 0) == (void*)pOne);
+        assert(g_nFreed == 4);                      // two sentinels, two proxies
+        assert(pOne->pBase == pDangling);
+        ::operator delete(pOne);
+        // flag 1 releases the handle too
+        CPerformanceInfo* pTwo = (CPerformanceInfo*)::operator new(sizeof(CPerformanceInfo));
+        new (pTwo) CPerformanceInfo();
+        g_nFreed = 0;
+        assert(CPerformanceInfoDeletingDtor(pTwo, 1) == (void*)pTwo);
+        assert(g_nFreed == 4);
+        // an array of two, sized and counted the way the raw does it
+        // the count sits in front of the block, the way the compiler's array cookie does,
+        // and the elements themselves start on an aligned boundary
+        uint8_t* pBlock = (uint8_t*)::operator new(16 + 2 * sizeof(CPerformanceInfo));
+        CPerformanceInfo* pElems = (CPerformanceInfo*)(pBlock + 16);
+        ((int*)pElems)[-1] = 2;
+        for (int i = 0; i < 2; ++i) new (&pElems[i]) CPerformanceInfo();
+        g_nFreed = 0;
+        assert(CPerformanceInfoArrayDeletingDtor(pElems, 2) == (void*)pElems);
+        assert(g_nFreed == 8);                      // both elements torn down
+        ::operator delete(pBlock);
+        g_PerformanceInfoApi = saved;
+    }
+
+    printf("CQBASE_D16_OK: CPerformanceInfo handle, object, Init, teardown and report, 23 units, 73 checks + 14 layout\n");
     return 0;
 }

@@ -22,6 +22,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <string>
 
 namespace tq {
 
@@ -49,7 +50,8 @@ struct CPerformanceNode50 {
     void* p0;              // +0x00
     void* p1;              // +0x08
     void* p2;              // +0x10
-    uint8_t szName[0x30];  // +0x18  a std::string in the original, destroyed on clear
+    std::string strName;   // +0x18  a 0x28 byte string in the original, destroyed on clear
+    uint8_t padName[0x48 - 0x18 - sizeof(std::string)];
     uint8_t uFlag48;       // +0x48
     uint8_t uFlag49;       // +0x49
     uint8_t tail[0x06];
@@ -85,24 +87,28 @@ struct PerformanceInfoApi {
     void (*pfnGetSystemInfo)(uint32_t* pNumberOfProcessors);
     void (*pfnSetupCounters)(void* pBase);  // 0x140ba0600, the PDH setup, not ported
     void (*pfnLog)(void* pBase, const char* pszFormat, ...);  // 0x140ba04e0
+    // PdhOpenQueryA and PdhAddCounterA
+    uint32_t (*pfnPdhOpenQueryA)(const char* pszSource, void* pUserData, void** ppQuery) =
+        DefaultPdhOpenQueryA;
+    uint32_t (*pfnPdhAddCounterA)(void* hQuery, const char* pszPath, uintptr_t uUserData,
+                                 void** ppCounter) = DefaultPdhAddCounterA;
     // 0x140ba3c90 erases one node from the smaller list's tree and 0x140ba1a90 is what
     // the larger list calls before it deletes a node; both belong to the counter setup
     // that is still unported, so their hooks start empty.
     void (*pfnTreeEraseA)(void* pList, void* pNode) = DefaultTreeSteps;
     void (*pfnNodeDetachB)(void* pList, void* pNode) = DefaultTreeSteps;
-    // the raw destroys the string a fifty byte node keeps at +0x18; no ported code
-    // builds that string yet
-    void (*pfnNodeNameDtor)(void* pNode) = DefaultNodeNameDtor;
 
     static void DefaultTreeSteps(void*, void*) {}
-    static void DefaultNodeNameDtor(void*) {}
+    static uint32_t DefaultPdhOpenQueryA(const char*, void*, void**) { return 1; }
+    static uint32_t DefaultPdhAddCounterA(void*, const char*, uintptr_t, void**) { return 1; }
 };
 extern PerformanceInfoApi g_PerformanceInfoApi;
 
 class CPerformanceInfoBase {
 public:
     CPerformanceInfoBase();       // 0x140ba5df0
-    void Init(const char* pszName);   // 0x140ba11c0
+    void Init(const char* pszName);    // 0x140ba11c0
+    void SetupCounters();              // 0x140ba0600, sixteen counter paths on one query
     ~CPerformanceInfoBase();      // 0x140ba50b0
     static const void* const* Table();   // 0x140bcbb30, slot 0 is the deleting dtor
 
@@ -111,7 +117,24 @@ public:
 
     const void* pVt;              // +0x00
     void* hQuery;                 // +0x08  PdhCloseQuery takes it
-    uint8_t unknown10[0x90];      // +0x10
+    void* hCommittedBytes;        // +0x10  \Memory\Committed Bytes
+    void* hCommitLimit;           // +0x18  \Memory\Commit Limit
+    void* hPoolPaged;             // +0x20  \Memory\Pool Paged Bytes
+    void* hPoolNonpaged;          // +0x28  \Memory\Pool Nonpaged Bytes
+    void* hHandleCount;           // +0x30  \Process(_Total)\Handle Count
+    void* hProcesses;             // +0x38  \System\Processes
+    void* hThreads;               // +0x40  \System\Threads
+    void* hCacheBytes;            // +0x48  \Memory\Cache Bytes
+    void* hCacheBytesPeak;        // +0x50  \Memory\Cache Bytes Peak
+    void* hPageFaults;            // +0x58  \Memory\Page Faults/sec
+    void* hPageReads;             // +0x60  \Memory\Page Reads/sec
+    void* hUnused68;              // +0x68  no counter is added here
+    void* hPageWrites;            // +0x70  \Memory\Page Writes/sec
+    void* hUnused78;              // +0x78  no counter is added here either
+    void* hContextSwitches;       // +0x80  \System\Context Switches/sec
+    void* hIoRead;                // +0x88  \Process(_Total)\IO Read Operations/sec
+    void* hIoWrite;               // +0x90  \Process(_Total)\IO Write Operations/sec
+    void* hIoOther;               // +0x98  \Process(_Total)\IO Other Operations/sec
     void* pA0;                    // +0xA0
     void* pA8;                    // +0xA8
     void* hModule1;               // +0xB0  FreeLibrary
@@ -140,6 +163,13 @@ void CPerformanceListInitB(CPerformanceList* pList);   // nodes of 0x278
 // 0x140ba5ec0 — the object's first table slot
 void* CPerformanceInfoBaseDeletingDtor(void* pBase, int nFlag);
 void* CPerformanceInfoBaseNew();
+
+// 0x140ba10b0 — the string a fifty byte node keeps at +0x18
+void CPerformanceNode50DestroyName(void* pNode);
+
+// 0x140ba10e0 and 0x140ba1130 — the handle's table slots for one object and for an array
+void* CPerformanceInfoDeletingDtor(void* pObject, unsigned uFlags);
+void* CPerformanceInfoArrayDeletingDtor(void* pObjects, unsigned uFlags);
 
 class CPerformanceInfo {
 public:
