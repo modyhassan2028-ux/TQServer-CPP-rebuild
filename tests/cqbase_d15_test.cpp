@@ -229,6 +229,64 @@ int main() {
         a.pBase = nullptr;
         b.pBase = nullptr;
     }
-    printf("CQBASE_D15_OK: CThreadTimesInfo handle, measuring object and Init, 7 units, 53 checks\n");
+    // ---- RecordThreadTimesInfo: it stays silent until initialised, then reports
+    {
+        CThreadTimesInfoBase base;
+        base.vSamples.push_back(CThreadTimesSample{(void*)0x3333, 40, 50});
+        g_vLogged.clear();
+        base.RecordThreadTimesInfo(true);          // not initialised yet
+        assert(g_vLogged.empty());
+
+        g_uTick = 1500; g_uProcKernel = 20000; g_uProcUser = 10000;
+        g_uThreadKernel = 90000; g_uThreadUser = 30000;
+        g_nThreadTimesFail = 0; g_nProcFail = 0;
+        g_nGetThreadTimesCalls = 0;
+        base.uInited = 1;
+        base.uTickCount = 1000;
+        base.uProcessKernelMs = 0;
+        base.uProcessUserMs = 0;
+        base.RecordThreadTimesInfo(true);
+        // the banner names the moment, so it must carry a date and a time
+        bool bBanner = false;
+        for (auto& t : g_vLogged) {
+            if (t.find("ThreadTimesInfo [") == std::string::npos) continue;
+            bBanner = t.find('-') != std::string::npos && t.find(':') != std::string::npos;
+            break;
+        }
+        assert(bBanner);
+        assert(SawLog("Number of Thread: 1"));
+        assert(SawLog("Process kernel:"));
+        assert(SawLog("thread   42 kernel:"));
+        assert(base.uTickCount == 1500);                    // updated
+        assert(base.uProcessKernelMs == 2 && base.uProcessUserMs == 1);
+        assert(base.vSamples[0].uKernelMs == 9 && base.vSamples[0].uUserMs == 3);
+        assert(g_vLogFiles.back() == "syslog/thread");
+
+        // ---- without the update flag nothing is stored, the delta is still reported
+        g_vLogged.clear();
+        g_uTick = 2500;
+        base.RecordThreadTimesInfo(false);
+        assert(base.uTickCount == 1500);
+        assert(base.uProcessKernelMs == 2 && base.uProcessUserMs == 1);
+        assert(base.vSamples[0].uKernelMs == 9 && base.vSamples[0].uUserMs == 3);
+        assert(SawLog("Number of Thread: 1"));
+
+        // ---- a clock that did not move forward is reported and becomes the base
+        g_vLogged.clear();
+        g_uTick = 1200;                                     // less than the stored 1500
+        base.RecordThreadTimesInfo(true);
+        assert(SawLog("GetTickCount err, new count: 1200, old count: 1500"));
+        assert(base.uTickCount == 1200);
+        assert(!SawLog("Number of Thread:"));               // the report stops there
+
+        // ---- an empty list is silent even when initialised
+        CThreadTimesInfoBase empty;
+        empty.uInited = 1;
+        g_vLogged.clear();
+        empty.RecordThreadTimesInfo(true);
+        assert(g_vLogged.empty());
+    }
+
+    printf("CQBASE_D15_OK: CThreadTimesInfo handle, measuring object, Init and the report, 8 units, 70 checks\n");
     return 0;
 }

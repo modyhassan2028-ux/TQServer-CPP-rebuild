@@ -5,6 +5,7 @@
 
 #include <cstdarg>
 #include <cstdio>
+#include <ctime>
 
 namespace tq {
 
@@ -82,6 +83,100 @@ bool CThreadTimesInfoBase::Init() {
     ThreadTimesLog("ThreadTimesInfo Init ok.");
     uInited = 1;
     return true;
+}
+
+// .rdata 0x140bc5ee8: the constant both percent and second figures divide by.
+static const double kThreadTimesPerSecond = 1000.0;
+
+// 0x140bb49d0 — the report. It says nothing at all until the list has a sample and the
+// object has been initialised, and both conditions are checked before the clock is read.
+void CThreadTimesInfoBase::RecordThreadTimesInfo(bool bUpdate) {
+    if (vSamples.empty() || uInited == 0) return;
+
+    char szTime[128];
+    {
+        time_t tNow = time(nullptr);
+        struct tm* pTm = localtime(&tNow);
+        if (pTm == nullptr) return;
+        strftime(szTime, 100, "%Y-%m-%d %H:%M:%S", pTm);
+    }
+    ThreadTimesLog(
+        "*********************************ThreadTimesInfo [%s]*********************************",
+        szTime);
+
+    uint32_t uNewCount = g_ThreadTimesApi.pfnGetTickCount();
+    // a zero count, or one that did not move forward, is reported and taken as the new base
+    if (uNewCount == 0 || uNewCount <= uTickCount) {
+        ThreadTimesLog(
+            "CThreadTimesInfoBase::RecordThreadTimesInfo GetTickCount err, new count: %u, old "
+            "count: %u",
+            uNewCount, uTickCount);
+        uTickCount = uNewCount;
+        return;
+    }
+    uint32_t uDeltaTick = uNewCount - uTickCount;
+    // the raw keeps this branch even though the check above already rules it out
+    if (uDeltaTick == 0) {
+        ThreadTimesLog("CThreadTimesInfoBase::RecordThreadTimesInfo dwDeltaTickCount is 0.");
+        return;
+    }
+    if (bUpdate) uTickCount = uNewCount;
+
+    if (hProcess == nullptr) hProcess = g_ThreadTimesApi.pfnGetCurrentProcess();
+
+    uint64_t uCreation = 0, uExit = 0, uKernel = 0, uUser = 0;
+    if (!g_ThreadTimesApi.pfnGetProcessTimes(hProcess, &uCreation, &uExit, &uKernel, &uUser)) {
+        // the raw reports this and skips the process line, so nothing is stored either
+        ThreadTimesLog("CThreadTimesInfoBase::Init GetProcessTimes failed.");
+    } else {
+        uint32_t uKernelMs = (uint32_t)(int32_t)((int64_t)uKernel / 10000);
+        uint32_t uUserMs = (uint32_t)(int32_t)((int64_t)uUser / 10000);
+        uint32_t uDeltaKernel = uKernelMs - uProcessKernelMs;
+        double dPercent = (double)(uint32_t)(uDeltaKernel * 100) / (double)uDeltaTick;
+        double dSeconds = (double)uDeltaKernel / kThreadTimesPerSecond;
+        if (bUpdate) {
+            uProcessKernelMs = uKernelMs;
+            uProcessUserMs = uUserMs;
+        }
+        // RAW: the format asks for eight figures and the call hands over two. The other
+        // six are whatever the registers held in the original, so nothing is supplied for
+        // them here either and that part of the line is unspecified in both.
+        ThreadTimesLog(
+            "Process kernel:%7.3fs @%5.2f%%, user:%7.3fs @%5.2f%%, total:%7.3fs @%5.2f%%, "
+            "elapsed: %.3fs",
+            dSeconds, dPercent);
+    }
+
+    ThreadTimesLog("Number of Thread: %d", (int)vSamples.size());
+
+    for (size_t i = 0; i < vSamples.size(); ++i) {
+        CThreadTimesSample& rSample = vSamples[i];
+        void* hThread = rSample.hThread;
+        if (hThread == nullptr || hThread == (void*)(intptr_t)-1) continue;
+        uint32_t uThreadId = g_ThreadTimesApi.pfnGetThreadId(hThread);
+        if (uThreadId == 0) continue;
+        uint64_t uThreadCreation = 0, uThreadExit = 0, uThreadKernel = 0, uThreadUser = 0;
+        if (!g_ThreadTimesApi.pfnGetThreadTimes(hThread, &uThreadCreation, &uThreadExit,
+                                                &uThreadKernel, &uThreadUser)) {
+            ThreadTimesLog(
+                "CThreadTimesInfoBase::RecordThreadTimesInfo GetThreadTime failed.Thread id %u",
+                uThreadId);
+            continue;
+        }
+        uint32_t uKernelMs = (uint32_t)(int32_t)((int64_t)uThreadKernel / 10000);
+        uint32_t uUserMs = (uint32_t)(int32_t)((int64_t)uThreadUser / 10000);
+        // the delta is taken against the value still in the sample, before any update
+        uint32_t uOldKernel = rSample.uKernelMs;
+        if (bUpdate) {
+            rSample.uKernelMs = uKernelMs;
+            rSample.uUserMs = uUserMs;
+        }
+        double dSeconds = (double)(uint32_t)(uKernelMs - uOldKernel) / kThreadTimesPerSecond;
+        // RAW: same story as the process line, eight figures asked for, two handed over
+        ThreadTimesLog(
+            "thread %4d kernel: %7.3fs @%5.2f%%, user: %7.3fs @%5.2f%%, total:%7.3fs @%5.2f%%",
+            (int)uThreadId, dSeconds);
+    }
 }
 
 // 0x140bb5590 — the table, an empty sample list, then every measuring field zeroed.

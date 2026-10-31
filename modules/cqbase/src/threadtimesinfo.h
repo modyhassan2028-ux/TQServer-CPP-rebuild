@@ -57,6 +57,7 @@ public:
     CThreadTimesInfoBase();     // 0x140bb5590
     ~CThreadTimesInfoBase();    // 0x140bb5800
     bool Init();                // 0x140bb4750 (the process half of that body)
+    void RecordThreadTimesInfo(bool bUpdate);   // 0x140bb49d0
 
     static const void* const* Table();   // 0x140bce3c8, slot 0 is the deleting dtor
 
