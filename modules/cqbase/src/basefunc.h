@@ -9,6 +9,8 @@
 #define CQBASE_UTIL_BASEFUNC_H
 
 #include <cstdint>
+#include <string>
+#include <vector>
 #include <ctime>
 
 namespace tq {
@@ -41,6 +43,23 @@ extern void (*g_pfnGetLocalTime)(SysLocalTime* pOut);
 extern int64_t (*g_pfnMkTime64)(tm* pTm);        // _mktime64
 extern int64_t (*g_pfnTime64Local)(void);        // _time64 for this file
 int* g_pCQLanguageValue();                       // the DAT_140be79a0 seam
+
+
+// ---- the string checks, all of them in basefunc.cpp in the original:
+//      their log calls name f:\version\...\modules\cqbase\src\basefunc.cpp
+// The forbidden word tables are the raw GBK bytes read out of .rdata, so the
+// comparisons happen on the same bytes the game compares.
+int StringCheck(char* pszStr, int nAllowBreak);                 // 0x140b880b0
+bool CheckChineseEmptyChar(char* pszStr);                       // 0x140b88160
+int NameStrCheck(char* pszStr, bool bAllowTeamWord);            // 0x140b88610
+bool LegalStrCheck(char* pszStr);                               // 0x140b88c50
+int TalkStrCheck(char* pszStr, int nFlag);                      // 0x140b88d60
+int AnnounceStrCheck(char* pszStr, int nFlag);                  // 0x140b88dd0
+int CheckForbiddenWords(char* pszStr, int nFlag);               // 0x140b88540
+bool HasBannedWord(char* pszStr);                               // 0x140b8a250
+// the banned word table FUN_140b8a250 walks (DAT_140be79b0 / DAT_140be79e0)
+void BannedWordAdd(const char* pszWord);
+void BannedWordClear();
 
 }  // namespace tq
 #endif

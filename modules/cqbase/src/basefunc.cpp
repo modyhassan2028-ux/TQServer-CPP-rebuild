@@ -4,6 +4,9 @@
 #include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <string>
+#include <vector>
+#include <cctype>
 
 #include "modules/cqbase/src/ctimer.h"
 
@@ -290,6 +293,287 @@ uint64_t TurnStampToTime(uint32_t uStamp) {
            (uint64_t)(pTm->tm_year + 0x76c) * 10000000000ULL +
            (uint64_t)(pTm->tm_hour * 10000) + (uint64_t)(pTm->tm_min * 100) +
            (uint64_t)pTm->tm_sec;
+}
+
+
+// ============================================================================
+// the string checks — basefunc.cpp, 0x140b880b0..0x140b88dd0
+// ============================================================================
+
+static const char kSz_ZhangSanFeng[] = "\xd5\xc5\xc8\xfd\xb7\xe1";  // '张三丰' at 0x46ccc
+static const char kSz_DaJia[] = "\xb4\xf3\xbc\xd2";  // '大家' at 0x46cd4
+static const char kSz_HaoYou[] = "\xba\xc3\xd3\xd1";  // '好友' at 0x46cdc
+static const char kSz_DuiWu[] = "\xb6\xd3\xce\xe9";  // '队伍' at 0x46ce4
+static const char kSz_ShouWei[] = "\xca\xd8\xce\xc0";  // '守卫' at 0x46cec
+static const char kSz_WeiBing[] = "\xce\xc0\xb1\xf8";  // '卫兵' at 0x46cf4
+static const char kSz_BangPai[] = "\xb0\xef\xc5\xc9";  // '帮派' at 0x46cfc
+static const char kSz_A6BF[] = "\xa6\xbf";  // '��' at 0x46d04
+static const char kSz_LingJiang[] = "\xc1\xec\xbd\xb1";  // '领奖' at 0x46d08
+static const char kSz_GongGao[] = "\xb9\xab\xb8\xe6";  // '公告' at 0x46d10
+static const char kSz_KeFu[] = "\xbf\xcd\xb7\xfe";  // '客服' at 0x46d18
+static const char kSz_GuanLi[] = "\xb9\xdc\xc0\xed";  // '管理' at 0x46d20
+static const char kSz_FuWu[] = "\xb7\xfe\xce\xf1";  // '服务' at 0x46d28
+static const char kSz_CeHua[] = "\xb2\xdf\xbb\xae";  // '策划' at 0x46d30
+static const char kSz_XiTong[] = "\xcf\xb5\xcd\xb3";  // '系统' at 0x46d38
+static const char kSz_TianQing[] = "\xcc\xec\xc7\xe7";  // '天晴' at 0x46d40
+static const char kSz_gm1[] = "\x67\xa3\xed";  // 'gｍ' at 0x46d48
+static const char kSz_Gm1[] = "\x47\xa3\xed";  // 'Gｍ' at 0x46d4c
+static const char kSz_gM1[] = "\x67\xa3\xcd";  // 'gＭ' at 0x46d50
+static const char kSz_GM1[] = "\x47\xa3\xcd";  // 'GＭ' at 0x46d54
+static const char kSz_gm2[] = "\xa3\xe7\x4d";  // 'ｇM' at 0x46d58
+static const char kSz_Gm2[] = "\xa3\xe7\x6d";  // 'ｇm' at 0x46d5c
+static const char kSz_GM2[] = "\xa3\xc7\x4d";  // 'ＧM' at 0x46d60
+static const char kSz_GmAscii[] = "\xa3\xc7\x6d";  // 'Ｇm' at 0x46d64
+static const char kSz_GMfull[] = "\xa3\xc7\xa3\xed";  // 'Ｇｍ' at 0x46d68
+static const char kSz_FullGM2[] = "\xa3\xe7\xa3\xcd";  // 'ｇＭ' at 0x46d70
+static const char kSz_FullGM3[] = "\xa3\xc7\xa3\xcd";  // 'ＧＭ' at 0x46d78
+static const char kSz_FullLower[] = "\xa3\xe7\xa3\xed";  // 'ｇｍ' at 0x46d80
+static const char kSz_FullPM1[] = "\xa3\xf0\xa3\xcd";  // 'ｐＭ' at 0x46d88
+static const char kSz_FullPM2[] = "\xa3\xd0\xa3\xed";  // 'Ｐｍ' at 0x46d90
+static const char kSz_FullPM3[] = "\xa3\xd0\xa3\xcd";  // 'ＰＭ' at 0x46d98
+static const char kSz_FullPM4[] = "\xa3\xf0\xa3\xed";  // 'ｐｍ' at 0x46da0
+static const char kSz_BracketClose[] = "\xa1\xbf";  // '】' at 0x46da8
+static const char kSz_BracketOpen[] = "\xa1\xbe";  // '【' at 0x46dac
+static const char kSz_IdeoSpace[] = "\xa1\xa1";  // '\u3000' at 0x46db0
+static const char kSz_A3A0[] = "\xa3\xa0";  // '��' at 0x46db4
+static const char kSz_RefMark[] = "\xa1\xf9";  // '※' at 0x46db8
+static const char kSz_WuZi[] = "\xce\xde";  // '无' at 0x46dbc
+static const char kSz_JinTao[] = "\xbd\xf5\xcc\xce";  // '锦涛' at 0x46c68
+static const char kSz_ZeMin[] = "\xd4\xf3\xc3\xf1";  // '泽民' at 0x46c70
+static const char kSz_HongZhi[] = "\xba\xea\xd6\xbe";  // '宏志' at 0x46c78
+static const char kSz_MinJin[] = "\xc3\xf1\xbd\xf8";  // '民进' at 0x46c80
+static const char kSz_DuLi[] = "\xb6\xc0\xc1\xa2";  // '独立' at 0x46c88
+static const char kSz_TaiDu[] = "\xcc\xa8\xb6\xc0";  // '台独' at 0x46c90
+static const char kSz_FaLun[] = "\xb7\xa8\xc2\xd6";  // '法轮' at 0x46c98
+
+static const char* const kForbiddenWords[] = {
+    kSz_RefMark, kSz_A3A0, kSz_IdeoSpace, kSz_BracketOpen, kSz_BracketClose,
+    kSz_FullPM4, kSz_FullPM3, kSz_FullPM2, kSz_FullPM1, kSz_FullLower, kSz_FullGM3,
+    kSz_FullGM2, kSz_GM2, kSz_GmAscii, kSz_GM1, kSz_gM1, kSz_Gm1, kSz_gm1,
+    kSz_TianQing, kSz_XiTong, kSz_CeHua, kSz_FuWu, kSz_GuanLi, kSz_KeFu, kSz_GongGao,
+    kSz_LingJiang, kSz_A6BF, kSz_BangPai, kSz_WeiBing, kSz_ShouWei, kSz_DuiWu,
+    kSz_HaoYou, kSz_DaJia, kSz_ZhangSanFeng,
+};
+// 队伍 (DuiWu, the team word) is skipped when the caller allows it
+static const char* const kBannedWords[] = {
+    kSz_JinTao, kSz_ZeMin, kSz_HongZhi, kSz_MinJin, kSz_DuLi, kSz_TaiDu, kSz_FaLun,
+};
+
+static std::vector<std::string>& BannedTable() {
+    static std::vector<std::string> s_words;
+    return s_words;
+}
+void BannedWordAdd(const char* pszWord) { BannedTable().push_back(pszWord); }
+void BannedWordClear() { BannedTable().clear(); }
+
+// 0x140b8a250 — walks the banned word table and answers 1, or a null string
+// answers 1 as well (the caller treats a non zero answer as refused).
+bool HasBannedWord(char* pszStr) {
+    if (pszStr == nullptr) return true;
+    for (const std::string& r : BannedTable()) {
+        if (std::strstr(pszStr, r.c_str()) != nullptr) return true;
+    }
+    return false;
+}
+
+// 0x140b880b0 — the general check. A lead byte (0x81..0xFF) counts as a double
+// byte character and only advances when the language is neither 5 nor 7; with
+// those two languages a lead byte advances one and skips every test. 0x80 is
+// always refused, and so are the control bytes, except that a caller allowing a
+// break also allows 0x0a and 0x0d.
+int StringCheck(char* pszStr, int nAllowBreak) {
+    if (pszStr == nullptr) return 0;
+    uint64_t uLen = std::strlen(pszStr);
+    if (uLen != 0) {
+        uint64_t uStep = 1;
+        uint64_t i = 0;
+        do {
+            uint8_t c = (uint8_t)pszStr[i];
+            if ((uint8_t)(c + 0x7f) < 0x7e) {
+                int nLang = *g_pCQLanguageValue();
+                if ((nLang != 5) && (nLang != 7)) {
+                    if (uLen <= uStep) return 0;
+                    i = i + 1;
+                    uStep = uStep + 1;
+                }
+            } else {
+                if (c == 0x80) return 0;
+                if (nAllowBreak == 0) {
+                    if (c < 0x20) return 0;
+                } else if (((c < 0x20) && (c != 10)) && (c != 0xd)) {
+                    return 0;
+                }
+            }
+            i = i + 1;
+            uStep = uStep + 1;
+        } while (i < uLen);
+    }
+    return 1;
+}
+
+// 0x140b88160 — the Chinese empty char scan. Only languages 0 and 1 take part;
+// every other language answers true at once. The GBK zone table refuses the
+// rows and cells that hold symbols rather than characters.
+bool CheckChineseEmptyChar(char* pszStr) {
+    if (pszStr == nullptr) return false;
+    int nLang = *g_pCQLanguageValue();
+    if ((nLang != 0) && (nLang != 1)) return true;
+    uint64_t uLen = std::strlen(pszStr);
+    if (uLen > 1) {
+        uint64_t i = 0;
+        uint64_t uStep = 1;
+        do {
+            uint8_t b1 = (uint8_t)pszStr[i];
+            if (b1 < 0x21) return false;
+            if (b1 == 0x7f) return false;
+            if (b1 < 0x7f) {
+                i = i + 1;
+                uStep = uStep + 1;
+            } else {
+                if (nLang == 1) return false;
+                if (uLen <= uStep) return true;
+                uint8_t b2 = (uint8_t)pszStr[i + 1];
+                i = i + 2;
+                uStep = uStep + 2;
+                if (b1 < 0xa1) return false;
+                if ((0xa9 < b1) && (b1 < 0xb0)) return false;
+                if (0xf7 < b1) return false;
+                if (b2 < 0xa1) return false;
+                if (b2 == 0xff) return false;
+                bool bTail = false;    // the shared arm at joined_140b88348
+                if (b1 == 0xa1) {
+                    if (b2 == 0xa1) return false;
+                } else if (b1 == 0xa2) {
+                    if ((0xaa < b2) && (b2 < 0xb1)) return false;
+                    if ((0xe2 < b2) && (b2 < 0xe5)) return false;
+                    if ((0xee < b2) && (b2 < 0xf1)) return false;
+                    if (0xfc < b2) bTail = true;
+                } else if (b1 == 0xa4) {
+                    if (0xf3 < b2) bTail = true;
+                } else if (b1 == 0xa5) {
+                    if (0xf6 < b2) bTail = true;
+                } else if (b1 == 0xa6) {
+                    if ((0xb8 < b2) && (b2 < 0xc1)) return false;
+                    if ((0xd8 < b2) && (b2 < 0xe0)) return false;
+                    if ((0xeb < b2) && (b2 < 0xee)) return false;
+                    if (0xf5 < b2) bTail = true;
+                } else if (b1 == 0xa7) {
+                    if ((0xc1 < b2) && (b2 < 0xd1)) return false;
+                    if (0xf1 < b2) bTail = true;
+                } else if (b1 == 0xa8) {
+                    if ((0xc0 < b2) && (b2 < 0xc5)) return false;
+                    if (0xe9 < b2) bTail = true;
+                } else if (b1 == 0xa9) {
+                    if ((0xa0 < b2) && (b2 < 0xa4)) return false;
+                    if (0xef < b2) bTail = true;
+                } else if ((b1 == 0xd7) && (0xf9 < b2)) {
+                    bTail = true;
+                }
+                if (bTail && (b2 != 0xff)) return false;
+            }
+        } while (i < uLen);
+    }
+    return true;
+}
+
+// 0x140b88540 — the seven word table in front of StringCheck.
+int CheckForbiddenWords(char* pszStr, int nFlag) {
+    static const char* const kPrefixes[] = { kSz_FaLun, kSz_TaiDu, kSz_DuLi, kSz_MinJin,
+                                             kSz_HongZhi, kSz_ZeMin, kSz_JinTao };
+    for (const char* pszWord : kPrefixes) {
+        if (std::strstr(pszStr, pszWord) != nullptr) return 0;
+    }
+    return StringCheck(pszStr, nFlag);
+}
+
+// 0x140b88c50 — the legal name scan: a leading or trailing '~', any "~~", a
+// control byte, the punctuation set, a banned word, then the Chinese scan.
+bool LegalStrCheck(char* pszStr) {
+    if (pszStr == nullptr) return false;
+    uint64_t uLen = std::strlen(pszStr);
+    if ((*pszStr == '~') || (pszStr[uLen - 1] == '~')) return false;
+    if (std::strstr(pszStr, "~~") != nullptr) return false;
+    for (uint64_t i = 0; i < uLen; ++i) {
+        uint8_t c = (uint8_t)pszStr[i];
+        if (c < 0x20) return false;
+        switch ((char)c) {
+            case ' ': case '#': case '%': case '\'': case ',': case '/': case ';':
+            case '=': case '@': case '\\':
+                return false;
+        }
+    }
+    if (HasBannedWord(pszStr)) return false;
+    return CheckChineseEmptyChar(pszStr);
+}
+
+// 0x140b88610 — the name scan. An empty name logs and refuses; a leading or
+// trailing '~', any "~~", a control byte, the punctuation set, one of the
+// forbidden words, or one of the blocked words in the uppercased copy all
+// refuse. The team word is skipped when the caller allows it.
+int NameStrCheck(char* pszStr, bool bAllowTeamWord) {
+    if (pszStr == nullptr) return 0;
+    uint64_t uLenWith = std::strlen(pszStr) + 1;   // the original's ~mask keeps the null
+    if (uLenWith == 1) return 0;
+    uint64_t uLen = uLenWith - 1;
+    if (*pszStr == '~') return 0;
+    if (pszStr[uLen - 1] == '~') return 0;
+    if (std::strstr(pszStr, "~~") != nullptr) return 0;
+    for (uint64_t i = 0; i < uLen; ++i) {
+        uint8_t c = (uint8_t)pszStr[i];
+        if (c < 0x20) return 0;
+        switch ((char)c) {
+            case ' ': case '"': case '%': case '\'': case ',': case '/': case ';':
+            case '=': case '@': case '[': case '\\': case ']':
+                return 0;
+        }
+    }
+    if (std::memcmp(pszStr, kSz_WuZi, 3) == 0) return 0;    // the three byte start
+    for (const char* pszWord : kForbiddenWords) {
+        if (pszWord == kSz_DuiWu && bAllowTeamWord) continue;
+        if (std::strstr(pszStr, pszWord) != nullptr) return 0;
+    }
+    char szUpper[256];
+    std::memset(szUpper, 0, sizeof(szUpper));
+    for (uint64_t i = 0; i < uLen && i < 255; ++i) {
+        szUpper[i] = (char)toupper((uint8_t)pszStr[i]);
+    }
+    static const char* const kBlockedUpper[] = { "GM", "PM", "SYSTEM", "NPC", "GUARD",
+                                                 "PATROL", "NONE" };
+    for (const char* pszWord : kBlockedUpper) {
+        if (std::strstr(szUpper, pszWord) != nullptr) return 0;
+    }
+    if (!CheckChineseEmptyChar(pszStr)) return 0;
+    return CheckForbiddenWords(pszStr, 0);
+}
+
+// 0x140b88d60 — talk: no control byte except 0x0a and 0x0d, no quote, no
+// apostrophe, no backslash, then the word table.
+int TalkStrCheck(char* pszStr, int nFlag) {
+    if (pszStr == nullptr) return 0;
+    uint64_t uLen = std::strlen(pszStr);
+    for (uint64_t i = 0; i < uLen; ++i) {
+        uint8_t c = (uint8_t)pszStr[i];
+        if (((c < 0x20) && (c != 0xd)) && (c != 10)) return 0;
+        if (c == 0x22) return 0;
+        if (c == 0x27) return 0;
+        if (c == 0x5c) return 0;
+    }
+    return CheckForbiddenWords(pszStr, nFlag);
+}
+
+// 0x140b88dd0 — announce: the talk set plus '^'.
+int AnnounceStrCheck(char* pszStr, int nFlag) {
+    if (pszStr == nullptr) return 0;
+    uint64_t uLen = std::strlen(pszStr);
+    for (uint64_t i = 0; i < uLen; ++i) {
+        uint8_t c = (uint8_t)pszStr[i];
+        if (((c < 0x20) && (c != 0xd)) && (c != 10)) return 0;
+        if (c == 0x22) return 0;
+        if (c == 0x27) return 0;
+        if (c == 0x5c) return 0;
+        if (c == 0x5e) return 0;
+    }
+    return CheckForbiddenWords(pszStr, nFlag);
 }
 
 }  // namespace tq
