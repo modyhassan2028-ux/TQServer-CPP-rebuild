@@ -1,5 +1,6 @@
 // D6 (CQBase) — basecode.cpp: the line reader, the parsers, the blob table, CIni
 #include "modules/cqbase/src/basecode.h"
+#include "modules/cqbase/src/cini.h"
 #include <cassert>
 #include <cstdio>
 #include <cstring>
@@ -108,14 +109,12 @@ int main() {
 
     // ---------------- tq::CIni
     static_assert(sizeof(CIni) == 16, "the original is a vftable and one pointer");
-    CIni aIni;
-    int nPayload = 5;
-    aIni.pData = &nPayload;
+    CIni aIni;                                            // no base, nothing owned
     CIni bIni(aIni);
-    assert(bIni.pData == &nPayload);
+    assert(bIni.m_pIniBase == nullptr);
     CIni cIni;
     cIni = bIni;
-    assert(cIni.pData == &nPayload);                     // assignment copies +8
+    assert(cIni.m_pIniBase == nullptr);                   // assignment copies +8
     CIniScalarDelete(new CIni(aIni), 1);
     // the vector form reads its count from the eight bytes before the array
     int nCount = 3;

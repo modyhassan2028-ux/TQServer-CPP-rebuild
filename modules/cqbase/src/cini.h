@@ -54,6 +54,8 @@ public:
     uint32_t GetInt(const char* pszSection, const char* pszIndex, ...);
     // 0x140b94030 — the value itself, null when the section or index is absent
     const char* GetStr(const char* pszSection, const char* pszIndex, ...);
+    // 0x140b96ed0 — reads the file and fills the section map
+    bool Open(const char* pszIniFile);
     std::map<CString, CIniSection> m_sections;   // +8
     bool m_bLogMissing;                          // +0x48
     CString m_strFile;                           // +0x50
@@ -62,12 +64,31 @@ public:
 class CIni {
 public:
     CIni() : m_pIniBase(nullptr) {}
-    virtual ~CIni() {}
+    // 0x140b82890 — the copy shares the base pointer; the original copies +8 as it is
+    CIni(const CIni& rOther) : m_pIniBase(rOther.m_pIniBase) {}
+    CIni& operator=(const CIni& rOther) { m_pIniBase = rOther.m_pIniBase; return *this; }
+    // 0x140b91d60 — frees the base through its vtable and clears +8
+    virtual ~CIni();
     bool SearchSection(char* pszSection);              // 0x140b946a0
     int GetData(char* pszSection, char* pszIndex);     // 0x140b946f0
     const char* GetString(char* pszSection, char* pszIndex);  // 0x140b94740
+    bool Open(char* pszIniFile);                              // 0x140b97510
+    CIni(bool bLogMissing);                                   // 0x140b97840
+    CIni(char* pszIniFile, bool bLogMissing);                 // 0x140b97900
+    static CIni* CreateNew(char* pszIniFile, bool bLogMissing);  // 0x140b979d0
     CIniBase* m_pIniBase;                              // +8
 };
+
+// 0x140b828c0 and 0x140b828f0 — the scalar and vector deleting destructors
+void* CIniScalarDelete(CIni* pThis, uint32_t uFlags);
+void* CIniVectorDelete(CIni* pThis, uint32_t uFlags);
+
+// 0x140b97740 — makes a base and opens the file, null on any failure
+CIniBase* CreateIniBase(const char* pszIniFile, bool bLogMissing);
+
+// 0x140b91300 — splits "key = value", trims the key and cuts the value at a
+// space, tab, semicolon or line break
+bool IniParseKeyValueLine(char* pszLine, CString* pKey, CString* pValue);
 
 // 0x140b91170 — a line that can hold a key: longer than two characters and
 // starting with none of tab, lf, cr, space, /, ;, = or backslash

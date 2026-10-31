@@ -143,47 +143,4 @@ uint8_t LoadDat(char* pszPath, int* pnA, int* pnB, char* pszOne, char* pszTwo,
     return 0;
 }
 
-// ---- tq::CIni: its vftable and one pointer at +8
-CIni::CIni() { pData = nullptr; }
-
-// 0x140b82890 — the copy constructor copies the pointer, nothing else
-CIni::CIni(const CIni& rOther) { pData = rOther.pData; }
-
-// 0x140b828b0 — assignment touches +8 only, the vftable stays
-CIni& CIni::operator=(const CIni& rOther) {
-    pData = rOther.pData;
-    return *this;
-}
-
-CIni::~CIni() = default;
-
-// 0x140b828c0 — scalar deleting destructor
-void* CIniScalarDelete(CIni* pThis, uint32_t uFlags) {
-    pThis->~CIni();
-    if ((uFlags & 1) != 0) {
-        operator delete(pThis);
-    }
-    return pThis;
-}
-
-// 0x140b828f0 — vector deleting destructor: flag 2 walks the elements backwards
-// from the count stored eight bytes before the array, then frees that address.
-void* CIniVectorDelete(CIni* pThis, uint32_t uFlags) {
-    if ((uFlags & 2) != 0) {
-        int nCount = *(int*)((char*)pThis - 8);
-        for (int i = nCount - 1; i >= 0; --i) {
-            pThis[i].~CIni();
-        }
-        if ((uFlags & 1) != 0) {
-            operator delete((char*)pThis - 8);
-        }
-        return (char*)pThis - 8;
-    }
-    pThis->~CIni();
-    if ((uFlags & 1) != 0) {
-        operator delete(pThis);
-    }
-    return pThis;
-}
-
 }  // namespace tq

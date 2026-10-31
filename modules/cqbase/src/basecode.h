@@ -38,19 +38,8 @@ uint8_t DecodeBlob(FILE* pFile, long lOffset, char* pszOut);
 uint8_t LoadDat(char* pszPath, int* pnA, int* pnB, char* pszOne, char* pszTwo,
                 char* pszThree, char* pszFour);
 
-// 0x140b82890 — tq::CIni is its vftable and one pointer at +8, sixteen bytes.
-// The vftable store the decompiler shows is the compiler's own vptr write, so
-// the virtual destructor alone gives the port that slot.
-class CIni {
-public:
-    CIni();
-    CIni(const CIni& rOther);            // 0x140b82890
-    CIni& operator=(const CIni& rOther); // 0x140b828b0
-    virtual ~CIni();
-    void* pData;                         // +8
-};
-void* CIniScalarDelete(CIni* pThis, uint32_t uFlags);   // 0x140b828c0
-void* CIniVectorDelete(CIni* pThis, uint32_t uFlags);   // 0x140b828f0
+// tq::CIni lives in cini.h: it is the same class, its +8 pointer is the CIniBase
+// the 0x140b82890 copy and the two deleting destructors were first guessed at.
 
 }  // namespace tq
 #endif

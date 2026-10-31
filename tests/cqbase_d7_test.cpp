@@ -104,6 +104,7 @@ int main() {
     assert(ini.SearchSection((char*)"Hero") == true);
     assert(ini.GetData((char*)"Hero", (char*)"Level") == 42);
     assert(std::strcmp(ini.GetString((char*)"Hero", (char*)"Name"), "Mizo") == 0);
+    ini.m_pIniBase = nullptr;   // the base above is on the stack, the CIni does not own it
 
     g_pfnLogPrintf = nullptr;
     printf("CQBASE_D7_OK: IniIsKeyLine, IniParseSectionLine, HasSection, GetInt, GetStr, CIni\n");

@@ -6,6 +6,12 @@
 #include <cstdlib>
 #include <cstring>
 
+// fopen_s answered with the errno shape the original tests against zero
+static int IniFopen(FILE** ppFile, const char* pszName, const char* pszMode) {
+    *ppFile = fopen(pszName, pszMode);
+    return (*ppFile == nullptr) ? 1 : 0;
+}
+
 namespace tq {
 
 static void DefLogPrintf(const char*, ...) {}
@@ -110,6 +116,218 @@ const char* CIniBase::GetStr(const char* pszSection, const char* pszIndex, ...) 
         return nullptr;
     }
     return itValue->second.c_str();
+}
+
+// 0x140b96ed0 — the parser. A line shorter than three characters is skipped
+// outright, a trailing newline is stripped, a "[name]" line closes the section
+// that is open and starts a new one, and any other line is a key/value pair that
+// belongs to the open section. A "[" line without its closing bracket falls
+// through to the key/value path instead of being refused, which is what the
+// original does. Duplicate sections merge and later keys overwrite earlier ones.
+bool CIniBase::Open(const char* pszIniFile) {
+    if (pszIniFile == nullptr) {
+        LogPrintf("%s", "IF_NOT pszIniFile ini.cpp:0xa9");
+        return false;
+    }
+    m_sections.clear();
+    FILE* pFile = nullptr;
+    if (IniFopen(&pFile, pszIniFile, "r") != 0) return false;
+    CString strSectionName;
+    std::map<CString, CString> mapPending;
+    char szLine[1024];
+    while (fgets(szLine, 0x400, pFile) != nullptr) {
+        size_t uLen = std::strlen(szLine);
+        if (uLen > 2) {
+            if (szLine[uLen - 1] == '\n') szLine[uLen - 1] = '\0';
+            bool bSectionLine = false;
+            if (szLine[0] == '[') {
+                size_t uSectionLen = std::strlen(szLine);
+                if (uSectionLen > 1) {
+                    size_t i = 1;
+                    bool bClosed = false;
+                    while (i < uSectionLen) {
+                        if (szLine[i] == ']') { bClosed = true; break; }
+                        i = i + 1;
+                    }
+                    if (bClosed) {
+                        szLine[i] = '\0';
+                        CString strName(szLine + 1);
+                        if (!strSectionName.empty()) {
+                            CIniSection& rSection = m_sections[strSectionName];
+                            for (std::map<CString, CString>::iterator it = mapPending.begin();
+                                 it != mapPending.end(); ++it) {
+                                rSection.m_values[it->first] = it->second;
+                            }
+                        }
+                        mapPending.clear();
+                        strSectionName = strName;
+                        bSectionLine = true;
+                    }
+                }
+            }
+            if (!bSectionLine) {
+                if (!strSectionName.empty()) {
+                    CString strKey, strValue;
+                    if (IniParseKeyValueLine(szLine, &strKey, &strValue)) {
+                        mapPending[strKey] = strValue;
+                    }
+                }
+            }
+        }
+    }
+    if (!strSectionName.empty()) {
+        CIniSection& rSection = m_sections[strSectionName];
+        for (std::map<CString, CString>::iterator it = mapPending.begin();
+             it != mapPending.end(); ++it) {
+            rSection.m_values[it->first] = it->second;
+        }
+    }
+    fclose(pFile);
+    m_strFile = pszIniFile;
+    return true;
+}
+
+// 0x140b91300 — "key = value". The key loses its trailing spaces and tabs, the
+// value loses its leading ones and is cut at a space, tab, semicolon or line
+// break. A line without '=' is refused; a line whose '=' ends it answers true
+// with the key alone and the value untouched.
+bool IniParseKeyValueLine(char* pszLine, CString* pKey, CString* pValue) {
+    if (!IniIsKeyLine(pszLine)) return false;
+    size_t uLen = std::strlen(pszLine);
+    char* pEqual = nullptr;
+    for (size_t i = 0; i < uLen; ++i) {
+        if (pszLine[i] == '=') {
+            pszLine[i] = '\0';
+            pEqual = pszLine + i;
+            break;
+        }
+    }
+    if (pEqual == nullptr) return false;
+    char* pKeyEnd = pEqual;
+    while (pKeyEnd > pszLine) {
+        char c = *(pKeyEnd - 1);
+        if ((c != ' ') && (c != '\t')) break;
+        *(pKeyEnd - 1) = '\0';
+        pKeyEnd = pKeyEnd - 1;
+    }
+    if (pKey != nullptr) pKey->assign(pszLine);
+    char* pAfter = pEqual + 1;
+    if (pAfter < pszLine + uLen) {
+        size_t uValueLen = std::strlen(pAfter);
+        size_t uSkip = 0;
+        while ((uSkip < uValueLen) && ((pAfter[uSkip] == ' ') || (pAfter[uSkip] == '\t'))) {
+            uSkip = uSkip + 1;
+        }
+        char* pStart = pAfter + uSkip;
+        size_t uRest = std::strlen(pStart);
+        for (size_t k = 0; k < uRest; ++k) {
+            char c = pStart[k];
+            if (((c == ' ') || (c == '\t')) || ((c == ';') || ((c == '\r') || (c == '\n')))) {
+                pStart[k] = '\0';
+                break;
+            }
+        }
+        if (pValue != nullptr) pValue->assign(pStart);
+    }
+    return true;
+}
+
+// 0x140b97740 — the base factory: null file logs, a failed open destroys it
+CIniBase* CreateIniBase(const char* pszIniFile, bool bLogMissing) {
+    if (pszIniFile == nullptr) {
+        LogPrintf("%s", "IF_NOT pszIniFile ini.cpp:0x15f");
+        return nullptr;
+    }
+    CIniBase* pBase = new CIniBase();
+    pBase->m_bLogMissing = bLogMissing;
+    if (!pBase->Open(pszIniFile)) {
+        delete pBase;
+        return nullptr;
+    }
+    return pBase;
+}
+
+// 0x140b97510 — the wrapper refuses while it has no base
+bool CIni::Open(char* pszIniFile) {
+    if (m_pIniBase == nullptr) {
+        LogPrintf("%s", "IF_OK m_pIniBase ini.cpp:0x1c5");
+        return false;
+    }
+    return m_pIniBase->Open(pszIniFile);
+}
+
+// 0x140b91d60 — the base is freed through its own vtable slot with flag one
+CIni::~CIni() {
+    if (m_pIniBase != nullptr) {
+        delete m_pIniBase;
+        m_pIniBase = nullptr;
+    }
+}
+
+// 0x140b828c0 — scalar deleting destructor
+void* CIniScalarDelete(CIni* pThis, uint32_t uFlags) {
+    pThis->~CIni();
+    if ((uFlags & 1) != 0) {
+        operator delete(pThis);
+    }
+    return pThis;
+}
+
+// 0x140b828f0 — vector deleting destructor, the count sits eight bytes before
+void* CIniVectorDelete(CIni* pThis, uint32_t uFlags) {
+    if ((uFlags & 2) != 0) {
+        int nCount = *(int*)((char*)pThis - 8);
+        for (int i = nCount - 1; i >= 0; --i) {
+            pThis[i].~CIni();
+        }
+        if ((uFlags & 1) != 0) {
+            operator delete((char*)pThis - 8);
+        }
+        return (char*)pThis - 8;
+    }
+    pThis->~CIni();
+    if ((uFlags & 1) != 0) {
+        operator delete(pThis);
+    }
+    return pThis;
+}
+
+// 0x140b97840 — the base is always made, the file is not opened
+CIni::CIni(bool bLogMissing) {
+    m_pIniBase = new CIniBase();
+    m_pIniBase->m_bLogMissing = bLogMissing;
+    if (m_pIniBase == nullptr) {
+        LogPrintf("%s", "IF_NOT m_pIniBase ini.cpp:0x179");
+    }
+}
+
+// 0x140b97900 — the base is made and then opened
+CIni::CIni(char* pszIniFile, bool bLogMissing) {
+    m_pIniBase = new CIniBase();
+    m_pIniBase->m_bLogMissing = bLogMissing;
+    if (m_pIniBase == nullptr) {
+        LogPrintf("%s", "IF_OK m_pIniBase ini.cpp:0x182");
+    } else {
+        m_pIniBase->Open(pszIniFile);
+    }
+}
+
+// 0x140b979d0 — makes a CIni and destroys it again when the open fails
+CIni* CIni::CreateNew(char* pszIniFile, bool bLogMissing) {
+    if (pszIniFile == nullptr) {
+        LogPrintf("%s", "IF_NOT pszIniFile ini.cpp:0x1d2");
+        return nullptr;
+    }
+    CIni* pIni = new CIni(bLogMissing);
+    if (pIni == nullptr) {
+        LogPrintf("%s", "IF_NOT pMyIni ini.cpp:0x1d6");
+        return nullptr;
+    }
+    if (!pIni->m_pIniBase->Open(pszIniFile)) {
+        delete pIni;
+        return nullptr;
+    }
+    return pIni;
 }
 
 // 0x140b946a0 — the wrapper refuses while it has no base
