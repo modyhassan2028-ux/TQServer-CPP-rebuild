@@ -27,6 +27,23 @@ static uint32_t WaitMany(uint32_t, void**, bool, uint32_t) { return kWaitTimeout
 SyncApi g_SyncApi = { CsEnter, CsLeave, WaitOne, RelMutex, SetEv, WaitMany };
 #endif
 
+// 0x140b9ffe0 — the argument is ignored, the plain initialiser is used
+CMyCriticalSection::CMyCriticalSection(uint32_t) {
+    for (int i = 0; i < 40; ++i) abCs[i] = 0;
+}
+
+// 0x140ba0020
+CMyCriticalSection::~CMyCriticalSection() {}
+
+// 0x140ba0360 / 0x140ba0380 — the lock is taken on construction and released on
+// destruction, both through the object's own vtable slots
+CMySingleLock::CMySingleLock(ILockObj* pLockObj) : pLock(pLockObj) {
+    if (pLock != nullptr) pLock->Lock();
+}
+CMySingleLock::~CMySingleLock() {
+    if (pLock != nullptr) pLock->Unlock();
+}
+
 // 0x140ba0060 / 0x140ba0070 — straight into the critical section at +0x08.
 void CMyCriticalSection::Lock() { g_SyncApi.pfnEnterCS(abCs); }
 void CMyCriticalSection::Unlock() { g_SyncApi.pfnLeaveCS(abCs); }

@@ -30,25 +30,30 @@ constexpr uint32_t kWaitTimeout = 0x102;    // WAIT_TIMEOUT
 constexpr int kWaitTimeoutCode = 0x7fffffff;
 constexpr int kWaitFailCode = -1;
 
-// ILockObj — only the virtual at +0x10 is used by CMySingleLock
+// ILockObj — CMySingleLock takes the slot at +0x08 on construction and the one at
+// +0x10 on destruction, so both are virtual here in that order
 class ILockObj {
 public:
-    virtual void UnlockVt4() {}   // +0x08
+    virtual void Lock() {}        // +0x08
     virtual void Unlock() {}      // +0x10, the slot CMySingleLock::Unlock calls
     virtual ~ILockObj() {}
 };
 
 class CMyCriticalSection : public ILockObj {
 public:
-    uint8_t abCs[40];        // +0x08, the CRITICAL_SECTION body
-    void Lock();             // 0x140ba0060
-    void Unlock() override;  // 0x140ba0070
+    // 0x140b9ffe0 — the spin count argument is accepted and then not used: the
+    // original calls InitializeCriticalSection, not its spin count variant
+    CMyCriticalSection(uint32_t nSpinCount);
+    ~CMyCriticalSection() override;   // 0x140ba0020
+    uint8_t abCs[40];                 // +0x08, the CRITICAL_SECTION body
+    void Lock() override;             // 0x140ba0060
+    void Unlock() override;           // 0x140ba0070
 };
 
 class CMutexLock : public ILockObj {
 public:
     void* hMutex;            // +0x08
-    void Lock();             // 0x140ba0110
+    void Lock() override;    // 0x140ba0110
     void Unlock() override;  // 0x140ba0130
 };
 
@@ -69,6 +74,9 @@ public:
 
 class CMySingleLock {
 public:
+    // 0x140ba0360 — stores the object and takes the +0x08 slot
+    explicit CMySingleLock(ILockObj* pLockObj);
+    ~CMySingleLock();        // 0x140ba0380, takes the +0x10 slot
     ILockObj* pLock;         // +0x00
     void Unlock();           // 0x140ba0390
 };

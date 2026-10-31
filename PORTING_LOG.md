@@ -7655,3 +7655,24 @@ thunk استيراد/CRT، الدوال التي تناديها، والنصوص
 
 **درس اختباري (1):** القسم الفارغ موجود لكن `GetAmount` = 0 و`GetStringByIndex(0)`
 = false، فلا يُخلط بين "قسم غائب" و"قسم بلا مفاتيح".
+
+## CQBase D10 — inimgr.cpp: مدير ملفات الـini + تصحيح أقفال csync (2026-10-31)
+**8 أجسام:** `CIniMgr::CIniMgr` (0x140b9b750)، `~CIniMgr` (0x140b9b8b0)،
+`GetIniPtr` (0x140b9ae60)، `DestroyFile` (0x140b9ad10)، `GetData` (0x140b9af80)،
+`GetString` (0x140b9b020)، `SearchSection` (0x140b9b3f0)، و`GetIniMgr`
+(0x140b9b820). ومعها **تصحيح `csync`**: `CMyCriticalSection(uint32_t)`
+(0x140b9ffe0، **يتجاهل معامل spin count** ويستدعي `InitializeCriticalSection`)،
+هادئها (0x140ba0020)، و`CMySingleLock(ILockObj*)`/`~CMySingleLock`
+(0x140ba0360/0x140ba0380) اللذان يأخذان **slot +0x08** عند البناء و**+0x10** عند
+الهدم.
+- **تصحيح مهم:** `ILockObj::Lock` كان معرَّفًا **غير virtual** في `csync.h` فكان
+  `CMySingleLock` لا يقفل شيئًا فعليًا. البناء يستدعي `(*(vt+8))(obj)` والهدم
+  `(*(vt+0x10))()` → `Lock` في +8 و`Unlock` في +0x10، وكلاهما virtual الآن.
+- `DestroyFile` يرفض الاسم الفارغ **قبل** أخذ القفل، و`GetIniPtr` يخزّن الملف عند
+  أول طلب فقط، وملف لا يُفتح يرجّع null **ولا يُخزَّن** (يُعاد المحاولة كل مرة).
+- `GetData`/`GetString`/`SearchSection` ترفض فورًا إذا كان القفل `+8` فارغًا.
+- `GetIniMgr` مدير لكل thread يُسجَّل في قائمة عامة تحت قفل خاص عند إنشائه.
+
+**دروس اختبارية (3):** بعد `DestroyFile` يُقرأ الملف من جديد (تغيير الملف على
+القرص لا يظهر قبل الحذف من الكاش — مُختبر)؛ والمدير بلا قفل يرجّع 0/null/false
+بلا أي استدعاء داخلي؛ والملف المفقود لا يُترك في الخريطة.

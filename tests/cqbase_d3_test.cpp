@@ -96,7 +96,7 @@ int main() {
     assert(abKeep[0] == 9);
 
     // ---------------- the locking primitives
-    CMyCriticalSection cs;
+    CMyCriticalSection cs(2000);      // the spin count is accepted and ignored
     cs.Lock();
     assert(g_nEnter == 1);
     cs.Unlock();
@@ -149,13 +149,16 @@ int main() {
 
     // ---- CMySingleLock forwards to the object it holds
     struct CountingLock : ILockObj {
+        int nLock = 0;
         int nUnlock = 0;
+        void Lock() override { nLock++; }
         void Unlock() override { nUnlock++; }
     } lock;
-    CMySingleLock single;
-    single.pLock = &lock;
-    single.Unlock();
-    assert(lock.nUnlock == 1);
+    {
+        CMySingleLock single(&lock);  // construction takes the slot at +0x08
+        assert(lock.nLock == 1 && lock.nUnlock == 0);
+    }
+    assert(lock.nUnlock == 1);        // destruction takes the one at +0x10
 
     printf("CQBASE_D3_OK: CStringPacker, critical section, mutex, event, "
            "multi event, single lock\n");
