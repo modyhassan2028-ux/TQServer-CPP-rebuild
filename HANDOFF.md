@@ -763,3 +763,9 @@ Flower.dll (30,375 بايت) — 333 جسمًا حقيقيًا و33 thunk. ال�
 الـdisassembly)، `TodayFlowerHeapValidate`. أُضيف `tools/import_map.py` +
 `Docs/FLOWER_IMPORTS.md` (21 trampoline مربوط بأسماء CQBase/MSVCR). الحزمة 168
 وحدة، والدورة 21 × 6.
+
+## CQBase D1 (2026-10-31)
+`tq::CMsg` كاملًا (16 دالة، `modules/cqbase/src/msg/cmsg.{h,cpp}`) بداية وحدة
+CQBase: 3095 دالة، 1341 جسم لعبة. الـvftable seam (`g_pVftCMsg`) لأن العنوان
+رمز بلا رقم. دورة جديدة `tools/run_cqbase_cycle.sh` بالـsanitizers، 6 مرات.
+التالى: `MsgHead`/`CMsg` المستهلكون ثم `CIni`/`CMyHeap` من نفس الوحدة.
