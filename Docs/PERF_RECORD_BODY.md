@@ -305,3 +305,33 @@ the shipped binary, it holds exactly:
 - The row format at 0x140bcbb90 is
   `%8d %25s %6.3f%% %10ld K %10ld K %11ld K %11ld %11ld %13ld %10ld %10ld %10ld`, and the
   header at 0x140bcbbe0 is `%8s %25s %7s %12s %12s %13s %11s %11s %13s %10s %10s %10s`.
+
+## Reading the value slots
+
+`tools/perf_trace.py` follows the body instruction by instruction and prints what filled
+r8, r9 and the stack slots at every log call. What it establishes, all of it from the
+instructions:
+
+- The counter values come from the `PDH_FMT_COUNTERVALUE` the collect writes into
+  `0x78(%rsp)`: each read is followed by `test %eax,%eax` and a `cmove` that keeps a zero
+  when the read failed, so a failed counter prints as zero rather than as rubbish.
+- The `I64` columns are all the same shape: `cqto` / `and $0x3ff,%edx` / `lea (%rdx,%rax,1)`
+  / `sar $0xa`: a signed divide by one thousand and twenty four, rounded toward zero.
+- The banner and the second call take their format from `0x140bcbf60` and `0x140bcbf38`;
+  the second is the collect failure line.
+- The two table calls at `0x140ba5775` and `0x140ba5bde` pass eleven label pointers (the
+  header) and then one `%8d` from a node field at `0x18(%rbx)`, the label pointers, and a
+  double in `%xmm6` for the `%6.3f%%` column.
+- The remaining work is naming each of the twenty counter reads against its printed column.
+  That needs the whole body read against the reads it performs, which is the next session's
+  job: writing it from the decompiled listing alone is exactly where the listing invents
+  arguments.
+
+## The tree step at 0x140ba4340
+
+It is the template instantiation of the standard library's erase for this node type: the
+loop that walks twelve bytes wide nodes with the flag at `0x271`, rotates and recolours,
+calls the list's own erase at `0x140ba3200`, and then releases the head. This project
+already excludes standard library internals (iterators, tree rotations, allocator helpers)
+from the port, and this belongs with them. What the file needs from it, the head release
+and the cleared count, is ported in `CPerformanceInfoListFinalB`.
