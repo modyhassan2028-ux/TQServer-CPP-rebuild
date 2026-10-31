@@ -6,7 +6,7 @@ OBJ=/app/co_repo/.build_cqbase
 mkdir -p "$OBJ"
 find "$OBJ" -name "*.o" -delete
 SAN="-fsanitize=address,undefined -fno-omit-frame-pointer -g"
-for f in $(ls modules/cqbase/src/*.cpp modules/cqbase/src/msg/*.cpp 2>/dev/null); do
+for f in $(find modules/cqbase/src -name "*.cpp" | sort); do
   o=$OBJ/$(echo "$f" | sed "s|/|_|g; s|\.cpp$|.o|")
   g++ -std=c++17 $SAN -I. -Iinclude -Imodules -c "$f" -o "$o" || { echo "OBJ-FAIL $f"; exit 1; }
 done

@@ -8,7 +8,7 @@ OBJ=/tmp/objs_wave; rm -f $OBJ/*.o; mkdir -p $OBJ
 # the d55a unit includes its port .cpp inline (to
 # reach the static sort internals) -> links with
 # NO port objects
-for f in modules/analyst/src/*.cpp modules/title/src/*.cpp modules/training/src/*.cpp modules/peerage/src/*.cpp modules/syndicate/src/*.cpp modules/syndicate/src/msg/*.cpp modules/flower/src/msg/*.cpp modules/flower/src/*.cpp modules/cqbase/src/*.cpp modules/cqbase/src/msg/*.cpp; do
+for f in $(find modules/cqbase/src -name "*.cpp" | sort) modules/analyst/src/*.cpp modules/title/src/*.cpp modules/training/src/*.cpp modules/peerage/src/*.cpp modules/syndicate/src/*.cpp modules/syndicate/src/msg/*.cpp modules/flower/src/msg/*.cpp modules/flower/src/*.cpp; do
   # the module-entry skeletons (modules/<mod>/src/<mod>.cpp, the
   # original module files) are separate DLL builds — excluded
   base=$(basename $f .cpp); dir=$(basename $(dirname $(dirname $f)))

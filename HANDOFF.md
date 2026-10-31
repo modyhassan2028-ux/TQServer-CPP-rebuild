@@ -769,3 +769,8 @@ Flower.dll (30,375 بايت) — 333 جسمًا حقيقيًا و33 thunk. ال�
 CQBase: 3095 دالة، 1341 جسم لعبة. الـvftable seam (`g_pVftCMsg`) لأن العنوان
 رمز بلا رقم. دورة جديدة `tools/run_cqbase_cycle.sh` بالـsanitizers، 6 مرات.
 التالى: `MsgHead`/`CMsg` المستهلكون ثم `CIni`/`CMyHeap` من نفس الوحدة.
+
+## CQBase D2 (2026-10-31)
+`tq::TimeGet`, `CTimer`, `CTimerMS` (35 جسمًا). قواعد مثبتة: CTimer `+0/+8`،
+CTimerMS `+0/+4` مع كتابة 8 بايت عند `+4` (عضو ذيل `uTail`)، و`Clear` يصفّر
+`+4` أولًا. `LocalTime64` بديل `_localtime64`. دورة CQBase 2 × 6.
