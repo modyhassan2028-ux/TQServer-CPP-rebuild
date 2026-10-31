@@ -57,7 +57,8 @@ public:
     CThreadTimesInfoBase();     // 0x140bb5590
     ~CThreadTimesInfoBase();    // 0x140bb5800
     bool Init();                // 0x140bb4750 (the process half of that body)
-    void RecordThreadTimesInfo(bool bUpdate);   // 0x140bb49d0
+    void RecordThreadTimesInfo(bool bUpdate);   // 0x140bb49d0 (the try wrapper)
+    void RecordThreadTimesInfoBody(bool bUpdate);  // the guarded body it calls
 
     static const void* const* Table();   // 0x140bce3c8, slot 0 is the deleting dtor
 
@@ -90,6 +91,9 @@ public:
     CThreadTimesInfo(const CThreadTimesInfo& rOther);         // 0x140bb3850
     CThreadTimesInfo& operator=(const CThreadTimesInfo&);     // 0x140bb3870
     ~CThreadTimesInfo();                                      // 0x140bb3960
+
+    bool Init();                                              // 0x140bb4fd0
+    void RecordThreadTimesInfo(bool bUpdate);                 // 0x140bb4ff0
 
     const void* pVt;   // +0x00  0x140bcde50
     void* pBase;       // +0x08  the 0x50 byte measuring object

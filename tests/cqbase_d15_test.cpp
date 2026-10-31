@@ -58,6 +58,7 @@ static bool FGetProcessTimes(void*, uint64_t* c, uint64_t* e, uint64_t* k, uint6
     return true;
 }
 static uint32_t FGetTickCount() { return g_uTick; }
+static uint32_t ThrowingTickCount() { throw 42; }
 static uint32_t FGetThreadIdTimes(void* h) {
     ++g_nGetThreadIdCalls;
     if (h == (void*)0x2222) return 0;      // the handle that has no thread id
@@ -287,6 +288,41 @@ int main() {
         assert(g_vLogged.empty());
     }
 
-    printf("CQBASE_D15_OK: CThreadTimesInfo handle, measuring object, Init and the report, 8 units, 70 checks\n");
+    // ---- the handle forwards to its measuring object, and refuses when it has none
+    {
+        g_pfnNewThreadTimesInfoBase = CThreadTimesInfoBaseNew;
+        g_uTick = 1000; g_nProcFail = 0; g_nThreadTimesFail = 0;
+        CThreadTimesInfo obj;
+        assert(obj.pBase != nullptr);
+        CThreadTimesInfoBase* pB = (CThreadTimesInfoBase*)obj.pBase;
+        pB->vSamples.push_back(CThreadTimesSample{(void*)0x3333, 0, 0});
+        assert(obj.Init() == true);
+        assert(pB->uInited == 1 && pB->uTickCount == 1000);
+        g_vLogged.clear();
+        g_uTick = 2000;
+        obj.RecordThreadTimesInfo(true);
+        assert(SawLog("Number of Thread: 1"));
+        assert(pB->uTickCount == 2000);
+        // an exception leaving the report is reported with the file and line it belongs to
+        g_vLogged.clear();
+        g_vLogFiles.clear();
+        g_ThreadTimesApi.pfnGetTickCount = ThrowingTickCount;
+        obj.RecordThreadTimesInfo(true);          // must not escape
+        assert(SawLog("CThreadTimesInfoBase::RecordThreadTimesInfo @"));
+        assert(SawLog("threadtimesinfo.cpp"));
+        g_ThreadTimesApi.pfnGetTickCount = FGetTickCount;
+    }
+    // ---- a handle that never got a measuring object answers no and stays quiet
+    {
+        g_pfnNewThreadTimesInfoBase = FakeNewFails;
+        g_vLogged.clear();
+        CThreadTimesInfo obj;
+        assert(obj.pBase == nullptr);
+        assert(obj.Init() == false);
+        obj.RecordThreadTimesInfo(true);
+        assert(g_vLogged.empty());
+    }
+
+    printf("CQBASE_D15_OK: CThreadTimesInfo handle, object, Init, report and forwarders, 10 units, 80 checks\n");
     return 0;
 }

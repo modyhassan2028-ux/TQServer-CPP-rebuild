@@ -90,8 +90,25 @@ static const double kThreadTimesPerSecond = 1000.0;
 
 // 0x140bb49d0 — the report. It says nothing at all until the list has a sample and the
 // object has been initialised, and both conditions are checked before the clock is read.
+// The original wraps this body in a __try and reports an escaping exception with the
+// file it belongs to, which the binary spells out in full:
+//   f:\version\cqserver-78.0.11-1204\modules\cqbase\src\threadtimesinfo.cpp
+// and the line 0xfb, 251. The port keeps the report on the same path.
+static const char* const kThreadTimesInfoFile =
+    "f:\\version\\cqserver-78.0.11-1204\\modules\\cqbase\\src\\threadtimesinfo.cpp";
+static const int kThreadTimesInfoRecordLine = 0xfb;
+
 void CThreadTimesInfoBase::RecordThreadTimesInfo(bool bUpdate) {
     if (vSamples.empty() || uInited == 0) return;
+    try {
+        RecordThreadTimesInfoBody(bUpdate);
+    } catch (...) {
+        log_InlineLogCATCH_ERROR("CThreadTimesInfoBase::RecordThreadTimesInfo @%s,%d",
+                                 kThreadTimesInfoFile, kThreadTimesInfoRecordLine);
+    }
+}
+
+void CThreadTimesInfoBase::RecordThreadTimesInfoBody(bool bUpdate) {
 
     char szTime[128];
     {
@@ -193,7 +210,8 @@ CThreadTimesInfoBase::CThreadTimesInfoBase()
       uTickCount(0),
       uInited(0) {}
 
-// 0x140bb5800
+// 0x140bb5610 is the destroy-only body the raw calls its destructor; 0x140bb5800 is the
+// same body with the optional free at the end, and that one is the table's first slot.
 CThreadTimesInfoBase::~CThreadTimesInfoBase() { pVt = kCThreadTimesInfoBaseVt; }
 
 void* CThreadTimesInfoBaseNew() { return new CThreadTimesInfoBase(); }
@@ -235,6 +253,17 @@ CThreadTimesInfo::~CThreadTimesInfo() {
         ((PfnDeletingDtor)ppVt[0])(pBase, 1);
     }
     pBase = nullptr;
+}
+
+// 0x140bb4fd0 — the handle forwards, and says no when it never got a measuring object
+bool CThreadTimesInfo::Init() {
+    if (pBase == nullptr) return false;
+    return ((CThreadTimesInfoBase*)pBase)->Init();
+}
+
+// 0x140bb4ff0
+void CThreadTimesInfo::RecordThreadTimesInfo(bool bUpdate) {
+    if (pBase != nullptr) ((CThreadTimesInfoBase*)pBase)->RecordThreadTimesInfo(bUpdate);
 }
 
 }  // namespace tq
