@@ -1233,5 +1233,168 @@ void* TreeInsertHint(int64_t* pTree, int64_t* pOut, int64_t* pHint,
     return pOut;
 }
 
+// 0x140d96850 — erase a key: the equal range from 0x140d95a00, a count over it
+// with the same advance walk as 0x140d94b10, then the pair goes to
+// 0x140d961f0. The return is the number of members taken out.
+uint64_t TreeEraseKey(int64_t* pTree, int64_t* pOut, uint32_t* pKey) {
+    int64_t abRange[4] = { 0, 0, 0, 0 };
+    TreeFind((void**)pTree, (void**)abRange, pKey);
+    const int64_t lVar3 = abRange[0];            // the first container
+    int64_t* plVar7 = (int64_t*)abRange[1];      // the first node
+    const int64_t lVar4 = abRange[2];            // the last container
+    int64_t* plVar5 = (int64_t*)abRange[3];      // the last node
+    uint64_t uCount = 0;
+    for (;;) {
+        if ((lVar3 == 0) || (lVar3 != lVar4)) InvalidParameter();
+        if (plVar7 == plVar5) break;
+        uCount = uCount + 1;
+        if (lVar3 == 0) InvalidParameter();
+        if (*(char*)((int64_t)plVar7 + 0x29) != '\0') {
+            InvalidParameter();
+        } else {
+            int64_t* plVar2 = (int64_t*)plVar7[2];
+            if (*(char*)((int64_t)plVar2 + 0x29) == '\0') {
+                char cVar1 = *(char*)(*plVar2 + 0x29);
+                plVar7 = plVar2;
+                plVar2 = (int64_t*)*plVar2;
+                while (cVar1 == '\0') {
+                    cVar1 = *(char*)(*plVar2 + 0x29);
+                    plVar7 = plVar2;
+                    plVar2 = (int64_t*)*plVar2;
+                }
+            } else {
+                char cVar1 = *(char*)(plVar7[1] + 0x29);
+                int64_t* plVar6 = (int64_t*)plVar7[1];
+                plVar2 = plVar7;
+                for (;;) {
+                    plVar7 = plVar6;
+                    if (!((cVar1 == '\0') && (plVar2 == (int64_t*)plVar7[2]))) break;
+                    cVar1 = *(char*)(plVar7[1] + 0x29);
+                    plVar6 = (int64_t*)plVar7[1];
+                    plVar2 = plVar7;
+                }
+            }
+        }
+    }
+    int64_t pairLast[2];
+    pairLast[0] = abRange[2];
+    pairLast[1] = abRange[3];
+    int64_t pairFirst[2];
+    pairFirst[0] = abRange[0];
+    pairFirst[1] = abRange[1];
+    TreeEraseRange(pTree, abRange, pairFirst, pairLast);
+    return uCount;
+}
+
+// 0x140d96760 — the distance between two iterators. The containers must be the
+// same and non-null at every step, and the counter is passed in by pointer, so
+// the caller's value is added to rather than replaced.
+void TreeDistance(int64_t* pFirst, int64_t* pLast, uint64_t* pCount) {
+    const int64_t lVar2 = pLast[0];
+    int64_t* plVar3 = (int64_t*)pLast[1];
+    const int64_t lVar4 = pFirst[0];
+    int64_t* plVar7 = (int64_t*)pFirst[1];
+    for (;;) {
+        if ((lVar4 == 0) || (lVar4 != lVar2)) InvalidParameter();
+        if (plVar7 == plVar3) break;
+        *pCount = *pCount + 1;
+        if (lVar4 == 0) InvalidParameter();
+        if (*(char*)((int64_t)plVar7 + 0x29) != '\0') {
+            InvalidParameter();
+        } else {
+            int64_t* plVar5 = (int64_t*)plVar7[2];
+            if (*(char*)((int64_t)plVar5 + 0x29) == '\0') {
+                char cVar1 = *(char*)(*plVar5 + 0x29);
+                plVar7 = plVar5;
+                plVar5 = (int64_t*)*plVar5;
+                while (cVar1 == '\0') {
+                    cVar1 = *(char*)(*plVar5 + 0x29);
+                    plVar7 = plVar5;
+                    plVar5 = (int64_t*)*plVar5;
+                }
+            } else {
+                char cVar1 = *(char*)(plVar7[1] + 0x29);
+                int64_t* plVar6 = (int64_t*)plVar7[1];
+                plVar5 = plVar7;
+                for (;;) {
+                    plVar7 = plVar6;
+                    if (!((cVar1 == '\0') && (plVar5 == (int64_t*)plVar7[2]))) break;
+                    cVar1 = *(char*)(plVar7[1] + 0x29);
+                    plVar6 = (int64_t*)plVar7[1];
+                    plVar5 = plVar7;
+                }
+            }
+        }
+    }
+}
+
+// 0x140d96990 — the single-node find. The walk keeps the last candidate that
+// went left (the lower bound), and then only a candidate whose key is not
+// greater than the argument survives: when the candidate is the head, or the
+// key is smaller than the candidate's key, the result is the end iterator.
+int64_t* TreeFindKey(int64_t* pTree, int64_t* pOut, uint32_t* pKey) {
+    int64_t* pHead = (int64_t*)pTree[6];
+    int64_t* puVar4 = pHead;
+    if (*(char*)(pHead[1] + 0x29) == '\0') {
+        int64_t* puVar1 = (int64_t*)pHead[1];
+        int64_t* puVar2 = nullptr;
+        for (;;) {
+            if (*(uint32_t*)(puVar1 + 3) < *pKey) {
+                puVar2 = (int64_t*)puVar1[2];
+            } else {
+                puVar2 = (int64_t*)*puVar1;
+                puVar4 = puVar1;
+            }
+            puVar1 = puVar2;
+            if (*(char*)((int64_t)puVar2 + 0x29) != '\0') break;
+        }
+    }
+    int64_t* pHead2 = (int64_t*)pTree[6];
+    int64_t local_28[2];
+    local_28[0] = *pTree;
+    local_28[1] = (int64_t)puVar4;
+    if (*pTree == 0) InvalidParameter();
+    if ((puVar4 == pHead2) || (*pKey < *(uint32_t*)(puVar4 + 3))) {
+        int64_t local_18[2];
+        local_18[0] = *pTree;
+        local_18[1] = pTree[6];
+        pOut[0] = local_18[0];
+        pOut[1] = local_18[1];
+    } else {
+        pOut[0] = local_28[0];
+        pOut[1] = local_28[1];
+    }
+    return pOut;
+}
+
+// 0x140d96470 — erase [first, last) from the vector. Both slots are validated
+// against [pVec[3], pVec[4]] first, then the tail is moved over the gap and the
+// end is re-pointed. There is no element teardown: the element is 8 bytes and
+// trivially destructible.
+int64_t* VectorEraseRange(int64_t* pVec, int64_t* pOut, int64_t* pFirst,
+                          int64_t* pLast) {
+    uint64_t uFirst = *(uint64_t*)(pFirst + 1);
+    *pOut = 0;
+    if ((pVec == nullptr) || (uFirst < (uint64_t)pVec[3]) ||
+        ((uint64_t)pVec[4] < uFirst)) {
+        InvalidParameter();
+    }
+    pOut[1] = (int64_t)uFirst;
+    *pOut = *pVec;
+    void* pSrc = *(void**)(pLast + 1);
+    if ((pSrc < (void*)pVec[3]) || ((void*)pVec[4] < pSrc)) InvalidParameter();
+    if ((*pOut == 0) || (*pOut != *pVec)) InvalidParameter();
+    void* pDst = (void*)pOut[1];
+    if (pDst != pSrc) {
+        uint64_t uTail = (uint64_t)(pVec[4] - (int64_t)pSrc) >> 3;
+        uint64_t uBytes = uTail * 8;
+        if (0 < (int64_t)uTail) {
+            ::memmove(pDst, pSrc, (size_t)uBytes);
+        }
+        pVec[4] = (int64_t)(uBytes + (uint64_t)pDst);
+    }
+    return pOut;
+}
+
 }  // namespace stl
 }  // namespace flower

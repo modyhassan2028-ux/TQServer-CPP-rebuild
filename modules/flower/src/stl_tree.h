@@ -107,6 +107,17 @@ void* TreeInsertValue(int64_t* pTree, int64_t* pOut, uint32_t* pKey);
 void* TreeInsertHint(int64_t* pTree, int64_t* pOut, int64_t* pHint,
                      uint32_t* pKey);
 
+// 0x140d96850 — erase a key: the equal range, its count, then the range erase
+uint64_t TreeEraseKey(int64_t* pTree, int64_t* pOut, uint32_t* pKey);
+// 0x140d96760 — the distance between two iterators of one container
+void TreeDistance(int64_t* pFirst, int64_t* pLast, uint64_t* pCount);
+// 0x140d96990 — the single-node find: the lower-bound walk, then the exact
+// match test against that candidate, so a miss yields the head as the end
+int64_t* TreeFindKey(int64_t* pTree, int64_t* pOut, uint32_t* pKey);
+// 0x140d96470 — erase [first, last) from the vector: the tail move only
+int64_t* VectorEraseRange(int64_t* pVec, int64_t* pOut, int64_t* pFirst,
+                          int64_t* pLast);
+
 }  // namespace stl
 }  // namespace flower
 #endif
