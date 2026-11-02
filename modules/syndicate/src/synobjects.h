@@ -1,7 +1,8 @@
 // ============================================================================
 // synobjects.h — RAW Syndicate.dll v6159 · the objects whose source file the binary does
-//   not name, each with the creator it is reached through and, for the two that have one,
-//   the release that takes it apart again.
+//   not name. Both initialisers build a data object by name through DB.dll's InstanceGet
+//   and then fill its children one by one through vtable slots read by offset, because the
+//   binary itself never names those slots.
 // +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #ifndef SYNDICATE_SYNOBJECTS_H
 #define SYNDICATE_SYNOBJECTS_H
@@ -35,6 +36,7 @@ public:
 class CSyndicate {
 public:
     static CSyndicate* Create(void* pOwner, void* p2, void* p3);
+    void* pInner;       // +0x00, the "cq_syndicate" data object once Create has run
 };
 
 // 0x1417c4b60 creator, 0x1417c4c00 release · 0x28 bytes: a zero qword, a zero dword at
@@ -43,7 +45,10 @@ class CSynDomain {
 public:
     static CSynDomain* Create(void* p1, void* p2, void* p3);
     static void Release(CSynDomain* pDomain);      // 0x1417c4c00
-    uint64_t u0;        // +0x00
+    static void FreeAlloc(void* pMem);             // 0x1417c4a70
+    uint64_t Init(uint32_t uId, const char* pszName);   // 0x1417c45c0
+    void Destroy(void* u1, void* u2);                   // 0x1417c4550
+    void* pInner;       // +0x00, the "cq_syndomain" data object
     uint32_t u8;        // +0x08
     void* p1;           // +0x10
     void* p2;           // +0x18
@@ -56,21 +61,26 @@ class CSynFacility {
 public:
     static CSynFacility* Create(void* p1, void* p2, void* p3);
     static void Release(CSynFacility* pFacility);  // 0x1417c53c0
-    uint64_t u0;        // +0x00
+    static void FreeAlloc(void* pMem);             // 0x1417c5230
+    uint64_t Init(uint32_t uId, int32_t nFacilityType);  // 0x1417c4cc0
+    void Destroy(void* u1, void* u2);                    // 0x1417c4c50
+    void* pInner;       // +0x00, the "cq_synfacility" data object
     void* p1;           // +0x08
     void* p2;           // +0x10
     void* p3;           // +0x18
 };
 
+// DB.dll!InstanceGet — the module instance both initialisers ask for the data object
+extern void* (*g_pfnDbInstanceGet)();
+
 // 0x1417a2470, the CSyndicate constructor, not ported yet
 extern void (*g_pfnConstructSyndicate)(void* pMem, void* pOwner, void* p2, void* p3);
 
-// the two halves of each release, in the order the binary calls them.
-// each one is handed the three undefined values the decompiler cannot name.
-extern void (*g_pfnDestroyDomain)(void* pDomain, void* u1, void* u2, void* u3);   // 0x1417c4550
-extern void (*g_pfnFreeDomainAlloc)(void* pDomain);                              // 0x1417c4a70
-extern void (*g_pfnDestroyFacility)(void* pFacility, void* u1, void* u2, void* u3);  // 0x1417c4c50
-extern void (*g_pfnFreeFacilityAlloc)(void* pFacility);                          // 0x1417c5230
+// the halves of each release, kept as hooks so a test can watch the order
+extern void (*g_pfnDestroyDomain)(void* pDomain, void* u1, void* u2);   // 0x1417c4550
+extern void (*g_pfnFreeDomainAlloc)(void* pDomain);                     // 0x1417c4a70
+extern void (*g_pfnDestroyFacility)(void* pFacility, void* u1, void* u2);  // 0x1417c4c50
+extern void (*g_pfnFreeFacilityAlloc)(void* pFacility);                 // 0x1417c5230
 
 }  // namespace tq
 

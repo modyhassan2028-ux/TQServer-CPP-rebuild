@@ -31,7 +31,7 @@ public:
 // ---- the seams this file needs, each one a unit of its own file that is not ported yet
 extern void* (*g_pfnFindSyn)(CSynManager* pMgr, uint32_t uIdSyn);            // 0x1417cad00
 extern void* (*g_pfnGetSynName)(void* pSyn);                                 // 0x14178f470
-extern bool (*g_pfnDomainInit)(CSynDomain* pDomain, uint32_t uIdSyn, void* pName);  // 0x1417c45c0
+extern bool (*g_pfnDomainInit)(CSynDomain* pDomain, uint32_t uIdSyn, void* pName);  // 0x1417c45c0 (ported)
 extern void (*g_pfnDomainRelease)(CSynDomain* pDomain);                      // 0x1417c4c00
 extern bool (*g_pfnFacilityInit)(CSynFacility* pFacility, uint32_t uIdSyn, int32_t nType);  // 0x1417c4cc0
 extern void (*g_pfnFacilityRelease)(CSynFacility* pFacility);                // 0x1417c53c0

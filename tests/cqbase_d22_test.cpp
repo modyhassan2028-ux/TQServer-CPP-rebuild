@@ -107,14 +107,14 @@ int main() {
 
         CSynDomain* pDomain = CSynDomain::Create((void*)0xD1, (void*)0xD2, (void*)0xD3);
         assert(pDomain != nullptr);
-        assert(pDomain->u0 == 0 && pDomain->u8 == 0);
+        assert(pDomain->pInner == nullptr && pDomain->u8 == 0);
         assert(pDomain->p1 == (void*)0xD1 && pDomain->p2 == (void*)0xD2 &&
                pDomain->p3 == (void*)0xD3);
         std::free(pDomain);
 
         CSynFacility* pFacility = CSynFacility::Create((void*)0xF1, (void*)0xF2, (void*)0xF3);
         assert(pFacility != nullptr);
-        assert(pFacility->u0 == 0);
+        assert(pFacility->pInner == nullptr);
         assert(pFacility->p1 == (void*)0xF1 && pFacility->p2 == (void*)0xF2 &&
                pFacility->p3 == (void*)0xF3);
         std::free(pFacility);

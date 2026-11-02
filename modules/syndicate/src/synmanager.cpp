@@ -12,9 +12,14 @@ static const char kSynManagerSource[] =
 
 static void* DefaultFindSyn(CSynManager*, uint32_t) { return nullptr; }
 static void* DefaultGetSynName(void*) { return nullptr; }
-static bool DefaultDomainInit(CSynDomain*, uint32_t, void*) { return false; }
+// the real initialiser now, so nothing here guesses at what a domain does
+static bool DefaultDomainInit(CSynDomain* pDomain, uint32_t uIdSyn, void* pName) {
+    return ((uint64_t)pDomain->Init(uIdSyn, (const char*)pName)) != 0;
+}
 static void DefaultDomainRelease(CSynDomain* p) { CSynDomain::Release(p); }
-static bool DefaultFacilityInit(CSynFacility*, uint32_t, int32_t) { return false; }
+static bool DefaultFacilityInit(CSynFacility* pFacility, uint32_t uIdSyn, int32_t nType) {
+    return ((uint64_t)pFacility->Init(uIdSyn, nType)) != 0;
+}
 static void DefaultFacilityRelease(CSynFacility* p) { CSynFacility::Release(p); }
 static void DefaultAddDomainToSyn(void*, CSynDomain*) {}
 static void DefaultAddFacilityToSyn(void*, CSynFacility*) {}
