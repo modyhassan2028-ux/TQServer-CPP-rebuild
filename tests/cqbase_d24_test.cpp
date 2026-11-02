@@ -99,9 +99,9 @@ int main() {
 
     // ---- the releases: null is ignored, anything else is taken apart then handed back
     {
-        g_pfnDestroyDomain = [](void* p, void*, void*, void*) { g_strRelease += "destroy;"; g_pReleaseArg = p; };
+        g_pfnDestroyDomain = [](void* p, void*, void*) { g_strRelease += "destroy;"; g_pReleaseArg = p; };
         g_pfnFreeDomainAlloc = [](void* p) { g_strRelease += "free;"; assert(p == g_pReleaseArg); };
-        g_pfnDestroyFacility = [](void* p, void*, void*, void*) { g_strRelease += "fdestroy;"; g_pReleaseArg = p; };
+        g_pfnDestroyFacility = [](void* p, void*, void*) { g_strRelease += "fdestroy;"; g_pReleaseArg = p; };
         g_pfnFreeFacilityAlloc = [](void* p) { g_strRelease += "ffree;"; assert(p == g_pReleaseArg); };
 
         g_strRelease.clear();
