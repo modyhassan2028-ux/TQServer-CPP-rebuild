@@ -52,11 +52,27 @@ public:
     CMyBaseHeap* m_pBaseHeap;                      // +0x00
 };
 
+// The block list the manager keeps at +0x08: a proxy at +0x00, the head at +0x30 and the
+// count at +0x38, which is the container the teardown walks. Its nodes are the library's,
+// so the walk itself (0x140b9f8c0) stays a seam; the frees around it are the binary's.
+struct HeapBlockList {
+    void* pProxy;         // +0x00
+    void* pPad[5];        // +0x08 .. +0x2f
+    void* pHead;          // +0x30
+    int64_t nCount;       // +0x38
+};
+extern void (*g_pfnEraseBlockList)(HeapBlockList* pList);   // 0x140b9f8c0
+
 // the manager every heap files itself into
 class CMyHeapMgr {
 public:
+    CMyHeapMgr();                                      // the vftable and the list start empty
+    ~CMyHeapMgr();                                     // 0x140b9fe20
     CMyHeapMgr& operator=(const CMyHeapMgr& rOther);   // 0x140b9d6e0
     void AddMyHeap(const char* pszName, CMyBaseHeap* pBase);   // 0x140b9f760
+
+    void* pVt;                     // +0x00
+    HeapBlockList* m_pBlockList;   // +0x08
 };
 extern CMyHeapMgr g_MyHeapMgr;
 

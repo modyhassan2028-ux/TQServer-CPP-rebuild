@@ -4,6 +4,7 @@
 #include "modules/cqbase/src/autopop.h"
 #include "modules/cqbase/src/csync.h"
 #include "modules/cqbase/src/logkernel.h"
+#include "modules/cqbase/src/myheap.h"
 
 #include <cassert>
 #include <cstdio>
@@ -148,7 +149,34 @@ int main() {
         assert(g_sLogs.empty());
     }
 
+    // ---- the heap manager takes its block list down with it
+    {
+        static int nErased = 0;
+        struct Hook {
+            static void Erase(HeapBlockList* pList) { ++nErased; (void)pList; }
+        };
+        g_pfnEraseBlockList = &Hook::Erase;
+
+        CMyHeapMgr mgr;
+        assert(mgr.pVt == nullptr && mgr.m_pBlockList == nullptr);
+        mgr.m_pBlockList = (HeapBlockList*)::operator new(sizeof(HeapBlockList));
+        std::memset(mgr.m_pBlockList, 0, sizeof(HeapBlockList));
+        mgr.m_pBlockList->pProxy = ::operator new(0x10);
+        mgr.m_pBlockList->pHead = ::operator new(0x28);
+        mgr.m_pBlockList->nCount = 3;
+
+        mgr.~CMyHeapMgr();
+        assert(nErased == 1);
+        assert(mgr.m_pBlockList == nullptr);   // the list is gone and the member cleared
+
+        // a manager with no list frees nothing and asks for no walk
+        CMyHeapMgr empty;
+        nErased = 0;
+        empty.~CMyHeapMgr();
+        assert(nErased == 0);
+    }
+
     tq::g_LogApi = savedLog;
-    std::printf("CQBASE_D21_OK: the multi event, the auto pop guard, its reporter, 3 units, %d checks\n", 31);
+    std::printf("CQBASE_D21_OK: the multi event, the auto pop guard, its reporter and the heap teardown, 4 units, 35 checks\n");
     return 0;
 }

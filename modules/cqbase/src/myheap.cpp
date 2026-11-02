@@ -149,4 +149,26 @@ void CMyHeapMgr::AddMyHeap(const char* pszName, CMyBaseHeap* pBase) {
     (void)pszName;
 }
 
+
+// ----------------------------------------------------------------------------
+// ~CMyHeapMgr (0x140b9fe20) — the vftable first, then the block list: every node goes,
+// the head is freed and cleared, the count is zeroed, the proxy and the list itself are
+// freed, and the member is left pointing at nothing.
+// ----------------------------------------------------------------------------
+static void DefaultEraseBlockList(HeapBlockList*) {}
+void (*g_pfnEraseBlockList)(HeapBlockList*) = DefaultEraseBlockList;
+
+CMyHeapMgr::CMyHeapMgr() : pVt(nullptr), m_pBlockList(nullptr) {}
+
+CMyHeapMgr::~CMyHeapMgr() {
+    if (m_pBlockList == nullptr) return;
+    g_pfnEraseBlockList(m_pBlockList);
+    ::operator delete(m_pBlockList->pHead);
+    m_pBlockList->pHead = nullptr;
+    m_pBlockList->nCount = 0;
+    ::operator delete(m_pBlockList->pProxy);
+    ::operator delete(m_pBlockList);
+    m_pBlockList = nullptr;
+}
+
 }  // namespace tq
