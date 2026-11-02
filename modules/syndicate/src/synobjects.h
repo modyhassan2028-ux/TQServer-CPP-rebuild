@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <string>
 
+#include "modules/cqbase/src/myheap.h"
 #include "modules/syndicate/src/synlist.h"
 
 namespace tq {
@@ -79,6 +80,10 @@ public:
     static CSynDomain* Create(void* p1, void* p2, void* p3);
     static void Release(CSynDomain* pDomain);      // 0x1417c4c00
     static void FreeAlloc(void* pMem);             // 0x1417c4a70
+    static CMyHeap& Heap();                        // 0x1417c49b0, one heap for the whole class
+    static void* Alloc(size_t uBytes);             // 0x1417c4a10
+    static bool IsValidPt(const void* pMem);       // 0x1417c4ad0
+    void* DeleteScalar(uint8_t uFlags);            // 0x1417c4b30
     uint64_t Init(uint32_t uId, const char* pszName);   // 0x1417c45c0
     void Destroy(void* u1, void* u2);                   // 0x1417c4550
     void* pInner;       // +0x00, the "cq_syndomain" data object
@@ -95,6 +100,10 @@ public:
     static CSynFacility* Create(void* p1, void* p2, void* p3);
     static void Release(CSynFacility* pFacility);  // 0x1417c53c0
     static void FreeAlloc(void* pMem);             // 0x1417c5230
+    static CMyHeap& Heap();                        // 0x1417c5170
+    static void* Alloc(size_t uBytes);             // 0x1417c51d0
+    static bool IsValidPt(const void* pMem);       // 0x1417c5290
+    void* DeleteScalar(uint8_t uFlags);            // 0x1417c52f0
     uint64_t Init(uint32_t uId, int32_t nFacilityType);  // 0x1417c4cc0
     void Destroy(void* u1, void* u2);                    // 0x1417c4c50
     void* pInner;       // +0x00, the "cq_synfacility" data object

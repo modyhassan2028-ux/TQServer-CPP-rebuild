@@ -135,8 +135,7 @@ CSyndicate* CSyndicate::Create(void* pOwner, void* p2, void* p3) {
 
 // 0x1417c4b60 — a zero qword, a zero dword at +0x08, then the three arguments
 CSynDomain* CSynDomain::Create(void* p1_, void* p2_, void* p3_) {
-    static CMyHeap sHeap("CSynDomain");
-    CSynDomain* p = (CSynDomain*)sHeap.Alloc(0x28);
+    CSynDomain* p = (CSynDomain*)Heap().Alloc(0x28);
     if (p == nullptr) return nullptr;
     p->pInner = nullptr;
     p->u8 = 0;
@@ -146,10 +145,28 @@ CSynDomain* CSynDomain::Create(void* p1_, void* p2_, void* p3_) {
     return p;
 }
 
+// 0x1417c5170 — the facility's own heap, again one per class
+CMyHeap& CSynFacility::Heap() {
+    static CMyHeap sHeap("CSynFacility");
+    return sHeap;
+}
+
+// 0x1417c51d0
+void* CSynFacility::Alloc(size_t uBytes) { return Heap().Alloc(uBytes); }
+
+// 0x1417c5290
+bool CSynFacility::IsValidPt(const void* pMem) { return Heap().IsValidPt(pMem); }
+
+// 0x1417c52f0
+void* CSynFacility::DeleteScalar(uint8_t uFlags) {
+    g_pfnDestroyFacility(this, nullptr, nullptr);
+    if ((uFlags & 1) != 0) g_pfnFreeFacilityAlloc(this);
+    return this;
+}
+
 // 0x1417c5320 — a zero qword and the three arguments
 CSynFacility* CSynFacility::Create(void* p1_, void* p2_, void* p3_) {
-    static CMyHeap sHeap("CSynFacility");
-    CSynFacility* p = (CSynFacility*)sHeap.Alloc(0x20);
+    CSynFacility* p = (CSynFacility*)Heap().Alloc(0x20);
     if (p == nullptr) return nullptr;
     p->pInner = nullptr;
     p->p1 = p1_;
@@ -196,11 +213,28 @@ void CSynDomain::Destroy(void* u1, void* u2) {
     pInner = nullptr;
 }
 
-// 0x1417c4a70 — the domain's own heap, made on first use and freed through after that
-void CSynDomain::FreeAlloc(void* pMem) {
+// 0x1417c49b0 — the class-wide heap. The binary declares it as one static object behind a
+// guard byte plus an atexit entry, which is exactly what one function-local static compiles to.
+CMyHeap& CSynDomain::Heap() {
     static CMyHeap sHeap("CSynDomain");
-    sHeap.Free(pMem);
+    return sHeap;
 }
+
+// 0x1417c4a10
+void* CSynDomain::Alloc(size_t uBytes) { return Heap().Alloc(uBytes); }
+
+// 0x1417c4ad0
+bool CSynDomain::IsValidPt(const void* pMem) { return Heap().IsValidPt(pMem); }
+
+// 0x1417c4b30 — tear the object down, and free it only when bit zero of the flags is set
+void* CSynDomain::DeleteScalar(uint8_t uFlags) {
+    g_pfnDestroyDomain(this, nullptr, nullptr);
+    if ((uFlags & 1) != 0) g_pfnFreeDomainAlloc(this);
+    return this;
+}
+
+// 0x1417c4a70 — freed back through the same class-wide heap
+void CSynDomain::FreeAlloc(void* pMem) { Heap().Free(pMem); }
 
 // ---- CSynFacility --------------------------------------------------------------
 // 0x1417c4cc0 — the guard is the same pair, checked together. Nine children are always
