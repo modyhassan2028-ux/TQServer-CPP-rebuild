@@ -1,5 +1,10 @@
 // CQBase.dll v6159 — basefunc.cpp helpers (0x140b82fb0..0x140b883f0)
 #include "modules/cqbase/src/basefunc.h"
+#include "modules/cqbase/src/cini.h"
+
+#include <cstdarg>
+#include <cstdio>
+#include <cstring>
 
 #include <cmath>
 #include <cstdio>
@@ -574,6 +579,183 @@ int AnnounceStrCheck(char* pszStr, int nFlag) {
         if (c == 0x5e) return 0;
     }
     return CheckForbiddenWords(pszStr, nFlag);
+}
+
+// ============================================================================
+// The console and the server's own configuration (0x140b83160 .. 0x140b83a90)
+// +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+//   Everything here is read off the binary. Two notes worth keeping:
+//   1. ConsoleWriteStr pads or cuts the line to the console width it was given, then
+//      writes exactly that many characters, not the length of the text.
+//   2. GetGameConfig ignores what fscanf returned: a malformed gameserver.cfg still
+//      reports success with whatever the scan managed to fill in.
+
+int16_t g_nConsoleWidth = 0;         // 0x140be700c
+int16_t g_nConsoleHeight = 0;        // 0x140be7008
+void* g_hConsoleOut = nullptr;       // 0x140be78f0
+uint32_t (*g_pfnGetModuleFileNameA)(void* hModule, char* pszOut, uint32_t uSize) = nullptr;
+
+static void* DefaultGetStdHandle(uint32_t uWhich) { (void)uWhich; return nullptr; }
+static int DefaultWindowInfo(void*, int, const ConsoleRect*) { return 0; }
+static int DefaultBufferSize(void*, ConsoleCoord) { return 0; }
+static int DefaultCursor(void*, ConsoleCoord) { return 0; }
+static int DefaultWriteConsole(void*, const void*, uint32_t, uint32_t* pWritten, void*) {
+    if (pWritten != nullptr) *pWritten = 0;
+    return 0;
+}
+static int DefaultWriteChars(void*, const char*, uint32_t, ConsoleCoord, uint32_t* pWritten) {
+    if (pWritten != nullptr) *pWritten = 0;
+    return 0;
+}
+
+ConsoleApi g_ConsoleApi = {DefaultGetStdHandle, DefaultWindowInfo, DefaultBufferSize,
+                           DefaultCursor, DefaultWriteConsole, DefaultWriteChars};
+
+// 0x140b83290 — the console is given a fixed window, at most fifty by fifty, and every
+// row inside it is cleared with spaces through WriteConsoleA.
+void ConsoleSetup(uint32_t uWidth, uint32_t uHeight) {
+    g_nConsoleHeight = (int16_t)uHeight;
+    if (uWidth > 0x50) uWidth = 0x50;
+    if (uHeight > 0x50) g_nConsoleHeight = 0x50;
+    g_nConsoleWidth = (int16_t)uWidth;
+    g_hConsoleOut = g_ConsoleApi.pfnGetStdHandle(0xfffffff5u);
+
+    ConsoleRect rect;
+    rect.Right = (int16_t)(g_nConsoleWidth - 1);
+    rect.Bottom = (int16_t)(g_nConsoleHeight - 1);
+    rect.Left = 0;
+    rect.Top = 0;
+    uint32_t uWritten = 0;
+    g_ConsoleApi.pfnSetConsoleWindowInfo(g_hConsoleOut, 1, &rect);
+
+    ConsoleCoord size;
+    size.X = g_nConsoleWidth;
+    size.Y = g_nConsoleHeight;
+    g_ConsoleApi.pfnSetConsoleScreenBufferSize(g_hConsoleOut, size);
+
+    int nRow = rect.Top;
+    while (nRow < rect.Bottom) {
+        ConsoleCoord pos;
+        pos.X = 0;
+        pos.Y = (int16_t)nRow;
+        g_ConsoleApi.pfnSetConsoleCursorPosition(g_hConsoleOut, pos);
+        char szBlank[0xff];
+        std::memset(szBlank, ' ', sizeof szBlank);   // the raw memcpy's 0xff spaces
+        g_ConsoleApi.pfnWriteConsoleA(g_hConsoleOut, szBlank, (uint32_t)rect.Right + 1, &uWritten,
+                                      nullptr);
+        ++nRow;
+    }
+}
+
+// 0x140b83160 — one line at a spot on the screen, padded to the console width
+void ConsoleWriteStr(uint32_t uX, uint32_t uY, const char* pszFormat, ...) {
+    uint32_t uWritten = 0;
+    char szLine[0x800];
+    szLine[0] = '\0';
+    std::memset(szLine + 1, 0, 0x7ff);
+    va_list vaArgs;
+    va_start(vaArgs, pszFormat);
+    std::vsprintf(szLine, pszFormat, vaArgs);      // the raw uses vsprintf, with no bound
+    va_end(vaArgs);
+
+    size_t nLen = std::strlen(szLine);
+    uint32_t uWidth = (uint32_t)g_nConsoleWidth;
+    if (nLen == 0) nLen = 1;                       // the raw turns an empty line into one
+    if (uWidth < nLen) {
+        szLine[uWidth] = '\0';
+    } else if (nLen < uWidth) {
+        std::memset(szLine + nLen, ' ', uWidth - nLen);
+    }
+    ConsoleCoord pos;
+    pos.X = (int16_t)uX;
+    pos.Y = (int16_t)uY;
+    g_ConsoleApi.pfnWriteConsoleOutputCharacterA(g_hConsoleOut, szLine, uWidth, pos, &uWritten);
+}
+
+// ---------------------------------------------------------------- configuration
+static void* DefaultFopenCfg(const char* pszName, const char* pszMode) {
+    return std::fopen(pszName, pszMode);
+}
+static int DefaultFscanfCfg(void* pFile, const char* pszFormat, ...) {
+    va_list vaArgs;
+    va_start(vaArgs, pszFormat);
+    int nRet = std::vfscanf((FILE*)pFile, pszFormat, vaArgs);
+    va_end(vaArgs);
+    return nRet;
+}
+static int DefaultFcloseCfg(void* pFile) { return std::fclose((FILE*)pFile); }
+static bool DefaultLoadDat(const char*, uint32_t*, uint32_t*, char*, char*, char*, char*) {
+    return false;
+}
+
+ServerConfigApi g_ServerConfigApi = {DefaultFopenCfg, DefaultFscanfCfg, DefaultFcloseCfg,
+                                     DefaultLoadDat};
+
+// 0x140b83810 — the text file first, the packed one when it is missing
+bool GetGameConfig(uint32_t& rFirst, uint32_t& rSecond, char* pszThird, char* pszFourth,
+                   char* pszFifth, char* pszSixth, uint32_t& rPort, char* pszCharSet) {
+    void* pFile = g_ServerConfigApi.pfnFopen("gameserver.cfg", "r");
+    if (pFile == nullptr) {
+        std::strncpy(pszCharSet, "gbk", 4);
+        if (!g_ServerConfigApi.pfnLoadDat("gameserver.dat", &rFirst, &rSecond, pszThird,
+                                          pszFourth, pszFifth, pszSixth)) {
+            return false;
+        }
+        rPort = 0xcea;                              // 3306, the port the packed file implies
+        return true;
+    }
+    // long is thirty two bits where this file came from, so the scan fills temporaries and
+    // the two numbers are copied out; what fscanf returned is not looked at
+    unsigned long uFirst = 0, uSecond = 0, uPort = 0;
+    g_ServerConfigApi.pfnFscanf(pFile, "%lu %lu %s %s %s %s %u %s\n", &uFirst, &uSecond,
+                                pszThird, pszFourth, pszFifth, pszSixth, &uPort, pszCharSet);
+    g_ServerConfigApi.pfnFclose(pFile);
+    rFirst = (uint32_t)uFirst;
+    rSecond = (uint32_t)uSecond;
+    rPort = (uint32_t)uPort;
+    return true;
+}
+
+// 0x140b83930 — six values out of crossshell.ini, every one of them copied blind
+bool GetCrossServerConfig(char* pszDbServer, char* pszLoginName, char* pszPassword,
+                          char* pszDbName, uint32_t& rPort, char* pszCharSet, int nSize) {
+    CIni ini((char*)"crossshell.ini", true);
+    const size_t nCount = (size_t)nSize;
+    std::strncpy(pszDbServer, ini.GetString((char*)"Database", (char*)"DBServer"), nCount);
+    std::strncpy(pszLoginName, ini.GetString((char*)"Database", (char*)"LoginName"), nCount);
+    std::strncpy(pszPassword, ini.GetString((char*)"Database", (char*)"Password"), nCount);
+    std::strncpy(pszDbName, ini.GetString((char*)"Database", (char*)"DBName"), nCount);
+    rPort = (uint32_t)ini.GetData((char*)"Database", (char*)"DBPort");
+    std::strncpy(pszCharSet, ini.GetString((char*)"Database", (char*)"CharSet"), nCount);
+    return true;
+}
+
+// 0x140b83a90 — the module's own file name decides it
+bool IsCrossServer() {
+    char szPath[0x104];
+    szPath[0] = '\0';
+    std::memset(szPath + 1, 0, 0x103);
+    if (g_pfnGetModuleFileNameA == nullptr) return false;
+    if (g_pfnGetModuleFileNameA(nullptr, szPath, 0x104) == 0) return false;
+    return std::strstr(szPath, "\\CQCrossServer.") != nullptr;
+}
+
+// 0x140b83560 — a build stamp of Dec 4 2015 turned into a day number: (year*12 + month)*31
+// + day, the month taken from a four byte compare against each three letter name.
+uint32_t BuildDaysGet() {
+    int nDay = 0;
+    int nYear = 0;
+    char szMonth[16];
+    std::memset(szMonth, 0, sizeof szMonth);
+    if (std::sscanf("Dec  4 2015", "%s %d %d", szMonth, &nDay, &nYear) != 3) return 0;
+    static const char* kMonths[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                                      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+    for (int i = 0; i < 12; ++i) {
+        if (std::memcmp(szMonth, kMonths[i], 4) == 0) {
+            return (uint32_t)((i + nYear * 12) * 31 + nDay);
+        }
+    }
+    return 0;
 }
 
 }  // namespace tq

@@ -61,5 +61,52 @@ bool HasBannedWord(char* pszStr);                               // 0x140b8a250
 void BannedWordAdd(const char* pszWord);
 void BannedWordClear();
 
+// ----------------------------------------------------------------------------
+// The console and the server's own configuration, all in this file's range
+// (StrCopy sits at 0x140b830d0, these start at 0x140b83160).
+// ----------------------------------------------------------------------------
+struct ConsoleCoord { int16_t X; int16_t Y; };
+struct ConsoleRect { int16_t Left; int16_t Top; int16_t Right; int16_t Bottom; };
+
+// the five console calls, so a test can watch what the port asks the console to do
+struct ConsoleApi {
+    void* (*pfnGetStdHandle)(uint32_t uWhich);                              // 0xfffffff5 = output
+    int (*pfnSetConsoleWindowInfo)(void* hOut, int bAbsolute, const ConsoleRect* pRect);
+    int (*pfnSetConsoleScreenBufferSize)(void* hOut, ConsoleCoord size);
+    int (*pfnSetConsoleCursorPosition)(void* hOut, ConsoleCoord pos);
+    int (*pfnWriteConsoleA)(void* hOut, const void* pBuf, uint32_t uLen, uint32_t* pWritten,
+                            void* pReserved);
+    int (*pfnWriteConsoleOutputCharacterA)(void* hOut, const char* pText, uint32_t uLen,
+                                           ConsoleCoord pos, uint32_t* pWritten);
+};
+extern ConsoleApi g_ConsoleApi;
+
+extern int16_t g_nConsoleWidth;      // 0x140be700c, the row width the console is given
+extern int16_t g_nConsoleHeight;     // 0x140be7008
+extern void* g_hConsoleOut;          // 0x140be78f0
+
+void ConsoleSetup(uint32_t uWidth, uint32_t uHeight);                    // 0x140b83290
+void ConsoleWriteStr(uint32_t uX, uint32_t uY, const char* pszFormat, ...);  // 0x140b83160
+
+// gameserver.cfg, or gameserver.dat when the text file is not there
+struct ServerConfigApi {
+    void* (*pfnFopen)(const char* pszName, const char* pszMode);
+    int (*pfnFscanf)(void* pFile, const char* pszFormat, ...);
+    int (*pfnFclose)(void* pFile);
+    // 0x140b82d30, the binary configuration reader, not ported
+    bool (*pfnLoadDat)(const char* pszName, uint32_t* p1, uint32_t* p2, char* p3, char* p4,
+                       char* p5, char* p6);
+};
+extern ServerConfigApi g_ServerConfigApi;
+
+bool GetGameConfig(uint32_t& rFirst, uint32_t& rSecond, char* pszThird, char* pszFourth,
+                   char* pszFifth, char* pszSixth, uint32_t& rPort, char* pszCharSet);  // 0x140b83810
+bool GetCrossServerConfig(char* pszDbServer, char* pszLoginName, char* pszPassword,
+                          char* pszDbName, uint32_t& rPort, char* pszCharSet, int nSize);  // 0x140b83930
+bool IsCrossServer();                                                     // 0x140b83a90
+extern uint32_t (*g_pfnGetModuleFileNameA)(void* hModule, char* pszOut, uint32_t uSize);
+
+uint32_t BuildDaysGet();                                                  // 0x140b83560
+
 }  // namespace tq
 #endif
