@@ -64,8 +64,13 @@ public:
     int Wait(int nMs);       // 0x140ba01b0
 };
 
+// the one call the constructor makes, a seam so this runs off Windows too
+extern void* (*g_pfnCreateEventA)(void* pAttributes, int bManualReset, int bInitialState,
+                                  const char* pszName);
+
 class CMyMultiEvent {
 public:
+    CMyMultiEvent(int nCount, bool bManualReset);   // 0x140ba01e0
     int nCount;              // +0x00
     void** phEvents;         // +0x08
     int Signal(int nIndex);  // 0x140ba02e0
@@ -80,6 +85,7 @@ public:
     ILockObj* pLock;         // +0x00
     void Unlock();           // 0x140ba0390
 };
+
 
 }  // namespace tq
 #endif

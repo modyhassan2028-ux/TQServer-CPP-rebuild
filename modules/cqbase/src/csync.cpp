@@ -100,4 +100,33 @@ void CMySingleLock::Unlock() {
     pLock->Unlock();
 }
 
+
+// ----------------------------------------------------------------------------
+// CMyMultiEvent (0x140ba01e0)
+// ----------------------------------------------------------------------------
+static void* DefaultCreateEventA(void*, int, int, const char*) { return nullptr; }
+void* (*g_pfnCreateEventA)(void*, int, int, const char*) = DefaultCreateEventA;
+
+CMyMultiEvent::CMyMultiEvent(int nCount, bool bManualReset) {
+    this->nCount = nCount;
+    phEvents = nullptr;
+    void** phEvents_keep = nullptr;
+    if (nCount > 0) {
+        // the raw multiplies as a sixty four bit value and takes the largest size when the
+        // high half is not zero; eight bytes a slot
+        const std::size_t nBytes = (std::size_t)((uint64_t)(int64_t)nCount * 8u);
+        phEvents_keep = (void**)::operator new[](nBytes);   // the raw new[] for the slots
+    }
+    phEvents = phEvents_keep;
+    // the raw sign extends the count before the loop test, so a negative one never runs
+    if ((int64_t)nCount > 0) {
+        long long i = 0;
+        do {
+            void* hEvent = g_pfnCreateEventA(nullptr, 0, (int)bManualReset, nullptr);
+            ++i;
+            phEvents[i - 1] = hEvent;
+        } while (i < (int64_t)nCount);
+    }
+}
+
 }  // namespace tq
