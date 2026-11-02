@@ -46,9 +46,60 @@ static void* DefaultDbInstanceGet() { return nullptr; }
 void* (*g_pfnDbInstanceGet)() = DefaultDbInstanceGet;
 
 
+// the class vtable, .rdata 0x141833f20; the virtuals come with the class itself
+void* g_pVftableCSyndicate = nullptr;
+
 // ---- the creators ---------------------------------------------------------------
 // each one takes the class's own heap, a guarded CMyHeap whose lifetime is the function's
-static void DefaultConstructSyndicate(void*, void*, void*, void*) {}
+static const char kSyndicateSource[] =
+    "f:\\version\\cqserver-78.0.11-1204\\modules\\syndicate\\src\\syndicate.cpp";
+
+// 0x1417a2470 — the vtable first, then the block at +0x08, then the message board from the
+// owner's vtable +0x120 with 0x89c. The eleven simple lists follow, then the five owned
+// blocks, the two flag dwords, the string and the tail. When the message board is there the
+// two map blocks at +0x2a0 and +0x2e0 are cleared and the two misaligned qwords at +0x3a4
+// and +0x3ac are wiped; when it is not, the constructor says so and leaves them alone.
+CSyndicate* CSyndicate::Construct(void* pOwner_, void* p3_, void* p4_) {
+    pVftable = g_pVftableCSyndicate;
+    SynBlockInit08(&blk08);
+
+    // the owner's vtable slot at +0x120, asked for board 0x89c
+    typedef void* (*pfnSlotOpenBoard)(void* pSelf, int32_t nId);
+    void** ppVft = *(void***)pOwner_;
+    pMsgBd = ((pfnSlotOpenBoard)ppVft[0x120 / 8])(pOwner_, 0x89c);
+
+    for (int i = 0; i < 11; ++i) SynSimpleListInit(&aList11[i]);
+
+    SynBlockInit20(&blk260);
+    SynBlockInit20(&blk2A0);
+    SynBlockInit20(&blk2E0);
+    SynBlockInit20(&blk320);
+    SynBlockInit68(&blk360);
+    u3A0 = 0;
+    new (&str3B8) std::string();
+    u3E0 = nullptr;
+    SynBlockInit30(&blk3E8);
+    u428 = nullptr;
+    pOwner = pOwner_;
+    p438 = p3_;
+    p440 = p4_;
+    u448 = 0;
+
+    if (pMsgBd == nullptr) {
+        log_InlineLogERROR("\xa1\xef%s(%s)\xa1\xef in %s, %d", "CHECK", "m_ptrMsgBd",
+                           kSyndicateSource, 0x25);
+    } else {
+        SynBlockClear(&blk2A0);
+        SynBlockClear(&blk2E0);
+        *(uint64_t*)((char*)this + 0x3a4) = 0;   // misaligned on purpose, as in the raw
+        *(uint64_t*)((char*)this + 0x3ac) = 0;
+    }
+    return this;
+}
+
+static void DefaultConstructSyndicate(void* pMem, void* pOwner, void* p2, void* p3) {
+    ((CSyndicate*)pMem)->Construct(pOwner, p2, p3);
+}
 void (*g_pfnConstructSyndicate)(void* pMem, void* pOwner, void* p2, void* p3) =
     DefaultConstructSyndicate;
 

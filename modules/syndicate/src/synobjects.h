@@ -8,6 +8,9 @@
 #define SYNDICATE_SYNOBJECTS_H
 
 #include <cstdint>
+#include <string>
+
+#include "modules/syndicate/src/synlist.h"
 
 namespace tq {
 
@@ -32,12 +35,42 @@ public:
     uint32_t u4C;       // +0x4c
 };
 
-// 0x1417a28c0 — 0x450 bytes, built by the constructor at 0x1417a2470
+// 0x1417a28c0 creator, 0x1417a2470 constructor · 0x450 bytes. The eleven lists at +0x50
+// are the simple shape, the five blocks below them own a header, and the owner, its two
+// companions and the message board pointer are kept at the tail.
 class CSyndicate {
 public:
     static CSyndicate* Create(void* pOwner, void* p2, void* p3);
-    void* pInner;       // +0x00, the "cq_syndicate" data object once Create has run
+    CSyndicate* Construct(void* pOwner, void* p3, void* p4);   // 0x1417a2470
+
+    void* pVftable;             // +0x00
+    SynBlock blk08;             // +0x08
+    void* pMsgBd;               // +0x48, from the owner's vtable +0x120 with 0x89c
+    SynSimpleList aList11[11];  // +0x50 .. +0x25f
+    SynBlock blk260;            // +0x260
+    SynBlock blk2A0;            // +0x2a0, cleared when the message board is there
+    SynBlock blk2E0;            // +0x2e0, cleared with it
+    SynBlock blk320;            // +0x320
+    SynBlock blk360;            // +0x360
+    uint32_t u3A0;              // +0x3a0
+    uint32_t u3A4;              // +0x3a4
+    uint32_t u3A8;              // +0x3a8
+    uint32_t u3AC;              // +0x3ac
+    uint32_t u3B0;              // +0x3b0
+    uint32_t u3B4;              // +0x3b4
+    std::string str3B8;         // +0x3b8
+    uint64_t u3D8;              // +0x3d8, never written
+    void* u3E0;                 // +0x3e0
+    SynBlock blk3E8;            // +0x3e8
+    void* u428;                 // +0x428
+    void* pOwner;               // +0x430
+    void* p438;                 // +0x438
+    void* p440;                 // +0x440
+    uint32_t u448;              // +0x448
 };
+
+// the class's vtable, data in .rdata at 0x141833f20; the virtuals themselves are not ported
+extern void* g_pVftableCSyndicate;
 
 // 0x1417c4b60 creator, 0x1417c4c00 release · 0x28 bytes: a zero qword, a zero dword at
 // +0x08, then the three arguments
@@ -73,7 +106,7 @@ public:
 // DB.dll!InstanceGet — the module instance both initialisers ask for the data object
 extern void* (*g_pfnDbInstanceGet)();
 
-// 0x1417a2470, the CSyndicate constructor, not ported yet
+// the constructor hook, the default is the ported body
 extern void (*g_pfnConstructSyndicate)(void* pMem, void* pOwner, void* p2, void* p3);
 
 // the halves of each release, kept as hooks so a test can watch the order
