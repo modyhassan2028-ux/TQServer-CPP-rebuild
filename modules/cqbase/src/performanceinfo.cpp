@@ -456,11 +456,12 @@ void CPerformanceInfoBase::RecordSystemCounters() {
     // the raw hands the last two values it read to a call with an empty format, where they
     // are never formatted; kept because it is what the binary does
     g_PerformanceInfoApi.pfnLog(this, "", (long)nContextSwitches, (long)nIoRead);
+
+    RecordProcessTable();   // the raw carries on into the table on the same path
 }
 
 // 0x140ba51c0 — the per process table: eleven label pointers, a header, then a row per node
 // from the larger list. Not ported yet; the seam keeps the ordering of the raw visible.
-void CPerformanceInfoBase::RecordProcessTable() {}
 
 // 0x140ba0a80 — the string comes first, then the dword the caller points at
 void CPerformanceKeyNodeBuild(CPerformanceKeyNode* pNode, const std::string& strKey,
@@ -490,6 +491,83 @@ void CPerformanceNode278Build(CPerformanceNode278* pNode, void* p0, void* p1, vo
 // 0x140ba5cd0 — the name is spelled this way in the original
 void CPerformanceInfo::RecrodPerformanceInfo() {
     if (pBase != nullptr) g_pfnPerformanceInfoBaseRecord(pBase);
+}
+
+
+// 0x140ba51c0 (second half) — the per process table. The twelve column labels and the
+// twelve values of every row come from the binary:
+//   "%8s %25s %7s %12s %12s %13s %11s %11s %13s %10s %10s %10s"  (labels 0x140bcbc1c)
+//   "%8d %25s %6.3f%% %10ld K %10ld K %11ld K %11ld %11ld %13ld %10ld %10ld %10ld"
+// The cpu column divides the 0x8200 read of the payload's counter at +0x20 by the
+// processor count at +0xC0, and leaves zero when the read is refused.
+namespace {
+struct RowWalk {
+    CPerformanceInfoBase* pBase;
+    uint32_t nRows;
+};
+
+int64_t KbFromCounter(CPerformanceInfoBase* pBase, const CPerformanceNode278* pNode,
+                      size_t nOffset) {
+    PdhCounterValue v = {};
+    if (g_PerformanceInfoApi.pfnPdhGetFormattedCounterValue(
+            pNode->CounterAt(nOffset), 0x400, nullptr, &v) != 0) {
+        return 0;
+    }
+    return KbFromBytes(v.nLarge);
+}
+
+int64_t LongFromCounter(const CPerformanceNode278* pNode, size_t nOffset) {
+    PdhCounterValue v = {};
+    if (g_PerformanceInfoApi.pfnPdhGetFormattedCounterValue(
+            pNode->CounterAt(nOffset), 0x100, nullptr, &v) != 0) {
+        return 0;
+    }
+    return (int64_t)v.nLong;
+}
+
+// The row itself: every column in the order the format asks for them.
+void RecordOneRow(void* pCtx, CPerformanceNode278* pNode) {
+    RowWalk* pWalk = (RowWalk*)pCtx;
+    CPerformanceInfoBase* pBase = pWalk->pBase;
+
+    double dCpu = 0.0;
+    {
+        PdhCounterValue v = {};
+        if (g_PerformanceInfoApi.pfnPdhGetFormattedCounterValue(
+                pNode->CounterAt(0x20), 0x8200, nullptr, &v) == 0) {
+            int32_t nDivisor = (int32_t)pBase->uC0;
+            if (nDivisor < 1) nDivisor = 0;
+            dCpu = v.dDouble / (double)nDivisor;
+        }
+    }
+    long nMemory = (long)KbFromCounter(pBase, pNode, 0x58);
+    long nPeak = (long)KbFromCounter(pBase, pNode, 0x60);
+    long nPageFile = (long)KbFromCounter(pBase, pNode, 0x68);
+    long nThreads = (long)LongFromCounter(pNode, 0x30);
+    long nHandles = (long)LongFromCounter(pNode, 0x28);
+    long nFaults = (long)LongFromCounter(pNode, 0x50);
+    long nIoRead = (long)LongFromCounter(pNode, 0x40);
+    long nIoWrite = (long)LongFromCounter(pNode, 0x48);
+    long nIoOther = (long)LongFromCounter(pNode, 0x38);
+
+    g_PerformanceInfoApi.pfnLog(pBase,
+        "%8d %25s %6.3f%% %10ld K %10ld K %11ld K %11ld %11ld %13ld %10ld %10ld %10ld",
+        pNode->ProcessId(), pNode->ProcessName(), dCpu, nMemory, nPeak, nPageFile,
+        nThreads, nHandles, nFaults, nIoRead, nIoWrite, nIoOther);
+}
+}  // namespace
+
+void CPerformanceInfoBase::RecordProcessTable() {
+    if (hModule1 == nullptr || hModule2 == nullptr || (int32_t)uC0 <= 0 || hQuery == nullptr) {
+        return;
+    }
+    g_PerformanceInfoApi.pfnLog(this,
+        "%8s %25s %7s %12s %12s %13s %11s %11s %13s %10s %10s %10s",
+        "PID", "Process", "CPU", "Memory", "MemoryPeak", "PageFileBytes",
+        "ThreadCount", "HandleCount", "PageFaults(s)", "IO Read", "IO Write", "IO Other");
+
+    RowWalk walk = { this, 0 };
+    g_PerformanceInfoApi.pfnWalkListB(ListB(), &RecordOneRow, &walk);
 }
 
 }  // namespace tq

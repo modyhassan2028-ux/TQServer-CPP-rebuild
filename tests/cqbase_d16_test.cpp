@@ -602,7 +602,7 @@ int main() {
         Reset();
         base.RecordSystemCounters();
         assert(g_nSleep == 1 && g_nCollect == 2 && g_nSecond == 1);
-        assert(g_Lines.size() == 8);      // the collect failure line is the only absent one
+        assert(g_Lines.size() == 9);      // eight lines, the empty one, and the table header      // eight lines, the empty one, the table header
         assert(g_Lines[0] ==
                "*********************************PerformanceInfo [2026-10-31 23:40:05]*********************************");
         char szRef[512];
@@ -655,6 +655,126 @@ int main() {
         g_PerformanceInfoApi = saved;
     }
 
-    printf("CQBASE_D16_OK: CPerformanceInfo handle, object, Init, teardown and report, 27 units, 102 checks + 16 layout\n");
+
+    // ---- the per process table: the header, then one row read from a payload
+    {
+        static uint8_t abPayload[0x278];
+        static std::vector<std::string> vLines;
+        static uint32_t uCpuReads = 0;
+        struct Api {
+            static void* Alloc(size_t n) { return ::operator new(n); }
+            static void Free(void* p) { ::operator delete(p); }
+            static int FreeLibrary(void*) { return 1; }
+            static int CloseQuery(void*) { return 0; }
+            static uint32_t GetFormatted(void* hCounter, uint32_t uType, void*,
+                                         PdhCounterValue* pValue) {
+                pValue->uStatus = 0; pValue->uPad = 0; pValue->nLarge = 0;
+                size_t nOff = (size_t)(uintptr_t)hCounter - 0x1000;
+                if (uType == 0x8200) { ++uCpuReads; pValue->dDouble = 12.5; return 0; }
+                if (uType == 0x400) {
+                    switch (nOff) {
+                        case 0x58: pValue->nLarge = 3 * 1024 * 1024; break;
+                        case 0x60: pValue->nLarge = 5 * 1024 * 1024; break;
+                        case 0x68: pValue->nLarge = 7 * 1024 * 1024; break;
+                        default:   pValue->nLarge = 0; break;
+                    }
+                    return 0;
+                }
+                switch (nOff) {
+                    case 0x30: pValue->nLong = 33; break;
+                    case 0x28: pValue->nLong = 44; break;
+                    case 0x50: pValue->nLong = 55; break;
+                    case 0x40: pValue->nLong = 66; break;
+                    case 0x48: pValue->nLong = 77; break;
+                    case 0x38: pValue->nLong = 88; break;
+                    default:   pValue->nLong = 0; break;
+                }
+                return 0;
+            }
+            static uint32_t Refuse(void*, uint32_t, void*, PdhCounterValue* pValue) {
+                pValue->uStatus = 1; pValue->uPad = 0; pValue->nLarge = 0;
+                return 1;
+            }
+            static void Walk(void*, void (*pfnRow)(void*, CPerformanceNode278*), void* pCtx) {
+                pfnRow(pCtx, (CPerformanceNode278*)abPayload);
+            }
+            static void Log(void*, const char* pszFormat, ...) {
+                std::string fmt;
+                for (const char* p = pszFormat; *p; ) {
+                    if (*p == '%') {
+                        const char* q = p + 1;
+                        while (*q && strchr("-+ #0123456789.", *q)) ++q;
+                        if (q[0] == 'I' && q[1] == '6' && q[2] == '4' && q[3] == 'd') {
+                            fmt.append(p, q - p); fmt += "lld"; p = q + 4; continue;
+                        }
+                    }
+                    fmt += *p++;
+                }
+                char szLine[512];
+                va_list args; va_start(args, pszFormat);
+                vsnprintf(szLine, sizeof szLine, fmt.c_str(), args);
+                va_end(args);
+                vLines.push_back(szLine);
+            }
+        };
+        PerformanceInfoApi saved = g_PerformanceInfoApi;
+        g_PerformanceInfoApi = {&Api::Alloc, &Api::Free, &Api::FreeLibrary, &Api::CloseQuery};
+        g_PerformanceInfoApi.pfnLog = &Api::Log;
+        g_PerformanceInfoApi.pfnPdhGetFormattedCounterValue = &Api::GetFormatted;
+        g_PerformanceInfoApi.pfnWalkListB = &Api::Walk;
+
+        memset(abPayload, 0, sizeof abPayload);
+        *(int32_t*)(abPayload + 0x18) = 4242;
+        strcpy((char*)(abPayload + 0x70), "svchost.exe");
+        for (size_t nOff : { (size_t)0x00, (size_t)0x08, (size_t)0x10, (size_t)0x20,
+                             (size_t)0x28, (size_t)0x30, (size_t)0x38, (size_t)0x40,
+                             (size_t)0x48, (size_t)0x50, (size_t)0x58, (size_t)0x60,
+                             (size_t)0x68 }) {
+            *(void**)(abPayload + nOff) = (void*)(uintptr_t)(0x1000 + nOff);
+        }
+
+        CPerformanceInfoBase base;
+        base.uC0 = 4;                       // the divisor of the cpu column
+        base.hModule1 = (void*)1;
+        base.hModule2 = (void*)2;
+        base.hQuery = (void*)3;
+        base.RecordProcessTable();
+
+        assert(vLines.size() == 2);
+        char szWant[256];
+        snprintf(szWant, sizeof szWant,
+                 "%8s %25s %7s %12s %12s %13s %11s %11s %13s %10s %10s %10s",
+                 "PID", "Process", "CPU", "Memory", "MemoryPeak", "PageFileBytes",
+                 "ThreadCount", "HandleCount", "PageFaults(s)", "IO Read", "IO Write",
+                 "IO Other");
+        assert(vLines[0] == szWant);
+        char szRow[512];
+        snprintf(szRow, sizeof szRow,
+                 "%8d %25s %6.3f%% %10ld K %10ld K %11ld K %11ld %11ld %13ld %10ld %10ld %10ld",
+                 4242, "svchost.exe", 12.5 / 4.0, 3072L, 5120L, 7168L, 33L, 44L, 55L, 66L,
+                 77L, 88L);
+        assert(vLines[1] == szRow);
+        assert(uCpuReads == 1);
+
+        // a refused read leaves its column at zero
+        g_PerformanceInfoApi.pfnPdhGetFormattedCounterValue = &Api::Refuse;
+        vLines.clear();
+        base.RecordProcessTable();
+        assert(vLines.size() == 2);
+        char szZero[512];
+        snprintf(szZero, sizeof szZero,
+                 "%8d %25s %6.3f%% %10ld K %10ld K %11ld K %11ld %11ld %13ld %10ld %10ld %10ld",
+                 4242, "svchost.exe", 0.0, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L);
+        assert(vLines[1] == szZero);
+
+        // the guard stops everything
+        vLines.clear();
+        base.hModule1 = nullptr;
+        base.RecordProcessTable();
+        assert(vLines.empty());
+
+        g_PerformanceInfoApi = saved;
+    }
+    printf("CQBASE_D16_OK: CPerformanceInfo handle, object, Init, teardown and report, 28 units, 109 checks + 16 layout\n");
     return 0;
 }

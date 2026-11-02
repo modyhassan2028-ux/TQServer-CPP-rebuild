@@ -7952,3 +7952,19 @@ ctor افتراضي (يبني كائن 0x150 على الكومة)، ctor نسخ�
   `(sysPerf[0x38] & 0xfffff) << 2`)، Page = (+0x58، +0x60، +0x70)،
   Context = (+0x80، +0x88، +0x90، +0x98) — كله بنوع 0x100 ما عدا الكاش/الكوميت/البول بنوع 0x400.
 - نداء بفورمات فاضي يمرر آخر قيمتين مقروءتين (عارض محفوظ، بيطبع سطر فاضي).
+
+### D16h — جدول العمليات (2026-11-02) · `performanceinfo.cpp` خلص
+`RecordProcessTable` (النصف التاني من 0x140ba51c0) — المجموع 28 وحدة في الملف:
+- الهيدر: 12 تسمية من البايناري: PID, Process, CPU, Memory, MemoryPeak, PageFileBytes,
+  ThreadCount, HandleCount, PageFaults(s), IO Read, IO Write, IO Other.
+- الصف: 12 عمودًا بترتيب الخام: `%8d` = *(int*)(payload+0x18)، `%25s` = payload+0x70،
+  ثم `%6.3f%%` ثم ست أعمدة، وأخيرًا ثلاثة أعمدة IO.
+- **CPU = قراءة نوع 0x8200 للعداد +0x20 مقسومة على عدد المعالجات (+0xC0)**، ولو القراءة
+  اترفضت العمود = 0.0 (xorpd قبلها).
+- التعيين من التعليمات: Memory=+0x58، MemoryPeak=+0x60، PageFileBytes=+0x68 (كلها 0x400
+  ثم ÷1024 بتقريب نحو الصفر)، ThreadCount=+0x30، HandleCount=+0x28، PageFaults=+0x50،
+  IO Read=+0x40، IO Write=+0x48، IO Other=+0x38 (كلها 0x100).
+- العقدة: العدّادات على 0x00/0x08/0x10 و0x20..0x68، والـpid int عند 0x18، والاسم عند 0x70.
+- **الحد الأقصى للصفوف 1,000,000** (`if (1000000 < count) break`) في حلقة الخام.
+- المشي بترتيب الشجرة (MSVC iterator) خارج النطاق: hook `pfnWalkListB` يسلّم كل payload
+  للصف، والصف نفسه منقول حرفيًا. التمرير من `RecordSystemCounters` زي الخام.

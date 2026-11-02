@@ -59,14 +59,23 @@ struct CPerformanceNode50 {
 };
 
 // 0x140ba1d20 — a six hundred and thirty two byte node, same shape
+// The payload the per process table reads: the pid at +0x18, the name text at +0x70, and
+// thirteen counter handles that skip the pid slot (from the reads at 0x140ba5a17 and on).
 struct CPerformanceNode278 {
-    void* p0;              // +0x00
-    void* p1;              // +0x08
-    void* p2;              // +0x10
+    void* p0;              // +0x00  counter handle 0
+    void* p1;              // +0x08  counter handle 1
+    void* p2;              // +0x10  counter handle 2
     uint8_t unknown18[0x258];
     uint8_t uFlag270;      // +0x270
     uint8_t uFlag271;      // +0x271
     uint8_t tail[0x06];
+
+    int32_t ProcessId() const { return *(const int32_t*)((const uint8_t*)this + 0x18); }
+    const char* ProcessName() const { return (const char*)((const uint8_t*)this + 0x70); }
+    // 0x140ba5887 and the reads after it name their counter by these offsets
+    void* CounterAt(size_t nOffset) const {
+        return *(void* const*)((const uint8_t*)this + nOffset);
+    }
 };
 
 // The two intrusive lists the measuring object keeps. Only what the ported half of the
@@ -115,6 +124,12 @@ struct PerformanceInfoApi {
     struct tm* (*pfnLocaltime)(const int32_t* pTime) = DefaultLocaltime;
     void (*pfnLogSecond)(void* pBase, const char* pszFormat, const char* pszStamp) =
         DefaultLogSecond;               // 0x140ba4560, the second reporter
+    // The in order walk of the larger list belongs to the container (an MSVC tree
+    // iterator, out of scope like the rest of those internals). The hook hands each
+    // payload to the row that prints it, so the row stays exactly what the binary does.
+    void (*pfnWalkListB)(void* pList, void (*pfnRow)(void*, CPerformanceNode278*),
+                         void* pCtx) = DefaultWalkListB;
+    static void DefaultWalkListB(void*, void (*)(void*, CPerformanceNode278*), void*) {}
     // 0x140ba3c90 erases one node from the smaller list's tree and 0x140ba1a90 is what
     // the larger list calls before it deletes a node; both belong to the counter setup
     // that is still unported, so their hooks start empty.
@@ -144,8 +159,8 @@ public:
     CPerformanceInfoBase();       // 0x140ba5df0
     void Init(const char* pszName);    // 0x140ba11c0
     void SetupCounters();              // 0x140ba0600, sixteen counter paths on one query
-    void RecordSystemCounters();       // 0x140ba51c0 up to the process table
-    void RecordProcessTable();         // 0x140ba51c0 from the table header on, not ported
+    void RecordSystemCounters();
+    void RecordProcessTable();         // 0x140ba51c0, its header and the per process rows
     ~CPerformanceInfoBase();      // 0x140ba50b0
     static const void* const* Table();   // 0x140bcbb30, slot 0 is the deleting dtor
 
