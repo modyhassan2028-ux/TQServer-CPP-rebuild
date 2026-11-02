@@ -8055,3 +8055,25 @@ ctor افتراضي (يبني كائن 0x150 على الكومة)، ctor نسخ�
 مشي كامل لحذف العقد (0x140b9f8c0 — داخلية MSVC، seam)، ثم حذف الرأس وتصغيره لصفر،
 ثم حذف البروكسي، ثم حذف القائمة نفسها، وأخيرًا تصفير العضو +0x08.
 تخطيط القائمة: بروكسي +0x00، رأس +0x30، عدد +0x38 (نفس std::list).
+
+## Syndicate D22 (2026-11-02) — أول دفعة في `Syndicate.dll`
+كل ما وصل له المشروع في Syndicate قبل الدفعة دي: صفر. الخريطة من البايناري:
+`modules\syndicate\src\` فيه 15 ملفًا، والمسارات موجودة في 55 دالة فقط (60KB) من
+إجمالي 9,865 دالة — يعني الباقي بلا مسار ولا اسم.
+كمان اتعملت خريطة نموذج الكائنات من دوال `CMyHeap::Alloc`: 9 كلاسات وأحجامها
+(CSyndicate 0x450، CSynAttr 0x50، CMeedRecord 0x40، CCrossVlmResult 0x38،
+CSynDomain 0x28، CSynFacility 0x20، CSynArenicMeed 8 …).
+7 وحدات في الدفعة (4 ملفات في `modules/syndicate/src/`):
+- `CCrossVlmResult::InstanceGet` (0x141741a30): كائن واحد محفوظ، كومة `CCrossVlmResult`،
+  0x38، والبناء مرة واحدة فقط مع MYASSERT "m_pSelf" سطر 0x32.
+- `CSynArenicMeed::InstanceGet` (0x141781b60): 8 بايت، **بلا كونستركتر** — تصفير مباشر،
+  MYASSERT سطر 0x5bd.
+- `CMeedRecord::Create` (0x1417791e0): **غير محفوظ** — كل نداء كائن جديد، 0x40،
+  والكونستركتر يأخذ المعرّف، وCHECKF بنص `pMR` سطر 0x1a5.
+- `CSynAttr::Create` (0x141788b60): 0x50، الترتيب الحرفي: صفر، ثلاث وسائط، ثم
+  +0x30/+0x34/+0x3c/+0x40/+0x44 = 0، **+0x48 = 1**، +0x4c = 0، ثم +0x20/+0x28 = 0.
+- `CSynDomain::Create` (0x1417c4b60): 0x28، صفر ثم صفر عند +0x08 ثم الوسائط.
+- `CSynFacility::Create` (0x1417c5320): 0x20، صفر ثم الوسائط.
+- `CSyndicate::Create` (0x1417a28c0): 0x450 ويسلّم الكل للكونستركتر 0x1417a2470 (seam).
+الملفات: crossvlmresult / synarenicmeed / meedrecord (مساراتها معروفة)،
+و`synobjects` للكلاسات اللي البايناري ما سمّاش ملفها.
