@@ -129,7 +129,8 @@ int main() {
 
     // ---- CMyMultiEvent: the guards on Signal, and the Wait arithmetic
     void* apHandles[3] = { &nFake, (void*)0x10, nullptr };
-    CMyMultiEvent me;
+    // the constructor now exists, so the fields are set through it and then replaced
+    CMyMultiEvent me(0, false);
     me.nCount = 3;
     me.phEvents = apHandles;
     assert(me.Signal(-1) == -1);
