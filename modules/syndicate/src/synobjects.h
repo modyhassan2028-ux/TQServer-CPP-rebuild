@@ -1,8 +1,7 @@
 // ============================================================================
-// synobjects.h — RAW Syndicate.dll v6159 · the objects whose source file the binary
-//   does not name. Four classes, each with the creator that the binary reaches for them
-//   through: the class's own CMyHeap, then the fields the creator sets in the order it
-//   sets them. The constructors that are not ported yet are seams.
+// synobjects.h — RAW Syndicate.dll v6159 · the objects whose source file the binary does
+//   not name, each with the creator it is reached through and, for the two that have one,
+//   the release that takes it apart again.
 // +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 #ifndef SYNDICATE_SYNOBJECTS_H
 #define SYNDICATE_SYNOBJECTS_H
@@ -38,10 +37,12 @@ public:
     static CSyndicate* Create(void* pOwner, void* p2, void* p3);
 };
 
-// 0x1417c4b60 — 0x28 bytes: a zero qword, a zero dword at +0x08, then the three arguments
+// 0x1417c4b60 creator, 0x1417c4c00 release · 0x28 bytes: a zero qword, a zero dword at
+// +0x08, then the three arguments
 class CSynDomain {
 public:
     static CSynDomain* Create(void* p1, void* p2, void* p3);
+    static void Release(CSynDomain* pDomain);      // 0x1417c4c00
     uint64_t u0;        // +0x00
     uint32_t u8;        // +0x08
     void* p1;           // +0x10
@@ -49,10 +50,12 @@ public:
     void* p3;           // +0x20
 };
 
-// 0x1417c5320 — 0x20 bytes: a zero qword and the three arguments
+// 0x1417c5320 creator, 0x1417c53c0 release · 0x20 bytes: a zero qword and the three
+// arguments
 class CSynFacility {
 public:
     static CSynFacility* Create(void* p1, void* p2, void* p3);
+    static void Release(CSynFacility* pFacility);  // 0x1417c53c0
     uint64_t u0;        // +0x00
     void* p1;           // +0x08
     void* p2;           // +0x10
@@ -61,6 +64,13 @@ public:
 
 // 0x1417a2470, the CSyndicate constructor, not ported yet
 extern void (*g_pfnConstructSyndicate)(void* pMem, void* pOwner, void* p2, void* p3);
+
+// the two halves of each release, in the order the binary calls them.
+// each one is handed the three undefined values the decompiler cannot name.
+extern void (*g_pfnDestroyDomain)(void* pDomain, void* u1, void* u2, void* u3);   // 0x1417c4550
+extern void (*g_pfnFreeDomainAlloc)(void* pDomain);                              // 0x1417c4a70
+extern void (*g_pfnDestroyFacility)(void* pFacility, void* u1, void* u2, void* u3);  // 0x1417c4c50
+extern void (*g_pfnFreeFacilityAlloc)(void* pFacility);                          // 0x1417c5230
 
 }  // namespace tq
 

@@ -70,4 +70,30 @@ CSynFacility* CSynFacility::Create(void* p1_, void* p2_, void* p3_) {
     return p;
 }
 
+static void DefaultDestroyDomain(void*, void*, void*, void*) {}
+static void DefaultFreeDomainAlloc(void*) {}
+static void DefaultDestroyFacility(void*, void*, void*, void*) {}
+static void DefaultFreeFacilityAlloc(void*) {}
+void (*g_pfnDestroyDomain)(void*, void*, void*, void*) = DefaultDestroyDomain;
+void (*g_pfnFreeDomainAlloc)(void*) = DefaultFreeDomainAlloc;
+void (*g_pfnDestroyFacility)(void*, void*, void*, void*) = DefaultDestroyFacility;
+void (*g_pfnFreeFacilityAlloc)(void*) = DefaultFreeFacilityAlloc;
+
+// 0x1417c4c00 — a null domain is not touched at all; anything else is taken apart and
+// then handed back, in that order.
+void CSynDomain::Release(CSynDomain* pDomain) {
+    if (pDomain != nullptr) {
+        g_pfnDestroyDomain(pDomain, nullptr, nullptr, nullptr);
+        g_pfnFreeDomainAlloc(pDomain);
+    }
+}
+
+// 0x1417c53c0 — the same two steps for a facility
+void CSynFacility::Release(CSynFacility* pFacility) {
+    if (pFacility != nullptr) {
+        g_pfnDestroyFacility(pFacility, nullptr, nullptr, nullptr);
+        g_pfnFreeFacilityAlloc(pFacility);
+    }
+}
+
 }  // namespace tq

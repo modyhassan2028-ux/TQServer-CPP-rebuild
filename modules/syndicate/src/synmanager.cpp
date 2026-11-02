@@ -13,9 +13,9 @@ static const char kSynManagerSource[] =
 static void* DefaultFindSyn(CSynManager*, uint32_t) { return nullptr; }
 static void* DefaultGetSynName(void*) { return nullptr; }
 static bool DefaultDomainInit(CSynDomain*, uint32_t, void*) { return false; }
-static void DefaultDomainRelease(CSynDomain*) {}
+static void DefaultDomainRelease(CSynDomain* p) { CSynDomain::Release(p); }
 static bool DefaultFacilityInit(CSynFacility*, uint32_t, int32_t) { return false; }
-static void DefaultFacilityRelease(CSynFacility*) {}
+static void DefaultFacilityRelease(CSynFacility* p) { CSynFacility::Release(p); }
 static void DefaultAddDomainToSyn(void*, CSynDomain*) {}
 static void DefaultAddFacilityToSyn(void*, CSynFacility*) {}
 static void DefaultMapFindByName(void*, const std::string&) {}
