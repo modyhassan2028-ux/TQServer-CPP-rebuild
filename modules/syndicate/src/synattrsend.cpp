@@ -2,7 +2,10 @@
 #include "modules/syndicate/src/synattrsend.h"
 
 #include "modules/syndicate/src/SyndicateAppoint3de.h"
+#include "modules/syndicate/src/SyndicateCMsgCtors.h"
 #include "modules/syndicate/src/SyndicateMsgProcess3.h"
+#include "modules/syndicate/src/module.h"
+#include "modules/syndicate/src/synuserattr.h"
 #include "modules/syndicate/src/msg/cmsgbase.h"
 
 #include <cstddef>
@@ -11,7 +14,9 @@
 namespace tq {
 
 uint32_t (*g_fnSynMsgPackerSize)(void*) = nullptr;
-void (*g_fnSynAttrInsertCore)(void*, void*, void*, uint32_t, char) = nullptr;
+void (*g_fnSynAttrFillRec)(void*, void*) = nullptr;
+bool (*g_fnSynAttrMsgInit)(void*, void*, void*) = nullptr;
+void (*g_fnSynAttrInsertCore)(void*, void*, void*, uint32_t, char) = &SynAttrInsertCore;
 
 namespace {
 
@@ -70,6 +75,79 @@ void SynAttrInsertById(void* pOwner, void* pUser, uint32_t uId, char cAnnounce) 
     }
     void* pObj = ::syndicate::g_fnA84FindUserById(*(void**)(U8(pOwner) + 0x90), uId);
     g_fnSynAttrInsertCore(pOwner, pUser, pObj, uId, cAnnounce);
+}
+
+// ============================================================================
+// 0x1417c5640 — the shared insert core. The manager lives at owner + 0x88 and is driven
+// through three vtable slots, in this order: 0x3f (compare the id), 1 (insert the
+// attribute message), 0x1b (commit, ALWAYS, even when the insert was refused). The
+// announce message goes out through the same slot 1 only when the caller asked for it.
+// ============================================================================
+namespace {
+
+// the manager is driven by raw vtable arithmetic, exactly as the binary does it
+uint32_t ManagerCompareId(void* pMgr, uint32_t uId) {
+    typedef uint32_t (*Slot3fFn)(void*, uint32_t);
+    return ((Slot3fFn)(*(void***)pMgr)[0x3f])(pMgr, uId);
+}
+
+void ManagerInsert(void* pMgr, uint32_t uId, void* pMsg) {
+    typedef void (*Slot1Fn)(void*, uint32_t, void*);
+    ((Slot1Fn)(*(void***)pMgr)[1])(pMgr, uId, pMsg);
+}
+
+void ManagerCommit(void* pMgr, uint32_t uId) {
+    typedef void (*Slot1bFn)(void*, uint32_t);
+    ((Slot1bFn)(*(void***)pMgr)[0x1b])(pMgr, uId);
+}
+
+}  // namespace
+
+void SynAttrInsertCore(void* pOwner, void* pUser, void* pAttrInfo, uint32_t uId,
+                       char cAnnounce) {
+    if (pUser == nullptr) {
+        // ORIGINAL line 0x348, the only path that skips every destructor
+        ReportCheck((const void*)0x141836e5cULL, 0x348);
+        return;
+    }
+    uint8_t aRec[0x28];
+    std::memset(aRec, 0, sizeof(aRec));
+
+    void* pMgr = *(void**)(U8(pOwner) + 0x88);
+    uint32_t uCompare = ManagerCompareId(pMgr, uId);
+    void* pActor = (uCompare == (uint32_t)SynUserAttrId(pUser)) ? pUser : nullptr;
+
+    if (pAttrInfo != nullptr) g_fnSynAttrFillRec(pAttrInfo, aRec);
+
+    // the 1088-byte attribute message
+    uint8_t aAttrMsg[1088];
+    std::memset(aAttrMsg, 0, sizeof(aAttrMsg));
+    ::syndicate::CtorCMsgSynAttrInfo(aAttrMsg);
+    if (g_fnSynAttrMsgInit(aAttrMsg, aRec, pActor)) {
+        ManagerInsert(pMgr, uId, aAttrMsg);
+    } else {
+        ReportCheck((const void*)0x14183a0c8ULL, 0x35a);
+    }
+    ManagerCommit(pMgr, uId);          // unconditional, the refusal path reaches it too
+
+    if (cAnnounce != 0) {
+        // ORIGINAL: rbx = &DAT_141827409 — the image's empty string; a real "" stands in
+        static const char kEmptyString[] = "";
+        const char* pszAnnounce = kEmptyString;
+        uint32_t uNumber = 0;
+        if (pActor != nullptr) {
+            pszAnnounce = SynUserAttrName(pActor);
+            uNumber = (uint32_t)SynUserAttrNumber(pActor);
+        }
+        uint8_t aAnnMsg[1064];
+        std::memset(aAnnMsg, 0, sizeof(aAnnMsg));
+        ::syndicate::CtorCMsgSyndicate(aAnnMsg);
+        if (SynMsgSyndicateAnnounce(aAnnMsg, 0x1b, uNumber, pszAnnounce)) {
+            ManagerInsert(pMgr, uId, aAnnMsg);
+        }
+        ::syndicate::g_fnModMem0428(aAnnMsg);      // 0x1417db330
+    }
+    ::syndicate::g_fnModMem1088(aAttrMsg);         // 0x1417da8b0
 }
 
 }  // namespace tq

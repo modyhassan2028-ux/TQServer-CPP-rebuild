@@ -19,7 +19,16 @@ namespace tq {
 
 // tq::CStringPacker::GetSize — the packer at +0x410 of the message
 extern uint32_t (*g_fnSynMsgPackerSize)(void* pPacker);
-// 0x1417c5640 — the shared insert core (not ported yet)
+// 0x141788040 — fill the 0x28 attribute record from the attribute pointer
+extern void (*g_fnSynAttrFillRec)(void* pAttrInfo, void* pRec);
+// 0x1417da910 — build the attribute message out of the record (false = refused)
+extern bool (*g_fnSynAttrMsgInit)(void* pMsg, void* pRec, void* pUser);
+
+// 0x1417c5640 — the shared insert core (this implementation)
+void SynAttrInsertCore(void* pOwner, void* pUser, void* pAttrInfo, uint32_t uId, char cAnnounce);
+
+// the hook the two entries call, so a caller (or a test) can replace the core
+
 extern void (*g_fnSynAttrInsertCore)(void* pOwner, void* pUser, void* pAttrInfo,
                                      uint32_t uId, char cAnnounce);
 
