@@ -66,6 +66,9 @@ uint64_t SynRecordReleaseMaps(void* pOwner) {
         ::operator delete(pWalk);
         pWalk = pNext;
     }
+    // the decompiler dropped this store; the instructions at 0x1417cdf32..0x1417cdf36 have it:
+    //   mov rax,[r13+0x38] ; mov [rax+0x8],rax     (the head's parent points back at itself)
+    *(uint8_t**)(*(uint8_t**)(At(pOwner, 0x38)) + 0x08) = *(uint8_t**)(At(pOwner, 0x38));
     *(uint64_t*)(At(pOwner, 0x40)) = 0;
     *(uint8_t**)(*(uint8_t**)(At(pOwner, 0x38))) = *(uint8_t**)(At(pOwner, 0x38));
     *(uint8_t**)(*(uint8_t**)(At(pOwner, 0x38)) + 0x10) = *(uint8_t**)(At(pOwner, 0x38));
