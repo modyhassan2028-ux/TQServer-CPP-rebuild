@@ -9,9 +9,12 @@
 
 #include <cstdint>
 
+// the port already keeps one hook for _invalid_parameter_noinfo (syndicatelogic.h, the same
+// one D98 bound): global namespace, so this is a re-declaration, not a second symbol
+namespace syndicate { extern void (*g_fnInvalidParam)(void); }
+
 namespace tq {
 
-extern void (*g_fnInvalidParam)(void);   // _invalid_parameter_noinfo
 
 // 0x1417c6c80 — call slot zero of the object held at +0x98
 void SynIterDerefHolder(void* pIter);

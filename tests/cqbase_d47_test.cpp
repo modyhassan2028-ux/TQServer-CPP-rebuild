@@ -16,7 +16,6 @@ static int g_nInvalid = 0;
 #define CHECK(x) do { ++g_nChecks; assert(x); } while (0)
 
 static void HookInvalid() { ++g_nInvalid; }
-void (*tq::g_fnInvalidParam)(void) = &HookInvalid;
 
 static int g_nSlot0 = 0;
 static void* g_pSlot0Self = nullptr;
@@ -27,6 +26,7 @@ static void Slot0(void* pSelf) {
 }
 
 int main() {
+        ::syndicate::g_fnInvalidParam = &HookInvalid;
     g_aVft[0x00 / 8] = (void*)&Slot0;
 
     uint8_t aObj[0x30];

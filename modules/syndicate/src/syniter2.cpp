@@ -28,7 +28,7 @@ void SynIterDerefSelf(void* pIter) {
 bool SynIterEqualA(void* pLeft, void* pRight) {
     void** pL = (void**)pLeft;
     void** pR = (void**)pRight;
-    if (pL[0] == nullptr || pL[0] != pR[0]) g_fnInvalidParam();
+    if (pL[0] == nullptr || pL[0] != pR[0]) ::syndicate::g_fnInvalidParam();
     return pL[1] != pR[1];
 }
 
@@ -36,7 +36,7 @@ bool SynIterEqualA(void* pLeft, void* pRight) {
 bool SynIterEqualB(void* pLeft, void* pRight) {
     void** pL = (void**)pLeft;
     void** pR = (void**)pRight;
-    if (pL[0] == nullptr || pL[0] != pR[0]) g_fnInvalidParam();
+    if (pL[0] == nullptr || pL[0] != pR[0]) ::syndicate::g_fnInvalidParam();
     return pL[1] != pR[1];
 }
 
@@ -55,7 +55,7 @@ void* SynIterValue(void* pIter) {
     void* pOwner = p[0];
     void* pHead = nullptr;
     if (pOwner == nullptr) {
-        g_fnInvalidParam();
+        ::syndicate::g_fnInvalidParam();
         pOwner = p[0];
         pHead = nullptr;
         // the release build never returns from the call, so this jump is unreachable there
@@ -63,7 +63,7 @@ void* SynIterValue(void* pIter) {
     }
     pHead = *(void**)pOwner;
 Checked:
-    if (p[1] == *(void**)((uint8_t*)pHead + 0x30)) g_fnInvalidParam();
+    if (p[1] == *(void**)((uint8_t*)pHead + 0x30)) ::syndicate::g_fnInvalidParam();
     return (uint8_t*)p[1] + 0x18;
 }
 
@@ -73,14 +73,14 @@ void* SynIterValue2(void* pIter) {
     void* pOwner = p[0];
     void* pHead = nullptr;
     if (pOwner == nullptr) {
-        g_fnInvalidParam();
+        ::syndicate::g_fnInvalidParam();
         pOwner = p[0];
         pHead = nullptr;
         if (pOwner == nullptr) goto Checked;
     }
     pHead = *(void**)pOwner;
 Checked:
-    if (p[1] == *(void**)((uint8_t*)pHead + 0x30)) g_fnInvalidParam();
+    if (p[1] == *(void**)((uint8_t*)pHead + 0x30)) ::syndicate::g_fnInvalidParam();
     return (uint8_t*)p[1] + 0x18;
 }
 
@@ -89,7 +89,7 @@ void* SynIterInit(void* pOut, void* pOwner, void* pSource) {
     void** p = (void**)pOut;
     p[0] = nullptr;
     p[1] = pOwner;
-    if (pSource == nullptr) g_fnInvalidParam();
+    if (pSource == nullptr) ::syndicate::g_fnInvalidParam();
     // unreachable in the original: _invalid_parameter_noinfo terminates before this read
     p[0] = *(void**)pSource;
     return pOut;
