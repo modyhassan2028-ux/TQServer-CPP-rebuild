@@ -2,6 +2,7 @@
 // address map + the seam list).
 #include <cstdio>
 #include "modules/syndicate/src/syndicatelogic.h"
+#include "modules/syndicate/src/synmanager3.h"
 #include "modules/syndicate/src/SyndicateLeagueCmp.h"       // LeagueMemberLookup
 #include "modules/syndicate/src/SyndicateLogRemove.h"        // LogRecMapFind
 #include "modules/syndicate/src/SyndicateCMsgCtors.h"        // the msg ctors
@@ -51,7 +52,10 @@ static void DefSoon(void*, uint32_t) {}
 void (*g_fnT1DelRoleSoon)(void*, uint32_t) = DefSoon;
 static int64_t DefDays(void*) { return 0; }
 int64_t (*g_fnT1GetDestroyDays)(void*) = DefDays;
-static int32_t DefOptGet(void*, uint32_t) { return 0; }
+// the real 0x1417c5830, ported in synmanager3.cpp; the hook stays so a test can still watch it
+static int32_t DefOptGet(void* pManager, uint32_t uId) {
+    return tq::SynManagerItemGet(pManager, (int32_t)uId);
+}
 int32_t (*g_fnT1OptGet)(void*, uint32_t) = DefOptGet;
 static void DefSetPlayer(void*, uint32_t, uint32_t) {}
 void (*g_fnT1SetPlayer)(void*, uint32_t, uint32_t) =
