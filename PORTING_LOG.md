@@ -8575,3 +8575,15 @@ CSynDomain 0x28، CSynFacility 0x20، CSynArenicMeed 8 …).
   والجسمان متطابقان بايت ببايت.
 - حالات الحالة: `+0x10` size، `+0x14` block، `+0x18` position، `+0x1c` last_returned.
 - 120 تحقق، 6/6 خضراء.
+
+## Syndicate D59 (2026-11-05) — خانتا BackUp لتدفّقات الخروج (2 وحدات)
+- 0x1417e66f0 `StringOutputStream::BackUp`: فحص `count<0` (سطر 0xbc)، ثم مقارنة **غير
+  موقّعة** `(uint64)count > target_->size()` (سطر 0xbd والنص 0x1418403f0)، ثم
+  `target_->resize(size - count)` عبر MSVCP90 (IAT 0x1418231c0 size و0x1418231c8 resize).
+  السلوك الخام: `count=-2` بيطلّع بلاغين (0xbc و0xbd) وبعدين resize بـ6 (لف غير موقّع)،
+  و`count>size` بيوصل لـ`std::length_error` من resize — مطابق لـMSVCP90.
+- 0x1417e74c0 `CopyingOutputStreamAdaptor::BackUp`: `count<0` (0x165)، ثم
+  `buffer_used_ != buffer_size_` (+0x2c مقابل +0x28) بسطر 0x166 ونصّين، ثم
+  `count > buffer_used_` بسطر 0x168 ونصّين، وأخيرًا `buffer_used_ -= count` بلف 32-بت.
+  لاحظ إن المقارنة الأولى **مساواة** (jne على الفرق) مش أكبر/أصغر.
+- 38 تحقق، 6/6 خضراء.
