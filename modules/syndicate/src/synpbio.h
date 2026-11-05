@@ -1,8 +1,12 @@
 // ============================================================================
 // synpbio.h — RAW Syndicate.dll v6159 · the last missing slots of the three protobuf io
 //   stream classes, and the four numeric-limit statics that go with them.
-//     0x1417e64a0  ArrayInputStream's  ByteCount   -> (int64)*(int*)(self + 0x18)
-//     0x1417e68b0  ArrayOutputStream's ByteCount  -> the std::string size at self + 8
+//     0x1417e64a0  ArrayOutputStream's ByteCount   -> (int64)*(int*)(self + 0x18)
+//                  (proved: the only .rdata reference to this address sits in the table at
+//                   0x141840ca0, and 0x1417e64a0's body is the sign-extend of +0x18.
+//                   The INPUT stream's ByteCount is 0x1417e6050, ported in synpbinstream
+//                   as SynPbArrayInByteCount6050; the two bodies are byte-identical.)
+//     0x1417e68b0  the std::string size at self + 8
 //     0x1417e7750  CopyingAdaptor's    ByteCount  -> *(int64*)(self + 0x18) + (int)*(self + 0x2c)
 //     0x1417e7980  the constant-false slot        -> 0
 //     0x1417e7d90  the aliasing refusal: the protobuf log carries severity 3,
