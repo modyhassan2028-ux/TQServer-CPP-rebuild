@@ -7,8 +7,12 @@
 //     index 0x00 -> container vtable +0x40 (slot 8)  : the id      (default 0)
 //     index 0x02 -> container vtable +0x78 (slot f)  : the name    (default "")
 //     index 0x2b -> container vtable +0x48 (slot 9)  : the number  (default 0)
-//   The container classes themselves are not ported yet, so the dispatch is expressed with
-//   the raw vtable arithmetic the binary performs, not with invented C++ types.
+//   WHAT THE PROVIDER IS (proved 2026-11-05, see PORTING_LOG): user + 0x428 is filled by
+//   0x14178df30, which calls DB.dll!InstanceGet (IAT 0x141823108) and then the factory's
+//   vt[4] with the blob at 0x141831938 — the ASCII name "cq_syndicate". So the provider is
+//   a DB.dll table, and the slot-8 / slot-9 / slot-0xf readers belong to its record class,
+//   which lives in DB.dll and not in this binary. The dispatch here stays raw vtable
+//   arithmetic on purpose: no class of ours is involved.
 // ============================================================================
 #ifndef SYNDICATE_SYNUSERATTR_H
 #define SYNDICATE_SYNUSERATTR_H
