@@ -101,7 +101,10 @@ def main():
     text = ported_text()
     rows = []
     for vt, name, slots in vtables():
-        miss = [s for s in slots if ('%x' % s) not in text]
+        # a slot counts as ported only when a real `0x<addr>` marker exists. A bare '%x'
+        # matched comment labels like `// ---- FUN_14173f950 ----`, which made the ledger
+        # report zero incomplete tables by construction.
+        miss = [s for s in slots if ('0x%x' % s) not in text]
         rows.append((len(miss), name, vt, len(slots), miss))
     rows.sort(key=lambda r: (r[0] == 0, -r[0]))
     total = len(rows)
