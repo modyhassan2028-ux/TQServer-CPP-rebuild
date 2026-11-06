@@ -8607,3 +8607,17 @@ CSynDomain 0x28، CSynFacility 0x20، CSynArenicMeed 8 …).
   تاج صفر أو wire type 4 ينهي الحلقة بنجاح؛ خلاف ذلك 0x1417f3f50 يتخطى الحقل. الاتنين بينضفوا
   الغلاف (0x1417e45d0) والقارئ (0x1417e6510)، والفشل يرجّع 0.
 - 12 سييم (اتنين منهم جديدين: 0x1417e3d80 و0x1417eb540)، 39 تحقق، 6/6 خضراء.
+
+## Syndicate D61 (2026-11-06) — سكانر كلاسات RTTI + إكمال 3 كلاسات
+- **أداة جديدة**: `tools/scan_classes.py` بتقرأ الـRTTI الحقيقي: عند `vtable-8` مؤشّر
+  الـCompleteObjectLocator (عنوان كامل، جوّاه TypeDescriptor **RVA** عند +0x0C)، والاسم المانجل
+  `. ?AV<Class>@@`. النتيجة: **75 جدول حقيقي، 53 مكتمل، 22 فيهم صفوف ناقصة** — بدل الأرقام
+  المضلّلة القديمة اللي كانت بتعدّ صفوف الجداول كلاسات.
+- الجداول الناقصة معظمها مكتبة protobuf/std (CopyingInputStreamAdaptor 5 صفوف، ArrayOutputStream 3،
+  StringOutputStream 2، std::logic_error/length_error/out_of_range/bad_alloc 2 لكل واحد)،
+  وفيه 3 كلاسات لعبة: `CSyndicate@tq` و`CToken@syndicate` و`CMsgLeagueConcubinesPB`.
+- **D61**: 0x1417a2890 مُدمّر CSyndicate الحاذف (بينادي 0x1417a1bf0 دايماً، والتحرير
+  0x141791990 بس لو بت 0 في الامتيازات)، 0x1417d5090 مُدمّر CToken (بيختم الـvtable
+  0x14183be50 **قبل** التحرير، وما بينادي أي مُدمّر جسم)، و0x1417ec100 thunk 5 بايت
+  `jmp 0x1417ebf80` — الصف الثامن في جدول CMsgLeagueConcubinesPB.
+- 6/6 خضراء.
