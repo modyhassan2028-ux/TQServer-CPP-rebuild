@@ -8651,3 +8651,31 @@ CSynDomain 0x28، CSynFacility 0x20، CSynArenicMeed 8 …).
 - **خلل خام محفوظ**: `Skip` بيقارن ردّ الدفق (bool = 0 أو 1) بعدد البايتات المطلوبة، فالنتيجة
   true بس لما يفضل بايت واحد. الاختبار بيثبت الحالتين (3 بايت → false، 1 بايت → true).
 - 58 تحقق، 6/6 خضراء. الجداول المكتملة: **63 من 75**.
+
+## Syndicate D64 (2026-11-06) — آخر 18 صفًا: **كل جداول الـRTTI مكتملة 75/75**
+- **11 مُدمّر حاذف متطابق** (54 بايت لكل واحد): جسم المُدمّر ثم التحرير 0x1417f2fdc لو بت 0،
+  وبيرجّع `this`. أجسامهم من أهداف النداء: `ArrayOutputStream`→0x1417e6120،
+  `StringOutputStream`→0x1417e6510، `CopyingOutputStreamAdaptor`→0x1417e7360،
+  `CopyingInputStream`→0x1417e68e0، `ZeroCopyInputStream`→0x1417e7d50،
+  `ZeroCopyOutputStream`→0x1417e7d70، `CopyingOutputStream`→0x1417e7280،
+  `FunctionClosure0`→0x1417e1040، `FatalException`→0x1417e13e0، `Closure`→0x1417e1020،
+  `MessageLite`→0x1417de5a0.
+- **0x1417e6160** `ArrayOutputStream::Next`: رفض لما `position_ >= size_` (مع تصفير
+  last_returned_)، وإلا `min(size_-position_, +0x14)` عبر 0x1417e5aa0 ثم `data = buffer+position_`
+  و`position_ += last_returned_`.
+- **0x1417e6220** `ArrayOutputStream::BackUp`: فحوص 0x88 (نصّين: 0x141840120 و0x141840150،
+  والتاني **بدون** مسافة بادئة عكس نظيره في الـadaptor — اتحقّقت من البايتات) ثم 0x8a ثم 0x8b،
+  وبعدين `position_ -= count` و`last_returned_ = 0`.
+- **0x1417e7420** `CopyingOutputStreamAdaptor::Next`: البوابة 0x1417e7770 بتشتغل **بس** لما
+  `used == size`، وبعدين الفلاش 0x1417e7830، والتسليم `buffer+used` و`size-used`، و`used = size`.
+- **0x1417e6900** `CopyingInputStream::Skip`: حَلقة بمخزن 4 كيلو على الستاك، تقصير بالمُحدِّد
+  0x1417e5aa0، ثم `Read` عبر vt[1]، والبايتات بتتجمّع لحد ما تخلص.
+- **0x1417e15b0** `FunctionClosure0::Run`: بيقرا بايت `+0x10` **قبل** النداء (فلو الدالة صفّرته
+  هو بيحذف نفسه برضه)، بينادي `[this+8](this)`، وبعدين `vt[0](this, 1)`.
+- **0x1417e1430** `FatalException`: `std::string::empty` على `+0x28`.
+- **0x1417e6550** `StringOutputStream::Next`: لو فيه سعة فاضية بيعمل `resize(capacity)` وياخد
+  الذيل، وإلا فيه نمو `max(16, old*2)` بعد فحص `numeric_limits<int>::max()/2` اللي بيسجّل
+  مستوى 2 بسطر 0xaa والنصّين 0x1418402e0 و0x141840318 ويرجّع false.
+- **تصحيح مهم**: الـclamp 0x1417e0370 في مسار النمو **أكبر-قيمة (max)**، والـ0x1417e5aa0 في مسار
+  Next **أصغر-قيمة (min)** — الاتنين اتجرّبوا منفصلين.
+- 128 تحقّق، 6/6 خضراء. **سكانر RTTI: 75/75 جدول مكتمل، صفر صفوف ناقصة.**

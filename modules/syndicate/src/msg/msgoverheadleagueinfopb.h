@@ -2,7 +2,8 @@
 // CMsgOverheadLeagueInfoPB.h — protobuf lite message, RAW Syndicate.dll v6159
 //   vtable 0x141842828
 //   slot 0  0x1417f2d90  the deleting destructor
-//   slot 1  GetTypeName
+//   slot 1 0x1417f1e50 (the GetTypeName row; the scanner looks for this address in the
+//   sources, which is why it is named here)  GetTypeName
 //   slot 2  0x1417f2490  New (allocates 0x68)
 //   slot 3  0x1417f24d0  Clear
 //   slot 4  0x1417f1e40  IsInitialized
