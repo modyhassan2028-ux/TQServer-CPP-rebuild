@@ -248,7 +248,7 @@ def lift(addr, funcs):
             d = enc(rest)
             if d is None:
                 raise SystemExit('neg form: %r' % ins)
-            w = d[2] if d[0] == 'reg' else d[3]
+            w = d[2] if d[0] in ('reg', 'sub') else d[3]
             bits = w * 8
             mask = '~0ULL' if bits == 64 else '0x%xULL' % ((1 << bits) - 1)
             body.append('    { const uint64_t m = %s; const uint64_t v = (%s) & m; const uint64_t r = (0 - v) & m;'
@@ -267,7 +267,7 @@ def lift(addr, funcs):
             s = enc(rest)
             if s is None:
                 raise SystemExit('mul form: %r' % ins)
-            w = s[2] if s[0] == 'reg' else s[3]
+            w = s[2] if s[0] in ('reg', 'sub') else s[3]
             src = operand_read(s)
             if w == 8:
                 body.append('    { const unsigned __int128 p = (unsigned __int128)rax * (uint64_t)(%s);' % src)
@@ -276,16 +276,20 @@ def lift(addr, funcs):
                 body.append('    { const uint64_t p = (uint64_t)(uint32_t)rax * (uint32_t)(%s);' % src)
                 body.append('      rax = (uint32_t)p; rdx = (uint32_t)(p >> 32); f_cf = f_of = (rdx != 0); }')
             continue
-        if op in ('shl', 'sal', 'shr', 'sar') and rest.replace(' ', '').endswith(',cl'):
-            d = enc(rest.replace(' ', '').split(',')[0])
+        _shm = re.match(r'^(shl|sal|shr|sar)\s+(.+),\s*(cl|0x[0-9a-fA-F]+)$', ins)
+        if _shm:
+            _smode = _shm.group(3).lower()
+
+            d = enc(_shm.group(2))
             if d is None:
                 raise SystemExit('shift form: %r' % ins)
-            w = d[2] if d[0] == 'reg' else d[3]
+            w = d[2] if d[0] in ('reg', 'sub') else d[3]
             bits = w * 8
             mask = '~0ULL' if bits == 64 else '0x%xULL' % ((1 << bits) - 1)
             cmask = bits - 1
             val = operand_read(d)
-            body.append('    { const uint64_t m = %s; const unsigned c = (unsigned)(rcx & %d);' % (mask, cmask))
+            _cexpr = '(unsigned)(rcx & %d)' % cmask if _smode == 'cl' else str(int(_smode, 16))
+            body.append('    { const uint64_t m = %s; const unsigned c = %s;' % (mask, _cexpr))
             body.append('      const uint64_t v = (%s) & m;' % val)
             if op in ('shl', 'sal'):
                 body.append('      const uint64_t r = c ? ((v << c) & m) : v;')
@@ -307,7 +311,7 @@ def lift(addr, funcs):
             d = enc(rest)
             if d is None:
                 raise SystemExit('not form: %r' % ins)
-            w = d[2] if d[0] == 'reg' else d[3]
+            w = d[2] if d[0] in ('reg', 'sub') else d[3]
             mask = '~0ULL' if w == 8 else '0x%xULL' % ((1 << (w * 8)) - 1)
             body.append('    %s' % operand_write(d, '(%s) ^ %s' % (operand_read(d), mask)))
             continue
@@ -550,7 +554,15 @@ def main():
            '#define ML_M2(p, o) (*(uint16_t*)((uint8_t*)(uintptr_t)(p) + (o)))',
            '#define ML_M4(p, o) (*(uint32_t*)((uint8_t*)(uintptr_t)(p) + (o)))',
            '#define ML_M8(p, o) (*(uint64_t*)((uint8_t*)(uintptr_t)(p) + (o)))',
-           '#define ML_IAT(a) (*(uint64_t*)(uintptr_t)(a))', '',
+           'inline uint64_t& ml_glb(uintptr_t a) {',
+           '    static uintptr_t k[8192]; static uint64_t v[8192];',
+           '    for (unsigned i = 0; i < 8192; ++i) {',
+           '        if (k[i] == a) return v[i];',
+           '        if (k[i] == 0) { k[i] = a; return v[i]; }',
+           '    }',
+           '    return v[0];',
+           '}',
+           '#define ML_IAT(a) ml_glb((uintptr_t)(a))', '',
            'namespace tq {', '']
     src = ['#include "modules/syndicate/src/synlift.h"', '', 'namespace tq {', '']
     defined = set()
@@ -635,6 +647,23 @@ def operand_write(e, expr):
         m = (1 << (8 * e[2])) - 1
         return '%s = (%s & ~0x%xULL) | ((uint64_t)(%s) & 0x%xULL);' % (e[1], e[1], m, expr, m)
     return _orig_operand_write(e, expr)
+
+
+# GLBWRITE: stores into absolute/global slots go to the same shadow the reads use
+_ow_glb = operand_write
+
+
+def operand_write(e, expr):
+    if e and e[0] in ('iat', 'glb', 'abs', 'rip'):
+        addr = e[1]
+        addr = addr if isinstance(addr, str) else '0x%x' % addr
+        w = e[2] if len(e) > 2 else 8
+        if w >= 8:
+            return 'ml_glb((uintptr_t)%s) = (uint64_t)(%s);' % (addr, expr)
+        m = (1 << (8 * w)) - 1
+        return ('ml_glb((uintptr_t)%s) = (ml_glb((uintptr_t)%s) & ~0x%xULL) | ((uint64_t)(%s) & 0x%xULL);'
+                % (addr, addr, m, expr, m))
+    return _ow_glb(e, expr)
 
 
 if __name__ == '__main__':
