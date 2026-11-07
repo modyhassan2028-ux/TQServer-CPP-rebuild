@@ -256,6 +256,10 @@ def lift(addr, funcs):
             else:
                 body.append('    ' + operand_write(d, '(%s) ^ (%s)' % (operand_read(d), operand_read(s))))
             continue
+        if op.startswith('set') and ('j' + op[3:]) in JCC:
+            d = enc(rest)
+            body.append('    ' + operand_write(d, '(%s) ? 1 : 0' % JCC['j' + op[3:]]))
+            continue
         if op in ('shl', 'shr', 'sar', 'sal'):
             d, s = [enc(x) for x in rest.replace(', ', ',').split(',', 1)]
             if d[0] != 'reg' or s[0] != 'imm':
@@ -330,8 +334,13 @@ def main():
            'namespace tq {', '']
     src = ['#include "modules/syndicate/src/synlift.h"', '', 'namespace tq {', '']
     defined = set()
+    skipped = []
     for a in addrs:
-        f, body, seams = lift(a, funcs)
+        try:
+            f, body, seams = lift(a, funcs)
+        except (SystemExit, KeyError) as e:
+            skipped.append((a, str(e)))
+            continue
         for s in sorted(seams):
             hdr.append('extern uint64_t (*g_fnLIFT_%x)(uint64_t, uint64_t, uint64_t, uint64_t);' % s)
             if s not in defined:
@@ -357,6 +366,8 @@ def main():
     src += ['}  // namespace tq', '']
     open(os.path.join(REPO, 'modules/syndicate/src/synlift.h'), 'w').write('\n'.join(hdr))
     open(os.path.join(REPO, 'modules/syndicate/src/synlift.cpp'), 'w').write('\n'.join(src))
+    for a, why in skipped:
+        print('  skipped 0x%x: %s' % (a, why))
 
 
 if __name__ == '__main__':
