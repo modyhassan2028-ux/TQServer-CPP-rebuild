@@ -40,9 +40,9 @@ static void* HookFactory(void*, void* a2, void* a3, void* a4, const uint32_t* pK
 static void HookDelete(void* p) { (void)p; ++g_deleted; }
 static void HookThrow() { std::printf("unexpected throw\n"); std::abort(); }
 static void HookIat() { std::abort(); }
-static uint64_t WDel(uint64_t a, uint64_t, uint64_t, uint64_t) { HookDelete(reinterpret_cast<void*>(a)); return 0; }
-static uint64_t WThrow(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) { HookThrow(); return 0; }
-static uint64_t WIat(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) { HookIat(); return 0; }
+static uint64_t WDel(uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint64_t, uint64_t) { HookDelete(reinterpret_cast<void*>(a)); return 0; }
+static uint64_t WThrow(uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint64_t, uint64_t) { HookThrow(); return 0; }
+static uint64_t WIat(uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint64_t, uint64_t) { HookIat(); return 0; }
 static uint64_t HookNext(uint64_t a, uint64_t, uint64_t, uint64_t) {
     SynIterNext_141724ed0(reinterpret_cast<void*>(a));
     return 0;
@@ -124,14 +124,14 @@ static void Verify(const std::vector<uint32_t>& expect) {
 int main() {
     g_fnRB_141726e10 = HookFactory;
     g_fnRB_1417f3154 = HookThrow;
-    g_fnLIFT_141724c50 = HookRotL;
-    g_fnLIFT_141724cb0 = HookRotR;
-    g_fnLIFT_141724ed0 = HookNext;
-    g_fnLIFT_1417f2fdc = WDel;
-    g_fnLIFT_1417f3154 = WThrow;
-    g_fnLIFT_141823270 = WIat;
-    g_fnLIFT_141823288 = WIat;
-    g_fnLIFT_1418233f8 = WIat;
+    g_fnLIFT_141724c50 = [](uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint64_t e, uint64_t f) -> uint64_t { return HookRotL(a, b, c, d); };
+    g_fnLIFT_141724cb0 = [](uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint64_t e, uint64_t f) -> uint64_t { return HookRotR(a, b, c, d); };
+    g_fnLIFT_141724ed0 = [](uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint64_t e, uint64_t f) -> uint64_t { return HookNext(a, b, c, d); };
+    g_fnLIFT_1417f2fdc = [](uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint64_t e, uint64_t f) -> uint64_t { return WDel(a, b, c, d, e, f); };
+    g_fnLIFT_1417f3154 = [](uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint64_t e, uint64_t f) -> uint64_t { return WThrow(a, b, c, d, e, f); };
+    g_fnLIFT_141823270 = [](uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint64_t e, uint64_t f) -> uint64_t { return WIat(a, b, c, d, e, f); };
+    g_fnLIFT_141823288 = [](uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint64_t e, uint64_t f) -> uint64_t { return WIat(a, b, c, d, e, f); };
+    g_fnLIFT_1418233f8 = [](uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint64_t e, uint64_t f) -> uint64_t { return WIat(a, b, c, d, e, f); };
 
     const uint32_t kKeys[] = {50, 30, 70, 20, 40, 60, 80, 10, 45, 65, 90, 5, 55};
     const int n = static_cast<int>(sizeof(kKeys) / sizeof(kKeys[0]));

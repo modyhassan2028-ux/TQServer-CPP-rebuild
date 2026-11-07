@@ -60,6 +60,15 @@ def main():
         except Exception:
             pass
 
+    # a row that was only a .pdata segment is counted at the length of the whole function that
+    # tools/bulk/merge_ranges.py rebuilt from it, otherwise the ledger would price 121 instructions as 34
+    extra_path = os.path.join(REPO, 'tools/bulk/extra_bodies.json')
+    if os.path.exists(extra_path):
+        for k, v in json.load(open(extra_path)).items():
+            a = int(k, 16)
+            if a in funcs and len(v['text']) > len(funcs[a]['text']):
+                funcs[a] = {'a': a, 'b': v['b'], 'addr': v['addr'], 'text': v['text']}
+
     defs &= set(funcs)
     json.dump(sorted(defs), open(os.path.join(REPO, 'tools/bulk/ported.json'), 'w'))
     total_ins = sum(len(x['text']) for x in funcs.values())
