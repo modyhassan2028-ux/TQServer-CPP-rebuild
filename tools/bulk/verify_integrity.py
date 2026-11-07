@@ -14,6 +14,12 @@ import sys
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 funcs = {x['a']: x for x in json.load(open(os.path.join(REPO, 'tools/bulk/funcs.json')))}
+_extra = json.load(open(os.path.join(REPO, 'tools/bulk/extra_bodies.json')))
+for _k, _v in _extra.items():
+    _a = int(_k, 16)
+    _t = _v.get('text') or []
+    if _a in funcs and _t and all(isinstance(x, str) for x in _t) and len(_t) > len(funcs[_a]['text']):
+        funcs[_a] = {'a': _a, 'addr': _v['addr'], 'text': _v['text']}
 ported = set(json.load(open(os.path.join(REPO, 'tools/bulk/ported.json'))))
 known = set()
 path = os.path.join(REPO, 'tools/bulk/truncated_rows.txt')
