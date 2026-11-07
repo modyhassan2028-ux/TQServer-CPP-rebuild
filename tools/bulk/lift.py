@@ -256,6 +256,9 @@ def lift(addr, funcs):
             else:
                 body.append('    ' + operand_write(d, '(%s) ^ (%s)' % (operand_read(d), operand_read(s))))
             continue
+        if op.startswith(('nop', 'data16', 'int3')):
+            body.append('    /* padding */')
+            continue
         if op.startswith('set') and ('j' + op[3:]) in JCC:
             d = enc(rest)
             body.append('    ' + operand_write(d, '(%s) ? 1 : 0' % JCC['j' + op[3:]]))
