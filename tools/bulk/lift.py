@@ -244,6 +244,65 @@ def lift(addr, funcs):
             seams.add(key)
             body.append('    rax = ML_CALL(%x);' % key)
             continue
+        if op == 'neg':
+            d = enc(rest)
+            if d is None:
+                raise SystemExit('neg form: %r' % ins)
+            w = d[2] if d[0] == 'reg' else d[3]
+            bits = w * 8
+            mask = '~0ULL' if bits == 64 else '0x%xULL' % ((1 << bits) - 1)
+            body.append('    { const uint64_t m = %s; const uint64_t v = (%s) & m; const uint64_t r = (0 - v) & m;'
+                        % (mask, operand_read(d)))
+            body.append('      %s' % operand_write(d, 'r'))
+            body.append('      f_cf = (v != 0); f_zf = (r == 0); f_sf = ((r >> %d) & 1) != 0; f_of = (v == (1ULL << %d)); }'
+                        % (bits - 1, bits - 1))
+            continue
+        if op == 'cdqe':
+            body.append('    rax = (uint64_t)(int64_t)(int32_t)(uint32_t)rax;   // cdqe')
+            continue
+        if op == 'cwde':
+            body.append('    rax = (uint64_t)(uint32_t)(int32_t)(int16_t)(uint16_t)rax;   // cwde')
+            continue
+        if op == 'mul':
+            s = enc(rest)
+            if s is None:
+                raise SystemExit('mul form: %r' % ins)
+            w = s[2] if s[0] == 'reg' else s[3]
+            src = operand_read(s)
+            if w == 8:
+                body.append('    { const unsigned __int128 p = (unsigned __int128)rax * (uint64_t)(%s);' % src)
+                body.append('      rax = (uint64_t)p; rdx = (uint64_t)(p >> 64); f_cf = f_of = (rdx != 0); }')
+            else:
+                body.append('    { const uint64_t p = (uint64_t)(uint32_t)rax * (uint32_t)(%s);' % src)
+                body.append('      rax = (uint32_t)p; rdx = (uint32_t)(p >> 32); f_cf = f_of = (rdx != 0); }')
+            continue
+        if op in ('shl', 'sal', 'shr', 'sar') and rest.replace(' ', '').endswith(',cl'):
+            d = enc(rest.replace(' ', '').split(',')[0])
+            if d is None:
+                raise SystemExit('shift form: %r' % ins)
+            w = d[2] if d[0] == 'reg' else d[3]
+            bits = w * 8
+            mask = '~0ULL' if bits == 64 else '0x%xULL' % ((1 << bits) - 1)
+            cmask = bits - 1
+            val = operand_read(d)
+            body.append('    { const uint64_t m = %s; const unsigned c = (unsigned)(rcx & %d);' % (mask, cmask))
+            body.append('      const uint64_t v = (%s) & m;' % val)
+            if op in ('shl', 'sal'):
+                body.append('      const uint64_t r = c ? ((v << c) & m) : v;')
+                body.append('      if (c) f_cf = ((v >> (%d - c)) & 1) != 0;' % bits)
+                body.append('      if (c == 1) f_of = (((r >> %d) & 1) != ((v >> %d) & 1));' % (bits - 1, bits - 1))
+            elif op == 'shr':
+                body.append('      const uint64_t r = c ? ((v & m) >> c) : v;')
+                body.append('      if (c) f_cf = ((v >> (c - 1)) & 1) != 0;')
+                body.append('      if (c == 1) f_of = ((v >> %d) & 1) != 0;' % (bits - 1))
+            else:
+                body.append('      const int64_t sv = (int64_t)(v << (64 - %d)) >> (64 - %d);' % (bits, bits))
+                body.append('      const uint64_t r = c ? ((uint64_t)(sv >> (c > %d ? %d : c)) & m) : v;' % (bits - 1, bits - 1))
+                body.append('      if (c) f_cf = (((v >> (c - 1)) & 1) != 0);')
+                body.append('      if (c == 1) f_of = false;')
+            body.append('      %s' % operand_write(d, 'r'))
+            body.append('      f_zf = (r == 0); f_sf = ((r >> %d) & 1) != 0; }' % (bits - 1))
+            continue
         if op == 'lea':
             d, s = [enc(x) for x in rest.replace(', ', ',').split(',', 1)]
             if s[0] == 'mem':
