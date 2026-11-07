@@ -27,6 +27,8 @@ def main():
     routines = json.load(open(os.path.join(REPO, 'tools/bulk/routines.json')))
     paths = glob.glob(os.path.join(REPO, 'modules/**/*.cpp'), recursive=True) + \
         glob.glob(os.path.join(REPO, 'modules/**/*.h'), recursive=True)
+    # staged work-in-progress is not ported until its battery is green
+    paths = [p for p in paths if os.path.basename(p) not in ('synlift_stage.cpp', 'synlift_stage.h')]
 
     defs = set()
     for p in paths:

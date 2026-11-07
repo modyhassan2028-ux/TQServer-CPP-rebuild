@@ -345,10 +345,10 @@ def main():
             skipped.append((a, str(e)))
             continue
         for s in sorted(seams):
-            hdr.append('extern uint64_t (*g_fnLIFT_%x)(uint64_t, uint64_t, uint64_t, uint64_t);' % s)
+            hdr.append('extern uint64_t (*g_fnLIFT_%x)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t);' % s)
             if s not in defined:
                 defined.add(s)
-                src.append('uint64_t (*g_fnLIFT_%x)(uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;' % s)
+                src.append('uint64_t (*g_fnLIFT_%x)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;' % s)
         hdr.append('')
         hdr.append('uint64_t SynLift_%x(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x%x' % (a, a))
         src.append('uint64_t SynLift_%x(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {' % a)
@@ -358,7 +358,9 @@ def main():
         src.append('    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};')
         src.append('    alignas(16) uint8_t stkFrame[0x400] = {0};')
         src.append('    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);')
-        src.append('#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9)')
+        # Win64 passes the 5th and 6th arguments on the stack, right after the 32-byte shadow space.
+        # The original body stores them there, so the lifted call hands them over as well.
+        src.append('#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))')
         src += body
         src.append('#undef ML_CALL')
         src.append('    return rax;')
@@ -367,8 +369,14 @@ def main():
         print('lifted 0x%x: %d instructions, %d seams' % (a, len(f['text']), len(seams)))
     hdr += ['}  // namespace tq', '']
     src += ['}  // namespace tq', '']
-    open(os.path.join(REPO, 'modules/syndicate/src/synlift.h'), 'w').write('\n'.join(hdr))
-    open(os.path.join(REPO, 'modules/syndicate/src/synlift.cpp'), 'w').write('\n'.join(src))
+    # LIFT_OUT=stage keeps work-in-progress bodies out of the verified module: they land in
+    # synlift_stage.* instead, so the ledger and the shipped header only ever carry tested code.
+    which = os.environ.get('LIFT_OUT', 'module')
+    base = 'synlift_stage' if which == 'stage' else 'synlift'
+    if which == 'stage':
+        src[0] = '#include "modules/syndicate/src/synlift_stage.h"'
+    open(os.path.join(REPO, 'modules/syndicate/src/%s.h' % base), 'w').write('\n'.join(hdr))
+    open(os.path.join(REPO, 'modules/syndicate/src/%s.cpp' % base), 'w').write('\n'.join(src))
     for a, why in skipped:
         print('  skipped 0x%x: %s' % (a, why))
 

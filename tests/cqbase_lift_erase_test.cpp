@@ -41,8 +41,8 @@ static void HookDelete(void* p) { (void)p; ++g_deleted; }
 static void HookThrow() { std::printf("unexpected throw\n"); std::abort(); }
 static void HookIat() { std::abort(); }
 static uint64_t WDel(uint64_t a, uint64_t, uint64_t, uint64_t) { HookDelete(reinterpret_cast<void*>(a)); return 0; }
-static uint64_t WThrow(uint64_t, uint64_t, uint64_t, uint64_t) { HookThrow(); return 0; }
-static uint64_t WIat(uint64_t, uint64_t, uint64_t, uint64_t) { HookIat(); return 0; }
+static uint64_t WThrow(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) { HookThrow(); return 0; }
+static uint64_t WIat(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) { HookIat(); return 0; }
 static uint64_t HookNext(uint64_t a, uint64_t, uint64_t, uint64_t) {
     SynIterNext_141724ed0(reinterpret_cast<void*>(a));
     return 0;
