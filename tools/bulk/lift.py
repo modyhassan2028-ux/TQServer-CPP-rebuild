@@ -133,6 +133,10 @@ def setflags(w, a, b, unsigned=True):
             '    f_of = (((a ^ b) & (a ^ d) & 0x%xULL) != 0);' % sign, '}']
 
 
+def normalise(t):
+    return re.sub(r'^rex(\.[WRX]+)? ', '', t.strip())
+
+
 def lift(addr, funcs):
     f = funcs[addr]
     t = f['text']
@@ -145,6 +149,7 @@ def lift(addr, funcs):
     body = []
     seams = set()
     for i, ins in enumerate(t):
+        ins = normalise(ins)
         if f['addr'][i] in label:
             body.append('L%d:' % i)
         parts = ins.split(None, 1)
