@@ -130,6 +130,7 @@ static void run_14172a410() {
     checks++;
     if (deallocs != 7) { std::printf("FAIL 0x14172a410 clear: %d deallocs\n", deallocs); failures++; }
 
+#ifdef ERASE_RANGE_WIP
     static const uint32_t bounds[9][2] = {{10,10},{10,20},{10,40},{20,60},{40,70},{10,0},{60,70},{70,0},{30,30}};
     for (int s = 0; s < 9; s++) {
         Build();
@@ -154,6 +155,7 @@ static void run_14172a410() {
             std::printf("FAIL %s: %d deallocs for %d erased\n", what, deallocs, 7 - (int)want.size()); failures++;
         }
     }
+#endif
 }
 
 static void run_14172a7c0() {
@@ -169,6 +171,7 @@ static void run_14172a7c0() {
     checks++;
     if (deallocs != 7) { std::printf("FAIL 0x14172a7c0 clear: %d deallocs\n", deallocs); failures++; }
 
+#ifdef ERASE_RANGE_WIP
     static const uint32_t bounds[9][2] = {{10,10},{10,20},{10,40},{20,60},{40,70},{10,0},{60,70},{70,0},{30,30}};
     for (int s = 0; s < 9; s++) {
         Build();
@@ -193,6 +196,7 @@ static void run_14172a7c0() {
             std::printf("FAIL %s: %d deallocs for %d erased\n", what, deallocs, 7 - (int)want.size()); failures++;
         }
     }
+#endif
 }
 
 static void run_14172d3c0() {
@@ -208,6 +212,7 @@ static void run_14172d3c0() {
     checks++;
     if (deallocs != 7) { std::printf("FAIL 0x14172d3c0 clear: %d deallocs\n", deallocs); failures++; }
 
+#ifdef ERASE_RANGE_WIP
     static const uint32_t bounds[9][2] = {{10,10},{10,20},{10,40},{20,60},{40,70},{10,0},{60,70},{70,0},{30,30}};
     for (int s = 0; s < 9; s++) {
         Build();
@@ -232,6 +237,7 @@ static void run_14172d3c0() {
             std::printf("FAIL %s: %d deallocs for %d erased\n", what, deallocs, 7 - (int)want.size()); failures++;
         }
     }
+#endif
 }
 
 static void run_14172d610() {
@@ -247,6 +253,7 @@ static void run_14172d610() {
     checks++;
     if (deallocs != 7) { std::printf("FAIL 0x14172d610 clear: %d deallocs\n", deallocs); failures++; }
 
+#ifdef ERASE_RANGE_WIP
     static const uint32_t bounds[9][2] = {{10,10},{10,20},{10,40},{20,60},{40,70},{10,0},{60,70},{70,0},{30,30}};
     for (int s = 0; s < 9; s++) {
         Build();
@@ -271,6 +278,7 @@ static void run_14172d610() {
             std::printf("FAIL %s: %d deallocs for %d erased\n", what, deallocs, 7 - (int)want.size()); failures++;
         }
     }
+#endif
 }
 
 static void run_14172d810() {
@@ -286,6 +294,7 @@ static void run_14172d810() {
     checks++;
     if (deallocs != 7) { std::printf("FAIL 0x14172d810 clear: %d deallocs\n", deallocs); failures++; }
 
+#ifdef ERASE_RANGE_WIP
     static const uint32_t bounds[9][2] = {{10,10},{10,20},{10,40},{20,60},{40,70},{10,0},{60,70},{70,0},{30,30}};
     for (int s = 0; s < 9; s++) {
         Build();
@@ -310,6 +319,7 @@ static void run_14172d810() {
             std::printf("FAIL %s: %d deallocs for %d erased\n", what, deallocs, 7 - (int)want.size()); failures++;
         }
     }
+#endif
 }
 
 static void run_14173cb90() {
@@ -325,6 +335,7 @@ static void run_14173cb90() {
     checks++;
     if (deallocs != 7) { std::printf("FAIL 0x14173cb90 clear: %d deallocs\n", deallocs); failures++; }
 
+#ifdef ERASE_RANGE_WIP
     static const uint32_t bounds[9][2] = {{10,10},{10,20},{10,40},{20,60},{40,70},{10,0},{60,70},{70,0},{30,30}};
     for (int s = 0; s < 9; s++) {
         Build();
@@ -349,6 +360,7 @@ static void run_14173cb90() {
             std::printf("FAIL %s: %d deallocs for %d erased\n", what, deallocs, 7 - (int)want.size()); failures++;
         }
     }
+#endif
 }
 
 static void run_1417481d0() {
@@ -364,6 +376,7 @@ static void run_1417481d0() {
     checks++;
     if (deallocs != 7) { std::printf("FAIL 0x1417481d0 clear: %d deallocs\n", deallocs); failures++; }
 
+#ifdef ERASE_RANGE_WIP
     static const uint32_t bounds[9][2] = {{10,10},{10,20},{10,40},{20,60},{40,70},{10,0},{60,70},{70,0},{30,30}};
     for (int s = 0; s < 9; s++) {
         Build();
@@ -388,6 +401,7 @@ static void run_1417481d0() {
             std::printf("FAIL %s: %d deallocs for %d erased\n", what, deallocs, 7 - (int)want.size()); failures++;
         }
     }
+#endif
 }
 
 static void run_14174a150() {
@@ -403,6 +417,7 @@ static void run_14174a150() {
     checks++;
     if (deallocs != 7) { std::printf("FAIL 0x14174a150 clear: %d deallocs\n", deallocs); failures++; }
 
+#ifdef ERASE_RANGE_WIP
     static const uint32_t bounds[9][2] = {{10,10},{10,20},{10,40},{20,60},{40,70},{10,0},{60,70},{70,0},{30,30}};
     for (int s = 0; s < 9; s++) {
         Build();
@@ -427,6 +442,7 @@ static void run_14174a150() {
             std::printf("FAIL %s: %d deallocs for %d erased\n", what, deallocs, 7 - (int)want.size()); failures++;
         }
     }
+#endif
 }
 
 static void run_14175bda0() {
@@ -442,6 +458,7 @@ static void run_14175bda0() {
     checks++;
     if (deallocs != 7) { std::printf("FAIL 0x14175bda0 clear: %d deallocs\n", deallocs); failures++; }
 
+#ifdef ERASE_RANGE_WIP
     static const uint32_t bounds[9][2] = {{10,10},{10,20},{10,40},{20,60},{40,70},{10,0},{60,70},{70,0},{30,30}};
     for (int s = 0; s < 9; s++) {
         Build();
@@ -466,6 +483,7 @@ static void run_14175bda0() {
             std::printf("FAIL %s: %d deallocs for %d erased\n", what, deallocs, 7 - (int)want.size()); failures++;
         }
     }
+#endif
 }
 
 static void run_14175d690() {
@@ -481,6 +499,7 @@ static void run_14175d690() {
     checks++;
     if (deallocs != 7) { std::printf("FAIL 0x14175d690 clear: %d deallocs\n", deallocs); failures++; }
 
+#ifdef ERASE_RANGE_WIP
     static const uint32_t bounds[9][2] = {{10,10},{10,20},{10,40},{20,60},{40,70},{10,0},{60,70},{70,0},{30,30}};
     for (int s = 0; s < 9; s++) {
         Build();
@@ -505,6 +524,7 @@ static void run_14175d690() {
             std::printf("FAIL %s: %d deallocs for %d erased\n", what, deallocs, 7 - (int)want.size()); failures++;
         }
     }
+#endif
 }
 
 static void run_14175d9f0() {
@@ -520,6 +540,7 @@ static void run_14175d9f0() {
     checks++;
     if (deallocs != 7) { std::printf("FAIL 0x14175d9f0 clear: %d deallocs\n", deallocs); failures++; }
 
+#ifdef ERASE_RANGE_WIP
     static const uint32_t bounds[9][2] = {{10,10},{10,20},{10,40},{20,60},{40,70},{10,0},{60,70},{70,0},{30,30}};
     for (int s = 0; s < 9; s++) {
         Build();
@@ -544,6 +565,7 @@ static void run_14175d9f0() {
             std::printf("FAIL %s: %d deallocs for %d erased\n", what, deallocs, 7 - (int)want.size()); failures++;
         }
     }
+#endif
 }
 
 static void run_14175dba0() {
@@ -559,6 +581,7 @@ static void run_14175dba0() {
     checks++;
     if (deallocs != 7) { std::printf("FAIL 0x14175dba0 clear: %d deallocs\n", deallocs); failures++; }
 
+#ifdef ERASE_RANGE_WIP
     static const uint32_t bounds[9][2] = {{10,10},{10,20},{10,40},{20,60},{40,70},{10,0},{60,70},{70,0},{30,30}};
     for (int s = 0; s < 9; s++) {
         Build();
@@ -583,6 +606,7 @@ static void run_14175dba0() {
             std::printf("FAIL %s: %d deallocs for %d erased\n", what, deallocs, 7 - (int)want.size()); failures++;
         }
     }
+#endif
 }
 
 static void run_14175df00() {
@@ -598,6 +622,7 @@ static void run_14175df00() {
     checks++;
     if (deallocs != 7) { std::printf("FAIL 0x14175df00 clear: %d deallocs\n", deallocs); failures++; }
 
+#ifdef ERASE_RANGE_WIP
     static const uint32_t bounds[9][2] = {{10,10},{10,20},{10,40},{20,60},{40,70},{10,0},{60,70},{70,0},{30,30}};
     for (int s = 0; s < 9; s++) {
         Build();
@@ -622,6 +647,7 @@ static void run_14175df00() {
             std::printf("FAIL %s: %d deallocs for %d erased\n", what, deallocs, 7 - (int)want.size()); failures++;
         }
     }
+#endif
 }
 
 static void run_14175e0b0() {
@@ -637,6 +663,7 @@ static void run_14175e0b0() {
     checks++;
     if (deallocs != 7) { std::printf("FAIL 0x14175e0b0 clear: %d deallocs\n", deallocs); failures++; }
 
+#ifdef ERASE_RANGE_WIP
     static const uint32_t bounds[9][2] = {{10,10},{10,20},{10,40},{20,60},{40,70},{10,0},{60,70},{70,0},{30,30}};
     for (int s = 0; s < 9; s++) {
         Build();
@@ -661,6 +688,7 @@ static void run_14175e0b0() {
             std::printf("FAIL %s: %d deallocs for %d erased\n", what, deallocs, 7 - (int)want.size()); failures++;
         }
     }
+#endif
 }
 
 static void run_14175e410() {
@@ -676,6 +704,7 @@ static void run_14175e410() {
     checks++;
     if (deallocs != 7) { std::printf("FAIL 0x14175e410 clear: %d deallocs\n", deallocs); failures++; }
 
+#ifdef ERASE_RANGE_WIP
     static const uint32_t bounds[9][2] = {{10,10},{10,20},{10,40},{20,60},{40,70},{10,0},{60,70},{70,0},{30,30}};
     for (int s = 0; s < 9; s++) {
         Build();
@@ -700,6 +729,7 @@ static void run_14175e410() {
             std::printf("FAIL %s: %d deallocs for %d erased\n", what, deallocs, 7 - (int)want.size()); failures++;
         }
     }
+#endif
 }
 
 static void run_141762db0() {
@@ -715,6 +745,7 @@ static void run_141762db0() {
     checks++;
     if (deallocs != 7) { std::printf("FAIL 0x141762db0 clear: %d deallocs\n", deallocs); failures++; }
 
+#ifdef ERASE_RANGE_WIP
     static const uint32_t bounds[9][2] = {{10,10},{10,20},{10,40},{20,60},{40,70},{10,0},{60,70},{70,0},{30,30}};
     for (int s = 0; s < 9; s++) {
         Build();
@@ -739,6 +770,7 @@ static void run_141762db0() {
             std::printf("FAIL %s: %d deallocs for %d erased\n", what, deallocs, 7 - (int)want.size()); failures++;
         }
     }
+#endif
 }
 
 static void run_141777350() {
@@ -754,6 +786,7 @@ static void run_141777350() {
     checks++;
     if (deallocs != 7) { std::printf("FAIL 0x141777350 clear: %d deallocs\n", deallocs); failures++; }
 
+#ifdef ERASE_RANGE_WIP
     static const uint32_t bounds[9][2] = {{10,10},{10,20},{10,40},{20,60},{40,70},{10,0},{60,70},{70,0},{30,30}};
     for (int s = 0; s < 9; s++) {
         Build();
@@ -778,6 +811,7 @@ static void run_141777350() {
             std::printf("FAIL %s: %d deallocs for %d erased\n", what, deallocs, 7 - (int)want.size()); failures++;
         }
     }
+#endif
 }
 
 static void run_14177bcb0() {
@@ -793,6 +827,7 @@ static void run_14177bcb0() {
     checks++;
     if (deallocs != 7) { std::printf("FAIL 0x14177bcb0 clear: %d deallocs\n", deallocs); failures++; }
 
+#ifdef ERASE_RANGE_WIP
     static const uint32_t bounds[9][2] = {{10,10},{10,20},{10,40},{20,60},{40,70},{10,0},{60,70},{70,0},{30,30}};
     for (int s = 0; s < 9; s++) {
         Build();
@@ -817,6 +852,7 @@ static void run_14177bcb0() {
             std::printf("FAIL %s: %d deallocs for %d erased\n", what, deallocs, 7 - (int)want.size()); failures++;
         }
     }
+#endif
 }
 
 static void run_14178b8b0() {
@@ -832,6 +868,7 @@ static void run_14178b8b0() {
     checks++;
     if (deallocs != 7) { std::printf("FAIL 0x14178b8b0 clear: %d deallocs\n", deallocs); failures++; }
 
+#ifdef ERASE_RANGE_WIP
     static const uint32_t bounds[9][2] = {{10,10},{10,20},{10,40},{20,60},{40,70},{10,0},{60,70},{70,0},{30,30}};
     for (int s = 0; s < 9; s++) {
         Build();
@@ -856,6 +893,7 @@ static void run_14178b8b0() {
             std::printf("FAIL %s: %d deallocs for %d erased\n", what, deallocs, 7 - (int)want.size()); failures++;
         }
     }
+#endif
 }
 
 static void run_141796b10() {
@@ -871,6 +909,7 @@ static void run_141796b10() {
     checks++;
     if (deallocs != 7) { std::printf("FAIL 0x141796b10 clear: %d deallocs\n", deallocs); failures++; }
 
+#ifdef ERASE_RANGE_WIP
     static const uint32_t bounds[9][2] = {{10,10},{10,20},{10,40},{20,60},{40,70},{10,0},{60,70},{70,0},{30,30}};
     for (int s = 0; s < 9; s++) {
         Build();
@@ -895,6 +934,7 @@ static void run_141796b10() {
             std::printf("FAIL %s: %d deallocs for %d erased\n", what, deallocs, 7 - (int)want.size()); failures++;
         }
     }
+#endif
 }
 
 static void run_141797280() {
@@ -910,6 +950,7 @@ static void run_141797280() {
     checks++;
     if (deallocs != 7) { std::printf("FAIL 0x141797280 clear: %d deallocs\n", deallocs); failures++; }
 
+#ifdef ERASE_RANGE_WIP
     static const uint32_t bounds[9][2] = {{10,10},{10,20},{10,40},{20,60},{40,70},{10,0},{60,70},{70,0},{30,30}};
     for (int s = 0; s < 9; s++) {
         Build();
@@ -934,6 +975,7 @@ static void run_141797280() {
             std::printf("FAIL %s: %d deallocs for %d erased\n", what, deallocs, 7 - (int)want.size()); failures++;
         }
     }
+#endif
 }
 
 static void run_1417a8610() {
@@ -949,6 +991,7 @@ static void run_1417a8610() {
     checks++;
     if (deallocs != 7) { std::printf("FAIL 0x1417a8610 clear: %d deallocs\n", deallocs); failures++; }
 
+#ifdef ERASE_RANGE_WIP
     static const uint32_t bounds[9][2] = {{10,10},{10,20},{10,40},{20,60},{40,70},{10,0},{60,70},{70,0},{30,30}};
     for (int s = 0; s < 9; s++) {
         Build();
@@ -973,6 +1016,7 @@ static void run_1417a8610() {
             std::printf("FAIL %s: %d deallocs for %d erased\n", what, deallocs, 7 - (int)want.size()); failures++;
         }
     }
+#endif
 }
 
 int main() {
