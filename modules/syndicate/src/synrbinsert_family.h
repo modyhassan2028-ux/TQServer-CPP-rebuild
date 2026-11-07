@@ -68,7 +68,7 @@ extern void* (*g_fnRB_1417cbb60_factory)(void*, void*, void*, void*, const uint3
 extern void (*g_fnRB_1417cbb60_throw)(void);
 
 inline void* SynRbInsert_1417293c0(void* pThis, void* pOutIter, uint8_t bLeft, void* pParent,
-                                   const uint32_t* pKey) {
+                                   const uint32_t* pKey) {   // 0x1417293c0
     // insn 1-10: frame plus argument unpacking
     void* rbx = pParent;                       // insn 7   mov rbx,r9
     const uint8_t dil = bLeft;                 // insn 8   movzx edi,r8b
@@ -287,7 +287,7 @@ L206:
 }
 
 inline void* SynRbInsert_141729790(void* pThis, void* pOutIter, uint8_t bLeft, void* pParent,
-                                   const uint32_t* pKey) {
+                                   const uint32_t* pKey) {   // 0x141729790
     // insn 1-10: frame plus argument unpacking
     void* rbx = pParent;                       // insn 7   mov rbx,r9
     const uint8_t dil = bLeft;                 // insn 8   movzx edi,r8b
@@ -506,7 +506,7 @@ L206:
 }
 
 inline void* SynRbInsert_141729ba0(void* pThis, void* pOutIter, uint8_t bLeft, void* pParent,
-                                   const uint32_t* pKey) {
+                                   const uint32_t* pKey) {   // 0x141729ba0
     // insn 1-10: frame plus argument unpacking
     void* rbx = pParent;                       // insn 7   mov rbx,r9
     const uint8_t dil = bLeft;                 // insn 8   movzx edi,r8b
@@ -725,7 +725,7 @@ L206:
 }
 
 inline void* SynRbInsert_14172a070(void* pThis, void* pOutIter, uint8_t bLeft, void* pParent,
-                                   const uint32_t* pKey) {
+                                   const uint32_t* pKey) {   // 0x14172a070
     // insn 1-10: frame plus argument unpacking
     void* rbx = pParent;                       // insn 7   mov rbx,r9
     const uint8_t dil = bLeft;                 // insn 8   movzx edi,r8b
@@ -944,7 +944,7 @@ L206:
 }
 
 inline void* SynRbInsert_141733a00(void* pThis, void* pOutIter, uint8_t bLeft, void* pParent,
-                                   const uint32_t* pKey) {
+                                   const uint32_t* pKey) {   // 0x141733a00
     // insn 1-10: frame plus argument unpacking
     void* rbx = pParent;                       // insn 7   mov rbx,r9
     const uint8_t dil = bLeft;                 // insn 8   movzx edi,r8b
@@ -1163,7 +1163,7 @@ L206:
 }
 
 inline void* SynRbInsert_14173c5c0(void* pThis, void* pOutIter, uint8_t bLeft, void* pParent,
-                                   const uint32_t* pKey) {
+                                   const uint32_t* pKey) {   // 0x14173c5c0
     // insn 1-10: frame plus argument unpacking
     void* rbx = pParent;                       // insn 7   mov rbx,r9
     const uint8_t dil = bLeft;                 // insn 8   movzx edi,r8b
@@ -1382,7 +1382,7 @@ L206:
 }
 
 inline void* SynRbInsert_14173e790(void* pThis, void* pOutIter, uint8_t bLeft, void* pParent,
-                                   const uint32_t* pKey) {
+                                   const uint32_t* pKey) {   // 0x14173e790
     // insn 1-10: frame plus argument unpacking
     void* rbx = pParent;                       // insn 7   mov rbx,r9
     const uint8_t dil = bLeft;                 // insn 8   movzx edi,r8b
@@ -1601,7 +1601,7 @@ L206:
 }
 
 inline void* SynRbInsert_1417483e0(void* pThis, void* pOutIter, uint8_t bLeft, void* pParent,
-                                   const uint32_t* pKey) {
+                                   const uint32_t* pKey) {   // 0x1417483e0
     // insn 1-10: frame plus argument unpacking
     void* rbx = pParent;                       // insn 7   mov rbx,r9
     const uint8_t dil = bLeft;                 // insn 8   movzx edi,r8b
@@ -1820,7 +1820,7 @@ L206:
 }
 
 inline void* SynRbInsert_141748820(void* pThis, void* pOutIter, uint8_t bLeft, void* pParent,
-                                   const uint32_t* pKey) {
+                                   const uint32_t* pKey) {   // 0x141748820
     // insn 1-10: frame plus argument unpacking
     void* rbx = pParent;                       // insn 7   mov rbx,r9
     const uint8_t dil = bLeft;                 // insn 8   movzx edi,r8b
@@ -2039,7 +2039,7 @@ L206:
 }
 
 inline void* SynRbInsert_1417585d0(void* pThis, void* pOutIter, uint8_t bLeft, void* pParent,
-                                   const uint32_t* pKey) {
+                                   const uint32_t* pKey) {   // 0x1417585d0
     // insn 1-10: frame plus argument unpacking
     void* rbx = pParent;                       // insn 7   mov rbx,r9
     const uint8_t dil = bLeft;                 // insn 8   movzx edi,r8b
@@ -2258,7 +2258,7 @@ L206:
 }
 
 inline void* SynRbInsert_141758a10(void* pThis, void* pOutIter, uint8_t bLeft, void* pParent,
-                                   const uint32_t* pKey) {
+                                   const uint32_t* pKey) {   // 0x141758a10
     // insn 1-10: frame plus argument unpacking
     void* rbx = pParent;                       // insn 7   mov rbx,r9
     const uint8_t dil = bLeft;                 // insn 8   movzx edi,r8b
@@ -2477,7 +2477,7 @@ L206:
 }
 
 inline void* SynRbInsert_141758dd0(void* pThis, void* pOutIter, uint8_t bLeft, void* pParent,
-                                   const uint32_t* pKey) {
+                                   const uint32_t* pKey) {   // 0x141758dd0
     // insn 1-10: frame plus argument unpacking
     void* rbx = pParent;                       // insn 7   mov rbx,r9
     const uint8_t dil = bLeft;                 // insn 8   movzx edi,r8b
@@ -2696,7 +2696,7 @@ L206:
 }
 
 inline void* SynRbInsert_14175bfb0(void* pThis, void* pOutIter, uint8_t bLeft, void* pParent,
-                                   const uint32_t* pKey) {
+                                   const uint32_t* pKey) {   // 0x14175bfb0
     // insn 1-10: frame plus argument unpacking
     void* rbx = pParent;                       // insn 7   mov rbx,r9
     const uint8_t dil = bLeft;                 // insn 8   movzx edi,r8b
@@ -2915,7 +2915,7 @@ L206:
 }
 
 inline void* SynRbInsert_14175c600(void* pThis, void* pOutIter, uint8_t bLeft, void* pParent,
-                                   const uint32_t* pKey) {
+                                   const uint32_t* pKey) {   // 0x14175c600
     // insn 1-10: frame plus argument unpacking
     void* rbx = pParent;                       // insn 7   mov rbx,r9
     const uint8_t dil = bLeft;                 // insn 8   movzx edi,r8b
@@ -3134,7 +3134,7 @@ L206:
 }
 
 inline void* SynRbInsert_14175ca70(void* pThis, void* pOutIter, uint8_t bLeft, void* pParent,
-                                   const uint32_t* pKey) {
+                                   const uint32_t* pKey) {   // 0x14175ca70
     // insn 1-10: frame plus argument unpacking
     void* rbx = pParent;                       // insn 7   mov rbx,r9
     const uint8_t dil = bLeft;                 // insn 8   movzx edi,r8b
@@ -3353,7 +3353,7 @@ L206:
 }
 
 inline void* SynRbInsert_14175ce90(void* pThis, void* pOutIter, uint8_t bLeft, void* pParent,
-                                   const uint32_t* pKey) {
+                                   const uint32_t* pKey) {   // 0x14175ce90
     // insn 1-10: frame plus argument unpacking
     void* rbx = pParent;                       // insn 7   mov rbx,r9
     const uint8_t dil = bLeft;                 // insn 8   movzx edi,r8b
@@ -3572,7 +3572,7 @@ L206:
 }
 
 inline void* SynRbInsert_14175d350(void* pThis, void* pOutIter, uint8_t bLeft, void* pParent,
-                                   const uint32_t* pKey) {
+                                   const uint32_t* pKey) {   // 0x14175d350
     // insn 1-10: frame plus argument unpacking
     void* rbx = pParent;                       // insn 7   mov rbx,r9
     const uint8_t dil = bLeft;                 // insn 8   movzx edi,r8b
@@ -3791,7 +3791,7 @@ L206:
 }
 
 inline void* SynRbInsert_141770600(void* pThis, void* pOutIter, uint8_t bLeft, void* pParent,
-                                   const uint32_t* pKey) {
+                                   const uint32_t* pKey) {   // 0x141770600
     // insn 1-10: frame plus argument unpacking
     void* rbx = pParent;                       // insn 7   mov rbx,r9
     const uint8_t dil = bLeft;                 // insn 8   movzx edi,r8b
@@ -4010,7 +4010,7 @@ L206:
 }
 
 inline void* SynRbInsert_141771050(void* pThis, void* pOutIter, uint8_t bLeft, void* pParent,
-                                   const uint32_t* pKey) {
+                                   const uint32_t* pKey) {   // 0x141771050
     // insn 1-10: frame plus argument unpacking
     void* rbx = pParent;                       // insn 7   mov rbx,r9
     const uint8_t dil = bLeft;                 // insn 8   movzx edi,r8b
@@ -4229,7 +4229,7 @@ L206:
 }
 
 inline void* SynRbInsert_141776900(void* pThis, void* pOutIter, uint8_t bLeft, void* pParent,
-                                   const uint32_t* pKey) {
+                                   const uint32_t* pKey) {   // 0x141776900
     // insn 1-10: frame plus argument unpacking
     void* rbx = pParent;                       // insn 7   mov rbx,r9
     const uint8_t dil = bLeft;                 // insn 8   movzx edi,r8b
@@ -4448,7 +4448,7 @@ L206:
 }
 
 inline void* SynRbInsert_14177af70(void* pThis, void* pOutIter, uint8_t bLeft, void* pParent,
-                                   const uint32_t* pKey) {
+                                   const uint32_t* pKey) {   // 0x14177af70
     // insn 1-10: frame plus argument unpacking
     void* rbx = pParent;                       // insn 7   mov rbx,r9
     const uint8_t dil = bLeft;                 // insn 8   movzx edi,r8b
@@ -4667,7 +4667,7 @@ L206:
 }
 
 inline void* SynRbInsert_14178ba80(void* pThis, void* pOutIter, uint8_t bLeft, void* pParent,
-                                   const uint32_t* pKey) {
+                                   const uint32_t* pKey) {   // 0x14178ba80
     // insn 1-10: frame plus argument unpacking
     void* rbx = pParent;                       // insn 7   mov rbx,r9
     const uint8_t dil = bLeft;                 // insn 8   movzx edi,r8b
@@ -4886,7 +4886,7 @@ L206:
 }
 
 inline void* SynRbInsert_14178be70(void* pThis, void* pOutIter, uint8_t bLeft, void* pParent,
-                                   const uint32_t* pKey) {
+                                   const uint32_t* pKey) {   // 0x14178be70
     // insn 1-10: frame plus argument unpacking
     void* rbx = pParent;                       // insn 7   mov rbx,r9
     const uint8_t dil = bLeft;                 // insn 8   movzx edi,r8b
@@ -5105,7 +5105,7 @@ L206:
 }
 
 inline void* SynRbInsert_141794e10(void* pThis, void* pOutIter, uint8_t bLeft, void* pParent,
-                                   const uint32_t* pKey) {
+                                   const uint32_t* pKey) {   // 0x141794e10
     // insn 1-10: frame plus argument unpacking
     void* rbx = pParent;                       // insn 7   mov rbx,r9
     const uint8_t dil = bLeft;                 // insn 8   movzx edi,r8b
@@ -5324,7 +5324,7 @@ L206:
 }
 
 inline void* SynRbInsert_141796d90(void* pThis, void* pOutIter, uint8_t bLeft, void* pParent,
-                                   const uint32_t* pKey) {
+                                   const uint32_t* pKey) {   // 0x141796d90
     // insn 1-10: frame plus argument unpacking
     void* rbx = pParent;                       // insn 7   mov rbx,r9
     const uint8_t dil = bLeft;                 // insn 8   movzx edi,r8b
@@ -5543,7 +5543,7 @@ L206:
 }
 
 inline void* SynRbInsert_14179e810(void* pThis, void* pOutIter, uint8_t bLeft, void* pParent,
-                                   const uint32_t* pKey) {
+                                   const uint32_t* pKey) {   // 0x14179e810
     // insn 1-10: frame plus argument unpacking
     void* rbx = pParent;                       // insn 7   mov rbx,r9
     const uint8_t dil = bLeft;                 // insn 8   movzx edi,r8b
@@ -5762,7 +5762,7 @@ L206:
 }
 
 inline void* SynRbInsert_1417a79e0(void* pThis, void* pOutIter, uint8_t bLeft, void* pParent,
-                                   const uint32_t* pKey) {
+                                   const uint32_t* pKey) {   // 0x1417a79e0
     // insn 1-10: frame plus argument unpacking
     void* rbx = pParent;                       // insn 7   mov rbx,r9
     const uint8_t dil = bLeft;                 // insn 8   movzx edi,r8b
@@ -5981,7 +5981,7 @@ L206:
 }
 
 inline void* SynRbInsert_1417cbb60(void* pThis, void* pOutIter, uint8_t bLeft, void* pParent,
-                                   const uint32_t* pKey) {
+                                   const uint32_t* pKey) {   // 0x1417cbb60
     // insn 1-10: frame plus argument unpacking
     void* rbx = pParent;                       // insn 7   mov rbx,r9
     const uint8_t dil = bLeft;                 // insn 8   movzx edi,r8b

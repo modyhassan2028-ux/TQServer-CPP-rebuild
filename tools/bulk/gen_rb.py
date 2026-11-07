@@ -113,7 +113,8 @@ def main():
     for h in hits:
         tag = '%x' % h['a']
         txt = ref
-        txt = txt.replace('SynRbInsert_141727e60', 'SynRbInsert_%s' % tag)
+        txt = txt.replace('inline void* SynRbInsert_141727e60(', 'inline void* SynRbInsert_%s(' % tag)
+        txt = txt.replace('const uint32_t* pKey) {', 'const uint32_t* pKey) {   // 0x%s' % tag)
         txt = txt.replace('g_fnRB_141726e10', 'g_fnRB_%s_factory' % tag)
         txt = txt.replace('g_fnRB_1417f3154', 'g_fnRB_%s_throw' % tag)
         txt = txt.replace('0x3ffffffffffffffeULL', '%sULL' % h['limit'])
