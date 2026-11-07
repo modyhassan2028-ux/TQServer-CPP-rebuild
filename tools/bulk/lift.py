@@ -159,7 +159,7 @@ def setflags(w, a, b, unsigned=True):
 
 
 def normalise(t):
-    return re.sub(r'^rex(\.[WRX]+)? ', '', t.strip())
+    return re.sub(r'^rex(?:\.[WRXB]+|64)?\s+', '', t.strip())
 
 
 REGISTRY = {int(x, 16) for x in json.load(open(os.path.join(os.path.dirname(__file__), 'seams.json')))} \
@@ -375,7 +375,7 @@ def lift(addr, funcs):
             body.append('      f_zf = (r == 0); f_sf = ((r >> %d) & 1) != 0; }' % (bits - 1))
             continue
         if op == 'movsd' and re.match(r'^movsd\s+(?:QWORD|DWORD) PTR', ins, re.I):
-            m2 = re.match(r'^movsd\s+(?:(QWORD|DWORD) PTR [^,]+),\s*(xmm\d+)$', ins, re.I)
+            m2 = re.match(r'^movsd\s+(?:(QWORD|DWORD) PTR [^,]+),\s*(xmm\d+)\s*$', ins, re.I)
             if not m2:
                 raise SystemExit('movsd form: %r' % ins)
             w = 8 if m2.group(1).upper() == 'QWORD' else 4
