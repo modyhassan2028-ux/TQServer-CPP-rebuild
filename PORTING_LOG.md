@@ -9471,3 +9471,17 @@ The remaining un-lifted rows split into two groups, recorded as machine-readable
 - `tools/bulk/backlog_rows.json` - real code that still needs work: out-of-range
   branch targets (`jbe` leaving the .pdata range), absolute `jmp 0x...` seams and
   `movabs ds:...` stores.
+
+## Jump tables were the last bulk blocker (2026-11-07)
+
+The 22 rows still refusing were all `.pdata` entries whose first instruction is a normal
+prologue, so they are real functions. What failed was further in: a `jmp QWORD PTR [reg*8+table]`
+switch, followed by the table bytes, which linear disassembly decodes as `ins` and as stores to
+impossible displacements.
+
+`tools/bulk/prune_dead.py` removes the instructions no path can reach: everything between an
+unconditional transfer and the next branch target inside the row is entered only by a jump, so it
+is data. 942 such slots were dropped from unported rows (ported rows are never rewritten). That
+alone unblocked the switches, and the rows behind them needed two ordinary families:
+scalar SSE arithmetic (`addsd/subsd/mulsd/divsd` and the single-precision forms) and the
+truncating converts (`cvttsd2si`, `cvttss2si`).

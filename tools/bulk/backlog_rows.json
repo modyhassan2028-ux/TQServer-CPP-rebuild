@@ -11,94 +11,28 @@
   "insns": 98,
   "referenced": false
  },
- "0x14177fbc0": {
-  "addr": "0x14177fbc0",
-  "first_refusal": "add BYTE PTR [rdi-0x3afffa04],ah",
-  "insns": 243,
-  "referenced": true
- },
- "0x141786c00": {
-  "addr": "0x141786c00",
-  "first_refusal": "ins BYTE PTR es:[rdi],dx",
-  "insns": 96,
-  "referenced": true
- },
  "0x1417873a0": {
   "addr": "0x1417873a0",
   "first_refusal": "jbe 0x141787995",
-  "insns": 666,
+  "insns": 384,
   "referenced": true
  },
  "0x141788560": {
   "addr": "0x141788560",
-  "first_refusal": "mulsd xmm6,QWORD PTR [rip@0x1418302a0]",
+  "first_refusal": "comisd xmm6,xmm7",
   "insns": 83,
   "referenced": true
  },
- "0x1417ac130": {
-  "addr": "0x1417ac130",
-  "first_refusal": "mulsd xmm0,xmm6",
-  "insns": 111,
-  "referenced": false
- },
  "0x1417ac170": {
   "addr": "0x1417ac170",
-  "first_refusal": "mulsd xmm6,QWORD PTR [rip@0x14183029f]",
+  "first_refusal": "comisd xmm6,xmm7",
   "insns": 102,
   "referenced": false
- },
- "0x1417b3260": {
-  "addr": "0x1417b3260",
-  "first_refusal": "divsd xmm6,xmm1",
-  "insns": 499,
-  "referenced": false
- },
- "0x1417b32d0": {
-  "addr": "0x1417b32d0",
-  "first_refusal": "divsd xmm6,xmm1",
-  "insns": 466,
-  "referenced": false
- },
- "0x1417b3300": {
-  "addr": "0x1417b3300",
-  "first_refusal": "divsd xmm6,xmm1",
-  "insns": 431,
-  "referenced": true
- },
- "0x1417b3a90": {
-  "addr": "0x1417b3a90",
-  "first_refusal": "divsd xmm6,xmm1",
-  "insns": 507,
-  "referenced": true
- },
- "0x1417bed70": {
-  "addr": "0x1417bed70",
-  "first_refusal": "divsd xmm6,xmm1",
-  "insns": 429,
-  "referenced": true
  },
  "0x1417d8c04": {
   "addr": "0x1417d8c04",
   "first_refusal": "movabs ds:0xba000b8a27000b89,al",
   "insns": 7,
-  "referenced": false
- },
- "0x1417da723": {
-  "addr": "0x1417da723",
-  "first_refusal": "mov WORD PTR [rsi-0x5951fff5],fs",
-  "insns": 536,
-  "referenced": false
- },
- "0x1417da746": {
-  "addr": "0x1417da746",
-  "first_refusal": "mov WORD PTR [rsi-0x5951fff5],fs",
-  "insns": 272,
-  "referenced": false
- },
- "0x1417da7a4": {
-  "addr": "0x1417da7a4",
-  "first_refusal": "mov WORD PTR [rsi-0x5951fff5],fs",
-  "insns": 109,
   "referenced": false
  },
  "0x1417da7d0": {
@@ -111,12 +45,6 @@
   "addr": "0x1417f340c",
   "first_refusal": "mov rax,QWORD PTR gs:0x30",
   "insns": 142,
-  "referenced": true
- },
- "0x1417f3dd0": {
-  "addr": "0x1417f3dd0",
-  "first_refusal": "ds or eax,0xd3e5500",
-  "insns": 103,
   "referenced": true
  },
  "0x1417f5830": {

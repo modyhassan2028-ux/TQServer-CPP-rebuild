@@ -826,8 +826,37 @@ def _cvt_pack(body, dst, src_tok, n_from, in_bits, out_kind, ins):
 
 
 
+_SSEARITH = {'addsd': ('double', '+'), 'subsd': ('double', '-'), 'mulsd': ('double', '*'),
+             'divsd': ('double', '/'), 'addss': ('float', '+'), 'subss': ('float', '-'),
+             'mulss': ('float', '*'), 'divss': ('float', '/')}
+
+
+
 def _emit_extra(op, rest, body, ins):
     """Returns True when it handled the instruction."""
+    _sa = re.match(r'^([a-z]+sd|[a-z]+ss)\s+(xmm\d+),\s*(.+)$', ins, re.I)
+    if _sa and _sa.group(1).lower() in _SSEARITH:
+        kind, oper = _SSEARITH[_sa.group(1).lower()]
+        dst, src_tok = _sa.group(2), _sa.group(3).strip()
+        if re.match(r'^xmm\d+$', src_tok):
+            src = '(const uint8_t*)%s' % src_tok
+            sargs = '(const uint8_t*)%s' % src_tok
+        else:
+            e = enc(src_tok)
+            if e is None:
+                raise SystemExit('simd arith: %r' % ins)
+            if e[0] == 'mem':
+                src = '(const uint8_t*)ML_ADDR(%s, %s)' % (e[1], e[2])
+            elif e[0] == 'iat':
+                src = '(const uint8_t*)ML_ADDR(0x%x, 0)' % e[1]
+            else:
+                raise SystemExit('simd arith: %r' % ins)
+            sargs = src
+        body.append('    { %s a; %s b; memcpy(&a, %s, %d); memcpy(&b, %s, %d);'
+                    % (kind, kind, dst, 8 if kind == 'double' else 4, sargs, 8 if kind == 'double' else 4))
+        body.append('      a = a %s b; memcpy(%s, &a, %d); }'
+                    % (oper, dst, 8 if kind == 'double' else 4))
+        return True
     _cv2 = re.match(r'^(cvtdq2pd|cvtdq2ps|cvttpd2dq|cvtpd2dq)\s+(.+)$', ins, re.I)
     if _cv2:
         m2 = _cv2.group(1).lower()
@@ -888,8 +917,8 @@ def _emit_extra(op, rest, body, ins):
     if _cs:
         mn2 = _cs.group(1).lower()
         a1, b1 = [x.strip() for x in _cs.group(2).split(',', 1)]
-        sb = enc(b1)
-        if sb is None:
+        sb = None if mn2.startswith('cvtt') else enc(b1)
+        if not mn2.startswith('cvtt') and sb is None:
             raise SystemExit('cvt form: %r' % ins)
         if mn2.startswith('cvtsi2'):
             w = sb[2] if sb[0] in ('reg', 'sub') else sb[3]
@@ -905,7 +934,7 @@ def _emit_extra(op, rest, body, ins):
             raise SystemExit('cvt form: %r' % ins)
         w = d[2] if d[0] in ('reg', 'sub') else d[3]
         cast = '(int64_t)' if w == 8 else '(int32_t)'
-        body.append('    { double d; memcpy(&d, %s, 8); %s }'
+        body.append('    { double d; memcpy(&d, %s, 8); %s; }'
                     % (b1, operand_write(d, cast + 'd').rstrip(';')))
         return True
     _sm = re.match(r'^scas\s+(?:[a-z]{2,3},\s*)?(BYTE|WORD|DWORD|QWORD) PTR (?:es:)?\[rdi\]$', ins, re.I)
