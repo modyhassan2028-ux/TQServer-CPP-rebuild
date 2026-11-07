@@ -74,9 +74,21 @@ def main():
     total_ins = sum(len(x['text']) for x in funcs.values())
     done = sum(1 for r in routines if all(a in defs for a in r['rows']))
     ins = sum(len(funcs[a]['text']) for a in defs)
-    print('rows %d/%d | routines %d/%d (%.1f%%) | instructions %d/%d (%.1f%%)'
+    # Instruction-address coverage: rows overlap (fragments nested in bigger functions), so summing
+    # their lengths double-counts. Counting each address once is the only honest denominator.
+    def addrs_of(a):
+        ad = funcs[a].get('addr') or [a]
+        return [ad] if isinstance(ad, int) else list(ad)
+    universe = set()
+    for a in funcs:
+        universe.update(addrs_of(a))
+    covered = set()
+    for a in defs:
+        covered.update(addrs_of(a))
+    print('rows %d/%d | routines %d/%d (%.1f%%) | instructions %d/%d (%.1f%%) | code covered %d/%d (%.1f%%)'
           % (len(defs), len(funcs), done, len(routines), 100.0 * done / len(routines),
-             ins, total_ins, 100.0 * ins / total_ins))
+             ins, total_ins, 100.0 * ins / total_ins,
+             len(covered), len(universe), 100.0 * len(covered) / len(universe)))
 
 
 if __name__ == '__main__':
