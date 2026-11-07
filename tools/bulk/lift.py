@@ -303,6 +303,81 @@ def lift(addr, funcs):
             body.append('      %s' % operand_write(d, 'r'))
             body.append('      f_zf = (r == 0); f_sf = ((r >> %d) & 1) != 0; }' % (bits - 1))
             continue
+        if op == 'not':
+            d = enc(rest)
+            if d is None:
+                raise SystemExit('not form: %r' % ins)
+            w = d[2] if d[0] == 'reg' else d[3]
+            mask = '~0ULL' if w == 8 else '0x%xULL' % ((1 << (w * 8)) - 1)
+            body.append('    %s' % operand_write(d, '(%s) ^ %s' % (operand_read(d), mask)))
+            continue
+        if op in ('repnz scas', 'repne scas', 'repz scas', 'repe scas') or re.match(r'^rep(?:nz|ne|z|e) scas', ins, re.I):
+            m = re.match(r'^rep(?:nz|ne|z|e)\s+scas\s+(?:[a-z]{2,3},\s*)?(BYTE|WORD|DWORD|QWORD) PTR (?:es:)?\[rdi\]\s*$', ins, re.I)
+            if not m:
+                raise SystemExit('scas form: %r' % ins)
+            bits = {'BYTE': 8, 'WORD': 16, 'DWORD': 32, 'QWORD': 64}[m.group(1).upper()]
+            w = bits // 8
+            mask = '~0ULL' if bits == 64 else '0x%xULL' % ((1 << bits) - 1)
+            stop_on_zf = bool(re.match(r'^rep(?:nz|ne)', ins, re.I))
+            body.append('    while (rcx) {')
+            body.append('        const uint64_t a = rax & %s, b = ML_M%d(rdi, 0) & %s;' % (mask, w, mask))
+            body.append('        const uint64_t d = (a - b) & %s;' % mask)
+            body.append('        rdi += %d; --rcx;' % w)
+            body.append('        f_cf = a < b; f_zf = (d == 0); f_sf = ((d >> %d) & 1) != 0;' % (bits - 1))
+            body.append('        f_of = ((((a ^ b) & (a ^ d)) >> %d) & 1) != 0;' % (bits - 1))
+            body.append('        if (%s) break;' % ('f_zf' if stop_on_zf else '!f_zf'))
+            body.append('    }')
+            continue
+        if op == 'movsd':
+            parts = [x.strip() for x in rest.split(',')]
+            if len(parts) == 2 and re.match(r'^xmm\d+$', parts[0]):
+                dst, src = parts[0], enc(parts[1])
+                if src is None:
+                    raise SystemExit('movsd form: %r' % ins)
+                if src[0] == 'reg' and src[1].startswith('xmm'):
+                    body.append('    memcpy(%s, %s, 8);   // movsd xmm, xmm (low quadword)' % (dst, src[1]))
+                else:
+                    body.append('    (*(uint64_t*)(%s)) = (uint64_t)(%s);   // movsd xmm, m64' % (dst, operand_read(src)))
+                continue
+            raise SystemExit('movsd form: %r' % ins)
+        if op in ('cdq', 'cqo'):
+            if op == 'cdq':
+                body.append('    rdx = (rax & 0x80000000ULL) ? 0xffffffffULL : 0ULL;   // cdq')
+            else:
+                body.append('    rdx = (rax & 0x8000000000000000ULL) ? ~0ULL : 0ULL;   // cqo')
+            continue
+        if op == 'xchg':
+            a1, b1 = [enc(x) for x in rest.replace(', ', ',').split(',')]
+            body.append('    { const uint64_t t = %s; %s %s }' % (operand_read(a1), operand_write(a1, operand_read(b1)), operand_write(b1, 't')))
+            continue
+        if op in ('sbb', 'adc'):
+            d0, s0 = [enc(x) for x in rest.replace(', ', ',').split(',', 1)]
+            w = d0[2] if d0[0] == 'reg' else d0[3]
+            bits = w * 8
+            mask = '~0ULL' if bits == 64 else '0x%xULL' % ((1 << bits) - 1)
+            body.append('    { const uint64_t m = %s; const uint64_t a = (%s) & m; const uint64_t b = (%s) & m;'
+                        % (mask, operand_read(d0), operand_read(s0)))
+            if op == 'sbb':
+                body.append('      const uint64_t c = f_cf ? 1 : 0;')
+                body.append('      const uint64_t r = (a - b - c) & m;')
+                body.append('      f_cf = (a < b) || (a == b && c) || (a - b < c && a >= b);')
+                body.append('      f_of = (((a ^ b) & (a ^ r)) >> %d) & 1;' % (bits - 1))
+            else:
+                body.append('      const uint64_t c = f_cf ? 1 : 0;')
+                body.append('      const uint64_t r = (a + b + c) & m;')
+                body.append('      f_cf = (r < a) || (c && r == a);')
+                body.append('      f_of = ((((a ^ r) & (b ^ r)) >> %d) & 1) != 0;' % (bits - 1))
+            body.append('      %s' % operand_write(d0, 'r'))
+            body.append('      f_zf = (r == 0); f_sf = ((r >> %d) & 1) != 0; }' % (bits - 1))
+            continue
+        if op == 'movsd' and re.match(r'^movsd\s+(?:QWORD|DWORD) PTR', ins, re.I):
+            m2 = re.match(r'^movsd\s+(?:(QWORD|DWORD) PTR [^,]+),\s*(xmm\d+)$', ins, re.I)
+            if not m2:
+                raise SystemExit('movsd form: %r' % ins)
+            w = 8 if m2.group(1).upper() == 'QWORD' else 4
+            dstm = enc(re.match(r'^movsd\s+((?:QWORD|DWORD) PTR [^,]+)', ins, re.I).group(1))
+            body.append('    %s' % operand_write(dstm, '(uint64_t)(*(uint64_t*)(%s))' % m2.group(2)))
+            continue
         if op == 'lea':
             d, s = [enc(x) for x in rest.replace(', ', ',').split(',', 1)]
             if s[0] == 'mem':

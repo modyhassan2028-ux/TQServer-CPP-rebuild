@@ -59,7 +59,10 @@ __attribute__((weak)) uint64_t (*g_fnLIFT_141823120)(uint64_t, uint64_t, uint64_
 __attribute__((weak)) uint64_t (*g_fnLIFT_141823118)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141823108)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1418230f8)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_1418230e8)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_1418230e0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1418230d0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_1418230c8)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1418230c0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1418230b8)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1418230b0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
@@ -118,12 +121,15 @@ __attribute__((weak)) uint64_t (*g_fnLIFT_1417f3dd0)(uint64_t, uint64_t, uint64_
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417f3cc4)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417f3b9c)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417f3ae0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_1417f3a30)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_1417f3a00)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417f3966)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417f3948)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417f37de)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417f330c)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417f32ac)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417f3260)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_1417f3174)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417f3166)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417f3160)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417f3154)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
@@ -474,8 +480,16 @@ __attribute__((weak)) uint64_t (*g_fnLIFT_1417d8c70)(uint64_t, uint64_t, uint64_
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417d8730)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417d83e0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417d8390)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_1417d82b0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_1417d8220)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_1417d8160)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417d80c0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_1417d80b0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_1417d7f20)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_1417d7ee0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_1417d7e80)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417d7e40)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_1417d7df0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417d7d60)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417d7cb0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417d7be0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
@@ -496,6 +510,7 @@ __attribute__((weak)) uint64_t (*g_fnLIFT_1417d73a0)(uint64_t, uint64_t, uint64_
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417d7350)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417d6820)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417d6790)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_1417d6740)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417d66c0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417d6640)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417d64c0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
@@ -717,6 +732,7 @@ __attribute__((weak)) uint64_t (*g_fnLIFT_1417c6040)(uint64_t, uint64_t, uint64_
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417c5fa0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417c5830)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417c5640)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_1417c5500)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417c5420)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417c53c0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417c5320)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
@@ -729,6 +745,7 @@ __attribute__((weak)) uint64_t (*g_fnLIFT_1417c4c50)(uint64_t, uint64_t, uint64_
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417c4c00)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417c4b60)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417c4a70)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_1417c4920)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417c4840)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417c4780)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417c45c0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
@@ -798,6 +815,7 @@ __attribute__((weak)) uint64_t (*g_fnLIFT_1417ae640)(uint64_t, uint64_t, uint64_
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417ae630)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417ac810)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417ac7d0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_1417ac750)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417ac710)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417ac700)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417ac6f0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
@@ -1055,6 +1073,7 @@ __attribute__((weak)) uint64_t (*g_fnLIFT_141790a10)(uint64_t, uint64_t, uint64_
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417903d0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141790390)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417902e0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_1417901d0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141790120)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141790110)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141790100)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
@@ -1087,6 +1106,7 @@ __attribute__((weak)) uint64_t (*g_fnLIFT_14178e4a0)(uint64_t, uint64_t, uint64_
 __attribute__((weak)) uint64_t (*g_fnLIFT_14178e2e0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_14178e270)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_14178e200)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_14178df30)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_14178dec0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_14178de40)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_14178dcd0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
@@ -1152,6 +1172,7 @@ __attribute__((weak)) uint64_t (*g_fnLIFT_1417889b0)(uint64_t, uint64_t, uint64_
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417888b0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417887b0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417886b0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_141788400)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141788040)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141787f90)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141787ed0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
@@ -1209,6 +1230,7 @@ __attribute__((weak)) uint64_t (*g_fnLIFT_141786320)(uint64_t, uint64_t, uint64_
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417862c0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417861d0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417860e0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_141785ff0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141785f00)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141785ea0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141785dc0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
@@ -1435,6 +1457,7 @@ __attribute__((weak)) uint64_t (*g_fnLIFT_141769750)(uint64_t, uint64_t, uint64_
 __attribute__((weak)) uint64_t (*g_fnLIFT_141769720)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141769640)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417695b0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_141768ec0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141768c70)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141768b20)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417689b0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
@@ -1455,6 +1478,7 @@ __attribute__((weak)) uint64_t (*g_fnLIFT_141766e90)(uint64_t, uint64_t, uint64_
 __attribute__((weak)) uint64_t (*g_fnLIFT_141766d10)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141766b60)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141766250)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_141766170)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417655c0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141765410)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141765060)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
@@ -1516,6 +1540,7 @@ __attribute__((weak)) uint64_t (*g_fnLIFT_14175f290)(uint64_t, uint64_t, uint64_
 __attribute__((weak)) uint64_t (*g_fnLIFT_14175efe0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_14175ee00)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_14175ecb0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_14175eb70)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_14175ead0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_14175ea60)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_14175ea00)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
@@ -1721,9 +1746,12 @@ __attribute__((weak)) uint64_t (*g_fnLIFT_14174ea50)(uint64_t, uint64_t, uint64_
 __attribute__((weak)) uint64_t (*g_fnLIFT_14174ea40)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_14174ea30)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_14174e950)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_14174e930)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_14174e920)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_14174e7f0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_14174e7e0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_14174e760)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_14174e750)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_14174e520)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_14174e400)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_14174e3f0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
@@ -1840,7 +1868,9 @@ __attribute__((weak)) uint64_t (*g_fnLIFT_141743f20)(uint64_t, uint64_t, uint64_
 __attribute__((weak)) uint64_t (*g_fnLIFT_141743e80)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141743e70)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141743e60)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_141743e00)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141743dd0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_141743d70)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141743d10)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141743cb0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141743c80)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
@@ -1868,6 +1898,7 @@ __attribute__((weak)) uint64_t (*g_fnLIFT_141740e80)(uint64_t, uint64_t, uint64_
 __attribute__((weak)) uint64_t (*g_fnLIFT_141740e10)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141740c20)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141740860)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_141740510)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141740390)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141740320)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141740310)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
@@ -1986,6 +2017,7 @@ __attribute__((weak)) uint64_t (*g_fnLIFT_1417320f0)(uint64_t, uint64_t, uint64_
 __attribute__((weak)) uint64_t (*g_fnLIFT_141732040)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141731fc0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141731f90)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_141731c30)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141731c00)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417317b0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141731390)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
@@ -1997,7 +2029,10 @@ __attribute__((weak)) uint64_t (*g_fnLIFT_141730cd0)(uint64_t, uint64_t, uint64_
 __attribute__((weak)) uint64_t (*g_fnLIFT_141730b10)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141730ae0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417309d0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_141730850)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_141730750)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141730720)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_141730240)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_14172fdb0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_14172fc90)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_14172f970)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
@@ -2144,8 +2179,10 @@ __attribute__((weak)) uint64_t (*g_fnLIFT_141722c50)(uint64_t, uint64_t, uint64_
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417227e0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141722680)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_1417224f0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_141721ec0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141721db0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141721cf0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
+__attribute__((weak)) uint64_t (*g_fnLIFT_141721be0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141721b60)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141721b50)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
 __attribute__((weak)) uint64_t (*g_fnLIFT_141721a40)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;
@@ -45367,6 +45404,563 @@ uint64_t SynLift_141731d25(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
     return rax;
 }
 
+uint64_t SynLift_141731d50(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L132;
+    rsp -= 8; ML_M8(rsp, 0) = rbp;
+    rsp -= 8; ML_M8(rsp, 0) = rsi;
+    rsp = rsp - (0x288ULL);
+    rax = ML_IAT(0x141886c40);
+    rax = (rax) ^ (rsp);
+    ML_M8(rsp, 0x270) = rax;
+    r9 = (uint64_t)(uint32_t)(ML_M4(rcx, 0x54));
+    rbp = (uint64_t)(uint32_t)((uint32_t)rdx);
+    ML_M4(rsp, 0x30) = (uint32_t)rdx;
+    r8 = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rdx = (uint64_t)(uint32_t)(0xfa0ULL);
+    rsi = rcx;
+    ML_M8(rsp, 0x280) = rdi;
+    rax = ML_CALL(141730240);
+    rdi = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L34;
+    r8 = (uint64_t)(uint32_t)(ML_M4(rsi, 0x54));
+    r9 = (uint64_t)(uint32_t)(0xfa0ULL);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rcx = rsi;
+    rax = ML_CALL(141721be0);
+    rdi = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L34;
+    r9 = (uintptr_t)0x141824e30;
+    r8 = (uintptr_t)0x141826678;
+    rdx = (uintptr_t)0x14182675c;
+    rcx = (uintptr_t)0x141824ca8;
+    ML_M4(rsp, 0x20) = 0x8c0ULL;
+    rax = ML_CALL(141823030);
+    goto L125;
+L34:
+    rax = (uint64_t)(uint32_t)(0);
+    r8 = rsp + 0x38;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rcx = rsi;
+    ML_M4(rsp, 0x38) = (uint32_t)rax;
+    ML_M2(rsp, 0x3c) = (uint16_t)rax;
+    ML_M4(rsp, 0x3e) = (uint32_t)rax;
+    ML_M4(rsp, 0x42) = (uint32_t)rax;
+    ML_M4(rsp, 0x46) = (uint32_t)rax;
+    ML_M4(rsp, 0x4a) = (uint32_t)rax;
+    ML_M2(rsp, 0x4e) = (uint16_t)rax;
+    ML_M2(rsp, 0x50) = (uint16_t)rax;
+    ML_M1(rsp, 0x52) = (uint8_t)rax;
+    ML_M8(rsp, 0x53) = rax;
+    ML_M8(rsp, 0x5b) = rax;
+    rax = ML_CALL(141721ec0);
+    rcx = rsi + 0x110;
+    rdx = rsp + 0x30;
+    rax = ML_CALL(141730750);
+    rcx = rsi + 0x1d0;
+    rdx = rsp + 0x30;
+    ML_M8(rax, 0x0) = rdi;
+    rax = ML_CALL(141730850);
+    rdx = rax;
+    rax = rsp + 0x38;
+    rcx = ML_M8(rax, 0x0);
+    ML_M8(rdx, 0x0) = rcx;
+    rcx = ML_M8(rax, 0x8);
+    ML_M8(rdx, 0x8) = rcx;
+    rcx = ML_M8(rax, 0x10);
+    ML_M8(rdx, 0x10) = rcx;
+    rcx = ML_M8(rax, 0x18);
+    ML_M8(rdx, 0x18) = rcx;
+    rcx = ML_M8(rax, 0x20);
+    ML_M8(rdx, 0x20) = rcx;
+    rcx = ML_M2(rax, 0x28);
+    ML_M2(rdx, 0x28) = (uint16_t)rcx;
+    rax = ML_M1(rax, 0x2a);
+    rcx = rsi;
+    ML_M1(rdx, 0x2a) = (uint8_t)rax;
+    rdx = (uint64_t)(uint32_t)(0xfa0ULL);
+    rax = ML_CALL(141731c30);
+    rcx = (rcx) | (0xffffffffffffffffULL);
+    rax = (uint64_t)(uint32_t)(0);
+    rdi = rsp + 0x53;
+    while (rcx) {
+        const uint64_t a = rax & 0xffULL, b = ML_M1(rdi, 0) & 0xffULL;
+        const uint64_t d = (a - b) & 0xffULL;
+        rdi += 1; --rcx;
+        f_cf = a < b; f_zf = (d == 0); f_sf = ((d >> 7) & 1) != 0;
+        f_of = ((((a ^ b) & (a ^ d)) >> 7) & 1) != 0;
+        if (f_zf) break;
+    }
+    rcx = (rcx) ^ ~0ULL;
+{
+    const uint64_t a = (uint64_t)(rcx) & ~0ULL, b = (uint64_t)(0x1ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf) goto L125;
+    rcx = rsp + 0x71;
+    rdx = (uint64_t)(uint32_t)(0);
+    r8 = (uint64_t)(uint32_t)(0x1ffULL);
+    ML_M8(rsp, 0x2b0) = rbx;
+    ML_M1(rsp, 0x70) = (uint8_t)rax;
+    rax = ML_CALL(1417f30c0);
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)(0xfa0ULL);
+    rbx = rax;
+    rax = ML_CALL(141768020);
+    rdx = (uintptr_t)0x141826a58;
+    rdi = rax;
+    rax = ML_M8(rbx, 0x0);
+    rcx = rbx;
+    rax = ML_CALLP(ML_M8(rax, 0x0));
+    r9 = rsp + 0x53;
+    rcx = rsp + 0x70;
+    rdx = (uint64_t)(uint32_t)(0x200ULL);
+    r8 = rax;
+    ML_M8(rsp, 0x20) = rdi;
+    rax = ML_CALL(1418233c8);
+    rcx = ML_M8(rsi, 0x0);
+    ML_M1(rsp, 0x26f) = 0x0ULL;
+    rax = ML_M8(rcx, 0x0);
+    rdx = rsp + 0x70;
+    r8 = (uint64_t)(uint32_t)(0x7d5ULL);
+    rax = ML_CALLP(ML_M8(rax, 0x90));
+    rcx = ML_M8(rsi, 0x0);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x268));
+    rbx = ML_M8(rsp, 0x2b0);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L125;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rcx = rsi;
+    rax = ML_CALL(14172ecb0);
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    r8 = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(1417524d0);
+L125:
+    rdi = ML_M8(rsp, 0x280);
+    rcx = ML_M8(rsp, 0x270);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    rsp = rsp + (0x288ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbp = v; }
+L132:
+    return rax;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ML_M8(rsp, 0x8) = rcx;
+    rsp -= 8; ML_M8(rsp, 0) = rbx;
+    rsp = rsp - (0x30ULL);
+    ML_M8(rsp, 0x20) = 0xfffffffffffffffeULL;
+    rbx = rcx;
+    rax = ML_CALL(14172cf70);
+    ;
+    rcx = ML_M8(rbx, 0x0);
+    rsp = rsp + (0x30ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbx = v; }
+    goto L186;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ML_M8(rsp, 0x8) = rcx;
+    rsp -= 8; ML_M8(rsp, 0) = rbx;
+    rsp = rsp - (0x30ULL);
+    ML_M8(rsp, 0x20) = 0xfffffffffffffffeULL;
+    rbx = rcx;
+    rcx = (uint64_t)(uint32_t)(0x8ULL);
+    rax = ML_CALL(1417f3166);
+    ML_M8(rsp, 0x48) = rax;
+    ML_M8(rsp, 0x50) = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L169;
+    ML_M8(rax, 0x0) = rbx;
+    goto L170;
+L169:
+    rax = (uint64_t)(uint32_t)(0);
+L170:
+    ML_M8(rbx, 0x0) = rax;
+    rcx = rbx;
+    rax = ML_CALL(141726c30);
+    ML_M8(rbx, 0x30) = rax;
+    ML_M1(rax, 0x1d) = 0x1ULL;
+    rax = ML_M8(rbx, 0x30);
+    ML_M8(rax, 0x8) = rax;
+    rax = ML_M8(rbx, 0x30);
+    ML_M8(rax, 0x0) = rax;
+    rax = ML_M8(rbx, 0x30);
+    ML_M8(rax, 0x10) = rax;
+    ML_M8(rbx, 0x38) = 0x0ULL;
+    rax = rbx;
+    rsp = rsp + (0x30ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbx = v; }
+    return rax;
+L186:
+    return ML_CALL(1418233f0);   // tail call
+    return ML_CALL(1418233e8);   // tail call
+    return ML_CALL(1418233e0);   // tail call
+    ;
+    ;
+    rax = rsp;
+    ML_M8(rax, 0x8) = rbx;
+    ML_M8(rax, 0x10) = rbp;
+    ML_M8(rax, 0x18) = rsi;
+    ML_M8(rax, 0x20) = rdi;
+    rsp -= 8; ML_M8(rsp, 0) = r12;
+    rsp = rsp - (0x20ULL);
+    rbx = ML_M8(r9, 0x38);
+    rsi = rdx;
+    r12 = r8;
+    rbp = rcx;
+    r8 = rbx + 0x4;
+    rdx = r9;
+    rcx = rsi;
+    rdi = r9;
+    rax = ML_CALL(1417f30cc);
+    r11 = (uint64_t)(uint32_t)(ML_M4(rbx, 0x4));
+    r10 = (uint64_t)(uint32_t)(ML_M4(rbp, 0x4));
+    rax = (uint64_t)(uint32_t)((uint32_t)r11);
+    r11 = (uint64_t)(uint32_t)(((uint32_t)r11) & (0x2ULL));
+    r8 = (uint64_t)(uint32_t)(0x1ULL);
+    rax = (uint64_t)(uint32_t)(((uint32_t)rax) & ((uint32_t)r8));
+    r10 = (r10 & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(((uint8_t)r10) & (0x66ULL));
+    if (f_zf) { r11 = (uint64_t)(uint32_t)((uint32_t)rax); }
+{
+    const uint64_t r = ((uint64_t)((uint32_t)r11) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)r11) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L223;
+    r9 = rdi;
+    r8 = r12;
+    rdx = rsi;
+    rcx = rbp;
+    rax = ML_CALL(1417f2f4a);
+    r8 = (uint64_t)(uint32_t)((uint32_t)rax);
+L223:
+    rbx = ML_M8(rsp, 0x30);
+    rbp = ML_M8(rsp, 0x38);
+    rsi = ML_M8(rsp, 0x40);
+    rdi = ML_M8(rsp, 0x48);
+    rax = (uint64_t)(uint32_t)((uint32_t)r8);
+    rsp = rsp + (0x20ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r12 = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
+uint64_t SynLift_141731d88(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    ML_M8(rsp, 0x280) = rdi;
+    rax = ML_CALL(141730240);
+    rdi = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L20;
+    r8 = (uint64_t)(uint32_t)(ML_M4(rsi, 0x54));
+    r9 = (uint64_t)(uint32_t)(0xfa0ULL);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rcx = rsi;
+    rax = ML_CALL(141721be0);
+    rdi = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L20;
+    r9 = (uintptr_t)0x141824e30;
+    r8 = (uintptr_t)0x141826678;
+    rdx = (uintptr_t)0x14182675c;
+    rcx = (uintptr_t)0x141824ca8;
+    ML_M4(rsp, 0x20) = 0x8c0ULL;
+    rax = ML_CALL(141823030);
+    goto L111;
+L20:
+    rax = (uint64_t)(uint32_t)(0);
+    r8 = rsp + 0x38;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rcx = rsi;
+    ML_M4(rsp, 0x38) = (uint32_t)rax;
+    ML_M2(rsp, 0x3c) = (uint16_t)rax;
+    ML_M4(rsp, 0x3e) = (uint32_t)rax;
+    ML_M4(rsp, 0x42) = (uint32_t)rax;
+    ML_M4(rsp, 0x46) = (uint32_t)rax;
+    ML_M4(rsp, 0x4a) = (uint32_t)rax;
+    ML_M2(rsp, 0x4e) = (uint16_t)rax;
+    ML_M2(rsp, 0x50) = (uint16_t)rax;
+    ML_M1(rsp, 0x52) = (uint8_t)rax;
+    ML_M8(rsp, 0x53) = rax;
+    ML_M8(rsp, 0x5b) = rax;
+    rax = ML_CALL(141721ec0);
+    rcx = rsi + 0x110;
+    rdx = rsp + 0x30;
+    rax = ML_CALL(141730750);
+    rcx = rsi + 0x1d0;
+    rdx = rsp + 0x30;
+    ML_M8(rax, 0x0) = rdi;
+    rax = ML_CALL(141730850);
+    rdx = rax;
+    rax = rsp + 0x38;
+    rcx = ML_M8(rax, 0x0);
+    ML_M8(rdx, 0x0) = rcx;
+    rcx = ML_M8(rax, 0x8);
+    ML_M8(rdx, 0x8) = rcx;
+    rcx = ML_M8(rax, 0x10);
+    ML_M8(rdx, 0x10) = rcx;
+    rcx = ML_M8(rax, 0x18);
+    ML_M8(rdx, 0x18) = rcx;
+    rcx = ML_M8(rax, 0x20);
+    ML_M8(rdx, 0x20) = rcx;
+    rcx = ML_M2(rax, 0x28);
+    ML_M2(rdx, 0x28) = (uint16_t)rcx;
+    rax = ML_M1(rax, 0x2a);
+    rcx = rsi;
+    ML_M1(rdx, 0x2a) = (uint8_t)rax;
+    rdx = (uint64_t)(uint32_t)(0xfa0ULL);
+    rax = ML_CALL(141731c30);
+    rcx = (rcx) | (0xffffffffffffffffULL);
+    rax = (uint64_t)(uint32_t)(0);
+    rdi = rsp + 0x53;
+    while (rcx) {
+        const uint64_t a = rax & 0xffULL, b = ML_M1(rdi, 0) & 0xffULL;
+        const uint64_t d = (a - b) & 0xffULL;
+        rdi += 1; --rcx;
+        f_cf = a < b; f_zf = (d == 0); f_sf = ((d >> 7) & 1) != 0;
+        f_of = ((((a ^ b) & (a ^ d)) >> 7) & 1) != 0;
+        if (f_zf) break;
+    }
+    rcx = (rcx) ^ ~0ULL;
+{
+    const uint64_t a = (uint64_t)(rcx) & ~0ULL, b = (uint64_t)(0x1ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf) goto L111;
+    rcx = rsp + 0x71;
+    rdx = (uint64_t)(uint32_t)(0);
+    r8 = (uint64_t)(uint32_t)(0x1ffULL);
+    ML_M8(rsp, 0x2b0) = rbx;
+    ML_M1(rsp, 0x70) = (uint8_t)rax;
+    rax = ML_CALL(1417f30c0);
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)(0xfa0ULL);
+    rbx = rax;
+    rax = ML_CALL(141768020);
+    rdx = (uintptr_t)0x141826a58;
+    rdi = rax;
+    rax = ML_M8(rbx, 0x0);
+    rcx = rbx;
+    rax = ML_CALLP(ML_M8(rax, 0x0));
+    r9 = rsp + 0x53;
+    rcx = rsp + 0x70;
+    rdx = (uint64_t)(uint32_t)(0x200ULL);
+    r8 = rax;
+    ML_M8(rsp, 0x20) = rdi;
+    rax = ML_CALL(1418233c8);
+    rcx = ML_M8(rsi, 0x0);
+    ML_M1(rsp, 0x26f) = 0x0ULL;
+    rax = ML_M8(rcx, 0x0);
+    rdx = rsp + 0x70;
+    r8 = (uint64_t)(uint32_t)(0x7d5ULL);
+    rax = ML_CALLP(ML_M8(rax, 0x90));
+    rcx = ML_M8(rsi, 0x0);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x268));
+    rbx = ML_M8(rsp, 0x2b0);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L111;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rcx = rsi;
+    rax = ML_CALL(14172ecb0);
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    r8 = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(1417524d0);
+L111:
+    rdi = ML_M8(rsp, 0x280);
+    rcx = ML_M8(rsp, 0x270);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    rsp = rsp + (0x288ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbp = v; }
+    return rax;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ML_M8(rsp, 0x8) = rcx;
+    rsp -= 8; ML_M8(rsp, 0) = rbx;
+    rsp = rsp - (0x30ULL);
+    ML_M8(rsp, 0x20) = 0xfffffffffffffffeULL;
+    rbx = rcx;
+    rax = ML_CALL(14172cf70);
+    ;
+    rcx = ML_M8(rbx, 0x0);
+    rsp = rsp + (0x30ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbx = v; }
+    goto L172;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ML_M8(rsp, 0x8) = rcx;
+    rsp -= 8; ML_M8(rsp, 0) = rbx;
+    rsp = rsp - (0x30ULL);
+    ML_M8(rsp, 0x20) = 0xfffffffffffffffeULL;
+    rbx = rcx;
+    rcx = (uint64_t)(uint32_t)(0x8ULL);
+    rax = ML_CALL(1417f3166);
+    ML_M8(rsp, 0x48) = rax;
+    ML_M8(rsp, 0x50) = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L155;
+    ML_M8(rax, 0x0) = rbx;
+    goto L156;
+L155:
+    rax = (uint64_t)(uint32_t)(0);
+L156:
+    ML_M8(rbx, 0x0) = rax;
+    rcx = rbx;
+    rax = ML_CALL(141726c30);
+    ML_M8(rbx, 0x30) = rax;
+    ML_M1(rax, 0x1d) = 0x1ULL;
+    rax = ML_M8(rbx, 0x30);
+    ML_M8(rax, 0x8) = rax;
+    rax = ML_M8(rbx, 0x30);
+    ML_M8(rax, 0x0) = rax;
+    rax = ML_M8(rbx, 0x30);
+    ML_M8(rax, 0x10) = rax;
+    ML_M8(rbx, 0x38) = 0x0ULL;
+    rax = rbx;
+    rsp = rsp + (0x30ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbx = v; }
+    return rax;
+L172:
+    return ML_CALL(1418233f0);   // tail call
+    return ML_CALL(1418233e8);   // tail call
+    return ML_CALL(1418233e0);   // tail call
+    ;
+    ;
+    rax = rsp;
+    ML_M8(rax, 0x8) = rbx;
+    ML_M8(rax, 0x10) = rbp;
+    ML_M8(rax, 0x18) = rsi;
+    ML_M8(rax, 0x20) = rdi;
+    rsp -= 8; ML_M8(rsp, 0) = r12;
+    rsp = rsp - (0x20ULL);
+    rbx = ML_M8(r9, 0x38);
+    rsi = rdx;
+    r12 = r8;
+    rbp = rcx;
+    r8 = rbx + 0x4;
+    rdx = r9;
+    rcx = rsi;
+    rdi = r9;
+    rax = ML_CALL(1417f30cc);
+    r11 = (uint64_t)(uint32_t)(ML_M4(rbx, 0x4));
+    r10 = (uint64_t)(uint32_t)(ML_M4(rbp, 0x4));
+    rax = (uint64_t)(uint32_t)((uint32_t)r11);
+    r11 = (uint64_t)(uint32_t)(((uint32_t)r11) & (0x2ULL));
+    r8 = (uint64_t)(uint32_t)(0x1ULL);
+    rax = (uint64_t)(uint32_t)(((uint32_t)rax) & ((uint32_t)r8));
+    r10 = (r10 & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(((uint8_t)r10) & (0x66ULL));
+    if (f_zf) { r11 = (uint64_t)(uint32_t)((uint32_t)rax); }
+{
+    const uint64_t r = ((uint64_t)((uint32_t)r11) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)r11) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L209;
+    r9 = rdi;
+    r8 = r12;
+    rdx = rsi;
+    rcx = rbp;
+    rax = ML_CALL(1417f2f4a);
+    r8 = (uint64_t)(uint32_t)((uint32_t)rax);
+L209:
+    rbx = ML_M8(rsp, 0x30);
+    rbp = ML_M8(rsp, 0x38);
+    rsi = ML_M8(rsp, 0x40);
+    rdi = ML_M8(rsp, 0x48);
+    rax = (uint64_t)(uint32_t)((uint32_t)r8);
+    rsp = rsp + (0x20ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r12 = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
 uint64_t SynLift_141731ec0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
     uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
     uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
@@ -75084,6 +75678,61 @@ L173:
     return rax;
 }
 
+uint64_t SynLift_141741ff0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    rsp -= 8; ML_M8(rsp, 0) = rbx;
+    rsp = rsp - (0x20ULL);
+    rbx = rcx;
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rdx) & 0xFFULL) & ((uint64_t)((uint8_t)rdx) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L14;
+    rax = ML_CALL(141741690);
+    rcx = ML_M8(rbx, 0x10);
+    rdx = (uint64_t)(uint32_t)(0x1ULL);
+    { const uint64_t m = 0xffffffffULL; const unsigned c = (unsigned)(rcx & 31);
+      const uint64_t v = ((uint32_t)rdx) & m;
+      const uint64_t r = c ? ((v << c) & m) : v;
+      if (c) f_cf = ((v >> (32 - c)) & 1) != 0;
+      if (c == 1) f_of = (((r >> 31) & 1) != ((v >> 31) & 1));
+      rdx = (uint64_t)(uint32_t)(r);
+      f_zf = (r == 0); f_sf = ((r >> 31) & 1) != 0; }
+    ML_M4(rax, 0x0) = (ML_M4(rax, 0x0)) | ((uint32_t)rdx);
+    rax = rbx;
+    rsp = rsp + (0x20ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbx = v; }
+    return rax;
+L14:
+    rax = ML_CALL(141741690);
+    rcx = ML_M8(rbx, 0x10);
+    rdx = (uint64_t)(uint32_t)(0x1ULL);
+    { const uint64_t m = 0xffffffffULL; const unsigned c = (unsigned)(rcx & 31);
+      const uint64_t v = ((uint32_t)rdx) & m;
+      const uint64_t r = c ? ((v << c) & m) : v;
+      if (c) f_cf = ((v >> (32 - c)) & 1) != 0;
+      if (c == 1) f_of = (((r >> 31) & 1) != ((v >> 31) & 1));
+      rdx = (uint64_t)(uint32_t)(r);
+      f_zf = (r == 0); f_sf = ((r >> 31) & 1) != 0; }
+    rdx = (uint64_t)(uint32_t)(((uint32_t)rdx) ^ 0xffffffffULL);
+    ML_M4(rax, 0x0) = (ML_M4(rax, 0x0)) & ((uint32_t)rdx);
+    rax = rbx;
+    rsp = rsp + (0x20ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbx = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
 uint64_t SynLift_141742040(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
     uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
     uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
@@ -75122,6 +75771,78 @@ uint64_t SynLift_141742060(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
     rax = rbx;
     rsp = rsp + (0x20ULL);
     { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbx = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
+uint64_t SynLift_141742080(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    ML_M8(rsp, 0x8) = rbx;
+    ML_M8(rsp, 0x10) = rsi;
+    rsp -= 8; ML_M8(rsp, 0) = rdi;
+    rsp = rsp - (0x20ULL);
+    rsi = rcx;
+    rcx = ML_M8(rdx, 0x10);
+    rdi = (uint64_t)(uint32_t)(0x1ULL);
+    rbx = (uint64_t)(uint32_t)((uint32_t)rdi);
+    { const uint64_t m = 0xffffffffULL; const unsigned c = (unsigned)(rcx & 31);
+      const uint64_t v = ((uint32_t)rbx) & m;
+      const uint64_t r = c ? ((v << c) & m) : v;
+      if (c) f_cf = ((v >> (32 - c)) & 1) != 0;
+      if (c == 1) f_of = (((r >> 31) & 1) != ((v >> 31) & 1));
+      rbx = (uint64_t)(uint32_t)(r);
+      f_zf = (r == 0); f_sf = ((r >> 31) & 1) != 0; }
+    rcx = rdx;
+    rax = ML_CALL(141741690);
+    rcx = rsi;
+{
+    const uint64_t r = ((uint64_t)(ML_M4(rax, 0x0)) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rbx) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L24;
+    rax = ML_CALL(141741690);
+    rcx = ML_M8(rsi, 0x10);
+    { const uint64_t m = 0xffffffffULL; const unsigned c = (unsigned)(rcx & 31);
+      const uint64_t v = ((uint32_t)rdi) & m;
+      const uint64_t r = c ? ((v << c) & m) : v;
+      if (c) f_cf = ((v >> (32 - c)) & 1) != 0;
+      if (c == 1) f_of = (((r >> 31) & 1) != ((v >> 31) & 1));
+      rdi = (uint64_t)(uint32_t)(r);
+      f_zf = (r == 0); f_sf = ((r >> 31) & 1) != 0; }
+    ML_M4(rax, 0x0) = (ML_M4(rax, 0x0)) | ((uint32_t)rdi);
+    rax = rsi;
+    rbx = ML_M8(rsp, 0x30);
+    rsi = ML_M8(rsp, 0x38);
+    rsp = rsp + (0x20ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    return rax;
+L24:
+    rax = ML_CALL(141741690);
+    rcx = ML_M8(rsi, 0x10);
+    rbx = ML_M8(rsp, 0x30);
+    { const uint64_t m = 0xffffffffULL; const unsigned c = (unsigned)(rcx & 31);
+      const uint64_t v = ((uint32_t)rdi) & m;
+      const uint64_t r = c ? ((v << c) & m) : v;
+      if (c) f_cf = ((v >> (32 - c)) & 1) != 0;
+      if (c == 1) f_of = (((r >> 31) & 1) != ((v >> 31) & 1));
+      rdi = (uint64_t)(uint32_t)(r);
+      f_zf = (r == 0); f_sf = ((r >> 31) & 1) != 0; }
+    rdi = (uint64_t)(uint32_t)(((uint32_t)rdi) ^ 0xffffffffULL);
+    ML_M4(rax, 0x0) = (ML_M4(rax, 0x0)) & ((uint32_t)rdi);
+    rax = rsi;
+    rsi = ML_M8(rsp, 0x38);
+    rsp = rsp + (0x20ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
     return rax;
 #undef ML_CALL
 #undef ML_CALLP
@@ -75708,6 +76429,933 @@ uint64_t SynLift_141742300(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
     return rax;
 }
 
+uint64_t SynLift_141742320(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    ML_M8(rsp, 0x10) = rdx;
+    ML_M8(rsp, 0x8) = rcx;
+    rsp -= 8; ML_M8(rsp, 0) = rbx;
+    rsp -= 8; ML_M8(rsp, 0) = rdi;
+    rsp -= 8; ML_M8(rsp, 0) = r12;
+    rsp = rsp - (0x40ULL);
+    rax = rdx;
+    rbx = rcx;
+    rdx = r8;
+    rcx = rax;
+    r12 = r9;
+    rdi = r8;
+    rax = ML_CALL(141740510);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L206;
+    ML_M8(rsp, 0x70) = rbp;
+    ML_M8(rsp, 0x38) = rsi;
+    ML_M8(rsp, 0x30) = r13;
+    ML_M8(rsp, 0x28) = r14;
+    ML_M8(rsp, 0x20) = r15;
+    /* padding */
+L21:
+    rax = ML_M8(rdi, 0x10);
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L27;
+    rax = rax - 1;
+    ML_M8(rdi, 0x10) = rax;
+    goto L47;
+L27:
+{
+    const uint64_t a = (uint64_t)(ML_M8(rdi, 0x0)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf) goto L31;
+{
+    const uint64_t a = (uint64_t)(ML_M8(rdi, 0x8)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L32;
+L31:
+    rax = ML_CALL(1418233c0);
+L32:
+    rax = ML_M8(rdi, 0x0);
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L37;
+    rax = ML_M8(rax, 0x0);
+    goto L38;
+L37:
+    rax = (uint64_t)(uint32_t)(0);
+L38:
+    rbx = ML_M8(rax, 0x30);
+{
+    const uint64_t a = (uint64_t)(rbx) & ~0ULL, b = (uint64_t)(ML_M8(rax, 0x38)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf || f_zf) goto L42;
+    rax = ML_CALL(1418233c0);
+L42:
+{
+    const uint64_t a = (uint64_t)(ML_M8(rdi, 0x8)) & ~0ULL, b = (uint64_t)(rbx) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_cf && !f_zf) goto L45;
+    rax = ML_CALL(1418233c0);
+L45:
+    ML_M8(rdi, 0x8) = ML_M8(rdi, 0x8) + (0xfffffffffffffffcULL);
+    ML_M8(rdi, 0x10) = 0x1fULL;
+L47:
+    rbx = ML_M8(rdi, 0x0);
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L52;
+    rbx = ML_M8(rbx, 0x0);
+    goto L53;
+L52:
+    rbx = (uint64_t)(uint32_t)(0);
+L53:
+    rax = ML_M8(rdi, 0x10);
+    r14 = ML_M8(rdi, 0x8);
+    ML_M8(rsp, 0x78) = rax;
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L59;
+    rax = ML_CALL(1418233c0);
+L59:
+    rax = ML_M8(r12, 0x10);
+    r13 = ML_M8(rbx, 0x0);
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L66;
+    rax = rax - 1;
+    ML_M8(r12, 0x10) = rax;
+    goto L86;
+L66:
+{
+    const uint64_t a = (uint64_t)(ML_M8(r12, 0x0)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf) goto L70;
+{
+    const uint64_t a = (uint64_t)(ML_M8(r12, 0x8)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L71;
+L70:
+    rax = ML_CALL(1418233c0);
+L71:
+    rax = ML_M8(r12, 0x0);
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L76;
+    rax = ML_M8(rax, 0x0);
+    goto L77;
+L76:
+    rax = (uint64_t)(uint32_t)(0);
+L77:
+    rbx = ML_M8(rax, 0x30);
+{
+    const uint64_t a = (uint64_t)(rbx) & ~0ULL, b = (uint64_t)(ML_M8(rax, 0x38)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf || f_zf) goto L81;
+    rax = ML_CALL(1418233c0);
+L81:
+{
+    const uint64_t a = (uint64_t)(ML_M8(r12, 0x8)) & ~0ULL, b = (uint64_t)(rbx) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_cf && !f_zf) goto L84;
+    rax = ML_CALL(1418233c0);
+L84:
+    ML_M8(r12, 0x8) = ML_M8(r12, 0x8) + (0xfffffffffffffffcULL);
+    ML_M8(r12, 0x10) = 0x1fULL;
+L86:
+    rbx = ML_M8(r12, 0x0);
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L91;
+    rbx = ML_M8(rbx, 0x0);
+    goto L92;
+L91:
+    rbx = (uint64_t)(uint32_t)(0);
+L92:
+    rbp = ML_M8(r12, 0x8);
+    r15 = ML_M8(r12, 0x10);
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L97;
+    rax = ML_CALL(1418233c0);
+L97:
+    rbx = ML_M8(rbx, 0x0);
+{
+    const uint64_t r = ((uint64_t)(r13) & ~0ULL) & ((uint64_t)(r13) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L102;
+{
+    const uint64_t r = ((uint64_t)(r14) & ~0ULL) & ((uint64_t)(r14) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L103;
+L102:
+    rax = ML_CALL(1418233c0);
+L103:
+{
+    const uint64_t r = ((uint64_t)(r13) & ~0ULL) & ((uint64_t)(r13) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L107;
+    rax = ML_M8(r13, 0x0);
+    goto L108;
+L107:
+    rax = (uint64_t)(uint32_t)(0);
+L108:
+    rsi = ML_M8(rax, 0x30);
+{
+    const uint64_t a = (uint64_t)(rsi) & ~0ULL, b = (uint64_t)(ML_M8(rax, 0x38)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf || f_zf) goto L112;
+    rax = ML_CALL(1418233c0);
+L112:
+    rcx = r14;
+    rcx = rcx - (rsi);
+    rsi = ML_M8(rsp, 0x78);
+    { const uint64_t src = rcx; const uint64_t res = (uint64_t)((int64_t)rcx >> 2);
+      f_cf = (((src >> 1) & 1) != 0); f_zf = ((res & ~0ULL) == 0);
+      f_sf = ((res & 0x8000000000000000ULL) != 0); f_of = false;
+    rcx = res; }
+    { const uint64_t src = rcx; const uint64_t res = (rcx << 5);
+      f_cf = (((src >> 4) & 1) != 0); f_zf = ((res & ~0ULL) == 0);
+      f_sf = ((res & 0x8000000000000000ULL) != 0); f_of = false;
+    rcx = res; }
+    rcx = rcx + (rsi);
+{
+    const uint64_t r = ((uint64_t)(r13) & ~0ULL) & ((uint64_t)(r13) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L122;
+    rax = ML_M8(r13, 0x0);
+    goto L123;
+L122:
+    rax = (uint64_t)(uint32_t)(0);
+L123:
+{
+    const uint64_t a = (uint64_t)(rcx) & ~0ULL, b = (uint64_t)(ML_M8(rax, 0x10)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf) goto L126;
+    rax = ML_CALL(1418233c0);
+L126:
+    rcx = rsi;
+    rax = (uint64_t)(uint32_t)(0x1ULL);
+    { const uint64_t m = 0xffffffffULL; const unsigned c = (unsigned)(rcx & 31);
+      const uint64_t v = ((uint32_t)rax) & m;
+      const uint64_t r = c ? ((v << c) & m) : v;
+      if (c) f_cf = ((v >> (32 - c)) & 1) != 0;
+      if (c == 1) f_of = (((r >> 31) & 1) != ((v >> 31) & 1));
+      rax = (uint64_t)(uint32_t)(r);
+      f_zf = (r == 0); f_sf = ((r >> 31) & 1) != 0; }
+{
+    const uint64_t r = ((uint64_t)(ML_M4(r14, 0x0)) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L163;
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L135;
+{
+    const uint64_t r = ((uint64_t)(rbp) & ~0ULL) & ((uint64_t)(rbp) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L136;
+L135:
+    rax = ML_CALL(1418233c0);
+L136:
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L140;
+    rax = ML_M8(rbx, 0x0);
+    goto L141;
+L140:
+    rax = (uint64_t)(uint32_t)(0);
+L141:
+    rsi = ML_M8(rax, 0x30);
+{
+    const uint64_t a = (uint64_t)(rsi) & ~0ULL, b = (uint64_t)(ML_M8(rax, 0x38)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf || f_zf) goto L145;
+    rax = ML_CALL(1418233c0);
+L145:
+    rax = rbp;
+    rax = rax - (rsi);
+    { const uint64_t src = rax; const uint64_t res = (uint64_t)((int64_t)rax >> 2);
+      f_cf = (((src >> 1) & 1) != 0); f_zf = ((res & ~0ULL) == 0);
+      f_sf = ((res & 0x8000000000000000ULL) != 0); f_of = false;
+    rax = res; }
+    { const uint64_t src = rax; const uint64_t res = (rax << 5);
+      f_cf = (((src >> 4) & 1) != 0); f_zf = ((res & ~0ULL) == 0);
+      f_sf = ((res & 0x8000000000000000ULL) != 0); f_of = false;
+    rax = res; }
+    rax = rax + (r15);
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L154;
+    rcx = ML_M8(rbx, 0x0);
+    goto L155;
+L154:
+    rcx = (uint64_t)(uint32_t)(0);
+L155:
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(ML_M8(rcx, 0x10)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf) goto L158;
+    rax = ML_CALL(1418233c0);
+L158:
+    rcx = r15;
+    rax = (uint64_t)(uint32_t)(0x1ULL);
+    { const uint64_t m = 0xffffffffULL; const unsigned c = (unsigned)(rcx & 31);
+      const uint64_t v = ((uint32_t)rax) & m;
+      const uint64_t r = c ? ((v << c) & m) : v;
+      if (c) f_cf = ((v >> (32 - c)) & 1) != 0;
+      if (c == 1) f_of = (((r >> 31) & 1) != ((v >> 31) & 1));
+      rax = (uint64_t)(uint32_t)(r);
+      f_zf = (r == 0); f_sf = ((r >> 31) & 1) != 0; }
+    ML_M4(rbp, 0x0) = (ML_M4(rbp, 0x0)) | ((uint32_t)rax);
+    goto L195;
+L163:
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L167;
+{
+    const uint64_t r = ((uint64_t)(rbp) & ~0ULL) & ((uint64_t)(rbp) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L168;
+L167:
+    rax = ML_CALL(1418233c0);
+L168:
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L172;
+    rax = ML_M8(rbx, 0x0);
+    goto L173;
+L172:
+    rax = (uint64_t)(uint32_t)(0);
+L173:
+    rsi = ML_M8(rax, 0x30);
+{
+    const uint64_t a = (uint64_t)(rsi) & ~0ULL, b = (uint64_t)(ML_M8(rax, 0x38)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf || f_zf) goto L177;
+    rax = ML_CALL(1418233c0);
+L177:
+    rax = rbp;
+    rax = rax - (rsi);
+    { const uint64_t src = rax; const uint64_t res = (uint64_t)((int64_t)rax >> 2);
+      f_cf = (((src >> 1) & 1) != 0); f_zf = ((res & ~0ULL) == 0);
+      f_sf = ((res & 0x8000000000000000ULL) != 0); f_of = false;
+    rax = res; }
+    { const uint64_t src = rax; const uint64_t res = (rax << 5);
+      f_cf = (((src >> 4) & 1) != 0); f_zf = ((res & ~0ULL) == 0);
+      f_sf = ((res & 0x8000000000000000ULL) != 0); f_of = false;
+    rax = res; }
+    rax = rax + (r15);
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L186;
+    rcx = ML_M8(rbx, 0x0);
+    goto L187;
+L186:
+    rcx = (uint64_t)(uint32_t)(0);
+L187:
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(ML_M8(rcx, 0x10)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf) goto L190;
+    rax = ML_CALL(1418233c0);
+L190:
+    rcx = r15;
+    rax = (uint64_t)(uint32_t)(0x1ULL);
+    { const uint64_t m = 0xffffffffULL; const unsigned c = (unsigned)(rcx & 31);
+      const uint64_t v = ((uint32_t)rax) & m;
+      const uint64_t r = c ? ((v << c) & m) : v;
+      if (c) f_cf = ((v >> (32 - c)) & 1) != 0;
+      if (c == 1) f_of = (((r >> 31) & 1) != ((v >> 31) & 1));
+      rax = (uint64_t)(uint32_t)(r);
+      f_zf = (r == 0); f_sf = ((r >> 31) & 1) != 0; }
+    rax = (uint64_t)(uint32_t)(((uint32_t)rax) ^ 0xffffffffULL);
+    ML_M4(rbp, 0x0) = (ML_M4(rbp, 0x0)) & ((uint32_t)rax);
+L195:
+    rcx = ML_M8(rsp, 0x68);
+    rdx = rdi;
+    rax = ML_CALL(141740510);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L21;
+    rbx = ML_M8(rsp, 0x60);
+    r15 = ML_M8(rsp, 0x20);
+    r14 = ML_M8(rsp, 0x28);
+    r13 = ML_M8(rsp, 0x30);
+    rsi = ML_M8(rsp, 0x38);
+    rbp = ML_M8(rsp, 0x70);
+L206:
+    rax = ML_M8(r12, 0x0);
+    ML_M8(rbx, 0x0) = rax;
+    rax = ML_M8(r12, 0x8);
+    ML_M8(rbx, 0x8) = rax;
+    rax = ML_M8(r12, 0x10);
+    ML_M8(rbx, 0x10) = rax;
+    rax = rbx;
+    rsp = rsp + (0x40ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r12 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbx = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
+uint64_t SynLift_141742351(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    ML_M8(rsp, 0x70) = rbp;
+    ML_M8(rsp, 0x38) = rsi;
+    ML_M8(rsp, 0x30) = r13;
+    ML_M8(rsp, 0x28) = r14;
+    ML_M8(rsp, 0x20) = r15;
+L5:
+    rax = ML_M8(rdi, 0x10);
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L11;
+    rax = rax - 1;
+    ML_M8(rdi, 0x10) = rax;
+    goto L31;
+L11:
+{
+    const uint64_t a = (uint64_t)(ML_M8(rdi, 0x0)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf) goto L15;
+{
+    const uint64_t a = (uint64_t)(ML_M8(rdi, 0x8)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L16;
+L15:
+    rax = ML_CALL(1418233c0);
+L16:
+    rax = ML_M8(rdi, 0x0);
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L21;
+    rax = ML_M8(rax, 0x0);
+    goto L22;
+L21:
+    rax = (uint64_t)(uint32_t)(0);
+L22:
+    rbx = ML_M8(rax, 0x30);
+{
+    const uint64_t a = (uint64_t)(rbx) & ~0ULL, b = (uint64_t)(ML_M8(rax, 0x38)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf || f_zf) goto L26;
+    rax = ML_CALL(1418233c0);
+L26:
+{
+    const uint64_t a = (uint64_t)(ML_M8(rdi, 0x8)) & ~0ULL, b = (uint64_t)(rbx) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_cf && !f_zf) goto L29;
+    rax = ML_CALL(1418233c0);
+L29:
+    ML_M8(rdi, 0x8) = ML_M8(rdi, 0x8) + (0xfffffffffffffffcULL);
+    ML_M8(rdi, 0x10) = 0x1fULL;
+L31:
+    rbx = ML_M8(rdi, 0x0);
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L36;
+    rbx = ML_M8(rbx, 0x0);
+    goto L37;
+L36:
+    rbx = (uint64_t)(uint32_t)(0);
+L37:
+    rax = ML_M8(rdi, 0x10);
+    r14 = ML_M8(rdi, 0x8);
+    ML_M8(rsp, 0x78) = rax;
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L43;
+    rax = ML_CALL(1418233c0);
+L43:
+    rax = ML_M8(r12, 0x10);
+    r13 = ML_M8(rbx, 0x0);
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L50;
+    rax = rax - 1;
+    ML_M8(r12, 0x10) = rax;
+    goto L70;
+L50:
+{
+    const uint64_t a = (uint64_t)(ML_M8(r12, 0x0)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf) goto L54;
+{
+    const uint64_t a = (uint64_t)(ML_M8(r12, 0x8)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L55;
+L54:
+    rax = ML_CALL(1418233c0);
+L55:
+    rax = ML_M8(r12, 0x0);
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L60;
+    rax = ML_M8(rax, 0x0);
+    goto L61;
+L60:
+    rax = (uint64_t)(uint32_t)(0);
+L61:
+    rbx = ML_M8(rax, 0x30);
+{
+    const uint64_t a = (uint64_t)(rbx) & ~0ULL, b = (uint64_t)(ML_M8(rax, 0x38)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf || f_zf) goto L65;
+    rax = ML_CALL(1418233c0);
+L65:
+{
+    const uint64_t a = (uint64_t)(ML_M8(r12, 0x8)) & ~0ULL, b = (uint64_t)(rbx) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_cf && !f_zf) goto L68;
+    rax = ML_CALL(1418233c0);
+L68:
+    ML_M8(r12, 0x8) = ML_M8(r12, 0x8) + (0xfffffffffffffffcULL);
+    ML_M8(r12, 0x10) = 0x1fULL;
+L70:
+    rbx = ML_M8(r12, 0x0);
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L75;
+    rbx = ML_M8(rbx, 0x0);
+    goto L76;
+L75:
+    rbx = (uint64_t)(uint32_t)(0);
+L76:
+    rbp = ML_M8(r12, 0x8);
+    r15 = ML_M8(r12, 0x10);
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L81;
+    rax = ML_CALL(1418233c0);
+L81:
+    rbx = ML_M8(rbx, 0x0);
+{
+    const uint64_t r = ((uint64_t)(r13) & ~0ULL) & ((uint64_t)(r13) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L86;
+{
+    const uint64_t r = ((uint64_t)(r14) & ~0ULL) & ((uint64_t)(r14) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L87;
+L86:
+    rax = ML_CALL(1418233c0);
+L87:
+{
+    const uint64_t r = ((uint64_t)(r13) & ~0ULL) & ((uint64_t)(r13) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L91;
+    rax = ML_M8(r13, 0x0);
+    goto L92;
+L91:
+    rax = (uint64_t)(uint32_t)(0);
+L92:
+    rsi = ML_M8(rax, 0x30);
+{
+    const uint64_t a = (uint64_t)(rsi) & ~0ULL, b = (uint64_t)(ML_M8(rax, 0x38)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf || f_zf) goto L96;
+    rax = ML_CALL(1418233c0);
+L96:
+    rcx = r14;
+    rcx = rcx - (rsi);
+    rsi = ML_M8(rsp, 0x78);
+    { const uint64_t src = rcx; const uint64_t res = (uint64_t)((int64_t)rcx >> 2);
+      f_cf = (((src >> 1) & 1) != 0); f_zf = ((res & ~0ULL) == 0);
+      f_sf = ((res & 0x8000000000000000ULL) != 0); f_of = false;
+    rcx = res; }
+    { const uint64_t src = rcx; const uint64_t res = (rcx << 5);
+      f_cf = (((src >> 4) & 1) != 0); f_zf = ((res & ~0ULL) == 0);
+      f_sf = ((res & 0x8000000000000000ULL) != 0); f_of = false;
+    rcx = res; }
+    rcx = rcx + (rsi);
+{
+    const uint64_t r = ((uint64_t)(r13) & ~0ULL) & ((uint64_t)(r13) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L106;
+    rax = ML_M8(r13, 0x0);
+    goto L107;
+L106:
+    rax = (uint64_t)(uint32_t)(0);
+L107:
+{
+    const uint64_t a = (uint64_t)(rcx) & ~0ULL, b = (uint64_t)(ML_M8(rax, 0x10)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf) goto L110;
+    rax = ML_CALL(1418233c0);
+L110:
+    rcx = rsi;
+    rax = (uint64_t)(uint32_t)(0x1ULL);
+    { const uint64_t m = 0xffffffffULL; const unsigned c = (unsigned)(rcx & 31);
+      const uint64_t v = ((uint32_t)rax) & m;
+      const uint64_t r = c ? ((v << c) & m) : v;
+      if (c) f_cf = ((v >> (32 - c)) & 1) != 0;
+      if (c == 1) f_of = (((r >> 31) & 1) != ((v >> 31) & 1));
+      rax = (uint64_t)(uint32_t)(r);
+      f_zf = (r == 0); f_sf = ((r >> 31) & 1) != 0; }
+{
+    const uint64_t r = ((uint64_t)(ML_M4(r14, 0x0)) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L147;
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L119;
+{
+    const uint64_t r = ((uint64_t)(rbp) & ~0ULL) & ((uint64_t)(rbp) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L120;
+L119:
+    rax = ML_CALL(1418233c0);
+L120:
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L124;
+    rax = ML_M8(rbx, 0x0);
+    goto L125;
+L124:
+    rax = (uint64_t)(uint32_t)(0);
+L125:
+    rsi = ML_M8(rax, 0x30);
+{
+    const uint64_t a = (uint64_t)(rsi) & ~0ULL, b = (uint64_t)(ML_M8(rax, 0x38)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf || f_zf) goto L129;
+    rax = ML_CALL(1418233c0);
+L129:
+    rax = rbp;
+    rax = rax - (rsi);
+    { const uint64_t src = rax; const uint64_t res = (uint64_t)((int64_t)rax >> 2);
+      f_cf = (((src >> 1) & 1) != 0); f_zf = ((res & ~0ULL) == 0);
+      f_sf = ((res & 0x8000000000000000ULL) != 0); f_of = false;
+    rax = res; }
+    { const uint64_t src = rax; const uint64_t res = (rax << 5);
+      f_cf = (((src >> 4) & 1) != 0); f_zf = ((res & ~0ULL) == 0);
+      f_sf = ((res & 0x8000000000000000ULL) != 0); f_of = false;
+    rax = res; }
+    rax = rax + (r15);
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L138;
+    rcx = ML_M8(rbx, 0x0);
+    goto L139;
+L138:
+    rcx = (uint64_t)(uint32_t)(0);
+L139:
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(ML_M8(rcx, 0x10)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf) goto L142;
+    rax = ML_CALL(1418233c0);
+L142:
+    rcx = r15;
+    rax = (uint64_t)(uint32_t)(0x1ULL);
+    { const uint64_t m = 0xffffffffULL; const unsigned c = (unsigned)(rcx & 31);
+      const uint64_t v = ((uint32_t)rax) & m;
+      const uint64_t r = c ? ((v << c) & m) : v;
+      if (c) f_cf = ((v >> (32 - c)) & 1) != 0;
+      if (c == 1) f_of = (((r >> 31) & 1) != ((v >> 31) & 1));
+      rax = (uint64_t)(uint32_t)(r);
+      f_zf = (r == 0); f_sf = ((r >> 31) & 1) != 0; }
+    ML_M4(rbp, 0x0) = (ML_M4(rbp, 0x0)) | ((uint32_t)rax);
+    goto L179;
+L147:
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L151;
+{
+    const uint64_t r = ((uint64_t)(rbp) & ~0ULL) & ((uint64_t)(rbp) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L152;
+L151:
+    rax = ML_CALL(1418233c0);
+L152:
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L156;
+    rax = ML_M8(rbx, 0x0);
+    goto L157;
+L156:
+    rax = (uint64_t)(uint32_t)(0);
+L157:
+    rsi = ML_M8(rax, 0x30);
+{
+    const uint64_t a = (uint64_t)(rsi) & ~0ULL, b = (uint64_t)(ML_M8(rax, 0x38)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf || f_zf) goto L161;
+    rax = ML_CALL(1418233c0);
+L161:
+    rax = rbp;
+    rax = rax - (rsi);
+    { const uint64_t src = rax; const uint64_t res = (uint64_t)((int64_t)rax >> 2);
+      f_cf = (((src >> 1) & 1) != 0); f_zf = ((res & ~0ULL) == 0);
+      f_sf = ((res & 0x8000000000000000ULL) != 0); f_of = false;
+    rax = res; }
+    { const uint64_t src = rax; const uint64_t res = (rax << 5);
+      f_cf = (((src >> 4) & 1) != 0); f_zf = ((res & ~0ULL) == 0);
+      f_sf = ((res & 0x8000000000000000ULL) != 0); f_of = false;
+    rax = res; }
+    rax = rax + (r15);
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L170;
+    rcx = ML_M8(rbx, 0x0);
+    goto L171;
+L170:
+    rcx = (uint64_t)(uint32_t)(0);
+L171:
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(ML_M8(rcx, 0x10)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf) goto L174;
+    rax = ML_CALL(1418233c0);
+L174:
+    rcx = r15;
+    rax = (uint64_t)(uint32_t)(0x1ULL);
+    { const uint64_t m = 0xffffffffULL; const unsigned c = (unsigned)(rcx & 31);
+      const uint64_t v = ((uint32_t)rax) & m;
+      const uint64_t r = c ? ((v << c) & m) : v;
+      if (c) f_cf = ((v >> (32 - c)) & 1) != 0;
+      if (c == 1) f_of = (((r >> 31) & 1) != ((v >> 31) & 1));
+      rax = (uint64_t)(uint32_t)(r);
+      f_zf = (r == 0); f_sf = ((r >> 31) & 1) != 0; }
+    rax = (uint64_t)(uint32_t)(((uint32_t)rax) ^ 0xffffffffULL);
+    ML_M4(rbp, 0x0) = (ML_M4(rbp, 0x0)) & ((uint32_t)rax);
+L179:
+    rcx = ML_M8(rsp, 0x68);
+    rdx = rdi;
+    rax = ML_CALL(141740510);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L5;
+    rbx = ML_M8(rsp, 0x60);
+    r15 = ML_M8(rsp, 0x20);
+    r14 = ML_M8(rsp, 0x28);
+    r13 = ML_M8(rsp, 0x30);
+    rsi = ML_M8(rsp, 0x38);
+    rbp = ML_M8(rsp, 0x70);
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
 uint64_t SynLift_1417425ea(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
     uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
     uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
@@ -76222,6 +77870,470 @@ L24:
     rsp = rsp + (0x20ULL);
     { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
     return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
+uint64_t SynLift_141742b10(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    rsp -= 8; ML_M8(rsp, 0) = rbp;
+    rsp -= 8; ML_M8(rsp, 0) = r13;
+    rsp -= 8; ML_M8(rsp, 0) = r14;
+    rsp = rsp - (0x20ULL);
+    r14 = r8;
+    r13 = rdx;
+    rbp = rcx;
+    rax = ML_CALL(141740510);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L103;
+    ML_M8(rsp, 0x40) = rbx;
+    ML_M8(rsp, 0x48) = rsi;
+    ML_M8(rsp, 0x50) = rdi;
+    ML_M8(rsp, 0x58) = r12;
+L14:
+    rbx = ML_M8(rbp, 0x0);
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L19;
+    rbx = ML_M8(rbx, 0x0);
+    goto L20;
+L19:
+    rbx = (uint64_t)(uint32_t)(0);
+L20:
+    rdi = ML_M8(rbp, 0x8);
+    r12 = ML_M8(rbp, 0x10);
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L25;
+    rax = ML_CALL(1418233c0);
+L25:
+{
+    const uint64_t a = (uint64_t)(ML_M1(r14, 0x0)) & 0xFFULL, b = (uint64_t)(0x0ULL) & 0xFFULL;
+    const uint64_t d = (a - b) & 0xFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80ULL) != 0);
+}
+    rbx = ML_M8(rbx, 0x0);
+    if (f_zf) goto L60;
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L32;
+{
+    const uint64_t r = ((uint64_t)(rdi) & ~0ULL) & ((uint64_t)(rdi) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L33;
+L32:
+    rax = ML_CALL(1418233c0);
+L33:
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L37;
+    rax = ML_M8(rbx, 0x0);
+    goto L38;
+L37:
+    rax = (uint64_t)(uint32_t)(0);
+L38:
+    rsi = ML_M8(rax, 0x30);
+{
+    const uint64_t a = (uint64_t)(rsi) & ~0ULL, b = (uint64_t)(ML_M8(rax, 0x38)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf || f_zf) goto L42;
+    rax = ML_CALL(1418233c0);
+L42:
+    rcx = rdi;
+    rcx = rcx - (rsi);
+    { const uint64_t src = rcx; const uint64_t res = (uint64_t)((int64_t)rcx >> 2);
+      f_cf = (((src >> 1) & 1) != 0); f_zf = ((res & ~0ULL) == 0);
+      f_sf = ((res & 0x8000000000000000ULL) != 0); f_of = false;
+    rcx = res; }
+    { const uint64_t src = rcx; const uint64_t res = (rcx << 5);
+      f_cf = (((src >> 4) & 1) != 0); f_zf = ((res & ~0ULL) == 0);
+      f_sf = ((res & 0x8000000000000000ULL) != 0); f_of = false;
+    rcx = res; }
+    rcx = rcx + (r12);
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L51;
+    rax = ML_M8(rbx, 0x0);
+    goto L52;
+L51:
+    rax = (uint64_t)(uint32_t)(0);
+L52:
+{
+    const uint64_t a = (uint64_t)(rcx) & ~0ULL, b = (uint64_t)(ML_M8(rax, 0x10)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf) goto L55;
+    rax = ML_CALL(1418233c0);
+L55:
+    rcx = r12;
+    rax = (uint64_t)(uint32_t)(0x1ULL);
+    { const uint64_t m = 0xffffffffULL; const unsigned c = (unsigned)(rcx & 31);
+      const uint64_t v = ((uint32_t)rax) & m;
+      const uint64_t r = c ? ((v << c) & m) : v;
+      if (c) f_cf = ((v >> (32 - c)) & 1) != 0;
+      if (c == 1) f_of = (((r >> 31) & 1) != ((v >> 31) & 1));
+      rax = (uint64_t)(uint32_t)(r);
+      f_zf = (r == 0); f_sf = ((r >> 31) & 1) != 0; }
+    ML_M4(rdi, 0x0) = (ML_M4(rdi, 0x0)) | ((uint32_t)rax);
+    goto L92;
+L60:
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L64;
+{
+    const uint64_t r = ((uint64_t)(rdi) & ~0ULL) & ((uint64_t)(rdi) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L65;
+L64:
+    rax = ML_CALL(1418233c0);
+L65:
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L69;
+    rax = ML_M8(rbx, 0x0);
+    goto L70;
+L69:
+    rax = (uint64_t)(uint32_t)(0);
+L70:
+    rsi = ML_M8(rax, 0x30);
+{
+    const uint64_t a = (uint64_t)(rsi) & ~0ULL, b = (uint64_t)(ML_M8(rax, 0x38)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf || f_zf) goto L74;
+    rax = ML_CALL(1418233c0);
+L74:
+    rcx = rdi;
+    rcx = rcx - (rsi);
+    { const uint64_t src = rcx; const uint64_t res = (uint64_t)((int64_t)rcx >> 2);
+      f_cf = (((src >> 1) & 1) != 0); f_zf = ((res & ~0ULL) == 0);
+      f_sf = ((res & 0x8000000000000000ULL) != 0); f_of = false;
+    rcx = res; }
+    { const uint64_t src = rcx; const uint64_t res = (rcx << 5);
+      f_cf = (((src >> 4) & 1) != 0); f_zf = ((res & ~0ULL) == 0);
+      f_sf = ((res & 0x8000000000000000ULL) != 0); f_of = false;
+    rcx = res; }
+    rcx = rcx + (r12);
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L83;
+    rax = ML_M8(rbx, 0x0);
+    goto L84;
+L83:
+    rax = (uint64_t)(uint32_t)(0);
+L84:
+{
+    const uint64_t a = (uint64_t)(rcx) & ~0ULL, b = (uint64_t)(ML_M8(rax, 0x10)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf) goto L87;
+    rax = ML_CALL(1418233c0);
+L87:
+    rcx = r12;
+    rax = (uint64_t)(uint32_t)(0x1ULL);
+    { const uint64_t m = 0xffffffffULL; const unsigned c = (unsigned)(rcx & 31);
+      const uint64_t v = ((uint32_t)rax) & m;
+      const uint64_t r = c ? ((v << c) & m) : v;
+      if (c) f_cf = ((v >> (32 - c)) & 1) != 0;
+      if (c == 1) f_of = (((r >> 31) & 1) != ((v >> 31) & 1));
+      rax = (uint64_t)(uint32_t)(r);
+      f_zf = (r == 0); f_sf = ((r >> 31) & 1) != 0; }
+    rax = (uint64_t)(uint32_t)(((uint32_t)rax) ^ 0xffffffffULL);
+    ML_M4(rdi, 0x0) = (ML_M4(rdi, 0x0)) & ((uint32_t)rax);
+L92:
+    rcx = rbp;
+    rax = ML_CALL(141741730);
+    rdx = r13;
+    rcx = rbp;
+    rax = ML_CALL(141740510);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L14;
+    r12 = ML_M8(rsp, 0x58);
+    rdi = ML_M8(rsp, 0x50);
+    rsi = ML_M8(rsp, 0x48);
+    rbx = ML_M8(rsp, 0x40);
+L103:
+    rsp = rsp + (0x20ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r14 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r13 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbp = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
+uint64_t SynLift_141742b30(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    ML_M8(rsp, 0x40) = rbx;
+    ML_M8(rsp, 0x48) = rsi;
+    ML_M8(rsp, 0x50) = rdi;
+    ML_M8(rsp, 0x58) = r12;
+L4:
+    rbx = ML_M8(rbp, 0x0);
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L9;
+    rbx = ML_M8(rbx, 0x0);
+    goto L10;
+L9:
+    rbx = (uint64_t)(uint32_t)(0);
+L10:
+    rdi = ML_M8(rbp, 0x8);
+    r12 = ML_M8(rbp, 0x10);
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L15;
+    rax = ML_CALL(1418233c0);
+L15:
+{
+    const uint64_t a = (uint64_t)(ML_M1(r14, 0x0)) & 0xFFULL, b = (uint64_t)(0x0ULL) & 0xFFULL;
+    const uint64_t d = (a - b) & 0xFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80ULL) != 0);
+}
+    rbx = ML_M8(rbx, 0x0);
+    if (f_zf) goto L50;
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L22;
+{
+    const uint64_t r = ((uint64_t)(rdi) & ~0ULL) & ((uint64_t)(rdi) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L23;
+L22:
+    rax = ML_CALL(1418233c0);
+L23:
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L27;
+    rax = ML_M8(rbx, 0x0);
+    goto L28;
+L27:
+    rax = (uint64_t)(uint32_t)(0);
+L28:
+    rsi = ML_M8(rax, 0x30);
+{
+    const uint64_t a = (uint64_t)(rsi) & ~0ULL, b = (uint64_t)(ML_M8(rax, 0x38)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf || f_zf) goto L32;
+    rax = ML_CALL(1418233c0);
+L32:
+    rcx = rdi;
+    rcx = rcx - (rsi);
+    { const uint64_t src = rcx; const uint64_t res = (uint64_t)((int64_t)rcx >> 2);
+      f_cf = (((src >> 1) & 1) != 0); f_zf = ((res & ~0ULL) == 0);
+      f_sf = ((res & 0x8000000000000000ULL) != 0); f_of = false;
+    rcx = res; }
+    { const uint64_t src = rcx; const uint64_t res = (rcx << 5);
+      f_cf = (((src >> 4) & 1) != 0); f_zf = ((res & ~0ULL) == 0);
+      f_sf = ((res & 0x8000000000000000ULL) != 0); f_of = false;
+    rcx = res; }
+    rcx = rcx + (r12);
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L41;
+    rax = ML_M8(rbx, 0x0);
+    goto L42;
+L41:
+    rax = (uint64_t)(uint32_t)(0);
+L42:
+{
+    const uint64_t a = (uint64_t)(rcx) & ~0ULL, b = (uint64_t)(ML_M8(rax, 0x10)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf) goto L45;
+    rax = ML_CALL(1418233c0);
+L45:
+    rcx = r12;
+    rax = (uint64_t)(uint32_t)(0x1ULL);
+    { const uint64_t m = 0xffffffffULL; const unsigned c = (unsigned)(rcx & 31);
+      const uint64_t v = ((uint32_t)rax) & m;
+      const uint64_t r = c ? ((v << c) & m) : v;
+      if (c) f_cf = ((v >> (32 - c)) & 1) != 0;
+      if (c == 1) f_of = (((r >> 31) & 1) != ((v >> 31) & 1));
+      rax = (uint64_t)(uint32_t)(r);
+      f_zf = (r == 0); f_sf = ((r >> 31) & 1) != 0; }
+    ML_M4(rdi, 0x0) = (ML_M4(rdi, 0x0)) | ((uint32_t)rax);
+    goto L82;
+L50:
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L54;
+{
+    const uint64_t r = ((uint64_t)(rdi) & ~0ULL) & ((uint64_t)(rdi) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L55;
+L54:
+    rax = ML_CALL(1418233c0);
+L55:
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L59;
+    rax = ML_M8(rbx, 0x0);
+    goto L60;
+L59:
+    rax = (uint64_t)(uint32_t)(0);
+L60:
+    rsi = ML_M8(rax, 0x30);
+{
+    const uint64_t a = (uint64_t)(rsi) & ~0ULL, b = (uint64_t)(ML_M8(rax, 0x38)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf || f_zf) goto L64;
+    rax = ML_CALL(1418233c0);
+L64:
+    rcx = rdi;
+    rcx = rcx - (rsi);
+    { const uint64_t src = rcx; const uint64_t res = (uint64_t)((int64_t)rcx >> 2);
+      f_cf = (((src >> 1) & 1) != 0); f_zf = ((res & ~0ULL) == 0);
+      f_sf = ((res & 0x8000000000000000ULL) != 0); f_of = false;
+    rcx = res; }
+    { const uint64_t src = rcx; const uint64_t res = (rcx << 5);
+      f_cf = (((src >> 4) & 1) != 0); f_zf = ((res & ~0ULL) == 0);
+      f_sf = ((res & 0x8000000000000000ULL) != 0); f_of = false;
+    rcx = res; }
+    rcx = rcx + (r12);
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L73;
+    rax = ML_M8(rbx, 0x0);
+    goto L74;
+L73:
+    rax = (uint64_t)(uint32_t)(0);
+L74:
+{
+    const uint64_t a = (uint64_t)(rcx) & ~0ULL, b = (uint64_t)(ML_M8(rax, 0x10)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf) goto L77;
+    rax = ML_CALL(1418233c0);
+L77:
+    rcx = r12;
+    rax = (uint64_t)(uint32_t)(0x1ULL);
+    { const uint64_t m = 0xffffffffULL; const unsigned c = (unsigned)(rcx & 31);
+      const uint64_t v = ((uint32_t)rax) & m;
+      const uint64_t r = c ? ((v << c) & m) : v;
+      if (c) f_cf = ((v >> (32 - c)) & 1) != 0;
+      if (c == 1) f_of = (((r >> 31) & 1) != ((v >> 31) & 1));
+      rax = (uint64_t)(uint32_t)(r);
+      f_zf = (r == 0); f_sf = ((r >> 31) & 1) != 0; }
+    rax = (uint64_t)(uint32_t)(((uint32_t)rax) ^ 0xffffffffULL);
+    ML_M4(rdi, 0x0) = (ML_M4(rdi, 0x0)) & ((uint32_t)rax);
+L82:
+    rcx = rbp;
+    rax = ML_CALL(141741730);
+    rdx = r13;
+    rcx = rbp;
+    rax = ML_CALL(141740510);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L4;
+    r12 = ML_M8(rsp, 0x58);
+    rdi = ML_M8(rsp, 0x50);
+    rsi = ML_M8(rsp, 0x48);
+    rbx = ML_M8(rsp, 0x40);
 #undef ML_CALL
 #undef ML_CALLP
     return rax;
@@ -153875,6 +155987,132 @@ L92:
     return rax;
 }
 
+uint64_t SynLift_141763a90(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    rax = rsp;
+    rsp -= 8; ML_M8(rsp, 0) = rdi;
+    rsp = rsp - (0x470ULL);
+    ML_M8(rsp, 0x30) = 0xfffffffffffffffeULL;
+    ML_M8(rax, 0x8) = rbx;
+    ML_M8(rax, 0x10) = rbp;
+    ML_M8(rax, 0x18) = rsi;
+    rsi = (uint64_t)(uint32_t)((uint32_t)rdx);
+    rbp = rcx;
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L65;
+{
+    const uint64_t r = ((uint64_t)((uint32_t)r8) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)r8) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L65;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r8);
+    rax = ML_CALL(1417630d0);
+    rbx = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L66;
+    rcx = rax;
+    rax = ML_CALL(141743e70);
+{
+    const uint64_t a = (uint64_t)((uint32_t)rsi) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_zf) goto L24;
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L66;
+L24:
+    rdx = (uint64_t)(uint32_t)(0x7ULL);
+    rcx = rbx;
+    rax = ML_CALL(141743d70);
+    rdi = rax;
+    rax = (uint64_t)(uint32_t)(0);
+    rcx = (rcx) | (0xffffffffffffffffULL);
+    while (rcx) {
+        const uint64_t a = rax & 0xffULL, b = ML_M1(rdi, 0) & 0xffULL;
+        const uint64_t d = (a - b) & 0xffULL;
+        rdi += 1; --rcx;
+        f_cf = a < b; f_zf = (d == 0); f_sf = ((d >> 7) & 1) != 0;
+        f_of = ((((a ^ b) & (a ^ d)) >> 7) & 1) != 0;
+        if (f_zf) break;
+    }
+    rcx = (rcx) ^ ~0ULL;
+{
+    const uint64_t a = (uint64_t)(rcx) & ~0ULL, b = (uint64_t)(0x1ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf) goto L63;
+    rcx = rsp + 0x40;
+    rax = ML_CALL(1417d6640);
+    rdx = (uint64_t)(uint32_t)(0x7ULL);
+    rcx = rbx;
+    rax = ML_CALL(141743d70);
+    r8 = rax;
+    rdx = (uint64_t)(uint32_t)(0x13ULL);
+    rax = (uint64_t)(uint32_t)(0);
+    ML_M4(rsp, 0x28) = (uint32_t)rax;
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    r9 = (uint64_t)(uint32_t)(0);
+    rcx = rsp + 0x40;
+    rax = ML_CALL(1417d6820);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L56;
+    ML_M4(rsp, 0x20) = 0x3e8ULL;
+    r9 = (uintptr_t)0x1418297c0;
+    r8 = (uintptr_t)0x14182b6a0;
+    rdx = (uintptr_t)0x14182666c;
+    rcx = (uintptr_t)0x141824ca8;
+    rax = ML_CALL(141823030);
+    goto L61;
+L56:
+    rcx = ML_M8(rbp, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    r8 = rsp + 0x40;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    rax = ML_CALLP(ML_M8(rax, 0x8));
+L61:
+    rcx = rsp + 0x40;
+    rax = ML_CALL(1417d66c0);
+L63:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    goto L66;
+L65:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+L66:
+    r11 = rsp + 0x470;
+    rbx = ML_M8(r11, 0x10);
+    rbp = ML_M8(r11, 0x18);
+    rsi = ML_M8(r11, 0x20);
+    rsp = r11;
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
 uint64_t SynLift_141763bc0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
     uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
     uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
@@ -171386,6 +173624,584 @@ L2:
     r12 = ML_M8(rsp, 0x30);
     rsp = rsp + (0x50ULL);
     { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r13 = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
+uint64_t SynLift_141769100(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L308;
+    rsp -= 8; ML_M8(rsp, 0) = rbp;
+    rsp -= 8; ML_M8(rsp, 0) = rsi;
+    rsp -= 8; ML_M8(rsp, 0) = rdi;
+    rsp -= 8; ML_M8(rsp, 0) = r12;
+    rsp -= 8; ML_M8(rsp, 0) = r13;
+    rsp -= 8; ML_M8(rsp, 0) = r14;
+    rsp -= 8; ML_M8(rsp, 0) = r15;
+    rsp = rsp - (0x4c0ULL);
+    ML_M8(rsp, 0x40) = 0xfffffffffffffffeULL;
+    ML_M8(rsp, 0x510) = rbx;
+    rax = ML_IAT(0x141886c40);
+    rax = (rax) ^ (rsp);
+    ML_M8(rsp, 0x4b0) = rax;
+    rsi = (uint64_t)(uint32_t)((uint32_t)rdx);
+    ML_M4(rsp, 0x24) = (uint32_t)rdx;
+    r15 = rcx;
+    rcx = ML_M8(rcx, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x4a8));
+    rdi = (uint64_t)(uint32_t)((uint32_t)rax);
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L296;
+    rcx = ML_M8(r15, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    rax = ML_CALLP(ML_M8(rax, 0x3e8));
+    rbx = (uint64_t)(uint32_t)((uint32_t)rax);
+    { const __int128 p = (__int128)(int64_t)((uint32_t)rbx) * (int64_t)(0xf4240ULL);
+      rbx = (uint64_t)(uint32_t)((uint64_t)p);
+      f_cf = f_of = (p != (__int128)(int64_t)(uint64_t)p); }
+    rsi = (rbx + rdi * 1) + 0x0;
+    ML_M4(rsp, 0x20) = (uint32_t)rsi;
+    rcx = ML_M8(r15, 0x8);
+    rdx = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rdx, 0x3f0));
+    rcx = rsp + 0x50;
+    rax = ML_CALL(1417d7df0);
+    rdx = (uint64_t)(uint32_t)(0x1ULL);
+    rcx = rsp + 0x50;
+    rax = ML_CALL(1417d7e80);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L294;
+    rdi = (uint64_t)(uint32_t)(ML_M4(r15, 0x18));
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rdi) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rdi) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L97;
+    r8 = (rbx + rdi * 1) + 0x0;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    rcx = r15;
+    rax = ML_CALL(141768ec0);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L97;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rdi);
+    rcx = r15;
+    rax = ML_CALL(1417630d0);
+    rbx = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L97;
+    rcx = rax;
+    rax = ML_CALL(141743e00);
+    rdi = rax;
+    rax = (uint64_t)(uint32_t)(0);
+    rcx = (rcx) | (0xffffffffffffffffULL);
+    while (rcx) {
+        const uint64_t a = rax & 0xffULL, b = ML_M1(rdi, 0) & 0xffULL;
+        const uint64_t d = (a - b) & 0xffULL;
+        rdi += 1; --rcx;
+        f_cf = a < b; f_zf = (d == 0); f_sf = ((d >> 7) & 1) != 0;
+        f_of = ((((a ^ b) & (a ^ d)) >> 7) & 1) != 0;
+        if (f_zf) break;
+    }
+    rcx = (rcx) ^ ~0ULL;
+{
+    const uint64_t a = (uint64_t)(rcx) & ~0ULL, b = (uint64_t)(0x1ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf) goto L82;
+    rdi = ML_M8(r15, 0x8);
+    rcx = rbx;
+    rax = ML_CALL(141743e00);
+    rbx = rax;
+    rdx = ML_M8(rdi, 0x0);
+    rcx = rdi;
+    rax = ML_CALLP(ML_M8(rdx, 0x3f0));
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    r8 = rbx;
+    rcx = rsp + 0x50;
+    rax = ML_CALL(1417d8160);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L97;
+    rcx = (uintptr_t)0x14182bb10;
+    rax = ML_CALL(141823030);
+    goto L97;
+L82:
+    rdi = ML_M8(r15, 0x8);
+    rcx = rbx;
+    rax = ML_CALL(141743dd0);
+    rbx = rax;
+    rdx = ML_M8(rdi, 0x0);
+    rcx = rdi;
+    rax = ML_CALLP(ML_M8(rdx, 0x3f0));
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    r8 = rbx;
+    rcx = rsp + 0x50;
+    rax = ML_CALL(1417d8160);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L97;
+    rcx = (uintptr_t)0x14182bb10;
+    rax = ML_CALL(141823030);
+L97:
+    rax = ML_M8(r15, 0x178);
+    rbx = ML_M8(rax, 0x0);
+    r14 = ML_M8(r15, 0x148);
+L100:
+    rdi = ML_M8(r15, 0x178);
+    rax = ML_M8(r15, 0x148);
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L106;
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(r14) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf) goto L107;
+L106:
+    rax = ML_CALL(1418233c0);
+L107:
+{
+    const uint64_t a = (uint64_t)(rdi) & ~0ULL, b = (uint64_t)(rbx) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf) goto L283;
+{
+    const uint64_t r = ((uint64_t)(r14) & ~0ULL) & ((uint64_t)(r14) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L114;
+    rax = ML_CALL(1418233c0);
+    rdx = (uint64_t)(uint32_t)(0);
+    goto L115;
+L114:
+    rdx = ML_M8(r14, 0x0);
+L115:
+{
+    const uint64_t a = (uint64_t)(rbx) & ~0ULL, b = (uint64_t)(ML_M8(rdx, 0x30)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L118;
+    rax = ML_CALL(1418233c0);
+L118:
+    r13 = (uint64_t)(uint32_t)(ML_M4(rbx, 0x18));
+{
+    const uint64_t r = ((uint64_t)(r14) & ~0ULL) & ((uint64_t)(r14) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L124;
+    rax = ML_CALL(1418233c0);
+    rdx = (uint64_t)(uint32_t)(0);
+    goto L125;
+L124:
+    rdx = ML_M8(r14, 0x0);
+L125:
+{
+    const uint64_t a = (uint64_t)(rbx) & ~0ULL, b = (uint64_t)(ML_M8(rdx, 0x30)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L128;
+    rax = ML_CALL(1418233c0);
+L128:
+    r8 = (uint64_t)(uint32_t)(ML_M4(rbx, 0x1c));
+    ML_M4(rsp, 0x28) = (uint32_t)r8;
+{
+    const uint64_t r = ((uint64_t)((uint32_t)r13) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)r13) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L253;
+{
+    const uint64_t r = ((uint64_t)((uint32_t)r8) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)r8) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L253;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    rcx = r15;
+    rax = ML_CALL(141768ec0);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L253;
+    r8 = rsp + 0x28;
+    rdx = rsp + 0x30;
+    rcx = r15 + 0x108;
+    rax = ML_CALL(141760950);
+    r12 = ML_M8(r15, 0x138);
+    rax = ML_M8(r15, 0x108);
+    rsi = ML_M8(rsp, 0x30);
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L150;
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rsi) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf) goto L151;
+L150:
+    rax = ML_CALL(1418233c0);
+L151:
+    rbp = ML_M8(rsp, 0x38);
+{
+    const uint64_t a = (uint64_t)(r12) & ~0ULL, b = (uint64_t)(rbp) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf) goto L252;
+{
+    const uint64_t r = ((uint64_t)(rsi) & ~0ULL) & ((uint64_t)(rsi) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L159;
+    rax = ML_CALL(1418233c0);
+    rdx = (uint64_t)(uint32_t)(0);
+    goto L160;
+L159:
+    rdx = ML_M8(rsi, 0x0);
+L160:
+{
+    const uint64_t a = (uint64_t)(rbp) & ~0ULL, b = (uint64_t)(ML_M8(rdx, 0x30)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L163;
+    rax = ML_CALL(1418233c0);
+L163:
+    rax = (uint64_t)(uint32_t)(0);
+    rcx = (rcx) | (0xffffffffffffffffULL);
+    rdi = rbp + 0x48;
+    while (rcx) {
+        const uint64_t a = rax & 0xffULL, b = ML_M1(rdi, 0) & 0xffULL;
+        const uint64_t d = (a - b) & 0xffULL;
+        rdi += 1; --rcx;
+        f_cf = a < b; f_zf = (d == 0); f_sf = ((d >> 7) & 1) != 0;
+        f_of = ((((a ^ b) & (a ^ d)) >> 7) & 1) != 0;
+        if (f_zf) break;
+    }
+    rcx = (rcx) ^ ~0ULL;
+{
+    const uint64_t a = (uint64_t)(rcx) & ~0ULL, b = (uint64_t)(0x1ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf) goto L209;
+{
+    const uint64_t r = ((uint64_t)(rsi) & ~0ULL) & ((uint64_t)(rsi) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L175;
+    rax = ML_CALL(1418233c0);
+    rdx = (uint64_t)(uint32_t)(0);
+    goto L176;
+L175:
+    rdx = ML_M8(rsi, 0x0);
+L176:
+{
+    const uint64_t a = (uint64_t)(rbp) & ~0ULL, b = (uint64_t)(ML_M8(rdx, 0x30)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L179;
+    rax = ML_CALL(1418233c0);
+L179:
+    r8 = rbp + 0x48;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r13);
+    rcx = rsp + 0x50;
+    rax = ML_CALL(1417d8160);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L248;
+    rcx = rsp + 0x50;
+    rax = ML_CALL(1417d7f20);
+    rcx = ML_M8(r15, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    r8 = rsp + 0x50;
+    rdx = (uint64_t)(uint32_t)(ML_M4(rsp, 0x24));
+    rax = ML_CALLP(ML_M8(rax, 0x8));
+    rcx = rsp + 0x50;
+    rax = ML_CALL(1417d7ee0);
+{
+    const uint64_t r = ((uint64_t)(rsi) & ~0ULL) & ((uint64_t)(rsi) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L199;
+    rax = ML_CALL(1418233c0);
+    rdx = (uint64_t)(uint32_t)(0);
+    goto L200;
+L199:
+    rdx = ML_M8(rsi, 0x0);
+L200:
+{
+    const uint64_t a = (uint64_t)(rbp) & ~0ULL, b = (uint64_t)(ML_M8(rdx, 0x30)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L203;
+    rax = ML_CALL(1418233c0);
+L203:
+    r8 = rbp + 0x48;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r13);
+    rcx = rsp + 0x50;
+    rax = ML_CALL(1417d8160);
+    rsi = (uint64_t)(uint32_t)(ML_M4(rsp, 0x20));
+    goto L253;
+L209:
+{
+    const uint64_t r = ((uint64_t)(rsi) & ~0ULL) & ((uint64_t)(rsi) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L214;
+    rax = ML_CALL(1418233c0);
+    rdx = (uint64_t)(uint32_t)(0);
+    goto L215;
+L214:
+    rdx = ML_M8(rsi, 0x0);
+L215:
+{
+    const uint64_t a = (uint64_t)(rbp) & ~0ULL, b = (uint64_t)(ML_M8(rdx, 0x30)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L218;
+    rax = ML_CALL(1418233c0);
+L218:
+    r8 = rbp + 0x28;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r13);
+    rcx = rsp + 0x50;
+    rax = ML_CALL(1417d8160);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L250;
+    rcx = rsp + 0x50;
+    rax = ML_CALL(1417d7f20);
+    rcx = ML_M8(r15, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    r8 = rsp + 0x50;
+    rdx = (uint64_t)(uint32_t)(ML_M4(rsp, 0x24));
+    rax = ML_CALLP(ML_M8(rax, 0x8));
+    rcx = rsp + 0x50;
+    rax = ML_CALL(1417d7ee0);
+{
+    const uint64_t r = ((uint64_t)(rsi) & ~0ULL) & ((uint64_t)(rsi) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L238;
+    rax = ML_CALL(1418233c0);
+    rdx = (uint64_t)(uint32_t)(0);
+    goto L239;
+L238:
+    rdx = ML_M8(rsi, 0x0);
+L239:
+{
+    const uint64_t a = (uint64_t)(rbp) & ~0ULL, b = (uint64_t)(ML_M8(rdx, 0x30)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L242;
+    rax = ML_CALL(1418233c0);
+L242:
+    r8 = rbp + 0x28;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r13);
+    rcx = rsp + 0x50;
+    rax = ML_CALL(1417d8160);
+    rsi = (uint64_t)(uint32_t)(ML_M4(rsp, 0x20));
+    goto L253;
+L248:
+    rsi = (uint64_t)(uint32_t)(ML_M4(rsp, 0x20));
+    goto L253;
+L250:
+    rsi = (uint64_t)(uint32_t)(ML_M4(rsp, 0x20));
+    goto L253;
+L252:
+    rsi = (uint64_t)(uint32_t)(ML_M4(rsp, 0x20));
+L253:
+{
+    const uint64_t r = ((uint64_t)(r14) & ~0ULL) & ((uint64_t)(r14) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L256;
+    rax = ML_CALL(1418233c0);
+L256:
+{
+    const uint64_t a = (uint64_t)(ML_M1(rbx, 0x21)) & 0xFFULL, b = (uint64_t)(0x0ULL) & 0xFFULL;
+    const uint64_t d = (a - b) & 0xFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80ULL) != 0);
+}
+    if (f_zf) goto L260;
+    rax = ML_CALL(1418233c0);
+    goto L100;
+L260:
+    rax = ML_M8(rbx, 0x10);
+{
+    const uint64_t a = (uint64_t)(ML_M1(rax, 0x21)) & 0xFFULL, b = (uint64_t)(0x0ULL) & 0xFFULL;
+    const uint64_t d = (a - b) & 0xFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80ULL) != 0);
+}
+    if (!f_zf) goto L272;
+    rbx = rax;
+    rax = ML_M8(rax, 0x0);
+{
+    const uint64_t a = (uint64_t)(ML_M1(rax, 0x21)) & 0xFFULL, b = (uint64_t)(0x0ULL) & 0xFFULL;
+    const uint64_t d = (a - b) & 0xFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80ULL) != 0);
+}
+    if (!f_zf) goto L100;
+L267:
+    rbx = rax;
+    rax = ML_M8(rax, 0x0);
+{
+    const uint64_t a = (uint64_t)(ML_M1(rax, 0x21)) & 0xFFULL, b = (uint64_t)(0x0ULL) & 0xFFULL;
+    const uint64_t d = (a - b) & 0xFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80ULL) != 0);
+}
+    if (f_zf) goto L267;
+    goto L100;
+L272:
+    rax = ML_M8(rbx, 0x8);
+{
+    const uint64_t a = (uint64_t)(ML_M1(rax, 0x21)) & 0xFFULL, b = (uint64_t)(0x0ULL) & 0xFFULL;
+    const uint64_t d = (a - b) & 0xFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80ULL) != 0);
+}
+    if (!f_zf) goto L281;
+L275:
+{
+    const uint64_t a = (uint64_t)(rbx) & ~0ULL, b = (uint64_t)(ML_M8(rax, 0x10)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L281;
+    rbx = rax;
+    rax = ML_M8(rax, 0x8);
+{
+    const uint64_t a = (uint64_t)(ML_M1(rax, 0x21)) & 0xFFULL, b = (uint64_t)(0x0ULL) & 0xFFULL;
+    const uint64_t d = (a - b) & 0xFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80ULL) != 0);
+}
+    if (f_zf) goto L275;
+L281:
+    rbx = rax;
+    goto L100;
+L283:
+    rcx = rsp + 0x50;
+    rax = ML_CALL(1417d80b0);
+{
+    const uint64_t r = ((uint64_t)((uint16_t)rax) & 0xFFFFULL) & ((uint64_t)((uint16_t)rax) & 0xFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L294;
+    rcx = rsp + 0x50;
+    rax = ML_CALL(1417d7f20);
+    rcx = ML_M8(r15, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    r8 = rsp + 0x50;
+    rdx = (uint64_t)(uint32_t)(ML_M4(rsp, 0x24));
+    rax = ML_CALLP(ML_M8(rax, 0x8));
+L294:
+    rcx = rsp + 0x50;
+    rax = ML_CALL(1417d7e40);
+L296:
+    rcx = ML_M8(rsp, 0x4b0);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    rbx = ML_M8(rsp, 0x510);
+    rsp = rsp + (0x4c0ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r15 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r14 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r13 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r12 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbp = v; }
+L308:
     return rax;
 #undef ML_CALL
 #undef ML_CALLP
@@ -191688,6 +194504,717 @@ uint64_t SynLift_141774c20(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
     ML_M8(rax, 0x10) = rax;
     rsp = rsp + (0x20ULL);
     { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbx = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
+uint64_t SynLift_141774c70(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    rax = rsp;
+    rsp -= 8; ML_M8(rsp, 0) = rdi;
+    rsp -= 8; ML_M8(rsp, 0) = r12;
+    rsp -= 8; ML_M8(rsp, 0) = r13;
+    rsp -= 8; ML_M8(rsp, 0) = r14;
+    rsp -= 8; ML_M8(rsp, 0) = r15;
+    rsp = rsp - (0x8c0ULL);
+    ML_M8(rsp, 0x30) = 0xfffffffffffffffeULL;
+    ML_M8(rax, 0x10) = rbx;
+    ML_M8(rax, 0x18) = rbp;
+    ML_M8(rax, 0x20) = rsi;
+    rax = ML_IAT(0x141886c40);
+    rax = (rax) ^ (rsp);
+    ML_M8(rsp, 0x8b0) = rax;
+    r14 = rcx;
+    rsi = rcx + 0x370;
+    rax = ML_M8(rsi, 0x30);
+    rbx = ML_M8(rax, 0x0);
+    rbp = ML_M8(rsi, 0x0);
+    r15 = (uint64_t)(uint32_t)(0);
+L20:
+    rdi = ML_M8(rsi, 0x30);
+    rax = ML_M8(rsi, 0x0);
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L26;
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rbp) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf) goto L27;
+L26:
+    rax = ML_CALL(1418233c0);
+L27:
+{
+    const uint64_t a = (uint64_t)(rdi) & ~0ULL, b = (uint64_t)(rbx) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf) goto L171;
+{
+    const uint64_t r = ((uint64_t)(rbp) & ~0ULL) & ((uint64_t)(rbp) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L34;
+    rax = ML_CALL(1418233c0);
+    rdx = r15;
+    goto L35;
+L34:
+    rdx = ML_M8(rbp, 0x0);
+L35:
+{
+    const uint64_t a = (uint64_t)(rbx) & ~0ULL, b = (uint64_t)(ML_M8(rdx, 0x30)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L38;
+    rax = ML_CALL(1418233c0);
+L38:
+    r13 = (uint64_t)(uint32_t)(ML_M4(rbx, 0x18));
+{
+    const uint64_t r = ((uint64_t)((uint32_t)r13) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)r13) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L133;
+{
+    const uint64_t r = ((uint64_t)(rbp) & ~0ULL) & ((uint64_t)(rbp) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L46;
+    rax = ML_CALL(1418233c0);
+    rdx = r15;
+    goto L47;
+L46:
+    rdx = ML_M8(rbp, 0x0);
+L47:
+{
+    const uint64_t a = (uint64_t)(rbx) & ~0ULL, b = (uint64_t)(ML_M8(rdx, 0x30)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L50;
+    rax = ML_CALL(1418233c0);
+L50:
+{
+    const uint64_t a = (uint64_t)(ML_M8(rbx, 0x58)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf) goto L133;
+    rax = ML_M8(rbx, 0x50);
+    rdi = ML_M8(rax, 0x0);
+    rdx = ML_M8(rbx, 0x20);
+{
+    const uint64_t r = ((uint64_t)(rdx) & ~0ULL) & ((uint64_t)(rdx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L60;
+    rax = ML_CALL(1418233c0);
+    rdx = r15;
+    goto L61;
+L60:
+    rdx = ML_M8(rdx, 0x0);
+L61:
+{
+    const uint64_t a = (uint64_t)(rdi) & ~0ULL, b = (uint64_t)(ML_M8(rdx, 0x30)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L64;
+    rax = ML_CALL(1418233c0);
+L64:
+    r12 = (uint64_t)(uint32_t)(ML_M4(rdi, 0x18));
+{
+    const uint64_t r = ((uint64_t)((uint32_t)r12) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)r12) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L133;
+    rcx = ML_M8(r14, 0x8);
+    rax = (uint64_t)(uint32_t)(0x431bde83ULL);
+    { const uint64_t p = (uint64_t)(uint32_t)rax * (uint32_t)((uint32_t)r13);
+      rax = (uint32_t)p; rdx = (uint32_t)(p >> 32); f_cf = f_of = (rdx != 0); }
+    rsi = (uint64_t)(uint32_t)((uint32_t)rdx);
+    { const uint64_t src = (uint32_t)rsi; const uint64_t res = (((uint32_t)rsi & 0xFFFFFFFFULL) >> 18);
+      f_cf = (((src >> 17) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rsi = (uint64_t)(uint32_t)(res); }
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x3f0));
+{
+    const uint64_t a = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)rsi) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (!f_zf) goto L132;
+    rax = (uint64_t)(uint32_t)(0x431bde83ULL);
+    { const uint64_t p = (uint64_t)(uint32_t)rax * (uint32_t)((uint32_t)r12);
+      rax = (uint32_t)p; rdx = (uint32_t)(p >> 32); f_cf = f_of = (rdx != 0); }
+    r15 = (uint64_t)(uint32_t)((uint32_t)rdx);
+    { const uint64_t src = (uint32_t)r15; const uint64_t res = (((uint32_t)r15 & 0xFFFFFFFFULL) >> 18);
+      f_cf = (((src >> 17) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    r15 = (uint64_t)(uint32_t)(res); }
+    ML_M1(rsp, 0x8a0) = 0x0ULL;
+    rax = (uint64_t)(uint32_t)(0);
+    ML_M8(rsp, 0x8a1) = rax;
+    ML_M4(rsp, 0x8a9) = (uint32_t)rax;
+    ML_M2(rsp, 0x8ad) = (uint16_t)rax;
+    ML_M1(rsp, 0x8af) = (uint8_t)rax;
+    r9 = rax + 0x10;
+    r8 = rsp + 0x8a0;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rcx = r14;
+    rax = ML_CALL(141766170);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L167;
+    rax = (uint64_t)(uint32_t)(0);
+    rcx = (rcx) | (0xffffffffffffffffULL);
+    rdi = rsp + 0x8a0;
+    while (rcx) {
+        const uint64_t a = rax & 0xffULL, b = ML_M1(rdi, 0) & 0xffULL;
+        const uint64_t d = (a - b) & 0xffULL;
+        rdi += 1; --rcx;
+        f_cf = a < b; f_zf = (d == 0); f_sf = ((d >> 7) & 1) != 0;
+        f_of = ((((a ^ b) & (a ^ d)) >> 7) & 1) != 0;
+        if (f_zf) break;
+    }
+    rcx = (rcx) ^ ~0ULL;
+{
+    const uint64_t a = (uint64_t)(rcx) & ~0ULL, b = (uint64_t)(0x1ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L107;
+    r9 = rax + 0x10;
+    r8 = rsp + 0x8a0;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rcx = r14;
+    rax = ML_CALL(141766250);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L163;
+L107:
+    rcx = rsp + 0x40;
+    rax = ML_CALL(1417d6640);
+    rdx = (uint64_t)(uint32_t)(0x43ULL);
+    ML_M4(rsp, 0x28) = 0x0ULL;
+    ML_M4(rsp, 0x20) = (uint32_t)r15;
+    r9 = (uint64_t)(uint32_t)(0);
+    r8 = rsp + 0x8a0;
+    rcx = rsp + 0x40;
+    rax = ML_CALL(1417d6820);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L127;
+    rcx = ML_M8(r14, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    { const __int128 p = (__int128)(int64_t)((uint32_t)rsi) * (int64_t)(0xf4240ULL);
+      rsi = (uint64_t)(uint32_t)((uint64_t)p);
+      f_cf = f_of = (p != (__int128)(int64_t)(uint64_t)p); }
+    r13 = (uint64_t)(uint32_t)((uint32_t)r13 - ((uint32_t)rsi));
+    ML_M1(rsp, 0x20) = 0x1ULL;
+    r9 = (uint64_t)(uint32_t)(0);
+    r8 = rsp + 0x40;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r13);
+    rax = ML_CALLP(ML_M8(rax, 0xb8));
+L127:
+    rcx = rsp + 0x40;
+    rax = ML_CALL(1417d66c0);
+    rsi = r14 + 0x370;
+    r15 = (uint64_t)(uint32_t)(0);
+    goto L133;
+L132:
+    rsi = r14 + 0x370;
+L133:
+{
+    const uint64_t r = ((uint64_t)(rbp) & ~0ULL) & ((uint64_t)(rbp) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L136;
+    rax = ML_CALL(1418233c0);
+L136:
+{
+    const uint64_t a = (uint64_t)(ML_M1(rbx, 0x61)) & 0xFFULL, b = (uint64_t)(0x0ULL) & 0xFFULL;
+    const uint64_t d = (a - b) & 0xFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80ULL) != 0);
+}
+    if (f_zf) goto L140;
+    rax = ML_CALL(1418233c0);
+    goto L20;
+L140:
+    rax = ML_M8(rbx, 0x10);
+{
+    const uint64_t a = (uint64_t)(ML_M1(rax, 0x61)) & 0xFFULL, b = (uint64_t)(0x0ULL) & 0xFFULL;
+    const uint64_t d = (a - b) & 0xFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80ULL) != 0);
+}
+    if (!f_zf) goto L152;
+    rbx = rax;
+    rax = ML_M8(rax, 0x0);
+{
+    const uint64_t a = (uint64_t)(ML_M1(rax, 0x61)) & 0xFFULL, b = (uint64_t)(0x0ULL) & 0xFFULL;
+    const uint64_t d = (a - b) & 0xFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80ULL) != 0);
+}
+    if (!f_zf) goto L20;
+L147:
+    rbx = rax;
+    rax = ML_M8(rax, 0x0);
+{
+    const uint64_t a = (uint64_t)(ML_M1(rax, 0x61)) & 0xFFULL, b = (uint64_t)(0x0ULL) & 0xFFULL;
+    const uint64_t d = (a - b) & 0xFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80ULL) != 0);
+}
+    if (f_zf) goto L147;
+    goto L20;
+L152:
+    rax = ML_M8(rbx, 0x8);
+{
+    const uint64_t a = (uint64_t)(ML_M1(rax, 0x61)) & 0xFFULL, b = (uint64_t)(0x0ULL) & 0xFFULL;
+    const uint64_t d = (a - b) & 0xFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80ULL) != 0);
+}
+    if (!f_zf) goto L161;
+L155:
+{
+    const uint64_t a = (uint64_t)(rbx) & ~0ULL, b = (uint64_t)(ML_M8(rax, 0x10)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L161;
+    rbx = rax;
+    rax = ML_M8(rax, 0x8);
+{
+    const uint64_t a = (uint64_t)(ML_M1(rax, 0x61)) & 0xFFULL, b = (uint64_t)(0x0ULL) & 0xFFULL;
+    const uint64_t d = (a - b) & 0xFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80ULL) != 0);
+}
+    if (f_zf) goto L155;
+L161:
+    rbx = rax;
+    goto L20;
+L163:
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rcx = (uintptr_t)0x14182c2c0;
+    rax = ML_CALL(141823030);
+    goto L382;
+L167:
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rcx = (uintptr_t)0x14182c2c0;
+    rax = ML_CALL(141823030);
+    goto L382;
+L171:
+    rax = ML_M8(r14, 0x3e0);
+    rbx = ML_M8(rax, 0x0);
+    r12 = ML_M8(r14, 0x3b0);
+L174:
+    rdi = ML_M8(r14, 0x3e0);
+    rax = ML_M8(r14, 0x3b0);
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L180;
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(r12) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf) goto L181;
+L180:
+    rax = ML_CALL(1418233c0);
+L181:
+{
+    const uint64_t a = (uint64_t)(rdi) & ~0ULL, b = (uint64_t)(rbx) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf) goto L303;
+{
+    const uint64_t r = ((uint64_t)(r12) & ~0ULL) & ((uint64_t)(r12) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L188;
+    rax = ML_CALL(1418233c0);
+    rdx = r15;
+    goto L189;
+L188:
+    rdx = ML_M8(r12, 0x0);
+L189:
+{
+    const uint64_t a = (uint64_t)(rbx) & ~0ULL, b = (uint64_t)(ML_M8(rdx, 0x30)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L192;
+    rax = ML_CALL(1418233c0);
+L192:
+    rbp = (uint64_t)(uint32_t)(ML_M4(rbx, 0x18));
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rbp) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rbp) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L269;
+{
+    const uint64_t r = ((uint64_t)(r12) & ~0ULL) & ((uint64_t)(r12) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L200;
+    rax = ML_CALL(1418233c0);
+    rdx = r15;
+    goto L201;
+L200:
+    rdx = ML_M8(r12, 0x0);
+L201:
+{
+    const uint64_t a = (uint64_t)(rbx) & ~0ULL, b = (uint64_t)(ML_M8(rdx, 0x30)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L204;
+    rax = ML_CALL(1418233c0);
+L204:
+{
+    const uint64_t a = (uint64_t)(ML_M8(rbx, 0x58)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf) goto L269;
+    rax = ML_M8(rbx, 0x50);
+    rdi = ML_M8(rax, 0x0);
+    rdx = ML_M8(rbx, 0x20);
+{
+    const uint64_t r = ((uint64_t)(rdx) & ~0ULL) & ((uint64_t)(rdx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L214;
+    rax = ML_CALL(1418233c0);
+    rdx = r15;
+    goto L215;
+L214:
+    rdx = ML_M8(rdx, 0x0);
+L215:
+{
+    const uint64_t a = (uint64_t)(rdi) & ~0ULL, b = (uint64_t)(ML_M8(rdx, 0x30)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L218;
+    rax = ML_CALL(1418233c0);
+L218:
+    rdi = (uint64_t)(uint32_t)(ML_M4(rdi, 0x18));
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rdi) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rdi) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L269;
+    rcx = ML_M8(r14, 0x8);
+    rax = (uint64_t)(uint32_t)(0x431bde83ULL);
+    { const uint64_t p = (uint64_t)(uint32_t)rax * (uint32_t)((uint32_t)rbp);
+      rax = (uint32_t)p; rdx = (uint32_t)(p >> 32); f_cf = f_of = (rdx != 0); }
+    rsi = (uint64_t)(uint32_t)((uint32_t)rdx);
+    { const uint64_t src = (uint32_t)rsi; const uint64_t res = (((uint32_t)rsi & 0xFFFFFFFFULL) >> 18);
+      f_cf = (((src >> 17) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rsi = (uint64_t)(uint32_t)(res); }
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x3f0));
+{
+    const uint64_t a = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)rsi) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (!f_zf) goto L269;
+    ML_M1(rsp, 0x8a0) = 0x0ULL;
+    rax = (uint64_t)(uint32_t)(0);
+    ML_M8(rsp, 0x8a1) = rax;
+    ML_M4(rsp, 0x8a9) = (uint32_t)rax;
+    ML_M2(rsp, 0x8ad) = (uint16_t)rax;
+    ML_M1(rsp, 0x8af) = (uint8_t)rax;
+    r9 = rax + 0x10;
+    r8 = rsp + 0x8a0;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rdi);
+    rcx = r14;
+    rax = ML_CALL(141766250);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L299;
+    rax = (uint64_t)(uint32_t)(0x431bde83ULL);
+    { const uint64_t p = (uint64_t)(uint32_t)rax * (uint32_t)((uint32_t)rdi);
+      rax = (uint32_t)p; rdx = (uint32_t)(p >> 32); f_cf = f_of = (rdx != 0); }
+    rdi = (uint64_t)(uint32_t)((uint32_t)rdx);
+    { const uint64_t src = (uint32_t)rdi; const uint64_t res = (((uint32_t)rdi & 0xFFFFFFFFULL) >> 18);
+      f_cf = (((src >> 17) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rdi = (uint64_t)(uint32_t)(res); }
+    rcx = rsp + 0x40;
+    rax = ML_CALL(1417d6640);
+    rdx = (uint64_t)(uint32_t)(0x44ULL);
+    ML_M4(rsp, 0x28) = (uint32_t)r15;
+    ML_M4(rsp, 0x20) = (uint32_t)rdi;
+    r9 = (uint64_t)(uint32_t)(0);
+    r8 = rsp + 0x8a0;
+    rcx = rsp + 0x40;
+    rax = ML_CALL(1417d6820);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L267;
+    rcx = ML_M8(r14, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    { const __int128 p = (__int128)(int64_t)((uint32_t)rsi) * (int64_t)(0xf4240ULL);
+      rsi = (uint64_t)(uint32_t)((uint64_t)p);
+      f_cf = f_of = (p != (__int128)(int64_t)(uint64_t)p); }
+    rbp = (uint64_t)(uint32_t)((uint32_t)rbp - ((uint32_t)rsi));
+    ML_M1(rsp, 0x20) = 0x1ULL;
+    r9 = (uint64_t)(uint32_t)(0);
+    r8 = rsp + 0x40;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rax = ML_CALLP(ML_M8(rax, 0xb8));
+L267:
+    rcx = rsp + 0x40;
+    rax = ML_CALL(1417d66c0);
+L269:
+{
+    const uint64_t r = ((uint64_t)(r12) & ~0ULL) & ((uint64_t)(r12) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L272;
+    rax = ML_CALL(1418233c0);
+L272:
+{
+    const uint64_t a = (uint64_t)(ML_M1(rbx, 0x61)) & 0xFFULL, b = (uint64_t)(0x0ULL) & 0xFFULL;
+    const uint64_t d = (a - b) & 0xFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80ULL) != 0);
+}
+    if (f_zf) goto L276;
+    rax = ML_CALL(1418233c0);
+    goto L174;
+L276:
+    rax = ML_M8(rbx, 0x10);
+{
+    const uint64_t a = (uint64_t)(ML_M1(rax, 0x61)) & 0xFFULL, b = (uint64_t)(0x0ULL) & 0xFFULL;
+    const uint64_t d = (a - b) & 0xFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80ULL) != 0);
+}
+    if (!f_zf) goto L288;
+    rbx = rax;
+    rax = ML_M8(rax, 0x0);
+{
+    const uint64_t a = (uint64_t)(ML_M1(rax, 0x61)) & 0xFFULL, b = (uint64_t)(0x0ULL) & 0xFFULL;
+    const uint64_t d = (a - b) & 0xFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80ULL) != 0);
+}
+    if (!f_zf) goto L174;
+L283:
+    rbx = rax;
+    rax = ML_M8(rax, 0x0);
+{
+    const uint64_t a = (uint64_t)(ML_M1(rax, 0x61)) & 0xFFULL, b = (uint64_t)(0x0ULL) & 0xFFULL;
+    const uint64_t d = (a - b) & 0xFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80ULL) != 0);
+}
+    if (f_zf) goto L283;
+    goto L174;
+L288:
+    rax = ML_M8(rbx, 0x8);
+{
+    const uint64_t a = (uint64_t)(ML_M1(rax, 0x61)) & 0xFFULL, b = (uint64_t)(0x0ULL) & 0xFFULL;
+    const uint64_t d = (a - b) & 0xFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80ULL) != 0);
+}
+    if (!f_zf) goto L297;
+L291:
+{
+    const uint64_t a = (uint64_t)(rbx) & ~0ULL, b = (uint64_t)(ML_M8(rax, 0x10)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L297;
+    rbx = rax;
+    rax = ML_M8(rax, 0x8);
+{
+    const uint64_t a = (uint64_t)(ML_M1(rax, 0x61)) & 0xFFULL, b = (uint64_t)(0x0ULL) & 0xFFULL;
+    const uint64_t d = (a - b) & 0xFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80ULL) != 0);
+}
+    if (f_zf) goto L291;
+L297:
+    rbx = rax;
+    goto L174;
+L299:
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rcx = (uintptr_t)0x14182c250;
+    rax = ML_CALL(141823030);
+    goto L382;
+L303:
+    ML_M4(r14, 0x35c) = 0x3ULL;
+    rdx = ML_M8(r14, 0x3a0);
+    rdx = ML_M8(rdx, 0x8);
+    rcx = r14 + 0x370;
+    rax = ML_CALL(1417713d0);
+    rdx = ML_M8(r14, 0x3a0);
+    ML_M8(rdx, 0x8) = rdx;
+    ML_M8(r14, 0x3a8) = r15;
+    rax = ML_M8(r14, 0x3a0);
+    ML_M8(rax, 0x0) = rax;
+    rax = ML_M8(r14, 0x3a0);
+    ML_M8(rax, 0x10) = rax;
+    rdx = ML_M8(r14, 0x3e0);
+    rdx = ML_M8(rdx, 0x8);
+    rcx = r14 + 0x3b0;
+    rax = ML_CALL(1417713d0);
+    rdx = ML_M8(r14, 0x3e0);
+    ML_M8(rdx, 0x8) = rdx;
+    ML_M8(r14, 0x3e8) = r15;
+    rax = ML_M8(r14, 0x3e0);
+    ML_M8(rax, 0x0) = rax;
+    rax = ML_M8(r14, 0x3e0);
+    ML_M8(rax, 0x10) = rax;
+    rdx = ML_M8(r14, 0x420);
+    rdx = ML_M8(rdx, 0x8);
+    rcx = r14 + 0x3f0;
+    rax = ML_CALL(1417713d0);
+    rdx = ML_M8(r14, 0x420);
+    ML_M8(rdx, 0x8) = rdx;
+    ML_M8(r14, 0x428) = r15;
+    rax = ML_M8(r14, 0x420);
+    ML_M8(rax, 0x0) = rax;
+    rax = ML_M8(r14, 0x420);
+    ML_M8(rax, 0x10) = rax;
+    rdx = ML_M8(r14, 0x460);
+    rdx = ML_M8(rdx, 0x8);
+    rcx = r14 + 0x430;
+    rax = ML_CALL(1417713d0);
+    rdx = ML_M8(r14, 0x460);
+    ML_M8(rdx, 0x8) = rdx;
+    ML_M8(r14, 0x468) = r15;
+    rax = ML_M8(r14, 0x460);
+    ML_M8(rax, 0x0) = rax;
+    rax = ML_M8(r14, 0x460);
+    ML_M8(rax, 0x10) = rax;
+    rdx = ML_M8(r14, 0x4a0);
+    rdx = ML_M8(rdx, 0x8);
+    rcx = r14 + 0x470;
+    rax = ML_CALL(1417713d0);
+    rcx = ML_M8(r14, 0x4a0);
+    ML_M8(rcx, 0x8) = rcx;
+    ML_M8(r14, 0x4a8) = r15;
+    rax = ML_M8(r14, 0x4a0);
+    ML_M8(rax, 0x0) = rax;
+    rax = ML_M8(r14, 0x4a0);
+    ML_M8(rax, 0x10) = rax;
+    rcx = ML_M8(r14, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    r8 = (uint64_t)(uint32_t)(0);
+    rdx = r8 + 0x3;
+    rax = ML_CALLP(ML_M8(rax, 0x528));
+    rcx = ML_M8(r14, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    r8 = (r8 & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    rdx = (uint64_t)(uint32_t)(0xaULL);
+    rax = ML_CALLP(ML_M8(rax, 0x528));
+    rcx = rsp + 0x470;
+    rax = ML_CALL(1417d6640);
+    rdx = (uint64_t)(uint32_t)(0x46ULL);
+    rcx = rsp + 0x470;
+    rax = ML_CALL(1417d6740);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L380;
+    rcx = ML_M8(r14, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    rdx = rsp + 0x470;
+    rax = ML_CALLP(ML_M8(rax, 0x98));
+L380:
+    rcx = rsp + 0x470;
+    rax = ML_CALL(1417d66c0);
+L382:
+    rcx = ML_M8(rsp, 0x8b0);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    r11 = rsp + 0x8c0;
+    rbx = ML_M8(r11, 0x38);
+    rbp = ML_M8(r11, 0x40);
+    rsi = ML_M8(r11, 0x48);
+    rsp = r11;
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r15 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r14 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r13 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r12 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
     return rax;
 #undef ML_CALL
 #undef ML_CALLP
@@ -234985,6 +238512,852 @@ L12:
     return rax;
 }
 
+uint64_t SynLift_141788c40(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    ML_M8(rsp, 0x48) = rbp;
+    rax = ML_CALL(141785dc0);
+    rbp = (uint64_t)(uint32_t)((uint32_t)rax);
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L10;
+    rbp = ML_M8(rsp, 0x48);
+    rsp = rsp + (0x28ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    return rax;
+L10:
+    rcx = rdi;
+    ML_M8(rsp, 0x50) = r12;
+    rax = ML_CALL(141785ea0);
+    rcx = ML_M8(rdi, 0x10);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(1417cad00);
+    r12 = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L25;
+    r12 = ML_M8(rsp, 0x50);
+    rbp = ML_M8(rsp, 0x48);
+    rsp = rsp + (0x28ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    return rax;
+L25:
+    rcx = ML_M8(rdi, 0x0);
+    rdx = (uint64_t)(uint32_t)(0x3ULL);
+    ML_M8(rsp, 0x58) = r13;
+    rax = ML_M8(rcx, 0x0);
+    ML_M8(rsp, 0x20) = r14;
+    rax = ML_CALLP(ML_M8(rax, 0x10));
+    rcx = rax;
+    rdx = ML_M8(rax, 0x0);
+    rax = ML_CALLP(ML_M8(rdx, 0x48));
+    r13 = (uint64_t)(uint32_t)(0x7530ULL);
+{
+    const uint64_t a = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)r13) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    r14 = (uint64_t)(uint32_t)((uint32_t)rax);
+    if (!f_zf && (f_sf == f_of)) goto L42;
+{
+    const uint64_t a = (uint64_t)((uint32_t)rsi) & 0xFFFFFFFFULL, b = (uint64_t)(0x2710ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf == f_of) goto L46;
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L141;
+L42:
+{
+    const uint64_t a = (uint64_t)((uint32_t)rsi) & 0xFFFFFFFFULL, b = (uint64_t)(0x186a0ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf == f_of) goto L46;
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L141;
+L46:
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    ML_M8(rsp, 0x40) = rbx;
+    rax = ML_M8(rcx, 0x0);
+    rbx = rsi;
+    rax = ML_CALLP(ML_M8(rax, 0x230));
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rsi) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L86;
+    rcx = r12;
+    rax = ML_CALL(14178f4f0);
+    rcx = 0x2e90edd000ULL;
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rcx) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L72;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uintptr_t)0x141830bd8;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L140;
+L72:
+    rax = rax + (rbx);
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rcx) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf || (f_sf != f_of)) goto L88;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uintptr_t)0x141830bc0;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+L86:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L140;
+L88:
+    rcx = ML_M8(rdi, 0x8);
+    r9 = (r9 & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    r8 = rbx;
+    rax = ML_M8(rcx, 0x0);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rax = ML_CALLP(ML_M8(rax, 0x130));
+{
+    const uint64_t a = (uint64_t)((uint32_t)r14) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)r13) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (!f_zf && (f_sf == f_of)) goto L119;
+    rax = (uint64_t)(uint32_t)(0x68db8badULL);
+    { const __int128 p = (__int128)(int64_t)rax * (int64_t)((uint32_t)rsi);
+      rax = (uint64_t)p; rdx = (uint64_t)(p >> 64); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rdx);
+    { const uint64_t src = (uint32_t)rbx; const uint64_t res = (uint64_t)((int64_t)(int32_t)((uint32_t)rbx & 0xFFFFFFFFULL) >> 12);
+      f_cf = (((src >> 11) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rbx = (uint64_t)(uint32_t)(res); }
+    rax = (uint64_t)(uint32_t)((uint32_t)rbx);
+    { const uint64_t src = (uint32_t)rax; const uint64_t res = (((uint32_t)rax & 0xFFFFFFFFULL) >> 31);
+      f_cf = (((src >> 30) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rax = (uint64_t)(uint32_t)(res); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rbx + ((uint32_t)rax));
+    rax = (rbx + r14 * 1) + 0x0;
+{
+    const uint64_t a = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)r13) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_zf || (f_sf != f_of)) goto L126;
+    r13 = (uint64_t)(uint32_t)((uint32_t)r13 - ((uint32_t)r14));
+    rax = (uint64_t)(uint32_t)((uint32_t)r13);
+    { const __int128 p = (__int128)(int64_t)((uint32_t)rax) * (int64_t)(0x2710ULL);
+      rax = (uint64_t)(uint32_t)((uint64_t)p);
+      f_cf = f_of = (p != (__int128)(int64_t)(uint64_t)p); }
+    rsi = (uint64_t)(uint32_t)((uint32_t)rsi - ((uint32_t)rax));
+    rax = (uint64_t)(uint32_t)(0x14f8b589ULL);
+    { const __int128 p = (__int128)(int64_t)rax * (int64_t)((uint32_t)rsi);
+      rax = (uint64_t)p; rdx = (uint64_t)(p >> 64); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rdx);
+    { const uint64_t src = (uint32_t)rbx; const uint64_t res = (uint64_t)((int64_t)(int32_t)((uint32_t)rbx & 0xFFFFFFFFULL) >> 13);
+      f_cf = (((src >> 12) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rbx = (uint64_t)(uint32_t)(res); }
+    rax = (uint64_t)(uint32_t)((uint32_t)rbx);
+    { const uint64_t src = (uint32_t)rax; const uint64_t res = (((uint32_t)rax & 0xFFFFFFFFULL) >> 31);
+      f_cf = (((src >> 30) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rax = (uint64_t)(uint32_t)(res); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rbx + ((uint32_t)rax));
+    rbx = (uint64_t)(uint32_t)((uint32_t)rbx + ((uint32_t)r13));
+    goto L126;
+L119:
+    rax = (uint64_t)(uint32_t)(0x14f8b589ULL);
+    { const __int128 p = (__int128)(int64_t)rax * (int64_t)((uint32_t)rsi);
+      rax = (uint64_t)p; rdx = (uint64_t)(p >> 64); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rdx);
+    { const uint64_t src = (uint32_t)rbx; const uint64_t res = (uint64_t)((int64_t)(int32_t)((uint32_t)rbx & 0xFFFFFFFFULL) >> 13);
+      f_cf = (((src >> 12) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rbx = (uint64_t)(uint32_t)(res); }
+    rax = (uint64_t)(uint32_t)((uint32_t)rbx);
+    { const uint64_t src = (uint32_t)rax; const uint64_t res = (((uint32_t)rax & 0xFFFFFFFFULL) >> 31);
+      f_cf = (((src >> 30) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rax = (uint64_t)(uint32_t)(res); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rbx + ((uint32_t)rax));
+L126:
+    (*(uint64_t*)(xmm2)) = (uint64_t)(ML_IAT(0x141884e5f));   // movsd xmm, m64
+    r9 = (uint64_t)(uint32_t)(0);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbx);
+    rcx = rdi;
+    rax = ML_CALL(141788400);
+    rdx = (r14 + rbx * 1) + 0x0;
+    rcx = rdi;
+    rax = ML_CALL(141785f00);
+    rcx = ML_M8(rdi, 0x10);
+    r9 = (uint64_t)(uint32_t)(0);
+    r8 = rdi;
+    rdx = r12;
+    rax = ML_CALL(1417c6a60);
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+L140:
+    rbx = ML_M8(rsp, 0x40);
+L141:
+    r13 = ML_M8(rsp, 0x58);
+    r14 = ML_M8(rsp, 0x20);
+    r12 = ML_M8(rsp, 0x50);
+    rbp = ML_M8(rsp, 0x48);
+    rsp = rsp + (0x28ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
+uint64_t SynLift_141788c5c(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    rcx = rdi;
+    ML_M8(rsp, 0x50) = r12;
+    rax = ML_CALL(141785ea0);
+    rcx = ML_M8(rdi, 0x10);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(1417cad00);
+    r12 = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L15;
+    r12 = ML_M8(rsp, 0x50);
+    rbp = ML_M8(rsp, 0x48);
+    rsp = rsp + (0x28ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    return rax;
+L15:
+    rcx = ML_M8(rdi, 0x0);
+    rdx = (uint64_t)(uint32_t)(0x3ULL);
+    ML_M8(rsp, 0x58) = r13;
+    rax = ML_M8(rcx, 0x0);
+    ML_M8(rsp, 0x20) = r14;
+    rax = ML_CALLP(ML_M8(rax, 0x10));
+    rcx = rax;
+    rdx = ML_M8(rax, 0x0);
+    rax = ML_CALLP(ML_M8(rdx, 0x48));
+    r13 = (uint64_t)(uint32_t)(0x7530ULL);
+{
+    const uint64_t a = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)r13) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    r14 = (uint64_t)(uint32_t)((uint32_t)rax);
+    if (!f_zf && (f_sf == f_of)) goto L32;
+{
+    const uint64_t a = (uint64_t)((uint32_t)rsi) & 0xFFFFFFFFULL, b = (uint64_t)(0x2710ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf == f_of) goto L36;
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L131;
+L32:
+{
+    const uint64_t a = (uint64_t)((uint32_t)rsi) & 0xFFFFFFFFULL, b = (uint64_t)(0x186a0ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf == f_of) goto L36;
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L131;
+L36:
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    ML_M8(rsp, 0x40) = rbx;
+    rax = ML_M8(rcx, 0x0);
+    rbx = rsi;
+    rax = ML_CALLP(ML_M8(rax, 0x230));
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rsi) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L76;
+    rcx = r12;
+    rax = ML_CALL(14178f4f0);
+    rcx = 0x2e90edd000ULL;
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rcx) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L62;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uintptr_t)0x141830bd8;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L130;
+L62:
+    rax = rax + (rbx);
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rcx) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf || (f_sf != f_of)) goto L78;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uintptr_t)0x141830bc0;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+L76:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L130;
+L78:
+    rcx = ML_M8(rdi, 0x8);
+    r9 = (r9 & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    r8 = rbx;
+    rax = ML_M8(rcx, 0x0);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rax = ML_CALLP(ML_M8(rax, 0x130));
+{
+    const uint64_t a = (uint64_t)((uint32_t)r14) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)r13) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (!f_zf && (f_sf == f_of)) goto L109;
+    rax = (uint64_t)(uint32_t)(0x68db8badULL);
+    { const __int128 p = (__int128)(int64_t)rax * (int64_t)((uint32_t)rsi);
+      rax = (uint64_t)p; rdx = (uint64_t)(p >> 64); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rdx);
+    { const uint64_t src = (uint32_t)rbx; const uint64_t res = (uint64_t)((int64_t)(int32_t)((uint32_t)rbx & 0xFFFFFFFFULL) >> 12);
+      f_cf = (((src >> 11) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rbx = (uint64_t)(uint32_t)(res); }
+    rax = (uint64_t)(uint32_t)((uint32_t)rbx);
+    { const uint64_t src = (uint32_t)rax; const uint64_t res = (((uint32_t)rax & 0xFFFFFFFFULL) >> 31);
+      f_cf = (((src >> 30) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rax = (uint64_t)(uint32_t)(res); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rbx + ((uint32_t)rax));
+    rax = (rbx + r14 * 1) + 0x0;
+{
+    const uint64_t a = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)r13) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_zf || (f_sf != f_of)) goto L116;
+    r13 = (uint64_t)(uint32_t)((uint32_t)r13 - ((uint32_t)r14));
+    rax = (uint64_t)(uint32_t)((uint32_t)r13);
+    { const __int128 p = (__int128)(int64_t)((uint32_t)rax) * (int64_t)(0x2710ULL);
+      rax = (uint64_t)(uint32_t)((uint64_t)p);
+      f_cf = f_of = (p != (__int128)(int64_t)(uint64_t)p); }
+    rsi = (uint64_t)(uint32_t)((uint32_t)rsi - ((uint32_t)rax));
+    rax = (uint64_t)(uint32_t)(0x14f8b589ULL);
+    { const __int128 p = (__int128)(int64_t)rax * (int64_t)((uint32_t)rsi);
+      rax = (uint64_t)p; rdx = (uint64_t)(p >> 64); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rdx);
+    { const uint64_t src = (uint32_t)rbx; const uint64_t res = (uint64_t)((int64_t)(int32_t)((uint32_t)rbx & 0xFFFFFFFFULL) >> 13);
+      f_cf = (((src >> 12) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rbx = (uint64_t)(uint32_t)(res); }
+    rax = (uint64_t)(uint32_t)((uint32_t)rbx);
+    { const uint64_t src = (uint32_t)rax; const uint64_t res = (((uint32_t)rax & 0xFFFFFFFFULL) >> 31);
+      f_cf = (((src >> 30) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rax = (uint64_t)(uint32_t)(res); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rbx + ((uint32_t)rax));
+    rbx = (uint64_t)(uint32_t)((uint32_t)rbx + ((uint32_t)r13));
+    goto L116;
+L109:
+    rax = (uint64_t)(uint32_t)(0x14f8b589ULL);
+    { const __int128 p = (__int128)(int64_t)rax * (int64_t)((uint32_t)rsi);
+      rax = (uint64_t)p; rdx = (uint64_t)(p >> 64); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rdx);
+    { const uint64_t src = (uint32_t)rbx; const uint64_t res = (uint64_t)((int64_t)(int32_t)((uint32_t)rbx & 0xFFFFFFFFULL) >> 13);
+      f_cf = (((src >> 12) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rbx = (uint64_t)(uint32_t)(res); }
+    rax = (uint64_t)(uint32_t)((uint32_t)rbx);
+    { const uint64_t src = (uint32_t)rax; const uint64_t res = (((uint32_t)rax & 0xFFFFFFFFULL) >> 31);
+      f_cf = (((src >> 30) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rax = (uint64_t)(uint32_t)(res); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rbx + ((uint32_t)rax));
+L116:
+    (*(uint64_t*)(xmm2)) = (uint64_t)(ML_IAT(0x141884e5f));   // movsd xmm, m64
+    r9 = (uint64_t)(uint32_t)(0);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbx);
+    rcx = rdi;
+    rax = ML_CALL(141788400);
+    rdx = (r14 + rbx * 1) + 0x0;
+    rcx = rdi;
+    rax = ML_CALL(141785f00);
+    rcx = ML_M8(rdi, 0x10);
+    r9 = (uint64_t)(uint32_t)(0);
+    r8 = rdi;
+    rdx = r12;
+    rax = ML_CALL(1417c6a60);
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+L130:
+    rbx = ML_M8(rsp, 0x40);
+L131:
+    r13 = ML_M8(rsp, 0x58);
+    r14 = ML_M8(rsp, 0x20);
+    r12 = ML_M8(rsp, 0x50);
+    rbp = ML_M8(rsp, 0x48);
+    rsp = rsp + (0x28ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
+uint64_t SynLift_141788c8d(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    rcx = ML_M8(rdi, 0x0);
+    rdx = (uint64_t)(uint32_t)(0x3ULL);
+    ML_M8(rsp, 0x58) = r13;
+    rax = ML_M8(rcx, 0x0);
+    ML_M8(rsp, 0x20) = r14;
+    rax = ML_CALLP(ML_M8(rax, 0x10));
+    rcx = rax;
+    rdx = ML_M8(rax, 0x0);
+    rax = ML_CALLP(ML_M8(rdx, 0x48));
+    r13 = (uint64_t)(uint32_t)(0x7530ULL);
+{
+    const uint64_t a = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)r13) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    r14 = (uint64_t)(uint32_t)((uint32_t)rax);
+    if (!f_zf && (f_sf == f_of)) goto L17;
+{
+    const uint64_t a = (uint64_t)((uint32_t)rsi) & 0xFFFFFFFFULL, b = (uint64_t)(0x2710ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf == f_of) goto L21;
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L116;
+L17:
+{
+    const uint64_t a = (uint64_t)((uint32_t)rsi) & 0xFFFFFFFFULL, b = (uint64_t)(0x186a0ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf == f_of) goto L21;
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L116;
+L21:
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    ML_M8(rsp, 0x40) = rbx;
+    rax = ML_M8(rcx, 0x0);
+    rbx = rsi;
+    rax = ML_CALLP(ML_M8(rax, 0x230));
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rsi) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L61;
+    rcx = r12;
+    rax = ML_CALL(14178f4f0);
+    rcx = 0x2e90edd000ULL;
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rcx) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L47;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uintptr_t)0x141830bd8;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L115;
+L47:
+    rax = rax + (rbx);
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rcx) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf || (f_sf != f_of)) goto L63;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uintptr_t)0x141830bc0;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+L61:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L115;
+L63:
+    rcx = ML_M8(rdi, 0x8);
+    r9 = (r9 & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    r8 = rbx;
+    rax = ML_M8(rcx, 0x0);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rax = ML_CALLP(ML_M8(rax, 0x130));
+{
+    const uint64_t a = (uint64_t)((uint32_t)r14) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)r13) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (!f_zf && (f_sf == f_of)) goto L94;
+    rax = (uint64_t)(uint32_t)(0x68db8badULL);
+    { const __int128 p = (__int128)(int64_t)rax * (int64_t)((uint32_t)rsi);
+      rax = (uint64_t)p; rdx = (uint64_t)(p >> 64); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rdx);
+    { const uint64_t src = (uint32_t)rbx; const uint64_t res = (uint64_t)((int64_t)(int32_t)((uint32_t)rbx & 0xFFFFFFFFULL) >> 12);
+      f_cf = (((src >> 11) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rbx = (uint64_t)(uint32_t)(res); }
+    rax = (uint64_t)(uint32_t)((uint32_t)rbx);
+    { const uint64_t src = (uint32_t)rax; const uint64_t res = (((uint32_t)rax & 0xFFFFFFFFULL) >> 31);
+      f_cf = (((src >> 30) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rax = (uint64_t)(uint32_t)(res); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rbx + ((uint32_t)rax));
+    rax = (rbx + r14 * 1) + 0x0;
+{
+    const uint64_t a = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)r13) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_zf || (f_sf != f_of)) goto L101;
+    r13 = (uint64_t)(uint32_t)((uint32_t)r13 - ((uint32_t)r14));
+    rax = (uint64_t)(uint32_t)((uint32_t)r13);
+    { const __int128 p = (__int128)(int64_t)((uint32_t)rax) * (int64_t)(0x2710ULL);
+      rax = (uint64_t)(uint32_t)((uint64_t)p);
+      f_cf = f_of = (p != (__int128)(int64_t)(uint64_t)p); }
+    rsi = (uint64_t)(uint32_t)((uint32_t)rsi - ((uint32_t)rax));
+    rax = (uint64_t)(uint32_t)(0x14f8b589ULL);
+    { const __int128 p = (__int128)(int64_t)rax * (int64_t)((uint32_t)rsi);
+      rax = (uint64_t)p; rdx = (uint64_t)(p >> 64); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rdx);
+    { const uint64_t src = (uint32_t)rbx; const uint64_t res = (uint64_t)((int64_t)(int32_t)((uint32_t)rbx & 0xFFFFFFFFULL) >> 13);
+      f_cf = (((src >> 12) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rbx = (uint64_t)(uint32_t)(res); }
+    rax = (uint64_t)(uint32_t)((uint32_t)rbx);
+    { const uint64_t src = (uint32_t)rax; const uint64_t res = (((uint32_t)rax & 0xFFFFFFFFULL) >> 31);
+      f_cf = (((src >> 30) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rax = (uint64_t)(uint32_t)(res); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rbx + ((uint32_t)rax));
+    rbx = (uint64_t)(uint32_t)((uint32_t)rbx + ((uint32_t)r13));
+    goto L101;
+L94:
+    rax = (uint64_t)(uint32_t)(0x14f8b589ULL);
+    { const __int128 p = (__int128)(int64_t)rax * (int64_t)((uint32_t)rsi);
+      rax = (uint64_t)p; rdx = (uint64_t)(p >> 64); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rdx);
+    { const uint64_t src = (uint32_t)rbx; const uint64_t res = (uint64_t)((int64_t)(int32_t)((uint32_t)rbx & 0xFFFFFFFFULL) >> 13);
+      f_cf = (((src >> 12) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rbx = (uint64_t)(uint32_t)(res); }
+    rax = (uint64_t)(uint32_t)((uint32_t)rbx);
+    { const uint64_t src = (uint32_t)rax; const uint64_t res = (((uint32_t)rax & 0xFFFFFFFFULL) >> 31);
+      f_cf = (((src >> 30) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rax = (uint64_t)(uint32_t)(res); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rbx + ((uint32_t)rax));
+L101:
+    (*(uint64_t*)(xmm2)) = (uint64_t)(ML_IAT(0x141884e5f));   // movsd xmm, m64
+    r9 = (uint64_t)(uint32_t)(0);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbx);
+    rcx = rdi;
+    rax = ML_CALL(141788400);
+    rdx = (r14 + rbx * 1) + 0x0;
+    rcx = rdi;
+    rax = ML_CALL(141785f00);
+    rcx = ML_M8(rdi, 0x10);
+    r9 = (uint64_t)(uint32_t)(0);
+    r8 = rdi;
+    rdx = r12;
+    rax = ML_CALL(1417c6a60);
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+L115:
+    rbx = ML_M8(rsp, 0x40);
+L116:
+    r13 = ML_M8(rsp, 0x58);
+    r14 = ML_M8(rsp, 0x20);
+    r12 = ML_M8(rsp, 0x50);
+    rbp = ML_M8(rsp, 0x48);
+    rsp = rsp + (0x28ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
+uint64_t SynLift_141788ce0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    ML_M8(rsp, 0x40) = rbx;
+    rax = ML_M8(rcx, 0x0);
+    rbx = rsi;
+    rax = ML_CALLP(ML_M8(rax, 0x230));
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rsi) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L38;
+    rcx = r12;
+    rax = ML_CALL(14178f4f0);
+    rcx = 0x2e90edd000ULL;
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rcx) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L24;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uintptr_t)0x141830bd8;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L92;
+L24:
+    rax = rax + (rbx);
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rcx) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf || (f_sf != f_of)) goto L40;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uintptr_t)0x141830bc0;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+L38:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L92;
+L40:
+    rcx = ML_M8(rdi, 0x8);
+    r9 = (r9 & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    r8 = rbx;
+    rax = ML_M8(rcx, 0x0);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rax = ML_CALLP(ML_M8(rax, 0x130));
+{
+    const uint64_t a = (uint64_t)((uint32_t)r14) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)r13) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (!f_zf && (f_sf == f_of)) goto L71;
+    rax = (uint64_t)(uint32_t)(0x68db8badULL);
+    { const __int128 p = (__int128)(int64_t)rax * (int64_t)((uint32_t)rsi);
+      rax = (uint64_t)p; rdx = (uint64_t)(p >> 64); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rdx);
+    { const uint64_t src = (uint32_t)rbx; const uint64_t res = (uint64_t)((int64_t)(int32_t)((uint32_t)rbx & 0xFFFFFFFFULL) >> 12);
+      f_cf = (((src >> 11) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rbx = (uint64_t)(uint32_t)(res); }
+    rax = (uint64_t)(uint32_t)((uint32_t)rbx);
+    { const uint64_t src = (uint32_t)rax; const uint64_t res = (((uint32_t)rax & 0xFFFFFFFFULL) >> 31);
+      f_cf = (((src >> 30) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rax = (uint64_t)(uint32_t)(res); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rbx + ((uint32_t)rax));
+    rax = (rbx + r14 * 1) + 0x0;
+{
+    const uint64_t a = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)r13) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_zf || (f_sf != f_of)) goto L78;
+    r13 = (uint64_t)(uint32_t)((uint32_t)r13 - ((uint32_t)r14));
+    rax = (uint64_t)(uint32_t)((uint32_t)r13);
+    { const __int128 p = (__int128)(int64_t)((uint32_t)rax) * (int64_t)(0x2710ULL);
+      rax = (uint64_t)(uint32_t)((uint64_t)p);
+      f_cf = f_of = (p != (__int128)(int64_t)(uint64_t)p); }
+    rsi = (uint64_t)(uint32_t)((uint32_t)rsi - ((uint32_t)rax));
+    rax = (uint64_t)(uint32_t)(0x14f8b589ULL);
+    { const __int128 p = (__int128)(int64_t)rax * (int64_t)((uint32_t)rsi);
+      rax = (uint64_t)p; rdx = (uint64_t)(p >> 64); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rdx);
+    { const uint64_t src = (uint32_t)rbx; const uint64_t res = (uint64_t)((int64_t)(int32_t)((uint32_t)rbx & 0xFFFFFFFFULL) >> 13);
+      f_cf = (((src >> 12) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rbx = (uint64_t)(uint32_t)(res); }
+    rax = (uint64_t)(uint32_t)((uint32_t)rbx);
+    { const uint64_t src = (uint32_t)rax; const uint64_t res = (((uint32_t)rax & 0xFFFFFFFFULL) >> 31);
+      f_cf = (((src >> 30) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rax = (uint64_t)(uint32_t)(res); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rbx + ((uint32_t)rax));
+    rbx = (uint64_t)(uint32_t)((uint32_t)rbx + ((uint32_t)r13));
+    goto L78;
+L71:
+    rax = (uint64_t)(uint32_t)(0x14f8b589ULL);
+    { const __int128 p = (__int128)(int64_t)rax * (int64_t)((uint32_t)rsi);
+      rax = (uint64_t)p; rdx = (uint64_t)(p >> 64); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rdx);
+    { const uint64_t src = (uint32_t)rbx; const uint64_t res = (uint64_t)((int64_t)(int32_t)((uint32_t)rbx & 0xFFFFFFFFULL) >> 13);
+      f_cf = (((src >> 12) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rbx = (uint64_t)(uint32_t)(res); }
+    rax = (uint64_t)(uint32_t)((uint32_t)rbx);
+    { const uint64_t src = (uint32_t)rax; const uint64_t res = (((uint32_t)rax & 0xFFFFFFFFULL) >> 31);
+      f_cf = (((src >> 30) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rax = (uint64_t)(uint32_t)(res); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rbx + ((uint32_t)rax));
+L78:
+    (*(uint64_t*)(xmm2)) = (uint64_t)(ML_IAT(0x141884e60));   // movsd xmm, m64
+    r9 = (uint64_t)(uint32_t)(0);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbx);
+    rcx = rdi;
+    rax = ML_CALL(141788400);
+    rdx = (r14 + rbx * 1) + 0x0;
+    rcx = rdi;
+    rax = ML_CALL(141785f00);
+    rcx = ML_M8(rdi, 0x10);
+    r9 = (uint64_t)(uint32_t)(0);
+    r8 = rdi;
+    rdx = r12;
+    rax = ML_CALL(1417c6a60);
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+L92:
+    rbx = ML_M8(rsp, 0x40);
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
 uint64_t SynLift_141788e1e(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
     uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
     uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
@@ -235007,6 +239380,2334 @@ uint64_t SynLift_141788e1e(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
     return rax;
 }
 
+uint64_t SynLift_141788e40(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    rsp -= 8; ML_M8(rsp, 0) = rbp;
+    rsp -= 8; ML_M8(rsp, 0) = rdi;
+    rsp = rsp - (0x478ULL);
+    rax = ML_IAT(0x141886c40);
+    rax = (rax) ^ (rsp);
+    ML_M8(rsp, 0x450) = rax;
+    rdi = rcx;
+    rcx = ML_M8(rcx, 0x0);
+    rbp = (uint64_t)(uint32_t)((uint32_t)rdx);
+{
+    const uint64_t r = ((uint64_t)(rcx) & ~0ULL) & ((uint64_t)(rcx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L13;
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L96;
+L13:
+    rax = ML_M8(rcx, 0x0);
+    rdx = (uint64_t)(uint32_t)(0);
+    ML_M8(rsp, 0x4a8) = rsi;
+    rax = ML_CALLP(ML_M8(rax, 0x10));
+    rcx = rax;
+    rdx = ML_M8(rax, 0x0);
+    rax = ML_CALLP(ML_M8(rdx, 0x40));
+    rsi = (uint64_t)(uint32_t)((uint32_t)rax);
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L29;
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x248));
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L31;
+L29:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L95;
+L31:
+    rcx = rdi;
+    ML_M8(rsp, 0x470) = r12;
+    rax = ML_CALL(141785ea0);
+    rcx = ML_M8(rdi, 0x10);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(1417cad00);
+    r12 = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L311;
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x238));
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rbp) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rbp) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf || (f_sf != f_of)) goto L311;
+{
+    const uint64_t a = (uint64_t)((uint32_t)rbp) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (!f_zf && (f_sf == f_of)) goto L311;
+    rcx = ML_M8(rdi, 0x0);
+    rdx = (uint64_t)(uint32_t)(0x4ULL);
+    ML_M8(rsp, 0x4a0) = rbx;
+    rax = ML_M8(rcx, 0x0);
+    ML_M8(rsp, 0x460) = r14;
+    rax = ML_CALLP(ML_M8(rax, 0x10));
+    rcx = rax;
+    rdx = ML_M8(rax, 0x0);
+    rax = ML_CALLP(ML_M8(rdx, 0x48));
+    rcx = r12;
+    r14 = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(14178f550);
+{
+    const uint64_t a = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL, b = (uint64_t)(0x3b9aca00ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L75;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uintptr_t)0x141830bc0;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L92;
+L75:
+    ML_M8(rsp, 0x468) = r13;
+    r13 = (rbp + rax * 1) + 0x0;
+{
+    const uint64_t a = (uint64_t)((uint32_t)r13) & 0xFFFFFFFFULL, b = (uint64_t)(0x3b9aca00ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_zf || (f_sf != f_of)) goto L103;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uintptr_t)0x141830bc0;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+L90:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+L91:
+    r13 = ML_M8(rsp, 0x468);
+L92:
+    rbx = ML_M8(rsp, 0x4a0);
+    r14 = ML_M8(rsp, 0x460);
+L94:
+    r12 = ML_M8(rsp, 0x470);
+L95:
+    rsi = ML_M8(rsp, 0x4a8);
+L96:
+    rcx = ML_M8(rsp, 0x450);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    rsp = rsp + (0x478ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbp = v; }
+    return rax;
+L103:
+    rax = ML_M8(rdi, 0x8);
+    rcx = r12;
+    rbx = ML_M8(rax, 0x0);
+    rax = ML_CALL(14178f270);
+    rcx = ML_M8(rdi, 0x8);
+    r8 = (uint64_t)(uint32_t)((uint32_t)rax);
+    r9 = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    ML_M1(rsp, 0x28) = 0x1ULL;
+    ML_M4(rsp, 0x20) = 0x10ULL;
+    rax = ML_CALLP(ML_M8(rbx, 0x140));
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L90;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r13);
+    rcx = r12;
+    rax = ML_CALL(14178fa70);
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x1d8));
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    r8 = ML_M8(rcx, 0x0);
+    rbx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x200));
+    ML_M4(rsp, 0x40) = (uint32_t)rbp;
+    ML_M4(rsp, 0x38) = (uint32_t)rbp;
+    ML_M4(rsp, 0x30) = 0xdeULL;
+    rdx = (uintptr_t)0x141830c50;
+    rcx = (uintptr_t)0x141830c38;
+    r9 = rbx;
+    r8 = (uint64_t)(uint32_t)((uint32_t)rsi);
+    ML_M4(rsp, 0x28) = 0xdeULL;
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    rax = ML_CALL(1418230a8);
+    rcx = rdi;
+    rax = ML_CALL(141785ea0);
+    rdx = (uintptr_t)0x141830c08;
+    rcx = (uintptr_t)0x14182e9a8;
+    r9 = (uint64_t)(uint32_t)((uint32_t)rsi);
+    r8 = rbx;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    rax = ML_CALL(1418230a8);
+    rcx = rsp + 0x51;
+    rdx = (uint64_t)(uint32_t)(0);
+    r8 = (uint64_t)(uint32_t)(0x3ffULL);
+    ML_M1(rsp, 0x50) = 0x0ULL;
+    rax = ML_CALL(1417f30c0);
+    rax = ML_CALL(141823050);
+    rdx = (uintptr_t)0x141830bf0;
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = rsp + 0x50;
+    r9 = rbx;
+    rdx = (uint64_t)(uint32_t)(0x400ULL);
+    r8 = rax;
+    ML_M4(rsp, 0x20) = (uint32_t)rbp;
+    rax = ML_CALL(1418233c8);
+    rax = ML_M8(rdi, 0x8);
+    ML_M1(rsp, 0x44f) = 0x0ULL;
+    rbx = ML_M8(rax, 0x0);
+    rcx = r12;
+    rsi = (uint64_t)(uint32_t)(0x7d4ULL);
+    rax = ML_CALL(14178f270);
+    rcx = ML_M8(rdi, 0x8);
+    r8 = rsp + 0x50;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    r9 = (uint64_t)(uint32_t)(0);
+    ML_M2(rsp, 0x20) = (uint16_t)rsi;
+    rax = ML_CALLP(ML_M8(rbx, 0x88));
+    rax = (rbp + rbp * 4) + 0x0;
+    r9 = (uint64_t)(uint32_t)(0);
+    (*(uint64_t*)(xmm2)) = (uint64_t)(ML_IAT(0x141884e67));   // movsd xmm, m64
+    rbx = (0 + rax * 4) + 0x0;
+    rcx = rdi;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbx);
+    rax = ML_CALL(141788400);
+    rdx = (rbx + r14 * 1) + 0x0;
+    rcx = rdi;
+    rax = ML_CALL(141785ff0);
+    rcx = ML_M8(rdi, 0x10);
+    r9 = (uint64_t)(uint32_t)(0);
+    r8 = rdi;
+    rdx = r12;
+    rax = ML_CALL(1417c6a60);
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    goto L91;
+L192:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L94;
+    ;
+    rsp -= 8; ML_M8(rsp, 0) = rbp;
+    rsp -= 8; ML_M8(rsp, 0) = rsi;
+    rsp = rsp - (0x458ULL);
+    rax = ML_IAT(0x141886c40);
+    rax = (rax) ^ (rsp);
+    ML_M8(rsp, 0x430) = rax;
+{
+    const uint64_t a = (uint64_t)(ML_M8(rcx, 0x0)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    rbp = (uint64_t)(int64_t)(int32_t)((uint32_t)rdx);
+    rsi = rcx;
+    if (!f_zf) goto L326;
+L205:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L423;
+L207:
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf || (f_sf != f_of)) goto L324;
+    ML_M8(rsp, 0x448) = r12;
+    rax = ML_CALL(141785dc0);
+    r12 = (uint64_t)(uint32_t)((uint32_t)rax);
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L422;
+    rcx = rsi;
+    ML_M8(rsp, 0x450) = rdi;
+    rax = ML_CALL(141785ea0);
+    rcx = ML_M8(rsi, 0x10);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(1417cad00);
+    rdi = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L421;
+    rcx = rsp + 0x31;
+    rdx = (uint64_t)(uint32_t)(0);
+    r8 = (uint64_t)(uint32_t)(0x3ffULL);
+    ML_M8(rsp, 0x480) = rbx;
+    ML_M1(rsp, 0x30) = 0x0ULL;
+    ML_M8(rsp, 0x440) = r13;
+    rax = ML_CALL(1417f30c0);
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x230));
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rbp) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_sf == f_of) goto L368;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uintptr_t)0x141830ca8;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L419;
+L249:
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rcx = rsi;
+    rbx = (rbx & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    rax = ML_CALL(141788c20);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L418;
+    rdx = rbp;
+    rcx = rdi;
+    rax = ML_CALL(14179bf80);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L418;
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x1d8));
+    r13 = rax;
+    rax = ML_CALL(141823050);
+    rcx = rdi;
+    rbx = rax;
+    rax = ML_CALL(14178f470);
+    r8 = ML_M8(rbx, 0x0);
+    rdx = (uintptr_t)0x141830c98;
+    rcx = rbx;
+    rdi = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = rsp + 0x30;
+    r9 = r13;
+    rdx = (uint64_t)(uint32_t)(0x3ffULL);
+    r8 = rax;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M8(rsp, 0x20) = rdi;
+    rax = ML_CALL(1418233c8);
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    r8 = rsp + 0x30;
+    r9 = (r9 & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_CALLP(ML_M8(rax, 0x60));
+{
+    const uint64_t a = (uint64_t)((uint32_t)rbp) & 0xFFFFFFFFULL, b = (uint64_t)(0x2710ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L417;
+    rcx = rsi;
+    rax = ML_CALL(141785ea0);
+    rdx = (uintptr_t)0x141830c68;
+    rcx = (uintptr_t)0x14182e9a8;
+    r9 = (uint64_t)(uint32_t)((uint32_t)r12);
+    r8 = r13;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    rax = ML_CALL(1418230a8);
+L298:
+    rbx = (rbx & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+L299:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)((uint8_t)rbx);
+L300:
+    rbx = ML_M8(rsp, 0x480);
+    r13 = ML_M8(rsp, 0x440);
+L302:
+    rdi = ML_M8(rsp, 0x450);
+L303:
+    r12 = ML_M8(rsp, 0x448);
+L304:
+    rcx = ML_M8(rsp, 0x430);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    rsp = rsp + (0x458ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbp = v; }
+    return rax;
+L311:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L94;
+    ;
+    rsp -= 8; ML_M8(rsp, 0) = rbp;
+    rsp -= 8; ML_M8(rsp, 0) = rsi;
+    rsp = rsp - (0x458ULL);
+    rax = ML_IAT(0x141886c40);
+    rax = (rax) ^ (rsp);
+    ML_M8(rsp, 0x430) = rax;
+{
+    const uint64_t a = (uint64_t)(ML_M8(rcx, 0x0)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    rbp = (uint64_t)(int64_t)(int32_t)((uint32_t)rdx);
+    rsi = rcx;
+    if (!f_zf) goto L326;
+L324:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L423;
+L326:
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf || (f_sf != f_of)) goto L324;
+    ML_M8(rsp, 0x448) = r12;
+    rax = ML_CALL(141785dc0);
+    r12 = (uint64_t)(uint32_t)((uint32_t)rax);
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L422;
+    rcx = rsi;
+    ML_M8(rsp, 0x450) = rdi;
+    rax = ML_CALL(141785ea0);
+    rcx = ML_M8(rsi, 0x10);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(1417cad00);
+    rdi = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L421;
+    rcx = rsp + 0x31;
+    rdx = (uint64_t)(uint32_t)(0);
+    r8 = (uint64_t)(uint32_t)(0x3ffULL);
+    ML_M8(rsp, 0x480) = rbx;
+    ML_M1(rsp, 0x30) = 0x0ULL;
+    ML_M8(rsp, 0x440) = r13;
+    rax = ML_CALL(1417f30c0);
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x230));
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rbp) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_sf == f_of) goto L368;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uintptr_t)0x141830ca8;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L419;
+L368:
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rcx = rsi;
+    rbx = (rbx & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    rax = ML_CALL(141788c20);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L418;
+    rdx = rbp;
+    rcx = rdi;
+    rax = ML_CALL(14179bf80);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L418;
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x1d8));
+    r13 = rax;
+    rax = ML_CALL(141823050);
+    rcx = rdi;
+    rbx = rax;
+    rax = ML_CALL(14178f470);
+    r8 = ML_M8(rbx, 0x0);
+    rdx = (uintptr_t)0x141830c98;
+    rcx = rbx;
+    rdi = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = rsp + 0x30;
+    r9 = r13;
+    rdx = (uint64_t)(uint32_t)(0x3ffULL);
+    r8 = rax;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M8(rsp, 0x20) = rdi;
+    rax = ML_CALL(1418233c8);
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    r8 = rsp + 0x30;
+    r9 = (r9 & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_CALLP(ML_M8(rax, 0x60));
+{
+    const uint64_t a = (uint64_t)((uint32_t)rbp) & 0xFFFFFFFFULL, b = (uint64_t)(0x2710ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L417;
+    rcx = rsi;
+    rax = ML_CALL(141785ea0);
+    rdx = (uintptr_t)0x141830c68;
+    rcx = (uintptr_t)0x14182e9a8;
+    r9 = (uint64_t)(uint32_t)((uint32_t)r12);
+    r8 = r13;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    rax = ML_CALL(1418230a8);
+L417:
+    rbx = (rbx & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+L418:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)((uint8_t)rbx);
+L419:
+    rbx = ML_M8(rsp, 0x480);
+    r13 = ML_M8(rsp, 0x440);
+L421:
+    rdi = ML_M8(rsp, 0x450);
+L422:
+    r12 = ML_M8(rsp, 0x448);
+L423:
+    rcx = ML_M8(rsp, 0x430);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    rsp = rsp + (0x458ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbp = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
+uint64_t SynLift_141788e75(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    ML_M8(rsp, 0x4a8) = rsi;
+    rax = ML_CALLP(ML_M8(rax, 0x10));
+    rcx = rax;
+    rdx = ML_M8(rax, 0x0);
+    rax = ML_CALLP(ML_M8(rdx, 0x40));
+    rsi = (uint64_t)(uint32_t)((uint32_t)rax);
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L14;
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x248));
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L16;
+L14:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L80;
+L16:
+    rcx = rdi;
+    ML_M8(rsp, 0x470) = r12;
+    rax = ML_CALL(141785ea0);
+    rcx = ML_M8(rdi, 0x10);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(1417cad00);
+    r12 = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L296;
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x238));
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rbp) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rbp) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf || (f_sf != f_of)) goto L296;
+{
+    const uint64_t a = (uint64_t)((uint32_t)rbp) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (!f_zf && (f_sf == f_of)) goto L296;
+    rcx = ML_M8(rdi, 0x0);
+    rdx = (uint64_t)(uint32_t)(0x4ULL);
+    ML_M8(rsp, 0x4a0) = rbx;
+    rax = ML_M8(rcx, 0x0);
+    ML_M8(rsp, 0x460) = r14;
+    rax = ML_CALLP(ML_M8(rax, 0x10));
+    rcx = rax;
+    rdx = ML_M8(rax, 0x0);
+    rax = ML_CALLP(ML_M8(rdx, 0x48));
+    rcx = r12;
+    r14 = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(14178f550);
+{
+    const uint64_t a = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL, b = (uint64_t)(0x3b9aca00ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L60;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uintptr_t)0x141830bc0;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L77;
+L60:
+    ML_M8(rsp, 0x468) = r13;
+    r13 = (rbp + rax * 1) + 0x0;
+{
+    const uint64_t a = (uint64_t)((uint32_t)r13) & 0xFFFFFFFFULL, b = (uint64_t)(0x3b9aca00ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_zf || (f_sf != f_of)) goto L88;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uintptr_t)0x141830bc0;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+L75:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+L76:
+    r13 = ML_M8(rsp, 0x468);
+L77:
+    rbx = ML_M8(rsp, 0x4a0);
+    r14 = ML_M8(rsp, 0x460);
+L79:
+    r12 = ML_M8(rsp, 0x470);
+L80:
+    rsi = ML_M8(rsp, 0x4a8);
+    rcx = ML_M8(rsp, 0x450);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    rsp = rsp + (0x478ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbp = v; }
+    return rax;
+L88:
+    rax = ML_M8(rdi, 0x8);
+    rcx = r12;
+    rbx = ML_M8(rax, 0x0);
+    rax = ML_CALL(14178f270);
+    rcx = ML_M8(rdi, 0x8);
+    r8 = (uint64_t)(uint32_t)((uint32_t)rax);
+    r9 = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    ML_M1(rsp, 0x28) = 0x1ULL;
+    ML_M4(rsp, 0x20) = 0x10ULL;
+    rax = ML_CALLP(ML_M8(rbx, 0x140));
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L75;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r13);
+    rcx = r12;
+    rax = ML_CALL(14178fa70);
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x1d8));
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    r8 = ML_M8(rcx, 0x0);
+    rbx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x200));
+    ML_M4(rsp, 0x40) = (uint32_t)rbp;
+    ML_M4(rsp, 0x38) = (uint32_t)rbp;
+    ML_M4(rsp, 0x30) = 0xdeULL;
+    rdx = (uintptr_t)0x141830c50;
+    rcx = (uintptr_t)0x141830c38;
+    r9 = rbx;
+    r8 = (uint64_t)(uint32_t)((uint32_t)rsi);
+    ML_M4(rsp, 0x28) = 0xdeULL;
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    rax = ML_CALL(1418230a8);
+    rcx = rdi;
+    rax = ML_CALL(141785ea0);
+    rdx = (uintptr_t)0x141830c08;
+    rcx = (uintptr_t)0x14182e9a8;
+    r9 = (uint64_t)(uint32_t)((uint32_t)rsi);
+    r8 = rbx;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    rax = ML_CALL(1418230a8);
+    rcx = rsp + 0x51;
+    rdx = (uint64_t)(uint32_t)(0);
+    r8 = (uint64_t)(uint32_t)(0x3ffULL);
+    ML_M1(rsp, 0x50) = 0x0ULL;
+    rax = ML_CALL(1417f30c0);
+    rax = ML_CALL(141823050);
+    rdx = (uintptr_t)0x141830bf0;
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = rsp + 0x50;
+    r9 = rbx;
+    rdx = (uint64_t)(uint32_t)(0x400ULL);
+    r8 = rax;
+    ML_M4(rsp, 0x20) = (uint32_t)rbp;
+    rax = ML_CALL(1418233c8);
+    rax = ML_M8(rdi, 0x8);
+    ML_M1(rsp, 0x44f) = 0x0ULL;
+    rbx = ML_M8(rax, 0x0);
+    rcx = r12;
+    rsi = (uint64_t)(uint32_t)(0x7d4ULL);
+    rax = ML_CALL(14178f270);
+    rcx = ML_M8(rdi, 0x8);
+    r8 = rsp + 0x50;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    r9 = (uint64_t)(uint32_t)(0);
+    ML_M2(rsp, 0x20) = (uint16_t)rsi;
+    rax = ML_CALLP(ML_M8(rbx, 0x88));
+    rax = (rbp + rbp * 4) + 0x0;
+    r9 = (uint64_t)(uint32_t)(0);
+    (*(uint64_t*)(xmm2)) = (uint64_t)(ML_IAT(0x141884e67));   // movsd xmm, m64
+    rbx = (0 + rax * 4) + 0x0;
+    rcx = rdi;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbx);
+    rax = ML_CALL(141788400);
+    rdx = (rbx + r14 * 1) + 0x0;
+    rcx = rdi;
+    rax = ML_CALL(141785ff0);
+    rcx = ML_M8(rdi, 0x10);
+    r9 = (uint64_t)(uint32_t)(0);
+    r8 = rdi;
+    rdx = r12;
+    rax = ML_CALL(1417c6a60);
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    goto L76;
+L177:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L79;
+    ;
+    rsp -= 8; ML_M8(rsp, 0) = rbp;
+    rsp -= 8; ML_M8(rsp, 0) = rsi;
+    rsp = rsp - (0x458ULL);
+    rax = ML_IAT(0x141886c40);
+    rax = (rax) ^ (rsp);
+    ML_M8(rsp, 0x430) = rax;
+{
+    const uint64_t a = (uint64_t)(ML_M8(rcx, 0x0)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    rbp = (uint64_t)(int64_t)(int32_t)((uint32_t)rdx);
+    rsi = rcx;
+    if (!f_zf) goto L311;
+L190:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L408;
+L192:
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf || (f_sf != f_of)) goto L309;
+    ML_M8(rsp, 0x448) = r12;
+    rax = ML_CALL(141785dc0);
+    r12 = (uint64_t)(uint32_t)((uint32_t)rax);
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L407;
+    rcx = rsi;
+    ML_M8(rsp, 0x450) = rdi;
+    rax = ML_CALL(141785ea0);
+    rcx = ML_M8(rsi, 0x10);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(1417cad00);
+    rdi = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L406;
+    rcx = rsp + 0x31;
+    rdx = (uint64_t)(uint32_t)(0);
+    r8 = (uint64_t)(uint32_t)(0x3ffULL);
+    ML_M8(rsp, 0x480) = rbx;
+    ML_M1(rsp, 0x30) = 0x0ULL;
+    ML_M8(rsp, 0x440) = r13;
+    rax = ML_CALL(1417f30c0);
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x230));
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rbp) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_sf == f_of) goto L353;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uintptr_t)0x141830ca8;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L404;
+L234:
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rcx = rsi;
+    rbx = (rbx & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    rax = ML_CALL(141788c20);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L403;
+    rdx = rbp;
+    rcx = rdi;
+    rax = ML_CALL(14179bf80);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L403;
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x1d8));
+    r13 = rax;
+    rax = ML_CALL(141823050);
+    rcx = rdi;
+    rbx = rax;
+    rax = ML_CALL(14178f470);
+    r8 = ML_M8(rbx, 0x0);
+    rdx = (uintptr_t)0x141830c98;
+    rcx = rbx;
+    rdi = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = rsp + 0x30;
+    r9 = r13;
+    rdx = (uint64_t)(uint32_t)(0x3ffULL);
+    r8 = rax;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M8(rsp, 0x20) = rdi;
+    rax = ML_CALL(1418233c8);
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    r8 = rsp + 0x30;
+    r9 = (r9 & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_CALLP(ML_M8(rax, 0x60));
+{
+    const uint64_t a = (uint64_t)((uint32_t)rbp) & 0xFFFFFFFFULL, b = (uint64_t)(0x2710ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L402;
+    rcx = rsi;
+    rax = ML_CALL(141785ea0);
+    rdx = (uintptr_t)0x141830c68;
+    rcx = (uintptr_t)0x14182e9a8;
+    r9 = (uint64_t)(uint32_t)((uint32_t)r12);
+    r8 = r13;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    rax = ML_CALL(1418230a8);
+L283:
+    rbx = (rbx & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+L284:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)((uint8_t)rbx);
+L285:
+    rbx = ML_M8(rsp, 0x480);
+    r13 = ML_M8(rsp, 0x440);
+L287:
+    rdi = ML_M8(rsp, 0x450);
+L288:
+    r12 = ML_M8(rsp, 0x448);
+L289:
+    rcx = ML_M8(rsp, 0x430);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    rsp = rsp + (0x458ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbp = v; }
+    return rax;
+L296:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L79;
+    ;
+    rsp -= 8; ML_M8(rsp, 0) = rbp;
+    rsp -= 8; ML_M8(rsp, 0) = rsi;
+    rsp = rsp - (0x458ULL);
+    rax = ML_IAT(0x141886c40);
+    rax = (rax) ^ (rsp);
+    ML_M8(rsp, 0x430) = rax;
+{
+    const uint64_t a = (uint64_t)(ML_M8(rcx, 0x0)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    rbp = (uint64_t)(int64_t)(int32_t)((uint32_t)rdx);
+    rsi = rcx;
+    if (!f_zf) goto L311;
+L309:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L408;
+L311:
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf || (f_sf != f_of)) goto L309;
+    ML_M8(rsp, 0x448) = r12;
+    rax = ML_CALL(141785dc0);
+    r12 = (uint64_t)(uint32_t)((uint32_t)rax);
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L407;
+    rcx = rsi;
+    ML_M8(rsp, 0x450) = rdi;
+    rax = ML_CALL(141785ea0);
+    rcx = ML_M8(rsi, 0x10);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(1417cad00);
+    rdi = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L406;
+    rcx = rsp + 0x31;
+    rdx = (uint64_t)(uint32_t)(0);
+    r8 = (uint64_t)(uint32_t)(0x3ffULL);
+    ML_M8(rsp, 0x480) = rbx;
+    ML_M1(rsp, 0x30) = 0x0ULL;
+    ML_M8(rsp, 0x440) = r13;
+    rax = ML_CALL(1417f30c0);
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x230));
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rbp) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_sf == f_of) goto L353;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uintptr_t)0x141830ca8;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L404;
+L353:
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rcx = rsi;
+    rbx = (rbx & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    rax = ML_CALL(141788c20);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L403;
+    rdx = rbp;
+    rcx = rdi;
+    rax = ML_CALL(14179bf80);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L403;
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x1d8));
+    r13 = rax;
+    rax = ML_CALL(141823050);
+    rcx = rdi;
+    rbx = rax;
+    rax = ML_CALL(14178f470);
+    r8 = ML_M8(rbx, 0x0);
+    rdx = (uintptr_t)0x141830c98;
+    rcx = rbx;
+    rdi = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = rsp + 0x30;
+    r9 = r13;
+    rdx = (uint64_t)(uint32_t)(0x3ffULL);
+    r8 = rax;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M8(rsp, 0x20) = rdi;
+    rax = ML_CALL(1418233c8);
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    r8 = rsp + 0x30;
+    r9 = (r9 & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_CALLP(ML_M8(rax, 0x60));
+{
+    const uint64_t a = (uint64_t)((uint32_t)rbp) & 0xFFFFFFFFULL, b = (uint64_t)(0x2710ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L402;
+    rcx = rsi;
+    rax = ML_CALL(141785ea0);
+    rdx = (uintptr_t)0x141830c68;
+    rcx = (uintptr_t)0x14182e9a8;
+    r9 = (uint64_t)(uint32_t)((uint32_t)r12);
+    r8 = r13;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    rax = ML_CALL(1418230a8);
+L402:
+    rbx = (rbx & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+L403:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)((uint8_t)rbx);
+L404:
+    rbx = ML_M8(rsp, 0x480);
+    r13 = ML_M8(rsp, 0x440);
+L406:
+    rdi = ML_M8(rsp, 0x450);
+L407:
+    r12 = ML_M8(rsp, 0x448);
+L408:
+    rcx = ML_M8(rsp, 0x430);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    rsp = rsp + (0x458ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbp = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
+uint64_t SynLift_141788eac(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    ML_M8(rsp, 0x470) = r12;
+    rax = ML_CALL(141785ea0);
+    rcx = ML_M8(rdi, 0x10);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(1417cad00);
+    r12 = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L279;
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x238));
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rbp) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rbp) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf || (f_sf != f_of)) goto L279;
+{
+    const uint64_t a = (uint64_t)((uint32_t)rbp) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (!f_zf && (f_sf == f_of)) goto L279;
+    rcx = ML_M8(rdi, 0x0);
+    rdx = (uint64_t)(uint32_t)(0x4ULL);
+    ML_M8(rsp, 0x4a0) = rbx;
+    rax = ML_M8(rcx, 0x0);
+    ML_M8(rsp, 0x460) = r14;
+    rax = ML_CALLP(ML_M8(rax, 0x10));
+    rcx = rax;
+    rdx = ML_M8(rax, 0x0);
+    rax = ML_CALLP(ML_M8(rdx, 0x48));
+    rcx = r12;
+    r14 = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(14178f550);
+{
+    const uint64_t a = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL, b = (uint64_t)(0x3b9aca00ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L43;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uintptr_t)0x141830bc0;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L60;
+L43:
+    ML_M8(rsp, 0x468) = r13;
+    r13 = (rbp + rax * 1) + 0x0;
+{
+    const uint64_t a = (uint64_t)((uint32_t)r13) & 0xFFFFFFFFULL, b = (uint64_t)(0x3b9aca00ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_zf || (f_sf != f_of)) goto L71;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uintptr_t)0x141830bc0;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+L58:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+L59:
+    r13 = ML_M8(rsp, 0x468);
+L60:
+    rbx = ML_M8(rsp, 0x4a0);
+    r14 = ML_M8(rsp, 0x460);
+L62:
+    r12 = ML_M8(rsp, 0x470);
+    rsi = ML_M8(rsp, 0x4a8);
+    rcx = ML_M8(rsp, 0x450);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    rsp = rsp + (0x478ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbp = v; }
+    return rax;
+L71:
+    rax = ML_M8(rdi, 0x8);
+    rcx = r12;
+    rbx = ML_M8(rax, 0x0);
+    rax = ML_CALL(14178f270);
+    rcx = ML_M8(rdi, 0x8);
+    r8 = (uint64_t)(uint32_t)((uint32_t)rax);
+    r9 = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    ML_M1(rsp, 0x28) = 0x1ULL;
+    ML_M4(rsp, 0x20) = 0x10ULL;
+    rax = ML_CALLP(ML_M8(rbx, 0x140));
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L58;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r13);
+    rcx = r12;
+    rax = ML_CALL(14178fa70);
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x1d8));
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    r8 = ML_M8(rcx, 0x0);
+    rbx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x200));
+    ML_M4(rsp, 0x40) = (uint32_t)rbp;
+    ML_M4(rsp, 0x38) = (uint32_t)rbp;
+    ML_M4(rsp, 0x30) = 0xdeULL;
+    rdx = (uintptr_t)0x141830c50;
+    rcx = (uintptr_t)0x141830c38;
+    r9 = rbx;
+    r8 = (uint64_t)(uint32_t)((uint32_t)rsi);
+    ML_M4(rsp, 0x28) = 0xdeULL;
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    rax = ML_CALL(1418230a8);
+    rcx = rdi;
+    rax = ML_CALL(141785ea0);
+    rdx = (uintptr_t)0x141830c08;
+    rcx = (uintptr_t)0x14182e9a8;
+    r9 = (uint64_t)(uint32_t)((uint32_t)rsi);
+    r8 = rbx;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    rax = ML_CALL(1418230a8);
+    rcx = rsp + 0x51;
+    rdx = (uint64_t)(uint32_t)(0);
+    r8 = (uint64_t)(uint32_t)(0x3ffULL);
+    ML_M1(rsp, 0x50) = 0x0ULL;
+    rax = ML_CALL(1417f30c0);
+    rax = ML_CALL(141823050);
+    rdx = (uintptr_t)0x141830bf0;
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = rsp + 0x50;
+    r9 = rbx;
+    rdx = (uint64_t)(uint32_t)(0x400ULL);
+    r8 = rax;
+    ML_M4(rsp, 0x20) = (uint32_t)rbp;
+    rax = ML_CALL(1418233c8);
+    rax = ML_M8(rdi, 0x8);
+    ML_M1(rsp, 0x44f) = 0x0ULL;
+    rbx = ML_M8(rax, 0x0);
+    rcx = r12;
+    rsi = (uint64_t)(uint32_t)(0x7d4ULL);
+    rax = ML_CALL(14178f270);
+    rcx = ML_M8(rdi, 0x8);
+    r8 = rsp + 0x50;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    r9 = (uint64_t)(uint32_t)(0);
+    ML_M2(rsp, 0x20) = (uint16_t)rsi;
+    rax = ML_CALLP(ML_M8(rbx, 0x88));
+    rax = (rbp + rbp * 4) + 0x0;
+    r9 = (uint64_t)(uint32_t)(0);
+    (*(uint64_t*)(xmm2)) = (uint64_t)(ML_IAT(0x141884e67));   // movsd xmm, m64
+    rbx = (0 + rax * 4) + 0x0;
+    rcx = rdi;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbx);
+    rax = ML_CALL(141788400);
+    rdx = (rbx + r14 * 1) + 0x0;
+    rcx = rdi;
+    rax = ML_CALL(141785ff0);
+    rcx = ML_M8(rdi, 0x10);
+    r9 = (uint64_t)(uint32_t)(0);
+    r8 = rdi;
+    rdx = r12;
+    rax = ML_CALL(1417c6a60);
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    goto L59;
+L160:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L62;
+    ;
+    rsp -= 8; ML_M8(rsp, 0) = rbp;
+    rsp -= 8; ML_M8(rsp, 0) = rsi;
+    rsp = rsp - (0x458ULL);
+    rax = ML_IAT(0x141886c40);
+    rax = (rax) ^ (rsp);
+    ML_M8(rsp, 0x430) = rax;
+{
+    const uint64_t a = (uint64_t)(ML_M8(rcx, 0x0)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    rbp = (uint64_t)(int64_t)(int32_t)((uint32_t)rdx);
+    rsi = rcx;
+    if (!f_zf) goto L294;
+L173:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L391;
+L175:
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf || (f_sf != f_of)) goto L292;
+    ML_M8(rsp, 0x448) = r12;
+    rax = ML_CALL(141785dc0);
+    r12 = (uint64_t)(uint32_t)((uint32_t)rax);
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L390;
+    rcx = rsi;
+    ML_M8(rsp, 0x450) = rdi;
+    rax = ML_CALL(141785ea0);
+    rcx = ML_M8(rsi, 0x10);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(1417cad00);
+    rdi = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L389;
+    rcx = rsp + 0x31;
+    rdx = (uint64_t)(uint32_t)(0);
+    r8 = (uint64_t)(uint32_t)(0x3ffULL);
+    ML_M8(rsp, 0x480) = rbx;
+    ML_M1(rsp, 0x30) = 0x0ULL;
+    ML_M8(rsp, 0x440) = r13;
+    rax = ML_CALL(1417f30c0);
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x230));
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rbp) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_sf == f_of) goto L336;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uintptr_t)0x141830ca8;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L387;
+L217:
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rcx = rsi;
+    rbx = (rbx & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    rax = ML_CALL(141788c20);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L386;
+    rdx = rbp;
+    rcx = rdi;
+    rax = ML_CALL(14179bf80);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L386;
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x1d8));
+    r13 = rax;
+    rax = ML_CALL(141823050);
+    rcx = rdi;
+    rbx = rax;
+    rax = ML_CALL(14178f470);
+    r8 = ML_M8(rbx, 0x0);
+    rdx = (uintptr_t)0x141830c98;
+    rcx = rbx;
+    rdi = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = rsp + 0x30;
+    r9 = r13;
+    rdx = (uint64_t)(uint32_t)(0x3ffULL);
+    r8 = rax;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M8(rsp, 0x20) = rdi;
+    rax = ML_CALL(1418233c8);
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    r8 = rsp + 0x30;
+    r9 = (r9 & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_CALLP(ML_M8(rax, 0x60));
+{
+    const uint64_t a = (uint64_t)((uint32_t)rbp) & 0xFFFFFFFFULL, b = (uint64_t)(0x2710ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L385;
+    rcx = rsi;
+    rax = ML_CALL(141785ea0);
+    rdx = (uintptr_t)0x141830c68;
+    rcx = (uintptr_t)0x14182e9a8;
+    r9 = (uint64_t)(uint32_t)((uint32_t)r12);
+    r8 = r13;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    rax = ML_CALL(1418230a8);
+L266:
+    rbx = (rbx & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+L267:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)((uint8_t)rbx);
+L268:
+    rbx = ML_M8(rsp, 0x480);
+    r13 = ML_M8(rsp, 0x440);
+L270:
+    rdi = ML_M8(rsp, 0x450);
+L271:
+    r12 = ML_M8(rsp, 0x448);
+L272:
+    rcx = ML_M8(rsp, 0x430);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    rsp = rsp + (0x458ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbp = v; }
+    return rax;
+L279:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L62;
+    ;
+    rsp -= 8; ML_M8(rsp, 0) = rbp;
+    rsp -= 8; ML_M8(rsp, 0) = rsi;
+    rsp = rsp - (0x458ULL);
+    rax = ML_IAT(0x141886c40);
+    rax = (rax) ^ (rsp);
+    ML_M8(rsp, 0x430) = rax;
+{
+    const uint64_t a = (uint64_t)(ML_M8(rcx, 0x0)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    rbp = (uint64_t)(int64_t)(int32_t)((uint32_t)rdx);
+    rsi = rcx;
+    if (!f_zf) goto L294;
+L292:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L391;
+L294:
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf || (f_sf != f_of)) goto L292;
+    ML_M8(rsp, 0x448) = r12;
+    rax = ML_CALL(141785dc0);
+    r12 = (uint64_t)(uint32_t)((uint32_t)rax);
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L390;
+    rcx = rsi;
+    ML_M8(rsp, 0x450) = rdi;
+    rax = ML_CALL(141785ea0);
+    rcx = ML_M8(rsi, 0x10);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(1417cad00);
+    rdi = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L389;
+    rcx = rsp + 0x31;
+    rdx = (uint64_t)(uint32_t)(0);
+    r8 = (uint64_t)(uint32_t)(0x3ffULL);
+    ML_M8(rsp, 0x480) = rbx;
+    ML_M1(rsp, 0x30) = 0x0ULL;
+    ML_M8(rsp, 0x440) = r13;
+    rax = ML_CALL(1417f30c0);
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x230));
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rbp) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_sf == f_of) goto L336;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uintptr_t)0x141830ca8;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L387;
+L336:
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rcx = rsi;
+    rbx = (rbx & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    rax = ML_CALL(141788c20);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L386;
+    rdx = rbp;
+    rcx = rdi;
+    rax = ML_CALL(14179bf80);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L386;
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x1d8));
+    r13 = rax;
+    rax = ML_CALL(141823050);
+    rcx = rdi;
+    rbx = rax;
+    rax = ML_CALL(14178f470);
+    r8 = ML_M8(rbx, 0x0);
+    rdx = (uintptr_t)0x141830c98;
+    rcx = rbx;
+    rdi = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = rsp + 0x30;
+    r9 = r13;
+    rdx = (uint64_t)(uint32_t)(0x3ffULL);
+    r8 = rax;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M8(rsp, 0x20) = rdi;
+    rax = ML_CALL(1418233c8);
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    r8 = rsp + 0x30;
+    r9 = (r9 & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_CALLP(ML_M8(rax, 0x60));
+{
+    const uint64_t a = (uint64_t)((uint32_t)rbp) & 0xFFFFFFFFULL, b = (uint64_t)(0x2710ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L385;
+    rcx = rsi;
+    rax = ML_CALL(141785ea0);
+    rdx = (uintptr_t)0x141830c68;
+    rcx = (uintptr_t)0x14182e9a8;
+    r9 = (uint64_t)(uint32_t)((uint32_t)r12);
+    r8 = r13;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    rax = ML_CALL(1418230a8);
+L385:
+    rbx = (rbx & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+L386:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)((uint8_t)rbx);
+L387:
+    rbx = ML_M8(rsp, 0x480);
+    r13 = ML_M8(rsp, 0x440);
+L389:
+    rdi = ML_M8(rsp, 0x450);
+L390:
+    r12 = ML_M8(rsp, 0x448);
+L391:
+    rcx = ML_M8(rsp, 0x430);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    rsp = rsp + (0x458ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbp = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
+uint64_t SynLift_141788ef7(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    ML_M8(rsp, 0x4a0) = rbx;
+    rax = ML_M8(rcx, 0x0);
+    ML_M8(rsp, 0x460) = r14;
+    rax = ML_CALLP(ML_M8(rax, 0x10));
+    rcx = rax;
+    rdx = ML_M8(rax, 0x0);
+    rax = ML_CALLP(ML_M8(rdx, 0x48));
+    rcx = r12;
+    r14 = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(14178f550);
+{
+    const uint64_t a = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL, b = (uint64_t)(0x3b9aca00ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L25;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uintptr_t)0x141830bc0;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L42;
+L25:
+    ML_M8(rsp, 0x468) = r13;
+    r13 = (rbp + rax * 1) + 0x0;
+{
+    const uint64_t a = (uint64_t)((uint32_t)r13) & 0xFFFFFFFFULL, b = (uint64_t)(0x3b9aca00ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_zf || (f_sf != f_of)) goto L53;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uintptr_t)0x141830bc0;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+L40:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+L41:
+    r13 = ML_M8(rsp, 0x468);
+L42:
+    rbx = ML_M8(rsp, 0x4a0);
+    r14 = ML_M8(rsp, 0x460);
+L44:
+    r12 = ML_M8(rsp, 0x470);
+    rsi = ML_M8(rsp, 0x4a8);
+    rcx = ML_M8(rsp, 0x450);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    rsp = rsp + (0x478ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbp = v; }
+    return rax;
+L53:
+    rax = ML_M8(rdi, 0x8);
+    rcx = r12;
+    rbx = ML_M8(rax, 0x0);
+    rax = ML_CALL(14178f270);
+    rcx = ML_M8(rdi, 0x8);
+    r8 = (uint64_t)(uint32_t)((uint32_t)rax);
+    r9 = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    ML_M1(rsp, 0x28) = 0x1ULL;
+    ML_M4(rsp, 0x20) = 0x10ULL;
+    rax = ML_CALLP(ML_M8(rbx, 0x140));
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L40;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r13);
+    rcx = r12;
+    rax = ML_CALL(14178fa70);
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x1d8));
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    r8 = ML_M8(rcx, 0x0);
+    rbx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x200));
+    ML_M4(rsp, 0x40) = (uint32_t)rbp;
+    ML_M4(rsp, 0x38) = (uint32_t)rbp;
+    ML_M4(rsp, 0x30) = 0xdeULL;
+    rdx = (uintptr_t)0x141830c50;
+    rcx = (uintptr_t)0x141830c38;
+    r9 = rbx;
+    r8 = (uint64_t)(uint32_t)((uint32_t)rsi);
+    ML_M4(rsp, 0x28) = 0xdeULL;
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    rax = ML_CALL(1418230a8);
+    rcx = rdi;
+    rax = ML_CALL(141785ea0);
+    rdx = (uintptr_t)0x141830c08;
+    rcx = (uintptr_t)0x14182e9a8;
+    r9 = (uint64_t)(uint32_t)((uint32_t)rsi);
+    r8 = rbx;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    rax = ML_CALL(1418230a8);
+    rcx = rsp + 0x51;
+    rdx = (uint64_t)(uint32_t)(0);
+    r8 = (uint64_t)(uint32_t)(0x3ffULL);
+    ML_M1(rsp, 0x50) = 0x0ULL;
+    rax = ML_CALL(1417f30c0);
+    rax = ML_CALL(141823050);
+    rdx = (uintptr_t)0x141830bf0;
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = rsp + 0x50;
+    r9 = rbx;
+    rdx = (uint64_t)(uint32_t)(0x400ULL);
+    r8 = rax;
+    ML_M4(rsp, 0x20) = (uint32_t)rbp;
+    rax = ML_CALL(1418233c8);
+    rax = ML_M8(rdi, 0x8);
+    ML_M1(rsp, 0x44f) = 0x0ULL;
+    rbx = ML_M8(rax, 0x0);
+    rcx = r12;
+    rsi = (uint64_t)(uint32_t)(0x7d4ULL);
+    rax = ML_CALL(14178f270);
+    rcx = ML_M8(rdi, 0x8);
+    r8 = rsp + 0x50;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    r9 = (uint64_t)(uint32_t)(0);
+    ML_M2(rsp, 0x20) = (uint16_t)rsi;
+    rax = ML_CALLP(ML_M8(rbx, 0x88));
+    rax = (rbp + rbp * 4) + 0x0;
+    r9 = (uint64_t)(uint32_t)(0);
+    (*(uint64_t*)(xmm2)) = (uint64_t)(ML_IAT(0x141884e67));   // movsd xmm, m64
+    rbx = (0 + rax * 4) + 0x0;
+    rcx = rdi;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbx);
+    rax = ML_CALL(141788400);
+    rdx = (rbx + r14 * 1) + 0x0;
+    rcx = rdi;
+    rax = ML_CALL(141785ff0);
+    rcx = ML_M8(rdi, 0x10);
+    r9 = (uint64_t)(uint32_t)(0);
+    r8 = rdi;
+    rdx = r12;
+    rax = ML_CALL(1417c6a60);
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    goto L41;
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L44;
+    ;
+    rsp -= 8; ML_M8(rsp, 0) = rbp;
+    rsp -= 8; ML_M8(rsp, 0) = rsi;
+    rsp = rsp - (0x458ULL);
+    rax = ML_IAT(0x141886c40);
+    rax = (rax) ^ (rsp);
+    ML_M8(rsp, 0x430) = rax;
+{
+    const uint64_t a = (uint64_t)(ML_M8(rcx, 0x0)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    rbp = (uint64_t)(int64_t)(int32_t)((uint32_t)rdx);
+    rsi = rcx;
+    if (!f_zf) goto L157;
+L155:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L254;
+L157:
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf || (f_sf != f_of)) goto L155;
+    ML_M8(rsp, 0x448) = r12;
+    rax = ML_CALL(141785dc0);
+    r12 = (uint64_t)(uint32_t)((uint32_t)rax);
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L253;
+    rcx = rsi;
+    ML_M8(rsp, 0x450) = rdi;
+    rax = ML_CALL(141785ea0);
+    rcx = ML_M8(rsi, 0x10);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(1417cad00);
+    rdi = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L252;
+    rcx = rsp + 0x31;
+    rdx = (uint64_t)(uint32_t)(0);
+    r8 = (uint64_t)(uint32_t)(0x3ffULL);
+    ML_M8(rsp, 0x480) = rbx;
+    ML_M1(rsp, 0x30) = 0x0ULL;
+    ML_M8(rsp, 0x440) = r13;
+    rax = ML_CALL(1417f30c0);
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x230));
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rbp) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_sf == f_of) goto L199;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uintptr_t)0x141830ca8;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L250;
+L199:
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rcx = rsi;
+    rbx = (rbx & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    rax = ML_CALL(141788c20);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L249;
+    rdx = rbp;
+    rcx = rdi;
+    rax = ML_CALL(14179bf80);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L249;
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x1d8));
+    r13 = rax;
+    rax = ML_CALL(141823050);
+    rcx = rdi;
+    rbx = rax;
+    rax = ML_CALL(14178f470);
+    r8 = ML_M8(rbx, 0x0);
+    rdx = (uintptr_t)0x141830c98;
+    rcx = rbx;
+    rdi = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = rsp + 0x30;
+    r9 = r13;
+    rdx = (uint64_t)(uint32_t)(0x3ffULL);
+    r8 = rax;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M8(rsp, 0x20) = rdi;
+    rax = ML_CALL(1418233c8);
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    r8 = rsp + 0x30;
+    r9 = (r9 & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_CALLP(ML_M8(rax, 0x60));
+{
+    const uint64_t a = (uint64_t)((uint32_t)rbp) & 0xFFFFFFFFULL, b = (uint64_t)(0x2710ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L248;
+    rcx = rsi;
+    rax = ML_CALL(141785ea0);
+    rdx = (uintptr_t)0x141830c68;
+    rcx = (uintptr_t)0x14182e9a8;
+    r9 = (uint64_t)(uint32_t)((uint32_t)r12);
+    r8 = r13;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    rax = ML_CALL(1418230a8);
+L248:
+    rbx = (rbx & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+L249:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)((uint8_t)rbx);
+L250:
+    rbx = ML_M8(rsp, 0x480);
+    r13 = ML_M8(rsp, 0x440);
+L252:
+    rdi = ML_M8(rsp, 0x450);
+L253:
+    r12 = ML_M8(rsp, 0x448);
+L254:
+    rcx = ML_M8(rsp, 0x430);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    rsp = rsp + (0x458ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbp = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
+uint64_t SynLift_141788f55(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    ML_M8(rsp, 0x468) = r13;
+    r13 = (rbp + rax * 1) + 0x0;
+{
+    const uint64_t a = (uint64_t)((uint32_t)r13) & 0xFFFFFFFFULL, b = (uint64_t)(0x3b9aca00ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_zf || (f_sf != f_of)) goto L28;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uintptr_t)0x141830bc0;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+L15:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+L16:
+    r13 = ML_M8(rsp, 0x468);
+    rbx = ML_M8(rsp, 0x4a0);
+    r14 = ML_M8(rsp, 0x460);
+L19:
+    r12 = ML_M8(rsp, 0x470);
+    rsi = ML_M8(rsp, 0x4a8);
+    rcx = ML_M8(rsp, 0x450);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    rsp = rsp + (0x478ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbp = v; }
+    return rax;
+L28:
+    rax = ML_M8(rdi, 0x8);
+    rcx = r12;
+    rbx = ML_M8(rax, 0x0);
+    rax = ML_CALL(14178f270);
+    rcx = ML_M8(rdi, 0x8);
+    r8 = (uint64_t)(uint32_t)((uint32_t)rax);
+    r9 = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    ML_M1(rsp, 0x28) = 0x1ULL;
+    ML_M4(rsp, 0x20) = 0x10ULL;
+    rax = ML_CALLP(ML_M8(rbx, 0x140));
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L15;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r13);
+    rcx = r12;
+    rax = ML_CALL(14178fa70);
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x1d8));
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    r8 = ML_M8(rcx, 0x0);
+    rbx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x200));
+    ML_M4(rsp, 0x40) = (uint32_t)rbp;
+    ML_M4(rsp, 0x38) = (uint32_t)rbp;
+    ML_M4(rsp, 0x30) = 0xdeULL;
+    rdx = (uintptr_t)0x141830c50;
+    rcx = (uintptr_t)0x141830c38;
+    r9 = rbx;
+    r8 = (uint64_t)(uint32_t)((uint32_t)rsi);
+    ML_M4(rsp, 0x28) = 0xdeULL;
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    rax = ML_CALL(1418230a8);
+    rcx = rdi;
+    rax = ML_CALL(141785ea0);
+    rdx = (uintptr_t)0x141830c08;
+    rcx = (uintptr_t)0x14182e9a8;
+    r9 = (uint64_t)(uint32_t)((uint32_t)rsi);
+    r8 = rbx;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    rax = ML_CALL(1418230a8);
+    rcx = rsp + 0x51;
+    rdx = (uint64_t)(uint32_t)(0);
+    r8 = (uint64_t)(uint32_t)(0x3ffULL);
+    ML_M1(rsp, 0x50) = 0x0ULL;
+    rax = ML_CALL(1417f30c0);
+    rax = ML_CALL(141823050);
+    rdx = (uintptr_t)0x141830bf0;
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = rsp + 0x50;
+    r9 = rbx;
+    rdx = (uint64_t)(uint32_t)(0x400ULL);
+    r8 = rax;
+    ML_M4(rsp, 0x20) = (uint32_t)rbp;
+    rax = ML_CALL(1418233c8);
+    rax = ML_M8(rdi, 0x8);
+    ML_M1(rsp, 0x44f) = 0x0ULL;
+    rbx = ML_M8(rax, 0x0);
+    rcx = r12;
+    rsi = (uint64_t)(uint32_t)(0x7d4ULL);
+    rax = ML_CALL(14178f270);
+    rcx = ML_M8(rdi, 0x8);
+    r8 = rsp + 0x50;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    r9 = (uint64_t)(uint32_t)(0);
+    ML_M2(rsp, 0x20) = (uint16_t)rsi;
+    rax = ML_CALLP(ML_M8(rbx, 0x88));
+    rax = (rbp + rbp * 4) + 0x0;
+    r9 = (uint64_t)(uint32_t)(0);
+    (*(uint64_t*)(xmm2)) = (uint64_t)(ML_IAT(0x141884e67));   // movsd xmm, m64
+    rbx = (0 + rax * 4) + 0x0;
+    rcx = rdi;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbx);
+    rax = ML_CALL(141788400);
+    rdx = (rbx + r14 * 1) + 0x0;
+    rcx = rdi;
+    rax = ML_CALL(141785ff0);
+    rcx = ML_M8(rdi, 0x10);
+    r9 = (uint64_t)(uint32_t)(0);
+    r8 = rdi;
+    rdx = r12;
+    rax = ML_CALL(1417c6a60);
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    goto L16;
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L19;
+    ;
+    rsp -= 8; ML_M8(rsp, 0) = rbp;
+    rsp -= 8; ML_M8(rsp, 0) = rsi;
+    rsp = rsp - (0x458ULL);
+    rax = ML_IAT(0x141886c40);
+    rax = (rax) ^ (rsp);
+    ML_M8(rsp, 0x430) = rax;
+{
+    const uint64_t a = (uint64_t)(ML_M8(rcx, 0x0)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    rbp = (uint64_t)(int64_t)(int32_t)((uint32_t)rdx);
+    rsi = rcx;
+    if (!f_zf) goto L132;
+L130:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L229;
+L132:
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf || (f_sf != f_of)) goto L130;
+    ML_M8(rsp, 0x448) = r12;
+    rax = ML_CALL(141785dc0);
+    r12 = (uint64_t)(uint32_t)((uint32_t)rax);
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L228;
+    rcx = rsi;
+    ML_M8(rsp, 0x450) = rdi;
+    rax = ML_CALL(141785ea0);
+    rcx = ML_M8(rsi, 0x10);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(1417cad00);
+    rdi = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L227;
+    rcx = rsp + 0x31;
+    rdx = (uint64_t)(uint32_t)(0);
+    r8 = (uint64_t)(uint32_t)(0x3ffULL);
+    ML_M8(rsp, 0x480) = rbx;
+    ML_M1(rsp, 0x30) = 0x0ULL;
+    ML_M8(rsp, 0x440) = r13;
+    rax = ML_CALL(1417f30c0);
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x230));
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rbp) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_sf == f_of) goto L174;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uintptr_t)0x141830ca8;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L225;
+L174:
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rcx = rsi;
+    rbx = (rbx & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    rax = ML_CALL(141788c20);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L224;
+    rdx = rbp;
+    rcx = rdi;
+    rax = ML_CALL(14179bf80);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L224;
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x1d8));
+    r13 = rax;
+    rax = ML_CALL(141823050);
+    rcx = rdi;
+    rbx = rax;
+    rax = ML_CALL(14178f470);
+    r8 = ML_M8(rbx, 0x0);
+    rdx = (uintptr_t)0x141830c98;
+    rcx = rbx;
+    rdi = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = rsp + 0x30;
+    r9 = r13;
+    rdx = (uint64_t)(uint32_t)(0x3ffULL);
+    r8 = rax;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M8(rsp, 0x20) = rdi;
+    rax = ML_CALL(1418233c8);
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    r8 = rsp + 0x30;
+    r9 = (r9 & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_CALLP(ML_M8(rax, 0x60));
+{
+    const uint64_t a = (uint64_t)((uint32_t)rbp) & 0xFFFFFFFFULL, b = (uint64_t)(0x2710ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L223;
+    rcx = rsi;
+    rax = ML_CALL(141785ea0);
+    rdx = (uintptr_t)0x141830c68;
+    rcx = (uintptr_t)0x14182e9a8;
+    r9 = (uint64_t)(uint32_t)((uint32_t)r12);
+    r8 = r13;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    rax = ML_CALL(1418230a8);
+L223:
+    rbx = (rbx & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+L224:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)((uint8_t)rbx);
+L225:
+    rbx = ML_M8(rsp, 0x480);
+    r13 = ML_M8(rsp, 0x440);
+L227:
+    rdi = ML_M8(rsp, 0x450);
+L228:
+    r12 = ML_M8(rsp, 0x448);
+L229:
+    rcx = ML_M8(rsp, 0x430);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    rsp = rsp + (0x458ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbp = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
 uint64_t SynLift_141788fbe(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
     uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
     uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
@@ -235016,6 +241717,316 @@ uint64_t SynLift_141788fbe(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
     uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
 #define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
 #define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    rcx = ML_M8(rsp, 0x450);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    rsp = rsp + (0x478ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbp = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
+uint64_t SynLift_141788fd8(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    rax = ML_M8(rdi, 0x8);
+    rcx = r12;
+    rbx = ML_M8(rax, 0x0);
+    rax = ML_CALL(14178f270);
+    rcx = ML_M8(rdi, 0x8);
+    r8 = (uint64_t)(uint32_t)((uint32_t)rax);
+    r9 = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    ML_M1(rsp, 0x28) = 0x1ULL;
+    ML_M4(rsp, 0x20) = 0x10ULL;
+    rax = ML_CALLP(ML_M8(rbx, 0x140));
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L208;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r13);
+    rcx = r12;
+    rax = ML_CALL(14178fa70);
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x1d8));
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    r8 = ML_M8(rcx, 0x0);
+    rbx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x200));
+    ML_M4(rsp, 0x40) = (uint32_t)rbp;
+    ML_M4(rsp, 0x38) = (uint32_t)rbp;
+    ML_M4(rsp, 0x30) = 0xdeULL;
+    rdx = (uintptr_t)0x141830c50;
+    rcx = (uintptr_t)0x141830c38;
+    r9 = rbx;
+    r8 = (uint64_t)(uint32_t)((uint32_t)rsi);
+    ML_M4(rsp, 0x28) = 0xdeULL;
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    rax = ML_CALL(1418230a8);
+    rcx = rdi;
+    rax = ML_CALL(141785ea0);
+    rdx = (uintptr_t)0x141830c08;
+    rcx = (uintptr_t)0x14182e9a8;
+    r9 = (uint64_t)(uint32_t)((uint32_t)rsi);
+    r8 = rbx;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    rax = ML_CALL(1418230a8);
+    rcx = rsp + 0x51;
+    rdx = (uint64_t)(uint32_t)(0);
+    r8 = (uint64_t)(uint32_t)(0x3ffULL);
+    ML_M1(rsp, 0x50) = 0x0ULL;
+    rax = ML_CALL(1417f30c0);
+    rax = ML_CALL(141823050);
+    rdx = (uintptr_t)0x141830bf0;
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = rsp + 0x50;
+    r9 = rbx;
+    rdx = (uint64_t)(uint32_t)(0x400ULL);
+    r8 = rax;
+    ML_M4(rsp, 0x20) = (uint32_t)rbp;
+    rax = ML_CALL(1418233c8);
+    rax = ML_M8(rdi, 0x8);
+    ML_M1(rsp, 0x44f) = 0x0ULL;
+    rbx = ML_M8(rax, 0x0);
+    rcx = r12;
+    rsi = (uint64_t)(uint32_t)(0x7d4ULL);
+    rax = ML_CALL(14178f270);
+    rcx = ML_M8(rdi, 0x8);
+    r8 = rsp + 0x50;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    r9 = (uint64_t)(uint32_t)(0);
+    ML_M2(rsp, 0x20) = (uint16_t)rsi;
+    rax = ML_CALLP(ML_M8(rbx, 0x88));
+    rax = (rbp + rbp * 4) + 0x0;
+    r9 = (uint64_t)(uint32_t)(0);
+    (*(uint64_t*)(xmm2)) = (uint64_t)(ML_IAT(0x141884e67));   // movsd xmm, m64
+    rbx = (0 + rax * 4) + 0x0;
+    rcx = rdi;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbx);
+    rax = ML_CALL(141788400);
+    rdx = (rbx + r14 * 1) + 0x0;
+    rcx = rdi;
+    rax = ML_CALL(141785ff0);
+    rcx = ML_M8(rdi, 0x10);
+    r9 = (uint64_t)(uint32_t)(0);
+    r8 = rdi;
+    rdx = r12;
+    rax = ML_CALL(1417c6a60);
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    goto L221;
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L233;
+    ;
+    rsp -= 8; ML_M8(rsp, 0) = rbp;
+    rsp -= 8; ML_M8(rsp, 0) = rsi;
+    rsp = rsp - (0x458ULL);
+    rax = ML_IAT(0x141886c40);
+    rax = (rax) ^ (rsp);
+    ML_M8(rsp, 0x430) = rax;
+{
+    const uint64_t a = (uint64_t)(ML_M8(rcx, 0x0)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    rbp = (uint64_t)(int64_t)(int32_t)((uint32_t)rdx);
+    rsi = rcx;
+    if (!f_zf) goto L104;
+L102:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L201;
+L104:
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf || (f_sf != f_of)) goto L102;
+    ML_M8(rsp, 0x448) = r12;
+    rax = ML_CALL(141785dc0);
+    r12 = (uint64_t)(uint32_t)((uint32_t)rax);
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L200;
+    rcx = rsi;
+    ML_M8(rsp, 0x450) = rdi;
+    rax = ML_CALL(141785ea0);
+    rcx = ML_M8(rsi, 0x10);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(1417cad00);
+    rdi = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L199;
+    rcx = rsp + 0x31;
+    rdx = (uint64_t)(uint32_t)(0);
+    r8 = (uint64_t)(uint32_t)(0x3ffULL);
+    ML_M8(rsp, 0x480) = rbx;
+    ML_M1(rsp, 0x30) = 0x0ULL;
+    ML_M8(rsp, 0x440) = r13;
+    rax = ML_CALL(1417f30c0);
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x230));
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rbp) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_sf == f_of) goto L146;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uintptr_t)0x141830ca8;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L197;
+L146:
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rcx = rsi;
+    rbx = (rbx & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    rax = ML_CALL(141788c20);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L196;
+    rdx = rbp;
+    rcx = rdi;
+    rax = ML_CALL(14179bf80);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L196;
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x1d8));
+    r13 = rax;
+    rax = ML_CALL(141823050);
+    rcx = rdi;
+    rbx = rax;
+    rax = ML_CALL(14178f470);
+    r8 = ML_M8(rbx, 0x0);
+    rdx = (uintptr_t)0x141830c98;
+    rcx = rbx;
+    rdi = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = rsp + 0x30;
+    r9 = r13;
+    rdx = (uint64_t)(uint32_t)(0x3ffULL);
+    r8 = rax;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M8(rsp, 0x20) = rdi;
+    rax = ML_CALL(1418233c8);
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    r8 = rsp + 0x30;
+    r9 = (r9 & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_CALLP(ML_M8(rax, 0x60));
+{
+    const uint64_t a = (uint64_t)((uint32_t)rbp) & 0xFFFFFFFFULL, b = (uint64_t)(0x2710ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L195;
+    rcx = rsi;
+    rax = ML_CALL(141785ea0);
+    rdx = (uintptr_t)0x141830c68;
+    rcx = (uintptr_t)0x14182e9a8;
+    r9 = (uint64_t)(uint32_t)((uint32_t)r12);
+    r8 = r13;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    rax = ML_CALL(1418230a8);
+L195:
+    rbx = (rbx & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+L196:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)((uint8_t)rbx);
+L197:
+    rbx = ML_M8(rsp, 0x480);
+    r13 = ML_M8(rsp, 0x440);
+L199:
+    rdi = ML_M8(rsp, 0x450);
+L200:
+    r12 = ML_M8(rsp, 0x448);
+L201:
+    rcx = ML_M8(rsp, 0x430);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    rsp = rsp + (0x458ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbp = v; }
+    return rax;
+L208:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+L209:
+    r13 = ML_M8(rsp, 0x468);
+    rbx = ML_M8(rsp, 0x4a0);
+    r14 = ML_M8(rsp, 0x460);
+L212:
+    r12 = ML_M8(rsp, 0x470);
+    rsi = ML_M8(rsp, 0x4a8);
+    rcx = ML_M8(rsp, 0x450);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    rsp = rsp + (0x478ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbp = v; }
+    return rax;
+L221:
+    r13 = ML_M8(rsp, 0x468);
+    rbx = ML_M8(rsp, 0x4a0);
+    r14 = ML_M8(rsp, 0x460);
+L224:
+    r12 = ML_M8(rsp, 0x470);
+    rsi = ML_M8(rsp, 0x4a8);
+    rcx = ML_M8(rsp, 0x450);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    rsp = rsp + (0x478ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbp = v; }
+    return rax;
+L233:
+    r12 = ML_M8(rsp, 0x470);
+    rsi = ML_M8(rsp, 0x4a8);
     rcx = ML_M8(rsp, 0x450);
     rcx = (rcx) ^ (rsp);
     rax = ML_CALL(1417f30a0);
@@ -250772,6 +257783,82 @@ L31:
     return rax;
 }
 
+uint64_t SynLift_14178fc51(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    ML_M8(rsp, 0x40) = rdi;
+    rax = (uint64_t)(uint32_t)(0);
+    rdi = rdx;
+    while (rcx) {
+        const uint64_t a = rax & 0xffULL, b = ML_M1(rdi, 0) & 0xffULL;
+        const uint64_t d = (a - b) & 0xffULL;
+        rdi += 1; --rcx;
+        f_cf = a < b; f_zf = (d == 0); f_sf = ((d >> 7) & 1) != 0;
+        f_of = ((((a ^ b) & (a ^ d)) >> 7) & 1) != 0;
+        if (f_zf) break;
+    }
+    rcx = (rcx) ^ ~0ULL;
+    rcx = rcx - 1;
+{
+    const uint64_t a = (uint64_t)(rcx) & ~0ULL, b = (uint64_t)(0x100ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf) goto L20;
+    r9 = (uintptr_t)0x1418319b0;
+    r8 = (uintptr_t)0x141831aa8;
+    rdx = (uintptr_t)0x141827b98;
+    rcx = (uintptr_t)0x141824ca8;
+    ML_M4(rsp, 0x20) = 0x9d2ULL;
+    rax = ML_CALL(141823030);
+    rdi = ML_M8(rsp, 0x40);
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    rbx = ML_M8(rsp, 0x48);
+    rsp = rsp + (0x30ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    return rax;
+L20:
+    rcx = ML_M8(rsi, 0x428);
+    rdx = (uint64_t)(uint32_t)(0x2ULL);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x10));
+    rdx = rbx;
+    rdi = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(rdi, 0x80));
+    rcx = ML_M8(rsi, 0x428);
+    rdx = (uint64_t)(uint32_t)(0x2bULL);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x10));
+    rcx = (uint64_t)(uint32_t)(0);
+    rbx = ML_M8(rax, 0x0);
+    rdi = rax;
+    rax = ML_CALL(1418230b8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    rcx = rdi;
+    rax = ML_CALLP(ML_M8(rbx, 0xb0));
+    rcx = ML_M8(rsi, 0x428);
+    rdx = (uint64_t)(uint32_t)(0);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x38));
+    rdi = ML_M8(rsp, 0x40);
+    rbx = ML_M8(rsp, 0x48);
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    rsp = rsp + (0x30ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
 uint64_t SynLift_14178fca8(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
     uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
     uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
@@ -255261,6 +262348,298 @@ uint64_t SynLift_141792c80(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
     ML_M8(rsp, 0x20) = rax;
     rax = ML_CALL(141792b70);
     rsp = rsp + (0x38ULL);
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
+uint64_t SynLift_141792cb0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    rax = rsp;
+    rsp -= 8; ML_M8(rsp, 0) = r12;
+    rsp -= 8; ML_M8(rsp, 0) = r13;
+    rsp -= 8; ML_M8(rsp, 0) = r14;
+    rsp = rsp - (0x470ULL);
+    ML_M8(rsp, 0x30) = 0xfffffffffffffffeULL;
+    ML_M8(rax, 0x8) = rbx;
+    ML_M8(rax, 0x10) = rbp;
+    ML_M8(rax, 0x18) = rsi;
+    ML_M8(rax, 0x20) = rdi;
+    r13 = (uint64_t)(uint32_t)((uint32_t)rdx);
+    rbx = rcx;
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L21;
+    ML_M4(rsp, 0x20) = 0x202ULL;
+    r9 = (uintptr_t)0x1418319b0;
+    r8 = (uintptr_t)0x141831e28;
+    rdx = (uintptr_t)0x14182664c;
+    rcx = (uintptr_t)0x141824ca8;
+    rax = ML_CALL(141823030);
+    goto L177;
+L21:
+{
+    const uint64_t a = (uint64_t)(ML_M8(rcx, 0x428)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L30;
+    ML_M4(rsp, 0x20) = 0x203ULL;
+    r9 = (uintptr_t)0x1418319b0;
+    r8 = (uintptr_t)0x141828944;
+    rdx = (uintptr_t)0x14182664c;
+    rcx = (uintptr_t)0x141824ca8;
+    rax = ML_CALL(141823030);
+    goto L177;
+L30:
+    rdi = ML_M8(rcx, 0x318);
+    rax = ML_CALL(1417901d0);
+{
+    const uint64_t a = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)rdi) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf == f_of) goto L38;
+    rcx = rbx;
+    rax = ML_CALL(1417901d0);
+    r12 = (uint64_t)(uint32_t)((uint32_t)rax);
+    goto L39;
+L38:
+    r12 = ML_M8(rbx, 0x318);
+L39:
+    r14 = (uint64_t)(uint32_t)(0);
+    rsi = (uint64_t)(uint32_t)((uint32_t)r14);
+    rdi = (uint64_t)(uint32_t)((uint32_t)r14);
+L42:
+    rcx = ML_M8(rbx, 0x428);
+    rax = ML_M8(rcx, 0x0);
+    rdx = rdi + 0xa;
+    rax = ML_CALLP(ML_M8(rax, 0x10));
+    rdx = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(rdx, 0x40));
+    rbp = (uint64_t)(uint32_t)((uint32_t)rax);
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L77;
+    rcx = rsp + 0x40;
+    rax = ML_CALL(1417db2b0);
+    rdx = (uint64_t)(uint32_t)(0x9ULL);
+    r8 = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rcx = rsp + 0x40;
+    rax = ML_CALL(1417db3a0);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L67;
+    ML_M4(rsp, 0x20) = 0x20eULL;
+    r9 = (uintptr_t)0x1418319b0;
+    r8 = (uintptr_t)0x141831e00;
+    rdx = (uintptr_t)0x14182666c;
+    rcx = (uintptr_t)0x141824ca8;
+    rax = ML_CALL(141823030);
+    goto L72;
+L67:
+    rcx = ML_M8(rbx, 0x430);
+    rax = ML_M8(rcx, 0x0);
+    r8 = rsp + 0x40;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r13);
+    rax = ML_CALLP(ML_M8(rax, 0x8));
+L72:
+    rsi = (uint64_t)(uint32_t)((uint32_t)rsi + 1);
+{
+    const uint64_t a = (uint64_t)((uint32_t)rsi) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)r12) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf == f_of) goto L81;
+    rcx = rsp + 0x40;
+    rax = ML_CALL(1417db330);
+L77:
+    rdi = (uint64_t)(uint32_t)((uint32_t)rdi + 1);
+{
+    const uint64_t a = (uint64_t)((uint32_t)rdi) & 0xFFFFFFFFULL, b = (uint64_t)(0xfULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf == f_of) goto L83;
+    goto L42;
+L81:
+    rcx = rsp + 0x40;
+    rax = ML_CALL(1417db330);
+L83:
+    rdi = (uint64_t)(uint32_t)((uint32_t)r14);
+L84:
+    rcx = ML_M8(rbx, 0x428);
+    rax = ML_M8(rcx, 0x0);
+    rdx = rdi + 0x19;
+    rax = ML_CALLP(ML_M8(rax, 0x10));
+    rdx = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(rdx, 0x40));
+    rsi = (uint64_t)(uint32_t)((uint32_t)rax);
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L116;
+    rcx = rsp + 0x40;
+    rax = ML_CALL(1417db2b0);
+    rdx = (uint64_t)(uint32_t)(0x7ULL);
+    r8 = (uint64_t)(uint32_t)((uint32_t)rsi);
+    rcx = rsp + 0x40;
+    rax = ML_CALL(1417db3a0);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L109;
+    ML_M4(rsp, 0x20) = 0x224ULL;
+    r9 = (uintptr_t)0x1418319b0;
+    r8 = (uintptr_t)0x141831de0;
+    rdx = (uintptr_t)0x14182666c;
+    rcx = (uintptr_t)0x141824ca8;
+    rax = ML_CALL(141823030);
+    goto L114;
+L109:
+    rcx = ML_M8(rbx, 0x430);
+    rax = ML_M8(rcx, 0x0);
+    r8 = rsp + 0x40;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r13);
+    rax = ML_CALLP(ML_M8(rax, 0x8));
+L114:
+    rcx = rsp + 0x40;
+    rax = ML_CALL(1417db330);
+L116:
+    rdi = (uint64_t)(uint32_t)((uint32_t)rdi + 1);
+{
+    const uint64_t a = (uint64_t)((uint32_t)rdi) & 0xFFFFFFFFULL, b = (uint64_t)(0xfULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L84;
+{
+    const uint64_t a = (uint64_t)(ML_M8(rbx, 0x428)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L129;
+    ML_M4(rsp, 0x20) = 0x87cULL;
+    r9 = (uintptr_t)0x1418319b0;
+    r8 = (uintptr_t)0x141828944;
+    rdx = (uintptr_t)0x14182666c;
+    rcx = (uintptr_t)0x141824ca8;
+    rax = ML_CALL(141823030);
+    rsi = (uintptr_t)0x141827409;
+    goto L137;
+L129:
+    rcx = ML_M8(rbx, 0x428);
+    rax = ML_M8(rcx, 0x0);
+    rdx = (uint64_t)(uint32_t)(0x2ULL);
+    rax = ML_CALLP(ML_M8(rax, 0x10));
+    rdx = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(rdx, 0x78));
+    rsi = rax;
+L137:
+    rax = (uint64_t)(uint32_t)(0);
+    rcx = (rcx) | (0xffffffffffffffffULL);
+    rdi = rsi;
+    while (rcx) {
+        const uint64_t a = rax & 0xffULL, b = ML_M1(rdi, 0) & 0xffULL;
+        const uint64_t d = (a - b) & 0xffULL;
+        rdi += 1; --rcx;
+        f_cf = a < b; f_zf = (d == 0); f_sf = ((d >> 7) & 1) != 0;
+        f_of = ((((a ^ b) & (a ^ d)) >> 7) & 1) != 0;
+        if (f_zf) break;
+    }
+    rcx = (rcx) ^ ~0ULL;
+{
+    const uint64_t a = (uint64_t)(rcx) & ~0ULL, b = (uint64_t)(0x1ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf) goto L177;
+    rcx = rsp + 0x40;
+    rax = ML_CALL(1417db2b0);
+{
+    const uint64_t a = (uint64_t)(ML_M8(rbx, 0x428)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L155;
+    ML_M4(rsp, 0x20) = 0x889ULL;
+    r9 = (uintptr_t)0x1418319b0;
+    r8 = (uintptr_t)0x141828944;
+    rdx = (uintptr_t)0x14182666c;
+    rcx = (uintptr_t)0x141824ca8;
+    rax = ML_CALL(141823030);
+    goto L163;
+L155:
+    rcx = ML_M8(rbx, 0x428);
+    rax = ML_M8(rcx, 0x0);
+    rdx = (uint64_t)(uint32_t)(0x2bULL);
+    rax = ML_CALLP(ML_M8(rax, 0x10));
+    rdx = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(rdx, 0x48));
+    r14 = (uint64_t)(uint32_t)((uint32_t)rax);
+L163:
+    rdx = (uint64_t)(uint32_t)(0x1bULL);
+    r9 = rsi;
+    r8 = (uint64_t)(uint32_t)((uint32_t)r14);
+    rcx = rsp + 0x40;
+    rax = ML_CALL(1417db530);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L175;
+    rcx = ML_M8(rbx, 0x430);
+    rax = ML_M8(rcx, 0x0);
+    r8 = rsp + 0x40;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r13);
+    rax = ML_CALLP(ML_M8(rax, 0x8));
+L175:
+    rcx = rsp + 0x40;
+    rax = ML_CALL(1417db330);
+L177:
+    r11 = rsp + 0x470;
+    rbx = ML_M8(r11, 0x20);
+    rbp = ML_M8(r11, 0x28);
+    rsi = ML_M8(r11, 0x30);
+    rdi = ML_M8(r11, 0x38);
+    rsp = r11;
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r14 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r13 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r12 = v; }
     return rax;
 #undef ML_CALL
 #undef ML_CALLP
@@ -276962,6 +284341,225 @@ L16:
     rsp = rsp + (0x30ULL);
     { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbx = v; }
     return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
+uint64_t SynLift_14179c4f0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    ML_M8(rsp, 0x10) = rbx;
+    ML_M8(rsp, 0x18) = rbp;
+    ML_M8(rsp, 0x20) = rsi;
+    rsp -= 8; ML_M8(rsp, 0) = r12;
+    rsp = rsp - (0x20ULL);
+    rbp = ML_M8(rcx, 0x3e0);
+    rbx = r8;
+    r12 = (uint64_t)(uint32_t)((uint32_t)rdx);
+    rsi = rcx;
+{
+    const uint64_t r = ((uint64_t)(rbp) & ~0ULL) & ((uint64_t)(rbp) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L13;
+L11:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L68;
+L13:
+    rcx = ML_M8(rcx, 0x440);
+    rax = ML_CALL(14178c8e0);
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L11;
+    rcx = rax;
+    rax = ML_CALL(1417867d0);
+{
+    const uint64_t a = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL, b = (uint64_t)(0x3e8ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_zf) goto L23;
+{
+    const uint64_t a = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL, b = (uint64_t)(0x3deULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (!f_zf) goto L11;
+L23:
+    rcx = rsi;
+    rax = ML_CALL(14178f4f0);
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(0x1e8480ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L11;
+    rcx = (rcx) | (0xffffffffffffffffULL);
+    ML_M8(rsp, 0x30) = rdi;
+    rax = (uint64_t)(uint32_t)(0);
+    rdi = rbx;
+    while (rcx) {
+        const uint64_t a = rax & 0xffULL, b = ML_M1(rdi, 0) & 0xffULL;
+        const uint64_t d = (a - b) & 0xffULL;
+        rdi += 1; --rcx;
+        f_cf = a < b; f_zf = (d == 0); f_sf = ((d >> 7) & 1) != 0;
+        f_of = ((((a ^ b) & (a ^ d)) >> 7) & 1) != 0;
+        if (f_zf) break;
+    }
+    rcx = (rcx) ^ ~0ULL;
+    rcx = rcx + (0xfffffffffffffff7ULL);
+{
+    const uint64_t a = (uint64_t)(rcx) & ~0ULL, b = (uint64_t)(0x7ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_cf && !f_zf) goto L54;
+    rcx = ML_M8(rsi, 0x430);
+    rdx = rbx;
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x2e8));
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L45;
+    rax = ML_CALL(141823050);
+    rdx = (uintptr_t)0x1418338c8;
+    goto L56;
+L45:
+    rdx = 0xffffffffffe17b80ULL;
+    rcx = rsi;
+    rax = ML_CALL(14179bf80);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L66;
+    rdx = rbx;
+    rcx = rbp;
+    rax = ML_CALL(1417c4920);
+    goto L67;
+L54:
+    rax = ML_CALL(141823050);
+    rdx = (uintptr_t)0x1418338a8;
+L56:
+    rcx = ML_M8(rsi, 0x430);
+    rdi = rax;
+    rax = ML_M8(rax, 0x0);
+    rbx = ML_M8(rcx, 0x0);
+    rcx = rdi;
+    rax = ML_CALLP(ML_M8(rax, 0x0));
+    rcx = ML_M8(rsi, 0x430);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+L66:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+L67:
+    rdi = ML_M8(rsp, 0x30);
+L68:
+    rbx = ML_M8(rsp, 0x38);
+    rbp = ML_M8(rsp, 0x40);
+    rsi = ML_M8(rsp, 0x48);
+    rsp = rsp + (0x20ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r12 = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
+uint64_t SynLift_14179c55c(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    ML_M8(rsp, 0x30) = rdi;
+    rax = (uint64_t)(uint32_t)(0);
+    rdi = rbx;
+    while (rcx) {
+        const uint64_t a = rax & 0xffULL, b = ML_M1(rdi, 0) & 0xffULL;
+        const uint64_t d = (a - b) & 0xffULL;
+        rdi += 1; --rcx;
+        f_cf = a < b; f_zf = (d == 0); f_sf = ((d >> 7) & 1) != 0;
+        f_of = ((((a ^ b) & (a ^ d)) >> 7) & 1) != 0;
+        if (f_zf) break;
+    }
+    rcx = (rcx) ^ ~0ULL;
+    rcx = rcx + (0xfffffffffffffff7ULL);
+{
+    const uint64_t a = (uint64_t)(rcx) & ~0ULL, b = (uint64_t)(0x7ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_cf && !f_zf) goto L26;
+    rcx = ML_M8(rsi, 0x430);
+    rdx = rbx;
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x2e8));
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L17;
+    rax = ML_CALL(141823050);
+    rdx = (uintptr_t)0x1418338c8;
+    goto L28;
+L17:
+    rdx = 0xffffffffffe17b80ULL;
+    rcx = rsi;
+    rax = ML_CALL(14179bf80);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L38;
+    rdx = rbx;
+    rcx = rbp;
+    rax = ML_CALL(1417c4920);
+    goto L39;
+L26:
+    rax = ML_CALL(141823050);
+    rdx = (uintptr_t)0x1418338a8;
+L28:
+    rcx = ML_M8(rsi, 0x430);
+    rdi = rax;
+    rax = ML_M8(rax, 0x0);
+    rbx = ML_M8(rcx, 0x0);
+    rcx = rdi;
+    rax = ML_CALLP(ML_M8(rax, 0x0));
+    rcx = ML_M8(rsi, 0x430);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+L38:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+L39:
+    rdi = ML_M8(rsp, 0x30);
 #undef ML_CALL
 #undef ML_CALLP
     return rax;
@@ -304966,6 +312564,187 @@ L57:
     return rax;
 }
 
+uint64_t SynLift_1417a7e8b(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    ML_M8(rsp, 0x30) = rbx;
+    ML_M8(rsp, 0x38) = rsi;
+    rsi = ML_M8(rcx, 0x58);
+    rbx = ML_M8(rax, 0x0);
+    ML_M8(rsp, 0x40) = rdi;
+L5:
+    rdi = ML_M8(rbp, 0x88);
+{
+    const uint64_t r = ((uint64_t)(rsi) & ~0ULL) & ((uint64_t)(rsi) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L10;
+{
+    const uint64_t a = (uint64_t)(rsi) & ~0ULL, b = (uint64_t)(ML_M8(rbp, 0x58)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf) goto L11;
+L10:
+    rax = ML_CALL(1418233c0);
+L11:
+{
+    const uint64_t a = (uint64_t)(rbx) & ~0ULL, b = (uint64_t)(rdi) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf) goto L72;
+{
+    const uint64_t r = ((uint64_t)(rsi) & ~0ULL) & ((uint64_t)(rsi) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L18;
+    rax = ML_CALL(1418233c0);
+    r11 = (uint64_t)(uint32_t)(0);
+    goto L19;
+L18:
+    r11 = ML_M8(rsi, 0x0);
+L19:
+{
+    const uint64_t a = (uint64_t)(rbx) & ~0ULL, b = (uint64_t)(ML_M8(r11, 0x30)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L22;
+    rax = ML_CALL(1418233c0);
+L22:
+    rdx = (uint64_t)(uint32_t)(ML_M4(rbx, 0x18));
+    rcx = ML_M8(rbp, 0x10);
+    rax = ML_CALL(14178c8e0);
+    rdi = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L42;
+{
+    const uint64_t r = ((uint64_t)(rsi) & ~0ULL) & ((uint64_t)(rsi) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L33;
+    rax = ML_CALL(1418233c0);
+    r11 = (uint64_t)(uint32_t)(0);
+    goto L34;
+L33:
+    r11 = ML_M8(rsi, 0x0);
+L34:
+{
+    const uint64_t a = (uint64_t)(rbx) & ~0ULL, b = (uint64_t)(ML_M8(r11, 0x30)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L37;
+    rax = ML_CALL(1418233c0);
+L37:
+    rdx = (uint64_t)(uint32_t)(ML_M4(rbx, 0x1c));
+    (*(uint64_t*)(xmm2)) = (uint64_t)(ML_IAT(0x141834348));   // movsd xmm, m64
+    r9 = (r9 & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    rcx = rdi;
+    rax = ML_CALL(141788400);
+L42:
+{
+    const uint64_t r = ((uint64_t)(rsi) & ~0ULL) & ((uint64_t)(rsi) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L45;
+    rax = ML_CALL(1418233c0);
+L45:
+{
+    const uint64_t a = (uint64_t)(ML_M1(rbx, 0x21)) & 0xFFULL, b = (uint64_t)(0x0ULL) & 0xFFULL;
+    const uint64_t d = (a - b) & 0xFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80ULL) != 0);
+}
+    if (f_zf) goto L49;
+    rax = ML_CALL(1418233c0);
+    goto L5;
+L49:
+    rax = ML_M8(rbx, 0x10);
+{
+    const uint64_t a = (uint64_t)(ML_M1(rax, 0x21)) & 0xFFULL, b = (uint64_t)(0x0ULL) & 0xFFULL;
+    const uint64_t d = (a - b) & 0xFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80ULL) != 0);
+}
+    if (!f_zf) goto L61;
+    rbx = rax;
+    rax = ML_M8(rax, 0x0);
+{
+    const uint64_t a = (uint64_t)(ML_M1(rax, 0x21)) & 0xFFULL, b = (uint64_t)(0x0ULL) & 0xFFULL;
+    const uint64_t d = (a - b) & 0xFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80ULL) != 0);
+}
+    if (!f_zf) goto L5;
+L56:
+    rbx = rax;
+    rax = ML_M8(rax, 0x0);
+{
+    const uint64_t a = (uint64_t)(ML_M1(rax, 0x21)) & 0xFFULL, b = (uint64_t)(0x0ULL) & 0xFFULL;
+    const uint64_t d = (a - b) & 0xFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80ULL) != 0);
+}
+    if (f_zf) goto L56;
+    goto L5;
+L61:
+    rax = ML_M8(rbx, 0x8);
+{
+    const uint64_t a = (uint64_t)(ML_M1(rax, 0x21)) & 0xFFULL, b = (uint64_t)(0x0ULL) & 0xFFULL;
+    const uint64_t d = (a - b) & 0xFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80ULL) != 0);
+}
+    if (!f_zf) goto L70;
+L64:
+{
+    const uint64_t a = (uint64_t)(rbx) & ~0ULL, b = (uint64_t)(ML_M8(rax, 0x10)) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L70;
+    rbx = rax;
+    rax = ML_M8(rax, 0x8);
+{
+    const uint64_t a = (uint64_t)(ML_M1(rax, 0x21)) & 0xFFULL, b = (uint64_t)(0x0ULL) & 0xFFULL;
+    const uint64_t d = (a - b) & 0xFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80ULL) != 0);
+}
+    if (f_zf) goto L64;
+L70:
+    rbx = rax;
+    goto L5;
+L72:
+    rsi = ML_M8(rsp, 0x38);
+    rbx = ML_M8(rsp, 0x30);
+    rdi = ML_M8(rsp, 0x40);
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
 uint64_t SynLift_1417a7fb0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
     uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
     uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
@@ -316833,6 +324612,264 @@ L159:
     return rax;
 }
 
+uint64_t SynLift_1417ab610(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    rsp -= 8; ML_M8(rsp, 0) = r12;
+    rsp -= 8; ML_M8(rsp, 0) = r13;
+    rsp -= 8; ML_M8(rsp, 0) = r14;
+    rsp = rsp - (0x40ULL);
+    ML_M8(rsp, 0x30) = 0xfffffffffffffffeULL;
+    ML_M8(rsp, 0x60) = rbx;
+    ML_M8(rsp, 0x68) = rsi;
+    ML_M8(rsp, 0x70) = rdi;
+    r14 = (uint64_t)(uint32_t)((uint32_t)r9);
+    rbx = r8;
+    r13 = (uint64_t)(uint32_t)((uint32_t)rdx);
+    rsi = rcx;
+{
+    const uint64_t a = (uint64_t)(ML_M8(rcx, 0x18)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L22;
+    ML_M4(rsp, 0x20) = 0x6b7ULL;
+    r9 = (uintptr_t)0x141835bd0;
+    r8 = (uintptr_t)0x141835ba8;
+    rdx = (uintptr_t)0x141827b98;
+    rcx = (uintptr_t)0x141824ca8;
+    rax = ML_CALL(141823030);
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L158;
+L22:
+{
+    const uint64_t a = (uint64_t)(ML_M8(rcx, 0x10)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L32;
+    ML_M4(rsp, 0x20) = 0x6b8ULL;
+    r9 = (uintptr_t)0x141835bd0;
+    r8 = (uintptr_t)0x141835bb8;
+    rdx = (uintptr_t)0x141827b98;
+    rcx = (uintptr_t)0x141824ca8;
+    rax = ML_CALL(141823030);
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L158;
+L32:
+{
+    const uint64_t a = (uint64_t)(ML_M8(rcx, 0x8)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L42;
+    ML_M4(rsp, 0x20) = 0x6b9ULL;
+    r9 = (uintptr_t)0x141835bd0;
+    r8 = (uintptr_t)0x141829a60;
+    rdx = (uintptr_t)0x141827b98;
+    rcx = (uintptr_t)0x141824ca8;
+    rax = ML_CALL(141823030);
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L158;
+L42:
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L155;
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L155;
+    rax = (uint64_t)(uint32_t)(0);
+    rcx = (rcx) | (0xffffffffffffffffULL);
+    rdi = rbx;
+    while (rcx) {
+        const uint64_t a = rax & 0xffULL, b = ML_M1(rdi, 0) & 0xffULL;
+        const uint64_t d = (a - b) & 0xffULL;
+        rdi += 1; --rcx;
+        f_cf = a < b; f_zf = (d == 0); f_sf = ((d >> 7) & 1) != 0;
+        f_of = ((((a ^ b) & (a ^ d)) >> 7) & 1) != 0;
+        if (f_zf) break;
+    }
+    rcx = (rcx) ^ ~0ULL;
+    rcx = rcx - 1;
+{
+    const uint64_t a = (uint64_t)(rcx) & ~0ULL, b = (uint64_t)(0x2ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf) goto L141;
+{
+    const uint64_t a = (uint64_t)(rcx) & ~0ULL, b = (uint64_t)(0x24ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_cf) goto L141;
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    rdx = rbx;
+    rax = ML_CALLP(ML_M8(rax, 0x2e8));
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L141;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r13);
+    rcx = ML_M8(rsi, 0x18);
+    rax = ML_CALL(14178c8e0);
+    rdi = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L139;
+    rcx = rax;
+    rax = ML_CALL(1417868c0);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L139;
+    rcx = rdi;
+    rax = ML_CALL(141785ea0);
+    r12 = (uint64_t)(uint32_t)((uint32_t)rax);
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L85;
+    ML_M4(rsp, 0x20) = 0x6d0ULL;
+    r9 = (uintptr_t)0x141835bd0;
+    r8 = (uintptr_t)0x141836290;
+    rdx = (uintptr_t)0x141827b98;
+    rcx = (uintptr_t)0x141824ca8;
+    rax = ML_CALL(141823030);
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L158;
+L85:
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    rcx = ML_M8(rsi, 0x10);
+    rax = ML_CALL(1417cad00);
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L158;
+    rdx = rbx;
+    rcx = ML_M8(rsi, 0x10);
+    rax = ML_CALL(1417cd250);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L109;
+    rax = ML_CALL(141823050);
+    rdi = rax;
+    rcx = ML_M8(rsi, 0x8);
+    rbx = ML_M8(rcx, 0x0);
+    rax = ML_M8(rax, 0x0);
+    rdx = (uintptr_t)0x141836268;
+    rcx = rdi;
+    rax = ML_CALLP(ML_M8(rax, 0x0));
+    r8 = rax;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r13);
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L158;
+L109:
+    rdx = rbx;
+    rcx = ML_M8(rsi, 0x10);
+    rax = ML_CALL(1417c8aa0);
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L128;
+    rax = ML_CALL(141823050);
+    rdi = rax;
+    rcx = ML_M8(rsi, 0x8);
+    rbx = ML_M8(rcx, 0x0);
+    rax = ML_M8(rax, 0x0);
+    rdx = (uintptr_t)0x141836268;
+    rcx = rdi;
+    rax = ML_CALLP(ML_M8(rax, 0x0));
+    r8 = rax;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r13);
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L158;
+L128:
+    rcx = ML_M8(rsi, 0x8);
+    rdi = ML_M8(rcx, 0x0);
+    rax = (uint64_t)(uint32_t)(ML_M4(rsp, 0x80));
+    ML_M4(rsp, 0x28) = (uint32_t)rax;
+    ML_M4(rsp, 0x20) = (uint32_t)r14;
+    r9 = rbx;
+    r8 = (uint64_t)(uint32_t)((uint32_t)r12);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r13);
+    rax = ML_CALLP(ML_M8(rdi, 0x3d8));
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    goto L158;
+L139:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L158;
+L141:
+    rax = ML_CALL(141823050);
+    rdi = rax;
+    rcx = ML_M8(rsi, 0x8);
+    rbx = ML_M8(rcx, 0x0);
+    rax = ML_M8(rax, 0x0);
+    rdx = (uintptr_t)0x141836250;
+    rcx = rdi;
+    rax = ML_CALLP(ML_M8(rax, 0x0));
+    r8 = rax;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r13);
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L158;
+L155:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L158;
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+L158:
+    rbx = ML_M8(rsp, 0x60);
+    rsi = ML_M8(rsp, 0x68);
+    rdi = ML_M8(rsp, 0x70);
+    rsp = rsp + (0x40ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r14 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r13 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r12 = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
 uint64_t SynLift_1417ab8c0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
     uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
     uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
@@ -318343,6 +326380,298 @@ uint64_t SynLift_1417ac080(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
     rax = ML_CALL(1417c6c80);
     rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
     rsp = rsp + (0x28ULL);
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
+uint64_t SynLift_1417ac0a0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    rsp -= 8; ML_M8(rsp, 0) = rbx;
+    rsp = rsp - (0x20ULL);
+    rcx = ML_M8(rcx, 0x18);
+    rbx = (uint64_t)(uint32_t)((uint32_t)r8);
+    rax = ML_CALL(14178c8e0);
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L12;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbx);
+    rcx = rax;
+    rsp = rsp + (0x20ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbx = v; }
+    goto L16;
+L12:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    rsp = rsp + (0x20ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbx = v; }
+    return rax;
+L16:
+    rsp -= 8; ML_M8(rsp, 0) = rsi;
+    rsp -= 8; ML_M8(rsp, 0) = rdi;
+    rsp = rsp - (0x28ULL);
+{
+    const uint64_t a = (uint64_t)(ML_M8(rcx, 0x0)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    rsi = (uint64_t)(int64_t)(int32_t)((uint32_t)rdx);
+    rdi = rcx;
+    if (!f_zf) goto L28;
+L23:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    rsp = rsp + (0x28ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    return rax;
+L28:
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf || (f_sf != f_of)) goto L23;
+    ML_M8(rsp, 0x48) = rbp;
+    rax = ML_CALL(141785dc0);
+    rbp = (uint64_t)(uint32_t)((uint32_t)rax);
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L40;
+    rbp = ML_M8(rsp, 0x48);
+    rsp = rsp + (0x28ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    return rax;
+L40:
+    rcx = rdi;
+    ML_M8(rsp, 0x50) = r12;
+    rax = ML_CALL(141785ea0);
+    rcx = ML_M8(rdi, 0x10);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(1417cad00);
+    r12 = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L55;
+    r12 = ML_M8(rsp, 0x50);
+    rbp = ML_M8(rsp, 0x48);
+    rsp = rsp + (0x28ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    return rax;
+L55:
+    rcx = ML_M8(rdi, 0x0);
+    rdx = (uint64_t)(uint32_t)(0x3ULL);
+    ML_M8(rsp, 0x58) = r13;
+    rax = ML_M8(rcx, 0x0);
+    ML_M8(rsp, 0x20) = r14;
+    rax = ML_CALLP(ML_M8(rax, 0x10));
+    rcx = rax;
+    rdx = ML_M8(rax, 0x0);
+    rax = ML_CALLP(ML_M8(rdx, 0x48));
+    r13 = (uint64_t)(uint32_t)(0x7530ULL);
+{
+    const uint64_t a = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)r13) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    r14 = (uint64_t)(uint32_t)((uint32_t)rax);
+    if (!f_zf && (f_sf == f_of)) goto L72;
+{
+    const uint64_t a = (uint64_t)((uint32_t)rsi) & 0xFFFFFFFFULL, b = (uint64_t)(0x2710ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf == f_of) goto L76;
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L171;
+L72:
+{
+    const uint64_t a = (uint64_t)((uint32_t)rsi) & 0xFFFFFFFFULL, b = (uint64_t)(0x186a0ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf == f_of) goto L76;
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L171;
+L76:
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    ML_M8(rsp, 0x40) = rbx;
+    rax = ML_M8(rcx, 0x0);
+    rbx = rsi;
+    rax = ML_CALLP(ML_M8(rax, 0x230));
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rsi) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L116;
+    rcx = r12;
+    rax = ML_CALL(14178f4f0);
+    rcx = 0x2e90edd000ULL;
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rcx) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L102;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uintptr_t)0x141830bd8;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L170;
+L102:
+    rax = rax + (rbx);
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rcx) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf || (f_sf != f_of)) goto L118;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uintptr_t)0x141830bc0;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+L116:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L170;
+L118:
+    rcx = ML_M8(rdi, 0x8);
+    r9 = (r9 & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    r8 = rbx;
+    rax = ML_M8(rcx, 0x0);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rax = ML_CALLP(ML_M8(rax, 0x130));
+{
+    const uint64_t a = (uint64_t)((uint32_t)r14) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)r13) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (!f_zf && (f_sf == f_of)) goto L149;
+    rax = (uint64_t)(uint32_t)(0x68db8badULL);
+    { const __int128 p = (__int128)(int64_t)rax * (int64_t)((uint32_t)rsi);
+      rax = (uint64_t)p; rdx = (uint64_t)(p >> 64); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rdx);
+    { const uint64_t src = (uint32_t)rbx; const uint64_t res = (uint64_t)((int64_t)(int32_t)((uint32_t)rbx & 0xFFFFFFFFULL) >> 12);
+      f_cf = (((src >> 11) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rbx = (uint64_t)(uint32_t)(res); }
+    rax = (uint64_t)(uint32_t)((uint32_t)rbx);
+    { const uint64_t src = (uint32_t)rax; const uint64_t res = (((uint32_t)rax & 0xFFFFFFFFULL) >> 31);
+      f_cf = (((src >> 30) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rax = (uint64_t)(uint32_t)(res); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rbx + ((uint32_t)rax));
+    rax = (rbx + r14 * 1) + 0x0;
+{
+    const uint64_t a = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)r13) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_zf || (f_sf != f_of)) goto L156;
+    r13 = (uint64_t)(uint32_t)((uint32_t)r13 - ((uint32_t)r14));
+    rax = (uint64_t)(uint32_t)((uint32_t)r13);
+    { const __int128 p = (__int128)(int64_t)((uint32_t)rax) * (int64_t)(0x2710ULL);
+      rax = (uint64_t)(uint32_t)((uint64_t)p);
+      f_cf = f_of = (p != (__int128)(int64_t)(uint64_t)p); }
+    rsi = (uint64_t)(uint32_t)((uint32_t)rsi - ((uint32_t)rax));
+    rax = (uint64_t)(uint32_t)(0x14f8b589ULL);
+    { const __int128 p = (__int128)(int64_t)rax * (int64_t)((uint32_t)rsi);
+      rax = (uint64_t)p; rdx = (uint64_t)(p >> 64); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rdx);
+    { const uint64_t src = (uint32_t)rbx; const uint64_t res = (uint64_t)((int64_t)(int32_t)((uint32_t)rbx & 0xFFFFFFFFULL) >> 13);
+      f_cf = (((src >> 12) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rbx = (uint64_t)(uint32_t)(res); }
+    rax = (uint64_t)(uint32_t)((uint32_t)rbx);
+    { const uint64_t src = (uint32_t)rax; const uint64_t res = (((uint32_t)rax & 0xFFFFFFFFULL) >> 31);
+      f_cf = (((src >> 30) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rax = (uint64_t)(uint32_t)(res); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rbx + ((uint32_t)rax));
+    rbx = (uint64_t)(uint32_t)((uint32_t)rbx + ((uint32_t)r13));
+    goto L156;
+L149:
+    rax = (uint64_t)(uint32_t)(0x14f8b589ULL);
+    { const __int128 p = (__int128)(int64_t)rax * (int64_t)((uint32_t)rsi);
+      rax = (uint64_t)p; rdx = (uint64_t)(p >> 64); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rdx);
+    { const uint64_t src = (uint32_t)rbx; const uint64_t res = (uint64_t)((int64_t)(int32_t)((uint32_t)rbx & 0xFFFFFFFFULL) >> 13);
+      f_cf = (((src >> 12) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rbx = (uint64_t)(uint32_t)(res); }
+    rax = (uint64_t)(uint32_t)((uint32_t)rbx);
+    { const uint64_t src = (uint32_t)rax; const uint64_t res = (((uint32_t)rax & 0xFFFFFFFFULL) >> 31);
+      f_cf = (((src >> 30) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rax = (uint64_t)(uint32_t)(res); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rbx + ((uint32_t)rax));
+L156:
+    (*(uint64_t*)(xmm2)) = (uint64_t)(ML_IAT(0x141884e5f));   // movsd xmm, m64
+    r9 = (uint64_t)(uint32_t)(0);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbx);
+    rcx = rdi;
+    rax = ML_CALL(141788400);
+    rdx = (r14 + rbx * 1) + 0x0;
+    rcx = rdi;
+    rax = ML_CALL(141785f00);
+    rcx = ML_M8(rdi, 0x10);
+    r9 = (uint64_t)(uint32_t)(0);
+    r8 = rdi;
+    rdx = r12;
+    rax = ML_CALL(1417c6a60);
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+L170:
+    rbx = ML_M8(rsp, 0x40);
+L171:
+    r13 = ML_M8(rsp, 0x58);
+    r14 = ML_M8(rsp, 0x20);
+    r12 = ML_M8(rsp, 0x50);
+    rbp = ML_M8(rsp, 0x48);
+    rsp = rsp + (0x28ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
     return rax;
 #undef ML_CALL
 #undef ML_CALLP
@@ -321060,6 +329389,612 @@ L96:
     { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
     { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
     { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbx = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
+uint64_t SynLift_1417ac9c0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    rsp -= 8; ML_M8(rsp, 0) = rbx;
+    rsp = rsp - (0x20ULL);
+    rcx = ML_M8(rcx, 0x18);
+    rbx = (uint64_t)(uint32_t)((uint32_t)r8);
+    rax = ML_CALL(14178c8e0);
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L12;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbx);
+    rcx = rax;
+    rsp = rsp + (0x20ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbx = v; }
+    goto L16;
+L12:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    rsp = rsp + (0x20ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbx = v; }
+    return rax;
+L16:
+    rsp -= 8; ML_M8(rsp, 0) = rbp;
+    rsp -= 8; ML_M8(rsp, 0) = rdi;
+    rsp = rsp - (0x478ULL);
+    rax = ML_IAT(0x141886c40);
+    rax = (rax) ^ (rsp);
+    ML_M8(rsp, 0x450) = rax;
+    rdi = rcx;
+    rcx = ML_M8(rcx, 0x0);
+    rbp = (uint64_t)(uint32_t)((uint32_t)rdx);
+{
+    const uint64_t r = ((uint64_t)(rcx) & ~0ULL) & ((uint64_t)(rcx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L29;
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L112;
+L29:
+    rax = ML_M8(rcx, 0x0);
+    rdx = (uint64_t)(uint32_t)(0);
+    ML_M8(rsp, 0x4a8) = rsi;
+    rax = ML_CALLP(ML_M8(rax, 0x10));
+    rcx = rax;
+    rdx = ML_M8(rax, 0x0);
+    rax = ML_CALLP(ML_M8(rdx, 0x40));
+    rsi = (uint64_t)(uint32_t)((uint32_t)rax);
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L45;
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x248));
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L47;
+L45:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L111;
+L47:
+    rcx = rdi;
+    ML_M8(rsp, 0x470) = r12;
+    rax = ML_CALL(141785ea0);
+    rcx = ML_M8(rdi, 0x10);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(1417cad00);
+    r12 = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L327;
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x238));
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rbp) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rbp) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf || (f_sf != f_of)) goto L327;
+{
+    const uint64_t a = (uint64_t)((uint32_t)rbp) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (!f_zf && (f_sf == f_of)) goto L327;
+    rcx = ML_M8(rdi, 0x0);
+    rdx = (uint64_t)(uint32_t)(0x4ULL);
+    ML_M8(rsp, 0x4a0) = rbx;
+    rax = ML_M8(rcx, 0x0);
+    ML_M8(rsp, 0x460) = r14;
+    rax = ML_CALLP(ML_M8(rax, 0x10));
+    rcx = rax;
+    rdx = ML_M8(rax, 0x0);
+    rax = ML_CALLP(ML_M8(rdx, 0x48));
+    rcx = r12;
+    r14 = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(14178f550);
+{
+    const uint64_t a = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL, b = (uint64_t)(0x3b9aca00ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L91;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uintptr_t)0x141830bc0;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L108;
+L91:
+    ML_M8(rsp, 0x468) = r13;
+    r13 = (rbp + rax * 1) + 0x0;
+{
+    const uint64_t a = (uint64_t)((uint32_t)r13) & 0xFFFFFFFFULL, b = (uint64_t)(0x3b9aca00ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_zf || (f_sf != f_of)) goto L119;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uintptr_t)0x141830bc0;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+L106:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+L107:
+    r13 = ML_M8(rsp, 0x468);
+L108:
+    rbx = ML_M8(rsp, 0x4a0);
+    r14 = ML_M8(rsp, 0x460);
+L110:
+    r12 = ML_M8(rsp, 0x470);
+L111:
+    rsi = ML_M8(rsp, 0x4a8);
+L112:
+    rcx = ML_M8(rsp, 0x450);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    rsp = rsp + (0x478ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbp = v; }
+    return rax;
+L119:
+    rax = ML_M8(rdi, 0x8);
+    rcx = r12;
+    rbx = ML_M8(rax, 0x0);
+    rax = ML_CALL(14178f270);
+    rcx = ML_M8(rdi, 0x8);
+    r8 = (uint64_t)(uint32_t)((uint32_t)rax);
+    r9 = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    ML_M1(rsp, 0x28) = 0x1ULL;
+    ML_M4(rsp, 0x20) = 0x10ULL;
+    rax = ML_CALLP(ML_M8(rbx, 0x140));
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L106;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r13);
+    rcx = r12;
+    rax = ML_CALL(14178fa70);
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x1d8));
+    rcx = ML_M8(rdi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    r8 = ML_M8(rcx, 0x0);
+    rbx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x200));
+    ML_M4(rsp, 0x40) = (uint32_t)rbp;
+    ML_M4(rsp, 0x38) = (uint32_t)rbp;
+    ML_M4(rsp, 0x30) = 0xdeULL;
+    rdx = (uintptr_t)0x141830c50;
+    rcx = (uintptr_t)0x141830c38;
+    r9 = rbx;
+    r8 = (uint64_t)(uint32_t)((uint32_t)rsi);
+    ML_M4(rsp, 0x28) = 0xdeULL;
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    rax = ML_CALL(1418230a8);
+    rcx = rdi;
+    rax = ML_CALL(141785ea0);
+    rdx = (uintptr_t)0x141830c08;
+    rcx = (uintptr_t)0x14182e9a8;
+    r9 = (uint64_t)(uint32_t)((uint32_t)rsi);
+    r8 = rbx;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    rax = ML_CALL(1418230a8);
+    rcx = rsp + 0x51;
+    rdx = (uint64_t)(uint32_t)(0);
+    r8 = (uint64_t)(uint32_t)(0x3ffULL);
+    ML_M1(rsp, 0x50) = 0x0ULL;
+    rax = ML_CALL(1417f30c0);
+    rax = ML_CALL(141823050);
+    rdx = (uintptr_t)0x141830bf0;
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = rsp + 0x50;
+    r9 = rbx;
+    rdx = (uint64_t)(uint32_t)(0x400ULL);
+    r8 = rax;
+    ML_M4(rsp, 0x20) = (uint32_t)rbp;
+    rax = ML_CALL(1418233c8);
+    rax = ML_M8(rdi, 0x8);
+    ML_M1(rsp, 0x44f) = 0x0ULL;
+    rbx = ML_M8(rax, 0x0);
+    rcx = r12;
+    rsi = (uint64_t)(uint32_t)(0x7d4ULL);
+    rax = ML_CALL(14178f270);
+    rcx = ML_M8(rdi, 0x8);
+    r8 = rsp + 0x50;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    r9 = (uint64_t)(uint32_t)(0);
+    ML_M2(rsp, 0x20) = (uint16_t)rsi;
+    rax = ML_CALLP(ML_M8(rbx, 0x88));
+    rax = (rbp + rbp * 4) + 0x0;
+    r9 = (uint64_t)(uint32_t)(0);
+    (*(uint64_t*)(xmm2)) = (uint64_t)(ML_IAT(0x141884e67));   // movsd xmm, m64
+    rbx = (0 + rax * 4) + 0x0;
+    rcx = rdi;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbx);
+    rax = ML_CALL(141788400);
+    rdx = (rbx + r14 * 1) + 0x0;
+    rcx = rdi;
+    rax = ML_CALL(141785ff0);
+    rcx = ML_M8(rdi, 0x10);
+    r9 = (uint64_t)(uint32_t)(0);
+    r8 = rdi;
+    rdx = r12;
+    rax = ML_CALL(1417c6a60);
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    goto L107;
+L208:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L110;
+    ;
+    rsp -= 8; ML_M8(rsp, 0) = rbp;
+    rsp -= 8; ML_M8(rsp, 0) = rsi;
+    rsp = rsp - (0x458ULL);
+    rax = ML_IAT(0x141886c40);
+    rax = (rax) ^ (rsp);
+    ML_M8(rsp, 0x430) = rax;
+{
+    const uint64_t a = (uint64_t)(ML_M8(rcx, 0x0)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    rbp = (uint64_t)(int64_t)(int32_t)((uint32_t)rdx);
+    rsi = rcx;
+    if (!f_zf) goto L342;
+L221:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L439;
+L223:
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf || (f_sf != f_of)) goto L340;
+    ML_M8(rsp, 0x448) = r12;
+    rax = ML_CALL(141785dc0);
+    r12 = (uint64_t)(uint32_t)((uint32_t)rax);
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L438;
+    rcx = rsi;
+    ML_M8(rsp, 0x450) = rdi;
+    rax = ML_CALL(141785ea0);
+    rcx = ML_M8(rsi, 0x10);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(1417cad00);
+    rdi = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L437;
+    rcx = rsp + 0x31;
+    rdx = (uint64_t)(uint32_t)(0);
+    r8 = (uint64_t)(uint32_t)(0x3ffULL);
+    ML_M8(rsp, 0x480) = rbx;
+    ML_M1(rsp, 0x30) = 0x0ULL;
+    ML_M8(rsp, 0x440) = r13;
+    rax = ML_CALL(1417f30c0);
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x230));
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rbp) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_sf == f_of) goto L384;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uintptr_t)0x141830ca8;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L435;
+L265:
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rcx = rsi;
+    rbx = (rbx & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    rax = ML_CALL(141788c20);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L434;
+    rdx = rbp;
+    rcx = rdi;
+    rax = ML_CALL(14179bf80);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L434;
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x1d8));
+    r13 = rax;
+    rax = ML_CALL(141823050);
+    rcx = rdi;
+    rbx = rax;
+    rax = ML_CALL(14178f470);
+    r8 = ML_M8(rbx, 0x0);
+    rdx = (uintptr_t)0x141830c98;
+    rcx = rbx;
+    rdi = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = rsp + 0x30;
+    r9 = r13;
+    rdx = (uint64_t)(uint32_t)(0x3ffULL);
+    r8 = rax;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M8(rsp, 0x20) = rdi;
+    rax = ML_CALL(1418233c8);
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    r8 = rsp + 0x30;
+    r9 = (r9 & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_CALLP(ML_M8(rax, 0x60));
+{
+    const uint64_t a = (uint64_t)((uint32_t)rbp) & 0xFFFFFFFFULL, b = (uint64_t)(0x2710ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L433;
+    rcx = rsi;
+    rax = ML_CALL(141785ea0);
+    rdx = (uintptr_t)0x141830c68;
+    rcx = (uintptr_t)0x14182e9a8;
+    r9 = (uint64_t)(uint32_t)((uint32_t)r12);
+    r8 = r13;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    rax = ML_CALL(1418230a8);
+L314:
+    rbx = (rbx & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+L315:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)((uint8_t)rbx);
+L316:
+    rbx = ML_M8(rsp, 0x480);
+    r13 = ML_M8(rsp, 0x440);
+L318:
+    rdi = ML_M8(rsp, 0x450);
+L319:
+    r12 = ML_M8(rsp, 0x448);
+L320:
+    rcx = ML_M8(rsp, 0x430);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    rsp = rsp + (0x458ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbp = v; }
+    return rax;
+L327:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L110;
+    ;
+    rsp -= 8; ML_M8(rsp, 0) = rbp;
+    rsp -= 8; ML_M8(rsp, 0) = rsi;
+    rsp = rsp - (0x458ULL);
+    rax = ML_IAT(0x141886c40);
+    rax = (rax) ^ (rsp);
+    ML_M8(rsp, 0x430) = rax;
+{
+    const uint64_t a = (uint64_t)(ML_M8(rcx, 0x0)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    rbp = (uint64_t)(int64_t)(int32_t)((uint32_t)rdx);
+    rsi = rcx;
+    if (!f_zf) goto L342;
+L340:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L439;
+L342:
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf || (f_sf != f_of)) goto L340;
+    ML_M8(rsp, 0x448) = r12;
+    rax = ML_CALL(141785dc0);
+    r12 = (uint64_t)(uint32_t)((uint32_t)rax);
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L438;
+    rcx = rsi;
+    ML_M8(rsp, 0x450) = rdi;
+    rax = ML_CALL(141785ea0);
+    rcx = ML_M8(rsi, 0x10);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(1417cad00);
+    rdi = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L437;
+    rcx = rsp + 0x31;
+    rdx = (uint64_t)(uint32_t)(0);
+    r8 = (uint64_t)(uint32_t)(0x3ffULL);
+    ML_M8(rsp, 0x480) = rbx;
+    ML_M1(rsp, 0x30) = 0x0ULL;
+    ML_M8(rsp, 0x440) = r13;
+    rax = ML_CALL(1417f30c0);
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x230));
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rbp) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_sf == f_of) goto L384;
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uintptr_t)0x141830ca8;
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    r8 = rax;
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L435;
+L384:
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rcx = rsi;
+    rbx = (rbx & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    rax = ML_CALL(141788c20);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L434;
+    rdx = rbp;
+    rcx = rdi;
+    rax = ML_CALL(14179bf80);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L434;
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x1d8));
+    r13 = rax;
+    rax = ML_CALL(141823050);
+    rcx = rdi;
+    rbx = rax;
+    rax = ML_CALL(14178f470);
+    r8 = ML_M8(rbx, 0x0);
+    rdx = (uintptr_t)0x141830c98;
+    rcx = rbx;
+    rdi = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = rsp + 0x30;
+    r9 = r13;
+    rdx = (uint64_t)(uint32_t)(0x3ffULL);
+    r8 = rax;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M8(rsp, 0x20) = rdi;
+    rax = ML_CALL(1418233c8);
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    r8 = rsp + 0x30;
+    r9 = (r9 & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_CALLP(ML_M8(rax, 0x60));
+{
+    const uint64_t a = (uint64_t)((uint32_t)rbp) & 0xFFFFFFFFULL, b = (uint64_t)(0x2710ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L433;
+    rcx = rsi;
+    rax = ML_CALL(141785ea0);
+    rdx = (uintptr_t)0x141830c68;
+    rcx = (uintptr_t)0x14182e9a8;
+    r9 = (uint64_t)(uint32_t)((uint32_t)r12);
+    r8 = r13;
+    ML_M4(rsp, 0x28) = (uint32_t)rbp;
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    rax = ML_CALL(1418230a8);
+L433:
+    rbx = (rbx & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+L434:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)((uint8_t)rbx);
+L435:
+    rbx = ML_M8(rsp, 0x480);
+    r13 = ML_M8(rsp, 0x440);
+L437:
+    rdi = ML_M8(rsp, 0x450);
+L438:
+    r12 = ML_M8(rsp, 0x448);
+L439:
+    rcx = ML_M8(rsp, 0x430);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    rsp = rsp + (0x458ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbp = v; }
     return rax;
 #undef ML_CALL
 #undef ML_CALLP
@@ -340388,6 +349323,796 @@ L31:
     return rax;
 }
 
+uint64_t SynLift_1417b0370(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    rsp -= 8; ML_M8(rsp, 0) = rbx;
+    rsp = rsp - (0x20ULL);
+    rbx = rcx;
+    rcx = ML_M8(rcx, 0x50);
+    rax = ML_CALL(141763680);
+    rcx = ML_M8(rbx, 0x10);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(1417cad00);
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L13;
+    rsp = rsp + (0x20ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbx = v; }
+    return rax;
+L13:
+    rcx = rax;
+    rsp = rsp + (0x20ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbx = v; }
+    goto L218;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    rsp -= 8; ML_M8(rsp, 0) = rbx;
+    rsp -= 8; ML_M8(rsp, 0) = rbp;
+    rsp -= 8; ML_M8(rsp, 0) = rsi;
+    rsp -= 8; ML_M8(rsp, 0) = rdi;
+    rsp -= 8; ML_M8(rsp, 0) = r12;
+    rsp -= 8; ML_M8(rsp, 0) = r13;
+    rsp -= 8; ML_M8(rsp, 0) = r14;
+    rsp -= 8; ML_M8(rsp, 0) = r15;
+    rsp = rsp - (0x88ULL);
+    ML_M8(rsp, 0x40) = 0xfffffffffffffffeULL;
+    rax = ML_IAT(0x141886c40);
+    rax = (rax) ^ (rsp);
+    ML_M8(rsp, 0x78) = rax;
+    rbp = r9;
+    r14 = (uint64_t)(uint32_t)((uint32_t)r8);
+    r12 = (uint64_t)(uint32_t)((uint32_t)rdx);
+    rsi = rcx;
+{
+    const uint64_t r = ((uint64_t)(r9) & ~0ULL) & ((uint64_t)(r9) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L49;
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L205;
+L49:
+    rdx = (uint64_t)(uint32_t)((uint32_t)r8);
+    rcx = ML_M8(rcx, 0x50);
+    rax = ML_CALL(1417630d0);
+    r13 = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L205;
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_CALLP(ML_M8(rax, 0x1f8));
+    rdi = (uint64_t)(uint32_t)((uint32_t)rax);
+    rdx = (uint64_t)(uint32_t)(0x2ULL);
+    rcx = r13;
+    rax = ML_CALL(141743cb0);
+{
+    const uint64_t a = (uint64_t)((uint32_t)rdi) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_zf) goto L67;
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L205;
+L67:
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rcx = ML_M8(rsi, 0x18);
+    rax = ML_CALL(14178c8e0);
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L205;
+    rcx = rax;
+    rax = ML_CALL(1417868c0);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L205;
+    rax = (uint64_t)(uint32_t)(0);
+    rcx = (rcx) | (0xffffffffffffffffULL);
+    rdi = rbp;
+    while (rcx) {
+        const uint64_t a = rax & 0xffULL, b = ML_M1(rdi, 0) & 0xffULL;
+        const uint64_t d = (a - b) & 0xffULL;
+        rdi += 1; --rcx;
+        f_cf = a < b; f_zf = (d == 0); f_sf = ((d >> 7) & 1) != 0;
+        f_of = ((((a ^ b) & (a ^ d)) >> 7) & 1) != 0;
+        if (f_zf) break;
+    }
+    rcx = (rcx) ^ ~0ULL;
+    rcx = rcx - 1;
+{
+    const uint64_t a = (uint64_t)(rcx) & ~0ULL, b = (uint64_t)(0x10ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_cf) goto L204;
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    rdx = rbp;
+    rax = ML_CALLP(ML_M8(rax, 0x2e8));
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L204;
+    rdx = rbp;
+    rcx = ML_M8(rsi, 0x50);
+    rax = ML_CALL(14175eb70);
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L109;
+    rax = ML_CALL(141823050);
+    rdi = rax;
+    rcx = ML_M8(rsi, 0x8);
+    rbx = ML_M8(rcx, 0x0);
+    rax = ML_M8(rax, 0x0);
+    rdx = (uintptr_t)0x141837278;
+    rcx = rdi;
+    rax = ML_CALLP(ML_M8(rax, 0x0));
+    r8 = rax;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L205;
+L109:
+    rcx = ML_M8(rsi, 0x50);
+    rax = ML_CALL(14174e750);
+    r15 = (uint64_t)(uint32_t)((uint32_t)rax);
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_CALLP(ML_M8(rax, 0x238));
+{
+    const uint64_t a = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)r15) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (!f_cf) goto L120;
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L205;
+L120:
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    ML_M1(rsp, 0x28) = 0x1ULL;
+    ML_M4(rsp, 0x20) = 0x43ULL;
+    r9 = (uint64_t)(uint32_t)((uint32_t)r15);
+    r8 = (uint64_t)(uint32_t)(0);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_CALLP(ML_M8(rax, 0x140));
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L205;
+    rcx = ML_M8(rsi, 0x8);
+    rdi = rcx;
+    rax = ML_M8(rcx, 0x0);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_CALLP(ML_M8(rax, 0x200));
+    rbx = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_M8(rdi, 0x0);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rcx = rdi;
+    rax = ML_CALLP(ML_M8(rax, 0x1d8));
+    r9 = rax;
+    ML_M4(rsp, 0x30) = (uint32_t)r15;
+    ML_M4(rsp, 0x28) = (uint32_t)r15;
+    ML_M4(rsp, 0x20) = (uint32_t)rbx;
+    r8 = (uint64_t)(uint32_t)((uint32_t)r12);
+    rdx = (uintptr_t)0x141837258;
+    rcx = (uintptr_t)0x141830c38;
+    rax = ML_CALL(1418230a8);
+    rcx = rsp + 0x50;
+    rax = ML_CALL(141823280);
+    ;
+    r12 = (uintptr_t)0x141824cf0;
+    ML_M8(rsp, 0x48) = r12;
+    rax = ML_CALL(141823050);
+    rdi = rax;
+    rcx = r13;
+    rax = ML_CALL(141743dd0);
+    rbx = rax;
+    rax = ML_M8(rdi, 0x0);
+    rdx = (uintptr_t)0x141837238;
+    rcx = rdi;
+    rax = ML_CALLP(ML_M8(rax, 0x0));
+    rdx = rax;
+    r9 = rbp;
+    r8 = rbx;
+    rcx = rsp + 0x48;
+    rax = ML_CALL(1417215d0);
+    rdx = rsp + 0x58;
+{
+    const uint64_t a = (uint64_t)(ML_M8(rsp, 0x70)) & ~0ULL, b = (uint64_t)(0x10ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_cf) { rdx = ML_M8(rsp, 0x58); }
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    r8 = (uint64_t)(uint32_t)(0x7d0ULL);
+    rax = ML_CALLP(ML_M8(rax, 0x90));
+    r9 = (r9 & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    r8 = rbp;
+    rdx = (uint64_t)(uint32_t)(0x1ULL);
+    rcx = r13;
+    rax = ML_CALL(141743f90);
+    rdx = ML_M8(rsi, 0x8);
+    rdi = ML_M8(rdx, 0x0);
+    rcx = r13;
+    rax = ML_CALL(141745520);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    r8 = rbp;
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_CALLP(ML_M8(rdi, 0x428));
+    rcx = ML_M8(rsi, 0x50);
+    rax = ML_CALL(14174e3f0);
+{
+    const uint64_t a = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)r14) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_zf) goto L199;
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    rdx = (uint64_t)(uint32_t)(0x7ULL);
+    ML_M8(rsp, 0x20) = rbp;
+    r9 = (uint64_t)(uint32_t)(0);
+    r8 = (uint64_t)(uint32_t)((uint32_t)r14);
+    rax = ML_CALLP(ML_M8(rax, 0x70));
+    ;
+L199:
+    ML_M8(rsp, 0x48) = r12;
+    rcx = rsp + 0x50;
+    rax = ML_CALL(141823290);
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    goto L205;
+L204:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+L205:
+    rcx = ML_M8(rsp, 0x78);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    rsp = rsp + (0x88ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r15 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r14 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r13 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r12 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbp = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbx = v; }
+    return rax;
+L218:
+    rsp = rsp - (0x38ULL);
+{
+    const uint64_t a = (uint64_t)(ML_M8(rcx, 0x428)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L230;
+    r9 = (uintptr_t)0x1418319b0;
+    r8 = (uintptr_t)0x141828944;
+    rdx = (uintptr_t)0x14182666c;
+    rcx = (uintptr_t)0x141824ca8;
+    ML_M4(rsp, 0x20) = 0x86fULL;
+    rax = ML_CALL(141823030);
+    rax = (uint64_t)(uint32_t)(0);
+    rsp = rsp + (0x38ULL);
+    return rax;
+L230:
+    rcx = ML_M8(rcx, 0x428);
+    rdx = (uint64_t)(uint32_t)(0x5ULL);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x10));
+    rcx = rax;
+    rdx = ML_M8(rax, 0x0);
+    rsp = rsp + (0x38ULL);
+    return ML_CALLP(ML_M8(rdx, 0x40));   // tail through pointer
+    ;
+    rsp = rsp - (0x38ULL);
+{
+    const uint64_t a = (uint64_t)(ML_M8(rcx, 0x428)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L251;
+    r9 = (uintptr_t)0x1418319b0;
+    r8 = (uintptr_t)0x141828944;
+    rdx = (uintptr_t)0x14182666c;
+    rcx = (uintptr_t)0x141824ca8;
+    ML_M4(rsp, 0x20) = 0x87cULL;
+    rax = ML_CALL(141823030);
+    rax = (uintptr_t)0x141827409;
+    rsp = rsp + (0x38ULL);
+    return rax;
+L251:
+    rcx = ML_M8(rcx, 0x428);
+    rdx = (uint64_t)(uint32_t)(0x2ULL);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x10));
+    rcx = rax;
+    rdx = ML_M8(rax, 0x0);
+    rsp = rsp + (0x38ULL);
+    return ML_CALLP(ML_M8(rdx, 0x78));   // tail through pointer
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    rsp = rsp - (0x38ULL);
+{
+    const uint64_t a = (uint64_t)(ML_M8(rcx, 0x428)) & ~0ULL, b = (uint64_t)(0x0ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L283;
+    r9 = (uintptr_t)0x1418319b0;
+    r8 = (uintptr_t)0x141828944;
+    rdx = (uintptr_t)0x14182666c;
+    rcx = (uintptr_t)0x141824ca8;
+    ML_M4(rsp, 0x20) = 0x889ULL;
+    rax = ML_CALL(141823030);
+    rax = (uint64_t)(uint32_t)(0);
+    rsp = rsp + (0x38ULL);
+    return rax;
+L283:
+    rcx = ML_M8(rcx, 0x428);
+    rdx = (uint64_t)(uint32_t)(0x2bULL);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x10));
+    rcx = rax;
+    rdx = ML_M8(rax, 0x0);
+    rsp = rsp + (0x38ULL);
+    return ML_CALLP(ML_M8(rdx, 0x48));   // tail through pointer
+    ;
+    rax = (uint64_t)(uint32_t)(ML_M4(rcx, 0x3a0));
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
+uint64_t SynLift_1417b03b0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    rsp -= 8; ML_M8(rsp, 0) = rbx;
+    rsp -= 8; ML_M8(rsp, 0) = rbp;
+    rsp -= 8; ML_M8(rsp, 0) = rsi;
+    rsp -= 8; ML_M8(rsp, 0) = rdi;
+    rsp -= 8; ML_M8(rsp, 0) = r12;
+    rsp -= 8; ML_M8(rsp, 0) = r13;
+    rsp -= 8; ML_M8(rsp, 0) = r14;
+    rsp -= 8; ML_M8(rsp, 0) = r15;
+    rsp = rsp - (0x88ULL);
+    ML_M8(rsp, 0x40) = 0xfffffffffffffffeULL;
+    rax = ML_IAT(0x141886c40);
+    rax = (rax) ^ (rsp);
+    ML_M8(rsp, 0x78) = rax;
+    rbp = r9;
+    r14 = (uint64_t)(uint32_t)((uint32_t)r8);
+    r12 = (uint64_t)(uint32_t)((uint32_t)rdx);
+    rsi = rcx;
+{
+    const uint64_t r = ((uint64_t)(r9) & ~0ULL) & ((uint64_t)(r9) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L21;
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L175;
+L21:
+    rdx = (uint64_t)(uint32_t)((uint32_t)r8);
+    rcx = ML_M8(rcx, 0x50);
+    rax = ML_CALL(1417630d0);
+    r13 = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L175;
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_CALLP(ML_M8(rax, 0x1f8));
+    rdi = (uint64_t)(uint32_t)((uint32_t)rax);
+    rdx = (uint64_t)(uint32_t)(0x2ULL);
+    rcx = r13;
+    rax = ML_CALL(141743cb0);
+{
+    const uint64_t a = (uint64_t)((uint32_t)rdi) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_zf) goto L39;
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L175;
+L39:
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rcx = ML_M8(rsi, 0x18);
+    rax = ML_CALL(14178c8e0);
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L175;
+    rcx = rax;
+    rax = ML_CALL(1417868c0);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L175;
+    rax = (uint64_t)(uint32_t)(0);
+    rcx = (rcx) | (0xffffffffffffffffULL);
+    rdi = rbp;
+    while (rcx) {
+        const uint64_t a = rax & 0xffULL, b = ML_M1(rdi, 0) & 0xffULL;
+        const uint64_t d = (a - b) & 0xffULL;
+        rdi += 1; --rcx;
+        f_cf = a < b; f_zf = (d == 0); f_sf = ((d >> 7) & 1) != 0;
+        f_of = ((((a ^ b) & (a ^ d)) >> 7) & 1) != 0;
+        if (f_zf) break;
+    }
+    rcx = (rcx) ^ ~0ULL;
+    rcx = rcx - 1;
+{
+    const uint64_t a = (uint64_t)(rcx) & ~0ULL, b = (uint64_t)(0x10ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_cf) goto L174;
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    rdx = rbp;
+    rax = ML_CALLP(ML_M8(rax, 0x2e8));
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L174;
+    rdx = rbp;
+    rcx = ML_M8(rsi, 0x50);
+    rax = ML_CALL(14175eb70);
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L81;
+    rax = ML_CALL(141823050);
+    rdi = rax;
+    rcx = ML_M8(rsi, 0x8);
+    rbx = ML_M8(rcx, 0x0);
+    rax = ML_M8(rax, 0x0);
+    rdx = (uintptr_t)0x141837278;
+    rcx = rdi;
+    rax = ML_CALLP(ML_M8(rax, 0x0));
+    r8 = rax;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L175;
+L81:
+    rcx = ML_M8(rsi, 0x50);
+    rax = ML_CALL(14174e750);
+    r15 = (uint64_t)(uint32_t)((uint32_t)rax);
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_CALLP(ML_M8(rax, 0x238));
+{
+    const uint64_t a = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)r15) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (!f_cf) goto L92;
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L175;
+L92:
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    ML_M1(rsp, 0x28) = 0x1ULL;
+    ML_M4(rsp, 0x20) = 0x43ULL;
+    r9 = (uint64_t)(uint32_t)((uint32_t)r15);
+    r8 = (uint64_t)(uint32_t)(0);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_CALLP(ML_M8(rax, 0x140));
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L175;
+    rcx = ML_M8(rsi, 0x8);
+    rdi = rcx;
+    rax = ML_M8(rcx, 0x0);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_CALLP(ML_M8(rax, 0x200));
+    rbx = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_M8(rdi, 0x0);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rcx = rdi;
+    rax = ML_CALLP(ML_M8(rax, 0x1d8));
+    r9 = rax;
+    ML_M4(rsp, 0x30) = (uint32_t)r15;
+    ML_M4(rsp, 0x28) = (uint32_t)r15;
+    ML_M4(rsp, 0x20) = (uint32_t)rbx;
+    r8 = (uint64_t)(uint32_t)((uint32_t)r12);
+    rdx = (uintptr_t)0x141837258;
+    rcx = (uintptr_t)0x141830c38;
+    rax = ML_CALL(1418230a8);
+    rcx = rsp + 0x50;
+    rax = ML_CALL(141823280);
+    r12 = (uintptr_t)0x141824cf0;
+    ML_M8(rsp, 0x48) = r12;
+    rax = ML_CALL(141823050);
+    rdi = rax;
+    rcx = r13;
+    rax = ML_CALL(141743dd0);
+    rbx = rax;
+    rax = ML_M8(rdi, 0x0);
+    rdx = (uintptr_t)0x141837238;
+    rcx = rdi;
+    rax = ML_CALLP(ML_M8(rax, 0x0));
+    rdx = rax;
+    r9 = rbp;
+    r8 = rbx;
+    rcx = rsp + 0x48;
+    rax = ML_CALL(1417215d0);
+    rdx = rsp + 0x58;
+{
+    const uint64_t a = (uint64_t)(ML_M8(rsp, 0x70)) & ~0ULL, b = (uint64_t)(0x10ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_cf) { rdx = ML_M8(rsp, 0x58); }
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    r8 = (uint64_t)(uint32_t)(0x7d0ULL);
+    rax = ML_CALLP(ML_M8(rax, 0x90));
+    r9 = (r9 & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    r8 = rbp;
+    rdx = (uint64_t)(uint32_t)(0x1ULL);
+    rcx = r13;
+    rax = ML_CALL(141743f90);
+    rdx = ML_M8(rsi, 0x8);
+    rdi = ML_M8(rdx, 0x0);
+    rcx = r13;
+    rax = ML_CALL(141745520);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    r8 = rbp;
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_CALLP(ML_M8(rdi, 0x428));
+    rcx = ML_M8(rsi, 0x50);
+    rax = ML_CALL(14174e3f0);
+{
+    const uint64_t a = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)r14) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_zf) goto L169;
+    rcx = ML_M8(rsi, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    rdx = (uint64_t)(uint32_t)(0x7ULL);
+    ML_M8(rsp, 0x20) = rbp;
+    r9 = (uint64_t)(uint32_t)(0);
+    r8 = (uint64_t)(uint32_t)((uint32_t)r14);
+    rax = ML_CALLP(ML_M8(rax, 0x70));
+L169:
+    ML_M8(rsp, 0x48) = r12;
+    rcx = rsp + 0x50;
+    rax = ML_CALL(141823290);
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    goto L175;
+L174:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+L175:
+    rcx = ML_M8(rsp, 0x78);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    rsp = rsp + (0x88ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r15 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r14 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r13 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r12 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbp = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbx = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
+uint64_t SynLift_1417b0680(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    ML_M8(rsp, 0x10) = rbx;
+    ML_M8(rsp, 0x18) = rbp;
+    rsp -= 8; ML_M8(rsp, 0) = rsi;
+    rsp = rsp - (0x20ULL);
+    rbx = r8;
+    rbp = (uint64_t)(uint32_t)((uint32_t)rdx);
+    rsi = rcx;
+{
+    const uint64_t r = ((uint64_t)(r8) & ~0ULL) & ((uint64_t)(r8) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L15;
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    rbx = ML_M8(rsp, 0x38);
+    rbp = ML_M8(rsp, 0x40);
+    rsp = rsp + (0x20ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    return rax;
+L15:
+    rcx = (rcx) | (0xffffffffffffffffULL);
+    ML_M8(rsp, 0x30) = rdi;
+    rax = (uint64_t)(uint32_t)(0);
+    rdi = rbx;
+    while (rcx) {
+        const uint64_t a = rax & 0xffULL, b = ML_M1(rdi, 0) & 0xffULL;
+        const uint64_t d = (a - b) & 0xffULL;
+        rdi += 1; --rcx;
+        f_cf = a < b; f_zf = (d == 0); f_sf = ((d >> 7) & 1) != 0;
+        f_of = ((((a ^ b) & (a ^ d)) >> 7) & 1) != 0;
+        if (f_zf) break;
+    }
+    rcx = (rcx) ^ ~0ULL;
+    rcx = rcx - 1;
+{
+    const uint64_t a = (uint64_t)(rcx) & ~0ULL, b = (uint64_t)(0x100ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_cf) goto L65;
+    rdx = rax + 0x1;
+    rcx = rbx;
+    rax = ML_CALL(1418230c8);
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L40;
+    rax = ML_CALL(141823050);
+    rdx = (uintptr_t)0x141837298;
+    rdi = ML_M8(rax, 0x0);
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(rdi, 0x0));
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rcx = rsi;
+    r8 = rax;
+    rax = ML_CALL(1417ac750);
+L38:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L65;
+L40:
+    rcx = ML_M8(rsi, 0x8);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbp);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x4a8));
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L38;
+    rcx = ML_M8(rsi, 0x50);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(1417630d0);
+    rdi = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L38;
+    rcx = rax;
+    rax = ML_CALL(141745520);
+    rcx = rsi;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(1417b0370);
+{
+    const uint64_t a = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)rbp) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (!f_zf) goto L38;
+    r9 = (r9 & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    r8 = rbx;
+    rdx = (uint64_t)(uint32_t)(0x6ULL);
+    rcx = rdi;
+    rax = ML_CALL(141743f90);
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+L65:
+    rdi = ML_M8(rsp, 0x30);
+    rbx = ML_M8(rsp, 0x38);
+    rbp = ML_M8(rsp, 0x40);
+    rsp = rsp + (0x20ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
 uint64_t SynLift_1417b0770(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
     uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
     uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
@@ -342457,6 +352182,310 @@ L21:
     return rax;
 }
 
+uint64_t SynLift_1417b1ae0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    ML_M8(rsp, 0x8) = rbx;
+    rsp -= 8; ML_M8(rsp, 0) = rdi;
+    rsp = rsp - (0x20ULL);
+    rbx = (uint64_t)(uint32_t)((uint32_t)rdx);
+    rdi = rcx;
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L12;
+L7:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    rbx = ML_M8(rsp, 0x30);
+    rsp = rsp + (0x20ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    return rax;
+L12:
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x510));
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L7;
+    rcx = ML_M8(rdi, 0x50);
+    r8 = (uint64_t)(uint32_t)((uint32_t)rax);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbx);
+    rbx = ML_M8(rsp, 0x30);
+    rsp = rsp + (0x20ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    goto L64;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ML_M8(rsp, 0x8) = rbx;
+    ML_M8(rsp, 0x10) = rsi;
+    rsp -= 8; ML_M8(rsp, 0) = rdi;
+    rsp = rsp - (0x20ULL);
+    rdi = r8;
+    rbx = (uint64_t)(uint32_t)((uint32_t)rdx);
+    rsi = rcx;
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L58;
+{
+    const uint64_t r = ((uint64_t)(r8) & ~0ULL) & ((uint64_t)(r8) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L58;
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x510));
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L58;
+    rcx = ML_M8(rsi, 0x50);
+    r9 = rdi;
+    r8 = (uint64_t)(uint32_t)((uint32_t)rax);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rbx);
+    rbx = ML_M8(rsp, 0x30);
+    rsi = ML_M8(rsp, 0x38);
+    rsp = rsp + (0x20ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    goto L139;
+L58:
+    rbx = ML_M8(rsp, 0x30);
+    rsi = ML_M8(rsp, 0x38);
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    rsp = rsp + (0x20ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    return rax;
+L64:
+    rax = rsp;
+    rsp -= 8; ML_M8(rsp, 0) = rdi;
+    rsp = rsp - (0x470ULL);
+    ML_M8(rsp, 0x30) = 0xfffffffffffffffeULL;
+    ML_M8(rax, 0x8) = rbx;
+    ML_M8(rax, 0x10) = rbp;
+    ML_M8(rax, 0x18) = rsi;
+    rsi = (uint64_t)(uint32_t)((uint32_t)rdx);
+    rbp = rcx;
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L131;
+{
+    const uint64_t r = ((uint64_t)((uint32_t)r8) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)r8) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L131;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r8);
+    rax = ML_CALL(1417630d0);
+    rbx = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L132;
+    rcx = rax;
+    rax = ML_CALL(141743e70);
+{
+    const uint64_t a = (uint64_t)((uint32_t)rsi) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_zf) goto L88;
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    goto L132;
+L88:
+    rdx = (uint64_t)(uint32_t)(0x7ULL);
+    rcx = rbx;
+    rax = ML_CALL(141743d70);
+    rdi = rax;
+    rax = (uint64_t)(uint32_t)(0);
+    rcx = (rcx) | (0xffffffffffffffffULL);
+    while (rcx) {
+        const uint64_t a = rax & 0xffULL, b = ML_M1(rdi, 0) & 0xffULL;
+        const uint64_t d = (a - b) & 0xffULL;
+        rdi += 1; --rcx;
+        f_cf = a < b; f_zf = (d == 0); f_sf = ((d >> 7) & 1) != 0;
+        f_of = ((((a ^ b) & (a ^ d)) >> 7) & 1) != 0;
+        if (f_zf) break;
+    }
+    rcx = (rcx) ^ ~0ULL;
+{
+    const uint64_t a = (uint64_t)(rcx) & ~0ULL, b = (uint64_t)(0x1ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf) goto L129;
+    rcx = rsp + 0x40;
+    rax = ML_CALL(1417d6640);
+    ;
+    rdx = (uint64_t)(uint32_t)(0x7ULL);
+    rcx = rbx;
+    rax = ML_CALL(141743d70);
+    r8 = rax;
+    rdx = (uint64_t)(uint32_t)(0x13ULL);
+    rax = (uint64_t)(uint32_t)(0);
+    ML_M4(rsp, 0x28) = (uint32_t)rax;
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    r9 = (uint64_t)(uint32_t)(0);
+    rcx = rsp + 0x40;
+    rax = ML_CALL(1417d6820);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L121;
+    ML_M4(rsp, 0x20) = 0x3e8ULL;
+    r9 = (uintptr_t)0x1418297c0;
+    r8 = (uintptr_t)0x14182b6a0;
+    rdx = (uintptr_t)0x14182666c;
+    rcx = (uintptr_t)0x141824ca8;
+    rax = ML_CALL(141823030);
+    goto L127;
+L121:
+    rcx = ML_M8(rbp, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    r8 = rsp + 0x40;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    rax = ML_CALLP(ML_M8(rax, 0x8));
+    ;
+L127:
+    rcx = rsp + 0x40;
+    rax = ML_CALL(1417d66c0);
+L129:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    goto L132;
+L131:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+L132:
+    r11 = rsp + 0x470;
+    rbx = ML_M8(r11, 0x10);
+    rbp = ML_M8(r11, 0x18);
+    rsi = ML_M8(r11, 0x20);
+    rsp = r11;
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    return rax;
+L139:
+    ML_M8(rsp, 0x10) = rbp;
+    ML_M8(rsp, 0x18) = rsi;
+    rsp -= 8; ML_M8(rsp, 0) = rdi;
+    rsp = rsp - (0x20ULL);
+    rsi = r9;
+    rdi = (uint64_t)(uint32_t)((uint32_t)rdx);
+    rbp = rcx;
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L194;
+{
+    const uint64_t r = ((uint64_t)((uint32_t)r8) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)r8) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L194;
+{
+    const uint64_t r = ((uint64_t)(r9) & ~0ULL) & ((uint64_t)(r9) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L194;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r8);
+    ML_M8(rsp, 0x30) = rbx;
+    rax = ML_CALL(1417630d0);
+    rbx = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L162;
+    rcx = rax;
+    rax = ML_CALL(141743e70);
+{
+    const uint64_t a = (uint64_t)((uint32_t)rdi) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_zf) goto L169;
+L162:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+L163:
+    rbx = ML_M8(rsp, 0x30);
+    rbp = ML_M8(rsp, 0x38);
+    rsi = ML_M8(rsp, 0x40);
+    rsp = rsp + (0x20ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    return rax;
+L169:
+    r9 = (r9 & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    r8 = rsi;
+    rdx = (uint64_t)(uint32_t)(0x7ULL);
+    rcx = rbx;
+    rax = ML_CALL(141743f90);
+    rax = ML_CALL(141823050);
+    rcx = ML_M8(rbp, 0x8);
+    rbx = ML_M8(rcx, 0x0);
+    r8 = ML_M8(rax, 0x0);
+    rdx = (uintptr_t)0x14182b700;
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(r8, 0x0));
+    rcx = ML_M8(rbp, 0x8);
+    r9 = (uint64_t)(uint32_t)(0xffff00ULL);
+    r8 = rax;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rdi);
+    rax = ML_CALLP(ML_M8(rbx, 0x28));
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    goto L163;
+L188:
+    rbp = ML_M8(rsp, 0x38);
+    rsi = ML_M8(rsp, 0x40);
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    rsp = rsp + (0x20ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    return rax;
+L194:
+    rbp = ML_M8(rsp, 0x38);
+    rsi = ML_M8(rsp, 0x40);
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    rsp = rsp + (0x20ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
 uint64_t SynLift_1417b1b30(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
     uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
     uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
@@ -342676,6 +352705,385 @@ uint64_t SynLift_1417b1dbb(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
     rax = rbx + 0x61;
     rsp = rsp + (0x30ULL);
     { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbx = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
+uint64_t SynLift_1417b1e80(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+{
+    const uint64_t r = ((uint64_t)(r9) & ~0ULL) & ((uint64_t)(r9) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L256;
+    rsp -= 8; ML_M8(rsp, 0) = rbx;
+    rsp -= 8; ML_M8(rsp, 0) = rbp;
+    rsp -= 8; ML_M8(rsp, 0) = rsi;
+    rsp -= 8; ML_M8(rsp, 0) = rdi;
+    rsp -= 8; ML_M8(rsp, 0) = r12;
+    rsp -= 8; ML_M8(rsp, 0) = r13;
+    rsp -= 8; ML_M8(rsp, 0) = r14;
+    rsp -= 8; ML_M8(rsp, 0) = r15;
+    rsp = rsp - (0x6f8ULL);
+    ML_M8(rsp, 0x70) = 0xfffffffffffffffeULL;
+    rax = ML_IAT(0x141886c40);
+    rax = (rax) ^ (rsp);
+    ML_M8(rsp, 0x6e0) = rax;
+    r14 = r9;
+    r15 = (uint64_t)(uint32_t)((uint32_t)r8);
+    rsi = (uint64_t)(uint32_t)((uint32_t)rdx);
+    ML_M4(rsp, 0x40) = (uint32_t)rdx;
+    r13 = rcx;
+    rax = (uint64_t)(uint32_t)(0);
+    rcx = (rcx) | (0xffffffffffffffffULL);
+    rdi = r9;
+    while (rcx) {
+        const uint64_t a = rax & 0xffULL, b = ML_M1(rdi, 0) & 0xffULL;
+        const uint64_t d = (a - b) & 0xffULL;
+        rdi += 1; --rcx;
+        f_cf = a < b; f_zf = (d == 0); f_sf = ((d >> 7) & 1) != 0;
+        f_of = ((((a ^ b) & (a ^ d)) >> 7) & 1) != 0;
+        if (f_zf) break;
+    }
+    rcx = (rcx) ^ ~0ULL;
+{
+    const uint64_t a = (uint64_t)(rcx) & ~0ULL, b = (uint64_t)(0x1ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf) goto L244;
+    rcx = ML_M8(r13, 0x50);
+    rax = ML_CALL(14174e920);
+    rbx = (uint64_t)(uint32_t)((uint32_t)rax);
+    rax = ML_CALL(1418230d0);
+{
+    const uint64_t a = (uint64_t)(ML_M4(rax, 0x0)) & 0xFFFFFFFFULL, b = (uint64_t)(0x0ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_zf) goto L39;
+    rax = ML_CALL(1418230d0);
+{
+    const uint64_t a = (uint64_t)(ML_M4(rax, 0x0)) & 0xFFFFFFFFULL, b = (uint64_t)(0x6ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_zf) goto L39;
+    rcx = ML_M8(r13, 0x50);
+    rax = ML_CALL(14174e930);
+    rbx = (uint64_t)(uint32_t)((uint32_t)rax);
+L39:
+    rax = (uint64_t)(uint32_t)(0);
+    rcx = (rcx) | (0xffffffffffffffffULL);
+    rdi = r14;
+    while (rcx) {
+        const uint64_t a = rax & 0xffULL, b = ML_M1(rdi, 0) & 0xffULL;
+        const uint64_t d = (a - b) & 0xffULL;
+        rdi += 1; --rcx;
+        f_cf = a < b; f_zf = (d == 0); f_sf = ((d >> 7) & 1) != 0;
+        f_of = ((((a ^ b) & (a ^ d)) >> 7) & 1) != 0;
+        if (f_zf) break;
+    }
+    rcx = (rcx) ^ ~0ULL;
+    rcx = rcx - 1;
+    rax = (uint64_t)(int64_t)(int32_t)((uint32_t)rbx);
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(rcx) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf) goto L232;
+    rcx = ML_M8(r13, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    rdx = r14;
+    rax = ML_CALLP(ML_M8(rax, 0x2e8));
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L232;
+    rcx = ML_M8(r13, 0x50);
+    rax = ML_CALL(14174e3f0);
+{
+    const uint64_t a = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)r15) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (!f_zf) goto L244;
+{
+    const uint64_t r = ((uint64_t)((uint32_t)r15) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)r15) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L244;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r15);
+    rcx = ML_M8(r13, 0x50);
+    rax = ML_CALL(1417630d0);
+    rdi = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L244;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r15);
+    rcx = r13;
+    rax = ML_CALL(1417b0370);
+{
+    const uint64_t a = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)rsi) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_zf) goto L84;
+    rax = ML_CALL(141823050);
+    rdi = rax;
+    rcx = ML_M8(r13, 0x8);
+    rbx = ML_M8(rcx, 0x0);
+    rax = ML_M8(rax, 0x0);
+    rdx = (uintptr_t)0x141837698;
+    rcx = rdi;
+    rax = ML_CALLP(ML_M8(rax, 0x0));
+    r8 = rax;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    rcx = ML_M8(r13, 0x8);
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    goto L244;
+L84:
+    r9 = (r9 & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    r8 = r14;
+    rdx = (uint64_t)(uint32_t)(0x4ULL);
+    rcx = rdi;
+    rax = ML_CALL(141743f90);
+    rcx = (uint64_t)(uint32_t)(0x3ULL);
+    rax = ML_CALL(141823048);
+    rbx = rax + 0x121eac0;
+    rcx = rsp + 0x80;
+    rax = ML_CALL(1417d6640);
+    rdx = (uint64_t)(uint32_t)(0x12ULL);
+    rax = (uint64_t)(uint32_t)(0);
+    ML_M4(rsp, 0x28) = (uint32_t)rax;
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    r9 = (uint64_t)(uint32_t)((uint32_t)rbx);
+    r8 = r14;
+    rcx = rsp + 0x80;
+    rax = ML_CALL(1417d6820);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L108;
+    rcx = ML_M8(r13, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    rdx = rsp + 0x80;
+    rax = ML_CALLP(ML_M8(rax, 0xe0));
+L108:
+    ML_M1(rsp, 0x4e0) = 0x0ULL;
+    rdx = (uint64_t)(uint32_t)(0);
+    r8 = (uint64_t)(uint32_t)(0x1ffULL);
+    rcx = rsp + 0x4e1;
+    rax = ML_CALL(1417f30c0);
+    rax = ML_CALL(141823050);
+    rdi = ML_M8(rax, 0x0);
+    rdx = (uintptr_t)0x141837680;
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(rdi, 0x0));
+    r8 = rax;
+    rdx = (uint64_t)(uint32_t)(0x200ULL);
+    rcx = rsp + 0x4e0;
+    rax = ML_CALL(1418233c8);
+    rcx = ML_M8(r13, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    r8 = rsp + 0x4e0;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    rax = ML_CALLP(ML_M8(rax, 0x18));
+    rax = (uint64_t)(uint32_t)(0xd1b71759ULL);
+    { const uint64_t p = (uint64_t)(uint32_t)rax * (uint32_t)((uint32_t)rbx);
+      rax = (uint32_t)p; rdx = (uint32_t)(p >> 32); f_cf = f_of = (rdx != 0); }
+    r12 = (uint64_t)(uint32_t)((uint32_t)rdx);
+    { const uint64_t src = (uint32_t)r12; const uint64_t res = (((uint32_t)r12 & 0xFFFFFFFFULL) >> 13);
+      f_cf = (((src >> 12) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    r12 = (uint64_t)(uint32_t)(res); }
+    rax = (uint64_t)(uint32_t)((uint32_t)r12);
+    { const __int128 p = (__int128)(int64_t)((uint32_t)rax) * (int64_t)(0x2710ULL);
+      rax = (uint64_t)(uint32_t)((uint64_t)p);
+      f_cf = f_of = (p != (__int128)(int64_t)(uint64_t)p); }
+    rcx = (uint64_t)(uint32_t)((uint32_t)rbx);
+    rcx = (uint64_t)(uint32_t)((uint32_t)rcx - ((uint32_t)rax));
+    rax = (uint64_t)(uint32_t)(0x51eb851fULL);
+    { const uint64_t p = (uint64_t)(uint32_t)rax * (uint32_t)((uint32_t)rcx);
+      rax = (uint32_t)p; rdx = (uint32_t)(p >> 32); f_cf = f_of = (rdx != 0); }
+    rbp = (uint64_t)(uint32_t)((uint32_t)rdx);
+    { const uint64_t src = (uint32_t)rbp; const uint64_t res = (((uint32_t)rbp & 0xFFFFFFFFULL) >> 5);
+      f_cf = (((src >> 4) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rbp = (uint64_t)(uint32_t)(res); }
+    rax = (uint64_t)(uint32_t)(0x51eb851fULL);
+    { const uint64_t p = (uint64_t)(uint32_t)rax * (uint32_t)((uint32_t)rbx);
+      rax = (uint32_t)p; rdx = (uint32_t)(p >> 32); f_cf = f_of = (rdx != 0); }
+    { const uint64_t src = (uint32_t)rdx; const uint64_t res = (((uint32_t)rdx & 0xFFFFFFFFULL) >> 5);
+      f_cf = (((src >> 4) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rdx = (uint64_t)(uint32_t)(res); }
+    { const __int128 p = (__int128)(int64_t)((uint32_t)rdx) * (int64_t)(0x64ULL);
+      rdx = (uint64_t)(uint32_t)((uint64_t)p);
+      f_cf = f_of = (p != (__int128)(int64_t)(uint64_t)p); }
+    rbx = (uint64_t)(uint32_t)((uint32_t)rbx - ((uint32_t)rdx));
+    ML_M4(rsp, 0x44) = (uint32_t)rbx;
+    rdx = (uintptr_t)0x141827409;
+    rcx = rsp + 0x48;
+    rax = ML_CALL(141823270);
+    rcx = rsp + 0x4b8;
+    rax = ML_CALL(141823280);
+    rax = (uintptr_t)0x141824cf0;
+    ML_M8(rsp, 0x4b0) = rax;
+    rdx = rsp + 0x50;
+{
+    const uint64_t a = (uint64_t)(ML_M8(rsp, 0x68)) & ~0ULL, b = (uint64_t)(0x10ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_cf) { rdx = ML_M8(rsp, 0x50); }
+    rcx = rsp + 0x4b8;
+    rax = ML_CALL(141823278);
+    rcx = rsp + 0x48;
+    rax = ML_CALL(141823290);
+    rax = ML_CALL(141823050);
+    rsi = rax;
+    rcx = ML_M8(r13, 0x8);
+    rdi = rcx;
+    rax = ML_M8(rcx, 0x0);
+    rdx = (uint64_t)(uint32_t)(ML_M4(rsp, 0x40));
+    rax = ML_CALLP(ML_M8(rax, 0x1d8));
+    rbx = rax;
+    rdx = ML_M8(rdi, 0x0);
+    rcx = rdi;
+    rax = ML_CALLP(ML_M8(rdx, 0x488));
+    rdi = rax;
+    rax = ML_M8(rsi, 0x0);
+    rdx = (uintptr_t)0x141837660;
+    rcx = rsi;
+    rax = ML_CALLP(ML_M8(rax, 0x0));
+    rdx = rax;
+    ML_M8(rsp, 0x38) = r14;
+    ML_M8(rsp, 0x30) = rbx;
+    ML_M8(rsp, 0x28) = rdi;
+    rax = (uint64_t)(uint32_t)(ML_M4(rsp, 0x44));
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    r9 = (uint64_t)(uint32_t)((uint32_t)rbp);
+    r8 = (uint64_t)(uint32_t)((uint32_t)r12);
+    rcx = rsp + 0x4b0;
+    rax = ML_CALL(1417215d0);
+    rdx = rsp + 0x4c0;
+{
+    const uint64_t a = (uint64_t)(ML_M8(rsp, 0x4d8)) & ~0ULL, b = (uint64_t)(0x10ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_cf) { rdx = ML_M8(rsp, 0x4c0); }
+    rcx = ML_M8(r13, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x438));
+    rbx = r13 + 0x61;
+    r8 = (uint64_t)(uint32_t)(0x20ULL);
+    rdx = r14;
+    rcx = rbx;
+    rax = ML_CALL(141823040);
+    rax = ML_CALL(141823050);
+    rdi = ML_M8(rax, 0x0);
+    rdx = (uintptr_t)0x141835810;
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(rdi, 0x0));
+    r11 = rax;
+    rdi = rbx;
+    rax = (uint64_t)(uint32_t)(0);
+    rcx = (rcx) | (0xffffffffffffffffULL);
+    while (rcx) {
+        const uint64_t a = rax & 0xffULL, b = ML_M1(rdi, 0) & 0xffULL;
+        const uint64_t d = (a - b) & 0xffULL;
+        rdi += 1; --rcx;
+        f_cf = a < b; f_zf = (d == 0); f_sf = ((d >> 7) & 1) != 0;
+        f_of = ((((a ^ b) & (a ^ d)) >> 7) & 1) != 0;
+        if (f_zf) break;
+    }
+    r9 = (uint64_t)(uint32_t)(0);
+    ;
+L208:
+    rcx = ML_M1((r11 + r9 * 1), 0x0);
+    ML_M1((rdi + r9 * 1), -0x1) = (uint8_t)rcx;
+    r9 = r9 + 1;
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rcx) & 0xFFULL) & ((uint64_t)((uint8_t)rcx) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L208;
+    rcx = ML_M8(r13, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    rdx = (uint64_t)(uint32_t)(0x7ULL);
+    ML_M8(rsp, 0x20) = rbx;
+    r9 = (uint64_t)(uint32_t)(0);
+    r8 = (uint64_t)(uint32_t)((uint32_t)r15);
+    rax = ML_CALLP(ML_M8(rax, 0x70));
+    rcx = ML_M8(r13, 0x8);
+    rax = ML_M8(rcx, 0x0);
+    r8 = r14;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r15);
+    rax = ML_CALLP(ML_M8(rax, 0x440));
+    rax = (uintptr_t)0x141824cf0;
+    ML_M8(rsp, 0x4b0) = rax;
+    rcx = rsp + 0x4b8;
+    rax = ML_CALL(141823290);
+    rcx = rsp + 0x80;
+    rax = ML_CALL(1417d66c0);
+    goto L244;
+L232:
+    rax = ML_CALL(141823050);
+    rdi = rax;
+    rcx = ML_M8(r13, 0x8);
+    rbx = ML_M8(rcx, 0x0);
+    rax = ML_M8(rax, 0x0);
+    rdx = (uintptr_t)0x141837648;
+    rcx = rdi;
+    rax = ML_CALLP(ML_M8(rax, 0x0));
+    r8 = rax;
+    rdx = (uint64_t)(uint32_t)((uint32_t)rsi);
+    rcx = ML_M8(r13, 0x8);
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+L244:
+    rcx = ML_M8(rsp, 0x6e0);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    rsp = rsp + (0x6f8ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r15 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r14 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r13 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r12 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbp = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbx = v; }
+L256:
     return rax;
 #undef ML_CALL
 #undef ML_CALLP
@@ -392586,6 +402994,350 @@ L133:
     return rax;
 }
 
+uint64_t SynLift_1417ce230(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    rsp -= 8; ML_M8(rsp, 0) = rbx;
+    rsp -= 8; ML_M8(rsp, 0) = rsi;
+    rsp -= 8; ML_M8(rsp, 0) = rdi;
+    rsp -= 8; ML_M8(rsp, 0) = r12;
+    rsp -= 8; ML_M8(rsp, 0) = r13;
+    rsp = rsp - (0x5e0ULL);
+    ML_M8(rsp, 0x48) = 0xfffffffffffffffeULL;
+    rax = ML_IAT(0x141886c40);
+    rax = (rax) ^ (rsp);
+    ML_M8(rsp, 0x5d0) = rax;
+    rbx = (uint64_t)(uint32_t)((uint32_t)r9);
+    rdi = r8;
+    r12 = (uint64_t)(uint32_t)((uint32_t)rdx);
+    rsi = rcx;
+    ML_M8(rsp, 0x38) = rcx;
+    ML_M4(rsp, 0x30) = (uint32_t)rdx;
+{
+    const uint64_t r = ((uint64_t)(r8) & ~0ULL) & ((uint64_t)(r8) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L26;
+    ML_M4(rsp, 0x20) = 0x1b4ULL;
+    r9 = (uintptr_t)0x141839fe0;
+    r8 = (uintptr_t)0x14183b208;
+    rdx = (uintptr_t)0x141827b98;
+    rcx = (uintptr_t)0x141824ca8;
+    rax = ML_CALL(141823030);
+    rax = (uint64_t)(uint32_t)(0);
+    goto L251;
+L26:
+    rcx = ML_M8(rcx, 0x88);
+    rax = ML_M8(rcx, 0x0);
+    rdx = r8;
+    rax = ML_CALLP(ML_M8(rax, 0x2e8));
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L34;
+    rax = (uint64_t)(uint32_t)(0);
+    goto L251;
+L34:
+    rcx = ML_M8(rsi, 0x88);
+    rax = ML_M8(rcx, 0x0);
+    r13 = (uint64_t)(int64_t)(int32_t)(ML_M4(rsp, 0x630));
+    r9 = (uint64_t)(uint32_t)((uint32_t)r13);
+    r8 = (uint64_t)(uint32_t)((uint32_t)rbx);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_CALLP(ML_M8(rax, 0x1b8));
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L45;
+    rax = (uint64_t)(uint32_t)(0);
+    goto L251;
+L45:
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rcx = ML_M8(rsi, 0x90);
+    rax = ML_CALL(14178c8e0);
+    rbx = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L62;
+    rcx = rax;
+    rax = ML_CALL(141785ea0);
+    rdi = (uint64_t)(uint32_t)((uint32_t)rax);
+    rcx = rbx;
+    rax = ML_CALL(141785dc0);
+    rdx = (uint64_t)(uint32_t)((uint32_t)rax);
+    r8 = (uint64_t)(uint32_t)((uint32_t)rdi);
+    rcx = (uintptr_t)0x14183b1a0;
+    rax = ML_CALL(141823030);
+    rax = (uint64_t)(uint32_t)(0);
+    goto L251;
+L62:
+    rdx = rdi;
+    rcx = rsi;
+    rax = ML_CALL(1417cd250);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L81;
+    rax = ML_CALL(141823050);
+    rdi = rax;
+    rcx = ML_M8(rsi, 0x88);
+    rbx = ML_M8(rcx, 0x0);
+    rax = ML_M8(rax, 0x0);
+    rdx = (uintptr_t)0x14183b180;
+    rcx = rdi;
+    rax = ML_CALLP(ML_M8(rax, 0x0));
+    r8 = rax;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rcx = ML_M8(rsi, 0x88);
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (uint64_t)(uint32_t)(0);
+    goto L251;
+L81:
+    rdx = rdi;
+    rcx = rsi;
+    rax = ML_CALL(1417c8aa0);
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L100;
+    rax = ML_CALL(141823050);
+    rdi = rax;
+    rcx = ML_M8(rsi, 0x88);
+    rbx = ML_M8(rcx, 0x0);
+    rax = ML_M8(rax, 0x0);
+    rdx = (uintptr_t)0x14183b180;
+    rcx = rdi;
+    rax = ML_CALLP(ML_M8(rax, 0x0));
+    r8 = rax;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rcx = ML_M8(rsi, 0x88);
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (uint64_t)(uint32_t)(0);
+    goto L251;
+L100:
+    rax = (uint64_t)(uint32_t)(ML_M4(rsp, 0x638));
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    r9 = rdi;
+    r8 = (uint64_t)(uint32_t)((uint32_t)r12);
+    rdx = rsp + 0x70;
+    rcx = rsi;
+    rax = ML_CALL(1417c5500);
+    r8 = ML_M8(rsi, 0x90);
+    rdx = rsi;
+    rcx = ML_M8(rsi, 0x88);
+    rax = ML_CALL(1417a28c0);
+    rbx = rax;
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L122;
+    ML_M4(rsp, 0x20) = 0x1ddULL;
+    r9 = (uintptr_t)0x141839fe0;
+    r8 = (uintptr_t)0x141836e5c;
+    rdx = (uintptr_t)0x141827b98;
+    rcx = (uintptr_t)0x141824ca8;
+    rax = ML_CALL(141823030);
+    rax = (uint64_t)(uint32_t)(0);
+    goto L251;
+L122:
+    rdx = rsp + 0x70;
+    rcx = rax;
+    rax = ML_CALL(14178df30);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L229;
+    rcx = rbx;
+    rax = ML_CALL(14178f270);
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L229;
+    rcx = ML_M8(rsi, 0x88);
+    rax = ML_M8(rcx, 0x0);
+    r8 = r13;
+    r9 = (r9 & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rax = ML_CALLP(ML_M8(rax, 0x130));
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L147;
+    ML_M4(rsp, 0x20) = 0x1e6ULL;
+    r9 = (uintptr_t)0x141839fe0;
+    r8 = (uintptr_t)0x14183b140;
+    rdx = (uintptr_t)0x141827b98;
+    rcx = (uintptr_t)0x141824ca8;
+    rax = ML_CALL(141823030);
+    rax = (uint64_t)(uint32_t)(0);
+    goto L251;
+L147:
+    rcx = rbx;
+    rax = ML_CALL(14178f270);
+    r13 = (uint64_t)(uint32_t)((uint32_t)rax);
+    ML_M4(rsp, 0x38) = (uint32_t)rax;
+    ML_M8(rsp, 0x40) = rbx;
+    rcx = rsi + 0x8;
+    r8 = rsp + 0x38;
+    rdx = rsp + 0x50;
+    rax = ML_CALL(1417cb580);
+    r8 = rsp + 0x74;
+    rdx = rsp + 0x1b0;
+    rcx = (uintptr_t)0x14183b120;
+    rax = ML_CALL(1418230e8);
+    rcx = rsp + 0x98;
+    rax = ML_CALL(1418230e8);
+    ML_M1(rsp, 0x1d0) = 0x0ULL;
+    rdx = (uint64_t)(uint32_t)(0);
+    r8 = (uint64_t)(uint32_t)(0x3ffULL);
+    rcx = rsp + 0x1d1;
+    rax = ML_CALL(1417f30c0);
+    rax = ML_CALL(141823050);
+    rdi = ML_M8(rax, 0x0);
+    rdx = (uintptr_t)0x14183b108;
+    rcx = rax;
+    rax = ML_CALLP(ML_M8(rdi, 0x0));
+    r8 = rax;
+    rax = rsp + 0x74;
+    ML_M8(rsp, 0x20) = rax;
+    r9 = rsp + 0x1b0;
+    rdx = (uint64_t)(uint32_t)(0x400ULL);
+    rcx = rsp + 0x1d0;
+    rax = ML_CALL(1418233c8);
+    ML_M1(rsp, 0x5cf) = 0x0ULL;
+    rcx = ML_M8(rsi, 0x88);
+    rax = ML_M8(rcx, 0x0);
+    rdx = rsp + 0x1d0;
+    rax = ML_CALLP(ML_M8(rax, 0xc8));
+    rax = (uint64_t)(uint32_t)(0);
+    rcx = (rcx) | (0xffffffffffffffffULL);
+    rdi = rsp + 0x98;
+    while (rcx) {
+        const uint64_t a = rax & 0xffULL, b = ML_M1(rdi, 0) & 0xffULL;
+        const uint64_t d = (a - b) & 0xffULL;
+        rdi += 1; --rcx;
+        f_cf = a < b; f_zf = (d == 0); f_sf = ((d >> 7) & 1) != 0;
+        f_of = ((((a ^ b) & (a ^ d)) >> 7) & 1) != 0;
+        if (f_zf) break;
+    }
+    rcx = (rcx) ^ ~0ULL;
+{
+    const uint64_t a = (uint64_t)(rcx) & ~0ULL, b = (uint64_t)(0x1ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf) goto L195;
+    rcx = ML_M8(rsi, 0x88);
+    rax = ML_M8(rcx, 0x0);
+    rdx = rsp + 0x98;
+    rax = ML_CALLP(ML_M8(rax, 0xc8));
+L195:
+    rax = ML_CALL(1417b6210);
+    ML_M1(rsp, 0x28) = 0x1ULL;
+    ML_M4(rsp, 0x20) = 0x0ULL;
+    r9 = (uint64_t)(uint32_t)(0x3e8ULL);
+    r8 = (uint64_t)(uint32_t)((uint32_t)r12);
+    rdx = rbx;
+    rcx = rax;
+    rax = ML_CALL(1417b8470);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (!f_zf) goto L212;
+    r8 = (uint64_t)(uint32_t)((uint32_t)r12);
+    rdx = (uintptr_t)0x14183b0d8;
+    rcx = (uintptr_t)0x14183b0d4;
+    rax = ML_CALL(1418230e0);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rcx = (uintptr_t)0x14183b0d8;
+    rax = ML_CALL(141823030);
+L212:
+    rcx = ML_M8(rsi, 0x88);
+    rax = ML_M8(rcx, 0x0);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r13);
+    rax = ML_CALLP(ML_M8(rax, 0x338));
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rcx = ML_M8(rsi, 0x90);
+    rax = ML_CALL(14178c8e0);
+    r8 = rax;
+    r9 = (uint64_t)(uint32_t)(0);
+    rdx = rbx;
+    rcx = rsi;
+    rax = ML_CALL(1417c6a60);
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rcx = rbx;
+    rax = ML_CALL(14179ad50);
+    rax = (uint64_t)(uint32_t)((uint32_t)r13);
+    goto L251;
+L229:
+    rax = ML_M8(rbx, 0x0);
+    rdx = (uint64_t)(uint32_t)(0x1ULL);
+    rcx = rbx;
+    rax = ML_CALLP(ML_M8(rax, 0x0));
+    goto L236;
+    rsi = ML_M8(rsp, 0x38);
+    r12 = (uint64_t)(uint32_t)(ML_M4(rsp, 0x30));
+L236:
+    rax = ML_CALL(141823050);
+    rdi = rax;
+    rcx = ML_M8(rsi, 0x88);
+    rbx = ML_M8(rcx, 0x0);
+    rax = ML_M8(rax, 0x0);
+    rdx = (uintptr_t)0x14183b180;
+    rcx = rdi;
+    rax = ML_CALLP(ML_M8(rax, 0x0));
+    r8 = rax;
+    rdx = (uint64_t)(uint32_t)((uint32_t)r12);
+    rcx = ML_M8(rsi, 0x88);
+    rax = ML_CALLP(ML_M8(rbx, 0x18));
+    rax = (uint64_t)(uint32_t)(0);
+    goto L251;
+    rax = (uint64_t)(uint32_t)(0);
+L251:
+    rcx = ML_M8(rsp, 0x5d0);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    rsp = rsp + (0x5e0ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r13 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; r12 = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbx = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
 uint64_t SynLift_1417ce6b0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
     uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
     uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
@@ -410856,6 +421608,103 @@ L12:
     return rax;
 }
 
+uint64_t SynLift_1417d8870(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    ML_M8(rsp, 0x8) = rbx;
+    ML_M8(rsp, 0x10) = rbp;
+    ML_M8(rsp, 0x18) = rsi;
+    rsp -= 8; ML_M8(rsp, 0) = rdi;
+    rsp = rsp - (0x20ULL);
+    rbx = r9;
+    rdi = r8;
+    rbp = (uint64_t)(uint32_t)((uint32_t)rdx);
+    rsi = rcx;
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L44;
+{
+    const uint64_t r = ((uint64_t)(r8) & ~0ULL) & ((uint64_t)(r8) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L44;
+    rcx = rcx + (0x408ULL);
+    rax = ML_M8(rcx, 0x0);
+    rax = ML_CALLP(ML_M8(rax, 0x40));
+    rax = (uint64_t)(int64_t)(int32_t)(uint32_t)rax;   // cdqe
+    rax = rax + (0x24ULL);
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(0x400ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_cf) goto L44;
+    rcx = rsi + 0x448;
+    rax = ML_CALL(1417d8730);
+    r8 = (uint64_t)(uint32_t)(0x10ULL);
+    rdx = rdi;
+    ML_M4(rax, 0x30) = (ML_M4(rax, 0x30)) | (0x1ULL);
+    rcx = rax;
+    rsi = rax;
+    ML_M4(rax, 0x48) = (uint32_t)rbp;
+    rax = ML_CALL(1417d8220);
+{
+    const uint64_t r = ((uint64_t)(rbx) & ~0ULL) & ((uint64_t)(rbx) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L42;
+    rcx = (rcx) | (0xffffffffffffffffULL);
+    rax = (uint64_t)(uint32_t)(0);
+    rdi = rbx;
+    while (rcx) {
+        const uint64_t a = rax & 0xffULL, b = ML_M1(rdi, 0) & 0xffULL;
+        const uint64_t d = (a - b) & 0xffULL;
+        rdi += 1; --rcx;
+        f_cf = a < b; f_zf = (d == 0); f_sf = ((d >> 7) & 1) != 0;
+        f_of = ((((a ^ b) & (a ^ d)) >> 7) & 1) != 0;
+        if (f_zf) break;
+    }
+    rcx = (rcx) ^ ~0ULL;
+{
+    const uint64_t a = (uint64_t)(rcx) & ~0ULL, b = (uint64_t)(0x1ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_zf) goto L42;
+    r8 = rax + 0x10;
+    rdx = rbx;
+    rcx = rsi;
+    rax = ML_CALL(1417d82b0);
+L42:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    goto L45;
+L44:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+L45:
+    rbx = ML_M8(rsp, 0x30);
+    rbp = ML_M8(rsp, 0x38);
+    rsi = ML_M8(rsp, 0x40);
+    rsp = rsp + (0x20ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
 uint64_t SynLift_1417d8942(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
     uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
     uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
@@ -417693,6 +428542,96 @@ L9:
     return rax;
 }
 
+uint64_t SynLift_1417db180(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    rsp -= 8; ML_M8(rsp, 0) = rbx;
+    rsp = rsp - (0x30ULL);
+    rax = ML_M8(rcx, 0x408);
+    rbx = rcx;
+    rax = ML_M2(rax, 0x0);
+    rax = rax + (0x38ULL);
+{
+    const uint64_t a = (uint64_t)(rax) & ~0ULL, b = (uint64_t)(0x400ULL) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf) goto L18;
+    r9 = (uintptr_t)0x14183db60;
+    r8 = (uintptr_t)0x14183db20;
+    rdx = (uintptr_t)0x141827b98;
+    rcx = (uintptr_t)0x141824ca8;
+    ML_M4(rsp, 0x20) = 0x44ULL;
+    rax = ML_CALL(141823030);
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    rsp = rsp + (0x30ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbx = v; }
+    return rax;
+L18:
+    rax = ML_M8(rcx, 0x408);
+    ML_M8(rsp, 0x40) = rdi;
+    rdi = r9;
+    ML_M2(rax, 0x0) = ML_M2(rax, 0x0) + (0x38ULL);
+    rcx = ML_M8(rcx, 0x408);
+    rax = (uint64_t)(int64_t)(int32_t)(ML_M4(rcx, 0x8));
+    { const __int128 p = (__int128)(int64_t)(rax) * (int64_t)(0x38ULL);
+      rax = (uint64_t)p;
+      f_cf = f_of = (p != (__int128)(int64_t)(uint64_t)p); }
+    ML_M8((rax + rcx * 1), 0x18) = r8;
+    rcx = ML_M8(rbx, 0x408);
+    rax = (uint64_t)(int64_t)(int32_t)(ML_M4(rcx, 0x8));
+    { const __int128 p = (__int128)(int64_t)(rax) * (int64_t)(0x38ULL);
+      rax = (uint64_t)p;
+      f_cf = f_of = (p != (__int128)(int64_t)(uint64_t)p); }
+    ML_M4((rax + rcx * 1), 0x10) = (uint32_t)rdx;
+    rdx = ML_M8(rbx, 0x408);
+    rax = (uint64_t)(uint32_t)(0);
+    rcx = (rcx) | (0xffffffffffffffffULL);
+    while (rcx) {
+        const uint64_t a = rax & 0xffULL, b = ML_M1(rdi, 0) & 0xffULL;
+        const uint64_t d = (a - b) & 0xffULL;
+        rdi += 1; --rcx;
+        f_cf = a < b; f_zf = (d == 0); f_sf = ((d >> 7) & 1) != 0;
+        f_of = ((((a ^ b) & (a ^ d)) >> 7) & 1) != 0;
+        if (f_zf) break;
+    }
+    rax = (uint64_t)(uint32_t)(0x24ULL);
+    rcx = (rcx) ^ ~0ULL;
+    rcx = rcx - 1;
+{
+    const uint64_t a = (uint64_t)(rcx) & ~0ULL, b = (uint64_t)(rax) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    r8 = rcx;
+    if (!f_cf && !f_zf) { r8 = rax; }
+    rax = (uint64_t)(int64_t)(int32_t)(ML_M4(rdx, 0x8));
+    { const __int128 p = (__int128)(int64_t)(rax) * (int64_t)(0x38ULL);
+      rax = (uint64_t)p;
+      f_cf = f_of = (p != (__int128)(int64_t)(uint64_t)p); }
+    rcx = (rax + rdx * 1) + 0x20;
+    rdx = r9;
+    rax = ML_CALL(1418232d8);
+    rdx = ML_M8(rbx, 0x408);
+    rdi = ML_M8(rsp, 0x40);
+    ML_M4(rdx, 0x8) = ML_M4(rdx, 0x8) + 1;
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    rsp = rsp + (0x30ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rbx = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
 uint64_t SynLift_1417db260(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
     uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
     uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
@@ -422977,6 +433916,76 @@ L62:
 L118:
     rsp = rsp + (0x1c0ULL);
     { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
+uint64_t SynLift_1417e06a0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    ML_M4(rsp, 0x10) = (uint32_t)rdx;
+    ML_M8(rsp, 0x8) = rcx;
+    rsp = rsp - (0xf8ULL);
+    ML_M8(rsp, 0xd8) = 0xfffffffffffffffeULL;
+    rax = ML_IAT(0x141886c40);
+    rax = (rax) ^ (rsp);
+    ML_M8(rsp, 0xe0) = rax;
+    ML_M4(rsp, 0xd0) = 0x0ULL;
+    rax = (uint64_t)(uint32_t)(ML_M4(rsp, 0x108));
+    rdx = (rax & 0x80000000ULL) ? 0xffffffffULL : 0ULL;   // cdq
+    rcx = (uint64_t)(uint32_t)(0xf4240ULL);
+    { const int64_t d = (int64_t)(uint32_t)rcx; if (!d) __builtin_trap();
+      const __int128 n = ((__int128)(int64_t)rdx << 64) | (uint64_t)rax;
+      rax = (uint64_t)(int64_t)(n / d); rdx = (uint64_t)(int64_t)(n % d); }
+    ML_M4(rsp, 0x38) = (uint32_t)rax;
+    rax = (uint64_t)(uint32_t)(ML_M4(rsp, 0x108));
+    rdx = (rax & 0x80000000ULL) ? 0xffffffffULL : 0ULL;   // cdq
+    rcx = (uint64_t)(uint32_t)(0x3e8ULL);
+    { const int64_t d = (int64_t)(uint32_t)rcx; if (!d) __builtin_trap();
+      const __int128 n = ((__int128)(int64_t)rdx << 64) | (uint64_t)rax;
+      rax = (uint64_t)(int64_t)(n / d); rdx = (uint64_t)(int64_t)(n % d); }
+    rdx = (rax & 0x80000000ULL) ? 0xffffffffULL : 0ULL;   // cdq
+    rcx = (uint64_t)(uint32_t)(0x3e8ULL);
+    { const int64_t d = (int64_t)(uint32_t)rcx; if (!d) __builtin_trap();
+      const __int128 n = ((__int128)(int64_t)rdx << 64) | (uint64_t)rax;
+      rax = (uint64_t)(int64_t)(n / d); rdx = (uint64_t)(int64_t)(n % d); }
+    ML_M4(rsp, 0x34) = (uint32_t)rdx;
+    rax = (uint64_t)(uint32_t)(ML_M4(rsp, 0x108));
+    rdx = (rax & 0x80000000ULL) ? 0xffffffffULL : 0ULL;   // cdq
+    rcx = (uint64_t)(uint32_t)(0x3e8ULL);
+    { const int64_t d = (int64_t)(uint32_t)rcx; if (!d) __builtin_trap();
+      const __int128 n = ((__int128)(int64_t)rdx << 64) | (uint64_t)rax;
+      rax = (uint64_t)(int64_t)(n / d); rdx = (uint64_t)(int64_t)(n % d); }
+    ML_M4(rsp, 0x30) = (uint32_t)rdx;
+    rax = (uint64_t)(uint32_t)(ML_M4(rsp, 0x30));
+    ML_M4(rsp, 0x28) = (uint32_t)rax;
+    rax = (uint64_t)(uint32_t)(ML_M4(rsp, 0x34));
+    ML_M4(rsp, 0x20) = (uint32_t)rax;
+    r9 = (uint64_t)(uint32_t)(ML_M4(rsp, 0x38));
+    r8 = (uintptr_t)0x14183f3b0;
+    rdx = (uint64_t)(uint32_t)(0x80ULL);
+    rcx = rsp + 0x50;
+    rax = ML_CALL(1418233c8);
+    ML_M1(rsp, 0xcf) = 0x0ULL;
+    rdx = rsp + 0x50;
+    rcx = ML_M8(rsp, 0x100);
+    rax = ML_CALL(141823270);
+    rax = (uint64_t)(uint32_t)(ML_M4(rsp, 0xd0));
+    rax = (uint64_t)(uint32_t)(((uint32_t)rax) | (0x1ULL));
+    ML_M4(rsp, 0xd0) = (uint32_t)rax;
+    rax = ML_M8(rsp, 0x100);
+    rcx = ML_M8(rsp, 0xe0);
+    rcx = (rcx) ^ (rsp);
+    rax = ML_CALL(1417f30a0);
+    rsp = rsp + (0xf8ULL);
     return rax;
 #undef ML_CALL
 #undef ML_CALLP
@@ -432579,6 +443588,56 @@ uint64_t SynLift_1417e7d90(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
     return rax;
 }
 
+uint64_t SynLift_1417e7e60(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    ML_M4(rsp, 0x10) = (uint32_t)rdx;
+    ML_M8(rsp, 0x8) = rcx;
+    rsp = rsp - (0x18ULL);
+    rcx = (uint64_t)(uint32_t)(ML_M4(rsp, 0x28));
+    rax = ML_M8(rsp, 0x20);
+    { const uint64_t t = ML_M4(rax, 0x0); ML_M4(rax, 0x0) = (uint32_t)rcx; rcx = (uint64_t)(uint32_t)(t); }
+    rax = (uint64_t)(uint32_t)((uint32_t)rcx);
+    ML_M4(rsp, 0x0) = (uint32_t)rax;
+    rax = (uint64_t)(uint32_t)(ML_M4(rsp, 0x0));
+    rsp = rsp + (0x18ULL);
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
+uint64_t SynLift_1417e7f00(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    ML_M8(rsp, 0x10) = rdx;
+    ML_M8(rsp, 0x8) = rcx;
+    rsp = rsp - (0x18ULL);
+    rcx = ML_M8(rsp, 0x28);
+    rax = ML_M8(rsp, 0x20);
+    { const uint64_t t = ML_M8(rax, 0x0); ML_M8(rax, 0x0) = rcx; rcx = t; }
+    rax = rcx;
+    ML_M8(rsp, 0x0) = rax;
+    rax = ML_M8(rsp, 0x0);
+    rsp = rsp + (0x18ULL);
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
 uint64_t SynLift_1417e8050(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
     uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
     uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
@@ -433870,6 +444929,132 @@ L2:
     rbx = ML_M8(rsp, 0x38);
     rsp = rsp + (0x20ULL);
     { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rsi = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
+uint64_t SynLift_1417e8d80(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    ML_M8(rsp, 0x8) = rbx;
+    ML_M8(rsp, 0x10) = rsi;
+    rsp -= 8; ML_M8(rsp, 0) = rdi;
+    rsp = rsp - (0x20ULL);
+    rdi = (uint64_t)(uint32_t)((uint32_t)r8);
+    r8 = ML_M8(rcx, 0x8);
+    rsi = rcx;
+    rcx = ML_M8(rcx, 0x10);
+    rbx = rdx;
+{
+    const uint64_t a = (uint64_t)(r8) & ~0ULL, b = (uint64_t)(rcx) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_cf) goto L46;
+    rax = ML_M1(r8, 0x0);
+{
+    const uint64_t r = ((uint64_t)((uint8_t)rax) & 0xFFULL) & ((uint64_t)((uint8_t)rax) & 0xFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80ULL) != 0);
+    f_of = false;
+}
+    if (f_zf || (f_sf != f_of)) goto L28;
+    rdx = (uint8_t)rax;
+{
+    const uint64_t a = (uint64_t)((uint32_t)rdi) & 0xFFFFFFFFULL, b = (uint64_t)(0x7fULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    rax = r8 + 0x1;
+L17:
+    ML_M8(rsi, 0x8) = rax;
+    ML_M4(rsi, 0x20) = (uint32_t)rdx;
+    if (!f_cf) goto L25;
+{
+    const uint64_t a = (uint64_t)((uint32_t)rdx) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)rdi) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_cf || f_zf) goto L25;
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0);
+    ML_M4(rbx, 0x0) = (uint32_t)rdx;
+    goto L53;
+L25:
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)(0x1ULL);
+    ML_M4(rbx, 0x0) = (uint32_t)rdx;
+    goto L53;
+L28:
+{
+    const uint64_t a = (uint64_t)((uint32_t)rdi) & 0xFFFFFFFFULL, b = (uint64_t)(0x80ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_cf) goto L46;
+    rdx = r8 + 0x1;
+{
+    const uint64_t a = (uint64_t)(rdx) & ~0ULL, b = (uint64_t)(rcx) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_cf) goto L46;
+    rcx = ML_M1(rdx, 0x0);
+    rax = ML_M1(r8, 0x0);
+    rcx = (uint64_t)(uint32_t)(((uint32_t)rcx) ^ 0xffffffffULL);
+    rcx = (uint64_t)(uint32_t)(((uint32_t)rcx) & ((uint32_t)rax));
+{
+    const uint64_t a = (uint64_t)((uint32_t)rcx) & 0xFFFFFFFFULL, b = (uint64_t)(0x80ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (f_sf != f_of) goto L46;
+    rcx = ML_M1(rdx, 0x0);
+    rax = ML_M1(r8, 0x0);
+    { const uint64_t src = (uint32_t)rcx; const uint64_t res = ((uint32_t)rcx << 7);
+      f_cf = (((src >> 6) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rcx = (uint64_t)(uint32_t)(res); }
+{
+    const uint64_t a = (uint64_t)((uint32_t)rdi) & 0xFFFFFFFFULL, b = (uint64_t)(0x3fffULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    rdx = (rcx + rax * 1) - 0x80;
+    rax = r8 + 0x2;
+    goto L17;
+L46:
+    rcx = rsi;
+    rax = ML_CALL(1417e3bc0);
+    ML_M4(rsi, 0x20) = (uint32_t)rax;
+    ML_M4(rbx, 0x0) = (uint32_t)rax;
+    rax = (uint64_t)(uint32_t)((uint32_t)rax - 1);
+{
+    const uint64_t a = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)rdi) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    rax = (rax & ~(uint64_t)0xFFULL) | (uint64_t)(uint8_t)((f_cf) ? 1 : 0);
+L53:
+    rsi = ML_M8(rsp, 0x38);
+    ML_M1(rbx, 0x4) = (uint8_t)rax;
+    rax = rbx;
+    rbx = ML_M8(rsp, 0x30);
+    rsp = rsp + (0x20ULL);
+    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
     return rax;
 #undef ML_CALL
 #undef ML_CALLP
@@ -460966,6 +472151,38 @@ uint64_t SynLift_1417f3130(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
     return rax;
 }
 
+uint64_t SynLift_1417f3224(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    rsp = rsp - (0x28ULL);
+    rax = ML_CALL(1417f3174);
+    { const uint64_t m = ~0ULL; const uint64_t v = (rax) & m; const uint64_t r = (0 - v) & m;
+      rax = r;
+      f_cf = (v != 0); f_zf = (r == 0); f_sf = ((r >> 63) & 1) != 0; f_of = (v == (1ULL << 63)); }
+    { const uint64_t m = 0xffffffffULL; const uint64_t a = ((uint32_t)rax) & m; const uint64_t b = ((uint32_t)rax) & m;
+      const uint64_t c = f_cf ? 1 : 0;
+      const uint64_t r = (a - b - c) & m;
+      f_cf = (a < b) || (a == b && c) || (a - b < c && a >= b);
+      f_of = (((a ^ b) & (a ^ r)) >> 31) & 1;
+      rax = (uint64_t)(uint32_t)(r);
+      f_zf = (r == 0); f_sf = ((r >> 31) & 1) != 0; }
+    { const uint64_t m = 0xffffffffULL; const uint64_t v = ((uint32_t)rax) & m; const uint64_t r = (0 - v) & m;
+      rax = (uint64_t)(uint32_t)(r);
+      f_cf = (v != 0); f_zf = (r == 0); f_sf = ((r >> 31) & 1) != 0; f_of = (v == (1ULL << 31)); }
+    rax = (uint64_t)(uint32_t)((uint32_t)rax - 1);
+    rsp = rsp + (0x28ULL);
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
 uint64_t SynLift_1417f3244(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
     uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
     uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
@@ -461227,6 +472444,53 @@ L11:
     return rax;
 }
 
+uint64_t SynLift_1417f3a80(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    rsp = rsp - (0x28ULL);
+    r8 = rcx;
+    r9 = (uintptr_t)0x141720000;
+    rcx = r9;
+    rax = ML_CALL(1417f3a00);
+{
+    const uint64_t r = ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL) & ((uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x80000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L19;
+    r8 = r8 - (r9);
+    rdx = r8;
+    rcx = r9;
+    rax = ML_CALL(1417f3a30);
+{
+    const uint64_t r = ((uint64_t)(rax) & ~0ULL) & ((uint64_t)(rax) & ~0ULL);
+    f_zf = (r == 0); f_cf = false; f_sf = ((r & 0x8000000000000000ULL) != 0);
+    f_of = false;
+}
+    if (f_zf) goto L19;
+    rax = (uint64_t)(uint32_t)(ML_M4(rax, 0x24));
+    { const uint64_t src = (uint32_t)rax; const uint64_t res = (((uint32_t)rax & 0xFFFFFFFFULL) >> 31);
+      f_cf = (((src >> 30) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rax = (uint64_t)(uint32_t)(res); }
+    rax = (uint64_t)(uint32_t)(((uint32_t)rax) ^ 0xffffffffULL);
+    rax = (uint64_t)(uint32_t)(((uint32_t)rax) & (0x1ULL));
+    goto L19;
+    rax = (uint64_t)(uint32_t)(0);
+L19:
+    rsp = rsp + (0x28ULL);
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
 uint64_t SynLift_1417f3bdc(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
     uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
     uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
@@ -461281,6 +472545,114 @@ L25:
     rsi = ML_M8(rsp, 0x38);
     rsp = rsp + (0x20ULL);
     { const uint64_t v = ML_M8(rsp, 0); rsp += 8; rdi = v; }
+    return rax;
+#undef ML_CALL
+#undef ML_CALLP
+    return rax;
+}
+
+uint64_t SynLift_1417f3cc4(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {
+    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;
+    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;
+    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;
+    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};
+    alignas(16) uint8_t stkFrame[0x400] = {0};
+    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);
+#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))
+    rsp = rsp - (0x18ULL);
+    r10 = rcx;
+    rax = (uint64_t)(uint32_t)(0x5a4dULL);
+{
+    const uint64_t a = (uint64_t)(ML_IAT(0x141720000)) & ~0ULL, b = (uint64_t)((uint16_t)rax) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L44;
+    r9 = (uint64_t)(int64_t)(int32_t)(ML_IAT(0x14172003c));
+    rcx = (uintptr_t)0x141720000;
+    r9 = r9 + (rcx);
+{
+    const uint64_t a = (uint64_t)(ML_M4(r9, 0x0)) & 0xFFFFFFFFULL, b = (uint64_t)(0x4550ULL) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (!f_zf) goto L44;
+    rax = (uint64_t)(uint32_t)(0x20bULL);
+{
+    const uint64_t a = (uint64_t)(ML_M2(r9, 0x18)) & 0xFFFFULL, b = (uint64_t)((uint16_t)rax) & 0xFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000ULL) != 0);
+}
+    if (!f_zf) goto L44;
+    r10 = r10 - (rcx);
+    rdx = (uint64_t)(uint32_t)(0);
+    r8 = (uint64_t)(uint32_t)((uint32_t)rdx);
+    ML_M4(rsp, 0x0) = (uint32_t)rdx;
+    rax = ML_M2(r9, 0x14);
+    rcx = (rax + r9 * 1) + 0x18;
+L19:
+    rax = ML_M2(r9, 0x6);
+{
+    const uint64_t a = (uint64_t)((uint32_t)r8) & 0xFFFFFFFFULL, b = (uint64_t)((uint32_t)rax) & 0xFFFFFFFFULL;
+    const uint64_t d = (a - b) & 0xFFFFFFFFULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x80000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x80000000ULL) != 0);
+}
+    if (!f_cf) goto L34;
+    r11 = (uint64_t)(uint32_t)(ML_M4(rcx, 0xc));
+{
+    const uint64_t a = (uint64_t)(r10) & ~0ULL, b = (uint64_t)(r11) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf) goto L29;
+    rax = (uint64_t)(uint32_t)(ML_M4(rcx, 0x8));
+    rax = (uint64_t)(uint32_t)((uint32_t)rax + ((uint32_t)r11));
+{
+    const uint64_t a = (uint64_t)(r10) & ~0ULL, b = (uint64_t)(rax) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (f_cf) goto L35;
+L29:
+    r8 = (uint64_t)(uint32_t)((uint32_t)r8 + 1);
+    ML_M4(rsp, 0x0) = (uint32_t)r8;
+    rcx = rcx + (0x28ULL);
+    ML_M8(rsp, 0x8) = rcx;
+    goto L19;
+L34:
+    rcx = rdx;
+L35:
+{
+    const uint64_t a = (uint64_t)(rcx) & ~0ULL, b = (uint64_t)(rdx) & ~0ULL;
+    const uint64_t d = (a - b) & ~0ULL;
+    f_zf = (d == 0); f_cf = (a < b); f_sf = ((d & 0x8000000000000000ULL) != 0);
+    f_of = (((a ^ b) & (a ^ d) & 0x8000000000000000ULL) != 0);
+}
+    if (!f_zf) goto L39;
+    rax = (uint64_t)(uint32_t)(0);
+    goto L47;
+L39:
+    rax = (uint64_t)(uint32_t)(ML_M4(rcx, 0x24));
+    { const uint64_t src = (uint32_t)rax; const uint64_t res = (((uint32_t)rax & 0xFFFFFFFFULL) >> 31);
+      f_cf = (((src >> 30) & 1) != 0); f_zf = ((res & 0xFFFFFFFFULL) == 0);
+      f_sf = ((res & 0x80000000ULL) != 0); f_of = false;
+    rax = (uint64_t)(uint32_t)(res); }
+    rax = (uint64_t)(uint32_t)(((uint32_t)rax) ^ 0xffffffffULL);
+    rax = (uint64_t)(uint32_t)(((uint32_t)rax) & (0x1ULL));
+    goto L47;
+L44:
+    rax = (uint64_t)(uint32_t)(0);
+    goto L47;
+    rax = (uint64_t)(uint32_t)(0);
+L47:
+    rsp = rsp + (0x18ULL);
     return rax;
 #undef ML_CALL
 #undef ML_CALLP
