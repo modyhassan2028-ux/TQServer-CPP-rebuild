@@ -67,7 +67,7 @@ def main():
         for k, v in json.load(open(extra_path)).items():
             a = int(k, 16)
             if a in funcs and len(v['text']) > len(funcs[a]['text']):
-                funcs[a] = {'a': a, 'b': v['b'], 'addr': v['addr'], 'text': v['text']}
+                funcs[a] = {'a': a, 'b': v.get('b', (max(v['addr']) if v.get('addr') else 0)), 'addr': v['addr'], 'text': v['text']}
 
     defs &= set(funcs)
     json.dump(sorted(defs), open(os.path.join(REPO, 'tools/bulk/ported.json'), 'w'))
