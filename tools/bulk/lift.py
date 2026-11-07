@@ -594,6 +594,15 @@ def main():
            '    return v[0];',
            '}',
            '#define ML_IAT(a) ml_glb((uintptr_t)(a))',
+           'inline uint64_t ml_gs(uintptr_t a) {',
+           '    static uintptr_t k[64]; static uint64_t v[64];',
+           '    for (unsigned i = 0; i < 64; ++i) {',
+           '        if (k[i] == a) return v[i];',
+           '        if (k[i] == 0) { k[i] = a; return v[i]; }',
+           '    }',
+           '    return 0;',
+           '}',
+           '#define ML_GS(a) ml_gs((uintptr_t)(a))',
            'static uint64_t mm0 = 0, mm1 = 0, mm2 = 0, mm3 = 0, mm4 = 0, mm5 = 0, mm6 = 0, mm7 = 0;', '',
            'namespace tq {', '']
     src = ['#include "modules/syndicate/src/synlift.h"', '', 'namespace tq {', '']
@@ -615,7 +624,7 @@ def main():
         src.append('uint64_t SynLift_%x(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {' % a)
         src.append('    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;')
         src.append('    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;')
-        src.append('    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;')
+        src.append('    bool f_zf = false, f_cf = false, f_sf = false, f_of = false, f_pf = false;')
         src.append('    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0}, xmm6[16] = {0}, xmm7[16] = {0}, xmm8[16] = {0}, xmm9[16] = {0}, xmm10[16] = {0}, xmm11[16] = {0}, xmm12[16] = {0}, xmm13[16] = {0}, xmm14[16] = {0}, xmm15[16] = {0};')
         src.append('    alignas(16) uint8_t stkFrame[0x400] = {0};')
         src.append('    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);')
@@ -788,6 +797,38 @@ def _cmps_body(body, bits, w, repeat, stop_on_zf):
 
 
 
+def _ptr(e):
+    """Pointer to an operand's storage, in the shadow-model convention the header defines."""
+    if e is None:
+        raise SystemExit('operand has no storage')
+    if e[0] == 'mem':
+        return '(const uint8_t*)(uintptr_t)((%s)%s)' % (e[1], ('+%s' % e[2]) if e[2] else '')
+    if e[0] == 'iat':
+        return '(const uint8_t*)(uintptr_t)ML_IAT(0x%x)' % e[1]
+    if e[0] == 'reg':
+        return '(const uint8_t*)&%s' % e[1]
+    raise SystemExit('operand has no storage: %r' % (e,))
+
+
+_CMOVC = {'o': 'f_of', 'no': '!f_of', 'b': 'f_cf', 'c': 'f_cf', 'nae': 'f_cf',
+          'ae': '!f_cf', 'nb': '!f_cf', 'nc': '!f_cf', 'e': 'f_zf', 'z': 'f_zf',
+          'ne': '!f_zf', 'nz': '!f_zf', 'be': 'f_cf || f_zf', 'na': 'f_cf || f_zf',
+          'a': '!f_cf && !f_zf', 'nbe': '!f_cf && !f_zf', 's': 'f_sf', 'ns': '!f_sf',
+          'p': 'f_pf', 'pe': 'f_pf', 'np': '!f_pf', 'po': '!f_pf',
+          'l': 'f_sf != f_of', 'nge': 'f_sf != f_of', 'ge': 'f_sf == f_of',
+          'nl': 'f_sf == f_of', 'le': 'f_zf || (f_sf != f_of)', 'ng': 'f_zf || (f_sf != f_of)',
+          'g': '!f_zf && (f_sf == f_of)', 'nle': '!f_zf && (f_sf == f_of)'}
+
+
+def _emit_float_cmp(body, op, a_dst, b_src, ins):
+    body.append('    { double x, y; memcpy(&x, %s, 8); memcpy(&y, %s, 8);' % (a_dst, b_src))
+    body.append('      if (x != x || y != y) { f_zf = 1; f_pf = 1; f_cf = 1; f_sf = 0; f_of = 0; }')
+    body.append('      else if (x < y) { f_zf = 0; f_pf = 0; f_cf = 1; f_sf = 1; f_of = 0; }')
+    body.append('      else if (x > y) { f_zf = 0; f_pf = 0; f_cf = 0; f_sf = 0; f_of = 0; }')
+    body.append('      else { f_zf = 1; f_pf = 1; f_cf = 0; f_sf = 0; f_of = 0; } }   // %s' % ins)
+    return True
+
+
 def _cvt_pack(body, dst, src_tok, n_from, in_bits, out_kind, ins):
     if not re.match(r'^xmm\d+$', dst):
         raise SystemExit('cvt form: %r' % ins)
@@ -798,9 +839,9 @@ def _cvt_pack(body, dst, src_tok, n_from, in_bits, out_kind, ins):
         if e is None:
             raise SystemExit('cvt form: %r' % ins)
         if e[0] == 'mem':
-            src = '(const uint8_t*)ML_ADDR(%s, %s)' % (e[1], e[2])
+            src = _ptr(e)
         elif e[0] == 'iat':
-            src = 'ML_ADDR(0x%x, 0)' % e[1]
+            src = _ptr(e)
         else:
             raise SystemExit('cvt form: %r' % ins)
     ctype = {32: 'int32_t', 64: 'int64_t'}[in_bits]
@@ -834,6 +875,32 @@ _SSEARITH = {'addsd': ('double', '+'), 'subsd': ('double', '-'), 'mulsd': ('doub
 
 def _emit_extra(op, rest, body, ins):
     """Returns True when it handled the instruction."""
+    _fc = re.match(r'^(?:u?comisd|u?comiss)\s+(xmm\d+),\s*(.+)$', ins, re.I)
+    if _fc:
+        _st = _fc.group(2).strip()
+        if re.match(r'^xmm\d+$', _st):
+            _srcp = '(const uint8_t*)%s' % _st
+        else:
+            _e = enc(_st)
+            if _e is None:
+                raise SystemExit('float compare: %r' % ins)
+            _srcp = _ptr(_e)
+        _emit_float_cmp(body, op, _fc.group(1), _srcp, ins)
+        return True
+    _cmv = re.match(r'^cmov([a-z]+)\s+(.+)$', ins, re.I)
+    if _cmv and _cmv.group(1).lower() in _CMOVC:
+        _a, _b = [x.strip() for x in _cmv.group(2).split(',', 1)]
+        _d, _src = enc(_a), enc(_b)
+        if _d is None or _src is None:
+            raise SystemExit('conditional move: %r' % ins)
+        body.append('    if (%s) { %s; }' % (_CMOVC[_cmv.group(1).lower()],
+                                             operand_write(_d, '(%s)' % operand_read(_src)).rstrip(';')))
+        return True
+    _gs = re.match(r'^mov\s+(r[a-z0-9]+),(BYTE|WORD|DWORD|QWORD) PTR (?:gs|fs):0x([0-9a-f]+)$', ins, re.I)
+    if _gs:
+        _w = {'BYTE': 1, 'WORD': 2, 'DWORD': 4, 'QWORD': 8}[_gs.group(2).upper()]
+        body.append('    %s = ML_GS(0x%x);   // %s' % (_gs.group(1), int(_gs.group(3), 16), ins))
+        return True
     _sa = re.match(r'^([a-z]+sd|[a-z]+ss)\s+(xmm\d+),\s*(.+)$', ins, re.I)
     if _sa and _sa.group(1).lower() in _SSEARITH:
         kind, oper = _SSEARITH[_sa.group(1).lower()]
@@ -846,9 +913,9 @@ def _emit_extra(op, rest, body, ins):
             if e is None:
                 raise SystemExit('simd arith: %r' % ins)
             if e[0] == 'mem':
-                src = '(const uint8_t*)ML_ADDR(%s, %s)' % (e[1], e[2])
+                src = _ptr(e)
             elif e[0] == 'iat':
-                src = '(const uint8_t*)ML_ADDR(0x%x, 0)' % e[1]
+                src = _ptr(e)
             else:
                 raise SystemExit('simd arith: %r' % ins)
             sargs = src

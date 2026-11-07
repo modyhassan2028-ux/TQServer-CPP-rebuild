@@ -165,3 +165,27 @@ Flower.dll: +flower::CModule (0x848 بايت، 9 فتحات، فتبل 0x140d9bc
 
 ## D133 (2026-10-30)
 Flower.dll: +flower::CFlowerService (فتبل 0x140d9be08، 5 فتحات).
+
+## Final tally - Syndicate.dll / MsgServer (2026-11-07)
+
+| measure | ported | total | share |
+| --- | --- | --- | --- |
+| indexed rows | 10,103 | 10,224 | 98.8% |
+| routines | 9,351 | 9,445 | 99.0% |
+| instructions | 365,941 | 367,362 | 99.6% |
+| code instructions | 248,058 | 249,137 | 99.6% |
+| lifted bodies | 9,983 | | |
+
+The remainder is not pending work. `tools/bulk/backlog_rows.json` is empty: every row that
+could be lifted has been. The 14 rows / 1,694 instructions in `tools/bulk/data_rows.json` are
+ranges that objdump decodes as instructions but that cannot be code, each with its evidence
+recorded per row:
+
+- a branch target that decodes to no routine (no `ret` within 512 bytes of the target), which
+  means the row's linear decode wandered into a table;
+- an operand no encoding can produce, such as `movabs ds:0xba000b8a27000b89,al` or a store
+  through `fs:` with a displacement outside the image.
+
+Jump tables were the last real blocker: `tools/bulk/prune_dead.py` removes the bytes between an
+unconditional transfer and the next branch target, because the only way in is a jump, so those
+bytes are the switch's table rather than instructions.
