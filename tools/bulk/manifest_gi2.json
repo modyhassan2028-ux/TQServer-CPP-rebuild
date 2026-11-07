@@ -1,0 +1,222 @@
+[
+ {
+  "a": 5392968288,
+  "cur": 8,
+  "lim": 32,
+  "add": 8,
+  "seam": 5394019264,
+  "cc": "jb",
+  "op": ">=",
+  "why": "the current value is at or above the limit"
+ },
+ {
+  "a": 5392968576,
+  "cur": 8,
+  "lim": 32,
+  "add": 8,
+  "seam": 5394019264,
+  "cc": "jb",
+  "op": ">=",
+  "why": "the current value is at or above the limit"
+ },
+ {
+  "a": 5392975568,
+  "cur": 8,
+  "lim": 32,
+  "add": 8,
+  "seam": 5394019264,
+  "cc": "jb",
+  "op": ">=",
+  "why": "the current value is at or above the limit"
+ },
+ {
+  "a": 5392975792,
+  "cur": 8,
+  "lim": 32,
+  "add": 8,
+  "seam": 5394019264,
+  "cc": "jb",
+  "op": ">=",
+  "why": "the current value is at or above the limit"
+ },
+ {
+  "a": 5393152944,
+  "cur": 8,
+  "lim": 32,
+  "add": 8,
+  "seam": 5394019264,
+  "cc": "jb",
+  "op": ">=",
+  "why": "the current value is at or above the limit"
+ },
+ {
+  "a": 5393153104,
+  "cur": 8,
+  "lim": 32,
+  "add": 8,
+  "seam": 5394019264,
+  "cc": "jb",
+  "op": ">=",
+  "why": "the current value is at or above the limit"
+ },
+ {
+  "a": 5393163680,
+  "cur": 8,
+  "lim": 32,
+  "add": 8,
+  "seam": 5394019264,
+  "cc": "jb",
+  "op": ">=",
+  "why": "the current value is at or above the limit"
+ },
+ {
+  "a": 5393163808,
+  "cur": 8,
+  "lim": 32,
+  "add": 8,
+  "seam": 5394019264,
+  "cc": "jb",
+  "op": ">=",
+  "why": "the current value is at or above the limit"
+ },
+ {
+  "a": 5393351152,
+  "cur": 8,
+  "lim": 32,
+  "add": 8,
+  "seam": 5394019264,
+  "cc": "jb",
+  "op": ">=",
+  "why": "the current value is at or above the limit"
+ },
+ {
+  "a": 5393351280,
+  "cur": 8,
+  "lim": 32,
+  "add": 8,
+  "seam": 5394019264,
+  "cc": "jb",
+  "op": ">=",
+  "why": "the current value is at or above the limit"
+ },
+ {
+  "a": 5393417824,
+  "cur": 8,
+  "lim": 32,
+  "add": 8,
+  "seam": 5394019264,
+  "cc": "jb",
+  "op": ">=",
+  "why": "the current value is at or above the limit"
+ },
+ {
+  "a": 5393423552,
+  "cur": 8,
+  "lim": 32,
+  "add": 8,
+  "seam": 5394019264,
+  "cc": "jb",
+  "op": ">=",
+  "why": "the current value is at or above the limit"
+ },
+ {
+  "a": 5393492864,
+  "cur": 8,
+  "lim": 32,
+  "add": 8,
+  "seam": 5394019264,
+  "cc": "jb",
+  "op": ">=",
+  "why": "the current value is at or above the limit"
+ },
+ {
+  "a": 5393495600,
+  "cur": 8,
+  "lim": 32,
+  "add": 8,
+  "seam": 5394019264,
+  "cc": "jb",
+  "op": ">=",
+  "why": "the current value is at or above the limit"
+ },
+ {
+  "a": 5393570336,
+  "cur": 8,
+  "lim": 32,
+  "add": 8,
+  "seam": 5394019264,
+  "cc": "jb",
+  "op": ">=",
+  "why": "the current value is at or above the limit"
+ },
+ {
+  "a": 5393570544,
+  "cur": 8,
+  "lim": 32,
+  "add": 8,
+  "seam": 5394019264,
+  "cc": "jb",
+  "op": ">=",
+  "why": "the current value is at or above the limit"
+ },
+ {
+  "a": 5393570752,
+  "cur": 8,
+  "lim": 32,
+  "add": 8,
+  "seam": 5394019264,
+  "cc": "jb",
+  "op": ">=",
+  "why": "the current value is at or above the limit"
+ },
+ {
+  "a": 5393587120,
+  "cur": 8,
+  "lim": 32,
+  "add": 8,
+  "seam": 5394019264,
+  "cc": "jb",
+  "op": ">=",
+  "why": "the current value is at or above the limit"
+ },
+ {
+  "a": 5393587312,
+  "cur": 8,
+  "lim": 32,
+  "add": 8,
+  "seam": 5394019264,
+  "cc": "jb",
+  "op": ">=",
+  "why": "the current value is at or above the limit"
+ },
+ {
+  "a": 5393587504,
+  "cur": 8,
+  "lim": 32,
+  "add": 8,
+  "seam": 5394019264,
+  "cc": "jb",
+  "op": ">=",
+  "why": "the current value is at or above the limit"
+ },
+ {
+  "a": 5393684368,
+  "cur": 8,
+  "lim": 32,
+  "add": 8,
+  "seam": 5394019264,
+  "cc": "jb",
+  "op": ">=",
+  "why": "the current value is at or above the limit"
+ },
+ {
+  "a": 5393686064,
+  "cur": 8,
+  "lim": 32,
+  "add": 8,
+  "seam": 5394019264,
+  "cc": "jb",
+  "op": ">=",
+  "why": "the current value is at or above the limit"
+ }
+]
