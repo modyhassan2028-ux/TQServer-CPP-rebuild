@@ -572,7 +572,7 @@ def main():
         src.append('    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;')
         src.append('    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;')
         src.append('    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;')
-        src.append('    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};')
+        src.append('    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0}, xmm6[16] = {0}, xmm7[16] = {0}, xmm8[16] = {0}, xmm9[16] = {0}, xmm10[16] = {0}, xmm11[16] = {0}, xmm12[16] = {0}, xmm13[16] = {0}, xmm14[16] = {0}, xmm15[16] = {0};')
         src.append('    alignas(16) uint8_t stkFrame[0x400] = {0};')
         src.append('    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);')
         # Win64 passes the 5th and 6th arguments on the stack, right after the 32-byte shadow space.
@@ -605,6 +605,36 @@ def main():
     open(os.path.join(REPO, 'modules/syndicate/src/%s.cpp' % base), 'w').write('\n'.join(src))
     for a, why in skipped:
         print('  skipped 0x%x: %s' % (a, why))
+
+
+
+
+# --- 16/8-bit register names (r9w, r9b, ...): masked read, read-modify-write on store ---
+SUBREGS = re.compile(r'^(r(?:[89]|1[0-5]))([wdb])$')
+_orig_enc = enc
+_orig_operand_read = operand_read
+_orig_operand_write = operand_write
+
+
+def enc(x):
+    if isinstance(x, str):
+        m = SUBREGS.match(x.strip())
+        if m:
+            return ('sub', m.group(1), {'w': 2, 'd': 4, 'b': 1}[m.group(2)])
+    return _orig_enc(x)
+
+
+def operand_read(e):
+    if e and e[0] == 'sub':
+        return '(uint64_t)(%s & 0x%xULL)' % (e[1], (1 << (8 * e[2])) - 1)
+    return _orig_operand_read(e)
+
+
+def operand_write(e, expr):
+    if e and e[0] == 'sub':
+        m = (1 << (8 * e[2])) - 1
+        return '%s = (%s & ~0x%xULL) | ((uint64_t)(%s) & 0x%xULL);' % (e[1], e[1], m, expr, m)
+    return _orig_operand_write(e, expr)
 
 
 if __name__ == '__main__':
