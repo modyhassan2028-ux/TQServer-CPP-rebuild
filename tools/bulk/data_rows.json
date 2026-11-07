@@ -1,0 +1,37 @@
+{
+ "0x1417d8c04": {
+  "addr": "0x1417d8c04",
+  "first_refusal": "movabs ds:0xba000b8a27000b89,al",
+  "insns": 7,
+  "reason": "unreferenced and decodes to an impossible operand, so the range is data not code",
+  "referenced": false
+ },
+ "0x1417da723": {
+  "addr": "0x1417da723",
+  "first_refusal": "mov WORD PTR [rsi-0x5951fff5],fs",
+  "insns": 536,
+  "reason": "unreferenced and decodes to an impossible operand, so the range is data not code",
+  "referenced": false
+ },
+ "0x1417da746": {
+  "addr": "0x1417da746",
+  "first_refusal": "mov WORD PTR [rsi-0x5951fff5],fs",
+  "insns": 272,
+  "reason": "unreferenced and decodes to an impossible operand, so the range is data not code",
+  "referenced": false
+ },
+ "0x1417da7a4": {
+  "addr": "0x1417da7a4",
+  "first_refusal": "mov WORD PTR [rsi-0x5951fff5],fs",
+  "insns": 109,
+  "reason": "unreferenced and decodes to an impossible operand, so the range is data not code",
+  "referenced": false
+ },
+ "0x1417da7d0": {
+  "addr": "0x1417da7d0",
+  "first_refusal": "mov WORD PTR [rsi-0x5951fff5],fs",
+  "insns": 26,
+  "reason": "unreferenced and decodes to an impossible operand, so the range is data not code",
+  "referenced": false
+ }
+}

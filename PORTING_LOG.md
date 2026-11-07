@@ -9458,3 +9458,16 @@ CSynDomain 0x28، CSynFacility 0x20، CSynArenicMeed 8 …).
 - الخطة: (1) `call [reg+disp]` و`call reg`، (2) تحويل `enc()==None` لرفض نظيف عشان الجرد يبقى كامل،
   (3) `div`/`imul` بالرايات الصح، (4) الكتابة للعنوان المطلق عبر `.data` reference، (5) `rep stos`.
   بعد كل شكل: رفع دفعة + بطاريات + تحديث الجرد + دفع.
+
+## Lift tail classification (2026-11-07)
+
+The remaining un-lifted rows split into two groups, recorded as machine-readable lists:
+
+- `tools/bulk/data_rows.json` - ranges objdump decodes as instructions but that are
+  data: no call or jump anywhere in the image targets them, and their byte stream
+  contains an impossible operand (I/O port `ins`/`outs`, a segment override, or a
+  displacement far outside the image). They are excluded from the coverage target
+  instead of being forced through the lifter.
+- `tools/bulk/backlog_rows.json` - real code that still needs work: out-of-range
+  branch targets (`jbe` leaving the .pdata range), absolute `jmp 0x...` seams and
+  `movabs ds:...` stores.

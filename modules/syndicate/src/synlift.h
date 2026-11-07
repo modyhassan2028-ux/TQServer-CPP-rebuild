@@ -6362,6 +6362,8 @@ uint64_t SynLift_1417b0890(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_1417b0980(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b0980
 
+uint64_t SynLift_1417b0a40(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b0a40
+
 uint64_t SynLift_1417b0ca0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b0ca0
 
 uint64_t SynLift_1417b0d80(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b0d80
@@ -6432,7 +6434,19 @@ uint64_t SynLift_1417b1ae0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_1417b1b30(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b1b30
 
+uint64_t SynLift_1417b1ba0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b1ba0
+
+uint64_t SynLift_1417b1bf0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b1bf0
+
+uint64_t SynLift_1417b1c30(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b1c30
+
+uint64_t SynLift_1417b1c80(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b1c80
+
 uint64_t SynLift_1417b1cf0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b1cf0
+
+uint64_t SynLift_1417b1d14(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b1d14
+
+uint64_t SynLift_1417b1d5d(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b1d5d
 
 uint64_t SynLift_1417b1d99(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b1d99
 
@@ -20277,6 +20291,7 @@ extern uint64_t (*g_fnLIFT_141743e70)(uint64_t, uint64_t, uint64_t, uint64_t, ui
 extern uint64_t (*g_fnLIFT_141743e80)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t);
 extern uint64_t (*g_fnLIFT_141743f20)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t);
 extern uint64_t (*g_fnLIFT_141743f90)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t);
+extern uint64_t (*g_fnLIFT_141744030)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t);
 extern uint64_t (*g_fnLIFT_1417440d0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t);
 extern uint64_t (*g_fnLIFT_141744130)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t);
 extern uint64_t (*g_fnLIFT_1417441e0)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t);

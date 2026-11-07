@@ -750,8 +750,60 @@ def _scas_body(body, bits, w, stop_on_zf):
     body.append('    }')
 
 
+def _cmps_body(body, bits, w, repeat, stop_on_zf):
+    mask = '~0ULL' if bits == 64 else '0x%xULL' % ((1 << bits) - 1)
+    body.append('    %s {' % ('while (rcx)' if repeat else 'do'))
+    body.append('        const uint64_t a = ML_M%d(rsi, 0) & %s, b = ML_M%d(rdi, 0) & %s;'
+                % (w, mask, w, mask))
+    body.append('        const uint64_t d = (a - b) & %s;' % mask)
+    body.append('        rsi += %d; rdi += %d;' % (w, w))
+    if repeat:
+        body.append('        --rcx;')
+    body.append('        f_cf = a < b; f_zf = (d == 0); f_sf = ((d >> %d) & 1) != 0;' % (bits - 1))
+    body.append('        f_of = ((((a ^ b) & (a ^ d)) >> %d) & 1) != 0;' % (bits - 1))
+    if stop_on_zf is not None:
+        body.append('        if (%s) break;' % ('f_zf' if stop_on_zf else '!f_zf'))
+    body.append('    }%s' % (' while (0)' if not repeat else ''))
+
+
+
 def _emit_extra(op, rest, body, ins):
     """Returns True when it handled the instruction."""
+    _cm = re.match(r'^(rep(?:nz|ne|z|e)?\s+)?cmps\s+(?:[a-z]{2,3},\s*)?(BYTE|WORD|DWORD|QWORD) PTR (?:ds:)?\[rsi\],\s*(?:(BYTE|WORD|DWORD|QWORD) PTR )?(?:es:)?\[rdi\]$', ins, re.I)
+    if _cm:
+        pref = (_cm.group(1) or '').strip().lower()
+        bits = {'BYTE': 8, 'WORD': 16, 'DWORD': 32, 'QWORD': 64}[_cm.group(2).upper()]
+        zf = None
+        if pref in ('repz', 'repe'):
+            zf = True
+        elif pref in ('repnz', 'repne'):
+            zf = False
+        _cmps_body(body, bits, bits // 8, bool(pref), zf)
+        return True
+    _cs = re.match(r'^(cvtsi2sd|cvtsi2ss|cvttsd2si|cvttss2si|vcvtsi2sd)\s+(.+)$', ins, re.I)
+    if _cs:
+        mn2 = _cs.group(1).lower()
+        a1, b1 = [x.strip() for x in _cs.group(2).split(',', 1)]
+        sb = enc(b1)
+        if sb is None:
+            raise SystemExit('cvt form: %r' % ins)
+        if mn2.startswith('cvtsi2'):
+            w = sb[2] if sb[0] in ('reg', 'sub') else sb[3]
+            if not re.match(r'^xmm\d+$', a1):
+                raise SystemExit('cvt form: %r' % ins)
+            cast = {4: '(double)(int32_t)', 8: '(double)(int64_t)'}[4 if w == 4 else 8]
+            body.append('    { const double d = %s(%s); memcpy(%s, &d, 8); }' % (cast, operand_read(sb), a1))
+            return True
+        if not re.match(r'^xmm\d+$', b1):
+            raise SystemExit('cvt form: %r' % ins)
+        d = enc(a1)
+        if d is None:
+            raise SystemExit('cvt form: %r' % ins)
+        w = d[2] if d[0] in ('reg', 'sub') else d[3]
+        cast = '(int64_t)' if w == 8 else '(int32_t)'
+        body.append('    { double d; memcpy(&d, %s, 8); %s }'
+                    % (b1, operand_write(d, cast + 'd').rstrip(';')))
+        return True
     _sm = re.match(r'^scas\s+(?:[a-z]{2,3},\s*)?(BYTE|WORD|DWORD|QWORD) PTR (?:es:)?\[rdi\]$', ins, re.I)
     if _sm or re.match(r'^scas$', ins, re.I):
         bits = {'BYTE': 8, 'WORD': 16, 'DWORD': 32, 'QWORD': 64}.get((_sm.group(1) if _sm else 'byte').upper(), 8)
