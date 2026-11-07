@@ -1,4 +1,25 @@
 {
+ "0x14176b050": {
+  "addr": "0x14176b050",
+  "first_refusal": "jmp 0x1417f2fdc",
+  "insns": 12,
+  "reason": "branch target decodes to no routine (no ret inside 512 bytes), so the range is data",
+  "referenced": true
+ },
+ "0x14176b090": {
+  "addr": "0x14176b090",
+  "first_refusal": "jmp 0x1417f2fdc",
+  "insns": 12,
+  "reason": "branch target decodes to no routine (no ret inside 512 bytes), so the range is data",
+  "referenced": true
+ },
+ "0x1417a1bc0": {
+  "addr": "0x1417a1bc0",
+  "first_refusal": "jmp 0x1417f2fdc",
+  "insns": 10,
+  "reason": "branch target decodes to no routine (no ret inside 512 bytes), so the range is data",
+  "referenced": true
+ },
  "0x1417d8c04": {
   "addr": "0x1417d8c04",
   "first_refusal": "movabs ds:0xba000b8a27000b89,al",

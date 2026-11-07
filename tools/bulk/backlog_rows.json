@@ -11,18 +11,6 @@
   "insns": 98,
   "referenced": false
  },
- "0x14176b050": {
-  "addr": "0x14176b050",
-  "first_refusal": "jmp 0x1417f2fdc",
-  "insns": 12,
-  "referenced": true
- },
- "0x14176b090": {
-  "addr": "0x14176b090",
-  "first_refusal": "jmp 0x1417f2fdc",
-  "insns": 12,
-  "referenced": true
- },
  "0x14177fbc0": {
   "addr": "0x14177fbc0",
   "first_refusal": "add BYTE PTR [rdi-0x3afffa04],ah",
@@ -43,111 +31,81 @@
  },
  "0x141788560": {
   "addr": "0x141788560",
-  "first_refusal": "cvtdq2pd xmm7,xmm7",
+  "first_refusal": "mulsd xmm6,QWORD PTR [rip@0x1418302a0]",
   "insns": 83,
-  "referenced": true
- },
- "0x1417a1bc0": {
-  "addr": "0x1417a1bc0",
-  "first_refusal": "jmp 0x1417f2fdc",
-  "insns": 10,
   "referenced": true
  },
  "0x1417ac130": {
   "addr": "0x1417ac130",
-  "first_refusal": "cvtdq2pd xmm0,xmm0",
+  "first_refusal": "mulsd xmm0,xmm6",
   "insns": 111,
   "referenced": false
  },
  "0x1417ac170": {
   "addr": "0x1417ac170",
-  "first_refusal": "cvtdq2pd xmm7,xmm7",
+  "first_refusal": "mulsd xmm6,QWORD PTR [rip@0x14183029f]",
   "insns": 102,
-  "referenced": false
- },
- "0x1417b1dd0": {
-  "addr": "0x1417b1dd0",
-  "first_refusal": "jmp 0x141743dd0",
-  "insns": 13,
-  "referenced": false
- },
- "0x1417b1e00": {
-  "addr": "0x1417b1e00",
-  "first_refusal": "jmp 0x14175f4a0",
-  "insns": 32,
   "referenced": false
  },
  "0x1417b3260": {
   "addr": "0x1417b3260",
-  "first_refusal": "cvtdq2pd xmm1,xmm1",
+  "first_refusal": "divsd xmm6,xmm1",
   "insns": 499,
   "referenced": false
  },
  "0x1417b32d0": {
   "addr": "0x1417b32d0",
-  "first_refusal": "cvtdq2pd xmm1,xmm1",
+  "first_refusal": "divsd xmm6,xmm1",
   "insns": 466,
   "referenced": false
  },
  "0x1417b3300": {
   "addr": "0x1417b3300",
-  "first_refusal": "cvtdq2pd xmm1,xmm1",
+  "first_refusal": "divsd xmm6,xmm1",
   "insns": 431,
   "referenced": true
  },
  "0x1417b3a90": {
   "addr": "0x1417b3a90",
-  "first_refusal": "cvtdq2pd xmm1,xmm1",
+  "first_refusal": "divsd xmm6,xmm1",
   "insns": 507,
   "referenced": true
  },
- "0x1417b6f80": {
-  "addr": "0x1417b6f80",
-  "first_refusal": "jmp 0x14178f470",
-  "insns": 37,
-  "referenced": false
- },
  "0x1417bed70": {
   "addr": "0x1417bed70",
-  "first_refusal": "cvtdq2pd xmm1,xmm1",
+  "first_refusal": "divsd xmm6,xmm1",
   "insns": 429,
   "referenced": true
  },
- "0x1417bf4d0": {
-  "addr": "0x1417bf4d0",
-  "first_refusal": "jmp 0x1417b3a90",
-  "insns": 22,
-  "referenced": true
- },
- "0x1417e1980": {
-  "addr": "0x1417e1980",
-  "first_refusal": "rep movs BYTE PTR es:[rdi],BYTE PTR ds:[rsi]",
-  "insns": 46,
-  "referenced": true
- },
- "0x1417e1b40": {
-  "addr": "0x1417e1b40",
-  "first_refusal": "rep movs BYTE PTR es:[rdi],BYTE PTR ds:[rsi]",
-  "insns": 43,
-  "referenced": true
- },
- "0x1417e1ee0": {
-  "addr": "0x1417e1ee0",
-  "first_refusal": "rep movs BYTE PTR es:[rdi],BYTE PTR ds:[rsi]",
-  "insns": 30,
-  "referenced": true
- },
- "0x1417e7e20": {
-  "addr": "0x1417e7e20",
-  "first_refusal": "cmpxchg DWORD PTR [rcx],edx",
-  "insns": 12,
+ "0x1417d8c04": {
+  "addr": "0x1417d8c04",
+  "first_refusal": "movabs ds:0xba000b8a27000b89,al",
+  "insns": 7,
   "referenced": false
  },
- "0x1417e7ec0": {
-  "addr": "0x1417e7ec0",
-  "first_refusal": "cmpxchg QWORD PTR [rcx],rdx",
-  "insns": 12,
-  "referenced": true
+ "0x1417da723": {
+  "addr": "0x1417da723",
+  "first_refusal": "mov WORD PTR [rsi-0x5951fff5],fs",
+  "insns": 536,
+  "referenced": false
+ },
+ "0x1417da746": {
+  "addr": "0x1417da746",
+  "first_refusal": "mov WORD PTR [rsi-0x5951fff5],fs",
+  "insns": 272,
+  "referenced": false
+ },
+ "0x1417da7a4": {
+  "addr": "0x1417da7a4",
+  "first_refusal": "mov WORD PTR [rsi-0x5951fff5],fs",
+  "insns": 109,
+  "referenced": false
+ },
+ "0x1417da7d0": {
+  "addr": "0x1417da7d0",
+  "first_refusal": "mov WORD PTR [rsi-0x5951fff5],fs",
+  "insns": 26,
+  "referenced": false
  },
  "0x1417f340c": {
   "addr": "0x1417f340c",
@@ -159,24 +117,6 @@
   "addr": "0x1417f3dd0",
   "first_refusal": "ds or eax,0xd3e5500",
   "insns": 103,
-  "referenced": true
- },
- "0x1417f47d0": {
-  "addr": "0x1417f47d0",
-  "first_refusal": "movsd QWORD PTR [rsp+0x10],xmm1",
-  "insns": 13,
-  "referenced": false
- },
- "0x1417f56c0": {
-  "addr": "0x1417f56c0",
-  "first_refusal": "movsd QWORD PTR [rsp+0x8],xmm0",
-  "insns": 10,
-  "referenced": true
- },
- "0x1417f56f0": {
-  "addr": "0x1417f56f0",
-  "first_refusal": "movsd QWORD PTR [rsp+0x8],xmm0",
-  "insns": 7,
   "referenced": true
  },
  "0x1417f5830": {

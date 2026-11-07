@@ -213,7 +213,14 @@ def lift(addr, funcs):
             continue
         if op == 'jmp':
             if re.match(r'^0x[0-9a-f]+$', rest.strip()):
-                body.append('    goto L%d;' % idx[int(rest.strip(), 16)])
+                _t = int(rest.strip(), 16)
+                if _t not in idx:
+                    if _t not in funcs:
+                        raise SystemExit('branch target has no body: %r' % ins)
+                    seams.add(_t)
+                    body.append('    return ML_CALL(%x);   // tail jump outside the row' % _t)
+                    continue
+                body.append('    goto L%d;' % idx[_t])
             else:
                 e = enc(rest)
                 if not e:
@@ -228,6 +235,12 @@ def lift(addr, funcs):
             continue
         if op in JCC:
             tgt = int(rest.strip(), 16)
+            if tgt not in idx:
+                if tgt not in funcs:
+                    raise SystemExit('branch target has no body: %r' % ins)
+                seams.add(tgt)
+                body.append('    if (%s) return ML_CALL(%x);   // branch outside the row' % (JCC[op], tgt))
+                continue
             body.append('    if (%s) goto L%d;' % (JCC[op], idx[tgt]))
             continue
         if op == 'call':
