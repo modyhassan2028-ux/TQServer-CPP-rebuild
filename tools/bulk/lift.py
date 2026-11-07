@@ -114,6 +114,8 @@ def mem(off, disp, w):
 
 
 def operand_read(op):
+    if op is None:
+        raise SystemExit('operand form')
     k = op[0]
     if k == 'reg':
         return rv(op)
@@ -127,6 +129,8 @@ def operand_read(op):
 
 
 def operand_write(op, expr):
+    if op is None:
+        raise SystemExit('operand form')
     k = op[0]
     if k == 'reg':
         return wr(op[1], op[2], expr)
@@ -212,7 +216,12 @@ def lift(addr, funcs):
                 body.append('    goto L%d;' % idx[int(rest.strip(), 16)])
             else:
                 e = enc(rest)
-                if not e or e[0] not in ('imm', 'iat'):
+                if not e:
+                    raise SystemExit('jmp form: %r' % ins)
+                if e[0] in ('mem', 'reg'):
+                    body.append('    return ML_CALLP(%s);   // tail through pointer' % operand_read(e))
+                    continue
+                if e[0] not in ('imm', 'iat'):
                     raise SystemExit('jmp form: %r' % ins)
                 seams.add(e[1])
                 body.append('    return ML_CALL(%x);   // tail call' % e[1])
@@ -223,7 +232,13 @@ def lift(addr, funcs):
             continue
         if op == 'call':
             e = enc(rest)
-            if not e or e[0] not in ('imm', 'iat'):
+            if not e:
+                raise SystemExit('call form: %r' % ins)
+            if e[0] in ('mem', 'reg'):
+                # indirect call through a function pointer: same Win64 arguments, pointer read first
+                body.append('    rax = ML_CALLP(%s);' % operand_read(e))
+                continue
+            if e[0] not in ('imm', 'iat'):
                 raise SystemExit('call form: %r' % ins)
             key = e[1]
             seams.add(key)
@@ -361,8 +376,8 @@ def main():
     for a in addrs:
         try:
             f, body, seams = lift(a, funcs)
-        except (SystemExit, KeyError, RangeTruncated) as e:
-            skipped.append((a, str(e)))
+        except Exception as e:   # one unencodable body must never kill the batch
+            skipped.append((a, '%s: %s' % (type(e).__name__, e)))
             continue
         for s in sorted(seams):
             if s not in defined:
@@ -380,8 +395,11 @@ def main():
         # Win64 passes the 5th and 6th arguments on the stack, right after the 32-byte shadow space.
         # The original body stores them there, so the lifted call hands them over as well.
         src.append('#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))')
+        src.append('#define ML_CALLP(t) ((uint64_t (*)(uint64_t,uint64_t,uint64_t,uint64_t,uint64_t,uint64_t))(uintptr_t)(t))'
+                   '(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))')
         src += body
         src.append('#undef ML_CALL')
+        src.append('#undef ML_CALLP')
         src.append('    return rax;')
         src.append('}')
         src.append('')
