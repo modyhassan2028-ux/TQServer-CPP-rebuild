@@ -158,6 +158,14 @@ def normalise(t):
     return re.sub(r'^rex(\.[WRX]+)? ', '', t.strip())
 
 
+REGISTRY = {int(x, 16) for x in json.load(open(os.path.join(os.path.dirname(__file__), 'seams.json')))} \
+    if os.path.exists(os.path.join(os.path.dirname(__file__), 'seams.json')) else set()
+
+
+class RangeTruncated(Exception):
+    pass
+
+
 def lift(addr, funcs):
     f = funcs[addr]
     t = f['text']
@@ -167,8 +175,15 @@ def lift(addr, funcs):
         if m:
             label.add(int(m.group(1), 16))
     idx = {a: i for i, a in enumerate(f['addr'])}
+    # a conditional branch that leaves the extracted range means the row is only part of the function:
+    # lifting it would silently drop the other arm, so refuse instead of producing a half body
+    for i, ins in enumerate(t):
+        m = re.match(r'^(j\w+) (0x[0-9a-f]+)$', ins)
+        if m and m.group(1) != 'jmp' and int(m.group(2), 16) not in idx:
+            raise RangeTruncated('%s at instruction %d leaves the row (target %s)'
+                                 % (m.group(1), i, m.group(2)))
     body = []
-    seams = set()
+    seams = set(REGISTRY)
     for i, ins in enumerate(t):
         ins = normalise(ins)
         if f['addr'][i] in label:
@@ -341,18 +356,18 @@ def main():
            'namespace tq {', '']
     src = ['#include "modules/syndicate/src/synlift.h"', '', 'namespace tq {', '']
     defined = set()
+    declared = []
     skipped = []
     for a in addrs:
         try:
             f, body, seams = lift(a, funcs)
-        except (SystemExit, KeyError) as e:
+        except (SystemExit, KeyError, RangeTruncated) as e:
             skipped.append((a, str(e)))
             continue
         for s in sorted(seams):
-            hdr.append('extern uint64_t (*g_fnLIFT_%x)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t);' % s)
             if s not in defined:
                 defined.add(s)
-                src.append('__attribute__((weak)) uint64_t (*g_fnLIFT_%x)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;' % s)
+                declared.append(s)
         hdr.append('')
         hdr.append('uint64_t SynLift_%x(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x%x' % (a, a))
         src.append('uint64_t SynLift_%x(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {' % a)
@@ -371,6 +386,12 @@ def main():
         src.append('}')
         src.append('')
         print('lifted 0x%x: %d instructions, %d seams' % (a, len(f['text']), len(seams)))
+    # every seam the module can point at, declared once, ahead of the bodies
+    block = ['// seams: an indirect call the bodies make out of the image (import thunks and other bodies)']
+    for s in sorted(declared):
+        block.append('extern uint64_t (*g_fnLIFT_%x)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t);' % s)
+        src.insert(4, '__attribute__((weak)) uint64_t (*g_fnLIFT_%x)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t) = nullptr;' % s)
+    hdr += block + ['']
     hdr += ['}  // namespace tq', '']
     src += ['}  // namespace tq', '']
     # LIFT_OUT=stage keeps work-in-progress bodies out of the verified module: they land in
