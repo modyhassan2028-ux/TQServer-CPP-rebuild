@@ -163,8 +163,14 @@ def lift(addr, funcs):
             body.append('    return rax;')
             continue
         if op == 'jmp':
-            tgt = int(rest.strip(), 16)
-            body.append('    goto L%d;' % idx[tgt])
+            if re.match(r'^0x[0-9a-f]+$', rest.strip()):
+                body.append('    goto L%d;' % idx[int(rest.strip(), 16)])
+            else:
+                e = enc(rest)
+                if not e or e[0] not in ('imm', 'iat'):
+                    raise SystemExit('jmp form: %r' % ins)
+                seams.add(e[1])
+                body.append('    return ML_CALL(%x);   // tail call' % e[1])
             continue
         if op in JCC:
             tgt = int(rest.strip(), 16)
@@ -231,6 +237,11 @@ def lift(addr, funcs):
 def main():
     addrs = [int(a, 16) for a in sys.argv[1:]]
     funcs = {x['a']: x for x in json.load(open(os.path.join(REPO, 'tools/bulk/funcs.json')))}
+    extra_path = os.path.join(REPO, 'tools/bulk/extra_bodies.json')
+    if os.path.exists(extra_path):
+        for k, v in json.load(open(extra_path)).items():
+            v['a'] = int(k, 16)
+            funcs[v['a']] = v
     hdr = ['// Lifted mechanically by tools/bulk/lift.py - one C++ statement per x86 instruction.',
            '// Registers are uint64_t, memory goes through width-tagged accessors, flags are computed explicitly.',
            '#pragma once', '#include <cstdint>', '',
