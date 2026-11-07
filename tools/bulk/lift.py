@@ -343,6 +343,14 @@ def lift(addr, funcs):
                 else:
                     body.append('    (*(uint64_t*)(%s)) = (uint64_t)(%s);   // movsd xmm, m64' % (dst, operand_read(src)))
                 continue
+            if len(parts) == 2 and re.match(r'^xmm\d+$', parts[1]):
+                d = enc(parts[0])
+                if d is not None and d[0] == 'mem':
+                    body.append('    ML_M8(%s, %s) = *(uint64_t*)(%s);   // movsd m64, xmm' % (d[1], d[2], parts[1]))
+                    continue
+                if d is not None and d[0] == 'iat':
+                    body.append('    ML_M8(0x%x, 0) = *(uint64_t*)(%s);   // movsd m64, xmm' % (d[1], parts[1]))
+                    continue
             raise SystemExit('movsd form: %r' % ins)
         if op in ('cdq', 'cqo'):
             if op == 'cdq':
@@ -767,8 +775,91 @@ def _cmps_body(body, bits, w, repeat, stop_on_zf):
 
 
 
+def _cvt_pack(body, dst, src_tok, n_from, in_bits, out_kind, ins):
+    if not re.match(r'^xmm\d+$', dst):
+        raise SystemExit('cvt form: %r' % ins)
+    if re.match(r'^xmm\d+$', src_tok):
+        src = src_tok
+    else:
+        e = enc(src_tok)
+        if e is None:
+            raise SystemExit('cvt form: %r' % ins)
+        if e[0] == 'mem':
+            src = '(const uint8_t*)ML_ADDR(%s, %s)' % (e[1], e[2])
+        elif e[0] == 'iat':
+            src = 'ML_ADDR(0x%x, 0)' % e[1]
+        else:
+            raise SystemExit('cvt form: %r' % ins)
+    ctype = {32: 'int32_t', 64: 'int64_t'}[in_bits]
+    if in_bits == 32 and out_kind == 'double':
+        body.append('    { int32_t t[%d]; memcpy(t, %s, %d); double o[%d];'
+                    % (n_from, src, 4 * n_from, n_from))
+        body.append('      for (int i = 0; i < %d; ++i) o[i] = (double)t[i];' % n_from)
+        body.append('      memcpy(%s, o, %d); }' % (dst, 8 * n_from))
+        return True
+    if in_bits == 32 and out_kind == 'float':
+        body.append('    { int32_t t[%d]; memcpy(t, %s, %d); float o[%d];'
+                    % (n_from, src, 4 * n_from, n_from))
+        body.append('      for (int i = 0; i < %d; ++i) o[i] = (float)t[i];' % n_from)
+        body.append('      memcpy(%s, o, %d); }' % (dst, 4 * n_from))
+        return True
+    if in_bits == 64 and out_kind == 'int32':
+        body.append('    { int64_t t[%d]; memcpy(t, %s, %d); int32_t o[%d];'
+                    % (n_from, src, 8 * n_from, n_from))
+        body.append('      for (int i = 0; i < %d; ++i) o[i] = (int32_t)t[i];' % n_from)
+        body.append('      memcpy(%s, o, %d); }' % (dst, 4 * n_from))
+        return True
+    raise SystemExit('cvt form: %r' % ins)
+
+
+
 def _emit_extra(op, rest, body, ins):
     """Returns True when it handled the instruction."""
+    _cv2 = re.match(r'^(cvtdq2pd|cvtdq2ps|cvttpd2dq|cvtpd2dq)\s+(.+)$', ins, re.I)
+    if _cv2:
+        m2 = _cv2.group(1).lower()
+        a1, b1 = [x.strip() for x in _cv2.group(2).split(',', 1)]
+        if m2 == 'cvtdq2pd':
+            _cvt_pack(body, a1, b1, 2, 32, 'double', ins)
+        elif m2 == 'cvtdq2ps':
+            _cvt_pack(body, a1, b1, 4, 32, 'float', ins)
+        else:
+            _cvt_pack(body, a1, b1, 2, 64, 'int32', ins)
+        return True
+    _cx = re.match(r'^cmpxchg\s+(.+)$', ins, re.I)
+    if _cx:
+        a1, b1 = [x.strip() for x in _cx.group(1).split(',', 1)]
+        d = enc(a1)
+        sb = enc(b1)
+        if d is None or sb is None:
+            raise SystemExit('cmpxchg form: %r' % ins)
+        w = d[2] if d[0] in ('reg', 'sub') else d[3]
+        mask = '~0ULL' if w == 8 else '0x%xULL' % ((1 << (w * 8)) - 1)
+        body.append('    { const uint64_t m = %s; const uint64_t ax = rax & m;' % mask)
+        body.append('      const uint64_t cur = (%s) & m;' % operand_read(d))
+        _cmw = operand_write(d, '(%s) & m' % operand_read(sb)).rstrip(';')
+        if not _cmw.rstrip().endswith(';'):
+            _cmw += ';'
+        body.append('      if (ax == cur) { %s f_zf = 1; }' % _cmw)
+        body.append('      else { rax = (rax & ~m) | cur; f_zf = 0; }')
+        body.append('      f_cf = 0; f_of = 0; f_sf = ((cur >> %d) & 1) != 0; }' % (w * 8 - 1))
+        return True
+    _mv = re.match(r'^(rep\s+)?(movs|lods)\s+(?:((BYTE|WORD|DWORD|QWORD) PTR (?:es:)?\[rdi\],\s*(?:(QWORD|DWORD|WORD|BYTE) PTR )?(?:ds:)?\[rsi\])|((BYTE|WORD|DWORD|QWORD) PTR (?:ds:)?\[rsi\]))$', ins, re.I)
+    if _mv:
+        rep = bool(_mv.group(1))
+        kind = _mv.group(2).lower()
+        wname = (_mv.group(4) or _mv.group(8) or 'byte').upper()
+        w = {'BYTE': 1, 'WORD': 2, 'DWORD': 4, 'QWORD': 8}[wname]
+        body.append('    %s {' % ('while (rcx)' if rep else 'do'))
+        if kind == 'movs':
+            body.append('        ML_M%d(rdi, 0) = ML_M%d(rsi, 0); rdi += %d; rsi += %d;' % (w, w, w, w))
+        else:
+            v = {'1': '(uint8_t)rax', '2': '(uint16_t)rax', '4': '(uint32_t)rax', '8': 'rax'}[str(w)]
+            body.append('        rax = (rax & ~0x%xULL) | (%s); rsi += %d;' % ((1 << (w * 8)) - 1, v, w))
+        if rep:
+            body.append('        --rcx;')
+        body.append('    }%s' % (' while (0)' if not rep else ''))
+        return True
     _cm = re.match(r'^(rep(?:nz|ne|z|e)?\s+)?cmps\s+(?:[a-z]{2,3},\s*)?(BYTE|WORD|DWORD|QWORD) PTR (?:ds:)?\[rsi\],\s*(?:(BYTE|WORD|DWORD|QWORD) PTR )?(?:es:)?\[rdi\]$', ins, re.I)
     if _cm:
         pref = (_cm.group(1) or '').strip().lower()
