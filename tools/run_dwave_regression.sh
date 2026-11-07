@@ -14,13 +14,13 @@ for f in $(find modules/cqbase/src -name "*.cpp" | sort) modules/analyst/src/*.c
   base=$(basename $f .cpp); dir=$(basename $(dirname $(dirname $f)))
   [ "$base" = "$dir" ] && continue
   obj=$OBJ/$(echo "$f" | sed "s|/|_|g; s|\.cpp$|.o|")
-  g++ -std=c++17 -I. -Iinclude -Imodules -c "$f" -o "$obj" || { echo "OBJ-FAIL $f"; exit 1; }
+  g++ -std=c++17 -I. -Iinclude -Imodules -Imodules/syndicate/src -c "$f" -o "$obj" || { echo "OBJ-FAIL $f"; exit 1; }
 done
 FAIL=0
 for pass in 1 2 3 4 5 6; do
   for t in $TESTS; do
     if [ "$t" = "syndicate_d55a" ]; then
-      g++ -std=c++17 -I. -Iinclude -Imodules tests/${t}_test.cpp -o /tmp/reg_bin 2>/tmp/reg_err.txt
+      g++ -std=c++17 -I. -Iinclude -Imodules -Imodules/syndicate/src tests/${t}_test.cpp -o /tmp/reg_bin 2>/tmp/reg_err.txt
     else
       g++ -std=c++17 -I. tests/${t}_test.cpp $OBJ/*.o -o /tmp/reg_bin 2>/tmp/reg_err.txt
     fi

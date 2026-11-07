@@ -1,5 +1,5 @@
 // Generated with tools/bulk/gen_cl.py - the seam pointers.
-#include "synthunks_cl.h"
+#include "modules/syndicate/src/synthunks_cl.h"
 
 namespace tq {
 

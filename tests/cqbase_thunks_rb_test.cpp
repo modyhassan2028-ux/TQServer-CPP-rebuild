@@ -3,7 +3,7 @@
 // The test builds a real tree the way the original caller does: search for the position, then call the routine
 // with (parent, insert_left). After every insert it checks the red-black invariants, the ordering, the head
 // sentinel links and the element count, so a wrong rotation or a wrong colour flip fails immediately.
-#include "synrbinsert.h"
+#include "modules/syndicate/src/synrbinsert.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>

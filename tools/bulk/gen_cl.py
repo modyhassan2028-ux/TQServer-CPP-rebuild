@@ -151,7 +151,7 @@ def main():
     hdr += ['}  // namespace tq', '', '#undef CL_Q', '#undef CL_B', '', '#endif']
     open(os.path.join(REPO, 'modules/syndicate/src/synthunks_cl.h'), 'w').write('\n'.join(hdr))
 
-    src = ['// Generated with tools/bulk/gen_cl.py - the seam pointers.', '#include "synthunks_cl.h"', '',
+    src = ['// Generated with tools/bulk/gen_cl.py - the seam pointers.', '#include "modules/syndicate/src/synthunks_cl.h"', '',
            'namespace tq {', '']
     for a, kind in seams:
         if kind == 'teardown':

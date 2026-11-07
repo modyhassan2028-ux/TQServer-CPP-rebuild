@@ -116,7 +116,7 @@ def main():
     hdr += ['}  // namespace tq', '', '#undef GI2_Q', '', '#endif']
     open(os.path.join(REPO, 'modules/syndicate/src/synthunks_gi2.h'), 'w').write('\n'.join(hdr))
 
-    src = ['// Generated with tools/bulk/gen_gi2.py - the seam pointers.', '#include "synthunks_gi2.h"', '',
+    src = ['// Generated with tools/bulk/gen_gi2.py - the seam pointers.', '#include "modules/syndicate/src/synthunks_gi2.h"', '',
            'namespace tq {', '']
     for a in seams:
         src.append('void (*g_fnGI2_%x)(void*) = nullptr;' % a)

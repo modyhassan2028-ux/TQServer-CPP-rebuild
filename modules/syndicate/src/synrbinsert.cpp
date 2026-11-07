@@ -1,5 +1,5 @@
 // synrbinsert.cpp — the two seams used by the transcription of 0x141727e60.
-#include "synrbinsert.h"
+#include "modules/syndicate/src/synrbinsert.h"
 
 namespace tq {
 

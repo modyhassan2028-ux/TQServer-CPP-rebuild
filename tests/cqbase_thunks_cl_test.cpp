@@ -1,5 +1,5 @@
 // Generated with tools/bulk/gen_cl.py - the clear() battery for every body.
-#include "synthunks_cl.h"
+#include "modules/syndicate/src/synthunks_cl.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>

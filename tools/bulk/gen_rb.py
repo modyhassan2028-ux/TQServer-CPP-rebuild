@@ -96,13 +96,13 @@ def main():
            '// factory and the colour/nil offsets differ per body. Do not hand edit.',
            '#pragma once',
            '#include <cstdint>',
-           '#include "synrbinsert.h"',
+           '#include "modules/syndicate/src/synrbinsert.h"',
            '',
            '#define RB_Q(p, off) (*(void**)((uint8_t*)(p) + (off)))',
            '#define RB_B(p, off) (*(uint8_t*)((uint8_t*)(p) + (off)))',
            '',
            'namespace tq {', '']
-    src = ['#include "synrbinsert_family.h"', '', 'namespace tq {', '']
+    src = ['#include "modules/syndicate/src/synrbinsert_family.h"', '', 'namespace tq {', '']
     for h in hits:
         tag = '%x' % h['a']
         hdr += ['extern void* (*g_fnRB_%s_factory)(void*, void*, void*, void*, const uint32_t*, uint8_t);' % tag,

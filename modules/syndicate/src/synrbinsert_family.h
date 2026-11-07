@@ -3,7 +3,7 @@
 // factory and the colour/nil offsets differ per body. Do not hand edit.
 #pragma once
 #include <cstdint>
-#include "synrbinsert.h"
+#include "modules/syndicate/src/synrbinsert.h"
 
 #define RB_Q(p, off) (*(void**)((uint8_t*)(p) + (off)))
 #define RB_B(p, off) (*(uint8_t*)((uint8_t*)(p) + (off)))

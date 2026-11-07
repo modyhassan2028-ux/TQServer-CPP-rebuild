@@ -1,5 +1,5 @@
 // Generated with tools/bulk/gen_fd.py — the lookup battery for every body of the family.
-#include "synthunks_fd_family.h"
+#include "modules/syndicate/src/synthunks_fd_family.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>

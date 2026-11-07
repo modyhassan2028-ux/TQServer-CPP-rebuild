@@ -1,5 +1,5 @@
 // Generated with tools/bulk/gen_gi2.py - the seam pointers.
-#include "synthunks_gi2.h"
+#include "modules/syndicate/src/synthunks_gi2.h"
 
 namespace tq {
 
