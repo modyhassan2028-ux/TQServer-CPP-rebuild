@@ -104,11 +104,13 @@ class Machine:
         # the original runs with a heap and initialized globals; here any page the body touches is
         # satisfied with zeros so the call can finish. Both sides of a comparison see the same zeros,
         # so this stays an honest oracle for the code path being checked.
-        page_base = address & ~0xfff
-        try:
-            uc.mem_map(page_base, 0x1000)
-        except UcError:
-            return False
+        for a in {address & ~0xfff, (address + max(size, 1) - 1) & ~0xfff}:
+            try:
+                uc.mem_map(a, 0x1000)
+            except UcError:
+                # already covered (an access can straddle into a mapped page) - retry and let it fault
+                # again if it is genuinely unreadable
+                continue
         return True
 
     def _code(self, uc, address, size, user):

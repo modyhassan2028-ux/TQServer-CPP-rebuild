@@ -185,8 +185,12 @@ def lift(addr, funcs):
         if op == 'pop':
             body.append('    { const uint64_t v = ML_M8(rsp, 0); rsp += 8; %s }' % operand_write(enc(rest), 'v'))
             continue
-        if op == 'ret':
+        if op == 'ret' or ins.strip() in ('repz ret', 'rep ret', 'repz retq'):
+            # `repz ret` is the padding form of a plain return
             body.append('    return rax;')
+            continue
+        if op == 'cqo':
+            body.append('    rdx = (rax >> 63) ? ~0ULL : 0ULL;   // sign-extend rax into rdx:rax')
             continue
         if op == 'jmp':
             if re.match(r'^0x[0-9a-f]+$', rest.strip()):
