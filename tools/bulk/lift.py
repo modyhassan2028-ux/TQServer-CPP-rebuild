@@ -348,12 +348,61 @@ def lift(addr, funcs):
             d, s = [enc(x) for x in rest.replace(', ', ',').split(',', 1)]
             body.append('    ' + operand_write(d, '(%s) %s (%s)' % (operand_read(d), '&' if op == 'and' else '|', operand_read(s))))
             continue
+
+        if op in ('div', 'idiv'):
+            s = enc(rest)
+            if s is None:
+                raise SystemExit('div form: %r' % ins)
+            d = operand_read(s)
+            if op == 'div':
+                # x86 divides the 128-bit pair rdx:rax; a zero divisor faults (#DE) just like the original
+                body.append('    { const uint64_t d = %s; if (!d) __builtin_trap();' % d)
+                body.append('      const unsigned __int128 n = ((unsigned __int128)rdx << 64) | rax;')
+                body.append('      rax = (uint64_t)(n / d); rdx = (uint64_t)(n % d); }')
+            else:
+                body.append('    { const int64_t d = (int64_t)%s; if (!d) __builtin_trap();' % d)
+                body.append('      const __int128 n = ((__int128)(int64_t)rdx << 64) | (uint64_t)rax;')
+                body.append('      rax = (uint64_t)(int64_t)(n / d); rdx = (uint64_t)(int64_t)(n % d); }')
+            continue
+        if op == 'imul':
+            parts = [x for x in rest.replace(', ', ',').split(',')]
+            if len(parts) == 1:
+                # one-operand form: rdx:rax = rax * src
+                src = operand_read(enc(parts[0]))
+                body.append('    { const __int128 p = (__int128)(int64_t)rax * (int64_t)(%s);' % src)
+                body.append('      rax = (uint64_t)p; rdx = (uint64_t)(p >> 64); }')
+                continue
+            dst = enc(parts[0])
+            if len(parts) == 2:
+                a, b = operand_read(dst), operand_read(enc(parts[1]))
+            else:
+                a, b = operand_read(enc(parts[1])), operand_read(enc(parts[2]))
+            # two/three-operand form keeps the low half and raises CF/OF on signed overflow
+            body.append('    { const __int128 p = (__int128)(int64_t)(%s) * (int64_t)(%s);' % (a, b))
+            body.append('      %s' % operand_write(dst, '(uint64_t)p'))
+            body.append('      f_cf = f_of = (p != (__int128)(int64_t)(uint64_t)p); }')
+            continue
+        if op == 'rep stos' or ins.lower().startswith('rep stos'):
+            m = re.match(r'^rep stos\s+(BYTE|WORD|DWORD|QWORD) PTR (?:es:)?\[rdi\]\s*,\s*(\w+)$', ins, re.I)
+            if not m:
+                raise SystemExit('rep stos form: %r' % ins)
+            w = {'BYTE': 1, 'WORD': 2, 'DWORD': 4, 'QWORD': 8}[m.group(1).upper()]
+            src = m.group(2)
+            ctype = {1: 'uint8_t', 2: 'uint16_t', 4: 'uint32_t', 8: 'uint64_t'}[w]
+            # the stored value comes from the accumulator, truncated to the store width
+            src = {'al': '(uint8_t)rax', 'ax': '(uint16_t)rax', 'eax': '(uint32_t)rax', 'rax': 'rax'}.get(src.lower(), src)
+            body.append('    while (rcx) { ML_M%d(rdi, 0) = (%s)%s; rdi += %d; --rcx; }' % (w, ctype, src, w))
+            continue
         raise SystemExit('unsupported instruction %r' % ins)
     return f, body, seams
 
 
 def main():
-    addrs = [int(a, 16) for a in sys.argv[1:]]
+    # a full-batch run can exceed the shell's argument limit, so also accept a list file
+    argv = sys.argv[1:]
+    if not argv and os.environ.get('LIFT_ARGS'):
+        argv = [l for l in open(os.environ['LIFT_ARGS']).read().split() if l.strip()]
+    addrs = [int(a, 16) for a in argv]
     funcs = {x['a']: x for x in json.load(open(os.path.join(REPO, 'tools/bulk/funcs.json')))}
     extra_path = os.path.join(REPO, 'tools/bulk/extra_bodies.json')
     if os.path.exists(extra_path):
@@ -376,7 +425,7 @@ def main():
     for a in addrs:
         try:
             f, body, seams = lift(a, funcs)
-        except Exception as e:   # one unencodable body must never kill the batch
+        except (Exception, SystemExit) as e:   # one unencodable body must never kill the batch
             skipped.append((a, '%s: %s' % (type(e).__name__, e)))
             continue
         for s in sorted(seams):
