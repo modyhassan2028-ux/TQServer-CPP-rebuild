@@ -85,11 +85,25 @@ def parse(f):
 
 def main():
     funcs = json.load(open(FUNC))
-    blob = ''
+    # a row counts as already ported only when a module really defines it: the address must sit on a code
+    # line that carries a '(' , or on a `// 0x<addr>` header line followed by a definition
+    blob = []
     for root, _d, files in os.walk(os.path.join(REPO, 'modules')):
         for n in sorted(files):
-            if n.endswith(('.cpp', '.h')):
-                blob += open(os.path.join(root, n), errors='ignore').read().lower()
+            if not n.endswith(('.cpp', '.h')):
+                continue
+            L = [l.rstrip('\n') for l in open(os.path.join(root, n), errors='ignore')]
+            for i, ln in enumerate(L):
+                low = ln.lower()
+                if '0x' not in low:
+                    continue
+                if ln.strip().startswith('//'):
+                    nxt = ' '.join(x.strip() for x in L[i + 1:i + 3])
+                    if '(' in nxt or '{' in nxt or '=' in nxt:
+                        blob.append(low)
+                elif '(' in ln:
+                    blob.append(low)
+    blob = '\n'.join(blob)
     blob += open(os.path.join(REPO, 'tests', 'cqbase_thunks_cl_test.cpp'), errors='ignore').read().lower() \
         if os.path.exists(os.path.join(REPO, 'tests', 'cqbase_thunks_cl_test.cpp')) else ''
     import glob
