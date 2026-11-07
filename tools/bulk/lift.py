@@ -159,7 +159,7 @@ def setflags(w, a, b, unsigned=True):
 
 
 def normalise(t):
-    return re.sub(r'^rex(?:\.[WRXB]+|64)?\s+', '', t.strip())
+    t = re.sub(r'^lock\s+', '', t.strip(), flags=re.I); return re.sub(r'^rex(?:\.[WRXB]+|64)?\s+', '', t)
 
 
 REGISTRY = {int(x, 16) for x in json.load(open(os.path.join(os.path.dirname(__file__), 'seams.json')))} \
@@ -531,6 +531,8 @@ def lift(addr, funcs):
             src = {'al': '(uint8_t)rax', 'ax': '(uint16_t)rax', 'eax': '(uint32_t)rax', 'rax': 'rax'}.get(src.lower(), src)
             body.append('    while (rcx) { ML_M%d(rdi, 0) = (%s)%s; rdi += %d; --rcx; }' % (w, ctype, src, w))
             continue
+        if _emit_extra(op, rest, body, ins):
+            continue
         raise SystemExit('unsupported instruction %r' % ins)
     return f, body, seams
 
@@ -549,7 +551,7 @@ def main():
             funcs[v['a']] = v
     hdr = ['// Lifted mechanically by tools/bulk/lift.py - one C++ statement per x86 instruction.',
            '// Registers are uint64_t, memory goes through width-tagged accessors, flags are computed explicitly.',
-           '#pragma once', '#include <cstdint>', '',
+           '#pragma once', '#include <cstdint>', '#include <cstring>', '',
            '#define ML_M1(p, o) (*(uint8_t*)((uint8_t*)(uintptr_t)(p) + (o)))',
            '#define ML_M2(p, o) (*(uint16_t*)((uint8_t*)(uintptr_t)(p) + (o)))',
            '#define ML_M4(p, o) (*(uint32_t*)((uint8_t*)(uintptr_t)(p) + (o)))',
@@ -562,7 +564,16 @@ def main():
            '    }',
            '    return v[0];',
            '}',
-           '#define ML_IAT(a) ml_glb((uintptr_t)(a))', '',
+           'inline uint8_t& ml_glb8(uintptr_t a) {',
+           '    static uintptr_t k[8192]; static uint8_t v[8192];',
+           '    for (unsigned i = 0; i < 8192; ++i) {',
+           '        if (k[i] == a) return v[i];',
+           '        if (k[i] == 0) { k[i] = a; return v[i]; }',
+           '    }',
+           '    return v[0];',
+           '}',
+           '#define ML_IAT(a) ml_glb((uintptr_t)(a))',
+           'static uint64_t mm0 = 0, mm1 = 0, mm2 = 0, mm3 = 0, mm4 = 0, mm5 = 0, mm6 = 0, mm7 = 0;', '',
            'namespace tq {', '']
     src = ['#include "modules/syndicate/src/synlift.h"', '', 'namespace tq {', '']
     defined = set()
@@ -664,6 +675,197 @@ def operand_write(e, expr):
         return ('ml_glb((uintptr_t)%s) = (ml_glb((uintptr_t)%s) & ~0x%xULL) | ((uint64_t)(%s) & 0x%xULL);'
                 % (addr, addr, m, expr, m))
     return _ow_glb(e, expr)
+
+
+
+# --- SSE/MMX byte ops, movd/movss, rotates, bit tests, cmovcc, repeated string ops ---
+_orig_lift_extra = None
+
+
+def _simd_dst(tok, ins):
+    if re.match(r'^xmm\d+$', tok):
+        return tok, 16
+    if re.match(r'^mm\d+$', tok):
+        return '((uint8_t*)&%s)' % tok, 8
+    raise SystemExit('simd dest: %r' % ins)
+
+
+def _simd_src_bytes(tok, n, ins):
+    if re.match(r'^xmm\d+$', tok):
+        return ['%s[%d]' % (tok, i) for i in range(n)]
+    if re.match(r'^mm\d+$', tok):
+        return ['((uint8_t*)&%s)[%d]' % (tok, i) for i in range(n)]
+    e = enc(tok)
+    if e is None:
+        raise SystemExit('simd src: %r' % ins)
+    if e[0] == 'mem':
+        return ['(uint8_t)ML_M1(%s, %s + %d)' % (e[1], e[2], i) for i in range(n)]
+    if e[0] == 'iat':
+        return ['(uint8_t)ML_M1(0x%x, %d)' % (e[1], i) for i in range(n)]
+    if e[0] in ('reg', 'sub'):
+        v = operand_read(e)
+        return ['(uint8_t)((%s) >> %d)' % (v, 8 * i) for i in range(n)]
+    raise SystemExit('simd src: %r' % ins)
+
+
+def _lift_simd(op, rest, body, ins):
+    a1, b1 = [x.strip() for x in rest.split(',', 1)]
+    dtok, n = _simd_dst(a1, ins)
+    src = _simd_src_bytes(b1, n, ins)
+    for i in range(n):
+        if op == 'pxor':
+            body.append('    %s[%d] ^= %s;' % (dtok, i, src[i]))
+        elif op == 'pand':
+            body.append('    %s[%d] &= %s;' % (dtok, i, src[i]))
+        elif op == 'por':
+            body.append('    %s[%d] |= %s;' % (dtok, i, src[i]))
+        elif op == 'paddb':
+            body.append('    %s[%d] = (uint8_t)(%s[%d] + %s);' % (dtok, i, dtok, i, src[i]))
+        elif op == 'psubb':
+            body.append('    %s[%d] = (uint8_t)(%s[%d] - %s);' % (dtok, i, dtok, i, src[i]))
+
+
+_lift_base = lift
+
+
+def lift(addr, funcs):
+    return _lift_base(addr, funcs)
+
+
+@staticmethod
+def _unused():
+    pass
+
+
+def _scas_body(body, bits, w, stop_on_zf):
+    mask = '~0ULL' if bits == 64 else '0x%xULL' % ((1 << bits) - 1)
+    body.append('    while (rcx) {')
+    body.append('        const uint64_t a = rax & %s, b = ML_M%d(rdi, 0) & %s;' % (mask, w, mask))
+    body.append('        const uint64_t d = (a - b) & %s;' % mask)
+    body.append('        rdi += %d; --rcx;' % w)
+    body.append('        f_cf = a < b; f_zf = (d == 0); f_sf = ((d >> %d) & 1) != 0;' % (bits - 1))
+    body.append('        f_of = ((((a ^ b) & (a ^ d)) >> %d) & 1) != 0;' % (bits - 1))
+    if stop_on_zf is not None:
+        body.append('        if (%s) break;' % ('f_zf' if stop_on_zf else '!f_zf'))
+    body.append('    }')
+
+
+def _emit_extra(op, rest, body, ins):
+    """Returns True when it handled the instruction."""
+    _sm = re.match(r'^scas\s+(?:[a-z]{2,3},\s*)?(BYTE|WORD|DWORD|QWORD) PTR (?:es:)?\[rdi\]$', ins, re.I)
+    if _sm or re.match(r'^scas$', ins, re.I):
+        bits = {'BYTE': 8, 'WORD': 16, 'DWORD': 32, 'QWORD': 64}.get((_sm.group(1) if _sm else 'byte').upper(), 8)
+        _scas_body(body, bits, bits // 8, None)
+        return True
+    if op in ('pxor', 'pand', 'por', 'paddb', 'psubb') and ',' in rest:
+        _lift_simd(op, rest, body, ins)
+        return True
+    if op in ('movd', 'movq') and ',' in rest:
+        a1, b1 = [x.strip() for x in rest.split(',', 1)]
+        n = 4 if op == 'movd' else 8
+        if re.match(r'^(xmm\d+)$', a1):
+            body.append('    memset(%s, 0, 16);' % a1)
+            s1 = _simd_src_bytes(b1, n, ins)
+            for i in range(n):
+                body.append('    %s[%d] = %s;' % (a1, i, s1[i]))
+            return True
+        if re.match(r'^mm\d+$', a1):
+            s1 = _simd_src_bytes(b1, n, ins)
+            body.append('    { uint8_t t[8] = {0}; (void)t;')
+            for i in range(n):
+                body.append('      ((uint8_t*)&%s)[%d] = %s;' % (a1, i, s1[i]))
+            body.append('    }')
+            return True
+        e = enc(a1)
+        if e is not None and e[0] in ('reg', 'sub'):
+            if re.match(r'^xmm\d+$', b1):
+                body.append('    %s' % operand_write(e, '*(uint32_t*)(%s)' % b1 if n == 4 else '*(uint64_t*)(%s)' % b1))
+                return True
+            if re.match(r'^mm\d+$', b1):
+                body.append('    %s' % operand_write(e, ('(uint32_t)%s' if n == 4 else '(uint64_t)%s') % b1))
+                return True
+        raise SystemExit('movd form: %r' % ins)
+    if op == 'movss' and ',' in rest:
+        a1, b1 = [x.strip() for x in rest.split(',', 1)]
+        if re.match(r'^xmm\d+$', a1):
+            s1 = _simd_src_bytes(b1, 4, ins)
+            body.append('    memset(%s, 0, 16);' % a1)
+            for i in range(4):
+                body.append('    %s[%d] = %s;' % (a1, i, s1[i]))
+            return True
+        e = enc(a1)
+        if e is not None:
+            if re.match(r'^xmm\d+$', b1):
+                for i in range(4):
+                    body.append('    %s' % operand_write(e, '%s[%d]' % (b1, i)))
+                return True
+            raise SystemExit('movss form: %r' % ins)
+    if op in ('rol', 'ror') and ',' in rest:
+        a1, b1 = [x.strip() for x in rest.split(',', 1)]
+        d = enc(a1)
+        if d is None or b1.lower() not in ('cl',) and not re.match(r'^0x[0-9a-f]+$', b1, re.I):
+            raise SystemExit('rol form: %r' % ins)
+        w = d[2] if d[0] in ('reg', 'sub') else d[3]
+        bits = w * 8
+        mask = '~0ULL' if bits == 64 else '0x%xULL' % ((1 << bits) - 1)
+        cnt = '(unsigned)(rcx & %d)' % (bits - 1) if b1.lower() == 'cl' else str(int(b1, 16) % bits)
+        val = operand_read(d)
+        shift = '(unsigned)(%s %% %d)' % (cnt, bits)
+        if op == 'rol':
+            e1 = '(((v << s) | (v >> (%d - s))) & m)' % bits
+        else:
+            e1 = '(((v >> s) | (v << (%d - s))) & m)' % bits
+        body.append('    { const uint64_t m = %s; const uint64_t v = (%s) & m; const unsigned s = %s ? %s : 0;'
+                    % (mask, val, shift, shift))
+        body.append('      const uint64_t r = s ? %s : v;' % e1)
+        body.append('      %s' % operand_write(d, 'r'))
+        body.append('      f_cf = ((r & 1) != 0); f_zf = (r == 0); f_sf = ((r >> %d) & 1) != 0; }' % (bits - 1))
+        return True
+    if op in ('bt', 'bts', 'btr', 'btc') and ',' in rest:
+        a1, b1 = [x.strip() for x in rest.split(',', 1)]
+        d = enc(a1)
+        sb = enc(b1)
+        if d is None or sb is None:
+            raise SystemExit('bt form: %r' % ins)
+        w = d[2] if d[0] in ('reg', 'sub') else d[3]
+        bits = w * 8
+        mask = '~0ULL' if bits == 64 else '0x%xULL' % ((1 << bits) - 1)
+        body.append('    { const uint64_t m = %s; const unsigned idx = (unsigned)(((%s) & m) %% %d);'
+                    % (mask, operand_read(sb), bits))
+        body.append('      uint64_t v = (%s) & m;' % operand_read(d))
+        body.append('      f_cf = ((v >> idx) & 1) != 0;')
+        if op == 'bts':
+            body.append('      v |= (1ULL << idx);')
+        elif op == 'btr':
+            body.append('      v &= ~(1ULL << idx);')
+        elif op == 'btc':
+            body.append('      v ^= (1ULL << idx);')
+        if op != 'bt':
+            body.append('      %s' % operand_write(d, 'v'))
+        body.append('    }')
+        return True
+    m = re.match(r'^cmov([a-z]{1,3})\s+(.+)$', ins, re.I)
+    if m:
+        cond = _CONDS.get(m.group(1).lower())
+        if cond:
+            a1, b1 = [x.strip() for x in m.group(2).split(',', 1)]
+            d = enc(a1)
+            sb = enc(b1)
+            if d is None or sb is None:
+                raise SystemExit('cmov form: %r' % ins)
+            w = d[2] if d[0] in ('reg', 'sub') else d[3]
+            mask = '~0ULL' if w == 8 else '0x%xULL' % ((1 << (w * 8)) - 1)
+            body.append('    if (%s) { %s }' % (cond, operand_write(d, '(%s) & %s' % (operand_read(sb), mask)).rstrip(';')))
+            return True
+    return False
+
+
+_CONDS = {
+    'o': 'f_of', 'no': '!f_of', 'b': 'f_cf', 'c': 'f_cf', 'nae': 'f_cf',
+    'ae': '!f_cf', 'nb': '!f_cf', 'nc': '!f_cf', 'e': 'f_zf', 'z': 'f_zf',
+    'ne': '!f_zf', 'nz': '!f_zf', 'be': '(f_cf || f_zf)', 'na': '(f_cf || f_zf)',
+    'a': '(!f_cf && !f_zf)', 'nbe': '(!f_cf && !f_zf)', 's': 'f_sf', 'ns': '!f_sf',
+}
 
 
 if __name__ == '__main__':
