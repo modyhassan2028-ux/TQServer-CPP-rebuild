@@ -23,7 +23,7 @@ A8 = {'al': 'rax', 'bl': 'rbx', 'cl': 'rcx', 'dl': 'rdx', 'sil': 'rsi', 'dil': '
       'r8b': 'r8', 'r9b': 'r9', 'r10b': 'r10', 'r11b': 'r11', 'r12b': 'r12', 'r13b': 'r13', 'r14b': 'r14',
       'r15b': 'r15'}
 A16 = {'ax': 'rax', 'bx': 'rbx', 'cx': 'rcx', 'dx': 'rdx', 'si': 'rsi', 'di': 'rdi', 'bp': 'rbp'}
-WIDTH_PTR = {'BYTE': 1, 'WORD': 2, 'DWORD': 4, 'QWORD': 8}
+WIDTH_PTR = {'BYTE': 1, 'WORD': 2, 'DWORD': 4, 'QWORD': 8, 'XMMWORD': 16}
 
 
 def reg_of(tok):
@@ -43,7 +43,7 @@ def reg_of(tok):
 def enc(tok):
     """Encode one operand."""
     t = tok.strip()
-    m = re.match(r'^(BYTE|WORD|DWORD|QWORD) PTR \[(.*)\]$', t) or re.match(r'^\[(.*)\]$', t)
+    m = re.match(r'^(BYTE|WORD|DWORD|QWORD|XMMWORD) PTR \[(.*)\]$', t) or re.match(r'^\[(.*)\]$', t)
     if m:
         w = WIDTH_PTR[m.group(1)] if m.lastindex == 2 else 8
         inner = m.group(2) if m.lastindex == 2 else m.group(1)
@@ -56,7 +56,28 @@ def enc(tok):
             if b.group(2) == '-':
                 disp = -disp
             return ('mem', b.group(1), disp, w)
-        return None
+        # base + index*scale (+ disp), as in [r13+rax*8+0x0]
+        base, index, disp = None, None, 0
+        for part in re.findall(r'[+-]?[^+-]+', inner):
+            sign = -1 if part.startswith('-') else 1
+            tok = part.lstrip('+-').strip()
+            if re.fullmatch(r'0x[0-9a-f]+', tok):
+                disp += sign * int(tok, 16)
+            elif re.fullmatch(r'\d+', tok):
+                disp += sign * int(tok)
+            elif '*' in tok:
+                reg, scale = tok.split('*')
+                index = (reg.strip(), int(scale, 16) if scale.startswith('0x') else int(scale))
+            elif re.fullmatch(r'r[a-z0-9]+', tok):
+                base = tok
+            else:
+                return None
+        if base is None and index is None:
+            return None
+        expr = base if base else '0'
+        if index:
+            expr = '(%s + %s * %d)' % (expr, index[0], index[1])
+        return ('mem', expr, disp, w)
     r = reg_of(t)
     if r:
         return ('reg', r[0], r[1], t)
@@ -235,6 +256,57 @@ def lift(addr, funcs):
             else:
                 body.append('    ' + operand_write(d, '(%s) ^ (%s)' % (operand_read(d), operand_read(s))))
             continue
+        if op in ('shl', 'shr', 'sar', 'sal'):
+            d, s = [enc(x) for x in rest.replace(', ', ',').split(',', 1)]
+            if d[0] != 'reg' or s[0] != 'imm':
+                raise SystemExit('shift form: %r' % ins)
+            w = d[2]; mask = {1: '0xFFULL', 2: '0xFFFFULL', 4: '0xFFFFFFFFULL', 8: '~0ULL'}[w]
+            cnt = s[1]; rd = operand_read(d)
+            if op in ('shl', 'sal'):
+                expr = '(%s << %d)' % (rd, cnt)
+            elif op == 'shr':
+                expr = '((%s & %s) >> %d)' % (rd, mask, cnt)
+            else:
+                if w == 8:
+                    expr = '(uint64_t)((int64_t)%s >> %d)' % (rd, cnt)
+                else:
+                    expr = '(uint64_t)((int64_t)(int32_t)(%s & 0xFFFFFFFFULL) >> %d)' % (rd, cnt)
+            body.append('    { const uint64_t src = %s; const uint64_t res = %s;' % (rd, expr))
+            body.append('      f_cf = (((src >> %d) & 1) != 0); f_zf = ((res & %s) == 0);' % (cnt - 1, mask))
+            body.append('      f_sf = ((res & 0x%xULL) != 0); f_of = false;' % (1 << (w * 8 - 1)))
+            body.append('    ' + operand_write(d, 'res') + ' }')
+            continue
+        if op in ('movaps', 'movups', 'movdqa', 'movdqu', 'movapd', 'movupd', 'movdqa32'):
+            a, b = [x.strip() for x in rest.split(',', 1)]
+            xa, xb = re.match(r'^xmm(\d+)$', a), re.match(r'^xmm(\d+)$', b)
+            if xa and xb:
+                body.append('    __builtin_memcpy(xmm%s, xmm%s, 16);' % (xa.group(1), xb.group(1)))
+            elif xa:
+                e = enc(b)
+                body.append('    __builtin_memcpy(xmm%s, (uint8_t*)((uintptr_t)%s + %d), 16);'
+                            % (xa.group(1), e[1], e[2]))
+            elif xb:
+                e = enc(a)
+                body.append('    __builtin_memcpy((uint8_t*)((uintptr_t)%s + %d), xmm%s, 16);'
+                            % (e[1], e[2], xb.group(1)))
+            else:
+                raise SystemExit('movaps form: %r' % ins)
+            continue
+        if op.startswith('cmov'):
+            d, s = [enc(x) for x in rest.replace(', ', ',').split(',', 1)]
+            jcc = 'j' + op[4:]
+            if jcc not in JCC:
+                raise SystemExit('cmov form: %r' % ins)
+            body.append('    if (%s) { %s }' % (JCC[jcc], operand_write(d, operand_read(s))))
+            continue
+        if op in ('movsxd', 'movsx'):
+            d, s = [enc(x) for x in rest.replace(', ', ',').split(',', 1)]
+            body.append('    ' + operand_write(d, '(uint64_t)(int64_t)(int32_t)(%s)' % operand_read(s)))
+            continue
+        if op in ('and', 'or'):
+            d, s = [enc(x) for x in rest.replace(', ', ',').split(',', 1)]
+            body.append('    ' + operand_write(d, '(%s) %s (%s)' % (operand_read(d), '&' if op == 'and' else '|', operand_read(s))))
+            continue
         raise SystemExit('unsupported instruction %r' % ins)
     return f, body, seams
 
@@ -271,6 +343,7 @@ def main():
         src.append('    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;')
         src.append('    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;')
         src.append('    bool f_zf = false, f_cf = false, f_sf = false, f_of = false;')
+        src.append('    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0};')
         src.append('    alignas(16) uint8_t stkFrame[0x400] = {0};')
         src.append('    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);')
         src.append('#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9)')
