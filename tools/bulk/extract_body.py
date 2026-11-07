@@ -49,12 +49,17 @@ def build(start):
     if not rows or rows[0][0] != start:
         return None
     keep = []
-    for i, (a, size, t) in enumerate(rows):
-        if t in ('int3',) or t.startswith('nop'):
-            break
+    for a, size, t in rows:
+        op = t.split()[0]
+        if op == 'int3' or op.startswith('nop'):
+            if keep:                     # padding after real code ends the routine
+                break
+            continue                     # leading hotpatch padding is not part of it
         keep.append((a, size, t))
+    if not keep:
+        return None
     # trim anything after the final ret
-    last = max(i for i, (_, _, t) in enumerate(keep) if t.split()[0] == 'ret')
+    last = max(i for i, (_, _, t) in enumerate(keep) if t.split()[0].startswith('ret'))
     keep = keep[:last + 1]
     return {'a': start, 'b': keep[-1][0] + keep[-1][1],
             'addr': [a for a, _, _ in keep], 'text': [t for _, _, t in keep]}
