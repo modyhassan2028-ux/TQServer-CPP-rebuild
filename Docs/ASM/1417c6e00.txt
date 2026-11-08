@@ -1,0 +1,287 @@
+1417c6e00: mov    %rbx,0x8(%rsp)
+1417c6e05: push   %rdi
+1417c6e06: sub    $0x20,%rsp
+1417c6e0a: mov    %r8,%rdi
+1417c6e0d: mov    %rcx,%rbx
+1417c6e10: movq   $0x0,(%rcx)
+1417c6e17: mov    %rdx,0x8(%rcx)
+1417c6e1b: test   %r8,%r8
+1417c6e1e: jne    0x1417c6e26
+1417c6e20: call   *0x5c59a(%rip)        # 0x1418233c0
+1417c6e26: mov    (%rdi),%rax
+1417c6e29: mov    %rax,(%rbx)
+1417c6e2c: mov    %rbx,%rax
+1417c6e2f: mov    0x30(%rsp),%rbx
+1417c6e34: add    $0x20,%rsp
+1417c6e38: pop    %rdi
+1417c6e39: ret
+1417c6e40: rex push %rbx
+1417c6e42: sub    $0x20,%rsp
+1417c6e46: mov    (%rcx),%rax
+1417c6e49: mov    %rcx,%rbx
+1417c6e4c: test   %rax,%rax
+1417c6e4f: jne    0x1417c6e5f
+1417c6e51: call   *0x5c569(%rip)        # 0x1418233c0
+1417c6e57: mov    (%rbx),%rax
+1417c6e5a: test   %rax,%rax
+1417c6e5d: je     0x1417c6e62
+1417c6e5f: mov    (%rax),%rax
+1417c6e62: mov    0x30(%rax),%rax
+1417c6e66: cmp    %rax,0x8(%rbx)
+1417c6e6a: jne    0x1417c6e72
+1417c6e6c: call   *0x5c54e(%rip)        # 0x1418233c0
+1417c6e72: mov    0x8(%rbx),%rax
+1417c6e76: add    $0x18,%rax
+1417c6e7a: add    $0x20,%rsp
+1417c6e7e: pop    %rbx
+1417c6e7f: ret
+1417c6e80: rex push %rbx
+1417c6e82: sub    $0x20,%rsp
+1417c6e86: cmpq   $0x0,(%rcx)
+1417c6e8a: mov    %rcx,%rbx
+1417c6e8d: jne    0x1417c6e95
+1417c6e8f: call   *0x5c52b(%rip)        # 0x1418233c0
+1417c6e95: mov    0x8(%rbx),%rcx
+1417c6e99: cmpb   $0x0,0x29(%rcx)
+1417c6e9d: je     0x1417c6eab
+1417c6e9f: add    $0x20,%rsp
+1417c6ea3: pop    %rbx
+1417c6ea4: rex.W jmp *0x5c515(%rip)        # 0x1418233c0
+1417c6eab: mov    0x10(%rcx),%rax
+1417c6eaf: cmpb   $0x0,0x29(%rax)
+1417c6eb3: jne    0x1417c6ed6
+1417c6eb5: mov    (%rax),%rcx
+1417c6eb8: cmpb   $0x0,0x29(%rcx)
+1417c6ebc: jne    0x1417c6ecc
+1417c6ec0: mov    %rcx,%rax
+1417c6ec3: mov    (%rcx),%rcx
+1417c6ec6: cmpb   $0x0,0x29(%rcx)
+1417c6eca: je     0x1417c6ec0
+1417c6ecc: mov    %rax,0x8(%rbx)
+1417c6ed0: add    $0x20,%rsp
+1417c6ed4: pop    %rbx
+1417c6ed5: ret
+1417c6ed6: mov    0x8(%rcx),%rcx
+1417c6eda: cmpb   $0x0,0x29(%rcx)
+1417c6ede: jne    0x1417c6ef8
+1417c6ee0: mov    0x10(%rcx),%rax
+1417c6ee4: cmp    %rax,0x8(%rbx)
+1417c6ee8: jne    0x1417c6ef8
+1417c6eea: mov    %rcx,0x8(%rbx)
+1417c6eee: mov    0x8(%rcx),%rcx
+1417c6ef2: cmpb   $0x0,0x29(%rcx)
+1417c6ef6: je     0x1417c6ee0
+1417c6ef8: mov    %rcx,0x8(%rbx)
+1417c6efc: add    $0x20,%rsp
+1417c6f00: pop    %rbx
+1417c6f01: ret
+1417c6f10: mov    (%rcx),%rcx
+1417c6f13: jmp    0x1417f2fdc
+1417c6f20: mov    (%rdx),%rax
+1417c6f23: mov    %rax,(%rcx)
+1417c6f26: mov    0x8(%rdx),%rax
+1417c6f2a: mov    %rax,0x8(%rcx)
+1417c6f2e: mov    %rcx,%rax
+1417c6f31: ret
+1417c6f40: movq   $0x0,(%rcx)
+1417c6f47: mov    %rcx,%rax
+1417c6f4a: ret
+1417c6f50: movabs $0xfffffffffffffff,%rax
+1417c6f5a: ret
+1417c6f60: mov    0x30(%rcx),%r8
+1417c6f64: mov    0x8(%r8),%rax
+1417c6f68: cmpb   $0x0,0x29(%rax)
+1417c6f6c: jne    0x1417c6f87
+1417c6f6e: mov    (%rdx),%ecx
+1417c6f70: cmp    %ecx,0x18(%rax)
+1417c6f73: jae    0x1417c6f7b
+1417c6f75: mov    0x10(%rax),%rax
+1417c6f79: jmp    0x1417c6f81
+1417c6f7b: mov    %rax,%r8
+1417c6f7e: mov    (%rax),%rax
+1417c6f81: cmpb   $0x0,0x29(%rax)
+1417c6f85: je     0x1417c6f70
+1417c6f87: mov    %r8,%rax
+1417c6f8a: ret
+1417c6f90: mov    0x10(%rdx),%r8
+1417c6f94: mov    (%r8),%rax
+1417c6f97: mov    %rax,0x10(%rdx)
+1417c6f9b: mov    (%r8),%rax
+1417c6f9e: cmpb   $0x0,0x29(%rax)
+1417c6fa2: jne    0x1417c6fa8
+1417c6fa4: mov    %rdx,0x8(%rax)
+1417c6fa8: mov    0x8(%rdx),%rax
+1417c6fac: mov    %rax,0x8(%r8)
+1417c6fb0: mov    0x30(%rcx),%rax
+1417c6fb4: cmp    0x8(%rax),%rdx
+1417c6fb8: jne    0x1417c6fc6
+1417c6fba: mov    %r8,0x8(%rax)
+1417c6fbe: mov    %rdx,(%r8)
+1417c6fc1: mov    %r8,0x8(%rdx)
+1417c6fc5: ret
+1417c6fc6: mov    0x8(%rdx),%rax
+1417c6fca: cmp    (%rax),%rdx
+1417c6fcd: jne    0x1417c6fda
+1417c6fcf: mov    %r8,(%rax)
+1417c6fd2: mov    %rdx,(%r8)
+1417c6fd5: mov    %r8,0x8(%rdx)
+1417c6fd9: ret
+1417c6fda: mov    %r8,0x10(%rax)
+1417c6fde: mov    %rdx,(%r8)
+1417c6fe1: mov    %r8,0x8(%rdx)
+1417c6fe5: ret
+1417c6ff0: mov    (%rdx),%r8
+1417c6ff3: mov    0x10(%r8),%rax
+1417c6ff7: mov    %rax,(%rdx)
+1417c6ffa: mov    0x10(%r8),%rax
+1417c6ffe: cmpb   $0x0,0x29(%rax)
+1417c7002: jne    0x1417c7008
+1417c7004: mov    %rdx,0x8(%rax)
+1417c7008: mov    0x8(%rdx),%rax
+1417c700c: mov    %rax,0x8(%r8)
+1417c7010: mov    0x30(%rcx),%rax
+1417c7014: cmp    0x8(%rax),%rdx
+1417c7018: jne    0x1417c7027
+1417c701a: mov    %r8,0x8(%rax)
+1417c701e: mov    %rdx,0x10(%r8)
+1417c7022: mov    %r8,0x8(%rdx)
+1417c7026: ret
+1417c7027: mov    0x8(%rdx),%rax
+1417c702b: cmp    0x10(%rax),%rdx
+1417c702f: jne    0x1417c703e
+1417c7031: mov    %r8,0x10(%rax)
+1417c7035: mov    %rdx,0x10(%r8)
+1417c7039: mov    %r8,0x8(%rdx)
+1417c703d: ret
+1417c703e: mov    %r8,(%rax)
+1417c7041: mov    %rdx,0x10(%r8)
+1417c7045: mov    %r8,0x8(%rdx)
+1417c7049: ret
+1417c7050: ret    $0x0
+1417c7060: ret    $0x0
+1417c7070: movabs $0x666666666666666,%rax
+1417c707a: ret
+1417c7080: mov    %rbx,0x8(%rsp)
+1417c7085: mov    %rsi,0x10(%rsp)
+1417c708a: push   %rdi
+1417c708b: sub    $0x20,%rsp
+1417c708f: mov    0x30(%rcx),%rdi
+1417c7093: mov    %rdx,%rsi
+1417c7096: mov    0x8(%rdi),%rbx
+1417c709a: cmpb   $0x0,0x41(%rbx)
+1417c709e: jne    0x1417c70c3
+1417c70a0: lea    0x18(%rbx),%rcx
+1417c70a4: mov    %rsi,%rdx
+1417c70a7: call   *0x5c1b3(%rip)        # 0x141823260
+1417c70ad: test   %al,%al
+1417c70af: je     0x1417c70b7
+1417c70b1: mov    0x10(%rbx),%rbx
+1417c70b5: jmp    0x1417c70bd
+1417c70b7: mov    %rbx,%rdi
+1417c70ba: mov    (%rbx),%rbx
+1417c70bd: cmpb   $0x0,0x41(%rbx)
+1417c70c1: je     0x1417c70a0
+1417c70c3: mov    0x30(%rsp),%rbx
+1417c70c8: mov    0x38(%rsp),%rsi
+1417c70cd: mov    %rdi,%rax
+1417c70d0: add    $0x20,%rsp
+1417c70d4: pop    %rdi
+1417c70d5: ret
+1417c70e0: mov    0x10(%rdx),%r8
+1417c70e4: mov    (%r8),%rax
+1417c70e7: mov    %rax,0x10(%rdx)
+1417c70eb: mov    (%r8),%rax
+1417c70ee: cmpb   $0x0,0x41(%rax)
+1417c70f2: jne    0x1417c70f8
+1417c70f4: mov    %rdx,0x8(%rax)
+1417c70f8: mov    0x8(%rdx),%rax
+1417c70fc: mov    %rax,0x8(%r8)
+1417c7100: mov    0x30(%rcx),%rax
+1417c7104: cmp    0x8(%rax),%rdx
+1417c7108: jne    0x1417c7116
+1417c710a: mov    %r8,0x8(%rax)
+1417c710e: mov    %rdx,(%r8)
+1417c7111: mov    %r8,0x8(%rdx)
+1417c7115: ret
+1417c7116: mov    0x8(%rdx),%rax
+1417c711a: cmp    (%rax),%rdx
+1417c711d: jne    0x1417c712a
+1417c711f: mov    %r8,(%rax)
+1417c7122: mov    %rdx,(%r8)
+1417c7125: mov    %r8,0x8(%rdx)
+1417c7129: ret
+1417c712a: mov    %r8,0x10(%rax)
+1417c712e: mov    %rdx,(%r8)
+1417c7131: mov    %r8,0x8(%rdx)
+1417c7135: ret
+1417c7140: mov    (%rdx),%r8
+1417c7143: mov    0x10(%r8),%rax
+1417c7147: mov    %rax,(%rdx)
+1417c714a: mov    0x10(%r8),%rax
+1417c714e: cmpb   $0x0,0x41(%rax)
+1417c7152: jne    0x1417c7158
+1417c7154: mov    %rdx,0x8(%rax)
+1417c7158: mov    0x8(%rdx),%rax
+1417c715c: mov    %rax,0x8(%r8)
+1417c7160: mov    0x30(%rcx),%rax
+1417c7164: cmp    0x8(%rax),%rdx
+1417c7168: jne    0x1417c7177
+1417c716a: mov    %r8,0x8(%rax)
+1417c716e: mov    %rdx,0x10(%r8)
+1417c7172: mov    %r8,0x8(%rdx)
+1417c7176: ret
+1417c7177: mov    0x8(%rdx),%rax
+1417c717b: cmp    0x10(%rax),%rdx
+1417c717f: jne    0x1417c718e
+1417c7181: mov    %r8,0x10(%rax)
+1417c7185: mov    %rdx,0x10(%r8)
+1417c7189: mov    %r8,0x8(%rdx)
+1417c718d: ret
+1417c718e: mov    %r8,(%rax)
+1417c7191: mov    %rdx,0x10(%r8)
+1417c7195: mov    %r8,0x8(%rdx)
+1417c7199: ret
+1417c71a0: ret    $0x0
+1417c71b0: movabs $0x1fffffffffffffff,%rax
+1417c71ba: ret
+1417c71c0: mov    0x30(%rcx),%r8
+1417c71c4: mov    0x8(%r8),%rax
+1417c71c8: cmpb   $0x0,0x21(%rax)
+1417c71cc: jne    0x1417c71e7
+1417c71ce: mov    (%rdx),%ecx
+1417c71d0: cmp    %ecx,0x18(%rax)
+1417c71d3: jae    0x1417c71db
+1417c71d5: mov    0x10(%rax),%rax
+1417c71d9: jmp    0x1417c71e1
+1417c71db: mov    %rax,%r8
+1417c71de: mov    (%rax),%rax
+1417c71e1: cmpb   $0x0,0x21(%rax)
+1417c71e5: je     0x1417c71d0
+1417c71e7: mov    %r8,%rax
+1417c71ea: ret
+1417c71f0: mov    0x10(%rdx),%r8
+1417c71f4: mov    (%r8),%rax
+1417c71f7: mov    %rax,0x10(%rdx)
+1417c71fb: mov    (%r8),%rax
+1417c71fe: cmpb   $0x0,0x21(%rax)
+1417c7202: jne    0x1417c7208
+1417c7204: mov    %rdx,0x8(%rax)
+1417c7208: mov    0x8(%rdx),%rax
+1417c720c: mov    %rax,0x8(%r8)
+1417c7210: mov    0x30(%rcx),%rax
+1417c7214: cmp    0x8(%rax),%rdx
+1417c7218: jne    0x1417c7226
+1417c721a: mov    %r8,0x8(%rax)
+1417c721e: mov    %rdx,(%r8)
+1417c7221: mov    %r8,0x8(%rdx)
+1417c7225: ret
+1417c7226: mov    0x8(%rdx),%rax
+1417c722a: cmp    (%rax),%rdx
+1417c722d: jne    0x1417c723a
+1417c722f: mov    %r8,(%rax)
+1417c7232: mov    %rdx,(%r8)
+1417c7235: mov    %r8,0x8(%rdx)
+1417c7239: ret
+1417c723a: mov    %r8,0x10(%rax)
+1417c723e: rex.WB
+1417c723f: .byte 0x89
