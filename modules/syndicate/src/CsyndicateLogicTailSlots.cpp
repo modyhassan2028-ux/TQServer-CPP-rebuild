@@ -18,7 +18,10 @@ uint64_t (*g_pfnLogic_1417a8a50)(uint64_t, uint64_t, uint64_t, uint64_t) = none4
 uint64_t (*g_pfnLogic_1417a8940)(uint64_t, uint64_t, uint64_t, uint64_t) = none4;
 uint64_t (*g_pfnLogic_14177f980)(uint64_t, uint64_t, uint64_t, uint64_t) = none4;
 
-uint64_t (*g_pfnLogic_1417cad00)(uint64_t, uint64_t, uint64_t, uint64_t) = none4;
+static uint64_t lookup_bridge(uint64_t a, uint64_t b, uint64_t c, uint64_t d) {
+    return Slot_1417cad00_lookup((void*)(uintptr_t)a, (uint32_t)b, c, d);
+}
+uint64_t (*g_pfnLogic_1417cad00)(uint64_t, uint64_t, uint64_t, uint64_t) = lookup_bridge;
 uint64_t (*g_pfnLogic_141797e00)(uint64_t, uint64_t) = none2;
 uint64_t (*g_pfnLogic_14178f470)(uint64_t) = none1;
 
@@ -80,6 +83,39 @@ void* Slot_1417c8f70_lower_bound(void* container_void, void* out_void, const uin
     out[0] = pair[0];                                    // mov rax,[rcx]  / mov [rbp],rax
     out[1] = pair[1];                                    // mov rax,[rcx+8] / mov [rbp+8],rax
     return out;                                          // mov rax,rbp
+}
+
+// 0x1417cad00 — the lookup the three wrappers call. Every load, compare and offset below is
+// the one the bytes perform; both branches that reach 0x1418233c0 are the _DEBUG iterator
+// checks, and like the original they continue rather than throw.
+uint64_t Slot_1417cad00_lookup(void* self, uint32_t id, uint64_t /*r8*/, uint64_t /*r9*/) {
+    if (id == 0)                                        // test edx,edx / jz L37
+        return 0;
+
+    uint8_t* container = (uint8_t*)self + 0x8;           // lea rbx,[rcx+0x8]
+    uint8_t* it[2] = {nullptr, nullptr};                 // rsp+0x20 / rsp+0x28
+    Slot_1417c8f70_lower_bound(container, it, &id);      // the id spilled at [rsp+0x10] is the key
+
+    uint8_t* scary = it[0];                              // mov rdi,[rsp+0x20]
+    uint8_t* head = *(uint8_t**)(container + kEndNode);  // mov rsi,[rbx+0x30]
+    if (scary == nullptr || scary != *(uint8_t**)(container + kScary))
+        g_pfnLogic_1418233c0();                          // L18
+
+    uint8_t* node = it[1];                               // mov rbx,[rsp+0x28]
+    if (node == head)                                    // cmp rbx,rsi / jz L37
+        return 0;
+
+    uint8_t* owner;
+    if (scary == nullptr) {                              // test rdi,rdi / jz
+        g_pfnLogic_1418233c0();
+        owner = nullptr;                                 // xor r11d,r11d
+    } else {
+        owner = *(uint8_t**)(scary + 0x00);              // mov r11,[rdi]
+    }
+    if (node == *(uint8_t**)(owner + kEndNode))          // cmp rbx,[r11+0x30]
+        g_pfnLogic_1418233c0();
+
+    return *(uint64_t*)(node + 0x20);                    // mov rax,[rbx+0x20]
 }
 
 int Slot_1417cad90(void* self, uint64_t rdx, uint64_t r8, uint64_t r9) {

@@ -5,6 +5,7 @@
 #include "modules/syndicate/src/CsyndicateLogicTailSlots.h"
 #include <cstdio>
 #include <cstring>
+#include <cstddef>
 
 using namespace tq;
 
@@ -36,6 +37,9 @@ static void reset_hooks(uint64_t ret) {
 }
 
 int main() {
+    // the shipped default for the lookup seam (the ported 0x1417cad00); the wrapper block
+    // below substitutes its own, so it is restored before the end-to-end checks
+    uint64_t (*const shipped_lookup)(uint64_t, uint64_t, uint64_t, uint64_t) = g_pfnLogic_1417cad00;
     unsigned char object[0x40];
     std::memset(object, 0, sizeof(object));
     void* self = object;
@@ -262,6 +266,81 @@ int main() {
         Slot_1417c8f70_lower_bound(container, out, &k);
         CHECK(out[1] == (void*)&head);
         CHECK(err == 0);
+    }
+
+    // --- 0x1417cad00 the shared lookup, on a real tree
+    {
+        // the offsets the bytes use: left 0x00, parent 0x08, right 0x10, key 0x18,
+        // value 0x20, _Isnil 0x29
+        struct N {
+            N* left = nullptr;
+            N* parent = nullptr;
+            N* right = nullptr;
+            uint32_t key = 0;
+            uint8_t pad1[4] = {0};
+            uint64_t value = 0;
+            uint8_t pad2 = 0;
+            uint8_t isnil = 0;
+        };
+        static_assert(offsetof(N, left) == 0x00 && offsetof(N, parent) == 0x08 &&
+                      offsetof(N, right) == 0x10 && offsetof(N, key) == 0x18 &&
+                      offsetof(N, value) == 0x20 && offsetof(N, isnil) == 0x29,
+                      "node layout must match the bytes");
+        static N n[4];
+        static N nil, head, other_head;
+        static struct { uint8_t pre[8]; uint8_t container[0x40]; } obj;
+
+        for (int i = 0; i < 4; ++i) n[i] = N();
+        nil = N(); nil.isnil = 1;
+        head = N(); head.isnil = 1;
+        other_head = N(); other_head.isnil = 1;
+
+        // 2 is the root: left nil, right 5
+        n[0].key = 2; n[0].value = 0xAAAA;  n[0].left = &nil; n[0].right = &n[1]; n[1].parent = &n[0];
+        n[1].key = 5; n[1].value = 0xBBBB;  n[1].left = &nil; n[1].right = &nil;
+        head.parent = &n[0];
+        other_head.parent = &n[0];
+
+        std::memset(&obj, 0, sizeof(obj));
+        *(void**)(obj.container + 0x30) = &head;      // the end node
+        *(void**)(obj.container + 0x00) = &other_head; // the "scary" word carried in the iterator
+        *(void**)((uint8_t*)&other_head + 0x00) = nullptr;  // owner comes from *(scary in iterator)
+        // scary is container[0] = &other_head, so owner = *(scary) -> point it at a live object
+        static struct { uint8_t pad[0x38]; } owner;
+        std::memset(&owner, 0, sizeof(owner));
+        *(void**)((uint8_t*)&other_head + 0x00) = &owner;
+        *(void**)((uint8_t*)&owner + 0x30) = &head;   // node == owner->head would error
+
+        g_pfnLogic_1418233c0 = [] { };
+
+        void* self = obj.pre;                          // container lives at self+8
+
+        // hit
+        CHECK(Slot_1417cad00_lookup(self, 5, 0, 0) == 0xBBBB);
+        CHECK(Slot_1417cad00_lookup(self, 2, 0, 0) == 0xAAAA);
+        // id 0 answers 0 without walking: 2 exists, so a walk would have found it
+        CHECK(Slot_1417cad00_lookup(self, 0, 0, 0) == 0);
+        // past the end
+        CHECK(Slot_1417cad00_lookup(self, 9, 0, 0) == 0);
+
+        // the iterator check that CAN fire: node == owner->head (the bytes compare rbx with
+        // [r11+0x30] and call the error path when they are equal)
+        static int g_err;
+        g_err = 0;
+        g_pfnLogic_1418233c0 = [] { ++g_err; };
+        *(void**)((uint8_t*)&owner + 0x30) = &n[1];     // owner->head == the found node
+        CHECK(Slot_1417cad00_lookup(self, 5, 0, 0) == 0xBBBB);   // still returns the value
+        CHECK(g_err == 1);
+        *(void**)((uint8_t*)&owner + 0x30) = &head;      // restore
+        g_pfnLogic_1418233c0 = [] { };
+
+        // the wrappers now run through the ported lookup by default
+        g_pfnLogic_1417cad00 = shipped_lookup;
+        *(void**)(obj.container + 0x00) = &other_head;
+        CHECK(Slot_1417cad90(self, 5, 0, 0) == 1);      // found -> true
+        CHECK(Slot_1417cad90(self, 9, 0, 0) == 0);      // not found -> false
+        CHECK(Slot_1417cadb0(self, 1, 5, 0) == 0x777);  // hit, forwards to the 2-arg tail
+        CHECK(Slot_1417cb000(self, 5, 0, 0) == 0x888);  // hit, forwards to the 1-arg tail
     }
 
     std::printf("%s checks=%d fails=%d\n", g_fails ? "LOGIC_SLOTS_FAIL" : "LOGIC_SLOTS_OK",

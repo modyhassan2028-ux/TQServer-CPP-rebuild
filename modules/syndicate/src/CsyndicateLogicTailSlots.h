@@ -50,7 +50,15 @@ extern uint64_t (*g_pfnLogic_14177f980)(uint64_t, uint64_t, uint64_t, uint64_t);
 // The three lookup wrappers these forwarders land on, and the lookup itself. 0x1417cad00
 // walks a container at this+8 (it calls 0x1417c8f70 and 0x1418233c0) and is not ported yet,
 // so it stays a seam; the three wrappers around it are ported here.
-extern uint64_t (*g_pfnLogic_1417cad00)(uint64_t, uint64_t, uint64_t, uint64_t);  // the lookup
+// The seam stays injectable; its default now runs the ported lookup below, so the three
+// wrappers are seam-free in practice while a test can still substitute it.
+extern uint64_t (*g_pfnLogic_1417cad00)(uint64_t, uint64_t, uint64_t, uint64_t);
+// 0x1417cad00 — the shared lookup, ported on top of the walk above; node value lives at +0x20.
+//   test edx,edx / jz -> answer 0 for id 0 without touching the tree
+//   lower_bound(this+8, &it, &id);  it[0]=scary, it[1]=node
+//   the two _DEBUG iterator checks (error path 0x1418233c0, then execution continues)
+//   node == head -> answer 0;  otherwise answer node[0x20]
+uint64_t Slot_1417cad00_lookup(void* self, uint32_t id, uint64_t r8, uint64_t r9);
 extern uint64_t (*g_pfnLogic_141797e00)(uint64_t, uint64_t);                      // 2-arg tail
 extern uint64_t (*g_pfnLogic_14178f470)(uint64_t);                                // 1-arg tail
 
