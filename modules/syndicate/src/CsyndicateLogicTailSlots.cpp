@@ -1556,6 +1556,13 @@ namespace tq {
 void (*g_pfnLogic_1417929f0)(void* first, uint64_t index, uint64_t count, void* elem) = nullptr;
 void (*g_pfnLogic_141792b70)(void* first, uint64_t index, uint64_t count, void* elem) = nullptr;
 
+// every iter_swap in this unit is four instructions: load one, load the other, store back
+static inline void SwapWords(void* pA, void* pB) {
+    void* pTmp = *(void**)pA;
+    *(void**)pA = *(void**)pB;
+    *(void**)pB = pTmp;
+}
+
 static int64_t SignAdjustedHalf(int64_t v) {              // cqto / sub %rdx,%rax / sar 1
     return (v - (v < 0 ? -1 : 0)) >> 1;
 }
@@ -1797,6 +1804,110 @@ void Slot_141793fd0(void* pFirst, void* pLast, bool (*pfnLess)(void* a, void* b)
             } while (pfnLess(pElem, *(void**)pScan));                 // 14179409a jne
         }
         *(void**)pHole = pElem;                                      // 14179409c mov %rdi,(%r12)
+    }
+}
+
+}  // namespace tq
+
+namespace tq {
+
+// ============================================================================
+// 0x141795d40 — the partition behind the 0x14179cf10 family: the median of three is put in
+// place (0x141793e70), then the range is split around it. The pair goes out through the
+// hidden first argument. Throughout: A is the pivot slot (_Pfirst), B the first slot after it
+// (_Plast), the predicate arrives in r9 and every element is one 8-byte word.
+//   141795d64..d83  Mid = First + ((Last-First) >> 3)/2 * 8
+//   141795d8a       call 0x141793e70 (First, Mid, Last-8, pred)
+//   141795d8f       B = A + 8
+//   141795d93..c5   while (First < A) unless the neighbours order, --A
+//   141795dc7..f3   while (B < Last) unless the neighbours order, ++B
+//   141795e00..3e   forward scan: greater ones stay, smaller ones break, equals go to B
+//   141795e40..8c   backward scan: smaller ones stay, greater ones break, equals go to --A
+//   141795e8c..ed9  low side exhausted: the equal block grows by one on both ends
+//   141795ede..f19  high side exhausted: pull one from A into Glast, then --B
+//   141795f1e..f35  neither: swap the pair and step Gfirst
+//   141795f44/f4c   the answer: out[0] = A, out[1] = B
+void (*g_pfnLogic_141793e70)(void* first, void* mid, void* last,
+                             bool (*pfnLess)(void* a, void* b)) = nullptr;
+
+void Slot_141795d40(void** pOut, void* pFirstArg, void* pLastArg,
+                    bool (*pfnLess)(void* a, void* b)) {
+    uint8_t* First = (uint8_t*)pFirstArg;                       // mov %rdx,%r15
+    uint8_t* Last = (uint8_t*)pLastArg;                         // mov %r8,%r14
+    const int64_t nHalf = SignAdjustedHalf((int64_t)(Last - First) >> 3);   // 141795d6a..d80
+    uint8_t* A = First + (nHalf << 3);                          // 141795d83, the pivot slot
+    if (g_pfnLogic_141793e70 != nullptr)                        // 141795d8a
+        g_pfnLogic_141793e70(First, A, Last - 8, pfnLess);
+    uint8_t* B = A + 8;                                         // 141795d8f
+
+    while (First < A) {                                         // 141795d93..c5
+        if (pfnLess != nullptr && pfnLess(*(void**)(A - 8), *(void**)A)) break;
+        if (pfnLess != nullptr && pfnLess(*(void**)A, *(void**)(A - 8))) break;
+        A -= 8;
+    }
+    while (B < Last) {                                          // 141795dc7..f3
+        if (pfnLess != nullptr && pfnLess(*(void**)B, *(void**)A)) break;
+        if (pfnLess != nullptr && pfnLess(*(void**)A, *(void**)B)) break;
+        B += 8;
+    }
+
+    uint8_t* Gfirst = B;                                        // 141795df5 mov %rbp,%rdi
+    uint8_t* Glast = A;                                         // 141795df8 mov %rbx,%r12
+    for (;;) {
+        while (Gfirst < Last) {                                 // 141795e00..3e
+            if (pfnLess != nullptr && pfnLess(*(void**)A, *(void**)Gfirst)) { Gfirst += 8; continue; }
+            if (pfnLess != nullptr && pfnLess(*(void**)Gfirst, *(void**)A)) break;
+            uint8_t* pOldB = B;                                 // 141795e1f mov %rbp,%rdx
+            B += 8;                                             // 141795e22 add $0x8,%rbp
+            if (pOldB != Gfirst)                                // 141795e26 cmp %rdi,%rdx
+                SwapWords(pOldB, Gfirst);                       // 141795e2b..e34
+            Gfirst += 8;                                        // 141795e37
+        }
+        while (First < Glast) {                                 // 141795e40..8c
+            uint8_t* pCand = Glast - 8;                         // 141795e45 lea -0x8(%r12),%rsi
+            if (pfnLess != nullptr && pfnLess(*(void**)pCand, *(void**)A)) {
+                Glast -= 8;                                     // 141795e7f sub $0x8,%r12
+                continue;
+            }
+            if (pfnLess != nullptr && pfnLess(*(void**)A, *(void**)pCand)) break;
+            A -= 8;                                             // 141795e6a sub $0x8,%rbx
+            if (A != pCand)                                     // 141795e6e cmp %rsi,%rbx
+                SwapWords(A, pCand);                            // 141795e73..e7c
+            Glast -= 8;                                         // 141795e7f sub $0x8,%r12
+        }
+
+        if (Glast == First) {                                   // 141795e8c cmp %r15,%r12
+            if (Gfirst == Last) {                               // 141795e91 cmp %r14,%rdi
+                pOut[0] = A;                                    // 141795f44 mov %rbx,(%rax)
+                pOut[1] = B;                                    // 141795f4c mov %rbp,0x8(%rax)
+                return;
+            }
+            if (B != Gfirst && A != B)                          // 141795e9a / 141795e9f
+                SwapWords(B, A);                                // 141795ea4..eb2
+            uint8_t* pOldA = A;                                 // 141795eb5 mov %rbx,%r8
+            uint8_t* pOldG = Gfirst;                            // 141795eb2 mov %rdi,%rdx
+            B += 8;                                             // 141795eb8
+            A += 8;                                             // 141795ebc
+            Gfirst += 8;                                        // 141795ec0
+            if (pOldA != pOldG)                                 // 141795ec4 cmp %rdx,%r8
+                SwapWords(pOldA, pOldG);                        // 141795ecd..ed6
+            continue;                                           // 141795ed9
+        }
+
+        Glast -= 8;                                             // 141795ede sub $0x8,%r12
+        if (Gfirst == Last) {                                   // 141795ee2 cmp %r14,%rdi
+            A -= 8;                                             // 141795ee7 sub $0x8,%rbx
+            if (Glast != A)                                     // 141795eeb cmp %rbx,%r12
+                SwapWords(Glast, A);                            // 141795ef0..efb
+            B -= 8;                                             // 141795efe sub $0x8,%rbp
+            if (A != B)                                         // 141795f02 cmp %rbp,%rbx
+                SwapWords(B, A);                                // 141795f0b..f15
+            continue;                                           // 141795f19
+        }
+
+        if (Gfirst != Glast)                                    // 141795f1e cmp %r12,%rdi
+            SwapWords(Gfirst, Glast);                           // 141795f23..f2d
+        Gfirst += 8;                                            // 141795f31
     }
 }
 

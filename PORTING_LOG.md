@@ -10084,3 +10084,32 @@ initialise to the ported bodies, so the sift chain is real when nothing override
 
 Batteries: 411 assertions, 6/6 runs, sanitizers clean. Also fixed a pre-existing misaligned read in
 an older battery (a 0x79 offset read as a word), which had been printing a UBSan note every run.
+
+## 2026-11-08 — 0x141795d40 ported (the partition of the 0x14179cf10 family)
+
+A hundred and seventy-two instructions. The pair comes back through the hidden first argument;
+the range is (rdx, r8) and the predicate is r9, all elements one 8-byte word:
+
+    Mid  = First + ((Last-First) >> 3)/2 * 8                   141795d64..d83
+    0x141793e70 (First, Mid, Last-8, pred) puts the median in place   141795d8a
+    A = Mid (_Pfirst), B = Mid+8 (_Plast)                       141795d8f
+    two seeding walks move A down and B up while the neighbours do not order
+    then the forward scan leaves greater elements, breaks on smaller, and pushes equals to B;
+    the backward scan leaves smaller elements, breaks on greater, and pulls equals into A;
+    the three continuations are the low side exhausted, the high side exhausted, and neither;
+    the answer is out[0] = A, out[1] = B                         141795f44 / 141795f4c
+
+One deviation from the MSVC text I had in mind, and the bytes win: the backward scan's equal case
+decrements **A** (`sub $0x8,%rbx` at 141795e6a) where the stock algorithm decrements `_Plast`. This
+variant collects the low-side equals into the block before the pivot instead of above it. The split
+property is the same and the batteries prove it.
+
+My first transcription was wrong in the same branch for a different reason: I treated the loop step
+(`sub $0x8,%r12` at 141795e7f) as the candidate address, so the backward scan compared one slot too
+far and the descending case came out unpartitioned (`3 8 4 6 2 | 5 | 1 7 9`). The bytes keep the
+candidate in rsi (`lea -0x8(%r12),%rsi` at 141795e45) and leave r12 alone until the loop continues.
+I found it by mirroring both the port and the stock algorithm in python and diffing the traces.
+
+Batteries: 7222 assertions, 6/6 runs, sanitizers clean. Six named shapes plus a fixed pseudo-random
+sweep of 12 lengths x 40 runs over a 7-value range, so plenty of equal keys, each checked for the
+strict split, the ordered pair, and the preserved multiset.

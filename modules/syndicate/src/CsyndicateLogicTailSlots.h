@@ -374,6 +374,11 @@ void Slot_14179cf10(void* pFirst, void* pLast, int64_t nCount, void* pfn);
 // 0x141793fd0 — the small-range row of the 0x14179cf10 family. Its third argument is a
 // comparator over 8-byte elements and the fourth is never read.
 void Slot_141793fd0(void* pFirst, void* pLast, bool (*pfnLess)(void* a, void* b), void* unused);
+// 0x141795d40 — the partition of the same family: the median of three is put in place by
+// 0x141793e70, then the range splits around it. The pair comes back through the first argument.
+extern void (*g_pfnLogic_141793e70)(void* first, void* mid, void* last,
+                                   bool (*pfnLess)(void* a, void* b));
+void Slot_141795d40(void** pOut, void* pFirst, void* pLast, bool (*pfnLess)(void* a, void* b));
 
 }  // namespace tq
 

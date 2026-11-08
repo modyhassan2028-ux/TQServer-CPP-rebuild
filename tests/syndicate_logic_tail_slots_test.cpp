@@ -33,6 +33,47 @@ static int g_checks, g_fails;
 static void* g_pBase = nullptr;
 #define CHECK(x) do { ++g_checks; if (!(x)) { ++g_fails; std::printf("FAILED %s:%d  %s\n", __FILE__, __LINE__, #x); } } while (0)
 
+// ---------------------------------------------------------------------------
+// helpers for the 0x141795d40 battery. 0x141793e70 is stubbed here as a plain median of three
+// (a stub, not a port: the real row is its own unit), so what the battery proves is the split.
+static uintptr_t g_aPartSortedSource[16];
+
+static bool PartLess(void* a, void* b) { return (uintptr_t)a < (uintptr_t)b; }
+
+static void PartMed3Stub(void* pF, void* pM, void* pL, bool (*pLess)(void*, void*)) {
+    if (pLess(*(void**)pM, *(void**)pF)) { void* t = *(void**)pM; *(void**)pM = *(void**)pF; *(void**)pF = t; }
+    if (pLess(*(void**)pL, *(void**)pM)) {
+        { void* t = *(void**)pL; *(void**)pL = *(void**)pM; *(void**)pM = t; }
+        if (pLess(*(void**)pM, *(void**)pF)) { void* t = *(void**)pM; *(void**)pM = *(void**)pF; *(void**)pF = t; }
+    }
+}
+
+static void PartRun(uintptr_t* pData, int nCount, uintptr_t* pOutPair) {
+    void** pOut = (void**)pOutPair;
+    tq::Slot_141795d40(pOut, pData, pData + nCount, PartLess);
+}
+
+static void PartCheckSplit(uintptr_t* pData, int nCount, uintptr_t uPivot) {
+    uintptr_t aPair[2] = {0, 0};
+    PartRun(pData, nCount, aPair);
+    const uintptr_t* pA = (const uintptr_t*)aPair[0];
+    const uintptr_t* pB = (const uintptr_t*)aPair[1];
+    CHECK(pA <= pB);
+    for (const uintptr_t* p = pData; p < pA; ++p) CHECK(*p < uPivot);
+    for (const uintptr_t* p = pA; p < pB; ++p) CHECK(*p == uPivot);
+    for (const uintptr_t* p = pB; p < pData + nCount; ++p) CHECK(*p > uPivot);
+    uintptr_t aCopy[16];
+    uintptr_t aWant[16];
+    for (int i = 0; i < nCount; ++i) { aCopy[i] = pData[i]; aWant[i] = g_aPartSortedSource[i]; }
+    for (int i = 1; i < nCount; ++i)
+        for (int j = i; j > 0 && aCopy[j - 1] > aCopy[j]; --j) {
+            uintptr_t t = aCopy[j - 1]; aCopy[j - 1] = aCopy[j]; aCopy[j] = t; }
+    for (int i = 1; i < nCount; ++i)
+        for (int j = i; j > 0 && aWant[j - 1] > aWant[j]; --j) {
+            uintptr_t t = aWant[j - 1]; aWant[j - 1] = aWant[j]; aWant[j] = t; }
+    for (int i = 0; i < nCount; ++i) CHECK(aCopy[i] == aWant[i]);   // the multiset survived
+}
+
 static uint64_t g_a, g_b, g_c, g_d;
 static int g_calls;
 static uint64_t g_ret;
@@ -1972,6 +2013,64 @@ int main() {
         CHECK(std::strstr(tq::g_szLastLog, "IF_OK(m_pRec)") != nullptr);
         CHECK(std::strstr(tq::g_szLastLog, "synattr.cpp") != nullptr);
         CHECK(std::strstr(tq::g_szLastLog, ", 607") != nullptr);
+    }
+
+    static uintptr_t aSortedSource[16];
+
+    // ------------------------------------------------------------------
+    // 0x141795d40 — the partition: below the pivot, the equal block, then above it. The
+    // helpers above stub 0x141793e70 with a median of three so the pivot is known.
+    {
+        static uintptr_t aP[16];
+        g_pfnLogic_141793e70 = &PartMed3Stub;
+
+        struct Case { int nCount; uintptr_t aData[16]; uintptr_t uPivot; };
+        static Case aCases[6] = {
+            {9,  {3, 1, 4, 1, 5, 9, 2, 6, 5}, 5},   // mixed, the median of a[0], a[4], a[8]
+            {9,  {1, 2, 3, 4, 5, 6, 7, 8, 9}, 5},   // ascending
+            {9,  {9, 8, 7, 6, 5, 4, 3, 2, 1}, 5},   // descending
+            {9,  {4, 4, 4, 4, 4, 4, 4, 4, 4}, 4},   // all equal: the whole range is the block
+            {3,  {2, 1, 2}, 2},                     // the smallest interesting run
+            {2,  {2, 1}, 2},                        // two elements
+        };
+        for (int nCase = 0; nCase < 6; ++nCase) {
+            const int n = aCases[nCase].nCount;
+            for (int i = 0; i < n; ++i) { aP[i] = aCases[nCase].aData[i]; g_aPartSortedSource[i] = aP[i]; }
+            PartCheckSplit(aP, n, aCases[nCase].uPivot);
+        }
+
+        // --- many shapes at once: a fixed pseudo-random sweep, each one checked for the
+        //     split and for the multiset. The pivot is the median the stub leaves in the middle.
+        {
+            uint64_t uSeed = 0x2545F4914F6CDD1DULL;
+            auto nextRand = [&uSeed](uint32_t uMod) -> uint64_t {
+                uSeed = uSeed * 6364136223846793005ULL + 1442695040888963407ULL;
+                return (uSeed >> 33) % uMod; };
+            for (int nLen = 1; nLen <= 12; ++nLen) {
+                for (int nRun = 0; nRun < 40; ++nRun) {
+                    for (int i = 0; i < nLen; ++i) {
+                        aP[i] = (uintptr_t)nextRand(7);          // a small value range: many equals
+                        g_aPartSortedSource[i] = aP[i];
+                    }
+                    uintptr_t aTmp[16];
+                    for (int i = 0; i < nLen; ++i) aTmp[i] = aP[i];
+                    PartMed3Stub(&aTmp[0], &aTmp[nLen / 2], &aTmp[nLen - 1], PartLess);
+                    PartCheckSplit(aP, nLen, aTmp[nLen / 2]);
+                }
+            }
+        }
+
+        // --- the pair lands in the first argument, in order, and bounds the equal block
+        {
+            uintptr_t aData[5] = {5, 1, 5, 3, 5};
+            uintptr_t aPair[2] = {0, 0};
+            PartRun(aData, 5, aPair);
+            CHECK(aPair[0] != 0 && aPair[1] != 0);
+            CHECK(aPair[0] <= aPair[1]);
+            CHECK(aPair[1] - aPair[0] == 3 * sizeof(uintptr_t));   // the three fives
+        }
+
+        g_pfnLogic_141793e70 = nullptr;
     }
 
     std::printf("%s checks=%d fails=%d\n", g_fails ? "LOGIC_SLOTS_FAIL" : "LOGIC_SLOTS_OK",
