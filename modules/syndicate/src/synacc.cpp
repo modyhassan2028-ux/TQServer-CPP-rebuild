@@ -774,4 +774,34 @@ void* SynAccVirt0_1417c6c90(void* pThis) {
     return nullptr;
 }
 
+// 0x1417c6d20 — movq $0x0,(%rcx) / mov %rcx,%rax / ret
+void* SynAccZeroLead_1417c6d20(void* pThis) {
+    *(void**)pThis = nullptr;
+    return pThis;
+}
+
+// 0x1417c6d30 — lea 0x18(%rcx),%rax / ret
+void* SynAccPlus18_1417c6d30(void* pThis) { return (unsigned char*)pThis + 0x18; }
+
+// 0x1417c6d40 — mov 0x30(%rcx),%rax / add $0x8,%rax / ret
+void* SynAccSlot30Plus8_1417c6d40(void* pThis) {
+    return (unsigned char*)*(void**)((unsigned char*)pThis + 0x30) + 8;
+}
+
+// 0x1417c6d60 — lea 0x18(%rcx),%rax / ret
+void* SynAccPlus18_1417c6d60(void* pThis) { return (unsigned char*)pThis + 0x18; }
+
+// 0x1417c6d70 — mov 0x30(%rcx),%rax / add $0x8,%rax / ret
+void* SynAccSlot30Plus8_1417c6d70(void* pThis) {
+    return (unsigned char*)*(void**)((unsigned char*)pThis + 0x30) + 8;
+}
+
+// 0x1417c6d90 — lea 0x18(%rcx),%rax / ret
+void* SynAccPlus18_1417c6d90(void* pThis) { return (unsigned char*)pThis + 0x18; }
+
+// 0x1417c6da0 — mov 0x30(%rcx),%rax / add $0x8,%rax / ret
+void* SynAccSlot30Plus8_1417c6da0(void* pThis) {
+    return (unsigned char*)*(void**)((unsigned char*)pThis + 0x30) + 8;
+}
+
 }  // namespace tq

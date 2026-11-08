@@ -337,3 +337,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   0x1417f2fdc), the repeats at 0x1417c6d60 / 0x1417c6d70 / 0x1417c6d80, 0x1417c6d90 /
   0x1417c6da0 / 0x1417c6db0, and 0x1417c6dc0 (the iterator `+0x18` accessor with two DEBUG
   checks).
+
+## D141 (latest)
+
+- Twelve bodies landed in one unit: `SYNDICATE_D141_OK ... 20 checks`, 6 passes under
+  ASan+UBSan. Cluster 132 bodies.
+- The saved dump ends at 0x1417c6dff, so the next unit starts by extending
+  `Docs/ASM/1417c69e0.txt` past 0x1417c6e00 before any line is written.

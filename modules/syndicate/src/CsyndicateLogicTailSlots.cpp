@@ -2554,4 +2554,59 @@ bool SynAccIterNe_1417c6ca0(void* pThis, void* pOther) {
     return *(void**)(t1 + 8) != *(void**)(o1 + 8);                // cmp %rdx,0x8(%rdi) / setne %al
 }
 
+// 0x1417c6ce0 — the setne iterator comparison once more, its own start:
+//   mov (%rcx),%rax / test / je seam / cmp (%rdx),%rax / je / call *0x1418233c0 /
+//   cmp %rdx,0x8(%rdi) / setne %al
+bool SynAccIterNe_1417c6ce0(void* pThis, void* pOther) {
+    unsigned char* s1 = (unsigned char*)pThis;                    // rdi
+    unsigned char* s2 = (unsigned char*)pOther;                   // rbx
+    void* lead = *(void**)s1;                                     // mov (%rcx),%rax
+    if (lead == nullptr || lead != *(void**)s2) {                 // test / je, cmp / je
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();                     // call *0x1418233c0
+    }
+    return *(void**)(s1 + 8) != *(void**)(s2 + 8);                // setne %al
+}
+
+// 0x1417c6d50 — mov (%rcx),%rcx / jmp 0x1417f2fdc
+// The pointer handed to the deallocate is the lead itself, not this.
+void SynAccFreeLead_1417c6d50(void* pThis) {
+    g_pfnLogic_1417f2fdc(*(void**)pThis);                          // mov (%rcx),%rcx / jmp
+}
+
+// 0x1417c6d80 — the same two instructions, its own start
+void SynAccFreeLead_1417c6d80(void* pThis) {
+    g_pfnLogic_1417f2fdc(*(void**)pThis);
+}
+
+// 0x1417c6db0 — and once more
+void SynAccFreeLead_1417c6db0(void* pThis) {
+    g_pfnLogic_1417f2fdc(*(void**)pThis);
+}
+
+// 0x1417c6dc0 — the +0x18 accessor with the DEBUG checks kept:
+//   mov (%rcx),%rax / test / jne 0x1417c6ddf / call seam / mov (%rbx),%rax / test / je 0x1417c6de2 /
+//   mov (%rax),%rax / mov 0x30(%rax),%rax / cmp %rax,0x8(%rbx) / jne / call seam /
+//   mov 0x8(%rbx),%rax / add $0x18,%rax
+// A lead that stays null after the check is read anyway, exactly as the bytes read it.
+void* SynAccCurrPlus18_1417c6dc0(void* pIter) {
+    unsigned char* it = (unsigned char*)pIter;                     // rbx
+    unsigned char* p = *(unsigned char**)it;                       // mov (%rcx),%rax
+    if (p == nullptr) {                                            // test %rax,%rax / jne
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();                      // call *0x1418233c0
+        p = *(unsigned char**)it;                                  // mov (%rbx),%rax
+        if (p != nullptr)                                          // test / je 0x1417c6de2
+            p = *(unsigned char**)p;                               // mov (%rax),%rax
+    } else {
+        p = *(unsigned char**)p;                                   // mov (%rax),%rax
+    }
+    unsigned char* q = *(unsigned char**)(p + 0x30);               // mov 0x30(%rax),%rax
+    if (q == *(void**)(it + 8)) {                                  // cmp %rax,0x8(%rbx) / jne
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();
+    }
+    return *(unsigned char**)(it + 8) + 0x18;                      // add $0x18,%rax
+}
+
 }  // namespace tq

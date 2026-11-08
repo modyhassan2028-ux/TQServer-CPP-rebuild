@@ -258,3 +258,20 @@ The four bodies that were held back at D134 are in, each read straight off its o
 - 0x1417c6ca0: the `setne` iterator comparison again, the DEBUG check at 0x1418233c0 running
   unless both leads name one node.
 - `tests/syndicate_d140_test.cpp`: 15 checks, 6 passes, ASan+UBSan clean. Cluster 120 bodies.
+
+## D141 — twelve bodies, 0x1417c6ce0 .. 0x1417c6dff
+
+- 0x1417c6ce0: the setne iterator comparison once more, its own start, the DEBUG check at
+  0x1418233c0 in the same two places.
+- 0x1417c6d20: `movq $0x0,(%rcx)` then `this` back.
+- The three `+0x18` accessors 0x1417c6d30 / 0x1417c6d60 / 0x1417c6d90 (`lea 0x18(%rcx),%rax`)
+  and the three 0x30-slot accessors 0x1417c6d40 / 0x1417c6d70 / 0x1417c6da0
+  (`mov 0x30(%rcx),%rax` / `add $0x8,%rax`).
+- The three deallocate thunks 0x1417c6d50 / 0x1417c6d80 / 0x1417c6db0: `mov (%rcx),%rcx` then
+  `jmp 0x1417f2fdc`, so the **lead** is what goes to the deallocate, not `this`. The test hands
+  each thunk a real allocation so the default seam can take it, and checks the lead still reads
+  back afterwards because the body only ever reads it.
+- 0x1417c6dc0: the `+0x18` accessor with both DEBUG checks kept. Its first check falls through
+  on a lead that stays null after the seam and reads `0x30(%rax)` with rax zero, exactly as the
+  bytes do; the port reproduces that read rather than guarding it.
+- `tests/syndicate_d141_test.cpp`: 20 checks, 6 passes, ASan+UBSan clean. Cluster 132 bodies.

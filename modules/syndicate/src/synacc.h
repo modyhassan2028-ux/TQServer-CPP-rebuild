@@ -139,5 +139,12 @@ bool SynAccChecked4_1417c6bd0(void* pThis, void* a2, void* a3, unsigned char uFl
 extern void* (*g_pfnSynVirt0_1417c6c80)(void* pSlot, void* pFn);            // jmp *(%rax)
 void* SynAccVirt0At98_1417c6c80(void* pThis);                              // 0x1417c6c80
 void* SynAccVirt0_1417c6c90(void* pThis);                                  // 0x1417c6c90
+void* SynAccZeroLead_1417c6d20(void* pThis);                              // 0x1417c6d20
+void* SynAccPlus18_1417c6d30(void* pThis);                                 // 0x1417c6d30
+void* SynAccSlot30Plus8_1417c6d40(void* pThis);                            // 0x1417c6d40
+void* SynAccPlus18_1417c6d60(void* pThis);                                 // 0x1417c6d60
+void* SynAccSlot30Plus8_1417c6d70(void* pThis);                            // 0x1417c6d70
+void* SynAccPlus18_1417c6d90(void* pThis);                                 // 0x1417c6d90
+void* SynAccSlot30Plus8_1417c6da0(void* pThis);                            // 0x1417c6da0
 }  // namespace tq
 #endif
