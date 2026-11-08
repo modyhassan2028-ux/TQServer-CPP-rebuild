@@ -170,11 +170,15 @@ Flower.dll: +flower::CFlowerService (فتبل 0x140d9be08، 5 فتحات).
 
 | measure | ported | total | share |
 | --- | --- | --- | --- |
-| indexed rows | 10,103 | 10,224 | 98.8% |
-| routines | 9,351 | 9,445 | 99.0% |
-| instructions | 365,941 | 367,362 | 99.6% |
-| code instructions | 248,058 | 249,137 | 99.6% |
-| lifted bodies | 9,983 | | |
+| indexed rows | 10,213 | 10,224 | 99.9% |
+| routines | 9,435 | 9,445 | 99.9% |
+| instructions | 366,303 | 367,362 | 99.7% |
+| code instructions | 248,085 | 249,137 | 99.6% |
+| lifted bodies | 10,079 | | |
+
+The last 140 entries were the epilogue thunks and short fragments the earlier census filtered out
+(rows under six instructions: `add rsp,0x48; pop r12; pop rdi; repz ret` and the like). They lift
+the same way as any other row; the filter, not the lifter, was what left them out.
 
 The remainder is not pending work. `tools/bulk/backlog_rows.json` is empty: every row that
 could be lifted has been. The 14 rows / 1,694 instructions in `tools/bulk/data_rows.json` are

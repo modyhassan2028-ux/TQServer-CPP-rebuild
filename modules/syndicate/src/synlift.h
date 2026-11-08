@@ -795,6 +795,8 @@ uint64_t SynLift_14172ded0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_14172df10(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14172df10
 
+uint64_t SynLift_14172df6c(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14172df6c
+
 uint64_t SynLift_14172df87(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14172df87
 
 uint64_t SynLift_14172dfc0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14172dfc0
@@ -808,6 +810,8 @@ uint64_t SynLift_14172e072(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_14172e092(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14172e092
 
 uint64_t SynLift_14172e15a(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14172e15a
+
+uint64_t SynLift_14172e21c(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14172e21c
 
 uint64_t SynLift_14172e230(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14172e230
 
@@ -857,6 +861,8 @@ uint64_t SynLift_14172e97c(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_14172ea30(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14172ea30
 
+uint64_t SynLift_14172ead4(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14172ead4
+
 uint64_t SynLift_14172eae0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14172eae0
 
 uint64_t SynLift_14172eb29(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14172eb29
@@ -864,6 +870,8 @@ uint64_t SynLift_14172eb29(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_14172eb4c(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14172eb4c
 
 uint64_t SynLift_14172ec00(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14172ec00
+
+uint64_t SynLift_14172eca4(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14172eca4
 
 uint64_t SynLift_14172ecb0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14172ecb0
 
@@ -873,7 +881,11 @@ uint64_t SynLift_14172eed6(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_14172ef70(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14172ef70
 
+uint64_t SynLift_14172ef83(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14172ef83
+
 uint64_t SynLift_14172ef9c(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14172ef9c
+
+uint64_t SynLift_14172efd6(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14172efd6
 
 uint64_t SynLift_14172efe7(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14172efe7
 
@@ -970,6 +982,8 @@ uint64_t SynLift_141731ba0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_141731c00(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141731c00
 
 uint64_t SynLift_141731c30(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141731c30
+
+uint64_t SynLift_141731c72(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141731c72
 
 uint64_t SynLift_141731c77(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141731c77
 
@@ -1531,9 +1545,13 @@ uint64_t SynLift_141742110(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_141742170(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141742170
 
+uint64_t SynLift_1417421f3(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417421f3
+
 uint64_t SynLift_1417421fd(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417421fd
 
 uint64_t SynLift_141742262(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141742262
+
+uint64_t SynLift_1417422d1(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417422d1
 
 uint64_t SynLift_1417422e0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417422e0
 
@@ -1554,6 +1572,8 @@ uint64_t SynLift_141742aa0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_141742b10(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141742b10
 
 uint64_t SynLift_141742b30(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141742b30
+
+uint64_t SynLift_141742c65(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141742c65
 
 uint64_t SynLift_141742c70(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141742c70
 
@@ -1777,6 +1797,8 @@ uint64_t SynLift_141746f30(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_141746f5a(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141746f5a
 
+uint64_t SynLift_141746ffd(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141746ffd
+
 uint64_t SynLift_141747010(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141747010
 
 uint64_t SynLift_141747090(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141747090
@@ -1784,6 +1806,8 @@ uint64_t SynLift_141747090(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_1417470a5(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417470a5
 
 uint64_t SynLift_1417470bd(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417470bd
+
+uint64_t SynLift_141747186(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141747186
 
 uint64_t SynLift_141747192(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141747192
 
@@ -1834,6 +1858,10 @@ uint64_t SynLift_141747c80(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_141747ec0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141747ec0
 
 uint64_t SynLift_141747ee5(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141747ee5
+
+uint64_t SynLift_141747f2c(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141747f2c
+
+uint64_t SynLift_141747f40(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141747f40
 
 uint64_t SynLift_141747f60(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141747f60
 
@@ -2685,6 +2713,8 @@ uint64_t SynLift_141757072(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_14175708d(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14175708d
 
+uint64_t SynLift_141757151(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141757151
+
 uint64_t SynLift_14175715f(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14175715f
 
 uint64_t SynLift_141757170(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141757170
@@ -2895,6 +2925,8 @@ uint64_t SynLift_14175b200(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_14175b228(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14175b228
 
+uint64_t SynLift_14175b265(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14175b265
+
 uint64_t SynLift_14175b290(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14175b290
 
 uint64_t SynLift_14175b640(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14175b640
@@ -3058,6 +3090,8 @@ uint64_t SynLift_14175fba0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_14175fdb0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14175fdb0
 
 uint64_t SynLift_14175fdd9(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14175fdd9
+
+uint64_t SynLift_14175febe(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14175febe
 
 uint64_t SynLift_14175fed0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14175fed0
 
@@ -3223,6 +3257,8 @@ uint64_t SynLift_1417631d0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_1417632e0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417632e0
 
+uint64_t SynLift_1417632ff(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417632ff
+
 uint64_t SynLift_141763315(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141763315
 
 uint64_t SynLift_14176334f(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14176334f
@@ -3257,11 +3293,19 @@ uint64_t SynLift_141763d20(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_141763d36(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141763d36
 
+uint64_t SynLift_141763dbc(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141763dbc
+
+uint64_t SynLift_141763dc1(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141763dc1
+
+uint64_t SynLift_141763e04(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141763e04
+
 uint64_t SynLift_141763fa7(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141763fa7
 
 uint64_t SynLift_141763feb(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141763feb
 
 uint64_t SynLift_141764000(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141764000
+
+uint64_t SynLift_141764034(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141764034
 
 uint64_t SynLift_14176403f(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14176403f
 
@@ -3277,13 +3321,21 @@ uint64_t SynLift_141764278(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_1417642b2(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417642b2
 
+uint64_t SynLift_1417642ee(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417642ee
+
 uint64_t SynLift_141764300(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141764300
+
+uint64_t SynLift_14176432e(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14176432e
+
+uint64_t SynLift_141764332(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141764332
 
 uint64_t SynLift_14176433e(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14176433e
 
 uint64_t SynLift_141764524(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141764524
 
 uint64_t SynLift_141764541(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141764541
+
+uint64_t SynLift_1417645ae(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417645ae
 
 uint64_t SynLift_1417645c0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417645c0
 
@@ -3305,6 +3357,8 @@ uint64_t SynLift_1417649b3(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_141764ad2(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141764ad2
 
+uint64_t SynLift_141764b68(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141764b68
+
 uint64_t SynLift_141764b80(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141764b80
 
 uint64_t SynLift_141764bad(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141764bad
@@ -3321,15 +3375,21 @@ uint64_t SynLift_141764edd(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_141764ef8(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141764ef8
 
+uint64_t SynLift_141764efc(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141764efc
+
 uint64_t SynLift_141764f10(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141764f10
 
 uint64_t SynLift_141764f2f(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141764f2f
+
+uint64_t SynLift_141764f8e(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141764f8e
 
 uint64_t SynLift_141764f95(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141764f95
 
 uint64_t SynLift_141764ffb(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141764ffb
 
 uint64_t SynLift_141765038(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141765038
+
+uint64_t SynLift_141765059(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141765059
 
 uint64_t SynLift_141765060(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141765060
 
@@ -3352,6 +3412,8 @@ uint64_t SynLift_141766000(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_141766330(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141766330
 
 uint64_t SynLift_14176634e(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14176634e
+
+uint64_t SynLift_1417664f5(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417664f5
 
 uint64_t SynLift_141766950(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141766950
 
@@ -3454,6 +3516,8 @@ uint64_t SynLift_141768ec0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_141768eed(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141768eed
 
 uint64_t SynLift_1417690e8(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417690e8
+
+uint64_t SynLift_1417690ec(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417690ec
 
 uint64_t SynLift_141769100(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141769100
 
@@ -3575,6 +3639,8 @@ uint64_t SynLift_14176e3e0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_14176e500(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14176e500
 
+uint64_t SynLift_14176e533(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14176e533
+
 uint64_t SynLift_14176e538(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14176e538
 
 uint64_t SynLift_14176e5b3(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14176e5b3
@@ -3606,6 +3672,8 @@ uint64_t SynLift_14176ea30(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_14176ecf0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14176ecf0
 
 uint64_t SynLift_14176ed25(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14176ed25
+
+uint64_t SynLift_14176ee45(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14176ee45
 
 uint64_t SynLift_14176ee60(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14176ee60
 
@@ -3841,11 +3909,15 @@ uint64_t SynLift_1417779e0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_141777a30(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141777a30
 
+uint64_t SynLift_141777a4a(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141777a4a
+
 uint64_t SynLift_141777a5d(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141777a5d
 
 uint64_t SynLift_141777b0d(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141777b0d
 
 uint64_t SynLift_141777b40(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141777b40
+
+uint64_t SynLift_141777b52(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141777b52
 
 uint64_t SynLift_141777b60(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141777b60
 
@@ -3919,6 +3991,8 @@ uint64_t SynLift_141778a32(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_141778a4d(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141778a4d
 
+uint64_t SynLift_141778b11(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141778b11
+
 uint64_t SynLift_141778b1f(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141778b1f
 
 uint64_t SynLift_141778b30(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141778b30
@@ -3928,6 +4002,8 @@ uint64_t SynLift_141778b60(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_141778d90(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141778d90
 
 uint64_t SynLift_141778db8(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141778db8
+
+uint64_t SynLift_141778df5(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141778df5
 
 uint64_t SynLift_141778e20(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141778e20
 
@@ -4161,6 +4237,8 @@ uint64_t SynLift_14177d9b0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_14177d9cb(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14177d9cb
 
+uint64_t SynLift_14177db12(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14177db12
+
 uint64_t SynLift_14177db30(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14177db30
 
 uint64_t SynLift_14177db90(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14177db90
@@ -4347,6 +4425,8 @@ uint64_t SynLift_141782823(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_14178283e(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14178283e
 
+uint64_t SynLift_141782953(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141782953
+
 uint64_t SynLift_141782962(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141782962
 
 uint64_t SynLift_141782970(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141782970
@@ -4513,6 +4593,8 @@ uint64_t SynLift_141787310(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_14178732c(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14178732c
 
+uint64_t SynLift_14178735e(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14178735e
+
 uint64_t SynLift_141787bb0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141787bb0
 
 uint64_t SynLift_141787c60(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141787c60
@@ -4538,6 +4620,10 @@ uint64_t SynLift_141788224(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_14178823e(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14178823e
 
 uint64_t SynLift_14178826b(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14178826b
+
+uint64_t SynLift_14178833d(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14178833d
+
+uint64_t SynLift_141788345(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141788345
 
 uint64_t SynLift_14178834d(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14178834d
 
@@ -4577,6 +4663,12 @@ uint64_t SynLift_141788ef7(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_141788f55(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141788f55
 
+uint64_t SynLift_141788f9e(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141788f9e
+
+uint64_t SynLift_141788fae(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141788fae
+
+uint64_t SynLift_141788fb6(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141788fb6
+
 uint64_t SynLift_141788fbe(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141788fbe
 
 uint64_t SynLift_141788fd8(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141788fd8
@@ -4591,11 +4683,17 @@ uint64_t SynLift_1417891ae(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_1417891df(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417891df
 
+uint64_t SynLift_141789317(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141789317
+
+uint64_t SynLift_14178931f(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14178931f
+
 uint64_t SynLift_141789327(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141789327
 
 uint64_t SynLift_141789350(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141789350
 
 uint64_t SynLift_1417893e0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417893e0
+
+uint64_t SynLift_141789410(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141789410
 
 uint64_t SynLift_141789440(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141789440
 
@@ -5189,6 +5287,8 @@ uint64_t SynLift_141793bf0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_141793c1a(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141793c1a
 
+uint64_t SynLift_141793cbc(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141793cbc
+
 uint64_t SynLift_141793cd0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141793cd0
 
 uint64_t SynLift_141793d50(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141793d50
@@ -5196,6 +5296,8 @@ uint64_t SynLift_141793d50(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_141793d65(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141793d65
 
 uint64_t SynLift_141793d7d(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141793d7d
+
+uint64_t SynLift_141793e58(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141793e58
 
 uint64_t SynLift_141793e64(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141793e64
 
@@ -5212,6 +5314,8 @@ uint64_t SynLift_141793fd0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_141793fe2(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141793fe2
 
 uint64_t SynLift_141793ffd(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141793ffd
+
+uint64_t SynLift_1417940c1(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417940c1
 
 uint64_t SynLift_1417940cf(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417940cf
 
@@ -5297,11 +5401,17 @@ uint64_t SynLift_141795ca0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_141795cc5(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141795cc5
 
+uint64_t SynLift_141795d0c(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141795d0c
+
+uint64_t SynLift_141795d20(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141795d20
+
 uint64_t SynLift_141795d40(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141795d40
 
 uint64_t SynLift_141795f70(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141795f70
 
 uint64_t SynLift_141795f98(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141795f98
+
+uint64_t SynLift_141795fd5(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141795fd5
 
 uint64_t SynLift_141796000(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x141796000
 
@@ -5587,6 +5697,8 @@ uint64_t SynLift_14179d770(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_14179d950(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14179d950
 
+uint64_t SynLift_14179db30(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14179db30
+
 uint64_t SynLift_14179db39(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14179db39
 
 uint64_t SynLift_14179dfaf(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14179dfaf
@@ -5594,6 +5706,8 @@ uint64_t SynLift_14179dfaf(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_14179e020(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14179e020
 
 uint64_t SynLift_14179e0b0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14179e0b0
+
+uint64_t SynLift_14179e0f9(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14179e0f9
 
 uint64_t SynLift_14179e0fe(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x14179e0fe
 
@@ -5821,6 +5935,8 @@ uint64_t SynLift_1417a4140(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_1417a4180(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417a4180
 
+uint64_t SynLift_1417a41a4(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417a41a4
+
 uint64_t SynLift_1417a41af(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417a41af
 
 uint64_t SynLift_1417a4349(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417a4349
@@ -5836,6 +5952,8 @@ uint64_t SynLift_1417a45d0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_1417a45e4(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417a45e4
 
 uint64_t SynLift_1417a45fc(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417a45fc
+
+uint64_t SynLift_1417a46c0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417a46c0
 
 uint64_t SynLift_1417a46d0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417a46d0
 
@@ -5858,6 +5976,8 @@ uint64_t SynLift_1417a4980(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_1417a4c70(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417a4c70
 
 uint64_t SynLift_1417a4c90(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417a4c90
+
+uint64_t SynLift_1417a4cea(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417a4cea
 
 uint64_t SynLift_1417a4d00(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417a4d00
 
@@ -5993,7 +6113,11 @@ uint64_t SynLift_1417a7d70(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_1417a7d88(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417a7d88
 
+uint64_t SynLift_1417a7e6a(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417a7e6a
+
 uint64_t SynLift_1417a7e8b(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417a7e8b
+
+uint64_t SynLift_1417a7faa(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417a7faa
 
 uint64_t SynLift_1417a7fb0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417a7fb0
 
@@ -6277,6 +6401,8 @@ uint64_t SynLift_1417af3d0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_1417af3e0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417af3e0
 
+uint64_t SynLift_1417af406(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417af406
+
 uint64_t SynLift_1417af410(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417af410
 
 uint64_t SynLift_1417af430(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417af430
@@ -6419,6 +6545,8 @@ uint64_t SynLift_1417b14c0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_1417b14f1(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b14f1
 
+uint64_t SynLift_1417b159e(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b159e
+
 uint64_t SynLift_1417b15b0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b15b0
 
 uint64_t SynLift_1417b15e2(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b15e2
@@ -6446,6 +6574,8 @@ uint64_t SynLift_1417b1a36(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_1417b1a40(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b1a40
 
 uint64_t SynLift_1417b1a62(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b1a62
+
+uint64_t SynLift_1417b1aab(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b1aab
 
 uint64_t SynLift_1417b1ac0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b1ac0
 
@@ -6485,11 +6615,15 @@ uint64_t SynLift_1417b2437(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_1417b2483(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b2483
 
+uint64_t SynLift_1417b2532(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b2532
+
 uint64_t SynLift_1417b2540(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b2540
 
 uint64_t SynLift_1417b25ba(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b25ba
 
 uint64_t SynLift_1417b264d(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b264d
+
+uint64_t SynLift_1417b2661(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b2661
 
 uint64_t SynLift_1417b2668(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b2668
 
@@ -6540,6 +6674,8 @@ uint64_t SynLift_1417b4d60(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_1417b52d0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b52d0
 
 uint64_t SynLift_1417b5300(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b5300
+
+uint64_t SynLift_1417b5359(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b5359
 
 uint64_t SynLift_1417b5370(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b5370
 
@@ -6647,6 +6783,8 @@ uint64_t SynLift_1417b9065(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_1417b907e(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b907e
 
+uint64_t SynLift_1417b90ac(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b90ac
+
 uint64_t SynLift_1417b90b4(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b90b4
 
 uint64_t SynLift_1417b90d1(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b90d1
@@ -6658,6 +6796,8 @@ uint64_t SynLift_1417b9220(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_1417b923d(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b923d
 
 uint64_t SynLift_1417b9286(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b9286
+
+uint64_t SynLift_1417b9298(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b9298
 
 uint64_t SynLift_1417b92b0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b92b0
 
@@ -6672,6 +6812,8 @@ uint64_t SynLift_1417b93c2(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_1417b93e1(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b93e1
 
 uint64_t SynLift_1417b9486(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b9486
+
+uint64_t SynLift_1417b9618(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b9618
 
 uint64_t SynLift_1417b9628(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417b9628
 
@@ -7585,6 +7727,8 @@ uint64_t SynLift_1417d2702(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_1417d271d(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417d271d
 
+uint64_t SynLift_1417d27e1(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417d27e1
+
 uint64_t SynLift_1417d27ef(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417d27ef
 
 uint64_t SynLift_1417d2800(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417d2800
@@ -7602,6 +7746,8 @@ uint64_t SynLift_1417d2990(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_1417d2bc0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417d2bc0
 
 uint64_t SynLift_1417d2be8(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417d2be8
+
+uint64_t SynLift_1417d2c25(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417d2c25
 
 uint64_t SynLift_1417d2c50(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417d2c50
 
@@ -7660,6 +7806,8 @@ uint64_t SynLift_1417d4270(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_1417d4480(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417d4480
 
 uint64_t SynLift_1417d44a3(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417d44a3
+
+uint64_t SynLift_1417d4501(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417d4501
 
 uint64_t SynLift_1417d4510(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417d4510
 
@@ -7881,6 +8029,8 @@ uint64_t SynLift_1417d8870(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_1417d8942(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417d8942
 
+uint64_t SynLift_1417d8c00(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417d8c00
+
 uint64_t SynLift_1417d8c20(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417d8c20
 
 uint64_t SynLift_1417d8c70(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417d8c70
@@ -7906,6 +8056,8 @@ uint64_t SynLift_1417d92e3(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_1417d932c(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417d932c
 
 uint64_t SynLift_1417d9365(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417d9365
+
+uint64_t SynLift_1417d93a1(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417d93a1
 
 uint64_t SynLift_1417d93ac(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417d93ac
 
@@ -8425,6 +8577,8 @@ uint64_t SynLift_1417e2c30(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_1417e2c90(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417e2c90
 
+uint64_t SynLift_1417e2cb0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417e2cb0
+
 uint64_t SynLift_1417e2cd0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417e2cd0
 
 uint64_t SynLift_1417e2d40(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417e2d40
@@ -8693,6 +8847,8 @@ uint64_t SynLift_1417e8d20(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_1417e8d34(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417e8d34
 
+uint64_t SynLift_1417e8d6f(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417e8d6f
+
 uint64_t SynLift_1417e8d80(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417e8d80
 
 uint64_t SynLift_1417e8e40(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417e8e40
@@ -8708,6 +8864,8 @@ uint64_t SynLift_1417e9046(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_1417e9080(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417e9080
 
 uint64_t SynLift_1417e9094(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417e9094
+
+uint64_t SynLift_1417e90cf(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417e90cf
 
 uint64_t SynLift_1417e90e0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417e90e0
 
@@ -8750,6 +8908,8 @@ uint64_t SynLift_1417e97f6(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_1417e9810(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417e9810
 
 uint64_t SynLift_1417e9836(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417e9836
+
+uint64_t SynLift_1417e9875(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417e9875
 
 uint64_t SynLift_1417e98a0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417e98a0
 
@@ -8827,6 +8987,8 @@ uint64_t SynLift_1417eaf10(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_1417eaf24(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417eaf24
 
+uint64_t SynLift_1417eaf5f(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417eaf5f
+
 uint64_t SynLift_1417eaf70(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417eaf70
 
 uint64_t SynLift_1417eb460(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417eb460
@@ -8838,6 +9000,8 @@ uint64_t SynLift_1417eb4a6(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_1417eb4e0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417eb4e0
 
 uint64_t SynLift_1417eb4f4(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417eb4f4
+
+uint64_t SynLift_1417eb52f(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417eb52f
 
 uint64_t SynLift_1417eb540(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417eb540
 
@@ -8880,6 +9044,8 @@ uint64_t SynLift_1417ebaae(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_1417ebac0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417ebac0
 
 uint64_t SynLift_1417ebae2(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417ebae2
+
+uint64_t SynLift_1417ebb15(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417ebb15
 
 uint64_t SynLift_1417ebb40(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417ebb40
 
@@ -8947,6 +9113,8 @@ uint64_t SynLift_1417eca80(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_1417eca94(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417eca94
 
+uint64_t SynLift_1417ecacf(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417ecacf
+
 uint64_t SynLift_1417ecae0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417ecae0
 
 uint64_t SynLift_1417ecb40(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417ecb40
@@ -8960,6 +9128,8 @@ uint64_t SynLift_1417ecdc6(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_1417ece00(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417ece00
 
 uint64_t SynLift_1417ece14(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417ece14
+
+uint64_t SynLift_1417ece4f(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417ece4f
 
 uint64_t SynLift_1417ece60(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417ece60
 
@@ -9003,6 +9173,8 @@ uint64_t SynLift_1417ed450(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_1417ed472(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417ed472
 
+uint64_t SynLift_1417ed4a5(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417ed4a5
+
 uint64_t SynLift_1417ed4d0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417ed4d0
 
 uint64_t SynLift_1417ed570(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417ed570
@@ -9040,6 +9212,8 @@ uint64_t SynLift_1417edd10(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_1417edd24(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417edd24
 
 uint64_t SynLift_1417edd55(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417edd55
+
+uint64_t SynLift_1417edd80(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417edd80
 
 uint64_t SynLift_1417edd85(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417edd85
 
@@ -9079,6 +9253,8 @@ uint64_t SynLift_1417ee3c0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_1417ee3d4(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417ee3d4
 
+uint64_t SynLift_1417ee40f(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417ee40f
+
 uint64_t SynLift_1417ee420(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417ee420
 
 uint64_t SynLift_1417ee450(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417ee450
@@ -9092,6 +9268,8 @@ uint64_t SynLift_1417ee676(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_1417ee6b0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417ee6b0
 
 uint64_t SynLift_1417ee6c4(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417ee6c4
+
+uint64_t SynLift_1417ee6ff(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417ee6ff
 
 uint64_t SynLift_1417ee710(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417ee710
 
@@ -9134,6 +9312,8 @@ uint64_t SynLift_1417eed86(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_1417eeda0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417eeda0
 
 uint64_t SynLift_1417eedc2(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417eedc2
+
+uint64_t SynLift_1417eedf5(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417eedf5
 
 uint64_t SynLift_1417eee20(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417eee20
 
@@ -9211,6 +9391,8 @@ uint64_t SynLift_1417eff80(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_1417eff94(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417eff94
 
+uint64_t SynLift_1417effcf(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417effcf
+
 uint64_t SynLift_1417effe0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417effe0
 
 uint64_t SynLift_1417f0010(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417f0010
@@ -9224,6 +9406,8 @@ uint64_t SynLift_1417f02b6(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_1417f02d0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417f02d0
 
 uint64_t SynLift_1417f02e4(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417f02e4
+
+uint64_t SynLift_1417f031f(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417f031f
 
 uint64_t SynLift_1417f0330(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417f0330
 
@@ -9267,6 +9451,8 @@ uint64_t SynLift_1417f0950(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_1417f0976(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417f0976
 
+uint64_t SynLift_1417f09b5(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417f09b5
+
 uint64_t SynLift_1417f09e0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417f09e0
 
 uint64_t SynLift_1417f0a80(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417f0a80
@@ -9304,6 +9490,8 @@ uint64_t SynLift_1417f1330(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_1417f1348(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417f1348
 
 uint64_t SynLift_1417f13e2(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417f13e2
+
+uint64_t SynLift_1417f140e(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417f140e
 
 uint64_t SynLift_1417f1413(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417f1413
 
@@ -9353,6 +9541,8 @@ uint64_t SynLift_1417f2080(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 
 uint64_t SynLift_1417f2094(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417f2094
 
+uint64_t SynLift_1417f20cf(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417f20cf
+
 uint64_t SynLift_1417f20e0(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417f20e0
 
 uint64_t SynLift_1417f2210(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417f2210
@@ -9364,6 +9554,8 @@ uint64_t SynLift_1417f224c(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t 
 uint64_t SynLift_1417f2280(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417f2280
 
 uint64_t SynLift_1417f2294(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417f2294
+
+uint64_t SynLift_1417f22cf(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417f22cf
 
 uint64_t SynLift_1417f2310(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x1417f2310
 
