@@ -49,3 +49,12 @@ extern void (*g_fn_1418230a0)(void* pSub);
 
 }  // namespace syndicate
 #endif
+
+// The three constructors below need the string packer: its own constructor is the import at
+// 0x1418230f8 and its SetBuf is the import at 0x141823008, both resolved through the IAT and named from
+// the decompiler's view of 0x1417db2b0.
+extern void (*g_pfnCStringPackerCtor)(void* pPacker);
+extern void (*g_pfnCStringPackerSetBuf)(void* pPacker, char* pBuf, uint32_t uLen, bool bFlag);
+// 0x1417f05f0 / 0x1417f1600 — the +0x408 resets the LeagueRobOpt and LeagueToken constructors call.
+extern void (*g_fn_1417f05f0)(void* pAt408);
+extern void (*g_fn_1417f1600)(void* pAt408);

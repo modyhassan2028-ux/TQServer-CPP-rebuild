@@ -10517,3 +10517,51 @@ is checked for field order and for each field being skipped on its own. The two 
 rebuilt against the new fallback and still pass at 491 and 198.
 
 Suites now: 14711 + 1284 + 125 + 491 + 198 + 104 + 24.
+
+## 2026-11-08 — D95: the seventeen message constructors
+
+Rather than port the module's sixteen members one at a time from the outside, this closes the whole
+ring: `0x14177ead0` builds them, and every one of them is the same handful of instructions. The
+decompiler's view names each class through its RTTI table, so the bodies carry real names instead of
+guesses:
+
+| address | class | vtable | notes |
+|---|---|---|---|
+| 0x1417d9710 | CMsgLog | 0x14182e4a0 | |
+| 0x1417d8390 | CMsgLeagueRobOpt | 0x14183cc78 | hands +0x408 to 0x1417f05f0 |
+| 0x1417d9000 | CMsgLeagueToken | 0x14183cfa0 | hands +0x408 to 0x1417f1600 |
+| 0x1417d9e60 | CMsgSelfSynMemAwardRank | 0x14183d558 | |
+| 0x1417da860 | CMsgSynAttrInfo | 0x14183d768 | |
+| 0x1417dac30 | CMsgSynBaseProffer | 0x14183d888 | |
+| 0x1417dae10 | CMsgSynChgDomName | 0x14182e520 | |
+| 0x1417db2b0 | CMsgSyndicate | 0x14183dc10 | packer at +0x410, buffer this+0x20, 0x3e5 |
+| 0x1417dca60 | CMsgSynDomain | 0x14183de00 | packer at +0x410, buffer this+0x128, 0x2d9 |
+| 0x1417dd050 | CMsgSynMemberInfo | 0x14183df00 | |
+| 0x1417dd230 | CMsgSynMemberList | 0x14183e010 | |
+| 0x1417dd6e0 | CMsgSynProffer | 0x14183e180 | |
+| 0x1417dd9f0 | CMsgSynProfferRank | 0x14183e2b0 | |
+| 0x1417ddc60 | CMsgSynRecruitAdvertising | 0x14183e3f8 | |
+| 0x1417ddf50 | CMsgSynRecruitAdvertisingList | 0x14183e508 | |
+| 0x1417de240 | CMsgSynRecruitAdvertisingOpt | 0x14183e620 | |
+| 0x1417d6640 | CMsgLeagueOpt | 0x14183c5a8 | packer at +0x410, buffer this+0x1a, 0x3ee |
+
+The shared shape, in the exact order the bytes do it: base table `0x14182e368`, `CMsg::Init`, then the
+class table, then a second `CMsg::Init`, and only then `*(this+0x408) = this+8`. That ordering matters:
+the base table is in place for the first `Init`, so a virtual call inside it still reaches `tq::CMsg`,
+and the second `Init` already runs under the derived table. An earlier draft of the generator wrote the
+`+0x408` store before the second `Init` and the order was corrected against the listing.
+
+The three packer classes instead build a `CStringPacker` at `+0x410` (the constructor is the import at
+0x1418230f8), run `Init`, set `+0x408`, and then `CStringPacker::SetBuf(packer, buffer, length, true)`
+(the import at 0x141823008). The two reset classes never store `this+8` at all.
+
+They are collected in one file, `modules/syndicate/src/msg/msgsynctors.cpp`, with each body labelled by
+its original source file, rather than split into seventeen files of one function each; the directory
+still matches the binary's `modules\syndicate\src\msg\`.
+
+Testing: `tests/syndicate_msgsynctors_test.cpp`, 142 assertions, 6/6 runs, sanitizers clean — every
+class checked for the returned `this`, the two `Init` calls, the base table present at the first one,
+the class table winning, the `+0x408` store, the reset target, the packer placement and buffer offset
+and length and flag, and that nothing outside the object is written.
+
+Suites now: 14711 + 1284 + 125 + 491 + 198 + 104 + 24 + 142.

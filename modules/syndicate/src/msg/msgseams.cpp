@@ -20,3 +20,8 @@ void* (*g_fnPbVf28InitErr)(void*, void*) = nullptr;
 void (*g_fn_1417ae720)(void*, uint32_t, uint8_t, uint8_t) = nullptr;
 void (*g_fn_1417ae790)(void*, uint32_t, uint32_t) = nullptr;
 }  // namespace syndicate
+
+void (*g_pfnCStringPackerCtor)(void*) = nullptr;
+void (*g_pfnCStringPackerSetBuf)(void*, char*, uint32_t, bool) = nullptr;
+void (*g_fn_1417f05f0)(void*) = nullptr;
+void (*g_fn_1417f1600)(void*) = nullptr;
