@@ -52,6 +52,10 @@ def main():
                 for op in ins.operands:
                     if op.type == capstone.x86.X86_OP_IMM:
                         targets.add(op.imm)
+    # a vtable slot is the DLL's own declaration of a function entry point, so a slot with no row
+    # is a missing body on the same footing as a call target
+    vt = json.load(open(os.path.join(BULK, 'class_vtables.json')))
+    targets |= {int(a, 16) for v in vt.values() for a in v['slots']}
     missing = sorted(t for t in targets if not inside(t))
     missing_set = set(missing)
 

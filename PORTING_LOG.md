@@ -9590,3 +9590,28 @@ return value and both memory windows. 16 bodies could not be followed by the emu
 (`UC_ERR_FETCH_UNMAP`: the original code calls into paths the harness does not emulate), which is a
 harness limit, not a disagreement. The comparison also counts outcomes, so a body that faults under
 the model while the original does not shows up as a divergence rather than being skipped.
+
+## Class inventory from the image, and the interior-entry gap (2026-11-08)
+
+`tools/bulk/rtti_vtables.py` walks the chain the compiler leaves behind (type descriptor -> complete
+object locator -> the word before slot 0), so the class list and each class's virtual slots come out
+of the file rather than from call shapes: **76 classes with a resolved vtable, 393 unique slots**.
+
+Cross-referenced against the lifted module:
+
+| | count |
+| --- | --- |
+| vtable slots total | 393 |
+| slot addresses that have a body | 329 |
+| slot addresses with no body of their own | 64 |
+
+The 64 are interior entries: a virtual function whose address is not a `.pdata` record start and not
+a call target either, so nothing in the inventory named it before the vtable did. They are reachable
+only through virtual dispatch, which the model cannot express yet because a body must start where the
+branch lands. Carving them from the vtable was attempted and is deliberately not committed: a body
+carved at an interior address duplicates instructions that already belong to the enclosing body, and
+that duplication has to be verified before it is trusted. Until then the gap is recorded here rather
+than papered over.
+
+The hand port itself: 596 of 10,660 rows are referenced by hand-written code (5.6%), and 76 classes
+have vtables of which 52 names are already declared in `modules/`.
