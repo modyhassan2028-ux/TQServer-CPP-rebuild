@@ -309,4 +309,26 @@ void Slot_14179a150(void* self);
 
 }  // namespace tq
 
+namespace tq {
+
+// 0x14179db30 — the memberwise tidy of a record (this, flags in dx). Nine vector members at a
+// 0x30 stride are released under one flag bit each, then a masked block (0x1f) releases the
+// member at 0x200 with a different callee. Constants read off the bytes:
+//
+//   bit  begin/finish/cap        type helper        bit   begin/finish/cap        type helper
+//   0x01 0x50 / 0x68 / 0x70      0x1417862c0        0x40  0x170 / 0x188 / 0x190   0x141786500
+//   0x02 0x80 / 0x98 / 0xa0      0x141786320        0x80  0x1a0 / 0x1b8 / 0x1c0   0x141786560
+//   0x04 0xb0 / 0xc8 / 0xd0      0x141786380        0x100 0x1d0 / 0x1e8 / 0x1f0   0x1417865c0
+//   0x08 0xe0 / 0xf8 / 0x100     0x1417863e0        0x1f  0x200 / 0x218 / 0x220   0x14178efd0
+//   0x10 0x110 / 0x128 / 0x130   0x141786440              (masked, callee 0x14179cf10)
+//   0x20 0x140 / 0x158 / 0x160   0x1417864a0
+//
+// The flag byte is read as `movzwl %dx,%esi`, so only bits 0..8 can ever be set.
+extern void* (*g_pfnLogic_141787c50)(void* out, const void* type);                 // the type/allocator
+extern void (*g_pfnLogic_14179cde0)(void* first, void* last, uint64_t count, void* alloc);
+extern void (*g_pfnLogic_14179cf10)(void* first, void* last, uint64_t count, void* fn);
+void Slot_14179db30(void* self, uint32_t uFlags);
+
+}  // namespace tq
+
 #endif

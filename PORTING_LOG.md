@@ -9880,3 +9880,34 @@ a020 entry, and each entry walks its own fifteen ids.
 
 The same method the repo already used for 0x1417a8520 == 0x1417c8f70, applied with the measurement
 written down instead of an assertion of sameness.
+
+## 2026-11-08 — 0x14179db30 ported (the memberwise tidy, values 9 + 1)
+
+296 instructions. The body is one block repeated for nine vector members at a 0x30 stride, plus a
+masked block. The constants are in the header as a table; each was read off its own `mov`/`lea`:
+
+    bit  begin / finish / cap        type helper        bit   begin / finish / cap        type helper
+    0x01 0x50 / 0x68 / 0x70          0x1417862c0        0x40  0x170 / 0x188 / 0x190   0x141786500
+    0x02 0x80 / 0x98 / 0xa0          0x141786320        0x80  0x1a0 / 0x1b8 / 0x1c0   0x141786560
+    0x04 0xb0 / 0xc8 / 0xd0          0x141786380        0x100 0x1d0 / 0x1e8 / 0x1f0   0x1417865c0
+    0x08 0xe0 / 0xf8 / 0x100         0x1417863e0        0x1f  0x200 / 0x218 / 0x220   0x14178efd0
+    0x10 0x110 / 0x128 / 0x130       0x141786440              (masked, callee 0x14179cf10)
+    0x20 0x140 / 0x158 / 0x160       0x1417864a0
+
+Block shape, transcribed once as `TidyVectorMember` (each line's instruction is in the source
+comment): cap = `[this+cap]`; the finish-above-cap check (0x1418233c0); finish and begin reloaded;
+the same check through memory; begin reloaded again for the iterator check; the type row goes to
+0x141787c50 and its first word is the allocator; then `0x14179cde0(finish, cap, (cap-finish)>>3,
+allocator)`.
+
+The masked block differs in three ways only: `test $0x1f,%sil` instead of a single bit, the begin
+read into rsi rather than r12, and `0x14179cf10(finish, cap, count, 0x14178efd0)`.
+
+Because the flag byte is loaded with `movzwl %dx,%esi`, only bits 0..8 can be set, so the nine bits
+are the whole single-bit range. **The mask 0x1f overlaps bits 0..4**, so a flag of 0x1 alone runs the
+0x50 member *and* the masked member — the test asserts exactly that instead of the tidier-looking
+"only one".
+
+Batteries: 314 assertions (31 new): no flags, one bit, the 0x100 bit, all nine bits in order with
+their offsets and a count of 6, the mask alone, and a finish-above-cap member that takes the error
+path and still proceeds. 6/6 runs, sanitizers clean.

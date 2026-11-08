@@ -1243,3 +1243,97 @@ void Slot_14179a020(void* self) { EraseIdRange(self, 0x2a0, 0x19, 0x28); }
 void Slot_14179a150(void* self) { EraseIdRange(self, 0x2e0, 0x0a, 0x19); }
 
 }  // namespace tq
+
+namespace tq {
+
+// ============================================================================
+// 0x14179db30 — the memberwise tidy. The body is nine copies of one block plus a masked
+// one; the block is transcribed once and called with each member's constants (the table
+// is in the header). One block, instruction by instruction:
+//   14179db53  rbp = [this+cap]              the capacity end
+//   14179db57  cmp [this+fin],rbp / jbe      fin above cap -> 0x1418233c0
+//   14179db63  r13 = [this+fin]
+//   14179db67  r12 = [this+begin]
+//   14179db6b  cmp [this+cap],r13 / jbe      the same check through memory
+//   14179db77  r14 = [this+begin]
+//   14179db7b  rdx = the member's type row, rcx = &[rsp+0x60], call 0x141787c50
+//   14179db8c  rbx = [rax]                   the allocator word
+//   14179db8f  test r12,r12 / je, then cmp r14,r12 / je   the begin check
+//   14179db9f  r8 = rbp - r13 (sar 3), r9 = rbx, rdx = rbp, rcx = r13, call 0x14179cde0
+// The masked block at 14179dfa9 does the same with r9 = 0x14178efd0 and 0x14179cf10, and it
+// reads the begin into rsi instead of r12 — that is the only structural difference.
+void* (*g_pfnLogic_141787c50)(void* out, const void* type) = nullptr;
+void (*g_pfnLogic_14179cde0)(void* first, void* last, uint64_t count, void* alloc) = nullptr;
+void (*g_pfnLogic_14179cf10)(void* first, void* last, uint64_t count, void* fn) = nullptr;
+
+static void TidyVectorMember(uint8_t* p, size_t nBegin, size_t nFinish, size_t nCap,
+                             const void* pType) {
+    void* uCap = *(void**)(p + nCap);                     // 14179db53 mov 0x70(%rcx),%rbp
+    if (*(void**)(p + nFinish) > uCap) {                  // cmp %rbp,0x68(%rcx) / jbe
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();             // 14179db5d
+    }
+    void* uFin = *(void**)(p + nFinish);                  // 14179db63 mov 0x68(%rdi),%r13
+    void* uBegin = *(void**)(p + nBegin);                 // 14179db67 mov 0x50(%rdi),%r12
+    if (uFin > *(void**)(p + nCap)) {                     // cmp 0x70(%rdi),%r13 / jbe
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();             // 14179db71
+    }
+    void* uBegin2 = *(void**)(p + nBegin);                // 14179db77 mov 0x50(%rdi),%r14
+
+    uint8_t aAlloc[0x20] = {0};                           // lea rcx,[rsp+0x60]
+    void* pAlloc = nullptr;
+    if (g_pfnLogic_141787c50 != nullptr) {                // 14179db87 call 0x141787c50
+        void* pRet = g_pfnLogic_141787c50(aAlloc, pType);  // lea rdx,[the type row]
+        pAlloc = *(void**)pRet;                           // 14179db8c mov (%rax),%rbx
+    }
+    if (uBegin == nullptr || uBegin != uBegin2) {          // 14179db8f / 14179db94
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();             // 14179db99
+    }
+    if (g_pfnLogic_14179cde0 != nullptr) {                // 14179dbb2 call 0x14179cde0
+        const uint64_t uCount =
+            (uint64_t)(((uintptr_t)uCap - (uintptr_t)uFin) >> 3);   // sub %r13,%r8 / sar 3
+        g_pfnLogic_14179cde0(uFin, uCap, uCount, pAlloc); // rcx=fin, rdx=cap, r8, r9
+    }
+}
+
+void Slot_14179db30(void* self, uint32_t uFlags) {
+    uint8_t* p = (uint8_t*)self;
+    const uint32_t u = (uint16_t)uFlags;                  // movzwl %dx,%esi
+
+    if (u & 0x1)   TidyVectorMember(p, 0x50, 0x68, 0x70, (const void*)0x1417862c0);
+    if (u & 0x2)   TidyVectorMember(p, 0x80, 0x98, 0xa0, (const void*)0x141786320);
+    if (u & 0x4)   TidyVectorMember(p, 0xb0, 0xc8, 0xd0, (const void*)0x141786380);
+    if (u & 0x8)   TidyVectorMember(p, 0xe0, 0xf8, 0x100, (const void*)0x1417863e0);
+    if (u & 0x10)  TidyVectorMember(p, 0x110, 0x128, 0x130, (const void*)0x141786440);
+    if (u & 0x20)  TidyVectorMember(p, 0x140, 0x158, 0x160, (const void*)0x1417864a0);
+    if (u & 0x40)  TidyVectorMember(p, 0x170, 0x188, 0x190, (const void*)0x141786500);
+    if (u & 0x80)  TidyVectorMember(p, 0x1a0, 0x1b8, 0x1c0, (const void*)0x141786560);
+    if (u & 0x100) TidyVectorMember(p, 0x1d0, 0x1e8, 0x1f0, (const void*)0x1417865c0);
+
+    if (u & 0x1f) {                                       // 14179dfa9 test $0x1f,%sil / je
+        void* uCap = *(void**)(p + 0x220);                // 14179dfaf mov 0x220(%rdi),%rbx
+        if (*(void**)(p + 0x218) > uCap) {                // cmp %rbx,0x218(%rdi) / jbe
+            if (g_pfn_invalid_parameter_noinfo != nullptr)
+                g_pfn_invalid_parameter_noinfo();         // 14179dfbf
+        }
+        void* uFin = *(void**)(p + 0x218);                // 14179dfc5 mov 0x218(%rdi),%rbp
+        void* uBegin = *(void**)(p + 0x200);              // 14179dfcc mov 0x200(%rdi),%rsi
+        if (uFin > *(void**)(p + 0x220)) {                // cmp 0x220(%rdi),%rbp / jbe
+            if (g_pfn_invalid_parameter_noinfo != nullptr)
+                g_pfn_invalid_parameter_noinfo();         // 14179dfdc
+        }
+        if (uBegin == nullptr || uBegin != *(void**)(p + 0x200)) {   // 14179dfe2 / 14179dfe7
+            if (g_pfn_invalid_parameter_noinfo != nullptr)
+                g_pfn_invalid_parameter_noinfo();         // 14179dff0
+        }
+        if (g_pfnLogic_14179cf10 != nullptr) {            // 14179e00d call 0x14179cf10
+            const uint64_t uCount =
+                (uint64_t)(((uintptr_t)uCap - (uintptr_t)uFin) >> 3);    // sub %rbp,%r8 / sar 3
+            g_pfnLogic_14179cf10(uFin, uCap, uCount, (void*)0x14178efd0); // r9 = 0x14178efd0
+        }
+    }
+}
+
+}  // namespace tq

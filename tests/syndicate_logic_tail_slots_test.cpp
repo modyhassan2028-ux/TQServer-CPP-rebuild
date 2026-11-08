@@ -10,6 +10,7 @@
 using namespace tq;
 
 static int g_checks, g_fails;
+static void* g_pBase = nullptr;
 #define CHECK(x) do { ++g_checks; if (!(x)) { ++g_fails; std::printf("FAILED %s:%d  %s\n", __FILE__, __LINE__, #x); } } while (0)
 
 static uint64_t g_a, g_b, g_c, g_d;
@@ -1382,6 +1383,97 @@ int main() {
         g_pfnLogic_14172ae00 = nullptr;
         g_pfn_log_141823030 = nullptr;
         g_pfnLogic_1417cad00 = nullptr;
+    }
+
+    // ------------------------------------------------------------------
+    // 0x14179db30 — the memberwise tidy: nine vector members at a 0x30 stride under one
+    // flag bit each, then the masked block at 0x200. The fixture sets every member to
+    // begin = base, finish = base + 0x10, cap = base + 0x40, so the count is always 6.
+    {
+        static int nCalls, nAlloc, nMasked, nInvalid2;
+        static uint64_t aRec[0x60];
+        static uint64_t aStorage[0x60];
+        static size_t aBeginOff[16]; static uint64_t aCount[16]; static void* aAlloc[16];
+        static const void* aType[16];
+
+        g_pfnLogic_141787c50 = +[](void* out, const void* type) -> void* {
+            ++nAlloc;
+            static void* aWord[2];
+            aWord[0] = (void*)0xA110C;               // the allocator word the block reads
+            aWord[1] = (void*)type;
+            (void)out; return aWord; };
+        g_pfnLogic_14179cde0 = +[](void* first, void* last, uint64_t count, void* alloc) {
+            if (nCalls < 16) { aCount[nCalls] = count; aAlloc[nCalls] = alloc;
+                               aBeginOff[nCalls] = (size_t)((uint8_t*)first - (uint8_t*)g_pBase); }
+            ++nCalls; (void)last; };
+        static size_t nMaskedOff; static uint64_t uMaskedCount; static void* pMaskedFn;
+        g_pfnLogic_14179cf10 = +[](void* first, void* last, uint64_t count, void* fn) {
+            ++nMasked; nMaskedOff = (size_t)((uint8_t*)first - (uint8_t*)g_pBase);
+            uMaskedCount = count; pMaskedFn = fn; (void)last; };
+        g_pfn_invalid_parameter_noinfo = +[]() { ++nInvalid2; };
+
+        std::memset(aRec, 0, sizeof aRec);
+        std::memset(aStorage, 0, sizeof aStorage);
+        g_pBase = aStorage;                       // the seam offsets are taken against this
+
+        // every member: begin, finish, cap
+        const size_t aBegin[10] = {0x50, 0x80, 0xb0, 0xe0, 0x110, 0x140, 0x170, 0x1a0, 0x1d0, 0x200};
+        for (int i = 0; i < 10; ++i) {
+            const size_t b = aBegin[i];
+            *(uint64_t*)((uint8_t*)aRec + b) = (uint64_t)((uint8_t*)aStorage + b);
+            *(uint64_t*)((uint8_t*)aRec + b + 0x18) = (uint64_t)((uint8_t*)aStorage + b + 0x10);
+            *(uint64_t*)((uint8_t*)aRec + b + 0x20) = (uint64_t)((uint8_t*)aStorage + b + 0x40);
+        }
+
+        auto reset = []() { nCalls = nAlloc = nMasked = nInvalid2 = 0;
+                            nMaskedOff = 0; uMaskedCount = 0; pMaskedFn = nullptr; };
+
+        // no flags: nothing is touched
+        reset();
+        Slot_14179db30(aRec, 0);
+        CHECK(nCalls == 0 && nMasked == 0 && nAlloc == 0);
+
+        // bit 1 releases the member at 0x50 — and 0x01 is also inside the 0x1f mask, so the
+        // masked block runs as well. That is what the two tests do to the same flag byte.
+        reset();
+        Slot_14179db30(aRec, 0x1);
+        CHECK(nCalls == 1 && nAlloc == 1 && nMasked == 1);
+        CHECK(aBeginOff[0] == 0x50 + 0x10);          // the callee is handed the finish pointer
+        CHECK(aCount[0] == 6);                       // (cap - finish) >> 3
+        CHECK(aAlloc[0] == (void*)0xA110C);
+
+        // the ninth bit is the 0x100 one, and it reaches the member at 0x1d0
+        reset();
+        Slot_14179db30(aRec, 0x100);
+        CHECK(nCalls == 1 && aBeginOff[0] == 0x1d0 + 0x10 && aCount[0] == 6);
+        CHECK(nMasked == 0);                         // 0x100 is outside the 0x1f mask
+
+        // every flag bit: nine members, the offsets in order
+        reset();
+        Slot_14179db30(aRec, 0x1ff);
+        CHECK(nCalls == 9 && nMasked == 1);
+        const size_t aExpect[9] = {0x60, 0x90, 0xc0, 0xf0, 0x120, 0x150, 0x180, 0x1b0, 0x1e0};
+        for (int i = 0; i < 9; ++i) CHECK(aBeginOff[i] == aExpect[i]);
+        for (int i = 0; i < 9; ++i) CHECK(aCount[i] == 6);
+
+        // the masked block fires on 0x1f and reaches the member at 0x200 with its own callee
+        reset();
+        Slot_14179db30(aRec, 0x1f);
+        CHECK(nCalls == 5 && nMasked == 1);          // bits 0..4 individually, then the mask
+        CHECK(nMaskedOff == 0x200 + 0x10 && uMaskedCount == 6);
+        CHECK(pMaskedFn == (void*)0x14178efd0);      // r9 in that block is the constant
+
+        // a member whose finish sits above its cap takes the error path and still proceeds
+        reset();
+        *(uint64_t*)((uint8_t*)aRec + 0x68) = (uint64_t)((uint8_t*)aStorage + 0x800);
+        Slot_14179db30(aRec, 0x1);
+        CHECK(nInvalid2 >= 1);
+        CHECK(nCalls == 1);
+
+        g_pfnLogic_141787c50 = nullptr;
+        g_pfnLogic_14179cde0 = nullptr;
+        g_pfnLogic_14179cf10 = nullptr;
+        g_pfn_invalid_parameter_noinfo = nullptr;
     }
 
     std::printf("%s checks=%d fails=%d\n", g_fails ? "LOGIC_SLOTS_FAIL" : "LOGIC_SLOTS_OK",

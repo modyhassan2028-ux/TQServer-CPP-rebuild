@@ -31,11 +31,11 @@ the build output, not just the test output.
 
 ## Where the work stands
 
-- Ported bodies in `modules/syndicate/src/CsyndicateLogicTailSlots.cpp`: 46 (42 at 8c97b8d).
+- Ported bodies in `modules/syndicate/src/CsyndicateLogicTailSlots.cpp`: 48 (42 at 8c97b8d).
   The command, which no longer depends on the return type or a `_name` suffix:
   `grep -cE '^[A-Za-z_][A-Za-z0-9_<>:*& ]* Slot_141[0-9a-f]{6}'` on that file.
   (Earlier patterns here missed `bool` and `const char*` bodies; this one counts them all.)
-- Batteries: 283 assertions in `tests/syndicate_logic_tail_slots_test.cpp` (219 at 8c97b8d), all passing, 6/6 runs, sanitizers clean. The binary prints its own count: `LOGIC_SLOTS_OK checks=283 fails=0`.
+- Batteries: 314 assertions in `tests/syndicate_logic_tail_slots_test.cpp` (219 at 8c97b8d), all passing, 6/6 runs, sanitizers clean. The binary prints its own count: `LOGIC_SLOTS_OK checks=314 fails=0`.
 - The `0x14177f980` family is complete and wired: `0x14177f980` -> `0x141779400` -> `0x141779090`,
   plus both singletons (`0x14177c770`, `0x1417b6210`), the map constructor `0x14177c6c0`, its end-node
   builder `0x14177ace0`, the key search `0x14177c0a0`, `lower_bound` `0x1417a8520`, the range pass
@@ -67,7 +67,6 @@ the build output, not just the test output.
 - `14177c6c0`
 - `14177f980`
 - `1417873a0`
-- `14179db30`   the value at node[0x20], first of the four; takes 0x3ff as its second argument
   (the four are the destroy chain 0x1417caa00 runs per node; each is a one-line seam, null by default)
 - `1417a6960`
 - `1417a8940`
