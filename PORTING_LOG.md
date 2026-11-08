@@ -10201,3 +10201,39 @@ Batteries: 14711 assertions, 6/6 runs, sanitizers clean. New checks pin the trip
 arrangements, the plain-triple guess below the threshold (6, the median of 7/5/6), the 41/42 boundary
 either side of `nCount == 0x28`, the ninther against its own definition read through the key, and
 every node's survival.
+
+## 2026-11-08 — 0x14172ae00 read: the map's find-or-insert (already lifted, now transcribed)
+
+`0x14172ae00` was on the remaining list only because it sat at the lifted stage: `SynLift_14172ae00`
+in `synlift.cpp` is a complete 121-instruction register translation (the same bytes; my 487 estimate
+belonged to a range that ran past the row, which ends at `14172afad`). What it did not have was a
+readable row, so it has one now, in `modules/syndicate/src/synrbfindoradd.cpp`.
+
+The shape: a lower-bound walk from `header->parent` that stays on greater keys (`setb` on an unsigned
+compare, so `bpl = key < node->key`) and steps left, else right, remembering the last real node in
+rdi and the last direction in bpl. Then:
+
+    14172ae6f  bpl clear -> the key check with rdi as the hint
+    14172ae94  rdi == header->left -> insert in front of everything, r8b = 1
+    14172aed7  otherwise the arrived-from-the-left fixup walks to the in-order predecessor:
+               right child if the hint is the header, else the left subtree's rightmost,
+               else up while the node is a left child. The running candidate moves into
+               [rsp+0x38]; rdi does not move, and rdi is what goes to 0x1417293c0 as the hint.
+    14172af60  candidate->key >= key (unsigned) -> the key is already there: flag 0, no insert
+
+Both insert paths jump into the same tail at `14172aea9`, which is why the port has one `do_insert`
+lambda: `0x1417293c0(this, &pos, bLeft, rdi, key)`, then the flag byte at `+0x10` and the two
+iterator words copied out of the helper's own pair.
+
+Two traps worth recording. First, the hint is rdi and the candidate is rbx: after the predecessor
+fixup they differ, and passing the candidate would insert at the wrong edge on the left-hand path.
+Second, the generated RB family header `#undef`s its `RB_Q`/`RB_B` accessors at the end, so a body
+that includes it and then uses them does not compile; the row redefines the same two.
+
+Testing: `tests/syndicate_findoradd_test.cpp`, 1284 assertions, 6/6 runs, sanitizers clean. Six
+named insert suites with their duplicates, a single-key repeat, and a 120-key sweep over 200 values
+that checks every answer's flag against what the sweep already saw, then the in-order order, the
+count at `+0x38`, the red root, no red-red and the black height. Only the node factory, the throw
+hook and `_invalid_parameter_noinfo` are stubs.
+
+That leaves two rows on the frontier: `0x1417873a0` (the jump table) and `0x14172d120`.
