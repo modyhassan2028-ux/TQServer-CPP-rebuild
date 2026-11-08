@@ -374,4 +374,26 @@ void Slot_14179cf10(void* pFirst, void* pLast, int64_t nCount, void* pfn);
 
 }  // namespace tq
 
+namespace tq {
+
+// The four heap helpers the two range routines reach when the count runs out. All four
+// work on 8-byte elements and take (first, last, fn); each pair differs only in which
+// sift row it calls, and in both pairs the fn argument is stored to a stack slot and
+// never read again, so it is carried and ignored exactly as the bytes do.
+//
+//   0x141795ca0 / 0x141795f70  make the heap: sift down parents count/2 .. 1, each with
+//                              the element it currently holds (mov -0x8(%rdi,%rbx,8),%r9
+//                              before the dec, so the index passed is the decremented one)
+//   0x141797670 / 0x1417976e0  drain the heap: copy the head onto the tail slot, sift the
+//                              saved tail down the shortened range, repeat while > 1 left
+extern void (*g_pfnLogic_1417929f0)(void* first, uint64_t index, uint64_t count, void* elem);
+extern void (*g_pfnLogic_141792b70)(void* first, uint64_t index, uint64_t count, void* elem);
+
+void Slot_141795ca0(void* pFirst, void* pLast, void* pfn);
+void Slot_141795f70(void* pFirst, void* pLast, void* pfn);
+void Slot_141797670(void* pFirst, void* pLast, void* pfn);
+void Slot_1417976e0(void* pFirst, void* pLast, void* pfn);
+
+}  // namespace tq
+
 #endif

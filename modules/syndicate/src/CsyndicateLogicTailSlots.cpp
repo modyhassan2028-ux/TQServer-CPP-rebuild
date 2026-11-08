@@ -1539,3 +1539,70 @@ void Slot_14179cf10(void* pFirst, void* pLast, int64_t nCount, void* pfn) {
 }
 
 }  // namespace tq
+
+namespace tq {
+
+// ============================================================================
+// The four heap rows. Every offset and every comparison below is one instruction:
+//   141795cb5  sub %rcx,%rsi / sar $0x3       the element count
+//   141795cbc  cmp $0x1,%rsi / jle            nothing to heap below two elements
+//   141795cca  cqto / sub %rdx,%rax / sar     count/2, sign-adjusted, as the bytes do it
+//   141795ce0  mov -0x8(%rdi,%rbx,8),%r9      the parent's own element, loaded first
+//   141795ce5  dec %rbx                       ... then the index is the decremented one
+//   141795cf6  call 0x1417929f0               (0x141795fc6 call 0x141792b70 in the twin)
+void (*g_pfnLogic_1417929f0)(void* first, uint64_t index, uint64_t count, void* elem) = nullptr;
+void (*g_pfnLogic_141792b70)(void* first, uint64_t index, uint64_t count, void* elem) = nullptr;
+
+static int64_t SignAdjustedHalf(int64_t v) {              // cqto / sub %rdx,%rax / sar 1
+    return (v - (v < 0 ? -1 : 0)) >> 1;
+}
+
+// 0x141795ca0 (sift 0x1417929f0) and 0x141795f70 (sift 0x141792b70) — build the heap.
+static void MakeHeapAt(void* pFirst, void* pLast, bool bSecond) {
+    uint8_t* p = (uint8_t*)pFirst;
+    int64_t nCount = ((int64_t)((uint8_t*)pLast - p)) >> 3;      // 141795cb5..cb8
+    if (nCount <= 1) return;                                      // 141795cbc cmp/jle
+    int64_t nParent = SignAdjustedHalf(nCount);                   // 141795cca..cd2
+    if (nParent <= 0) return;                                     // 141795cd5 test/jle
+    for (;;) {
+        uint64_t uElem = *(uint64_t*)(p + nParent * 8 - 8);        // 141795ce0 mov -0x8(%rdi,%rbx,8)
+        --nParent;                                                // 141795ce5 dec %rbx
+        if (bSecond) {                                            // 141795fc6
+            if (g_pfnLogic_141792b70 != nullptr)
+                g_pfnLogic_141792b70(p, (uint64_t)nParent, (uint64_t)nCount, (void*)uElem);
+        } else {                                                  // 141795cf6
+            if (g_pfnLogic_1417929f0 != nullptr)
+                g_pfnLogic_1417929f0(p, (uint64_t)nParent, (uint64_t)nCount, (void*)uElem);
+        }
+        if (nParent <= 0) break;                                  // 141795cfb test/jle
+    }
+}
+
+// 0x141797670 (sift 0x1417929f0) and 0x1417976e0 (sift 0x141792b70) — drain the heap.
+static void SortHeapAt(void* pFirst, void* pLast, bool bSecond) {
+    uint8_t* p = (uint8_t*)pFirst;
+    int64_t nBytes = (int64_t)((uint8_t*)pLast - p);              // 141797685 sub %rcx,%rbx
+    if ((nBytes >> 3) <= 1) return;                               // 14179768f cmp/jle
+    for (;;) {
+        uint64_t uHead = *(uint64_t*)p;                           // 141797695 mov (%rdi),%rax
+        uint64_t uTail = *(uint64_t*)(p + nBytes - 8);             // 141797698 mov -0x8(%rdi,%rbx,1),%r9
+        *(uint64_t*)(p + nBytes - 8) = uHead;                     // 1417976a2 the head lands on the tail
+        int64_t nCount = (nBytes - 8) >> 3;                        // 1417976a7..6ad
+        if (bSecond) {                                            // 141797727
+            if (g_pfnLogic_141792b70 != nullptr)
+                g_pfnLogic_141792b70(p, 0, (uint64_t)nCount, (void*)uTail);
+        } else {                                                  // 1417976b7
+            if (g_pfnLogic_1417929f0 != nullptr)
+                g_pfnLogic_1417929f0(p, 0, (uint64_t)nCount, (void*)uTail);
+        }
+        nBytes -= 8;                                              // 1417976c1 sub $0x8,%rbx
+        if ((nBytes >> 3) <= 1) break;                            // 1417976cc cmp/jg
+    }
+}
+
+void Slot_141795ca0(void* pFirst, void* pLast, void* /*pfn*/) { MakeHeapAt(pFirst, pLast, false); }
+void Slot_141795f70(void* pFirst, void* pLast, void* /*pfn*/) { MakeHeapAt(pFirst, pLast, true); }
+void Slot_141797670(void* pFirst, void* pLast, void* /*pfn*/) { SortHeapAt(pFirst, pLast, false); }
+void Slot_1417976e0(void* pFirst, void* pLast, void* /*pfn*/) { SortHeapAt(pFirst, pLast, true); }
+
+}  // namespace tq

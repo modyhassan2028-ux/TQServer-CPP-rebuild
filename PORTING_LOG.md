@@ -9966,3 +9966,26 @@ Batteries: 340 assertions (15 new): the small range answers with one tail call a
 pair without partitioning; a large range with count 4 walks 4 -> 3 -> 1 -> 0 and produces exactly
 three partitions, three tail calls and one exhausted pair, with the element counts 0x60 and 0x5e
 recorded; and both entry points stay inside their own seam families. 6/6 runs, sanitizers clean.
+
+## 2026-11-08 — the four heap rows closed (0x141795ca0, 0x141795f70, 0x141797670, 0x1417976e0)
+
+These are what the two range routines at 0x14179cde0 / 0x14179cf10 call when their counter
+runs out. Four rows, two shapes, and each shape exists twice because it reaches a different
+sift row:
+
+- 0x141795ca0 / 0x141795f70 build the heap: `count = (last-first)>>3`; below two elements the
+  row returns; the parent walk starts at `count/2` (`cqto / sub %rdx,%rax / sar`, the sign
+  adjusted halving) and runs down to 1. Each pass loads the parent's own 8-byte element
+  (`mov -0x8(%rdi,%rbx,8),%r9`) *before* `dec %rbx`, so the index handed to the sift is the
+  decremented one.
+- 0x141797670 / 0x1417976e0 drain it: copy the head onto the tail slot, sift the saved tail
+  over the shortened range with index 0, shrink by 8, repeat while more than one element is
+  left.
+
+The sift rows 0x1417929f0 and 0x141792b70 are the only difference inside each pair, and both
+stay seams. The `fn` (r8) argument of all four is stored to a stack slot and never read again,
+so the port carries it and ignores it, exactly as the bytes do.
+
+Batteries: 354 assertions, 6/6 runs, sanitizers clean. The drain case proves the count chain
+3, 2, 1 and that the head value lands on every tail slot; the build case proves the element is
+the parent's own, loaded before the decrement.

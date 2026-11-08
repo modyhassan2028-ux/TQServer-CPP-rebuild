@@ -1628,6 +1628,67 @@ int main() {
         g_pfnLogic_1417976e0 = nullptr;
     }
 
+    // ------------------------------------------------------------------
+    // 0x141795ca0 / 0x141795f70 (build the heap) and 0x141797670 / 0x1417976e0 (drain it).
+    // The fixture is four 8-byte elements; the sift rows are stubs that only record.
+    {
+        static uint64_t aElems[4];
+        static int nSift1, nSift2;
+        static uint64_t aIdx[8], aCnt[8];
+        static void* aElem[8];
+
+        g_pfnLogic_1417929f0 = +[](void* first, uint64_t index, uint64_t count, void* elem) {
+            if (nSift1 < 8) { aIdx[nSift1] = index; aCnt[nSift1] = count; aElem[nSift1] = elem; }
+            ++nSift1; (void)first; };
+        g_pfnLogic_141792b70 = +[](void* first, uint64_t index, uint64_t count, void* elem) {
+            if (nSift2 < 8) { aIdx[nSift2] = index; aCnt[nSift2] = count; aElem[nSift2] = elem; }
+            ++nSift2; (void)first; };
+
+        // --- the heap build over four elements: parents 2 then 1, so indices 1 then 0
+        aElems[0] = 10; aElems[1] = 20; aElems[2] = 30; aElems[3] = 40;
+        nSift1 = nSift2 = 0;
+        Slot_141795ca0(aElems, aElems + 4, nullptr);
+        CHECK(nSift1 == 2 && nSift2 == 0);          // the 9f0 family, twice
+        CHECK(aIdx[0] == 1 && aCnt[0] == 4 && aElem[0] == (void*)20);   // elem loaded before the dec
+        CHECK(aIdx[1] == 0 && aCnt[1] == 4 && aElem[1] == (void*)10);
+
+        nSift1 = nSift2 = 0;
+        Slot_141795f70(aElems, aElems + 4, nullptr);
+        CHECK(nSift2 == 2 && nSift1 == 0);          // the twin only through 0xb70
+        CHECK(aIdx[0] == 1 && aElem[0] == (void*)20);
+
+        // --- one element is not a heap: nothing happens at all
+        nSift1 = nSift2 = 0;
+        Slot_141795ca0(aElems, aElems + 1, nullptr);
+        Slot_141795f70(aElems, aElems + 1, nullptr);
+        CHECK(nSift1 == 0 && nSift2 == 0);
+
+        // --- the drain: the head lands on the tail slot each pass, counts 3, 2, 1
+        aElems[0] = 10; aElems[1] = 20; aElems[2] = 30; aElems[3] = 40;
+        nSift1 = nSift2 = 0;
+        Slot_141797670(aElems, aElems + 4, nullptr);
+        CHECK(nSift1 == 3 && nSift2 == 0);
+        CHECK(aCnt[0] == 3 && aCnt[1] == 2 && aCnt[2] == 1);
+        CHECK(aElem[0] == (void*)40 && aElem[1] == (void*)30 && aElem[2] == (void*)20);
+        CHECK(aIdx[0] == 0 && aIdx[1] == 0 && aIdx[2] == 0);
+        CHECK(aElems[0] == 10 && aElems[1] == 10 && aElems[2] == 10 && aElems[3] == 10);
+
+        aElems[0] = 10; aElems[1] = 20; aElems[2] = 30; aElems[3] = 40;
+        nSift1 = nSift2 = 0;
+        Slot_1417976e0(aElems, aElems + 4, nullptr);
+        CHECK(nSift2 == 3 && nSift1 == 0);
+        CHECK(aCnt[0] == 3 && aElem[0] == (void*)40);
+
+        // --- one element to drain: nothing
+        nSift1 = nSift2 = 0;
+        Slot_141797670(aElems, aElems + 1, nullptr);
+        Slot_1417976e0(aElems, aElems + 1, nullptr);
+        CHECK(nSift1 == 0 && nSift2 == 0);
+
+        g_pfnLogic_1417929f0 = nullptr;
+        g_pfnLogic_141792b70 = nullptr;
+    }
+
     std::printf("%s checks=%d fails=%d\n", g_fails ? "LOGIC_SLOTS_FAIL" : "LOGIC_SLOTS_OK",
                 g_checks, g_fails);
     return g_fails ? 1 : 0;
