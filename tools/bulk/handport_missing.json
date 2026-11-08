@@ -1,0 +1,19 @@
+{
+ "classes": [
+  "CCrossMeritMgr",
+  "CLeague",
+  "FatalException",
+  "FunctionClosure0",
+  "ISynMngModify",
+  "Thank_you",
+  "XSynMngModify",
+  "_Container_base_secure",
+  "_String_base",
+  "bad_alloc",
+  "exception",
+  "length_error",
+  "logic_error",
+  "out_of_range",
+  "type_info"
+ ]
+}

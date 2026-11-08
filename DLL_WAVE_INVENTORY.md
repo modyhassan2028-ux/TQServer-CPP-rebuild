@@ -193,3 +193,25 @@ recorded per row:
 Jump tables were the last real blocker: `tools/bulk/prune_dead.py` removes the bytes between an
 unconditional transfer and the next branch target, because the only way in is a jump, so those
 bytes are the switch's table rather than instructions.
+
+## Where the port actually stands (2026-11-08)
+
+Two separate tracks, and they must not be confused:
+
+1. **The mechanical reference model** (`modules/syndicate/src/synlift*.cpp`, generated) is complete:
+   10,647 bodies, 10,221/10,224 rows, 9,442/9,445 routines, 246,552/246,621 code instructions. Its
+   remaining 13 rows are data, each with its evidence in `tools/bulk/backlog_rows.tsv`. It is verified
+   twice over: `audit_decode.py`/`audit_integrity.py` against capstone, and `diff_test.py` against
+   unicorn (3,518 sampled body-runs, no divergence).
+2. **The hand-written port** is the real deliverable and it is far from done. Measured with
+   `tools/bulk/inventory_classes.py` and a row sweep of the tree:
+
+   | measure | value |
+   | --- | --- |
+   | classes named by the DLL's own RTTI | 81 |
+   | of those, declared in `modules/` | 52 |
+   | rows referenced by hand-written code | 596 of 10,660 (5.6%) |
+
+   The 15 still-missing polymorphic types of interest are listed in
+   `tools/bulk/handport_missing.json`; the rest of the gap is the row count above, i.e. functions that
+   exist only in the lifted model so far.
