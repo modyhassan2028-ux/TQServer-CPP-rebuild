@@ -8,7 +8,10 @@
 #define ML_M2(p, o) (*(uint16_t*)((uint8_t*)(uintptr_t)(p) + (o)))
 #define ML_M4(p, o) (*(uint32_t*)((uint8_t*)(uintptr_t)(p) + (o)))
 #define ML_M8(p, o) (*(uint64_t*)((uint8_t*)(uintptr_t)(p) + (o)))
+extern "C" uint64_t* ml_image_slot(uintptr_t) __attribute__((weak));
+extern "C" void ml_hit(uintptr_t) __attribute__((weak));
 inline uint64_t& ml_glb(uintptr_t a) {
+    if (ml_image_slot) { uint64_t* p = ml_image_slot(a); if (p) return *p; }
     static uintptr_t k[8192]; static uint64_t v[8192];
     for (unsigned i = 0; i < 8192; ++i) {
         if (k[i] == a) return v[i];
@@ -17,6 +20,7 @@ inline uint64_t& ml_glb(uintptr_t a) {
     return v[0];
 }
 inline uint8_t& ml_glb8(uintptr_t a) {
+    if (ml_image_slot) { uint64_t* p = ml_image_slot(a & ~7ULL); if (p) return *((uint8_t*)p + (a & 7)); }
     static uintptr_t k[8192]; static uint8_t v[8192];
     for (unsigned i = 0; i < 8192; ++i) {
         if (k[i] == a) return v[i];

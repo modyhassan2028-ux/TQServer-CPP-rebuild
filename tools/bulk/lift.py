@@ -579,7 +579,10 @@ def main():
            '#define ML_M2(p, o) (*(uint16_t*)((uint8_t*)(uintptr_t)(p) + (o)))',
            '#define ML_M4(p, o) (*(uint32_t*)((uint8_t*)(uintptr_t)(p) + (o)))',
            '#define ML_M8(p, o) (*(uint64_t*)((uint8_t*)(uintptr_t)(p) + (o)))',
+           'extern "C" uint64_t* ml_image_slot(uintptr_t) __attribute__((weak));',
+           'extern "C" void ml_hit(uintptr_t) __attribute__((weak));',
            'inline uint64_t& ml_glb(uintptr_t a) {',
+           '    if (ml_image_slot) { uint64_t* p = ml_image_slot(a); if (p) return *p; }',
            '    static uintptr_t k[8192]; static uint64_t v[8192];',
            '    for (unsigned i = 0; i < 8192; ++i) {',
            '        if (k[i] == a) return v[i];',
@@ -588,6 +591,7 @@ def main():
            '    return v[0];',
            '}',
            'inline uint8_t& ml_glb8(uintptr_t a) {',
+           '    if (ml_image_slot) { uint64_t* p = ml_image_slot(a & ~7ULL); if (p) return *((uint8_t*)p + (a & 7)); }',
            '    static uintptr_t k[8192]; static uint8_t v[8192];',
            '    for (unsigned i = 0; i < 8192; ++i) {',
            '        if (k[i] == a) return v[i];',
@@ -624,6 +628,7 @@ def main():
         hdr.append('')
         hdr.append('uint64_t SynLift_%x(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A);   // 0x%x' % (a, a))
         src.append('uint64_t SynLift_%x(uint64_t rcxA, uint64_t rdxA, uint64_t r8A, uint64_t r9A) {' % a)
+        src.append('    if (ml_hit) ml_hit(0x%x);' % a)
         src.append('    uint64_t rax = 0, rbx = 0, rbp = 0, rsi = 0, rdi = 0, r10 = 0, r11 = 0, r12 = 0, r13 = 0, r14 = 0, r15 = 0;')
         src.append('    uint64_t rcx = rcxA, rdx = rdxA, r8 = r8A, r9 = r9A;')
         src.append('    bool f_zf = false, f_cf = false, f_sf = false, f_of = false, f_pf = false;')

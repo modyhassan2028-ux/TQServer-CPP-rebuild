@@ -9485,3 +9485,31 @@ is data. 942 such slots were dropped from unported rows (ported rows are never r
 alone unblocked the switches, and the rows behind them needed two ordinary families:
 scalar SSE arithmetic (`addsd/subsd/mulsd/divsd` and the single-precision forms) and the
 truncating converts (`cvttsd2si`, `cvttss2si`).
+
+## Real-path smoke run (2026-11-08)
+
+The batteries exercise a handful of families with hand-built fixtures. A first pass at the whole
+module is `tests/cqbase_lift_smoke.cpp`, driven by the table `tests/lift_smoke_table.h` that
+`tools/bulk/gen_smoke_table.py` regenerates from the header:
+
+- each body runs in its own forked child, so a fault is attributed to one address and cannot hide
+  the rest;
+- the DLL's `.text`/`.rdata`/`.data` are mapped at their own virtual addresses, and `ml_glb`
+  consults that mapping before its shadow, so a global read returns the byte the DLL shipped;
+- the object arguments point into an arena whose every word points back into the arena, so a body
+  that walks its fields keeps running, while a body that invents an address still faults;
+- every seam `g_fnLIFT_<addr>` is bound to the lifted body at that address (1,938 of them), and each
+  body reports itself through the weak `ml_hit` hook.
+
+Numbers from the run:
+
+| run | bodies started | ran clean | bodies reached |
+| --- | --- | --- | --- |
+| every body in isolation | 10,082 | 1,216 | 10,082 |
+| real entry points only (seam targets skipped) | 8,144 | 888 | 8,992 |
+
+Starting from entry points, 848 bodies are executed only because another body called them, which
+is the first evidence of real depth rather than one frame per test. The remaining faults are not
+treated as bugs: 7,890 of them read at address 0, which is what a body does when it dereferences a
+field a caller would have filled in. They are recorded per body in `tools/bulk/smoke_status.csv`
+with the accessed address, so a body can be picked up later and given a real object.
