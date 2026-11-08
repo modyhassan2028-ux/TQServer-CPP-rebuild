@@ -589,6 +589,7 @@ def main():
            '#define ML_M8(p, o) (*(uint64_t*)((uint8_t*)(uintptr_t)(p) + (o)))',
            'extern "C" uint64_t* ml_image_slot(uintptr_t) __attribute__((weak));',
            'extern "C" void ml_hit(uintptr_t) __attribute__((weak));',
+           'extern "C" void ml_entry_rsp(uintptr_t, uint64_t) __attribute__((weak));',
            'inline uint64_t& ml_glb(uintptr_t a) {',
            '    if (ml_image_slot) { uint64_t* p = ml_image_slot(a); if (p) return *p; }',
            '    static uintptr_t k[8192]; static uint64_t v[8192];',
@@ -643,6 +644,7 @@ def main():
         src.append('    uint8_t xmm0[16] = {0}, xmm1[16] = {0}, xmm2[16] = {0}, xmm3[16] = {0}, xmm4[16] = {0}, xmm5[16] = {0}, xmm6[16] = {0}, xmm7[16] = {0}, xmm8[16] = {0}, xmm9[16] = {0}, xmm10[16] = {0}, xmm11[16] = {0}, xmm12[16] = {0}, xmm13[16] = {0}, xmm14[16] = {0}, xmm15[16] = {0};')
         src.append('    alignas(16) uint8_t stkFrame[0x400] = {0};')
         src.append('    uint64_t rsp = (uint64_t)(uintptr_t)(stkFrame + 0x200);')
+        src.append('    if (ml_entry_rsp) ml_entry_rsp(0x%x, rsp);' % a)
         # Win64 passes the 5th and 6th arguments on the stack, right after the 32-byte shadow space.
         # The original body stores them there, so the lifted call hands them over as well.
         src.append('#define ML_CALL(t) g_fnLIFT_##t(rcx, rdx, r8, r9, ML_M8(rsp, 0x20), ML_M8(rsp, 0x28))')

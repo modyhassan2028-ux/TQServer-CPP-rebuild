@@ -9571,3 +9571,22 @@ instructions (99.9%), 246,552/246,621 code instructions (100.0%). Batteries 24 O
 13 rows remain and every one is listed in `tools/bulk/backlog_rows.tsv`: nine decode to operands no
 encoding can produce (`add BYTE PTR [rdi-0x5afff98a], bh`), which is data, and four branch into that
 same data region.
+
+## Differential test against an independent CPU emulator (2026-11-08)
+
+The audits proved the rows match the bytes; they say nothing about whether the emitted C++ computes
+what those bytes compute. `tests/cqbase_lift_diff.cpp` plus `tools/bulk/diff_test.py` settle that by
+running both sides from an identical state:
+
+- the driver runs a lifted body and prints the state it started from, the value returned, and the
+  scratch and stack windows afterwards;
+- `diff_test.py` replays the driver's generator exactly (a 32-bit LCG seeded with `seed ^ addr`), so
+  both sides begin with identical memory, then executes the row's original bytes in unicorn;
+- emulation stops before the `ret`, because the model's `ret` returns rather than popping, so that
+  final pop is the one place the two cannot agree by construction.
+
+First run over a random 120-body sample: **104 of 104 executable bodies agree exactly** on the
+return value and both memory windows. 16 bodies could not be followed by the emulator
+(`UC_ERR_FETCH_UNMAP`: the original code calls into paths the harness does not emulate), which is a
+harness limit, not a disagreement. The comparison also counts outcomes, so a body that faults under
+the model while the original does not shows up as a divergence rather than being skipped.
