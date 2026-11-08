@@ -21,3 +21,30 @@ search path and no longer needs the log stub the test file used to carry.
 
 Verification: run_flower_cycle.sh CYCLE-6X-GREEN 21 units, run_syndicate_pbsuite.sh
 PBSUITE-GREEN x6 (33 checks, 0 fails), container accessors 33, comparators 24, vtable forwarders 20.
+
+## D103 — the ini/inimgr sources under their binary paths, and the CQBase cycle's shared-process seams
+
+- `modules/cqbase/src/cini.cpp` -> `modules/cqbase/src/ini.cpp` and
+  `modules/cqbase/src/cinimgr.cpp` -> `modules/cqbase/src/inimgr.cpp`, both via `git mv`.
+  The eight `ini.cpp` bodies (0x140b91170, 0x140b91260, 0x140b93e10, 0x140b94030,
+  0x140b944f0, 0x140b96ed0, 0x140b97740) and the `inimgr.cpp` bodies already in the port
+  keep their line strings unchanged; only the source path now matches the binary's own
+  `f:\\version\\cqserver-78.0.11-1204\\modules\\cqbase\\src\\ini.cpp` literal.
+- `tests/cqbase_d53_test.cpp` re-pointed at the real message-destructor seams after D102:
+  `tq::g_pfnL_1417da8b0` (0x1417da8b0, the 1088-byte message destructor) and
+  `tq::g_pfnL_1417db330` (0x1417db330, the 1064-byte message destructor).
+- `tools/run_cqbase_cycle.sh` now links the syndicate objects the CQBase units reach
+  (`EXTRA`): `SynMsgDestroy` (synexc.cpp), the module seam family and the message
+  constructors in `modules/syndicate/src/msg/`.
+- `tests/cqbase_d10/d11/d12/d7/d8` no longer leave `g_pfnLogPrintf` null at the end of
+  their run: the units share one process, and the next unit's first `LogPrintf` went
+  straight through a null seam. They leave their `CatchLog` sink installed instead.
+- `tests/cqbase_d25_test.cpp` stubs the four `tq::g_LogApi` entry points: a free on a heap
+  nothing was taken from still reports, which the original does (`IF_NOT m_lNumAlloc > 0
+  myheap.cpp:0x53`) and then falls through to the heap check.
+- Verified in isolation: `cqbase_d25` prints
+  `SYNDICATE_D25_OK: both initialisers, both teardowns and both frees, 6 units, 57 checks`.
+- Open: in the single consolidated binary `cqbase_d25` fails the later
+  `Release(pDom)` assertion (`g_nDestroyCalls == 1 && g_nDeleteCalls == 1`) only when it
+  runs after `cqbase_d24`; on its own it passes. The state another unit leaves behind is
+  the next unit's work.

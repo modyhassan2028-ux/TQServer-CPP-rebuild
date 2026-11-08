@@ -83,7 +83,7 @@ int main() {
         CStringManagerScalarDelete(pHeap, 1);
     }
     std::remove(kRes);
-    g_pfnLogPrintf = nullptr;
+    g_pfnLogPrintf = CatchLog;   // keep a sink installed: the units share one process
     printf("CQBASE_D11_OK: CStringManager table, ParseLine, GetStr, operator[]\n");
     return 0;
 }

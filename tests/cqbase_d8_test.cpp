@@ -119,7 +119,7 @@ int main() {
     assert(CreateIniBase("/tmp/cqbase_d8_missing.ini", true) == nullptr);
 
     std::remove(kIni);
-    g_pfnLogPrintf = nullptr;
+    g_pfnLogPrintf = CatchLog;   // keep a sink installed: the units share one process
     printf("CQBASE_D8_OK: IniParseKeyValueLine, CIniBase::Open, CIni makers\n");
     return 0;
 }

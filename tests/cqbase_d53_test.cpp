@@ -107,8 +107,8 @@ int main() {
     g_fnSynMsgPackerSize = [] (void* p) -> uint32_t { return (uint32_t)std::strlen((const char*)p + 0x10); };
     g_fnSynAttrFillRec = &FillHook;
     g_fnSynAttrMsgInit = &MsgInitHook;
-    syndicate::g_fnModMem1088 = (decltype(syndicate::g_fnModMem1088))&Dtor1088Hook;
-    syndicate::g_fnModMem0428 = (decltype(syndicate::g_fnModMem0428))&Dtor0428Hook;
+    tq::g_pfnL_1417da8b0 = (decltype(tq::g_pfnL_1417da8b0))&Dtor1088Hook;   // 0x1417da8b0, the 1088-byte message destructor
+    tq::g_pfnL_1417db330 = (decltype(tq::g_pfnL_1417db330))&Dtor0428Hook;   // 0x1417db330, the 1064-byte message destructor
 
     g_aMgrVt[0x3f] = (void*)&MgrCompare;
     g_aMgrVt[1] = (void*)&MgrInsert;

@@ -58,7 +58,7 @@ int main() {
     assert(strKey == "Zone" && strValue == "3");
     ini.m_pIniBase = nullptr;                   // the base above is borrowed
 
-    g_pfnLogPrintf = nullptr;
+    g_pfnLogPrintf = CatchLog;   // keep a sink installed: the units share one process
     printf("CQBASE_D9_OK: GetAmount, GetStringByIndex\n");
     return 0;
 }

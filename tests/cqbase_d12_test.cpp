@@ -92,7 +92,7 @@ int main() {
         assert(g_strLast.find("m_hHeap") != std::string::npos);
         base.m_hHeap = hKeep;
     }
-    g_pfnLogPrintf = nullptr;
+    g_pfnLogPrintf = CatchLog;   // keep a sink installed: the units share one process
     printf("CQBASE_D12_OK: CMyHeap/CMyBaseHeap counts, refusals, sharing\n");
     return 0;
 }

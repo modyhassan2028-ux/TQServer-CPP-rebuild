@@ -6,7 +6,10 @@ OBJ=/app/co_repo/.build_cqbase
 mkdir -p "$OBJ"
 find "$OBJ" -name "*.o" -delete
 SAN="-fsanitize=address,undefined -fno-omit-frame-pointer -g"
-for f in $(find modules/cqbase/src -name "*.cpp" | sort); do
+# the cqbase units reach a handful of syndicate seams (the message
+# destroy entry, the module seam family and the message constructors)
+EXTRA="$(find modules/syndicate/src -name '*.cpp' ! -name syndicate.cpp | sort)"
+for f in $(find modules/cqbase/src -name "*.cpp" | sort) $EXTRA; do
   o=$OBJ/$(echo "$f" | sed "s|/|_|g; s|\.cpp$|.o|")
   g++ -std=c++17 $SAN -I. -Iinclude -Imodules -c "$f" -o "$o" || { echo "OBJ-FAIL $f"; exit 1; }
 done

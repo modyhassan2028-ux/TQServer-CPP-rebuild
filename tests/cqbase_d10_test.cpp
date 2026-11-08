@@ -86,7 +86,7 @@ int main() {
     assert(strCached == "same");
 
     std::remove(kIni);
-    g_pfnLogPrintf = nullptr;
+    g_pfnLogPrintf = CatchLog;   // keep a sink installed: the units share one process
     printf("CQBASE_D10_OK: CIniMgr cache, DestroyFile, refusals, GetIniMgr\n");
     return 0;
 }

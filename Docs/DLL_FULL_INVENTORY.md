@@ -7,10 +7,10 @@ Binaries: **48** · decompiled functions: **128,853** · embedded source paths: 
 | binary | functions | classes | source paths | port dir | files present |
 |---|---:|---:|---:|---|---:|
 | `MsgServer.exe` | 59,977 | 47 | 410 | no | 0/410 |
-| `Syndicate.dll` | 9,862 | 9 | 42 | yes | 3/42 |
+| `Syndicate.dll` | 9,862 | 9 | 42 | yes | 9/42 |
 | `NpcServer.exe` | 7,239 | 7 | 50 | no | 0/50 |
 | `CQCrossServer.exe` | 3,127 | 3 | 19 | no | 0/19 |
-| `CQBase.dll` | 3,095 | 3 | 15 | no | 0/15 |
+| `CQBase.dll` | 3,095 | 3 | 15 | yes | 10/15 |
 | `DB.dll` | 2,736 | 3 | 2 | no | 0/2 |
 | `ClanPKArenic.dll` | 2,315 | 4 | 15 | yes | 0/15 |
 | `PopPKArenic.dll` | 2,311 | 4 | 15 | yes | 0/15 |
@@ -45,7 +45,7 @@ Binaries: **48** · decompiled functions: **128,853** · embedded source paths: 
 | `Sponsor.dll` | 613 | 4 | 7 | yes | 0/7 |
 | `Booth.dll` | 600 | 4 | 6 | yes | 1/6 |
 | `Common.dll` | 428 | 1 | 2 | no | 0/2 |
-| `Flower.dll` | 402 | 4 | 6 | yes | 2/6 |
+| `Flower.dll` | 402 | 4 | 6 | yes | 3/6 |
 | `Training.dll` | 333 | 4 | 4 | yes | 0/4 |
 | `Title.dll` | 330 | 4 | 6 | yes | 1/6 |
 | `Peerage.dll` | 327 | 4 | 6 | yes | 1/6 |
@@ -105,18 +105,18 @@ Binaries: **48** · decompiled functions: **128,853** · embedded source paths: 
 - `f:/version/cqserver-78.0.11-1204/include/basecode/basetype.h` — missing
 - `f:/version/cqserver-78.0.11-1204/include/basecode/logthread.h` — missing
 - `f:/version/cqserver-78.0.11-1204/include/basecode/mystack.h` — missing
-- `f:/version/cqserver-78.0.11-1204/modules/cqbase/src/basecode.cpp` — missing
-- `f:/version/cqserver-78.0.11-1204/modules/cqbase/src/basefunc.cpp` — missing
-- `f:/version/cqserver-78.0.11-1204/modules/cqbase/src/common.cpp` — missing
-- `f:/version/cqserver-78.0.11-1204/modules/cqbase/src/ini.cpp` — missing
-- `f:/version/cqserver-78.0.11-1204/modules/cqbase/src/inifile.cpp` — missing
-- `f:/version/cqserver-78.0.11-1204/modules/cqbase/src/inimgr.cpp` — missing
-- `f:/version/cqserver-78.0.11-1204/modules/cqbase/src/logkernel.cpp` — missing
-- `f:/version/cqserver-78.0.11-1204/modules/cqbase/src/myheap.cpp` — missing
-- `f:/version/cqserver-78.0.11-1204/modules/cqbase/src/performanceinfo.cpp` — missing
-- `f:/version/cqserver-78.0.11-1204/modules/cqbase/src/stringmanager.cpp` — missing
-- `f:/version/cqserver-78.0.11-1204/modules/cqbase/src/terrainobjinfomgr.cpp` — missing
-- `f:/version/cqserver-78.0.11-1204/modules/cqbase/src/threadtimesinfo.cpp` — missing
+- `f:/version/cqserver-78.0.11-1204/modules/cqbase/src/basecode.cpp` — present
+- `f:/version/cqserver-78.0.11-1204/modules/cqbase/src/basefunc.cpp` — present
+- `f:/version/cqserver-78.0.11-1204/modules/cqbase/src/common.cpp` — present
+- `f:/version/cqserver-78.0.11-1204/modules/cqbase/src/ini.cpp` — present
+- `f:/version/cqserver-78.0.11-1204/modules/cqbase/src/inifile.cpp` — present
+- `f:/version/cqserver-78.0.11-1204/modules/cqbase/src/inimgr.cpp` — present
+- `f:/version/cqserver-78.0.11-1204/modules/cqbase/src/logkernel.cpp` — present
+- `f:/version/cqserver-78.0.11-1204/modules/cqbase/src/myheap.cpp` — present
+- `f:/version/cqserver-78.0.11-1204/modules/cqbase/src/performanceinfo.cpp` — present
+- `f:/version/cqserver-78.0.11-1204/modules/cqbase/src/stringmanager.cpp` — present
+- `f:/version/cqserver-78.0.11-1204/modules/cqbase/src/terrainobjinfomgr.cpp` — present
+- `f:/version/cqserver-78.0.11-1204/modules/cqbase/src/threadtimesinfo.cpp` — present
 
 ### CQCrossServer.exe
 
@@ -268,7 +268,7 @@ Binaries: **48** · decompiled functions: **128,853** · embedded source paths: 
 
 ### Flower.dll
 
-- `f:/version/cqserver-78.0.11-1204/modules/flower/src/flowerservice.cpp` — missing
+- `f:/version/cqserver-78.0.11-1204/modules/flower/src/flowerservice.cpp` — present
 - `f:/version/cqserver-78.0.11-1204/modules/flower/src/module.cpp` — present
 - `f:/version/cqserver-78.0.11-1204/modules/flower/src/msg/msgflower.cpp` — missing
 - `f:/version/cqserver-78.0.11-1204/modules/flower/src/msg/msglog.cpp` — missing
@@ -891,11 +891,11 @@ Binaries: **48** · decompiled functions: **128,853** · embedded source paths: 
 - `f:/version/cqserver-78.0.11-1204/include/google/protobuf/repeated_field.h` — missing
 - `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/country.cpp` — missing
 - `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/crossmeritmgr.cpp` — missing
-- `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/crossvlmresult.cpp` — missing
+- `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/crossvlmresult.cpp` — present
 - `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/league.cpp` — present
 - `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/leaguemgr.cpp` — missing
 - `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/leaguetokenmgr.cpp` — missing
-- `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/meedrecord.cpp` — missing
+- `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/meedrecord.cpp` — present
 - `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/meedrecordmgr.cpp` — missing
 - `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/module.cpp` — present
 - `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/msg/msgleagueopt.cpp` — missing
@@ -915,16 +915,16 @@ Binaries: **48** · decompiled functions: **128,853** · embedded source paths: 
 - `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/msg/msgsynrecruitadvertising.cpp` — missing
 - `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/msg/msgsynrecruitadvertisinglist.cpp` — missing
 - `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/msg/msgsynrecruitadvertisingopt.cpp` — missing
-- `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/pointrecordmgr.cpp` — missing
-- `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/synarenicmeed.cpp` — missing
-- `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/synattr.cpp` — missing
+- `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/pointrecordmgr.cpp` — present
+- `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/synarenicmeed.cpp` — present
+- `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/synattr.cpp` — present
 - `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/synattrmgr.cpp` — missing
 - `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/syndicate.cpp` — missing
 - `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/syndicatecompetemgr.cpp` — missing
 - `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/syndicatelogic.cpp` — present
 - `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/syndomain.cpp` — missing
 - `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/synfacility.cpp` — missing
-- `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/synmanager.cpp` — missing
+- `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/synmanager.cpp` — present
 - `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/synrecruitadvertising.cpp` — missing
 - `f:/version/cqserver-78.0.11-1204/modules/syndicate/src/token.cpp` — missing
 

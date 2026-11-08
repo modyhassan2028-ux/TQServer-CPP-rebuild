@@ -109,11 +109,21 @@ static bool HeapFree(void*, uint32_t, void* pMem) {
     std::free(pMem);
     return true;
 }
+static void LogWrite(const char*, const char*, int) {}
+static void LogPost(void*, const char*, const char*, int) {}
+static uint32_t LogTid() { return 0x25; }
+static bool LogRunning() { return true; }
 static bool HeapValid(void*, uint32_t, const void*) { return true; }
 static bool HeapDestroy(void*) { return true; }
 
 int main() {
     tq::LogApi savedLog = tq::g_LogApi;
+    // the reporting seams: a Free on a heap nothing was taken from still logs,
+    // straight through to the heap check the way the original does
+    tq::g_LogApi.pfnIsThreadRunning = &LogRunning;
+    tq::g_LogApi.pfnWriteDirect = &LogWrite;
+    tq::g_LogApi.pfnPostToThread = &LogPost;
+    tq::g_LogApi.pfnGetCurrentThreadId = &LogTid;
     HeapApi savedHeap = tq::g_HeapApi;
     tq::g_HeapApi = {&HeapCreate, &HeapAlloc, &HeapFree, &HeapValid, &HeapDestroy};
 

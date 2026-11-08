@@ -131,8 +131,8 @@
 14177f551  synlift.cpp
 14177f5c9  synlift.cpp
 14177f964  synlift.cpp
-14177fa40  synlift.cpp
-14177fa50  synlift.cpp
+14177fa40  synlift.cpp, vtableforwarders.cpp
+14177fa50  synlift.cpp, vtableforwarders.cpp
 141780100  synlift.cpp
 1417808d2  synlift.cpp
 141780935  synlift.cpp
@@ -365,10 +365,10 @@
 1417d84b1  SyndicateLeagueRobOptClass.cpp
 1417d85f9  SyndicateLeagueRobOptClass.cpp
 1417d9829  synlift.cpp
-1417d9840  CMsgLog.cpp
+1417d9840  CMsgLog.cpp, msgfieldflags.cpp
 1417d98b4  CMsgLog.cpp
 1417d98d4  CMsgLog.cpp
-1417d98f7  CMsgLog.cpp
+1417d98f7  CMsgLog.cpp, msgfieldflags.cpp
 1417daf49  synlift.cpp
 1417dc84d  SyndicateMsgSyndicate.cpp
 1417de545  synlift.cpp
@@ -403,7 +403,6 @@
 1417ed4ef  synlift.cpp
 1417ed52d  synlift.cpp
 1417ed553  synlift.cpp
-1417ee110  msgpbseams.cpp
 1417eee36  synlift.cpp
 1417eee3f  synlift.cpp
 1417eee7d  synlift.cpp

@@ -106,7 +106,7 @@ int main() {
     assert(std::strcmp(ini.GetString((char*)"Hero", (char*)"Name"), "Mizo") == 0);
     ini.m_pIniBase = nullptr;   // the base above is on the stack, the CIni does not own it
 
-    g_pfnLogPrintf = nullptr;
+    g_pfnLogPrintf = CatchLog;   // keep a sink installed: the units share one process
     printf("CQBASE_D7_OK: IniIsKeyLine, IniParseSectionLine, HasSection, GetInt, GetStr, CIni\n");
     return 0;
 }

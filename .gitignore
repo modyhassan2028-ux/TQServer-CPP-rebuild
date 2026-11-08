@@ -9,3 +9,5 @@ vendor/lua/*.o
 # build artifacts
 .build_flower/cycle_bin
 .build_flower/*.o
+.build_cqbase/
+.build_*/

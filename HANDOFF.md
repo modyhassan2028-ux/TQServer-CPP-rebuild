@@ -233,3 +233,14 @@ Seams declared in the header: 19 (some are already defaulted to a ported body, s
 `0x141722c70` (length error), `0x141724d10` (allocate), `0x14172acb0` and `0x141727380` (element
 moves), `0x1417f2fdc` (deallocate). Take them smallest first and wire each seam to its ported body the
 way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still watch the arguments.
+
+## D103 (latest)
+
+- `ini.cpp` / `inimgr.cpp` now live at the binary's own `modules/cqbase/src/` paths
+  (renamed from cini/cinimgr). Twelve of the twelve CQBase `__FILE__` paths are present.
+- `cqbase_d53` moved to the D102 seam names; `cqbase_d7/d8/d10/d11/d12` keep a log sink
+  installed so a shared process does not call through a null `g_pfnLogPrintf`.
+- `tools/run_cqbase_cycle.sh` links the syndicate objects its units reach.
+- Next: `cqbase_d25` passes alone but not after `cqbase_d24` in the one binary. Find the
+  global `cqbase_d24` leaves behind (vtable slot, heap or tree seam) and reset it, then the
+  CQBase cycle is green again.
