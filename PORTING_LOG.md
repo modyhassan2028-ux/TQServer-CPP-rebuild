@@ -10679,3 +10679,38 @@ policy that protobuf and STL are covered by standard replacements rather than po
 Testing: `tests/syndicate_fieldflags_test.cpp`, 27 assertions, six cycles, sanitizers clean.
 
 Suites now: 14711 + 1284 + 125 + 491 + 198 + 125 + 33 + 27 + 24 + 142.
+
+## 2026-11-08 — D99: twenty container accessors, and what a walk really returns
+
+`0x1417c5980..0x1417c5f5a`, twenty functions of one to six instructions from `synrangeB.cpp` and
+`synleaves.cpp`. They are the container family's `begin()`, `_Lmost()`, member references and two-field
+initializers, each reduced by inlining to a `lea` or `mov` and a `ret`. Ported in
+`modules/syndicate/src/containeraccessors.cpp`:
+
+| address | shape |
+|---|---|
+| `0x1417c5980` | word from `src` to `+0x0`, quad from `tail` to `+0x8`, return self |
+| `0x1417c59c0/59e0/5a30/5a90/5c20/5c30/5c40/5c90/5cd0` | `lea this+0x29 / 0x10 / 0x41 / 0x21 / 0x28 / 0x8 / 0x18 / 0x40 / 0x20` |
+| `0x1417c59f0/5b00` | load the pointer at `+0x30` / `+0x8` |
+| `0x1417c5a00/5dd0` | that pointer `+0x10` / `+0x8`, as an address |
+| `0x1417c5ae0` | sixteen bytes from `src`, then **one byte** to `+0x10` |
+| `0x1417c5e60` | sixteen bytes from `src` |
+| `0x1417c5c50/5f30` | minimal-element walks, sentinel flag at `+0x29` vs `+0x41` |
+| `0x1417c5c80` | `mov %rdx,%rcx; jmp 0x1417f2fdc` — the first argument is dropped |
+| `0x1417c5ef0` | `0x0fffffffffffffff` (fifteen f's) |
+
+**The walks do not return what their name suggests,** and the test caught me being wrong about it twice.
+`0x1417c5c50` keeps two pointers: `cur` starts as the caller's object and `node` as `*cur`; it stops when
+`node[0x29]` is set and returns **`cur`**, the node *before* the sentinel. So a container whose first node
+is already flagged returns the caller's own pointer, not that node. I had asserted the opposite and the
+object disagreed, which is the useful kind of failure: the sentinel is a real node, and `begin()` on an
+empty container yields the header.
+
+The other two traps: `0x1417c5ae0` copies eight bytes, then eight more, then exactly one byte at `+0x10`
+(`movzbl (%r8)` / `mov %al,0x10(%rcx)`) — a word store there would take `+0x11` with it. And
+`0x1417c5ef0` is `movabs $0xfffffffffffffff` — fifteen f's, `0x0fff...`, one digit away from the
+`0x1fff...` at `0x1417c5f50`. Both are constants a comparison could silently disagree with.
+
+Testing: `tests/syndicate_containeraccessors_test.cpp`, 33 assertions, six cycles, sanitizers clean.
+
+Suites now: 14711 + 1284 + 125 + 491 + 198 + 125 + 33 + 27 + 33 + 24 + 142.
