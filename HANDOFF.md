@@ -31,8 +31,8 @@ the build output, not just the test output.
 
 ## Where the work stands
 
-- Ported bodies in `modules/syndicate/src/CsyndicateLogicTailSlots.cpp`: 18.
-- Batteries: 203 assertions in `tests/syndicate_logic_tail_slots_test.cpp`, all passing, 6/6 runs, sanitizers clean.
+- Ported bodies in `modules/syndicate/src/CsyndicateLogicTailSlots.cpp`: 23.
+- Batteries: 215 assertions in `tests/syndicate_logic_tail_slots_test.cpp`, all passing, 6/6 runs, sanitizers clean.
 - The `0x14177f980` family is complete and wired: `0x14177f980` -> `0x141779400` -> `0x141779090`,
   plus both singletons (`0x14177c770`, `0x1417b6210`), the map constructor `0x14177c6c0`, its end-node
   builder `0x14177ace0`, the key search `0x14177c0a0`, `lower_bound` `0x1417a8520`, the range pass

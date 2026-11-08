@@ -201,6 +201,57 @@ void* (*g_pfnLogic_14177ace0)(void* self) = nullptr;
 void* (*g_pfnLogic_1417495d0)(void* arg) = nullptr;
 void (*g_pfnLogic_141732040)(void* arg, void* elem) = nullptr;
 
+// 0x141722c70 — the length error. The bytes build a std::length_error from the text at 0x141824f38
+// (logic_error base at rsp+0x28, length_error at rsp+0x50 with its vtable, an exception copy at
+// rsp+0x68) and hand it to _CxxThrowException at 0x1417f3154, then int3. Reproducing that object
+// layout would be reproducing MSVC's ABI, so the throw is a seam that carries the text.
+void (*g_pfn_throw_length_error)(const char* what) = nullptr;
+
+void Slot_141722c70_throw_length_error(void) {
+    if (g_pfn_throw_length_error != nullptr)                  // call 0x1417f3154 after the frame is built
+        g_pfn_throw_length_error("vector<T> too long");        // lea rdx,[rip+0x1022b1] -> 0x141824f38
+}
+
+// 0x141724d10 — allocate count elements of 4 bytes.
+void* Slot_141724d10_allocate(void* /*unused*/, uint64_t count) {
+    if (count != 0) {                                         // test rdx,rdx / je alloc
+        uint64_t q = 0xffffffffffffffffULL / count;            // or rax,-1 / div r8
+        if (q < 4) {                                          // cmp rax,4 / jae alloc
+            if (g_pfn_throw_length_error != nullptr)           // the same _CxxThrowException path
+                g_pfn_throw_length_error("vector<T> too long");
+            return nullptr;                                    // the bytes int3 here
+        }
+    }
+    return ::operator new(count * 4);                          // lea rcx,[r8*4] / call 0x1417f3166
+}
+
+// 0x14172acb0 — move a block down to dst, answering dst + bytes.
+uint64_t Slot_14172acb0_move_block(void* /*unused*/, void* src, void* src_end, void* dst) {
+    uint64_t elems = ((uint64_t)src_end - (uint64_t)src) >> 2;  // sub r8,rdx / sar 2
+    uint64_t bytes = elems * 4;                                // lea rdx,[r8*4]
+    uint64_t ret = (uint64_t)dst + bytes;                       // lea rbx,[rdx+r9]
+    if (elems != 0 && g_pfn_memmove_s != nullptr)               // test r8,r8 / je
+        g_pfn_memmove_s(dst, bytes, src, bytes);                // dst size and count are the same word
+    return ret;                                                // mov rax,rbx
+}
+
+// 0x141727380 — move src..mid so that it ends at dst_end.
+uint64_t Slot_141727380_move_tail(void* src, void* mid, void* dst_end) {
+    int64_t elems = (int64_t)((uint64_t)mid - (uint64_t)src) >> 2;   // sub rdx,rcx / sar 2
+    uint64_t bytes = (uint64_t)elems * 4;                       // lea rax,[rdx*4]
+    uint64_t dst = (uint64_t)dst_end - bytes;                    // sub rbx,rax
+    if (elems > 0 && g_pfn_memmove_s != nullptr)                // test rdx,rdx / jle  (signed)
+        g_pfn_memmove_s((void*)dst, bytes, src, bytes);
+    return dst;                                                // mov rax,rbx
+}
+
+// 0x1417f2fdc — the six bytes here are a lone `jmp qword ptr [rip+0x3040e]`, landing on
+// 0x1418233f0, which iat_slots.json resolves to MSVCR90!operator delete. It is not a .pdata row
+// start because it is a thunk, not a function body.
+void Slot_1417f2fdc_deallocate(void* p) {
+    ::operator delete(p);                                      // jmp [MSVCR90!operator delete]
+}
+
 // MSVCR90!memmove_s at 0x1418232a8. On the valid-argument path it is memmove, so the default keeps
 // that behaviour without needing a header for the _s form.
 static void memmove_s_default(void* dst, size_t /*dst_size*/, const void* src, size_t count) {
@@ -211,11 +262,11 @@ static void memmove_s_default(void* dst, size_t /*dst_size*/, const void* src, s
     else { for (size_t i = count; i-- > 0;) d[i] = q[i]; }
 }
 
-void (*g_pfnLogic_141722c70)(void) = nullptr;
-void* (*g_pfnLogic_141724d10)(void* alloc, uint64_t count) = nullptr;
-uint64_t (*g_pfnLogic_14172acb0)(void* self, void* dst, void* src, void* src_end) = nullptr;
-void (*g_pfnLogic_141727380)(void* it, void* dst, void* src_end) = nullptr;
-void (*g_pfnLogic_1417f2fdc)(void* p) = nullptr;
+void (*g_pfnLogic_141722c70)(void) = &Slot_141722c70_throw_length_error;
+void* (*g_pfnLogic_141724d10)(void* alloc, uint64_t count) = &Slot_141724d10_allocate;
+uint64_t (*g_pfnLogic_14172acb0)(void* unused, void* src, void* src_end, void* dst) = &Slot_14172acb0_move_block;
+uint64_t (*g_pfnLogic_141727380)(void* src, void* mid, void* dst_end) = &Slot_141727380_move_tail;
+void (*g_pfnLogic_1417f2fdc)(void* p) = &Slot_1417f2fdc_deallocate;
 void (*g_pfn_memmove_s)(void* dst, size_t dst_size, const void* src, size_t count) = memmove_s_default;
 
 // 0x14172d120 — _Insert_n. Path A reallocates, path B shifts the tail right, path C fills past the end

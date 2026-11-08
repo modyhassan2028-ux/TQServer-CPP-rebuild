@@ -127,11 +127,31 @@ void* Slot_141730cd0_grow_insert(void* self, uint64_t* out, const uint64_t* pair
 // MSVCR90!memmove_s (dst, dst size, src, count), not the two-argument memmove they resemble.
 extern void (*g_pfnLogic_141722c70)(void);
 extern void* (*g_pfnLogic_141724d10)(void* alloc, uint64_t count);
-extern uint64_t (*g_pfnLogic_14172acb0)(void* self, void* dst, void* src, void* src_end);
-extern void (*g_pfnLogic_141727380)(void* it, void* dst, void* src_end);
+extern uint64_t (*g_pfnLogic_14172acb0)(void* unused, void* src, void* src_end, void* dst);
+extern uint64_t (*g_pfnLogic_141727380)(void* src, void* mid, void* dst_end);
 extern void (*g_pfnLogic_1417f2fdc)(void* p);
 extern void (*g_pfn_memmove_s)(void* dst, size_t dst_size, const void* src, size_t count);
 void Slot_14172d120_insert_n(void* self, const uint64_t* it, uint64_t count, const void* value);
+// 0x141722c70 — builds std::length_error("vector<T> too long") on the frame and throws it through
+// _CxxThrowException. That object layout is MSVC ABI, so the throw itself is one seam taking the text.
+// The string the bytes load is at 0x141824f38.
+extern void (*g_pfn_throw_length_error)(const char* what);
+void Slot_141722c70_throw_length_error(void);
+
+// 0x141724d10 — allocate count 4-byte elements, with the divide-based overflow guard the bytes make
+// before operator new(count*4).
+void* Slot_141724d10_allocate(void* unused, uint64_t count);
+
+// 0x14172acb0 — moves src..src_end down to dst and answers dst + byte_count.
+// Argument order is the one the bytes take: rcx ignored, rdx src, r8 src_end, r9 dst.
+uint64_t Slot_14172acb0_move_block(void* unused, void* src, void* src_end, void* dst);
+
+// 0x141727380 — moves src..mid so it ends at dst_end. The guard is a *signed* jle, so a mid below
+// src means no move at all.
+uint64_t Slot_141727380_move_tail(void* src, void* mid, void* dst_end);
+
+// 0x1417f2fdc — jmp [0x1418233f0], which iat_slots.json resolves to MSVCR90!operator delete.
+void Slot_1417f2fdc_deallocate(void* p);
 
 // 0x1417495d0 — clears the 4-byte vector at +0x18/+0x20/+0x28. The memmove the bytes would make is
 // a zero-length one, so the only effect is finish = begin; the port keeps the shape that shows it.

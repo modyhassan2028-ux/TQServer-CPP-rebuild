@@ -9740,3 +9740,7 @@ Transcribed from the decode in HANDOFF.md: reallocate path with the cmovb growth
 ### 2026-11-08 correction
 
 Commit f1ceb18 said 17 bodies in its message; measured on that tree it is 18 bodies with 27 seam pointers declared in the header. HANDOFF.md carries the measured number. Rule stands: take counts from the command, not from the message I am writing.
+
+## 2026-11-08 — the five callees of 0x14172d120 ported
+
+0x141722c70 (length error; the throw is one seam over MSVC ABI), 0x141724d10 (allocate with the divide-based overflow guard), 0x14172acb0 (move block, answers dst+bytes), 0x141727380 (move tail, signed jle guard), 0x1417f2fdc (thunk to MSVCR90!operator delete, which is why it is not a .pdata row start). All five seams default to ported bodies. Measured: 23 bodies, 215 assertions, 6/6 green.

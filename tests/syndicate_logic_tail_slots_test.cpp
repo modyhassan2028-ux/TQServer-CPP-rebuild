@@ -453,6 +453,55 @@ int main() {
         g_pfnLogic_14172d120 = nullptr;
     }
 
+    // --- the five callees of 0x14172d120, ported as bodies of their own
+    {
+        // 0x141722c70: builds a length_error and throws it, so the seam carries the text
+        static int throws;
+        static const char* seen;
+        throws = 0; seen = nullptr;
+        g_pfn_throw_length_error = [](const char* w) { ++throws; seen = w; };
+        Slot_141722c70_throw_length_error();
+        CHECK(throws == 1);
+        CHECK(seen != nullptr);
+
+        // 0x141724d10: count*4 bytes, after the divide-based overflow guard
+        void* p = Slot_141724d10_allocate(nullptr, 2);
+        CHECK(p != nullptr);
+        ::operator delete(p);
+        throws = 0;
+        CHECK(Slot_141724d10_allocate(nullptr, 0x4000000000000000ULL) == nullptr);  // max/count = 3
+        CHECK(throws == 1);                                   // the guard threw instead of allocating
+        void* zero = Slot_141724d10_allocate(nullptr, 0);     // zero still allocates
+        CHECK(zero != nullptr);
+        ::operator delete(zero);
+        g_pfn_throw_length_error = nullptr;
+
+        // 0x14172acb0: move src..src_end down to dst, answer dst + bytes
+        static uint32_t mb[8];
+        std::memset(mb, 0, sizeof(mb));
+        mb[0] = 1; mb[1] = 2; mb[2] = 3;
+        uint64_t r = Slot_14172acb0_move_block(nullptr, &mb[0], &mb[2], &mb[4]);
+        CHECK(mb[4] == 1 && mb[5] == 2);                      // two elements moved
+        CHECK(r == (uint64_t)&mb[6]);                         // dst + 8 bytes
+        CHECK(Slot_14172acb0_move_block(nullptr, &mb[0], &mb[0], &mb[4]) == (uint64_t)&mb[4]);
+
+        // 0x141727380: move src..mid so it ends at dst_end, with a signed guard
+        static uint32_t mt[8];
+        std::memset(mt, 0, sizeof(mt));
+        mt[0] = 7; mt[1] = 8;
+        uint64_t d = Slot_141727380_move_tail(&mt[0], &mt[2], &mt[6]);
+        CHECK(d == (uint64_t)&mt[4]);                         // ends at dst_end - 8 bytes
+        CHECK(mt[4] == 7 && mt[5] == 8);
+        // mid below src: the signed guard skips the move, but the answer is still dst_end minus the
+        // negative byte count, which the bytes compute as dst_end + 8. The test expectation was wrong
+        // here, not the port; &mt[8] is what `lea rax,[rdx*4]` then `sub rbx,rax` produces.
+        CHECK(Slot_141727380_move_tail(&mt[2], &mt[0], &mt[6]) == (uint64_t)&mt[8]);
+
+        // 0x1417f2fdc: the jmp thunk onto MSVCR90!operator delete
+        void* heap = ::operator new(0x20);
+        Slot_1417f2fdc_deallocate(heap);                      // LSan fails the run if this leaks
+    }
+
     // --- 0x14172d120 inserts: the three paths the bytes have
     {
         static uint32_t buf[16], newbuf[16];
@@ -469,7 +518,7 @@ int main() {
         vec[5] = (uint64_t)&buf[8];        // +0x28 capacity end
         g_pfnLogic_14172acb0 = [](void*, void*, void* src, void*) -> uint64_t {
             return (uint64_t)src; };       // pretend the tail moved and finish is unchanged
-        g_pfnLogic_141727380 = [](void*, void*, void*) { };
+        g_pfnLogic_141727380 = [](void*, void*, void*) -> uint64_t { return 0; };   // return ignored here
         uint64_t it[2] = {0, (uint64_t)&buf[1]};
         uint32_t v = 0x99;
         Slot_14172d120_insert_n(vec, it, 2, &v);
