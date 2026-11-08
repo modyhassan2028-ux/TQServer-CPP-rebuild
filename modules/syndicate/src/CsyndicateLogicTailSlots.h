@@ -331,4 +331,20 @@ void Slot_14179db30(void* self, uint32_t uFlags);
 
 }  // namespace tq
 
+namespace tq {
+
+// 0x141787c50 — three instructions: `mov %rdx,(%rcx) / mov %rcx,%rax / ret`, i.e. store the
+// type row into the caller's slot and answer that slot.
+void* Slot_141787c50(void* out, const void* type);
+
+// 0x141726210 — free a subtree of the map whose node layout is the +0x1d one: right child
+// recursed first, then the node deleted, then the walk moves to the left child.
+void Slot_141726210(void* container, void* node);
+
+// 0x141727640 — the same walk over the whole tree, then the head at +0x30 is pointed at itself
+// on all three links and the size at +0x38 is cleared. Node nil byte +0x1d, key +0x18.
+void Slot_141727640(void* container);
+
+}  // namespace tq
+
 #endif

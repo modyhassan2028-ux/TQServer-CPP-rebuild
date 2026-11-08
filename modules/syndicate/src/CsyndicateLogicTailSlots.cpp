@@ -1180,7 +1180,8 @@ namespace tq {
 //   14179a117  rcx = [rdi+0x428], edx = 0, call *0x38
 // 0x141727640 and 0x14172ae00 are not ported: two seams, null by default. 0x1417cad00 is
 // ported, so it is called through its own injectable pointer.
-void (*g_pfnLogic_141727640)(void* p) = nullptr;
+static void map_clear_bridge(void* p);
+void (*g_pfnLogic_141727640)(void* p) = map_clear_bridge;
 void (*g_pfnLogic_14172ae00)(void* container, void* out, void* key) = nullptr;
 
 static void EraseIdRange(void* self, size_t nContainerOff, uint32_t uFirst, uint32_t uLast) {
@@ -1262,7 +1263,8 @@ namespace tq {
 //   14179db9f  r8 = rbp - r13 (sar 3), r9 = rbx, rdx = rbp, rcx = r13, call 0x14179cde0
 // The masked block at 14179dfa9 does the same with r9 = 0x14178efd0 and 0x14179cf10, and it
 // reads the begin into rsi instead of r12 — that is the only structural difference.
-void* (*g_pfnLogic_141787c50)(void* out, const void* type) = nullptr;
+static void* type_store_bridge(void* out, const void* type);
+void* (*g_pfnLogic_141787c50)(void* out, const void* type) = type_store_bridge;
 void (*g_pfnLogic_14179cde0)(void* first, void* last, uint64_t count, void* alloc) = nullptr;
 void (*g_pfnLogic_14179cf10)(void* first, void* last, uint64_t count, void* fn) = nullptr;
 
@@ -1335,5 +1337,79 @@ void Slot_14179db30(void* self, uint32_t uFlags) {
         }
     }
 }
+
+}  // namespace tq
+
+namespace tq {
+
+// ============================================================================
+// 0x141787c50 — three instructions, transcribed exactly:
+//   141787c50  mov %rdx,(%rcx)     the type row goes into the caller's slot
+//   141787c53  mov %rcx,%rax       the slot is the answer
+//   141787c56  ret
+void* Slot_141787c50(void* out, const void* type) {
+    *(const void**)out = type;                            // mov %rdx,(%rcx)
+    return out;                                          // mov %rcx,%rax
+}
+
+// 0x141726210 — free one subtree. The node layout here is the +0x1d one (nil byte at +0x1d,
+// left +0x00, right +0x10). Instruction anchors:
+//   14172621f  cmpb $0,0x1d(%rdx) / jne  the nil node ends the walk
+//   141726223  rdi = rdx (the node), rsi = rcx (the container), rbx = rdx
+//   141726230  rdx = [rbx+0x10] ; rcx = rsi ; call 0x141726210   the right subtree first
+//   14172623c  rbx = [rbx]        the left child is taken before the free
+//   14172623f  rcx = rdi ; call 0x1417f2fdc                      operator delete on the node
+//   141726247  cmpb $0,0x1d(%rbx) ; 14172624b rdi = rbx ; je 0x141726230
+void Slot_141726210(void* container, void* node) {
+    uint8_t* c = (uint8_t*)container;
+    void* uNode = node;                                   // mov %rdx,%rdi
+    void* uSaved = node;                                  // mov %rdx,%rbx
+    if (*(uint8_t*)((uint8_t*)uNode + 0x1d) != 0) return; // cmpb $0,0x1d(%rdx) / jne
+    for (;;) {
+        Slot_141726210(c, *(void**)((uint8_t*)uSaved + 0x10));   // 141726230 the right child
+        uSaved = *(void**)uSaved;                         // 14172623c mov (%rbx),%rbx
+        if (g_pfnLogic_1417f2fdc != nullptr)              // 141726242 call 0x1417f2fdc
+            g_pfnLogic_1417f2fdc(uNode);                  // rcx = rdi
+        uNode = uSaved;                                   // 14172624b mov %rbx,%rdi
+        if (*(uint8_t*)((uint8_t*)uSaved + 0x1d) != 0) break;   // 141726247 / je 141726230
+    }
+}
+
+// 0x141727640 — the whole tree, then the head is reset:
+//   14172764f  rax = [rcx+0x30]                    the head
+//   141727656  rsi = [rax+0x08]                    the root
+//   14172765a  rdi = rsi
+//   14172765d  cmpb $0,0x1d(%rsi) / jne 141727683
+//   141727663  rdx = [rdi+0x10] ; rcx = rbx ; call 0x141726210    one subtree
+//   14172766f  rdi = [rdi]                        the left child
+//   141727672  rcx = rsi ; call 0x1417f2fdc       the node itself
+//   14172767a  cmpb $0,0x1d(%rdi) ; 14172767e rsi = rdi ; je 141727663
+//   141727683  [head+0x08] = head ; 141727694 [this+0x38] = 0 ; [head] = head ;
+//              [head+0x10] = head
+void Slot_141727640(void* container) {
+    uint8_t* c = (uint8_t*)container;
+    void* uHead = *(void**)(c + 0x30);                    // mov 0x30(%rcx),%rax
+    void* uRoot = *(void**)((uint8_t*)uHead + 0x08);      // mov 0x8(%rax),%rsi
+    void* uCur = uRoot;                                   // mov %rsi,%rdi
+    void* uSaved = uRoot;                                 // rsi
+    while (*(uint8_t*)((uint8_t*)uCur + 0x1d) == 0) {     // cmpb $0,0x1d(%rsi) / jne
+        Slot_141726210(c, *(void**)((uint8_t*)uCur + 0x10));    // 14172766a call 0x141726210
+        void* pLeft = *(void**)uCur;                      // 14172766f mov (%rdi),%rdi
+        if (g_pfnLogic_1417f2fdc != nullptr)              // 141727675 call 0x1417f2fdc
+            g_pfnLogic_1417f2fdc(uSaved);                 // rcx = rsi
+        uSaved = pLeft;                                   // 14172767e mov %rdi,%rsi
+        uCur = pLeft;                                     // rdi
+    }
+    void* uH1 = *(void**)(c + 0x30);                      // 141727683
+    *(void**)((uint8_t*)uH1 + 0x08) = uH1;                // [head+0x08] = head
+    *(uint64_t*)(c + 0x38) = 0;                           // 141727694 size = 0
+    void* uH2 = *(void**)(c + 0x30);
+    *(void**)uH2 = uH2;                                   // [head] = head
+    void* uH3 = *(void**)(c + 0x30);
+    *(void**)((uint8_t*)uH3 + 0x10) = uH3;                // [head+0x10] = head
+}
+
+static void map_clear_bridge(void* p) { Slot_141727640(p); }
+static void* type_store_bridge(void* out, const void* type) { return Slot_141787c50(out, type); }
 
 }  // namespace tq

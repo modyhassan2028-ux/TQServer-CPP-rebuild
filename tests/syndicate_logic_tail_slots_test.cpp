@@ -1476,6 +1476,64 @@ int main() {
         g_pfn_invalid_parameter_noinfo = nullptr;
     }
 
+    // ------------------------------------------------------------------
+    // 0x141787c50, 0x141726210, 0x141727640 — the type store and the two tree frees.
+    // The map here is the +0x1d layout: head at container+0x30 with its three links, size
+    // at +0x38, nodes with left +0x00, parent +0x08, right +0x10 and the nil byte +0x1d.
+    {
+        // --- 0x141787c50 stores the type row and answers the slot
+        void* aSlot[1] = {nullptr};
+        const void* kType = (const void*)0x14178efd0;
+        CHECK(Slot_141787c50(aSlot, kType) == (void*)aSlot);
+        CHECK(aSlot[0] == (void*)kType);
+
+        struct Node { uint64_t uLeft, uParent, uRight; uint32_t uKey; uint8_t cPad1c, cNil, aTail[2]; };
+        static Node Head, R, L, RR;
+        std::memset(&Head, 0, sizeof Head); std::memset(&R, 0, sizeof R);
+        std::memset(&L, 0, sizeof L); std::memset(&RR, 0, sizeof RR);
+        Head.cNil = 1;
+
+        static uint64_t aCnt[0x10];
+        static int nFreed; static void* aFreed[8];
+        nFreed = 0;
+        g_pfnLogic_1417f2fdc = +[](void* p) { if (nFreed < 8) aFreed[nFreed] = p; ++nFreed; };
+
+        // a three-node tree: R at the root, L on its left, RR on its right
+        R.uLeft = (uint64_t)&L; R.uRight = (uint64_t)&RR; R.uParent = (uint64_t)&Head; R.cNil = 0;
+        L.uParent = (uint64_t)&R; L.uLeft = (uint64_t)&Head; L.uRight = (uint64_t)&Head; L.cNil = 0;
+        RR.uParent = (uint64_t)&R; RR.uLeft = (uint64_t)&Head; RR.uRight = (uint64_t)&Head; RR.cNil = 0;
+        Head.uParent = (uint64_t)&R; Head.uLeft = (uint64_t)&L; Head.uRight = (uint64_t)&RR;
+
+        std::memset(aCnt, 0, sizeof aCnt);
+        *(void**)((uint8_t*)aCnt + 0x30) = &Head;      // the container's head
+        *(uint64_t*)((uint8_t*)aCnt + 0x38) = 3;       // the size
+
+        // --- 0x141726210 frees one subtree only, and the node first handed to it too
+        nFreed = 0;
+        Slot_141726210(aCnt, &R);
+        CHECK(nFreed == 3);
+        CHECK(aFreed[0] == (void*)&R || aFreed[0] == (void*)&RR || aFreed[0] == (void*)&L);
+
+        // --- 0x141727640 frees the whole tree, then resets the head on all three links
+        nFreed = 0;
+        Head.uParent = (uint64_t)&R; Head.uLeft = (uint64_t)&L; Head.uRight = (uint64_t)&RR;
+        *(uint64_t*)((uint8_t*)aCnt + 0x38) = 3;
+        Slot_141727640(aCnt);
+        CHECK(nFreed == 3);
+        CHECK(Head.uLeft == (uint64_t)&Head);
+        CHECK(Head.uParent == (uint64_t)&Head);
+        CHECK(Head.uRight == (uint64_t)&Head);
+        CHECK(*(uint64_t*)((uint8_t*)aCnt + 0x38) == 0);
+
+        // an already empty map (head's parent is the head) frees nothing and still resets
+        nFreed = 0;
+        Slot_141727640(aCnt);
+        CHECK(nFreed == 0);
+        CHECK(Head.uParent == (uint64_t)&Head);
+
+        g_pfnLogic_1417f2fdc = nullptr;
+    }
+
     std::printf("%s checks=%d fails=%d\n", g_fails ? "LOGIC_SLOTS_FAIL" : "LOGIC_SLOTS_OK",
                 g_checks, g_fails);
     return g_fails ? 1 : 0;

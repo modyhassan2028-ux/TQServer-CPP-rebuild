@@ -9911,3 +9911,27 @@ are the whole single-bit range. **The mask 0x1f overlaps bits 0..4**, so a flag 
 Batteries: 314 assertions (31 new): no flags, one bit, the 0x100 bit, all nine bits in order with
 their offsets and a count of 6, the mask alone, and a finish-above-cap member that takes the error
 path and still proceeds. 6/6 runs, sanitizers clean.
+
+## 2026-11-08 — three small callees of the destroy chain ported
+
+- **0x141787c50** (3 instructions): `mov %rdx,(%rcx) / mov %rcx,%rax / ret` — store the type row
+  into the caller's slot and answer that slot. No branch, nothing to infer.
+- **0x141726210** (71 instructions): free one subtree of the +0x1d map layout. Right child recursed
+  first, then the node freed through 0x1417f2fdc, then the walk moves to the left child; the nil
+  byte at +0x1d ends both the loop and the recursion.
+- **0x141727640** (31 instructions): the same walk over the whole tree from `[container+0x30]->parent`,
+  and then the head is pointed at itself on all three links with the size at `+0x38` cleared. The
+  left child is read before the node is freed, which is why a real free cannot pull the next link
+  out from under the walk.
+
+`g_pfnLogic_141727640` and `g_pfnLogic_141787c50` now default to these bodies, so the two ports that
+called them through seams (0x14179a020/0x14179a150 for the clear, 0x14179db30 for the type store) are
+no longer talking to null.
+
+Batteries: 325 assertions (11 new): the type store answers its own slot; a three-node tree freed by
+0x141726210 counts three frees; the whole-tree clear counts three and leaves the head pointing at
+itself on all three links with size 0; an already-empty map frees nothing and still resets.
+
+Scaffolding fault in this batch: the fixture's node struct put the nil byte at +0x21 (4 bytes of key
+plus a 5-byte pad) while the code reads +0x1d, so the recursion never saw a nil node and ran away.
+The sanitizer caught it; the struct was corrected to the layout the bytes use.
