@@ -2,6 +2,9 @@
 #include "modules/syndicate/src/msg/msgleagueroboptpb.h"
 #include "modules/syndicate/src/msg/msgpbmemberdtors.h"
 namespace syndicate {
+extern void (*g_pfnMessageLiteCtor)(void*);
+
+
 
 uint32_t g_uRobOptServerVft = 0;
 uint32_t g_uPbInitFlag2 = 2;
@@ -327,6 +330,29 @@ void CMsgLeagueRobOptPB::MergeFrom(void* self, void* from) {
         }
     }
     ((std::string*)(s + 8))->append(*(std::string*)(f + 8));
+}
+
+// ---------------------------------------------------------------------------------------------
+// 0x1417f05f0. Two tables at offset zero (base, then derived) and the MessageLite constructor at
+// +0x8, which is the import at 0x141823280 and therefore a seam. The zeros are written in the order
+// the listing writes them: +0x40 as a 64-bit store, then +0x48, +0x4c, +0x50, +0x34, +0x38, +0x3c and
+// +0x30 as 32-bit stores — the order matters only for parity, since none of them overlaps.
+
+
+void* CMsgLeagueRobOptPB::Ctor(void* self) {
+    auto* p = static_cast<std::uint8_t*>(self);
+    *reinterpret_cast<std::uintptr_t*>(p) = 0x14183EEE8ULL;      // MessageLite, 1417f060d
+    *reinterpret_cast<std::uintptr_t*>(p) = 0x1418423D8ULL;      // CMsgLeagueRobOptPB, 1417f0617
+    if (g_pfnMessageLiteCtor != nullptr) g_pfnMessageLiteCtor(p + 0x8);   // 1417f061e
+    *reinterpret_cast<std::uint64_t*>(p + 0x40) = 0;             // 1417f0627
+    *reinterpret_cast<std::uint32_t*>(p + 0x48) = 0;             // 1417f062b
+    *reinterpret_cast<std::uint32_t*>(p + 0x4C) = 0;             // 1417f062e
+    *reinterpret_cast<std::uint32_t*>(p + 0x50) = 0;             // 1417f0631
+    *reinterpret_cast<std::uint32_t*>(p + 0x34) = 0;             // 1417f0634
+    *reinterpret_cast<std::uint32_t*>(p + 0x38) = 0;             // 1417f0637
+    *reinterpret_cast<std::uint32_t*>(p + 0x3C) = 0;             // 1417f063a
+    *reinterpret_cast<std::uint32_t*>(p + 0x30) = 0;             // 1417f063d
+    return self;
 }
 
 }  // namespace syndicate

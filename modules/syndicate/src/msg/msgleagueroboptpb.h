@@ -58,6 +58,12 @@ public:
     static void SerializeWithCachedSizes(void* self, void* pBuf);            // 0x1417f07d0
     static bool Merge(void* self, void* input);                               // 0x1417f0b30
     static void MergeFrom(void* self, void* from);                            // 0x1417f0e60
+
+    // 0x1417f05f0 — the constructor. The class is a protobuf MessageLite: the base table goes down
+    // first (0x14183eee8, google::protobuf::MessageLite), then CMsgLeagueRobOptPB's own
+    // (0x1418423d8), then the MessageLite sub-object at +0x8 is constructed and the value fields are
+    // zeroed. This is exactly what CMsgLeagueRobOpt's constructor starts at +0x408.
+    static void* Ctor(void* self);
 };
 
 }  // namespace syndicate

@@ -2,6 +2,9 @@
 #include "modules/syndicate/src/msg/msgleaguetokenpb.h"
 #include "modules/syndicate/src/msg/msgpbmemberdtors.h"
 namespace syndicate {
+extern void (*g_fn_1417e8050)();
+
+
 
 void (*g_pfnPbF10A0)(void*, void*) = nullptr;
 
@@ -291,6 +294,34 @@ void CMsgLeagueTokenPB::MergeFrom(void* self, void* from) {
             g_pfnPbF10A0(self, *(void**)(f + 0x48));
     }
     ((std::string*)(s + 8))->append(*(std::string*)(f + 8));
+}
+
+// ---------------------------------------------------------------------------------------------
+// 0x1417f1600. Same two-table opening as CMsgLeagueRobOptPB, then one call into 0x1417e8050 whose
+// result is discarded, five word fields cleared, and a value copied straight out of the image:
+// `mov 0x95848(%rip),%rax # 0x141886ea0` loads the 64-bit constant 0x00125f74_00001524 and stores it
+// at +0x48. That constant is initialized data, not computed, so the port reproduces it as the initial
+// value of a global and copies the global, which is what the original does.
+
+extern void (*g_pfnMessageLiteCtor)(void*);
+extern std::uint64_t g_qw141886ea0;
+std::uint64_t g_qw141886ea0 = 0x00125F7400001524ULL;             // image .data at 0x141886ea0
+
+void* CMsgLeagueTokenPB::Ctor(void* self) {
+    auto* p = static_cast<std::uint8_t*>(self);
+    *reinterpret_cast<std::uintptr_t*>(p) = 0x14183EEE8ULL;      // MessageLite, 1417f161d
+    *reinterpret_cast<std::uintptr_t*>(p) = 0x141842658ULL;      // CMsgLeagueTokenPB, 1417f1627
+    if (g_pfnMessageLiteCtor != nullptr) g_pfnMessageLiteCtor(p + 0x8);   // 1417f162e
+    if (g_fn_1417e8050 != nullptr) g_fn_1417e8050();             // 1417f1635, answer discarded
+    const std::uint32_t uZero = 0;                               // 1417f163a xor %r11d,%r11d
+    *reinterpret_cast<std::uint32_t*>(p + 0x34) = uZero;         // 1417f163d
+    *reinterpret_cast<std::uint32_t*>(p + 0x38) = uZero;         // 1417f1641
+    *reinterpret_cast<std::uint32_t*>(p + 0x3C) = uZero;         // 1417f1645
+    *reinterpret_cast<std::uint32_t*>(p + 0x40) = uZero;         // 1417f1649
+    *reinterpret_cast<std::uint32_t*>(p + 0x44) = uZero;         // 1417f164d
+    *reinterpret_cast<std::uint64_t*>(p + 0x48) = g_qw141886ea0; // 1417f1651
+    *reinterpret_cast<std::uint32_t*>(p + 0x30) = 0;             // 1417f165e
+    return self;
 }
 
 }  // namespace syndicate

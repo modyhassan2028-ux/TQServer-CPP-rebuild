@@ -46,6 +46,13 @@ public:
     static void SerializeWithCachedSizes(void* self, void* pBuf);      // 0x1417f1270
     static bool Merge(void* self, void* input);                        // 0x1417f19a0
     static void MergeFrom(void* self, void* from);                     // 0x1417f1430
+
+    // 0x1417f1600 — the constructor, same shape as CMsgLeagueRobOptPB's: the MessageLite table
+    // (0x14183eee8), then this class's (0x141842658), the MessageLite sub-object at +0x8, one call to
+    // 0x1417e8050, five zeroed word fields, a 64-bit value copied out of the image's .data at
+    // 0x141886ea0 into +0x48, and finally +0x30 zeroed. This is what CMsgLeagueToken's constructor
+    // starts at +0x408.
+    static void* Ctor(void* self);
 };
 
 }  // namespace syndicate

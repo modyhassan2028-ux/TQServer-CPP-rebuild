@@ -10598,3 +10598,49 @@ member tables at their exact offsets, seventeen `Init` pairs, three string packe
 resets.
 
 Suites now: 14711 + 1284 + 125 + 491 + 198 + 125 + 24 + 142.
+
+## 2026-11-08 — D97: the two protobuf constructors, and a family that could not link
+
+The league messages carry a protobuf sub-object at `+0x408`. Its constructor is a separate function, and
+two of them are now ported:
+
+| address | class | shape |
+|---|---|---|
+| `0x1417f05f0` | `CMsgLeagueRobOptPB` | two tables, MessageLite ctor at `+0x8`, eight cleared fields |
+| `0x1417f1600` | `CMsgLeagueTokenPB` | same, plus one ignored call and a constant copied from `.data` |
+
+Both open the same way, and the RTTI settles why: base table `0x14183eee8` is
+`google::protobuf::MessageLite`, and it is written and then immediately overwritten by the class's own
+table (`0x1418423d8`, `0x141842658`). The `MessageLite` constructor at `+0x8` is the import at
+`0x141823280`, so it stays a seam.
+
+The token constructor does two things worth recording. It calls `0x1417e8050` and discards the answer
+(`call` with no register consumed afterwards). And it loads its `+0x48` field straight out of the image:
+
+```
+mov 0x95848(%rip),%rax   # 0x141886ea0  ->  0x00125f74_00001524
+```
+
+That is initialized `.data`, not arithmetic, so the port reproduces the constant as the initial value of
+a global and copies the global, exactly as the original reads memory.
+
+**A finding worth more than the two functions:** the protobuf family had never been linked. Its headers
+declare twenty-four seams and seventeen of them were defined in no translation unit at all
+(`g_pfnPb3A50`, `g_pfnPb3BC0`, `g_pfnPb4550`, `g_pfnPb45D0`, `g_pfnPb64C0`, `g_pfnPb6510`,
+`g_pfnPb8050`, `g_pfnPbCheckFail`, `g_pfnPbDelArray`, `g_pfnPbE0110`, `g_pfnPbF3F50`, `g_pfnPbF4DC0`,
+`g_pfnPbF51E0`, `g_pfnPbInitGuard`, `g_pfnPbVarintSize`, `g_pfnPbWriteString`, `g_pfnPbWriteUnknown`,
+`g_pfnPbWriteVarint32`, `g_pPbDefaultStr`, `g_pfnMessageLiteCtor`, `g_fn_1417e8050`), and four more were
+defined at the top of the two files that use them — which is why `msgpbseams.cpp` defines exactly the
+first group and no more. Every type is copied from the declaration, not guessed: a seam is only useful
+if a test can wire a function of the right shape into it.
+
+**And a dead end closed:** `0x1417e8016`, listed as an open `tq::CMsg::Init` seam, is
+`jmp *0x1418230f0` — an import thunk for a function that lives in another module. There is nothing to
+port and it will never close; it should not be chased again.
+
+Testing: `tests/syndicate_pbctors_test.cpp`, 33 assertions, six cycles, sanitizers clean
+(`tools/run_syndicate_pbsuite.sh`). The assertions that mattered were the boundaries — a 32-bit store at
+`+0x50` really does cover `0x50..0x53`, and `+0x40` as a 64-bit store covers `0x40..0x47` — because two
+of my first three boundary checks were wrong and the object proved it.
+
+Suites now: 14711 + 1284 + 125 + 491 + 198 + 125 + 33 + 24 + 142.
