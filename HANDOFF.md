@@ -245,3 +245,11 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   runs clean in the same process: `CQBAE-CYCLE-6X-GREEN: 77 units` (6 passes, ASan+UBSan).
 - Next: back to the function porting sequence — the limbs table at 0x1417c5980..
   (the small accessor cluster) is dumped and ready.
+
+## D129 (latest)
+
+- The pure accessor cluster 0x1417c5980..0x1417c5f80 is ported: `modules/syndicate/src/
+  synacc.cpp`, 41 bodies, `SYNDICATE_D129_OK ... 56 checks`, 6 passes under ASan+UBSan.
+- Next: the rest of the same cluster — 0x1417c5b30 / 0x1417c5b80 (they call the seam at
+  0x1418233c0), the sentinel walks 0x1417c5c50 / 0x1417c5f00 / 0x1417c5f30, and the two
+  `jmp 0x1417f2fdc` thunks 0x1417c5c80 / 0x1417c5cc0.

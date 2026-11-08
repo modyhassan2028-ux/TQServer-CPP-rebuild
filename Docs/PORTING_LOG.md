@@ -50,3 +50,25 @@ PBSUITE-GREEN x6 (33 checks, 0 fails), container accessors 33, comparators 24, v
   back, so `cqbase_d25`'s `Release(pDom)` went to d24's lambdas and its own counters
   stayed at zero. `cqbase_d24` now saves them on entry and restores them at the end.
 - `tools/run_cqbase_cycle.sh` -> `CQBAE-CYCLE-6X-GREEN: 77 units`.
+
+## D129 — the pure accessor cluster at 0x1417c5980..0x1417c5f80
+
+41 bodies, one source file, no seam: nothing in the cluster calls out, so each body is
+its own instruction run and nothing else.
+
+- `modules/syndicate/src/synacc.cpp` + `synacc.h`. Every function is named for its own
+  start address because the cluster's `__FILE__` literal is not resolved yet; when it is,
+  the two files move to that path and the names take the original's.
+- Byte-for-byte forms implemented: `mov (%rdx),%eax / mov %eax,(%rcx)` with the qword at
+  `+0x8` (0x1417c5980, 0x1417c5990); `movq $0x0,(%rcx)` (0x1417c59a0); the twelve
+  `mov %rcx,%rax` bodies; the fifteen `lea 0xNN(%rcx),%rax` bodies at 0x10/0x18/0x20/0x21/
+  0x28/0x29/0x40/0x41; the 0x30 slot loaded plain, `+0x8` and `+0x10` (0x1417c59f0,
+  0x1417c5a00, 0x1417c5a60, 0x1417c5a70, 0x1417c5d00, 0x1417c5dd0); the 0x8 slot
+  (0x1417c5b00, 0x1417c5b70, 0x1417c5bc0); the two-qwords-and-a-byte copy at +0x10
+  (0x1417c5ae0, 0x1417c5b10); the two-qword copy (0x1417c5e60); and the raw
+  `movabs $0xfffffffffffffff` answer (0x1417c5ef0).
+- `tests/syndicate_d129_test.cpp`: 56 checks, 6 passes, ASan+UBSan clean.
+- Left for the next unit because they are not pure: the two seams-calling comparisons at
+  0x1417c5b30 and 0x1417c5b80 (`call *0x1418233c0`), the sentinel walks at 0x1417c5c50
+  (`cmpb $0x0,0x29(%rax)`) and 0x1417c5f00 / 0x1417c5f30 (`cmpb $0x0,0x41(%rax)`), and the
+  two `jmp 0x1417f2fdc` thunks at 0x1417c5c80 and 0x1417c5cc0.
