@@ -7,15 +7,13 @@ namespace syndicate {
 void (*g_pfnCSynManagerBaseCtor)(void* self) = nullptr;
 void (*g_pfnCSynManagerDelete)(void* p) = nullptr;
 
-// 1417c5860: two id gates, the first one returns, the second falls through.
-void CSynManager::SetValue(int id, uint32_t value) {
-    if (id == static_cast<int>(kIdStateA)) {
+// 1417c5860: two independent id gates, neither of which returns early, then `this + 0x98`.
+void* CSynManager::SetValue(int id, uint32_t value) {
+    if (id == static_cast<int>(kIdStateA))
         *reinterpret_cast<uint32_t*>(reinterpret_cast<char*>(this) + 0xa8) = value;
-        return;
-    }
-    if (id == static_cast<int>(kIdStateB)) {
+    if (id == static_cast<int>(kIdStateB))
         *reinterpret_cast<uint32_t*>(reinterpret_cast<char*>(this) + 0xac) = value;
-    }
+    return reinterpret_cast<char*>(this) + 0x98;
 }
 
 // 1417cf2b0: base ctor first, then the conditional delete.
