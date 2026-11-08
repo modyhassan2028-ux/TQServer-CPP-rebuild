@@ -1,5 +1,6 @@
 #include "modules/syndicate/src/module.h"
 #include "modules/syndicate/src/CsyndicateLogicTailSlots.h"   // Slot_1417b6210_singleton
+#include "modules/syndicate/src/msg/msgsynctors.h"
 
 namespace tq {
 
@@ -62,22 +63,37 @@ void* Slot_14177ead0_ModuleCtor(void* pMem, void* pArg2, uint32_t nArg3) {
     *(void**)pThis = (void*)0x14182E428ULL;                         // 14177eaf5, base table
     *(void**)pThis = (void*)0x14182E5A8ULL;                         // 14177eaff, then the derived
     *(uint32_t*)(pThis + 0x8) = nArg3;                              // 14177eb02 mov %r8d,0x8(%rcx)
-    if (g_pfnL_1417d9710 != nullptr) g_pfnL_1417d9710(pThis + 0x10);  // 14177eb0a
+    // 0x14177eb0a constructs the sub-object at +0x10, which is a CMsgLog: 0x1417d9710 is its
+    // constructor. The seam wins when a test wires it; otherwise the ported body runs.
+    if (g_pfnL_1417d9710 != nullptr) g_pfnL_1417d9710(pThis + 0x10);
+    else syndicate::CMsgLog_Ctor_1417d9710(pThis + 0x10);
     *(void**)(pThis + 0x420) = pArg2;                               // 14177eb10 mov %rbx,0x420(%rdi)
     // The sixteen members, in the order the constructor writes them.
-    struct Member { uint32_t nOffset; void (**ppFn)(void*); };
+    // Each member constructor's address is also its class: the sixteen are the message constructors
+    // ported in msgsynctors.cpp, so when a test does not wire a seam the real body runs and the member
+    // is a properly built message rather than a hole.
+    struct Member { uint32_t nOffset; void (**ppFn)(void*); void* (*pfnPort)(void*); };
     static const Member aMembers[] = {
-        { 0x428, &g_pfnL_1417db2b0 }, { 0x850, &g_pfnL_1417dca60 },
-        { 0xC78, &g_pfnL_1417dd6e0 }, { 0x1088, &g_pfnL_1417da860 },
-        { 0x1498, &g_pfnL_1417dae10 }, { 0x18A8, &g_pfnL_1417dd050 },
-        { 0x1CB8, &g_pfnL_1417dd230 }, { 0x20C8, &g_pfnL_1417dac30 },
-        { 0x24D8, &g_pfnL_1417dd9f0 }, { 0x28E8, &g_pfnL_1417d9e60 },
-        { 0x2CF8, &g_pfnL_1417ddc60 }, { 0x3108, &g_pfnL_1417de240 },
-        { 0x3518, &g_pfnL_1417ddf50 }, { 0x3928, &g_pfnL_1417d6640 },
-        { 0x3D50, &g_pfnL_1417d9000 }, { 0x41A8, &g_pfnL_1417d8390 },
+        { 0x428, &g_pfnL_1417db2b0, &syndicate::CMsgSyndicate_Ctor_1417db2b0 },
+        { 0x850, &g_pfnL_1417dca60, &syndicate::CMsgSynDomain_Ctor_1417dca60 },
+        { 0xC78, &g_pfnL_1417dd6e0, &syndicate::CMsgSynProffer_Ctor_1417dd6e0 },
+        { 0x1088, &g_pfnL_1417da860, &syndicate::CMsgSynAttrInfo_Ctor_1417da860 },
+        { 0x1498, &g_pfnL_1417dae10, &syndicate::CMsgSynChgDomName_Ctor_1417dae10 },
+        { 0x18A8, &g_pfnL_1417dd050, &syndicate::CMsgSynMemberInfo_Ctor_1417dd050 },
+        { 0x1CB8, &g_pfnL_1417dd230, &syndicate::CMsgSynMemberList_Ctor_1417dd230 },
+        { 0x20C8, &g_pfnL_1417dac30, &syndicate::CMsgSynBaseProffer_Ctor_1417dac30 },
+        { 0x24D8, &g_pfnL_1417dd9f0, &syndicate::CMsgSynProfferRank_Ctor_1417dd9f0 },
+        { 0x28E8, &g_pfnL_1417d9e60, &syndicate::CMsgSelfSynMemAwardRank_Ctor_1417d9e60 },
+        { 0x2CF8, &g_pfnL_1417ddc60, &syndicate::CMsgSynRecruitAdvertising_Ctor_1417ddc60 },
+        { 0x3108, &g_pfnL_1417de240, &syndicate::CMsgSynRecruitAdvertisingOpt_Ctor_1417de240 },
+        { 0x3518, &g_pfnL_1417ddf50, &syndicate::CMsgSynRecruitAdvertisingList_Ctor_1417ddf50 },
+        { 0x3928, &g_pfnL_1417d6640, &syndicate::CMsgLeagueOpt_Ctor_1417d6640 },
+        { 0x3D50, &g_pfnL_1417d9000, &syndicate::CMsgLeagueToken_Ctor_1417d9000 },
+        { 0x41A8, &g_pfnL_1417d8390, &syndicate::CMsgLeagueRobOpt_Ctor_1417d8390 },
     };
-    for (const Member& m : aMembers) {
-        if (*m.ppFn != nullptr) (*m.ppFn)(pThis + m.nOffset);       // 14177eb1e .. 14177ec1c
+    for (const Member& m : aMembers) {                                // 14177eb1e .. 14177ec1c
+        if (*m.ppFn != nullptr) (*m.ppFn)(pThis + m.nOffset);
+        else m.pfnPort(pThis + m.nOffset);
     }
     return pThis;                                                   // 14177ec21 mov %rdi,%rax
 }

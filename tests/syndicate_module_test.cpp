@@ -6,6 +6,8 @@
 #include <cstdint>
 #include "modules/syndicate/src/module.h"
 #include "modules/syndicate/src/pointrecordmgr.h"
+#include "modules/syndicate/src/msg/msgseams.h"
+#include "modules/syndicate/src/msg/msgsynctors.h"
 
 using namespace tq;
 namespace tq { void log_InlineLogERROR(const char*, ...) {} }
@@ -157,6 +159,44 @@ int main() {
     Slot_14177ead0_ModuleCtor(g_mem2, nullptr, 0);
     CHECK(*(void**)g_mem2 == (void*)0x14182E5A8ULL);
     CHECK(*(void**)(g_mem2 + 0x420) == nullptr);
+
+    // ---- with every seam cleared, the module builds itself out of the ported bodies: the sub-object
+    // at +0x10 is a CMsgLog and the sixteen members are messages, each with its own class table.
+    g_pfnL_1417d9710 = nullptr;
+    g_pfnL_1417db2b0 = nullptr; g_pfnL_1417dca60 = nullptr; g_pfnL_1417dd6e0 = nullptr;
+    g_pfnL_1417da860 = nullptr; g_pfnL_1417dae10 = nullptr; g_pfnL_1417dd050 = nullptr;
+    g_pfnL_1417dd230 = nullptr; g_pfnL_1417dac30 = nullptr; g_pfnL_1417dd9f0 = nullptr;
+    g_pfnL_1417d9e60 = nullptr; g_pfnL_1417ddc60 = nullptr; g_pfnL_1417de240 = nullptr;
+    g_pfnL_1417ddf50 = nullptr; g_pfnL_1417d6640 = nullptr; g_pfnL_1417d9000 = nullptr;
+    g_pfnL_1417d8390 = nullptr;
+    static int initCalls; initCalls = 0;
+    syndicate::g_pfnCMsgInit = [](void*) { ++initCalls; };
+    static int packerCtors; packerCtors = 0;
+    g_pfnCStringPackerCtor = [](void*) { ++packerCtors; };
+    g_pfnCStringPackerSetBuf = [](void*, char*, uint32_t, bool) {};
+    static int resets; resets = 0;
+    g_fn_1417f05f0 = [](void*) { ++resets; };
+    g_fn_1417f1600 = [](void*) { ++resets; };
+    std::memset(g_mem2, 0, sizeof g_mem2);
+    CHECK(Slot_14177ead0_ModuleCtor(g_mem2, nullptr, 0) == (void*)g_mem2);
+    CHECK(*(void**)(g_mem2 + 0x10) == (void*)0x14182E4A0ULL);        // CMsgLog under the module
+    static const uintptr_t wantVt[16] = {
+        0x14183DC10, 0x14183DE00, 0x14183E180, 0x14183D768, 0x14182E520, 0x14183DF00,
+        0x14183E010, 0x14183D888, 0x14183E2B0, 0x14183D558, 0x14183E3F8, 0x14183E620,
+        0x14183E508, 0x14183C5A8, 0x14183CFA0, 0x14183CC78,
+    };
+    static const uint32_t wantOff2[16] = {
+        0x428, 0x850, 0xC78, 0x1088, 0x1498, 0x18A8, 0x1CB8, 0x20C8,
+        0x24D8, 0x28E8, 0x2CF8, 0x3108, 0x3518, 0x3928, 0x3D50, 0x41A8,
+    };
+    for (int i = 0; i < 16; ++i) {
+        CHECK(*(uintptr_t*)(g_mem2 + wantOff2[i]) == wantVt[i]);
+    }
+    // 0x1498 is CMsgSynChgDomName, the one class whose table sits in the low range with tq::CMsg's
+    // (0x14182e520), and 0x20c8 is CMsgSynBaseProffer (0x14183d888).
+    CHECK(initCalls == 17 * 2);                                       // CMsgLog plus sixteen messages
+    CHECK(packerCtors == 3);                                          // Syndicate, SynDomain, LeagueOpt
+    CHECK(resets == 2);                                               // LeagueToken, LeagueRobOpt
 
     // ---- 0x14177e890: eighteen registrations through +0x8, four through +0x10, one through +0x18
     std::memset(g_seq, 0, sizeof g_seq); g_n[0] = g_n[1] = g_n[2] = 0;

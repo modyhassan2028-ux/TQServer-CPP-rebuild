@@ -10565,3 +10565,36 @@ the class table winning, the `+0x408` store, the reset target, the packer placem
 and length and flag, and that nothing outside the object is written.
 
 Suites now: 14711 + 1284 + 125 + 491 + 198 + 104 + 24 + 142.
+
+## 2026-11-08 — D96: the module now builds itself from ported bodies
+
+0x14177ead0's sixteen members are the seventeen message constructors of D95, one for one, and its base
+sub-object at +0x10 is `0x1417d9710`, the `CMsgLog` constructor. So the seams in the module constructor
+could finally be pointed at real code: a wired seam still wins (the tests need to observe individual
+calls), and when it is not wired the ported body runs. The member table now carries both, so a module
+can be built end to end without any test scaffolding.
+
+That closes a real gap rather than a cosmetic one: before this, an unwired module constructor produced
+sixteen holes instead of sixteen messages.
+
+The offset-to-class map, which the assembled module now proves:
+
+```
+0x428 CMsgSyndicate        0x850 CMsgSynDomain         0xc78 CMsgSynProffer
+0x1088 CMsgSynAttrInfo     0x1498 CMsgSynChgDomName     0x18a8 CMsgSynMemberInfo
+0x1cb8 CMsgSynMemberList   0x20c8 CMsgSynBaseProffer    0x24d8 CMsgSynProfferRank
+0x28e8 CMsgSelfSynMemAwardRank                         0x2cf8 CMsgSynRecruitAdvertising
+0x3108 CMsgSynRecruitAdvertisingOpt                    0x3518 CMsgSynRecruitAdvertisingList
+0x3928 CMsgLeagueOpt       0x3d50 CMsgLeagueToken      0x41a8 CMsgLeagueRobOpt
+```
+
+Note `0x1498` is the one class whose table lives in the low range beside `tq::CMsg`'s
+(`0x14182e520`), so a check written from the pattern alone would get it wrong — the assembled module is
+what proved it.
+
+Testing: `tests/syndicate_module_test.cpp` grew to 125 assertions, 6/6 runs, sanitizers clean. With
+every seam cleared, the test builds a module and checks the `CMsgLog` table at +0x10, all sixteen
+member tables at their exact offsets, seventeen `Init` pairs, three string packers and two `+0x408`
+resets.
+
+Suites now: 14711 + 1284 + 125 + 491 + 198 + 125 + 24 + 142.

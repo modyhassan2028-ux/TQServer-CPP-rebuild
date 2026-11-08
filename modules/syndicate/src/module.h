@@ -17,8 +17,9 @@ extern bool (*g_pfnL_14177e890)(void* pModule);
 // 0x14177e890 and destroy through vtable +0x8 when that says no. Returns the module or null.
 void* Slot_14177ec90_ModuleCreate(void* pArg, uint32_t nArg2);
 // 0x14177ead0 — the module constructor. Writes the derived vtable (0x14182e5a8) over the base one
-// (0x14182e428), stores both extra arguments, constructs the base sub-object at +0x10, then sixteen
-// members. Each member constructor is still a seam; the offsets are exact.
+// (0x14182e428), stores both extra arguments, constructs the base sub-object at +0x10 (0x1417d9710,
+// the CMsgLog constructor), then sixteen message members at fixed offsets. Every one of those
+// constructors is now ported: a wired seam still wins, otherwise the real body runs.
 void* Slot_14177ead0_ModuleCtor(void* pMem, void* pArg2, uint32_t nArg3);
 extern void (*g_pfnL_1417d9710)(void* pBase);                    // base sub-object at this+0x10
 extern void (*g_pfnL_1417d8390)(void*);  extern void (*g_pfnL_1417d9000)(void*);

@@ -35,14 +35,15 @@ the build output, not just the test output.
   The command, which no longer depends on the return type or a `_name` suffix:
   `grep -cE '^[A-Za-z_][A-Za-z0-9_<>:*& ]* Slot_141[0-9a-f]{6}'` on that file.
   (Earlier patterns here missed `bool` and `const char*` bodies; this one counts them all.)
-- `modules/syndicate/src/msg/msgsynctors.cpp`: 17 more (every message constructor) (`0x1417ac700`, `0x1417ac710`, `0x1417ac720`, `0x1417ac730`, `0x1417ac5e0`)
+- `modules/syndicate/src/msg/msgsynctors.cpp`: 17 more (every message constructor)
+- `modules/syndicate/src/module.cpp`: the sixteen member seams now fall back to those real bodies (`0x1417ac700`, `0x1417ac710`, `0x1417ac720`, `0x1417ac730`, `0x1417ac5e0`)
 - `modules/syndicate/src/module.cpp`: 5 more (`0x14177ead0`, `0x14177e890`, `0x14177ec90`, `0x14177ed30`, `0x14177ed40`)
 - `modules/syndicate/src/pointrecordmgr.cpp`: 1 more (`0x14177ed50`)
 - `modules/syndicate/src/msg/msgleagueopt.cpp`: 1 more (`0x1417d68d0`, 79 cases, 2 tables)
 - `modules/syndicate/src/msg/msgleaguerobopt.cpp`: 1 more (`0x1417d8920`, 7 cases, list build)
 - `modules/syndicate/src/CMsgLog.cpp`: 19 more (`0x1417d97c0`, twelve setters, then `0x1417dae90`,
   `0x1417daee0`, `0x1417dafe0`, the ctor/dtor and `0x1417db010`), same command.
-- Batteries: 14711 + 1284 + 125 + 491 + 198 + 104 + 24 + 142 assertions (eight suites) in `tests/syndicate_logic_tail_slots_test.cpp` (219 at 8c97b8d), `tests/syndicate_findoradd_test.cpp` and `tests/syndicate_cmsglog_test.cpp`, `tests/syndicate_msgleagueopt_test.cpp`, `tests/syndicate_leaguerobopt_test.cpp`, `tests/syndicate_module_test.cpp`, `tests/syndicate_slotforwarders_test.cpp`, `tests/syndicate_msgsynctors_test.cpp`, all passing, 6/6 runs, sanitizers clean. Each binary prints its own count: `LOGIC_SLOTS_OK checks=14711 fails=0`, `FINDORADD_OK checks=1284 fails=0`, `CMSGLOG_OK checks=125 fails=0`, `MSGLGOPT_OK checks=491 fails=0`, `LEAGUEROB_OK checks=198 fails=0`, `MODULE_OK checks=104 fails=0`, `SLOTFWD_OK checks=24 fails=0`, `MSGSYNCTOR_OK checks=142 fails=0`.
+- Batteries: 14711 + 1284 + 125 + 491 + 198 + 125 + 24 + 142 assertions (eight suites) in `tests/syndicate_logic_tail_slots_test.cpp` (219 at 8c97b8d), `tests/syndicate_findoradd_test.cpp` and `tests/syndicate_cmsglog_test.cpp`, `tests/syndicate_msgleagueopt_test.cpp`, `tests/syndicate_leaguerobopt_test.cpp`, `tests/syndicate_module_test.cpp`, `tests/syndicate_slotforwarders_test.cpp`, `tests/syndicate_msgsynctors_test.cpp`, all passing, 6/6 runs, sanitizers clean. Each binary prints its own count: `LOGIC_SLOTS_OK checks=14711 fails=0`, `FINDORADD_OK checks=1284 fails=0`, `CMSGLOG_OK checks=125 fails=0`, `MSGLGOPT_OK checks=491 fails=0`, `LEAGUEROB_OK checks=198 fails=0`, `MODULE_OK checks=125 fails=0`, `SLOTFWD_OK checks=24 fails=0`, `MSGSYNCTOR_OK checks=142 fails=0`.
 - The `0x14177f980` family is complete and wired: `0x14177f980` -> `0x141779400` -> `0x141779090`,
   plus both singletons (`0x14177c770`, `0x1417b6210`), the map constructor `0x14177c6c0`, its end-node
   builder `0x14177ace0`, the key search `0x14177c0a0`, `lower_bound` `0x1417a8520`, the range pass
