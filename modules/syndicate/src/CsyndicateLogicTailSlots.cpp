@@ -1,6 +1,8 @@
 // Instruction-by-instruction port of the twelve CSyndicateLogic slots described in the
 // header. Nothing is inferred beyond the registers the bytes read.
 #include "CsyndicateLogicTailSlots.h"
+
+#include <cstring>
 #include <cstddef>
 
 namespace tq {
@@ -1743,6 +1745,58 @@ void Slot_1417917a0(void* pFirst, int64_t nHole, int64_t nOrig, void* pElem, uin
         if (nOrig >= nHole) break;                                // 14179180c cmp/jl
     }
     p[nHole] = (uint64_t)(uintptr_t)pElem;                        // 141791814 mov %rsi,(%rbx,%rdi,8)
+}
+
+}  // namespace tq
+
+namespace tq {
+
+// ============================================================================
+// 0x141793fd0 — the small-range row for the 0x14179cf10 family: an insertion sort over
+// 8-byte elements, comparator in r8 (the r9 argument is never read).
+//   141793fd3  cmp %rdx,%rcx / je          an empty range returns at once
+//   141793fe7  lea 0x8(%rcx),%rbx          the first element that can move is first+8
+//   141793ff7  cmp %rdx,%rbx / je          a single element returns without comparing
+//   141794011  mov $0x8,%r15d / sub %rcx   8 - first, the pointer-to-index bias
+//   14179402d  call *%r13                  less(element, first)?
+//   141794034  lea -0x8(%r15,%rbx,1) >> 3  the index of the element, i.e. how many precede it
+//   141794056  call *0x1418232a8           the memmove import, (first+8, first, index*8)
+//   14179405c  mov %rdi,0x0(%rbp)          the element lands at the front
+//   14179406d  call *%r13                  otherwise less(element, previous)?
+//   141794086  mov %rax,(%r12) / mov %rsi,%r12 / sub $0x8,%rsi   shift right, step back
+//   14179409c  mov %rdi,(%r12)             the element lands in the hole
+//   1417940a7  jne 141794020               for every element up to last
+void Slot_141793fd0(void* pFirst, void* pLast, bool (*pfnLess)(void* a, void* b), void*) {
+    uint8_t* first = (uint8_t*)pFirst;
+    if (pFirst == pLast) return;                                     // 141793fd3 cmp/je
+    uint8_t* it = first + 8;                                         // 141793fe7 lea
+    if (it == (uint8_t*)pLast) return;                               // 141793ff7 cmp/je
+    const int64_t nBias = 8 - (int64_t)(uintptr_t)first;             // 141794011..17
+
+    for (; it != (uint8_t*)pLast; it += 8) {                         // 1417940a0..a7
+        void* pElem = *(void**)it;                                   // 141794020 mov (%rbx),%rdi
+        uint8_t* pHole = it;                                         // 141794027 mov %rbx,%r12
+        const bool bBelowFirst = (pfnLess != nullptr) &&
+                                 pfnLess(pElem, *(void**)first);      // 14179402d
+        if (bBelowFirst) {                                           // 141794032 je
+            const int64_t nBefore = (nBias + (int64_t)(uintptr_t)it - 8) >> 3;  // 141794034..39
+            if (nBefore > 0) {                                       // 141794040 jle
+                const int64_t nBytes = nBefore << 3;                 // 141794042 shl $0x3
+                memmove(it - nBytes + 8, first, (size_t)nBytes);      // 141794056 the import
+            }
+            *(void**)first = pElem;                                  // 14179405c
+            continue;                                                // jmp 1417940a0
+        }
+        uint8_t* pScan = it - 8;                                     // 141794066 lea -0x8(%rbx),%rsi
+        if (pfnLess != nullptr && pfnLess(pElem, *(void**)pScan)) {   // 14179406d
+            do {
+                *(void**)pHole = *(void**)pScan;                     // 141794086 mov %rax,(%r12)
+                pHole = pScan;                                       // 14179408e mov %rsi,%r12
+                pScan -= 8;                                          // 141794091 sub $0x8,%rsi
+            } while (pfnLess(pElem, *(void**)pScan));                 // 14179409a jne
+        }
+        *(void**)pHole = pElem;                                      // 14179409c mov %rdi,(%r12)
+    }
 }
 
 }  // namespace tq

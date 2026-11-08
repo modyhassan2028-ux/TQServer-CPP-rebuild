@@ -10037,3 +10037,22 @@ body, which the last test proves by passing a wild value and getting the same be
 
 Batteries: 390 assertions, 6/6 runs, sanitizers clean. The climb is checked with two levels, with a
 stop at the second parent, with the orig >= hole short circuit, and with the inert fifth argument.
+
+## 2026-11-08 — 0x141793fd0 ported (the small-range row of the 0x14179cf10 family)
+
+Ninety-eight instructions of insertion sort over 8-byte elements, comparator in r8; the r9
+argument is never read. The shape is the classic pair of cases:
+
+- element below the first: the elements before it are moved up with one memmove (the import at
+  0x1418232a8, called with (first+8, first, index*8)), then the element lands at the front;
+- otherwise: shift backwards while the element is less than its predecessor, then land it in the
+  hole. The comparison result is `setg` over a secondary pair in the wrapper, but here the value
+  is whatever the comparator returns in al.
+
+The pointer-to-index bias is the interesting detail: `mov $0x8,%r15d / sub %rcx` then
+`lea -0x8(%r15,%rbx,1)` and `sar $0x3` reproduce `(it - first) >> 3` without keeping a counter.
+
+Batteries: 397 assertions, 6/6. Unsorted, empty, single, sorted, descending and duplicate runs are
+covered. One expectation of mine was wrong (I predicted 3 comparisons on an already sorted run of
+four; every element compares against the front *and* its neighbour, so it is 6). The port was right,
+the assertion was not.

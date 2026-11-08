@@ -1838,6 +1838,47 @@ int main() {
         g_pfnLogic_141787c60 = nullptr;
     }
 
+    // ------------------------------------------------------------------
+    // 0x141793fd0 — insertion sort over 8-byte elements, comparator in the third argument.
+    {
+        static uint64_t aS[6];
+        static int nCmpS;
+        auto lessS = +[](void* a, void* b) -> bool {
+            ++nCmpS;
+            return (uint64_t)(uintptr_t)a < (uint64_t)(uintptr_t)b; };
+
+        // --- an unsorted run becomes sorted, and the values are the same multiset
+        aS[0] = 5; aS[1] = 2; aS[2] = 4; aS[3] = 1; aS[4] = 3; aS[5] = 6;
+        nCmpS = 0;
+        Slot_141793fd0(aS, aS + 6, lessS, nullptr);
+        CHECK(aS[0] == 1 && aS[1] == 2 && aS[2] == 3 && aS[3] == 4 && aS[4] == 5 && aS[5] == 6);
+        CHECK(nCmpS > 0);
+
+        // --- an empty range and a single element both return without comparing
+        nCmpS = 0;
+        Slot_141793fd0(aS, aS, lessS, nullptr);
+        Slot_141793fd0(aS, aS + 1, lessS, nullptr);
+        CHECK(nCmpS == 0);
+
+        // --- already sorted: one comparison per element, no shifting
+        uint64_t aSorted[4] = {1, 2, 3, 4};
+        nCmpS = 0;
+        Slot_141793fd0(aSorted, aSorted + 4, lessS, nullptr);
+        CHECK(nCmpS == 6);                       // every element checks the front, then its neighbour
+        CHECK(aSorted[0] == 1 && aSorted[3] == 4);
+
+        // --- descending: every element goes through the front path and the memmove
+        uint64_t aDesc[4] = {4, 3, 2, 1};
+        nCmpS = 0;
+        Slot_141793fd0(aDesc, aDesc + 4, lessS, nullptr);
+        CHECK(aDesc[0] == 1 && aDesc[1] == 2 && aDesc[2] == 3 && aDesc[3] == 4);
+
+        // --- duplicates must survive: equal elements are never less than each other
+        uint64_t aDup[5] = {2, 1, 2, 1, 2};
+        Slot_141793fd0(aDup, aDup + 5, lessS, nullptr);
+        CHECK(aDup[0] == 1 && aDup[1] == 1 && aDup[2] == 2 && aDup[3] == 2 && aDup[4] == 2);
+    }
+
     std::printf("%s checks=%d fails=%d\n", g_fails ? "LOGIC_SLOTS_FAIL" : "LOGIC_SLOTS_OK",
                 g_checks, g_fails);
     return g_fails ? 1 : 0;

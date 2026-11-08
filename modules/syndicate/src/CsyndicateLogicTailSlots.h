@@ -371,6 +371,9 @@ extern void (*g_pfnLogic_141797670)(void* first, void* last, void* fn);
 extern void (*g_pfnLogic_1417976e0)(void* first, void* last, void* fn);
 void Slot_14179cde0(void* pFirst, void* pLast, int64_t nCount, void* pfn);
 void Slot_14179cf10(void* pFirst, void* pLast, int64_t nCount, void* pfn);
+// 0x141793fd0 — the small-range row of the 0x14179cf10 family. Its third argument is a
+// comparator over 8-byte elements and the fourth is never read.
+void Slot_141793fd0(void* pFirst, void* pLast, bool (*pfnLess)(void* a, void* b), void* unused);
 
 }  // namespace tq
 
