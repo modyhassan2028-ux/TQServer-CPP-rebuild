@@ -10113,3 +10113,37 @@ I found it by mirroring both the port and the stock algorithm in python and diff
 Batteries: 7222 assertions, 6/6 runs, sanitizers clean. Six named shapes plus a fixed pseudo-random
 sweep of 12 lengths x 40 runs over a 7-value range, so plenty of equal keys, each checked for the
 strict split, the ordered pair, and the preserved multiset.
+
+## 2026-11-08 — 0x141793e70 and 0x141792ae0 ported: the median guess closes the sort path
+
+Fifty-odd instructions each, and with them the partition's last open edge is gone: the sort path
+now runs on ported code from the comparison all the way down.
+
+**0x141792ae0** is the triple ordering. It is the shape the compiler gives iter_swap with a
+same-iterator guard:
+
+    if (pred(*mid, *first)) swap(mid, first) when mid != first     141792af7..b1a
+    if (pred(*last, *mid)) {                                       141792b1d..b37
+        swap(last, mid) when last != mid
+        if (pred(*mid, *first)) swap(mid, first) when mid != first  141792b3a..b54
+    }
+
+**0x141793e70** is the guess built on it. The threshold is in gaps, not elements:
+
+    nCount = (Last - First) >> 3                                   141793e7a..e8d
+    nCount <= 0x28  -> one triple                                   141793e91 jle / 141793f41
+    otherwise  step = (nCount + 1) / 8                             141793e97..eb6
+      the compiler's divide-by-eight is inc / cqto / and $0x7 / add / sar $3, so the step is
+      the element count over eight, rounded the way the bytes round it
+      triple at the front (First, +step, +2step)                    141793ed4
+      triple at the middle (Mid-step, Mid, Mid+step)                141793ee9
+      triple at the back (Last-2step, Last-step, Last)              141793f03
+      then the three medians (First+step, Mid, Last-step)           141793f32, as a tail jump
+
+The seam `g_pfnLogic_141793e70` now initialises to the ported row, so the partition's median step is
+real code instead of a stub.
+
+Batteries: 7349 assertions, 6/6 runs, sanitizers clean. The new battery pins the triple on four
+arrangements, the plain-triple guess below the threshold (knowing the answer is 6, not the 7 I first
+wrote), the 41/42 boundary either side of `nCount == 0x28`, the nine-sample path against its own
+ninther definition, and finally the partition over 64 elements with the real median in place.

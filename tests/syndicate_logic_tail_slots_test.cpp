@@ -36,7 +36,7 @@ static void* g_pBase = nullptr;
 // ---------------------------------------------------------------------------
 // helpers for the 0x141795d40 battery. 0x141793e70 is stubbed here as a plain median of three
 // (a stub, not a port: the real row is its own unit), so what the battery proves is the split.
-static uintptr_t g_aPartSortedSource[16];
+static uintptr_t g_aPartSortedSource[64];
 
 static bool PartLess(void* a, void* b) { return (uintptr_t)a < (uintptr_t)b; }
 
@@ -2070,7 +2070,94 @@ int main() {
             CHECK(aPair[1] - aPair[0] == 3 * sizeof(uintptr_t));   // the three fives
         }
 
-        g_pfnLogic_141793e70 = nullptr;
+        g_pfnLogic_141793e70 = &Slot_141793e70;   // the ported median
+    }
+
+    // ------------------------------------------------------------------
+    // 0x141792ae0 — the triple ordering, and 0x141793e70 — the median guess on top of it.
+    // Below 0x29 elements the guess is one triple; above it, nine samples in three triples
+    // whose medians are then ordered, so the middle of the range ends up the ninther.
+    {
+        struct MedCase { int nLen; uintptr_t aData[64]; };
+        static MedCase aMed[4] = {
+            {3,  {3, 1, 2}},
+            {3,  {2, 3, 1}},
+            {2,  {2, 1}},
+            {2,  {1, 2}},
+        };
+        for (int n = 0; n < 4; ++n) {
+            const int nLen = aMed[n].nLen;
+            uintptr_t a[4] = {0, 0, 0, 0};
+            for (int i = 0; i < nLen; ++i) a[i] = aMed[n].aData[i];
+            tq::Slot_141792ae0(&a[0], &a[nLen / 2], &a[nLen - 1], PartLess);
+            // the three positions come back ordered, and nothing was lost
+            CHECK(a[0] <= a[nLen / 2]);
+            CHECK(a[nLen / 2] <= a[nLen - 1]);
+            uintptr_t uSumBefore = aMed[n].aData[0] + aMed[n].aData[1];
+            if (nLen == 3) uSumBefore += aMed[n].aData[2];
+            CHECK(a[0] + a[1] + (nLen == 3 ? a[2] : 0) == uSumBefore);
+        }
+
+        // --- below the threshold the guess is one triple: the whole range ordered around it
+        {
+            uintptr_t a[8] = {7, 3, 9, 1, 5, 8, 2, 6};
+            tq::Slot_141793e70(&a[0], &a[4], &a[7], PartLess);     // nCount = 7 <= 0x28
+            CHECK(a[0] <= a[4] && a[4] <= a[7]);                   // the three sampled positions
+            CHECK(a[4] == 6);                                      // the median of 7, 5, 6
+        }
+
+        // --- 41 elements is still one triple (nCount == 40), 42 is the nine-sample path
+        {
+            static uintptr_t a41[41];
+            for (int i = 0; i < 41; ++i) a41[i] = (uintptr_t)((i * 17) % 41);
+            uintptr_t aCopy[41];
+            for (int i = 0; i < 41; ++i) aCopy[i] = a41[i];
+            tq::Slot_141793e70(&a41[0], &a41[20], &a41[40], PartLess);
+            CHECK(a41[0] <= a41[20] && a41[20] <= a41[40]);
+            for (int i = 0; i < 41; ++i) {   // the multiset survived, so only three moved
+                int nLeft = 0, nRight = 0;
+                for (int j = 0; j < 41; ++j) { if (aCopy[j] == aCopy[i]) ++nLeft; if (a41[j] == aCopy[i]) ++nRight; }
+                CHECK(nLeft == nRight);
+            }
+        }
+        {
+            static uintptr_t a42[42];
+            for (int i = 0; i < 42; ++i) a42[i] = (uintptr_t)((i * 11) % 42);
+            const int nStep = 42 / 8;                              // (nCount+1)/8 with nCount = 41
+            tq::Slot_141793e70(&a42[0], &a42[21], &a42[41], PartLess);
+            // each of the three triples comes back ordered
+            CHECK(a42[0] <= a42[nStep] && a42[nStep] <= a42[2 * nStep]);
+            CHECK(a42[21 - nStep] <= a42[21] && a42[21] <= a42[21 + nStep]);
+            CHECK(a42[41 - 2 * nStep] <= a42[41 - nStep] && a42[41 - nStep] <= a42[41]);
+            // and the three medians are ordered among themselves, so the middle one is the guess
+            CHECK(a42[nStep] <= a42[21] && a42[21] <= a42[41 - nStep]);
+            // the ninther is the median of the three triple medians
+            uintptr_t aMed3[3] = {a42[nStep], a42[21], a42[41 - nStep]};
+            for (int i = 1; i < 3; ++i)
+                for (int j = i; j > 0 && aMed3[j - 1] > aMed3[j]; --j) {
+                    uintptr_t t = aMed3[j - 1]; aMed3[j - 1] = aMed3[j]; aMed3[j] = t; }
+            CHECK(a42[21] == aMed3[1]);
+            // nothing was lost
+            uintptr_t uSum = 0;
+            for (int i = 0; i < 42; ++i) uSum += a42[i];
+            CHECK(uSum == (uintptr_t)(42 * 41 / 2));
+        }
+
+        // --- the partition now runs on the real median: the split still holds, unwatched
+        {
+            static uintptr_t aData[64];
+            for (int i = 0; i < 64; ++i) { aData[i] = (uintptr_t)((i * 29) % 64); g_aPartSortedSource[i] = aData[i]; }
+            uintptr_t aPair[2] = {0, 0};
+            PartRun(aData, 64, aPair);
+            const uintptr_t* pA = (const uintptr_t*)aPair[0];
+            const uintptr_t* pB = (const uintptr_t*)aPair[1];
+            CHECK(pA <= pB);
+            uintptr_t uPivot = 0;
+            if (pA != pB) uPivot = *pA;
+            for (const uintptr_t* p = aData; p < pA; ++p) CHECK(*p < uPivot);
+            for (const uintptr_t* p = pA; p < pB; ++p) CHECK(*p == uPivot);
+            for (const uintptr_t* p = pB; p < aData + 64; ++p) CHECK(*p > uPivot);
+        }
     }
 
     std::printf("%s checks=%d fails=%d\n", g_fails ? "LOGIC_SLOTS_FAIL" : "LOGIC_SLOTS_OK",

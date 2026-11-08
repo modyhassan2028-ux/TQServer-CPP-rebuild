@@ -378,6 +378,12 @@ void Slot_141793fd0(void* pFirst, void* pLast, bool (*pfnLess)(void* a, void* b)
 // 0x141793e70, then the range splits around it. The pair comes back through the first argument.
 extern void (*g_pfnLogic_141793e70)(void* first, void* mid, void* last,
                                    bool (*pfnLess)(void* a, void* b));
+// 0x141792ae0 — the triple ordering behind the median guess.
+void Slot_141792ae0(void* pFirst, void* pMid, void* pLast,
+                    bool (*pfnLess)(void* a, void* b));
+// 0x141793e70 — the median guess itself: one triple below 0x29 elements, nine samples above.
+void Slot_141793e70(void* pFirst, void* pMid, void* pLast,
+                    bool (*pfnLess)(void* a, void* b));
 void Slot_141795d40(void** pOut, void* pFirst, void* pLast, bool (*pfnLess)(void* a, void* b));
 
 }  // namespace tq

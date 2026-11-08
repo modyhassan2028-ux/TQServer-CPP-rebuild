@@ -1828,7 +1828,7 @@ namespace tq {
 //   141795f1e..f35  neither: swap the pair and step Gfirst
 //   141795f44/f4c   the answer: out[0] = A, out[1] = B
 void (*g_pfnLogic_141793e70)(void* first, void* mid, void* last,
-                             bool (*pfnLess)(void* a, void* b)) = nullptr;
+                             bool (*pfnLess)(void* a, void* b)) = &Slot_141793e70;
 
 void Slot_141795d40(void** pOut, void* pFirstArg, void* pLastArg,
                     bool (*pfnLess)(void* a, void* b)) {
@@ -1909,6 +1909,55 @@ void Slot_141795d40(void** pOut, void* pFirstArg, void* pLastArg,
             SwapWords(Gfirst, Glast);                           // 141795f23..f2d
         Gfirst += 8;                                            // 141795f31
     }
+}
+
+}  // namespace tq
+
+namespace tq {
+
+// ============================================================================
+// 0x141792ae0 — the three-element ordering the median guess is built from.
+//   141792b06  if (pred(*mid, *first)) swap them (guarded when mid == first)
+//   141792b23  if (pred(*last, *mid)) swap them, then re-test (mid, first)
+// Both swaps keep the same-iterator guard the compiler emits for iter_swap(x, x).
+void Slot_141792ae0(void* pFirst, void* pMid, void* pLast,
+                    bool (*pfnLess)(void* a, void* b)) {
+    if (pfnLess(*(void**)pMid, *(void**)pFirst)) {              // 141792af7..b08
+        if (pMid != pFirst)                                     // 141792b0c cmp %rdi,%rbx
+            SwapWords(pMid, pFirst);                            // 141792b11..b1a
+    }
+    if (pfnLess(*(void**)pLast, *(void**)pMid)) {               // 141792b1d..b25
+        if (pLast != pMid)                                      // 141792b29 cmp %rbx,%rsi
+            SwapWords(pLast, pMid);                             // 141792b2e..b37
+        if (pfnLess(*(void**)pMid, *(void**)pFirst)) {           // 141792b3a..b42
+            if (pMid != pFirst)                                 // 141792b46
+                SwapWords(pMid, pFirst);                        // 141792b4b..b54
+        }
+    }
+}
+
+// ============================================================================
+// 0x141793e70 — the median guess the partition starts from.
+//   nCount = (Last - First) >> 3; over 0x28 it takes nine samples: one element, two
+//   elements and two-elements-back from each end, ordering each triple with 0x141792ae0 and
+//   then the three triple-medians; underneath 0x29 it is one plain triple.
+//   141793e8d cmp $0x28  141793e97 inc  141793eb0 and $0x7 / sar $3  = step = elements / 8
+void Slot_141793e70(void* pFirst, void* pMid, void* pLast,
+                    bool (*pfnLess)(void* a, void* b)) {
+    const int64_t nCount = (int64_t)((uint8_t*)pLast - (uint8_t*)pFirst) >> 3;   // 141793e7a..8d
+    if (nCount <= 0x28) {                                       // 141793e91 jle
+        Slot_141792ae0(pFirst, pMid, pLast, pfnLess);           // 141793f41 tail
+        return;
+    }
+    const int64_t nStep = (nCount + 1) / 8;                     // 141793e97..eb6
+    uint8_t* pOne = (uint8_t*)pFirst + (nStep << 3);            // 141793ebd..ec9
+    uint8_t* pTwo = (uint8_t*)pFirst + (nStep << 4);            // 141793ec5..ecd
+    Slot_141792ae0(pFirst, pOne, pTwo, pfnLess);                // 141793ed4
+    Slot_141792ae0((uint8_t*)pMid - (nStep << 3), pMid,
+                   (uint8_t*)pMid + (nStep << 3), pfnLess);     // 141793ee9
+    Slot_141792ae0((uint8_t*)pLast - (nStep << 4),
+                   (uint8_t*)pLast - (nStep << 3), pLast, pfnLess);   // 141793f03
+    Slot_141792ae0(pOne, pMid, (uint8_t*)pLast - (nStep << 3), pfnLess);   // 141793f32 tail
 }
 
 }  // namespace tq
