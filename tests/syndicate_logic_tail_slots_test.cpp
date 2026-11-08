@@ -401,6 +401,91 @@ int main() {
         CHECK(g_calls == 0);
     }
 
+    // --- 0x14177f980 gates on the kind, then chains vtable -> find -> tail call
+    {
+        static uint32_t vcall_hit;      // what the vtable slot answers
+        static uint32_t vcall_seen_id;
+        static uint64_t tail_result;
+        static void* tail_found;
+        static uint32_t tail_id, tail_kind, tail_calls;
+        static uint32_t logged_kind;
+        static int log_calls;
+        log_calls = 0; logged_kind = 0; tail_calls = 0; tail_result = 0xDEAD;
+
+        // fake 0x88-byte singleton: [A+8] -> inner, [inner] -> table, table[0x3f] -> handler
+        struct A88 { uint8_t bytes[0x88]; };
+        static A88 a;
+        static void* inner_vt[0x40];
+        static struct { uint8_t bytes[0x10]; } inner;
+        for (int i = 0; i < 0x40; ++i) inner_vt[i] = nullptr;
+        inner_vt[0x3f] = (void*)+[](void* self, uint32_t id) -> uint64_t {
+            vcall_seen_id = id; return vcall_hit;
+        };
+        std::memset(&a, 0, sizeof(a));
+        *(void**)(inner.bytes) = inner_vt;
+        *(void**)(a.bytes + 0x08) = &inner;
+        Slot_1417b6210_seed(&a);
+
+        // fake 0x40-byte singleton carrying the map used by the key search
+        struct K {
+            K* left = nullptr; K* parent = nullptr; K* right = nullptr;
+            uint32_t key = 0; uint8_t pad1[4] = {0}; uint64_t value = 0;
+            uint8_t pad2 = 0; uint8_t isnil = 0; uint8_t tail[0x38 - 0x2a] = {0};
+        };
+        static K node, nil, head, scaryholder, owner;
+        static struct { uint8_t bytes[0x40]; } b40;
+        node = K(); nil = K(); nil.isnil = 1; head = K(); head.isnil = 1;
+        scaryholder = K(); owner = K();
+        node.key = 7; node.value = 0x5555; node.left = &nil; node.right = &nil;
+        head.parent = &node;
+        std::memset(&b40, 0, sizeof(b40));
+        *(void**)(b40.bytes + 0x30) = &head;
+        *(void**)(b40.bytes + 0x00) = &scaryholder;
+        *(K**)&scaryholder.left = &owner;
+        *(void**)((uint8_t*)&owner + 0x30) = &head;
+        Slot_14177c770_seed(b40.bytes);
+
+        g_pfn_invalid_parameter_noinfo = [] { };
+        g_pfn_log_InlineLogERROR = [](const void*, const void* p1, const void*, const void*,
+                                      uint32_t) {
+            ++log_calls; logged_kind = (uint32_t)(uintptr_t)p1;
+        };
+        g_pfnLogic_141779400 = [](void* found, uint32_t id, uint32_t kind) -> uint64_t {
+            ++tail_calls; tail_found = found; tail_id = id; tail_kind = kind; return tail_result;
+        };
+
+        // a kind outside 1..3 is reported and answers 0
+        CHECK(Slot_14177f980(&a, 1, 4, 0) == 0);
+        CHECK(log_calls == 1 && logged_kind == 4);
+        CHECK(tail_calls == 0);
+        log_calls = 0;
+
+        // the vtable slot answering 0 stops the chain
+        vcall_hit = 0;
+        CHECK(Slot_14177f980(&a, 1, 1, 0) == 0);
+        CHECK(tail_calls == 0);
+        CHECK(vcall_seen_id == 1);
+
+        // an id the map does not hold stops the chain too: the node carries 7, so ask for 8
+        vcall_hit = 8;
+        CHECK(Slot_14177f980(&a, 1, 2, 0) == 0);
+        CHECK(tail_calls == 0);
+
+        // and a real hit forwards the found object, the original id and the kind
+        node.key = 9; head.parent = &node;
+        vcall_hit = 9;
+        CHECK(Slot_14177f980(&a, 3, 3, 0) == tail_result);
+        CHECK(tail_calls == 1);
+        CHECK(tail_found == (void*)(uintptr_t)0x5555);
+        CHECK(tail_id == 3);
+        CHECK(tail_kind == 3);
+
+        g_pfnLogic_141779400 = nullptr;
+        g_pfn_log_InlineLogERROR = nullptr;
+        Slot_1417b6210_seed(nullptr);
+        Slot_14177c770_seed(nullptr);
+    }
+
     // --- the two singletons build once and hand back the same object
     {
         static int ctor_calls;

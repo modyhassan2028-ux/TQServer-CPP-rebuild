@@ -96,6 +96,15 @@ extern void (*g_pfn_log_InlineLogERROR)(const void* p0, const void* p1, const vo
                                         const void* p3, uint32_t line);   // CQBase import
 void* Slot_14177c770_singleton(void);                          // 0x40 bytes, ctor 0x14177c6c0
 void* Slot_1417b6210_singleton(void);                          // 0x88 bytes, initialised inline
+void Slot_14177c770_seed(void* value);                         // test hook: preload the static slot
+void Slot_1417b6210_seed(void* value);
+
+// 0x14177f980 — the seam itself. Kinds 1..3 ask the 0x88-byte singleton's vtable slot 0x1f8 for an
+// id, look that id up in the 0x40-byte singleton's map, and tail-call 0x141779400 with the found
+// object, the original id and the kind. Any other kind logs through CQBase and answers 0. The tail
+// call is a seam until 0x141779400 is ported; while the seam is null this body answers 0 there.
+extern uint64_t (*g_pfnLogic_141779400)(void* found, uint32_t id, uint32_t kind);
+uint64_t Slot_14177f980(void* self, uint32_t id, uint32_t kind, uint64_t r9);
 
 // 0x14177c0a0 — exact-key search over the same node layout as the ported walk
 // (right +0x10, key +0x18, value +0x20, _Isnil +0x29). Answers the stored value, or 0 when the

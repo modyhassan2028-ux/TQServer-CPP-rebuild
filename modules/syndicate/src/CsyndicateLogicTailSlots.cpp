@@ -197,6 +197,36 @@ void* Slot_1417b6210_singleton(void) {
     return g_singleton_1417b6210;                            // mov rax,rax at the shared tail
 }
 
+void Slot_14177c770_seed(void* value) { g_singleton_14177c770 = value; }
+void Slot_1417b6210_seed(void* value) { g_singleton_1417b6210 = value; }
+
+uint64_t (*g_pfnLogic_141779400)(void* found, uint32_t id, uint32_t kind) = nullptr;
+
+// 0x14177f980 — kind-gated dispatch. The `lea eax,[r8-1] / cmp eax,2 / ja` is an unsigned range
+// test, so kinds 1, 2 and 3 take the work path and everything else, including 0, is reported.
+uint64_t Slot_14177f980(void* self, uint32_t id, uint32_t kind, uint64_t /*r9*/) {
+    if ((uint32_t)(kind - 1) > 2u) {                         // lea eax,[r8-1] / cmp eax,2 / ja
+        if (g_pfn_log_InlineLogERROR != nullptr)             // lea rcx,[rip+..] / mov edx,ebx
+            g_pfn_log_InlineLogERROR((const void*)(uintptr_t)0x14182eec8ULL,
+                                     (const void*)(uintptr_t)kind, nullptr, nullptr, 0);
+        return 0;                                            // xor eax,eax
+    }
+
+    void* a = Slot_1417b6210_singleton();                     // call 0x1417b6210
+    uint32_t hit = (uint32_t)Slot_1417ac810_vcall_1f8(a, id);  // call 0x1417ac810, edx = id
+    if (hit == 0)                                            // mov esi,eax / test eax,eax / je
+        return 0;
+
+    void* b = Slot_14177c770_singleton();                     // call 0x14177c770
+    uint64_t found = Slot_14177c0a0_find(b, hit);             // call 0x14177c0a0, edx = hit
+    if (found == 0)                                          // test rax,rax / jne
+        return 0;
+
+    if (g_pfnLogic_141779400 == nullptr)                     // jmp 0x141779400, a tail call
+        return 0;
+    return g_pfnLogic_141779400((void*)(uintptr_t)found, id, kind);
+}
+
 // 0x14177c0a0 — find by key. The walk keeps its candidate in rbx starting at the head, exactly
 // like 0x1417c8f70, but this one answers the stored value and decides "absent" by comparing the
 // wanted key with the candidate's key rather than by reaching the end node.
