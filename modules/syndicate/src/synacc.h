@@ -54,5 +54,19 @@ void* SynAccTwoQwordsByte_1417c5e80(void* pThis, const void* pSrc, void* pArg); 
 void* SynAccZeroQword_1417c5ea0(void* pThis);                              // 0x1417c5ea0
 uint64_t SynAccConst_1417c5eb0();                                          // 0x1417c5eb0
 void* SynAccWalk10_29_1417c5ec0(void* pThis);                              // 0x1417c5ec0
+void* SynAccPlus28_1417c60e0(void* pThis);                                 // 0x1417c60e0
+void* SynAccPlus18_1417c60f0(void* pThis);                                 // 0x1417c60f0
+void* SynAccRotRight_1417c6100(void* pTree, void* pNode);                  // 0x1417c6100
+void* SynAccSlot30Plus10_1417c6160(void* pThis);                           // 0x1417c6160
+void* SynAccRotLeft_1417c6170(void* pTree, void* pNode);                   // 0x1417c6170
+void* SynAccCopy32_1417c6250(void* pThis, const void* pA, const void* pB);  // 0x1417c6250
+void* SynAccCopy32_1417c6280(void* pThis, const void* pA, const void* pB);  // 0x1417c6280
+void* SynAccCtor_1417c62b0(void* pThis, void* a, void* b, void* c, const void* pPair,
+                           unsigned char uFlag);                           // 0x1417c62b0
+void* SynAccCtor_1417c6330(void* pThis, void* a, void* b, void* c, const void* pPair,
+                           unsigned char uFlag);                           // 0x1417c6330
+void* SynAccZeroQword_1417c6360(void* pThis);                              // 0x1417c6360
+void* SynAccWalk10_21_1417c6370(void* pThis);                              // 0x1417c6370
+void* SynAccWalk21_1417c63a0(void* pThis);                                 // 0x1417c63a0
 }  // namespace tq
 #endif

@@ -107,3 +107,23 @@ holds the two seams these bodies need), inside `namespace tq`.
   the same run of code: 0x1417c5fa0, the tree increment, whose body continues past 0x1417c601e
   (`cmp %rax,0x8(%rbx)` / `jne` / `mov %rcx,0x8(%rbx)`) and needs a full dump before it can be
   written verbatim.
+
+## D132 — sixteen more bodies of the cluster, 0x1417c5fa0..0x1417c63a0
+
+- `synacc.cpp` / `synacc.h`: 0x1417c60e0 and 0x1417c60f0 (`lea 0x28` / `lea 0x18`),
+  0x1417c6160 (the 0x30 slot `+0x10`), 0x1417c6100 and 0x1417c6170 (the two rotations, the
+  head branch, the parent branch and the fallthrough all kept as the bytes order them),
+  0x1417c6250 and 0x1417c6280 (four qword stores: 0x10 from rdx, 0x10 from r8), 0x1417c62b0
+  and 0x1417c6330 (the 0x29 and 0x21 node builds; the pair is the fifth argument, the byte
+  the sixth, and the sentinel is cleared last), 0x1417c6360 and the two 0x21 walks
+  0x1417c6370 / 0x1417c63a0.
+- `CsyndicateLogicTailSlots.cpp`: the two increments 0x1417c5fa0 (0x29 flag) and 0x1417c6040
+  (0x41 flag), each with its three routes (header, flagged left child, climb) and the two
+  seam jumps; 0x1417c61d0, which reads the lead's lead, takes its 0x30 slot and answers the
+  node `+0x18`; and 0x1417c6210, the `setne` comparison.
+- `tests/syndicate_d132_test.cpp`: 48 checks, 6 passes, ASan+UBSan clean.
+- Note for the next unit: in 0x1417c61d0 a null lead that stays null after the check walks
+  into `mov 0x30(%rax),%rax` with rax zero, exactly as the bytes do; the port reproduces that
+  read rather than guarding it.
+- Excluded on purpose: 0x1417c62e0 (calls `*0x141823288`, a seam not yet modelled in the file)
+  and 0x1417c63c0 (dump cut at 0x1417c63fe).

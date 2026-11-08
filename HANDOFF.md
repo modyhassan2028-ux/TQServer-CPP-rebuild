@@ -269,3 +269,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - Next: 0x1417c5fa0, the tree increment (`cmpq $0x0,(%rcx)` / the sentinel check on `0x8(%rbx)`
   / the `0x29` climbs at 0x1417c5fd9 and 0x1417c6007). Its dump must be taken whole this time,
   from 0x1417c5fa0 to the `ret` past 0x1417c6028 before any line is written.
+
+## D132 (latest)
+
+- Sixteen more bodies: `SYNDICATE_D132_OK ... 48 checks`, 6 passes under ASan+UBSan. The
+  cluster now stands at 73 bodies (D129 41, D130 9, D131 7, D132 16).
+- Next: 0x1417c62e0 needs the seam at `0x141823288` modelled first; 0x1417c63c0 needs a whole
+  dump from its start past 0x1417c63fe before a line is written.

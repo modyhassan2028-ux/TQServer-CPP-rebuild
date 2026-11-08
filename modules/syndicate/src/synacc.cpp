@@ -207,4 +207,158 @@ void* SynAccWalk10_29_1417c5ec0(void* pThis) {
     return pRet;                                                        // mov %rcx,%rax
 }
 
+// 0x1417c60e0 — lea 0x28(%rcx),%rax / ret
+void* SynAccPlus28_1417c60e0(void* pThis) { return (unsigned char*)pThis + 0x28; }
+
+// 0x1417c60f0 — lea 0x18(%rcx),%rax / ret
+void* SynAccPlus18_1417c60f0(void* pThis) { return (unsigned char*)pThis + 0x18; }
+
+// 0x1417c6100 — the rotate that moves the 0x10 side up:
+//   r8 = 0x10(%rdx) / rax = (%r8) / 0x10(%rdx) = rax / rax = (%r8) /
+//   if 0x29(%rax)==0 : 0x8(%rax) = rdx / rax = 0x8(%rdx) / 0x8(%r8) = rax /
+//   rax = 0x30(%rcx) / if rdx == 0x8(%rax) : 0x8(%rax)=r8, (%r8)=rdx, 0x8(%rdx)=r8 /
+//   else rax = 0x8(%rdx) / if rdx == (%rax) : (%rax)=r8, (%r8)=rdx, 0x8(%rdx)=r8 /
+//   else 0x10(%rax)=r8, (%r8)=rdx, 0x8(%rdx)=r8
+void* SynAccRotRight_1417c6100(void* pTree, void* pNode) {
+    unsigned char* s = (unsigned char*)pTree;             // rcx
+    unsigned char* x = (unsigned char*)pNode;             // rdx
+    unsigned char* y = *(unsigned char**)(x + 0x10);      // mov 0x10(%rdx),%r8
+    *(void**)(x + 0x10) = *(void**)(y);                   // mov (%r8),%rax / mov %rax,0x10(%rdx)
+    unsigned char* l = *(unsigned char**)(y);             // mov (%r8),%rax
+    if (*(unsigned char*)(l + 0x29) == 0)                 // cmpb $0x0,0x29(%rax) / jne
+        *(void**)(l + 8) = x;                             // mov %rdx,0x8(%rax)
+    *(void**)(y + 8) = *(void**)(x + 8);                  // mov 0x8(%rdx),%rax / mov %rax,0x8(%r8)
+    unsigned char* head = *(unsigned char**)(s + 0x30);   // mov 0x30(%rcx),%rax
+    if (x == *(unsigned char**)(head + 8)) {              // cmp 0x8(%rax),%rdx / jne
+        *(void**)(head + 8) = y;                          // mov %r8,0x8(%rax)
+        *(void**)(y) = x;                                 // mov %rdx,(%r8)
+        *(void**)(x + 8) = y;                             // mov %r8,0x8(%rdx)
+        return pNode;
+    }
+    unsigned char* p = *(unsigned char**)(x + 8);         // mov 0x8(%rdx),%rax
+    if (x == *(unsigned char**)p) {                       // cmp (%rax),%rdx / jne
+        *(void**)(p) = y;                                 // mov %r8,(%rax)
+        *(void**)(y) = x;                                 // mov %rdx,(%r8)
+        *(void**)(x + 8) = y;                             // mov %r8,0x8(%rdx)
+        return pNode;
+    }
+    *(void**)(p + 0x10) = y;                              // mov %r8,0x10(%rax)
+    *(void**)(y) = x;                                     // mov %rdx,(%r8)
+    *(void**)(x + 8) = y;                                 // mov %r8,0x8(%rdx)
+    return pNode;
+}
+
+// 0x1417c6160 — mov 0x30(%rcx),%rax / add $0x10,%rax / ret
+void* SynAccSlot30Plus10_1417c6160(void* pThis) {
+    return (unsigned char*)*(void**)((unsigned char*)pThis + 0x30) + 0x10;
+}
+
+// 0x1417c6170 — the mirror: the 0x0 side moves up.
+void* SynAccRotLeft_1417c6170(void* pTree, void* pNode) {
+    unsigned char* s = (unsigned char*)pTree;             // rcx
+    unsigned char* x = (unsigned char*)pNode;             // rdx
+    unsigned char* y = *(unsigned char**)(x);             // mov (%rdx),%r8
+    *(void**)(x) = *(void**)(y + 0x10);                   // mov 0x10(%r8),%rax / mov %rax,(%rdx)
+    unsigned char* r = *(unsigned char**)(y + 0x10);      // mov 0x10(%r8),%rax
+    if (*(unsigned char*)(r + 0x29) == 0)                 // cmpb $0x0,0x29(%rax) / jne
+        *(void**)(r + 8) = x;                             // mov %rdx,0x8(%rax)
+    *(void**)(y + 8) = *(void**)(x + 8);                  // mov 0x8(%rdx),%rax / mov %rax,0x8(%r8)
+    unsigned char* head = *(unsigned char**)(s + 0x30);   // mov 0x30(%rcx),%rax
+    if (x == *(unsigned char**)(head + 8)) {              // cmp 0x8(%rax),%rdx / jne
+        *(void**)(head + 8) = y;
+        *(void**)(y + 0x10) = x;                          // mov %rdx,0x10(%r8)
+        *(void**)(x + 8) = y;
+        return pNode;
+    }
+    unsigned char* p = *(unsigned char**)(x + 8);         // mov 0x8(%rdx),%rax
+    if (x == *(unsigned char**)(p + 0x10)) {              // cmp 0x10(%rax),%rdx / jne
+        *(void**)(p + 0x10) = y;                          // mov %r8,0x10(%rax)
+        *(void**)(y + 0x10) = x;
+        *(void**)(x + 8) = y;
+        return pNode;
+    }
+    *(void**)(p) = y;                                     // mov %r8,(%rax)
+    *(void**)(y + 0x10) = x;                              // mov %rdx,0x10(%r8)
+    *(void**)(x + 8) = y;
+    return pNode;
+}
+
+// 0x1417c6250 — 0x10 bytes from rdx into the lead, 0x10 from r8 into +0x10, this back.
+void* SynAccCopy32_1417c6250(void* pThis, const void* pA, const void* pB) {
+    std::memcpy(pThis, pA, 0x10);
+    std::memcpy((unsigned char*)pThis + 0x10, pB, 0x10);
+    return pThis;
+}
+
+// 0x1417c6280 — the same four qword stores, its own start.
+void* SynAccCopy32_1417c6280(void* pThis, const void* pA, const void* pB) {
+    std::memcpy(pThis, pA, 0x10);
+    std::memcpy((unsigned char*)pThis + 0x10, pB, 0x10);
+    return pThis;
+}
+
+// 0x1417c62b0 — the 0x29-byte node built around two qwords of the pair in the fifth
+// argument and the byte of the sixth; the sentinel at +0x29 is cleared last.
+void* SynAccCtor_1417c62b0(void* pThis, void* a, void* b, void* c, const void* pPair,
+                           unsigned char uFlag) {
+    unsigned char* s = (unsigned char*)pThis;
+    *(void**)(s) = a;                                     // mov %rdx,(%rcx)
+    *(void**)(s + 8) = b;                                 // mov %r8,0x8(%rcx)
+    *(void**)(s + 0x10) = c;                              // mov %r9,0x10(%rcx)
+    *(void**)(s + 0x18) = *(void**)pPair;                 // mov (%rdx),%rax / mov %rax,0x18(%rcx)
+    *(unsigned char*)(s + 0x29) = 0;                      // movb $0x0,0x29(%rcx)
+    *(void**)(s + 0x20) = *(void**)((const unsigned char*)pPair + 8);  // mov 0x8(%rdx),%rax / mov %rax,0x20(%rcx)
+    *(unsigned char*)(s + 0x28) = uFlag;                  // movzbl 0x30(%rsp),%eax / mov %al,0x28(%rcx)
+    return pThis;
+}
+
+// 0x1417c6330 — the same build in the order the bytes take it: the pair first, then the
+// byte at +0x20, then the sentinel at +0x21.
+void* SynAccCtor_1417c6330(void* pThis, void* a, void* b, void* c, const void* pPair,
+                           unsigned char uFlag) {
+    unsigned char* s = (unsigned char*)pThis;
+    *(void**)(s) = a;                                     // mov %rdx,(%rcx)
+    *(void**)(s + 8) = b;                                 // mov %r8,0x8(%rcx)
+    *(void**)(s + 0x10) = c;                              // mov %r9,0x10(%rcx)
+    *(unsigned char*)(s + 0x20) = uFlag;                  // movzbl 0x30(%rsp),%eax / mov %al,0x20(%rcx)
+    *(void**)(s + 0x18) = *(void**)pPair;                 // mov (%rax),%rdx / mov %rdx,0x18(%rcx)
+    *(unsigned char*)(s + 0x21) = 0;                      // movb $0x0,0x21(%rcx)
+    return pThis;
+}
+
+// 0x1417c6360 — movq $0x0,(%rcx) / ret rcx
+void* SynAccZeroQword_1417c6360(void* pThis) {
+    *(void**)pThis = nullptr;
+    return pThis;
+}
+
+// 0x1417c6370 — mov 0x10(%rcx),%rax / cmpb $0x0,0x21(%rax) / jne out /
+//               mov %rax,%rcx / mov 0x10(%rax),%rax / cmpb $0x0,0x21(%rax) / je back
+void* SynAccWalk10_21_1417c6370(void* pThis) {
+    unsigned char* pRet = (unsigned char*)pThis;          // rcx
+    unsigned char* pNode = *(unsigned char**)((unsigned char*)pThis + 0x10);
+    if (*(unsigned char*)(pNode + 0x21) == 0) {
+        for (;;) {
+            pRet = pNode;                                 // mov %rax,%rcx
+            pNode = *(unsigned char**)(pNode + 0x10);     // mov 0x10(%rax),%rax
+            if (*(unsigned char*)(pNode + 0x21) != 0) break;
+        }
+    }
+    return pRet;                                          // mov %rcx,%rax
+}
+
+// 0x1417c63a0 — the same walk through the lead instead of +0x10.
+void* SynAccWalk21_1417c63a0(void* pThis) {
+    unsigned char* pRet = (unsigned char*)pThis;
+    unsigned char* pNode = *(unsigned char**)pThis;       // mov (%rcx),%rax
+    if (*(unsigned char*)(pNode + 0x21) == 0) {
+        for (;;) {
+            pRet = pNode;
+            pNode = *(unsigned char**)pNode;              // mov (%rax),%rax
+            if (*(unsigned char*)(pNode + 0x21) != 0) break;
+        }
+    }
+    return pRet;
+}
+
 }  // namespace tq
