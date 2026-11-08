@@ -124,5 +124,10 @@ extern void (*g_pfnSynFwd_1417c5640)(void* pThis, void* a2, void* a3, int nFrom,
 
 void* SynAccChecked2_1417c6a60(void* pThis, void* a2, void* a3, unsigned char uFlag); // 0x1417c6a60
 void* SynAccChecked3_1417c6b30(void* pThis, void* a2, uint32_t uA3, unsigned char uFlag); // 0x1417c6b30
+// 0x1417c69e0 tail-jumps through the slot at 0x141823290 after advancing rcx by 0x18.
+// That slot still holds an unresolved RVA (0x1628a6) in the image, so the port keeps it a
+// null-by-default seam rather than pretending to know its target.
+extern void* (*g_pfnSynTail_141823290)(void* pArg);                        // 0x141823290
+void* SynAccTail18_1417c69e0(void* pThis);                                 // 0x1417c69e0
 }  // namespace tq
 #endif

@@ -691,4 +691,21 @@ void* SynAccChecked3_1417c6b30(void* pThis, void* a2, uint32_t uA3, unsigned cha
     return pThis;
 }
 
+// The tail slot 0x1417c69e0 jumps through. Its entry in the image is an unresolved RVA
+// (0x1628a6), so nothing is claimed about what sits behind it.
+void* (*g_pfnSynTail_141823290)(void*) = nullptr;              // 0x141823290
+
+// 0x1417c69e0 — mov %rcx,0x8(%rsp) / sub $0x38,%rsp /
+//               movq $0xfffffffffffffffe,0x20(%rsp) / add $0x18,%rcx /
+//               add $0x38,%rsp / jmp *0x141823290
+// The frame is torn down before the jump, so this is a true tail call on `this + 0x18`.
+void* SynAccTail18_1417c69e0(void* pThis) {
+    volatile int64_t sentinel = -2;                            // movq $0xfffffffffffffffe,0x20(%rsp)
+    (void)sentinel;
+    void* pArg = (unsigned char*)pThis + 0x18;                 // add $0x18,%rcx
+    if (g_pfnSynTail_141823290 != nullptr)
+        return g_pfnSynTail_141823290(pArg);                   // jmp *0x141823290
+    return nullptr;
+}
+
 }  // namespace tq

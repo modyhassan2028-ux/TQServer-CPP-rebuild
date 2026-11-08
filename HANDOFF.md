@@ -314,3 +314,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   are ported: `SYNDICATE_D137_OK ... 34 checks`, 6 passes. Cluster 115 bodies.
 - The same family continues in `Docs/ASM/1417c69e0.txt` at 0x1417c6bd0 (it starts
   `mov %r9d,%esi`), which the next unit takes next, using the seams that are now in place.
+
+## D138 (latest)
+
+- 0x1417c69e0 ported as the tail call it is: `SYNDICATE_D138_OK ... 7 checks`, 6 passes.
+  Cluster 116 bodies.
+- Next from `Docs/ASM/1417c69e0.txt`: 0x1417c6bd0 (starts `mov %r9d,%esi`), the third of the
+  checked-forwarder family; the assertion seam it needs is already in place.

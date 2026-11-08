@@ -220,3 +220,14 @@ The four bodies that were held back at D134 are in, each read straight off its o
 - Three more seams, all null by default with the call guarded: `g_pfnSynPrep_141785dc0`,
   `g_pfnSynPrep_14178c8e0` and the shared `g_pfnSynFwd_1417c5640`.
 - `tests/syndicate_d137_test.cpp`: 34 checks, 6 passes, ASan+UBSan clean. Cluster 115 bodies.
+
+## D138 — 0x1417c69e0, the `this + 0x18` tail call
+
+- Bytes: `mov %rcx,0x8(%rsp)` / `sub $0x38,%rsp` / `movq $0xfffffffffffffffe,0x20(%rsp)` /
+  `add $0x18,%rcx` / `add $0x38,%rsp` / `jmp *0x141823290`. The frame is gone before the jump,
+  so it is a genuine tail call and the port keeps it as one.
+- The slot at 0x141823290 holds an unresolved RVA (0x1628a6) in the image; rather than guess
+  what sits behind it, the port keeps it as `g_pfnSynTail_141823290`, null by default with the
+  call guarded. The argument handed over is `this + 0x18`, and the answer is the callee's.
+- `tests/syndicate_d138_test.cpp`: 7 checks including the `this + 0x18` identity and the unset
+  seam answering nothing, 6 passes, ASan+UBSan clean. Cluster 116 bodies.
