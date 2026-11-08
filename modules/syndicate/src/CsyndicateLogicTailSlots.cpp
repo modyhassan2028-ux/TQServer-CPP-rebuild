@@ -1961,3 +1961,94 @@ void Slot_141793e70(void* pFirst, void* pMid, void* pLast,
 }
 
 }  // namespace tq
+
+namespace tq {
+
+// ============================================================================
+// 0x141795a30 — the same partition compiled for a key reader instead of a predicate: the
+// caller passes the record key function in r9, every comparison goes through 0x141787c60 with
+// the address of that slot as the context, and the median comes from 0x141793bf0.
+// The shape is 0x141795d40's, statement for statement; what changes is how "a sorts before b"
+// is asked, and that the answer pair is written through rcx and handed back in rax.
+//   r14 First, r13 Last, r15 out, rbx A (_Pfirst), rbp B (_Plast), r12 Glast, rdi Gfirst
+void (*g_pfnLogic_141793bf0)(void* first, void* mid, void* last, void* pfnKey) = nullptr;
+
+void* Slot_141795a30(void** pOut, void* pFirstArg, void* pLastArg, void* pfnKey) {
+    void* pKeySlot = pfnKey;                                   // 141795a3f, the address is the ctx
+    const auto less = [&pKeySlot](void* a, void* b) -> bool {
+        return g_pfnLogic_141787c60(&pKeySlot, a, b);           // lea 0x68(%rsp),%rcx
+    };
+
+    uint8_t* First = (uint8_t*)pFirstArg;                       // 141795a51 mov %rdx,%r14
+    uint8_t* Last = (uint8_t*)pLastArg;                         // 141795a57 mov %r8,%r13
+    const int64_t nHalf = SignAdjustedHalf((int64_t)(Last - First) >> 3);   // 141795a5a..a70
+    uint8_t* A = First + (nHalf << 3);                          // 141795a73, the pivot slot
+    if (g_pfnLogic_141793bf0 != nullptr)                        // 141795a7a
+        g_pfnLogic_141793bf0(First, A, Last - 8, pfnKey);
+    uint8_t* B = A + 8;                                         // 141795a7f
+
+    while (First < A) {                                         // 141795a83..ac3
+        if (less(*(void**)(A - 8), *(void**)A)) break;          // 141795a90
+        if (less(*(void**)A, *(void**)(A - 8))) break;          // 141795aaf
+        A -= 8;                                                 // 141795abd mov %rdi,%rbx
+    }
+    while (B < Last) {                                          // 141795ac5..b01
+        if (less(*(void**)B, *(void**)A)) break;                // 141795ad0
+        if (less(*(void**)A, *(void**)B)) break;                // 141795ae5
+        B += 8;                                                 // 141795afa
+    }
+
+    uint8_t* Gfirst = B;                                        // 141795b03 mov %rbp,%rdi
+    uint8_t* Glast = A;                                         // 141795b06 mov %rbx,%r12
+    for (;;) {
+        while (Gfirst < Last) {                                 // 141795b10..b60
+            if (less(*(void**)A, *(void**)Gfirst)) { Gfirst += 8; continue; }   // 141795b20
+            if (less(*(void**)Gfirst, *(void**)A)) break;       // 141795b34
+            uint8_t* pOldB = B;                                 // 141795b48 mov %rbp,%rdx
+            B += 8;                                             // 141795b4b
+            if (pOldB != Gfirst) SwapWords(pOldB, Gfirst);      // 141795b4f..b5a
+            Gfirst += 8;                                        // 141795b60
+        }
+        while (First < Glast) {                                 // 141795b69..bc8
+            uint8_t* pCand = Glast - 8;                         // 141795b83 mov (%rsi),%rdx
+            if (less(*(void**)pCand, *(void**)A)) {             // 141795b86..b92
+                Glast -= 8;                                     // 141795bbd
+                continue;
+            }
+            if (less(*(void**)A, *(void**)pCand)) break;        // 141795b9a..ba6
+            A -= 8;                                             // 141795ba8 sub $0x8,%rbx
+            if (A != pCand) SwapWords(A, pCand);                // 141795bac..bba
+            Glast -= 8;                                         // 141795bbd
+        }
+
+        if (Glast == First) {                                   // 141795bca cmp %r14,%r12
+            if (Gfirst == Last) {                               // 141795bcf cmp %r13,%rdi
+                pOut[0] = A;                                    // 141795c7d mov %rbx,(%r15)
+                pOut[1] = B;                                    // 141795c85 mov %rbp,0x8(%r15)
+                return pOut;                                    // 141795c8e mov %r15,%rax
+            }
+            if (B != Gfirst && A != B)                          // 141795bd8 / 141795bdd
+                SwapWords(B, A);                                // 141795be2..bec
+            uint8_t* pOldA = A;                                 // 141795bf3 mov %rbx,%r8
+            uint8_t* pOldG = Gfirst;                            // 141795bf0 mov %rdi,%rdx
+            B += 8;                                             // 141795bf6
+            A += 8;                                             // 141795bfa
+            Gfirst += 8;                                        // 141795bfe
+            if (pOldA != pOldG) SwapWords(pOldA, pOldG);        // 141795c02..c14
+            continue;                                           // 141795c17
+        }
+
+        Glast -= 8;                                             // 141795c1c sub $0x8,%r12
+        if (Gfirst == Last) {                                   // 141795c20 cmp %r13,%rdi
+            A -= 8;                                             // 141795c25
+            if (Glast != A) SwapWords(Glast, A);                // 141795c29..c39
+            B -= 8;                                             // 141795c3c
+            if (A != B) SwapWords(B, A);                        // 141795c40..c53
+            continue;                                           // 141795c57
+        }
+        if (Gfirst != Glast) SwapWords(Gfirst, Glast);           // 141795c5c..c6b
+        Gfirst += 8;                                            // 141795c6f
+    }
+}
+
+}  // namespace tq

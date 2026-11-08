@@ -10147,3 +10147,29 @@ Batteries: 7349 assertions, 6/6 runs, sanitizers clean. The new battery pins the
 arrangements, the plain-triple guess below the threshold (knowing the answer is 6, not the 7 I first
 wrote), the 41/42 boundary either side of `nCount == 0x28`, the nine-sample path against its own
 ninther definition, and finally the partition over 64 elements with the real median in place.
+
+## 2026-11-08 — 0x141795a30 ported: the partition for a key reader, the real caller of 0x141787c60
+
+A hundred and eighty-one instructions, and the one that finally uses yesterday's comparator: every
+comparison goes through `0x141787c60` with the address of the r9 slot as its context, and the median
+comes from `0x141793bf0` (a seam, its own row, same key reader in r9).
+
+The structure is `0x141795d40`'s statement for statement: seeding walks, forward scan, backward scan,
+the three continuations, and the pair written through rcx with the out pointer handed back in rax.
+What differs is the comparison sense, and that turned out to matter more than the shape.
+
+**The invariant is stated in the predicate, not in the values.** Run `0x141795d40` with a reversed
+predicate and it answers `6 9 | 5 5 | 1 1 2 4 3`, which is not "ascending with a pivot of 5" but is a
+perfect partition under the predicate it was given: before the equal block everything satisfies
+`pred(x, pivot)`, after it everything satisfies `pred(pivot, x)`. Because `0x141787c60` answers
+"key(a) > key(b)", this row's split reads: keys above the pivot in front, the equal block, then keys
+below it. That is what the battery asserts, and it is why guessing "ascending by key" here fails.
+
+My transcription had the forward scan's two arguments swapped (I advanced on `less(Gfirst, pivot)`
+where the bytes advance on `less(pivot, Gfirst)`), which produced a range that was not a partition at
+all. Two things caught it: the differential run of the sibling with a reversed predicate, and the
+battery's split check. The backward scan and both seeding walks were right.
+
+Batteries: 14650 assertions, 6/6 runs, sanitizers clean. The nodes in the battery are real three-level
+records (slot -> node -> record -> vtable) because the comparator walks them for the second key, so
+equal keys really exercise that path; six named shapes plus the same 12 x 40 pseudo-random sweep.

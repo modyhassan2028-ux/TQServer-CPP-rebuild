@@ -53,6 +53,77 @@ static void PartRun(uintptr_t* pData, int nCount, uintptr_t* pOutPair) {
     tq::Slot_141795d40(pOut, pData, pData + nCount, PartLess);
 }
 
+// ---------------------------------------------------------------------------
+// helpers for the 0x141795a30 battery. The comparator there reads a node's first word as the
+// record, the record's first word as its vtable, asks slot 0x10 for the sub-record and slot
+// 0x40 for the second key. The nodes below carry exactly that: slot -> node -> record -> vtable.
+// Both keys agree, so equal keys are equal to the comparator too.
+// 0x141793bf0 is a seam (its own unit later): the stub orders the same way that row will.
+static int32_t g_nKeyCalls;
+
+struct PKeyNode { void* pRec; int32_t nKey; int32_t nPad[2]; };
+struct PKeyRec  { void* pVft; int32_t nKey; int32_t nPad[2]; };
+static void* g_aPKVft[16];
+
+static int32_t PartKeyOf(void* pNode) { ++g_nKeyCalls; return ((PKeyNode*)pNode)->nKey; }
+static void* g_pPartKeyFn = (void*)(int32_t (*)(void*))PartKeyOf;
+
+static void* PartKeySub(void* pRec, int32_t) { return pRec; }
+static int32_t PartKeySecond(void* pRec) { return ((PKeyRec*)pRec)->nKey; }
+
+static void PartKeySetup(void** pSlots, PKeyNode* pNodes, PKeyRec* pRecs,
+                         const int32_t* pKeys, int nCount) {
+    g_aPKVft[0x10 / 8] = (void*)(void* (*)(void*, int32_t))PartKeySub;
+    g_aPKVft[0x40 / 8] = (void*)(int32_t (*)(void*))PartKeySecond;
+    for (int i = 0; i < nCount; ++i) {
+        pRecs[i].pVft = (void*)g_aPKVft;
+        pRecs[i].nKey = pKeys[i];
+        pNodes[i].pRec = (void*)&pRecs[i];
+        pNodes[i].nKey = pKeys[i];
+        pSlots[i] = (void*)&pNodes[i];
+    }
+}
+
+static void PartKeyMed3(void* pF, void* pM, void* pL, void* pfnKey) {
+    (void)pfnKey;
+    if (tq::Slot_141787c60(&g_pPartKeyFn, *(void**)pM, *(void**)pF)) {
+        void* t = *(void**)pM; *(void**)pM = *(void**)pF; *(void**)pF = t; }
+    if (tq::Slot_141787c60(&g_pPartKeyFn, *(void**)pL, *(void**)pM)) {
+        { void* t = *(void**)pL; *(void**)pL = *(void**)pM; *(void**)pM = t; }
+        if (tq::Slot_141787c60(&g_pPartKeyFn, *(void**)pM, *(void**)pF)) {
+            void* t = *(void**)pM; *(void**)pM = *(void**)pF; *(void**)pF = t; } }
+}
+
+static int32_t PartKeyPivotOf(void** pSlots, int nCount) {
+    void* aCopy[16];
+    for (int i = 0; i < nCount; ++i) aCopy[i] = pSlots[i];
+    PartKeyMed3(&aCopy[0], &aCopy[nCount / 2], &aCopy[nCount - 1], g_pPartKeyFn);
+    return ((PKeyNode*)aCopy[nCount / 2])->nKey;
+}
+
+static void PartKeyCheck(void** pSlots, int nCount, int32_t nPivot) {
+    void* aCopy[16];
+    for (int i = 0; i < nCount; ++i) aCopy[i] = pSlots[i];
+    void* aOut[2] = {nullptr, nullptr};
+    void* pRet = tq::Slot_141795a30(aOut, pSlots, pSlots + nCount, g_pPartKeyFn);
+    CHECK(pRet == (void*)aOut);                      // the out pointer comes back in rax
+    void** pA = (void**)aOut[0];
+    void** pB = (void**)aOut[1];
+    CHECK(pA <= pB);
+    // descending: before the block higher than the pivot, after it lower
+    for (void** p = pSlots; p < pA; ++p) CHECK(((PKeyNode*)*p)->nKey > nPivot);
+    for (void** p = pA; p < pB; ++p) CHECK(((PKeyNode*)*p)->nKey == nPivot);
+    for (void** p = pB; p < pSlots + nCount; ++p) CHECK(((PKeyNode*)*p)->nKey < nPivot);
+    for (int i = 0; i < nCount; ++i) {               // every node still present exactly once
+        int nLeft = 0, nRight = 0;
+        for (int j = 0; j < nCount; ++j) {
+            if (aCopy[j] == aCopy[i]) ++nLeft;
+            if (pSlots[j] == aCopy[i]) ++nRight;
+        }
+        CHECK(nLeft == nRight);
+    }
+}
+
 static void PartCheckSplit(uintptr_t* pData, int nCount, uintptr_t uPivot) {
     uintptr_t aPair[2] = {0, 0};
     PartRun(pData, nCount, aPair);
@@ -2158,6 +2229,57 @@ int main() {
             for (const uintptr_t* p = pA; p < pB; ++p) CHECK(*p == uPivot);
             for (const uintptr_t* p = pB; p < aData + 64; ++p) CHECK(*p > uPivot);
         }
+    }
+
+    // ------------------------------------------------------------------
+    // 0x141795a30 — the partition for a key reader. Every comparison goes through 0x141787c60
+    // and the median through a stub of 0x141793bf0, so the ordering here is descending by key:
+    // above the pivot in front, the equal block, then below it.
+    {
+        g_pfnLogic_141793bf0 = &PartKeyMed3;
+        static void* aSlots[16];
+        static PKeyNode aNodes[16];
+        static PKeyRec aRecs[16];
+        static int32_t aKeys[16];
+
+        struct KCase { int nLen; int32_t aData[16]; };
+        static KCase aK[6] = {
+            {9, {3, 1, 4, 1, 5, 9, 2, 6, 5}},
+            {9, {1, 2, 3, 4, 5, 6, 7, 8, 9}},
+            {9, {9, 8, 7, 6, 5, 4, 3, 2, 1}},
+            {9, {4, 4, 4, 4, 4, 4, 4, 4, 4}},
+            {3, {2, 1, 2}},
+            {2, {2, 1}},
+        };
+        for (int nCase = 0; nCase < 6; ++nCase) {
+            const int n = aK[nCase].nLen;
+            for (int i = 0; i < n; ++i) aKeys[i] = aK[nCase].aData[i];
+            PartKeySetup(aSlots, aNodes, aRecs, aKeys, n);
+            const int32_t nPivot = PartKeyPivotOf(aSlots, n);
+            g_nKeyCalls = 0;
+            PartKeyCheck(aSlots, n, nPivot);
+            CHECK(g_nKeyCalls > 0);              // the reader was actually consulted
+        }
+
+        // --- the random sweep, the same shapes the 0x141795d40 battery runs
+        {
+            uint64_t uSeed = 0x9E3779B97F4A7C15ULL;
+            auto nextRand = [&uSeed](uint32_t uMod) -> uint32_t {
+                uSeed = uSeed * 6364136223846793005ULL + 1442695040888963407ULL;
+                return (uint32_t)((uSeed >> 33) % uMod); };
+            for (int nLen = 1; nLen <= 12; ++nLen) {
+                for (int nRun = 0; nRun < 40; ++nRun) {
+                    for (int i = 0; i < nLen; ++i) aKeys[i] = (int32_t)nextRand(7);
+                    PartKeySetup(aSlots, aNodes, aRecs, aKeys, nLen);
+                    PartKeyCheck(aSlots, nLen, PartKeyPivotOf(aSlots, nLen));
+                }
+            }
+        }
+
+        // --- the wiring this row depends on: the comparator is the ported synattr body
+        CHECK(g_pfnLogic_141787c60 == &tq::Slot_141787c60);
+
+        g_pfnLogic_141793bf0 = nullptr;
     }
 
     std::printf("%s checks=%d fails=%d\n", g_fails ? "LOGIC_SLOTS_FAIL" : "LOGIC_SLOTS_OK",

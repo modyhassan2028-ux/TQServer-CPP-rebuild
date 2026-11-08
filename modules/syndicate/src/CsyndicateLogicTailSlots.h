@@ -385,6 +385,10 @@ void Slot_141792ae0(void* pFirst, void* pMid, void* pLast,
 void Slot_141793e70(void* pFirst, void* pMid, void* pLast,
                     bool (*pfnLess)(void* a, void* b));
 void Slot_141795d40(void** pOut, void* pFirst, void* pLast, bool (*pfnLess)(void* a, void* b));
+// 0x141795a30 — the same partition for a key reader: the comparisons go through 0x141787c60
+// and the median through 0x141793bf0, both handed the key function in r9.
+extern void (*g_pfnLogic_141793bf0)(void* first, void* mid, void* last, void* pfnKey);
+void* Slot_141795a30(void** pOut, void* pFirst, void* pLast, void* pfnKey);
 
 }  // namespace tq
 
