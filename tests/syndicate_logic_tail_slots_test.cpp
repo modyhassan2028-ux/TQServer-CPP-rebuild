@@ -401,6 +401,55 @@ int main() {
         CHECK(g_calls == 0);
     }
 
+    // --- 0x1417495d0 clears the vector by moving finish back to begin
+    {
+        static uint32_t buf[4];
+        static uint64_t vec[6];
+        std::memset(vec, 0, sizeof(vec));
+        vec[0] = (uint64_t)&vec[0];        // the container word
+        vec[3] = (uint64_t)&buf[0];        // +0x18 begin
+        vec[4] = (uint64_t)&buf[3];        // +0x20 finish
+        vec[5] = (uint64_t)&buf[4];        // +0x28 capacity end
+        g_pfn_invalid_parameter_noinfo = [] { };
+        Slot_1417495d0_clear_vector(vec);
+        CHECK(vec[4] == vec[3]);           // finish == begin
+        vec[4] = vec[3];                   // already empty
+        Slot_1417495d0_clear_vector(vec);
+        CHECK(vec[4] == vec[3]);
+    }
+
+    // --- 0x141732040 appends while there is room and hands off when there is not
+    {
+        static uint32_t buf[4];
+        static uint64_t vec[6];
+        static int grow_calls;
+        static uint32_t grow_value;
+        grow_calls = 0; grow_value = 0;
+
+        std::memset(buf, 0, sizeof(buf));
+        std::memset(vec, 0, sizeof(vec));
+        vec[0] = (uint64_t)&vec[0];        // the container word
+        vec[3] = (uint64_t)&buf[0];        // +0x18 begin
+        vec[4] = (uint64_t)&buf[1];        // +0x20 finish, one element in
+        vec[5] = (uint64_t)&buf[2];        // +0x28 capacity end
+        g_pfn_invalid_parameter_noinfo = [] { };
+        g_pfnLogic_141730cd0 = [](void*, void*, void*, const void* v) {
+            ++grow_calls; grow_value = *(const uint32_t*)v;
+        };
+
+        uint32_t v = 0x1234;
+        Slot_141732040_push_back(vec, &v);         // room for one more
+        CHECK(grow_calls == 0);
+        CHECK(buf[1] == 0x1234);
+        CHECK(vec[4] == (uint64_t)&buf[2]);        // finish advanced by four
+
+        v = 0x5678;
+        Slot_141732040_push_back(vec, &v);         // full now, so the seam takes over
+        CHECK(grow_calls == 1);
+        CHECK(grow_value == 0x5678);
+        g_pfnLogic_141730cd0 = nullptr;
+    }
+
     // --- 0x14177ace0 makes the end node
     {
         void* n = Slot_14177ace0_new_node();

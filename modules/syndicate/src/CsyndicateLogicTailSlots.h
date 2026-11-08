@@ -107,6 +107,19 @@ extern void* (*g_pfnLogic_14177ace0)(void* self);
 extern void* (*g_pfnLogic_1417495d0)(void* arg);
 extern void (*g_pfnLogic_141732040)(void* arg, void* elem);
 
+// 0x141732040 appends one 4-byte element, and its capacity-full path hands off to 0x141730cd0,
+// which is not ported yet. The second pointer that call receives points at stack space this frame
+// never writes, so the port passes a zeroed buffer of the same width and says so rather than
+// pretending to know what the callee stores there.
+extern void (*g_pfnLogic_141730cd0)(void* self, void* out_or_arg, void* pair, const void* value);
+
+// 0x1417495d0 — clears the 4-byte vector at +0x18/+0x20/+0x28. The memmove the bytes would make is
+// a zero-length one, so the only effect is finish = begin; the port keeps the shape that shows it.
+void Slot_1417495d0_clear_vector(void* self);
+
+// 0x141732040 — appends one element, growing through 0x141730cd0 when the vector is full.
+void Slot_141732040_push_back(void* self, const uint32_t* value);
+
 // 0x14177ace0 — allocates the 0x30-byte node the map constructor uses as its end node: left,
 // parent and right cleared, the colour byte at +0x28 set to 1, _Isnil at +0x29 cleared.
 void* Slot_14177ace0_new_node(void);

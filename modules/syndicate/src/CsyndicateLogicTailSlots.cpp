@@ -201,6 +201,64 @@ void* (*g_pfnLogic_14177ace0)(void* self) = nullptr;
 void* (*g_pfnLogic_1417495d0)(void* arg) = nullptr;
 void (*g_pfnLogic_141732040)(void* arg, void* elem) = nullptr;
 
+void (*g_pfnLogic_141730cd0)(void* self, void* out_or_arg, void* pair, const void* value) = nullptr;
+
+// 0x1417495d0 — clear the vector. Worth reading carefully: the byte count is computed from the
+// finish pointer minus itself, so the memmove is always zero length and the function's whole effect
+// is to move finish back to begin. The port shows that instead of writing a loop the bytes do not
+// contain.
+void Slot_1417495d0_clear_vector(void* self) {
+    uint8_t* s = (uint8_t*)self;
+    uint64_t finish = *(uint64_t*)(s + 0x20);                 // mov rsi,[rcx+0x20]
+    if (*(uint64_t*)(s + 0x18) > finish)                      // cmp [rcx+0x18],rsi / jbe
+        g_pfn_invalid_parameter_noinfo();
+    uint64_t begin = *(uint64_t*)(s + 0x18);                  // mov rdi,[rbx+0x18]
+    if (begin > *(uint64_t*)(s + 0x20))                       // cmp rdi,[rbx+0x20] / jbe
+        g_pfn_invalid_parameter_noinfo();
+    if (*(uint64_t*)(s + 0x18) > begin)                       // cmp [rbx+0x18],rdi / ja
+        g_pfn_invalid_parameter_noinfo();
+    if (begin > *(uint64_t*)(s + 0x20))                       // cmp rdi,[rbx+0x20] / jbe
+        g_pfn_invalid_parameter_noinfo();
+    uint64_t scary = *(uint64_t*)(s + 0x00);                  // mov rbp,[rbx]
+    if (*(uint64_t*)(s + 0x18) > finish)                      // cmp [rbx+0x18],rsi / ja
+        g_pfn_invalid_parameter_noinfo();
+    if (finish > *(uint64_t*)(s + 0x20))                      // cmp rsi,[rbx+0x20] / jbe
+        g_pfn_invalid_parameter_noinfo();
+    if (scary != 0 && scary != *(uint64_t*)(s + 0x00))        // the self-comparison the bytes make
+        g_pfn_invalid_parameter_noinfo();
+    if (begin == finish)                                     // cmp rdi,rsi / je done
+        return;
+
+    int64_t count = (int64_t)(*(uint64_t*)(s + 0x20) - finish) >> 2;   // sar 2, so zero here
+    uint64_t bytes = (uint64_t)count * 4;                    // lea rdx,[rax*4]
+    uint64_t new_finish = bytes + begin;                     // lea rbp,[rdx+rdi]
+    if (count > 0) {                                         // test rax,rax / jle
+        // the bytes would memmove(begin, finish, bytes); with bytes 0 it does nothing
+    }
+    *(uint64_t*)(s + 0x20) = new_finish;                     // mov [rbx+0x20],rbp
+}
+
+// 0x141732040 — append one element.
+void Slot_141732040_push_back(void* self, const uint32_t* value) {
+    uint8_t* s = (uint8_t*)self;
+    uint64_t begin = *(uint64_t*)(s + 0x18);                  // mov rcx,[rcx+0x18]
+    uint64_t cap_elems = (begin == 0)                        // test rcx,rcx / jne
+                             ? 0
+                             : (*(uint64_t*)(s + 0x28) - begin) >> 2;
+    uint64_t finish = *(uint64_t*)(s + 0x20);                 // mov rdi,[rbx+0x20]
+    uint64_t size = (finish - begin) >> 2;                    // sar rax,2
+    if (size < cap_elems) {                                   // cmp rax,r8 / jae grow
+        *(uint32_t*)finish = *value;                          // mov eax,[rdx] / mov [rdi],eax
+        *(uint64_t*)(s + 0x20) = finish + 4;                  // lea rax,[rdi+4] / mov [rbx+0x20],rax
+        return;
+    }
+    if (begin > finish)                                       // cmp rcx,rdi / jbe
+        g_pfn_invalid_parameter_noinfo();
+    uint64_t pair[2] = {*(uint64_t*)(s + 0x00), finish};      // the two words the frame builds
+    if (g_pfnLogic_141730cd0 != nullptr)                      // call 0x141730cd0
+        g_pfnLogic_141730cd0(self, pair, pair, value);
+}
+
 // 0x14177ace0 — the end node. Only the first store is guarded by the null test; the bytes then write
 // +0x08 and +0x10 without looking again, which is kept here rather than tidied into a check.
 void* Slot_14177ace0_new_node(void) {
