@@ -87,6 +87,16 @@ extern void (*g_pfnLogic_1417a6960)(void* value, uint64_t arg);                 
 // that is not 0, whether or not the key was found.
 bool Slot_1417a8a50(void* self, uint32_t id, uint64_t arg3, uint64_t r9);
 
+// The two lazily created singletons behind 0x14177f980. Both follow the same MSVC shape: read a
+// static slot, allocate with operator new, build, store, and log through
+// CQBase.dll!log_InlineLogERROR if the allocation came back null. The log call is variadic, so it
+// is an injectable seam taking the same four pointers and the same line number the bytes pass.
+extern void* (*g_pfnLogic_14177c6c0)(void* mem);              // the 0x40-byte object's constructor
+extern void (*g_pfn_log_InlineLogERROR)(const void* p0, const void* p1, const void* p2,
+                                        const void* p3, uint32_t line);   // CQBase import
+void* Slot_14177c770_singleton(void);                          // 0x40 bytes, ctor 0x14177c6c0
+void* Slot_1417b6210_singleton(void);                          // 0x88 bytes, initialised inline
+
 // 0x14177c0a0 — exact-key search over the same node layout as the ported walk
 // (right +0x10, key +0x18, value +0x20, _Isnil +0x29). Answers the stored value, or 0 when the
 // key is absent; the candidate is the smallest node whose key is >= the wanted one, so

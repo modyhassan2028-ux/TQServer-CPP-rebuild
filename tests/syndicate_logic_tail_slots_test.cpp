@@ -401,6 +401,30 @@ int main() {
         CHECK(g_calls == 0);
     }
 
+    // --- the two singletons build once and hand back the same object
+    {
+        static int ctor_calls;
+        ctor_calls = 0;
+        g_pfnLogic_14177c6c0 = [](void* mem) -> void* { ++ctor_calls; return mem; };
+
+        void* a = Slot_14177c770_singleton();
+        void* b = Slot_14177c770_singleton();
+        CHECK(a != nullptr);
+        CHECK(a == b);                     // the second call answers the stored slot
+        CHECK(ctor_calls == 1);            // and the constructor ran once
+
+        void* c = Slot_1417b6210_singleton();
+        void* d = Slot_1417b6210_singleton();
+        CHECK(c != nullptr && c == d);
+        // the inline initialisation: derived vtable store last, and the cleared words
+        CHECK(*(uint64_t*)((uint8_t*)c + 0x00) == 0x141835068ULL);
+        CHECK(*(uint64_t*)((uint8_t*)c + 0x08) == 0);
+        CHECK(*(uint64_t*)((uint8_t*)c + 0x58) == 0);
+        CHECK(*(uint8_t *)((uint8_t*)c + 0x60) == 0);
+        CHECK(*(uint64_t*)((uint8_t*)c + 0x79) == 0);
+        g_pfnLogic_14177c6c0 = nullptr;
+    }
+
     // --- 0x14177c0a0 finds a key and answers the stored value
     {
         struct K {

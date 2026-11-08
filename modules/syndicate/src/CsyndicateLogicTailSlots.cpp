@@ -130,6 +130,73 @@ void* Slot_1417c8f70_lower_bound(void* container_void, void* out_void, const uin
 // 0x1417cad00 — the lookup the three wrappers call. Every load, compare and offset below is
 // the one the bytes perform; both branches that reach 0x1418233c0 are the _DEBUG iterator
 // checks, and like the original they continue rather than throw.
+// The static slots the two getters read and write. In the image these are rip-relative words in
+// .data; here they are file-scope pointers, which is the same lifetime without a relocation.
+static void zero_bytes(uint8_t* p, size_t n) {            // byte writes, so no alignment UB
+    for (size_t i = 0; i < n; ++i) p[i] = 0;
+}
+
+static void* g_singleton_14177c770 = nullptr;
+static void* g_singleton_1417b6210 = nullptr;
+
+void* (*g_pfnLogic_14177c6c0)(void* mem) = nullptr;
+void (*g_pfn_log_InlineLogERROR)(const void* p0, const void* p1, const void* p2,
+                                 const void* p3, uint32_t line) = nullptr;
+
+// 0x14177c770 — the 0x40-byte singleton.
+void* Slot_14177c770_singleton(void) {
+    if (g_singleton_14177c770 != nullptr)                    // mov rax,[rip+..] / test / jne
+        return g_singleton_14177c770;
+
+    void* mem = ::operator new(0x40);                        // lea ecx,[rax+0x40] / call new
+    void* built = nullptr;
+    if (mem != nullptr) {                                    // test rax,rax / je
+        if (g_pfnLogic_14177c6c0 != nullptr)                  // call 0x14177c6c0
+            built = g_pfnLogic_14177c6c0(mem), built = mem;
+        else
+            built = mem;
+    }
+    g_singleton_14177c770 = built;                           // mov [rip+..],rbx
+    if (g_singleton_14177c770 == nullptr) {                  // test rbx,rbx / jne
+        if (g_pfn_log_InlineLogERROR != nullptr)             // line 0xa6, four pointers
+            g_pfn_log_InlineLogERROR((const void*)(uintptr_t)0x141824ca8ULL,
+                                     (const void*)(uintptr_t)0x141828160ULL,
+                                     (const void*)(uintptr_t)0x141828170ULL,
+                                     (const void*)(uintptr_t)0x14182db40ULL, 0xa6);
+    }
+    return g_singleton_14177c770;                            // mov rax,rbx
+}
+
+// 0x1417b6210 — the 0x88-byte singleton, built inline with two vtable stores and the rest cleared.
+void* Slot_1417b6210_singleton(void) {
+    if (g_singleton_1417b6210 != nullptr)                    // mov rax,[rip+..] / test / jne
+        return g_singleton_1417b6210;
+
+    uint8_t* mem = (uint8_t*)::operator new(0x88);            // mov ecx,0x88 / call new
+    uint8_t* built = nullptr;
+    if (mem != nullptr) {                                    // test rax,rax / je
+        *(void**)mem = (void*)(uintptr_t)0x141834928ULL;      // lea rcx,[rip+..] / mov [rax],rcx
+        *(void**)mem = (void*)(uintptr_t)0x141835068ULL;      // second vtable store wins, as written
+        for (size_t off = 0x8; off <= 0x58; off += 8)         // the cleared words
+            zero_bytes(mem + off, 8);
+        *(uint8_t*)(mem + 0x60) = 0;                          // mov byte [rax+0x60],cl
+        zero_bytes(mem + 0x61, 8);                            // then four unaligned words
+        zero_bytes(mem + 0x69, 8);
+        zero_bytes(mem + 0x71, 8);
+        zero_bytes(mem + 0x79, 8);
+        built = mem;
+    }
+    g_singleton_1417b6210 = built;                           // mov [rip+..],rax
+    if (g_singleton_1417b6210 == nullptr) {                  // test rax,rax / jne
+        if (g_pfn_log_InlineLogERROR != nullptr)             // line 0xdd, four pointers
+            g_pfn_log_InlineLogERROR((const void*)(uintptr_t)0x141824ca8ULL,
+                                     (const void*)(uintptr_t)0x141828160ULL,
+                                     (const void*)(uintptr_t)0x141828170ULL,
+                                     (const void*)(uintptr_t)0x141835bd0ULL, 0xdd);
+    }
+    return g_singleton_1417b6210;                            // mov rax,rax at the shared tail
+}
+
 // 0x14177c0a0 — find by key. The walk keeps its candidate in rbx starting at the head, exactly
 // like 0x1417c8f70, but this one answers the stored value and decides "absent" by comparing the
 // wanted key with the candidate's key rather than by reaching the end node.
