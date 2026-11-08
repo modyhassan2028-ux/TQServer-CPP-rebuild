@@ -72,3 +72,25 @@ its own instruction run and nothing else.
   0x1417c5b30 and 0x1417c5b80 (`call *0x1418233c0`), the sentinel walks at 0x1417c5c50
   (`cmpb $0x0,0x29(%rax)`) and 0x1417c5f00 / 0x1417c5f30 (`cmpb $0x0,0x41(%rax)`), and the
   two `jmp 0x1417f2fdc` thunks at 0x1417c5c80 and 0x1417c5cc0.
+
+## D130 — the accessor cluster's non-pure tail, 0x1417c5b30..0x1417c5f50
+
+Appended to `modules/syndicate/src/CsyndicateLogicTailSlots.cpp` (the file that already
+holds the two seams these bodies need), inside `namespace tq`.
+
+- 0x1417c5b30 and 0x1417c5b80: `mov (%rcx),%rax / test / je` + `cmp (%rdx),%rax / je` then
+  `call *0x1418233c0`, the DEBUG iterator check the file already models as
+  `g_pfn_invalid_parameter_noinfo`; the answer is `cmp 0x8(%rdx),0x8(%rdi) / sete`.
+- 0x1417c5c50: the 0x29 walk. The sentinel byte is read on the **lead** (`cmpl $0x0,0x29(%rax)`
+  straight after `mov (%rcx),%rax`), so a null lead is a fault in the original too; rcx starts
+  as `this` and only moves inside the loop, which is why this is what comes back when the lead
+  already carries the sentinel.
+- 0x1417c5c70: `mov %rcx,%rax / ret`.
+- 0x1417c5c80 and 0x1417c5cc0: `mov %rdx,%rcx / jmp 0x1417f2fdc`, the deallocate thunk; the
+  forwarded pointer is the **second** argument and the first is dropped, exactly as the bytes do.
+- 0x1417c5f00: the 0x41 walk stepping through `+0x10`; 0x1417c5f30: the 0x41 walk stepping
+  through the lead; both read the sentinel on the node they just loaded.
+- 0x1417c5f50: `movabs $0x1fffffffffffffff`.
+- `tests/syndicate_d130_test.cpp`: 24 checks, 6 passes, ASan+UBSan clean.
+- Left: 0x1417c5e00 and 0x1417c5e80 (their dumps were cut) and the comparison at 0x1417c5f60,
+  whose body continues past the same seam.

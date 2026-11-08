@@ -253,3 +253,11 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - Next: the rest of the same cluster — 0x1417c5b30 / 0x1417c5b80 (they call the seam at
   0x1418233c0), the sentinel walks 0x1417c5c50 / 0x1417c5f00 / 0x1417c5f30, and the two
   `jmp 0x1417f2fdc` thunks 0x1417c5c80 / 0x1417c5cc0.
+
+## D130 (latest)
+
+- The cluster's non-pure tail is ported: 0x1417c5b30, 0x1417c5b80, 0x1417c5c50, 0x1417c5c70,
+  0x1417c5c80, 0x1417c5cc0, 0x1417c5f00, 0x1417c5f30, 0x1417c5f50 ->
+  `SYNDICATE_D130_OK ... 24 checks`, 6 passes under ASan+UBSan.
+- Next: 0x1417c5e00 / 0x1417c5e80 (re-dump, the earlier reads were truncated) and
+  0x1417c5f60, the next iterator comparison on the same seam.

@@ -2104,3 +2104,107 @@ void Slot_141792950(void* pFirst, void* pMid, void* pLast, void* pfnKey) {
 }
 
 }  // namespace tq
+
+// ---------------------------------------------------------------------------
+namespace tq {
+
+// D130 — the accessor cluster's non-pure tail, 0x1417c5b30..0x1417c5f50.
+// These are the four bodies of the cluster that are not pure: the two iterator
+// comparisons call the DEBUG check at 0x1418233c0 whenever the two leads are not
+// the same node, the two walks end on the sentinel byte their loop tests, and the
+// two thunks forward their *second* argument to 0x1417f2fdc (operator delete).
+
+// 0x1417c5b30 — mov (%rcx),%rax / test %rax,%rax / je 0x1417c5b4d /
+//               cmp (%rdx),%rax / je 0x1417c5b53 / call *0x1418233c0 /
+//               mov 0x8(%rbx),%rdx / cmp %rdx,0x8(%rdi) / sete %al / ret
+bool SynAccIterEq_1417c5b30(void* pThis, void* pOther) {
+    uint8_t* t = (uint8_t*)pThis;                          // rdi
+    uint8_t* o = (uint8_t*)pOther;                         // rbx
+    void* lead = *(void**)t;                               // mov (%rcx),%rax
+    if (lead == nullptr || lead != *(void**)o) {           // test / je, cmp (%rdx),%rax / je
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();              // call *0x1418233c0
+    }
+    return *(void**)(t + 8) == *(void**)(o + 8);           // cmp %rdx,0x8(%rdi) / sete %al
+}
+
+// 0x1417c5b80 — the same body again, its own start: (%rcx) against (%rdx), the
+// DEBUG check on either mismatch, then the two +0x8 words compared.
+bool SynAccIterEq_1417c5b80(void* pThis, void* pOther) {
+    uint8_t* t = (uint8_t*)pThis;
+    uint8_t* o = (uint8_t*)pOther;
+    void* lead = *(void**)t;
+    if (lead == nullptr || lead != *(void**)o) {
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();
+    }
+    return *(void**)(t + 8) == *(void**)(o + 8);
+}
+
+// 0x1417c5c50 — mov (%rcx),%rax / cmpb $0x0,0x29(%rax) / jne 0x1417c5c6c /
+//               mov %rax,%rcx / mov (%rax),%rax / cmpb $0x0,0x29(%rax) / je back
+// The answer is rcx: this itself when the lead already carries the sentinel,
+// otherwise the last node whose own lead did not.
+void* SynAccWalk29_1417c5c50(void* pThis) {
+    uint8_t* pRet = (uint8_t*)pThis;                       // rcx
+    uint8_t* pNode = *(uint8_t**)pThis;                    // mov (%rcx),%rax
+    if (*(uint8_t*)(pNode + 0x29) == 0) {                  // cmpb $0x0,0x29(%rax) / jne
+        for (;;) {
+            pRet = pNode;                                  // mov %rax,%rcx
+            pNode = *(uint8_t**)pNode;                     // mov (%rax),%rax
+            if (*(uint8_t*)(pNode + 0x29) != 0) break;      // cmpb $0x0,0x29(%rax) / je back
+        }
+    }
+    return pRet;                                           // mov %rcx,%rax
+}
+
+// 0x1417c5c70 — mov %rcx,%rax / ret
+void* SynAccRetThis_1417c5c70(void* pThis) { return pThis; }
+
+// 0x1417c5c80 — mov %rdx,%rcx / jmp 0x1417f2fdc : the allocator's deallocate,
+// the pointer its second argument, the object it replaces dropped as the bytes do.
+void SynAccDealloc_1417c5c80(void* pAlloc, void* pMem) {
+    (void)pAlloc;                                          // rcx is overwritten, never read
+    g_pfnLogic_1417f2fdc(pMem);                            // jmp 0x1417f2fdc
+}
+
+// 0x1417c5cc0 — the same six bytes, its own start
+void SynAccDealloc_1417c5cc0(void* pAlloc, void* pMem) {
+    (void)pAlloc;
+    g_pfnLogic_1417f2fdc(pMem);
+}
+
+// 0x1417c5f00 — mov 0x10(%rcx),%rax / cmpb $0x0,0x41(%rax) / jne 0x1417c5f1d /
+//               mov %rax,%rcx / mov 0x10(%rax),%rax / cmpb $0x0,0x41(%rax) / je back
+void* SynAccWalk10_41_1417c5f00(void* pThis) {
+    uint8_t* pRet = (uint8_t*)pThis;                       // rcx
+    uint8_t* pNode = *(uint8_t**)((uint8_t*)pThis + 0x10); // mov 0x10(%rcx),%rax
+    if (*(uint8_t*)(pNode + 0x41) == 0) {                  // cmpb $0x0,0x41(%rax) / jne
+        for (;;) {
+            pRet = pNode;                                  // mov %rax,%rcx
+            pNode = *(uint8_t**)(pNode + 0x10);            // mov 0x10(%rax),%rax
+            if (*(uint8_t*)(pNode + 0x41) != 0) break;      // cmpb $0x0,0x41(%rax) / je back
+        }
+    }
+    return pRet;
+}
+
+// 0x1417c5f30 — mov (%rcx),%rax / cmpb $0x0,0x41(%rax) / jne 0x1417c5f4c /
+//               mov %rax,%rcx / mov (%rax),%rax / cmpb $0x0,0x41(%rax) / je back
+void* SynAccWalk41_1417c5f30(void* pThis) {
+    uint8_t* pRet = (uint8_t*)pThis;
+    uint8_t* pNode = *(uint8_t**)pThis;                    // mov (%rcx),%rax
+    if (*(uint8_t*)(pNode + 0x41) == 0) {
+        for (;;) {
+            pRet = pNode;
+            pNode = *(uint8_t**)pNode;
+            if (*(uint8_t*)(pNode + 0x41) != 0) break;
+        }
+    }
+    return pRet;
+}
+
+// 0x1417c5f50 — movabs $0x1fffffffffffffff,%rax / ret
+uint64_t SynAccConst_1417c5f50() { return 0x1fffffffffffffffULL; }
+
+}  // namespace tq
