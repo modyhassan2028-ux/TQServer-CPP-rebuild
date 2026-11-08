@@ -231,3 +231,19 @@ The four bodies that were held back at D134 are in, each read straight off its o
   call guarded. The argument handed over is `this + 0x18`, and the answer is the callee's.
 - `tests/syndicate_d138_test.cpp`: 7 checks including the `this + 0x18` identity and the unset
   seam answering nothing, 6 passes, ASan+UBSan clean. Cluster 116 bodies.
+
+## D139 — 0x1417c6bd0, the checked forwarder that also dispatches
+
+- The assertion branch carries a pointer set that differs from its two neighbours:
+  file 0x141824ca8, **0x141827b98** in the second slot, 0x141831610 in the third and
+  0x141839fe0 in the fourth, at line **0x39c**. That branch is the only one answering false.
+- 0x141787300 only decides whether the dispatch runs: its answer goes into `test %al,%al` and
+  `je 0x1417c6c5e` jumps straight to `mov $0x1,%al`, so a false there still answers true.
+- The dispatch reads `0x88(%rdi)` for the slot, `(%rcx)` for its vtable and `0x1a0(%r9)` for the
+  target, with `edx` the `0x141785dc0` answer and `r8d` the flag. Modelled as
+  `g_pfnSynVirt_1417c6bd0(pSlot, pFn, n, flag)` so both the slot and the resolved target stay
+  visible, while the slot and vtable reads are the bytes' own.
+- The hand-off to 0x1417c6a60 passes a **zero** flag (`xor %r9d,%r9d`), not the incoming one,
+  and 0x141785dc0 therefore runs twice on this path: once for the dispatch and once inside
+  0x1417c6a60. The test pins that count.
+- `tests/syndicate_d139_test.cpp`: 22 checks, 6 passes, ASan+UBSan clean. Cluster 117 bodies.

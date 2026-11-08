@@ -708,4 +708,46 @@ void* SynAccTail18_1417c69e0(void* pThis) {
     return nullptr;
 }
 
+// The boolean test and the virtual slot 0x1417c6bd0 goes through.
+bool (*g_pfnSynPrepBool_141787300)(void*) = nullptr;                        // 0x141787300
+void (*g_pfnSynVirt_1417c6bd0)(void*, void*, int, unsigned char) = nullptr; // call *0x1a0(%r9)
+
+// 0x1417c6bd0 — the checked forwarder that also dispatches:
+//   mov %r9d,%esi / mov %r8,%rbp / mov %rdx,%rbx / mov %rcx,%rdi /
+//   test %rdx,%rdx / jne 0x1417c6c23 /
+//   line 0x39c with 0x141824ca8, 0x141827b98, 0x141831610, 0x141839fe0 /
+//   call *0x141823030 / xor %al,%al / jmp end /
+//   mov %rdx,%rcx / call 0x141787300 / test %al,%al / je 0x1417c6c5e /
+//   mov %rbx,%rcx / call 0x141785dc0 / mov 0x88(%rdi),%rcx / mov %esi,%r8d /
+//   mov (%rcx),%r9 / mov %eax,%edx / call *0x1a0(%r9) /
+//   xor %r9d,%r9d / mov %rbx,%r8 / mov %rbp,%rdx / mov %rdi,%rcx / call 0x1417c6a60 /
+//   end: mov $0x1,%al
+// The failing branch is the only one that answers false; the 0x141787300 answer only decides
+// whether the dispatch runs, not what comes back.
+bool SynAccChecked4_1417c6bd0(void* pThis, void* a2, void* a3, unsigned char uFlag) {
+    if (a2 == nullptr) {                                   // test %rdx,%rdx / jne
+        if (g_pfnSynAssert_141823030 != nullptr)
+            g_pfnSynAssert_141823030((const void*)(uintptr_t)0x141824ca8ULL,
+                                     (const void*)(uintptr_t)0x141827b98ULL,
+                                     (const void*)(uintptr_t)0x141831610ULL,
+                                     (const void*)(uintptr_t)0x141839fe0ULL, 0x39c);
+        return false;                                      // xor %al,%al
+    }
+    bool bGo = false;                                      // test %al,%al after 0x141787300
+    if (g_pfnSynPrepBool_141787300 != nullptr)
+        bGo = g_pfnSynPrepBool_141787300(a2);              // mov %rbx,%rcx / call 0x141787300
+    if (bGo) {
+        int nFrom = 0;                                     // mov %eax,%edx
+        if (g_pfnSynPrep_141785dc0 != nullptr)
+            nFrom = g_pfnSynPrep_141785dc0(a2);            // mov %rbx,%rcx / call 0x141785dc0
+        unsigned char* pSlot = *(unsigned char**)((unsigned char*)pThis + 0x88);  // mov 0x88(%rdi),%rcx
+        void* pVft = *(void**)pSlot;                       // mov (%rcx),%r9
+        void* pFn = *(void**)((unsigned char*)pVft + 0x1a0);   // call *0x1a0(%r9)
+        if (g_pfnSynVirt_1417c6bd0 != nullptr)
+            g_pfnSynVirt_1417c6bd0(pSlot, pFn, nFrom, uFlag);  // rcx, edx, r8d
+        SynAccChecked2_1417c6a60(pThis, a2, a3, 0);        // xor %r9d,%r9d / call 0x1417c6a60
+    }
+    return true;                                           // mov $0x1,%al
+}
+
 }  // namespace tq

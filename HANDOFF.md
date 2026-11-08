@@ -321,3 +321,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   Cluster 116 bodies.
 - Next from `Docs/ASM/1417c69e0.txt`: 0x1417c6bd0 (starts `mov %r9d,%esi`), the third of the
   checked-forwarder family; the assertion seam it needs is already in place.
+
+## D139 (latest)
+
+- 0x1417c6bd0 ported with its dispatch: `SYNDICATE_D139_OK ... 22 checks`, 6 passes.
+  Cluster 117 bodies.
+- Next from the dump: 0x1417c6c80 / 0x1417c6c90 (the two `jmp *(%rax)` bodies, one after
+  `add $0x98,%rcx`) and 0x1417c6ca0 / 0x1417c6ce0, the `setne` comparisons.

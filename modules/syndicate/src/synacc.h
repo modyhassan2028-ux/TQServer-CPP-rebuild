@@ -129,5 +129,11 @@ void* SynAccChecked3_1417c6b30(void* pThis, void* a2, uint32_t uA3, unsigned cha
 // null-by-default seam rather than pretending to know its target.
 extern void* (*g_pfnSynTail_141823290)(void* pArg);                        // 0x141823290
 void* SynAccTail18_1417c69e0(void* pThis);                                 // 0x1417c69e0
+// The two seams 0x1417c6bd0 needs: the boolean test at 0x141787300 and the virtual slot it
+// reaches through `*(this+0x88)` and `0x1a0(vtable)`.
+extern bool (*g_pfnSynPrepBool_141787300)(void* pArg);                     // 0x141787300
+extern void (*g_pfnSynVirt_1417c6bd0)(void* pSlot, void* pFn, int nArg,
+                                      unsigned char uFlag);                // call *0x1a0(%r9)
+bool SynAccChecked4_1417c6bd0(void* pThis, void* a2, void* a3, unsigned char uFlag); // 0x1417c6bd0
 }  // namespace tq
 #endif
