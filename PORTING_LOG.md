@@ -10751,3 +10751,42 @@ run of it failed on two of my own assertions about the descending key — the ob
 of `setg` was not.
 
 Suites now: 14711 + 1284 + 125 + 491 + 198 + 125 + 33 + 27 + 33 + 24 + 24 + 142.
+
+## 2026-11-08 — D101: the forwarder family, and the last frontier entry that was never a function
+
+The unit at `0x14177fa10..0x14177fa90` is four forwarders and the switch that hands them out. Each one
+reshapes a call and tail-jumps into a vtable slot, so the three-argument surface stays the same while the
+slot offset is what actually varies:
+
+| address | receiver | slot | second argument |
+|---|---|---|---|
+| `0x14177fa40` | `*(void**)self` | `+0x2b0` | the **third** argument |
+| `0x14177fa50` | `*(void**)self` | `+0x2b8` | the third argument |
+| `0x14177fa10` | whatever `0x1417b6210(self)` returns | `+0x378` | the third argument |
+| `0x14177fa60` | whatever `0x14173f9c0(self, a2, a3)` returns | tail-jumps `0x14173d820` | both, unchanged |
+
+In all four, `edx` is overwritten with `r8d` before the jump, so the caller's second argument is dropped.
+The vtable dispatch itself is real code, not a seam: the port walks the object's vtable pointer to the
+offset and calls through it, which is what the original's `mov (%rcx),%rax / jmp *0x2b0(%rax)` does.
+`0x14177fa90` is a plain switch returning the four function pointers and null for anything outside 0..3.
+
+**And the last frontier entry.** `0x141821f80`, carried as a single 0x600-byte "function", is not one: the
+region is **nine** 16-byte blocks, each `lea rcx,[<file-scope static>]` followed by `jmp *0x141823088`,
+which is the `atexit` import. They are the compiler's own static-destructor registration thunks, one per
+file-scope object in that translation unit (`0x141886cf0`, `0x141886d20`, `0x141886d70`, `0x141886d80`,
+`0x141886da0`, `0x141886db0`, `0x141886de0`, and two more before `0x141822010`). Nothing in them is game
+logic and nothing in them is portable: a rebuilt translation unit gets its registration thunks from the
+toolchain. Closing this entry rather than porting it is the accurate call, the same as the import thunk at
+`0x1417e8016`.
+
+**Syndicate's game code is now closed.** The frontier's 1690 open addresses resolved to 26 function
+starts — twenty container accessors (D99), four comparators (D100), the four forwarders here, and the
+zero-length remainder that was never a function at all. Everything else was either inside already-ported
+code (1641) or a library internal that the standard replacements cover.
+
+Testing: `tests/syndicate_vtableforwarders_test.cpp`, 20 assertions, six cycles, sanitizers clean. The
+test builds a fake vtable with the same body installed at all three slots and checks the receiver, the
+argument reshuffle and the tail-call arguments, because "it dispatched" alone would pass even with the
+wrong slot.
+
+Suites now: 14711 + 1284 + 125 + 491 + 198 + 125 + 33 + 27 + 33 + 24 + 24 + 20 + 142.
