@@ -99,6 +99,15 @@ void* Slot_1417b6210_singleton(void);                          // 0x88 bytes, in
 void Slot_14177c770_seed(void* value);                         // test hook: preload the static slot
 void Slot_1417b6210_seed(void* value);
 
+// 0x141779090 — scans the range held at [self+0x20]..[self+0x28] (8-byte slots) for the first
+// element whose virtual answer at slot 0x40 equals id and whose answer at slot 0x48 equals kind.
+// Writes the iterator pair {container word, slot} into out and answers out.
+uint64_t* Slot_141779090_search(void* self, uint64_t* out, uint32_t id, uint32_t kind);
+
+// 0x141779400 — the tail target of 0x14177f980. Runs that scan, re-checks the pair, then takes
+// the element through virtual slot 0x10 with 4 and tail-calls the result's slot 0x48.
+uint64_t Slot_141779400(void* found, uint32_t id, uint32_t kind);
+
 // 0x14177f980 — the seam itself. Kinds 1..3 ask the 0x88-byte singleton's vtable slot 0x1f8 for an
 // id, look that id up in the 0x40-byte singleton's map, and tail-call 0x141779400 with the found
 // object, the original id and the kind. Any other kind logs through CQBase and answers 0. The tail

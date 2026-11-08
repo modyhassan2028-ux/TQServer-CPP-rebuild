@@ -401,6 +401,55 @@ int main() {
         CHECK(g_calls == 0);
     }
 
+    // --- 0x141779090 scans a slot range for the first (id, kind) match, and 0x141779400 takes it
+    {
+        static uint32_t want_id, want_kind, answer_kind;
+        static void* last_self;
+        struct Obj { void* vt[0x10]; };
+        static Obj elem;
+        static uint64_t slot[1], scaryholder[1], owner[8], found[8];
+
+        static uint64_t table[0x10];
+        for (int i = 0; i < 0x10; ++i) table[i] = 0;
+        table[1] = (uint64_t)+[](void* self, uint32_t) -> void* { last_self = self; return self; };
+        table[2] = (uint64_t)+[](void* self, uint32_t) -> void* { last_self = self; return self; };
+        table[8] = (uint64_t)+[](void*) -> uint64_t { return want_id; };      // slot 0x40
+        table[9] = (uint64_t)+[](void*) -> uint64_t { return answer_kind; };  // slot 0x48
+        elem.vt[0] = (void*)table;    // the object's first word points AT the table, as in the image
+
+        std::memset(slot, 0, sizeof(slot));
+        slot[0] = (uint64_t)&elem;
+        std::memset(found, 0, sizeof(found));
+        found[1] = (uint64_t)&scaryholder[0];        // +0x08 the container word
+        found[4] = (uint64_t)&slot[0];               // +0x20 begin
+        found[5] = (uint64_t)&slot[1];               // +0x28 end, one past
+        scaryholder[0] = (uint64_t)&owner[0];
+        owner[4] = ~0ull;                            // +0x20 the bound every slot must stay under
+
+        g_pfn_invalid_parameter_noinfo = [] { };
+        g_pfn_log_InlineLogERROR = nullptr;
+
+        uint64_t it[2] = {0, 0};
+        want_id = 0xB; want_kind = 2; answer_kind = 2;   // slot 0x48 is what the scan compares
+        uint64_t* out = Slot_141779090_search(found, it, 0xB, 2);
+        CHECK(out == it);
+        CHECK(it[1] == (uint64_t)&slot[0]);           // matched the only element
+        CHECK(last_self == (void*)&elem);
+
+        uint64_t it2[2] = {0, 0};
+        out = Slot_141779090_search(found, it2, 0xC, 2);   // the id does not answer
+        CHECK(out == it2);
+        CHECK(it2[1] == (uint64_t)&slot[1]);          // walked off the end
+
+        // 0x141779400: no slot left answers 0
+        CHECK(Slot_141779400(found, 0xC, 2) == 0);
+        // and a match returns what slot 0x48 answers on the object slot 0x10 handed back. The scan
+        // matches on that same slot, so the answer is the value that satisfied the kind test.
+        answer_kind = 2;
+        CHECK(Slot_141779400(found, 0xB, 2) == 2);
+        CHECK(last_self == (void*)&elem);
+    }
+
     // --- 0x14177f980 gates on the kind, then chains vtable -> find -> tail call
     {
         static uint32_t vcall_hit;      // what the vtable slot answers

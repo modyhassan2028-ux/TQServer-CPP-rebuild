@@ -197,6 +197,99 @@ void* Slot_1417b6210_singleton(void) {
     return g_singleton_1417b6210;                            // mov rax,rax at the shared tail
 }
 
+// 0x141779090 — range scan. Every failed bound re-checks through the same
+// __invalid_parameter_noinfo the other walks use, and the element answering zero is skipped, not
+// treated as a match.
+uint64_t* Slot_141779090_search(void* self, uint64_t* out, uint32_t id, uint32_t kind) {
+    uint8_t* s = (uint8_t*)self;
+    uint64_t begin = *(uint64_t*)(s + 0x20);                  // mov rdi,[rcx+0x20]
+    *out = 0;                                                 // mov qword [rdx],0
+    if (begin > *(uint64_t*)(s + 0x28))                       // cmp rdi,[rcx+0x28] / jbe
+        g_pfn_invalid_parameter_noinfo();
+    out[1] = begin;                                           // mov [rbx+8],rdi
+    *out = *(uint64_t*)(s + 0x08);                            // mov rax,[rsi+8] / mov [rbx],rax
+
+    for (;;) {
+        uint64_t end = *(uint64_t*)(s + 0x28);                 // mov rdi,[rsi+0x28]
+        if (*(uint64_t*)(s + 0x20) > end)                      // cmp [rsi+0x20],rdi / jbe
+            g_pfn_invalid_parameter_noinfo();
+        uint64_t scary = *(uint64_t*)(s + 0x08);               // mov rax,[rsi+8]
+        if (scary != 0 && scary != *out)                        // test / cmp rax,[rbx] / je
+            g_pfn_invalid_parameter_noinfo();
+        if (end == out[1])                                     // cmp rdi,[rbx+8] / je done
+            break;
+
+        uint64_t cur = *out;                                   // mov rax,[rbx]
+        if (cur == 0)                                          // test rax,rax / jne
+            g_pfn_invalid_parameter_noinfo();
+        cur = *out;                                            // the bytes reload before the deref
+        uint64_t owner = *(uint64_t*)cur;                      // mov rax,[rax]
+        if (out[1] >= *(uint64_t*)(owner + 0x20))              // cmp [rbx+8],rax / jb
+            g_pfn_invalid_parameter_noinfo();
+
+        uint64_t elem = *(uint64_t*)out[1];                    // mov rdi,[rax]
+        if (elem != 0) {                                       // test rdi,rdi / je advance
+            void** vt = *(void***)elem;
+            void* pass1 = ((void* (*)(void*, uint32_t))vt[0x8 / 8])((void*)elem, 2);  // call [rax+8]
+            void** vt2 = *(void***)pass1;
+            uint32_t got_id = (uint32_t)((uint64_t (*)(void*))vt2[0x40 / 8])(pass1);  // [rdx+0x40]
+            if (got_id == id) {                                // cmp eax,r12d / sete / je
+                void** vt3 = *(void***)elem;
+                void* pass2 = ((void* (*)(void*, uint32_t))vt3[0x8 / 8])((void*)elem, 3);
+                void** vt4 = *(void***)pass2;
+                uint32_t got_kind = (uint32_t)((uint64_t (*)(void*))vt4[0x48 / 8])(pass2);
+                if (got_kind == kind)                          // cmp eax,ebp / sete / jne
+                    break;
+            }
+        }
+
+        uint64_t cur2 = *out;                                  // mov rax,[rbx]
+        if (cur2 == 0)                                         // test rax,rax / jne
+            g_pfn_invalid_parameter_noinfo();
+        cur2 = *out;
+        uint64_t owner2 = *(uint64_t*)cur2;                    // mov rax,[rax]
+        if (out[1] >= *(uint64_t*)(owner2 + 0x20))             // cmp [rbx+8],rax / jb
+            g_pfn_invalid_parameter_noinfo();
+        out[1] += 8;                                           // add qword [rbx+8],8
+    }
+    return out;                                                // mov rax,rbx
+}
+
+// 0x141779400 — the tail call 0x14177f980 makes once a key was found.
+uint64_t Slot_141779400(void* found, uint32_t id, uint32_t kind) {
+    uint8_t* f = (uint8_t*)found;
+    uint64_t it[2] = {0, 0};                                   // rsp+0x20 / rsp+0x28
+    Slot_141779090_search(found, it, id, kind);                // call 0x141779090
+
+    uint64_t endn = *(uint64_t*)(f + 0x28);                    // mov rsi,[rbx+0x28]
+    if (*(uint64_t*)(f + 0x20) > endn)                         // cmp [rbx+0x20],rsi / jbe
+        g_pfn_invalid_parameter_noinfo();
+    uint64_t scary = *(uint64_t*)(f + 0x08);                   // mov rax,[rbx+8]
+    if (scary == 0 || scary != it[0])                          // test / cmp rax,rdi / je
+        g_pfn_invalid_parameter_noinfo();
+    uint64_t cur = it[1];                                      // mov rbx,[rsp+0x28]
+    if (endn == cur)                                           // cmp rsi,rbx / je zero
+        return 0;
+
+    uint64_t owner;
+    if (it[0] == 0) {                                          // test rdi,rdi / jne
+        g_pfn_invalid_parameter_noinfo();
+        owner = 0;                                             // xor r11d,r11d
+    } else {
+        owner = *(uint64_t*)it[0];                             // mov r11,[rdi]
+    }
+    if (!(cur < *(uint64_t*)(owner + 0x20)))                   // cmp rbx,[r11+0x20] / jb
+        g_pfn_invalid_parameter_noinfo();
+
+    uint8_t* elem = *(uint8_t**)cur;                           // mov rcx,[rbx]
+    if (elem == nullptr)                                       // test rcx,rcx / je zero
+        return 0;
+    void** vt = *(void***)elem;
+    void* pass = ((void* (*)(void*, uint32_t))vt[0x10 / 8])(elem, 4);   // call [rax+0x10], edx=4
+    void** vt2 = *(void***)pass;
+    return ((uint64_t (*)(void*))vt2[0x48 / 8])(pass);         // jmp [rdx+0x48]
+}
+
 void Slot_14177c770_seed(void* value) { g_singleton_14177c770 = value; }
 void Slot_1417b6210_seed(void* value) { g_singleton_1417b6210 = value; }
 
