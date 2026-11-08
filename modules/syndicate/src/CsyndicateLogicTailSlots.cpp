@@ -201,6 +201,54 @@ void* (*g_pfnLogic_14177ace0)(void* self) = nullptr;
 void* (*g_pfnLogic_1417495d0)(void* arg) = nullptr;
 void (*g_pfnLogic_141732040)(void* arg, void* elem) = nullptr;
 
+// 0x14177ace0 — the end node. Only the first store is guarded by the null test; the bytes then write
+// +0x08 and +0x10 without looking again, which is kept here rather than tidied into a check.
+void* Slot_14177ace0_new_node(void) {
+    uint8_t* n = (uint8_t*)::operator new(0x30);              // mov ecx,0x30 / call operator new
+    if (n != nullptr)                                         // test rax,rax / je
+        *(uint64_t*)n = 0;                                    // xor ecx,ecx / mov [rax],rcx
+    *(uint64_t*)(n + 0x08) = 0;                               // lea rdx,[rax+8] / mov [rdx],rcx
+    *(uint64_t*)(n + 0x10) = 0;                               // lea rdx,[rax+0x10] / mov [rdx],rcx
+    *(uint8_t*)(n + 0x28) = 1;                                // mov byte [rax+0x28],1
+    *(uint8_t*)(n + 0x29) = 0;                                // mov byte [rax+0x29],0
+    return n;                                                 // rax
+}
+
+// 0x1417a8520 — lower_bound with the key passed by pointer.
+uint64_t* Slot_1417a8520_lower_bound(void* self, uint64_t* out, const uint32_t* key) {
+    uint8_t* s = (uint8_t*)self;
+    uint8_t* head = *(uint8_t**)(s + kEndNode);               // mov rbx,[rcx+0x30]
+    uint8_t* node = *(uint8_t**)(head + kParent);             // mov rax,[rbx+8]
+    uint8_t* candidate = head;                                // rbx stays the candidate
+    if (*(uint8_t*)(node + kIsNil) == 0) {                    // cmp byte [rax+0x29],0 / jne
+        do {
+            if (*(uint32_t*)(node + kKey) < *key)             // mov r9d,[r8] / cmp [rax+0x18],r9d
+                node = *(uint8_t**)(node + kRight);           // mov rax,[rax+0x10]
+            else {
+                candidate = node;                             // mov rbx,rax
+                node = *(uint8_t**)(node + kLeft);            // mov rax,[rax]
+            }
+        } while (*(uint8_t*)(node + kIsNil) == 0);            // cmp byte [rax+0x29],0 / je
+    }
+
+    uint64_t scary = *(uint64_t*)(s + kScary);                // mov rax,[rcx]
+    uint64_t end = *(uint64_t*)(s + kEndNode);                // mov rdi,[rcx+0x30]
+    if (scary == 0)                                           // test rax,rax / je
+        g_pfn_invalid_parameter_noinfo();
+    // the bytes then compare rax with itself, so that check can never fire
+
+    const bool use_candidate = (uint64_t)candidate != end &&           // cmp rbx,rdi / je
+                               !(*key < *(uint32_t*)(candidate + kKey));  // cmp [r12],eax / jb
+    if (use_candidate) {
+        out[0] = scary;                                       // mov [rbp],rax
+        out[1] = (uint64_t)candidate;                         // mov [rbp+8],rax
+    } else {
+        out[0] = *(uint64_t*)(s + kScary);                    // mov rax,[rsi] / mov [rsp+0x30],rax
+        out[1] = *(uint64_t*)(s + kEndNode);                  // mov rax,[rsi+0x30] / mov [rsp+0x38],rax
+    }
+    return out;                                               // mov rax,rbp
+}
+
 // 0x14177c6c0 — the map constructor. The 8-byte allocation is not padding: the byte store
 // `mov [rax],rbx` puts the map itself in it, so the word at [map] leads back to the owner, which is
 // exactly the shape the iterator checks in the ported walks expect.

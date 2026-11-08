@@ -401,6 +401,65 @@ int main() {
         CHECK(g_calls == 0);
     }
 
+    // --- 0x14177ace0 makes the end node
+    {
+        void* n = Slot_14177ace0_new_node();
+        CHECK(n != nullptr);
+        uint8_t* p = (uint8_t*)n;
+        CHECK(*(uint64_t*)(p + 0x00) == 0);        // left
+        CHECK(*(uint64_t*)(p + 0x08) == 0);        // parent
+        CHECK(*(uint64_t*)(p + 0x10) == 0);        // right
+        CHECK(*(uint8_t *)(p + 0x28) == 1);        // colour
+        CHECK(*(uint8_t *)(p + 0x29) == 0);        // _Isnil clear, unlike the map's own end node
+        ::operator delete(n);
+    }
+
+    // --- 0x1417a8520 answers a lower_bound pair, with the key taken by pointer
+    {
+        struct K {
+            K* left = nullptr; K* parent = nullptr; K* right = nullptr;
+            uint32_t key = 0; uint8_t pad1[4] = {0}; uint64_t value = 0;
+            uint8_t pad2 = 0; uint8_t isnil = 0; uint8_t tail[0x38 - 0x2a] = {0};
+        };
+        static K root, right_child, nil, head, scaryholder, owner;
+        static struct { uint8_t bytes[0x38]; } map;
+        root = K(); right_child = K(); nil = K(); nil.isnil = 1;
+        head = K(); head.isnil = 1; scaryholder = K(); owner = K();
+
+        root.key = 5; root.left = &nil; root.right = &right_child; right_child.parent = &root;
+        right_child.key = 7; right_child.left = &nil; right_child.right = &nil;
+        head.parent = &root;
+
+        std::memset(&map, 0, sizeof(map));
+        *(void**)(map.bytes + 0x30) = &head;
+        *(void**)(map.bytes + 0x00) = &scaryholder;
+        *(K**)&scaryholder.left = &owner;
+
+        g_pfn_invalid_parameter_noinfo = [] { };
+        uint64_t out[2];
+        uint32_t k = 5;
+        CHECK(Slot_1417a8520_lower_bound(map.bytes, out, &k) == out);
+        CHECK(out[1] == (uint64_t)&root);              // the key itself
+        CHECK(out[0] == (uint64_t)&scaryholder);
+
+        k = 7;
+        Slot_1417a8520_lower_bound(map.bytes, out, &k);
+        CHECK(out[1] == (uint64_t)&right_child);
+
+        k = 1;                                         // below everything lands on the end node
+        Slot_1417a8520_lower_bound(map.bytes, out, &k);
+        CHECK(out[1] == (uint64_t)&head);
+
+        k = 9;                                         // above everything does too
+        Slot_1417a8520_lower_bound(map.bytes, out, &k);
+        CHECK(out[1] == (uint64_t)&head);
+
+        head.parent = &nil;                            // an empty tree
+        k = 5;
+        Slot_1417a8520_lower_bound(map.bytes, out, &k);
+        CHECK(out[1] == (uint64_t)&head);
+    }
+
     // --- 0x14177c6c0 builds the map: proxy, end node, and the size
     {
         struct Head { uint8_t bytes[0x38]; };

@@ -107,6 +107,15 @@ extern void* (*g_pfnLogic_14177ace0)(void* self);
 extern void* (*g_pfnLogic_1417495d0)(void* arg);
 extern void (*g_pfnLogic_141732040)(void* arg, void* elem);
 
+// 0x14177ace0 — allocates the 0x30-byte node the map constructor uses as its end node: left,
+// parent and right cleared, the colour byte at +0x28 set to 1, _Isnil at +0x29 cleared.
+void* Slot_14177ace0_new_node(void);
+
+// 0x1417a8520 — lower_bound over the same tree layout. The key arrives by pointer, and the answer is
+// an iterator pair: the candidate when it is not the end node and the key is not below its own, the
+// end pair otherwise.
+uint64_t* Slot_1417a8520_lower_bound(void* self, uint64_t* out, const uint32_t* key);
+
 // 0x14177c6c0 — constructor of the 0x40-byte map: an 8-byte proxy that points back at the map,
 // the end node at +0x30 with _Isnil set and left/parent/right pointing at itself, size 0 at +0x38.
 void* Slot_14177c6c0_ctor(void* self);
