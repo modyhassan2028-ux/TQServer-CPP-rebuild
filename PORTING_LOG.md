@@ -9547,3 +9547,27 @@ regressions:
   all, so no row exists there to call;
 - **41 rows** are fragments whose conditional branch leaves the `.pdata` range, i.e. one function
   split across several records.
+
+## Carving the targets that had no row (2026-11-08)
+
+Removing the corrupt overrides exposed two gaps and both turned out to be missing bodies, not
+missing logic:
+
+- **280 control-transfer targets** land in `.text` with no `.pdata` record. They decode as complete
+  little routines (`mov [rcx],rdx; mov rax,rcx; ret` then `int3` padding), so they are real code that
+  the exception directory simply does not describe. `tools/bulk/carve_targets.py` decodes each one
+  from its own address until the routine ends and stops rather than swallow a neighbouring entry or
+  an indexed row.
+- **89 branches leave their own record** because a function was split across `.pdata` entries.
+  `tools/bulk/carve_labels.py` gives exactly those targets an entry point of their own, so the branch
+  becomes a tail call to real code instead of a refusal. It only carves targets that block a row, so
+  the module does not accumulate an entry for every loop label. The lifter's guard was relaxed to
+  match: a conditional branch may leave its row when the target has a body, and still refuses when
+  it does not.
+
+Result: 10,647 bodies, 10,221/10,224 rows, 9,442/9,445 routines (100.0%), 321,504/321,723
+instructions (99.9%), 246,552/246,621 code instructions (100.0%). Batteries 24 OK.
+
+13 rows remain and every one is listed in `tools/bulk/backlog_rows.tsv`: nine decode to operands no
+encoding can produce (`add BYTE PTR [rdi-0x5afff98a], bh`), which is data, and four branch into that
+same data region.

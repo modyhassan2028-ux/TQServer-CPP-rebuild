@@ -183,7 +183,8 @@ def lift(addr, funcs):
     # lifting it would silently drop the other arm, so refuse instead of producing a half body
     for i, ins in enumerate(t):
         m = re.match(r'^(j\w+) (0x[0-9a-f]+)$', ins)
-        if m and m.group(1) != 'jmp' and int(m.group(2), 16) not in idx:
+        if m and m.group(1) != 'jmp' and int(m.group(2), 16) not in idx \
+                and int(m.group(2), 16) not in funcs:
             raise RangeTruncated('%s at instruction %d leaves the row (target %s)'
                                  % (m.group(1), i, m.group(2)))
     body = []
