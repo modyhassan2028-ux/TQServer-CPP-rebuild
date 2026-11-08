@@ -35,6 +35,13 @@ static void HookInitList(void** ppHead) {
 }
 
 int main() {
+    // the release seams are this unit's own: put the incoming ones back when done,
+    // the units share one process
+    const auto sv_pfnInitCrossVlmList = g_pfnInitCrossVlmList;
+    const auto sv_pfnDestroyDomain = g_pfnDestroyDomain;
+    const auto sv_pfnFreeDomainAlloc = g_pfnFreeDomainAlloc;
+    const auto sv_pfnDestroyFacility = g_pfnDestroyFacility;
+    const auto sv_pfnFreeFacilityAlloc = g_pfnFreeFacilityAlloc;
     tq::LogApi savedLog = tq::g_LogApi;
     tq::g_LogApi = {&HookRunning, &HookWrite, &HookPost, &HookTid};
 
@@ -120,6 +127,12 @@ int main() {
     }
 
     tq::g_LogApi = savedLog;
+
+    g_pfnInitCrossVlmList = sv_pfnInitCrossVlmList;
+    g_pfnDestroyDomain = sv_pfnDestroyDomain;
+    g_pfnFreeDomainAlloc = sv_pfnFreeDomainAlloc;
+    g_pfnDestroyFacility = sv_pfnDestroyFacility;
+    g_pfnFreeFacilityAlloc = sv_pfnFreeFacilityAlloc;
     std::printf("SYNDICATE_D24_OK: the two constructors and the two releases, 4 units, 27 checks\n");
     return 0;
 }

@@ -44,7 +44,9 @@ PBSUITE-GREEN x6 (33 checks, 0 fails), container accessors 33, comparators 24, v
   myheap.cpp:0x53`) and then falls through to the heap check.
 - Verified in isolation: `cqbase_d25` prints
   `SYNDICATE_D25_OK: both initialisers, both teardowns and both frees, 6 units, 57 checks`.
-- Open: in the single consolidated binary `cqbase_d25` fails the later
-  `Release(pDom)` assertion (`g_nDestroyCalls == 1 && g_nDeleteCalls == 1`) only when it
-  runs after `cqbase_d24`; on its own it passes. The state another unit leaves behind is
-  the next unit's work.
+- Closed the same day: `cqbase_d24` installed its own release seams
+  (`g_pfnDestroyDomain`, `g_pfnFreeDomainAlloc`, `g_pfnDestroyFacility`,
+  `g_pfnFreeFacilityAlloc`, `g_pfnInitCrossVlmList`) and never put the incoming ones
+  back, so `cqbase_d25`'s `Release(pDom)` went to d24's lambdas and its own counters
+  stayed at zero. `cqbase_d24` now saves them on entry and restores them at the end.
+- `tools/run_cqbase_cycle.sh` -> `CQBAE-CYCLE-6X-GREEN: 77 units`.

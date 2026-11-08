@@ -241,6 +241,7 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - `cqbase_d53` moved to the D102 seam names; `cqbase_d7/d8/d10/d11/d12` keep a log sink
   installed so a shared process does not call through a null `g_pfnLogPrintf`.
 - `tools/run_cqbase_cycle.sh` links the syndicate objects its units reach.
-- Next: `cqbase_d25` passes alone but not after `cqbase_d24` in the one binary. Find the
-  global `cqbase_d24` leaves behind (vtable slot, heap or tree seam) and reset it, then the
-  CQBase cycle is green again.
+- `cqbase_d24` now restores the five release seams it installs, so `cqbase_d25`
+  runs clean in the same process: `CQBAE-CYCLE-6X-GREEN: 77 units` (6 passes, ASan+UBSan).
+- Next: back to the function porting sequence — the limbs table at 0x1417c5980..
+  (the small accessor cluster) is dumped and ready.
