@@ -1306,6 +1306,84 @@ int main() {
         g_pfnLogic_1417cad00 = nullptr;
     }
 
+    // ------------------------------------------------------------------
+    // 0x14179a150 — the same routine as 0x14179a020 over the container at +0x2e0 and
+    // the id range 0xa..0x18. Same fixture, one offset apart, so the checks below only
+    // have to prove the two constants and that the loop count follows them.
+    {
+        static int nSlot2b, nSlot8b, nSlot16b, nSlot7b, nLog4, nLookup4, nErase4, nClear4;
+        static void* pClearArg; static void* pEraseArg;
+        static uint32_t uMode2;
+        static void* rObjVt[40]; static void* rRecVt[40]; static void* rHitVt[40];
+        static void* pSelfObj; static void* pHitRecObj;
+        static uint64_t rHit[0x90];
+        static uint64_t rRec[2];
+        static void* pResObj;
+
+        rRecVt[0x10 / 8] = (void*)(void* (*)(void*, uint32_t)) + [](void*, uint32_t) -> void* {
+            ++nSlot2b; return pResObj; };
+        rRecVt[0x38 / 8] = (void*)(uint32_t (*)(void*, uint32_t)) + [](void*, uint32_t) -> uint32_t {
+            ++nSlot7b; return 0; };
+        rObjVt[0x40 / 8] = (void*)(uint32_t (*)(void*)) + [](void*) -> uint32_t {
+            ++nSlot8b; return uMode2; };
+        rObjVt[0xb0 / 8] = (void*)(uint32_t (*)(void*, uint32_t)) + [](void*, uint32_t) -> uint32_t {
+            ++nSlot16b; return 0; };
+        rHitVt[0x10 / 8] = (void*)(void* (*)(void*, uint32_t)) + [](void*, uint32_t) -> void* {
+            return pHitRecObj; };
+        rHitVt[0x48 / 8] = (void*)(uint32_t (*)(void*)) + [](void*) -> uint32_t { return 0; };
+
+        static void* pResHolder[1]; pResHolder[0] = (void*)rObjVt;
+        static void* pHitHolder[1]; pHitHolder[0] = (void*)rHitVt;
+        static void* pSelfHolder[1]; pSelfHolder[0] = (void*)rRecVt;
+        pResObj = pResHolder;
+        pHitRecObj = pHitHolder;
+        rRec[0] = (uint64_t)rHitVt;
+        *(uint64_t*)((uint8_t*)rHit + 0x428) = (uint64_t)rRec;
+
+        static uint64_t aSelf4[0x90];
+        std::memset(aSelf4, 0, sizeof aSelf4);
+        *(uint64_t*)((uint8_t*)aSelf4 + 0x428) = (uint64_t)pSelfHolder;
+        *(uint64_t*)((uint8_t*)aSelf4 + 0x438) = 0x2222;
+
+        g_pfnLogic_141727640 = +[](void* p) { ++nClear4; pClearArg = p; };
+        g_pfnLogic_14172ae00 = +[](void* c, void* o, void* k) { ++nErase4; pEraseArg = c; (void)o; (void)k; };
+        g_pfn_log_141823030 = +[](const char*, const char*, const char*, const char*, int) { ++nLog4; };
+        g_pfnLogic_1417cad00 = +[](uint64_t, uint64_t, uint64_t, uint64_t) -> uint64_t {
+            ++nLookup4; return (uint64_t)(uintptr_t)rHit; };
+
+        // the clear is handed this+0x2e0, not this+0x2a0
+        uMode2 = 0;
+        nClear4 = nErase4 = nLookup4 = nSlot7b = nSlot16b = nSlot2b = nSlot8b = 0;
+        pClearArg = pEraseArg = nullptr;
+        Slot_14179a150(aSelf4);
+        CHECK(nClear4 == 1);
+        CHECK(pClearArg == (void*)((uint8_t*)aSelf4 + 0x2e0));
+        CHECK(nSlot2b == 15 && nSlot8b == 15);         // 0xa..0x18 is fifteen ids
+        CHECK(nLookup4 == 0 && nErase4 == 0);
+
+        // with a non-zero id the erase is handed the same +0x2e0 container
+        uMode2 = 3;
+        nClear4 = nErase4 = nLookup4 = nSlot7b = nSlot16b = nSlot2b = nSlot8b = 0;
+        pClearArg = pEraseArg = nullptr;
+        Slot_14179a150(aSelf4);
+        CHECK(nLookup4 == 15 && nErase4 == 15 && nLog4 == 0);
+        CHECK(pEraseArg == (void*)((uint8_t*)aSelf4 + 0x2e0));
+
+        // and the sibling still uses +0x2a0 over its own fifteen ids, 0x19..0x27
+        uMode2 = 3;
+        nClear4 = nErase4 = nLookup4 = nSlot7b = nSlot16b = nSlot2b = nSlot8b = 0;
+        pClearArg = pEraseArg = nullptr;
+        Slot_14179a020(aSelf4);
+        CHECK(pClearArg == (void*)((uint8_t*)aSelf4 + 0x2a0));
+        CHECK(pEraseArg == (void*)((uint8_t*)aSelf4 + 0x2a0));
+        CHECK(nSlot2b == 15 && nLookup4 == 15);
+
+        g_pfnLogic_141727640 = nullptr;
+        g_pfnLogic_14172ae00 = nullptr;
+        g_pfn_log_141823030 = nullptr;
+        g_pfnLogic_1417cad00 = nullptr;
+    }
+
     std::printf("%s checks=%d fails=%d\n", g_fails ? "LOGIC_SLOTS_FAIL" : "LOGIC_SLOTS_OK",
                 g_checks, g_fails);
     return g_fails ? 1 : 0;

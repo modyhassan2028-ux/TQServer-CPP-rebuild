@@ -1183,12 +1183,12 @@ namespace tq {
 void (*g_pfnLogic_141727640)(void* p) = nullptr;
 void (*g_pfnLogic_14172ae00)(void* container, void* out, void* key) = nullptr;
 
-void Slot_14179a020(void* self) {
+static void EraseIdRange(void* self, size_t nContainerOff, uint32_t uFirst, uint32_t uLast) {
     uint8_t* p = (uint8_t*)self;                              // mov rdi,rcx
     if (g_pfnLogic_141727640 != nullptr)                      // 14179a039 call 0x141727640
-        g_pfnLogic_141727640(p + 0x2a0);                      // lea rcx,[rcx+0x2a0]
+        g_pfnLogic_141727640(p + nContainerOff);              // lea rcx,[rcx+0x2a0] (0x2e0 in a150)
 
-    for (uint32_t i = 0x19; i < 0x28; ++i) {                  // mov ebx,0x19 / cmp 0x28 / jl
+    for (uint32_t i = uFirst; i < uLast; ++i) {               // mov ebx,0x19 / cmp 0x28 / jl
         void* pRec = *(void**)(p + 0x428);                    // 14179a050 mov rcx,[rdi+0x428]
         void*** vtRec = *(void****)pRec;                      // mov rax,[rcx]
         void* p1 = ((void* (*)(void*, uint32_t))vtRec[0x10 / 8])(pRec, i);   // call *0x10
@@ -1217,7 +1217,7 @@ void Slot_14179a020(void* self) {
     erase:
         if (g_pfnLogic_14172ae00 != nullptr) {                // 14179a0f2 call 0x14172ae00
             uint8_t aOut[0x30] = {0};                         // [rsp+0x30]
-            g_pfnLogic_14172ae00(p + 0x2a0, aOut, &uKey);      // lea r8,[rsp+0x60]
+            g_pfnLogic_14172ae00(p + nContainerOff, aOut, &uKey);   // lea r8,[rsp+0x60]
         }
         continue;                                             // jmp 14179a126
 
@@ -1234,5 +1234,12 @@ void Slot_14179a020(void* self) {
         }
     }
 }
+
+// The two entry points differ in exactly two immediates and one displacement, which is what
+// the byte comparison of the two rows shows: 69 instructions each, 57 byte-identical, and the
+// 12 that differ are `add $0x2a0` vs `$0x2e0`, `mov $0x19` vs `$0xa`, `cmp $0x28` vs `$0x19`,
+// plus the rel32-encoded targets that must differ because the code sits elsewhere.
+void Slot_14179a020(void* self) { EraseIdRange(self, 0x2a0, 0x19, 0x28); }
+void Slot_14179a150(void* self) { EraseIdRange(self, 0x2e0, 0x0a, 0x19); }
 
 }  // namespace tq

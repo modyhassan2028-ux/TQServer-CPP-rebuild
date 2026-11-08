@@ -301,6 +301,11 @@ namespace tq {
 extern void (*g_pfnLogic_141727640)(void* p);                    // the +0x2a0 clear
 extern void (*g_pfnLogic_14172ae00)(void* container, void* out, void* key);  // the erase
 void Slot_14179a020(void* self);
+// 0x14179a150 is the same routine over the container at +0x2e0 and the id range 0xa..0x18.
+// Proven by comparing the two rows instruction by instruction: 69 each, 57 byte-identical, and
+// the only differences are those two immediates, the one displacement (+0x2a0 vs +0x2e0) and the
+// rel32 targets that have to differ with the row's address.
+void Slot_14179a150(void* self);
 
 }  // namespace tq
 

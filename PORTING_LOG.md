@@ -9859,3 +9859,24 @@ hit whose slot 0x48 answers non-zero (release), with the id sequence and the loo
 Test-scaffolding faults in this batch: the fixture put the vtable itself at `+0x428` instead of an
 object whose first word is the vtable, and the slot-2 handler sat in the wrong table (it belongs to
 m_pRec, not to the record it returns). Both were fixed in the fixture; no check was relaxed.
+
+## 2026-11-08 — 0x14179a150 ported (the sibling of 0x14179a020)
+
+The two rows are the same routine. Compared instruction by instruction before writing anything:
+69 instructions each, **57 byte-identical**, and the 12 that differ are exactly `add $0x2a0` vs
+`add $0x2e0`, `mov $0x19` vs `mov $0xa`, `cmp $0x28` vs `cmp $0x19`, and the eight rel32-encoded
+operands that must differ because the code sits at a different address (the four `lea rip` literals,
+`0x141727640`, `0x1417cad00`, `0x14172ae00` and the IAT call — all resolving to the same targets).
+
+So there is one transcription, `EraseIdRange(self, containerOffset, first, last)`, and two entry
+points that pass their own constants:
+
+    0x14179a020 -> EraseIdRange(self, 0x2a0, 0x19, 0x28)
+    0x14179a150 -> EraseIdRange(self, 0x2e0, 0x0a, 0x19)
+
+Batteries: 283 assertions (9 new). The new ones prove the constants rather than restating the old
+ones: the clear and the erase are handed `this+0x2e0` for the a150 entry and `this+0x2a0` for the
+a020 entry, and each entry walks its own fifteen ids.
+
+The same method the repo already used for 0x1417a8520 == 0x1417c8f70, applied with the measurement
+written down instead of an assertion of sameness.
