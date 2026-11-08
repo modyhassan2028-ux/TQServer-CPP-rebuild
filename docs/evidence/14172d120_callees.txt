@@ -1,0 +1,88 @@
+=== 0x141722c70 -> 0x141722cda  (106 bytes, 21 instructions) callees: 0x1417f3154, 0x141823270, 0x141823288, 0x1418233f8
+  0x141722c70 4881ec98000000         sub rsp, 0x98
+  0x141722c77 48c7442420feffffff     mov qword ptr [rsp + 0x20], 0xfffffffffffffffe
+  0x141722c80 488d15b1221000         lea rdx, [rip + 0x1022b1]
+  0x141722c87 488d4c2428             lea rcx, [rsp + 0x28]
+  0x141722c8c ff15de051000           call qword ptr [rip + 0x1005de]
+  0x141722c92 90                     nop 
+  0x141722c93 488d4c2450             lea rcx, [rsp + 0x50]
+  0x141722c98 ff155a071000           call qword ptr [rip + 0x10075a]
+  0x141722c9e 90                     nop 
+  0x141722c9f 488d05ba1d1000         lea rax, [rip + 0x101dba]
+  0x141722ca6 4889442450             mov qword ptr [rsp + 0x50], rax
+  0x141722cab 488d542428             lea rdx, [rsp + 0x28]
+  0x141722cb0 488d4c2468             lea rcx, [rsp + 0x68]
+  0x141722cb5 ff15cd051000           call qword ptr [rip + 0x1005cd]
+  0x141722cbb 90                     nop 
+  0x141722cbc 488d053d1e1000         lea rax, [rip + 0x101e3d]
+  0x141722cc3 4889442450             mov qword ptr [rsp + 0x50], rax
+  0x141722cc8 488d1569f01500         lea rdx, [rip + 0x15f069]
+  0x141722ccf 488d4c2450             lea rcx, [rsp + 0x50]
+  0x141722cd4 e87b040d00             call 0x1417f3154
+  0x141722cd9 cc                     int3 
+=== 0x141724d10 -> 0x141724d7d  (109 bytes, 26 instructions) callees: 0x1417f3154, 0x1417f3166, 0x1418233e8
+  0x141724d10 4883ec48               sub rsp, 0x48
+  0x141724d14 48c7442420feffffff     mov qword ptr [rsp + 0x20], 0xfffffffffffffffe
+  0x141724d1d 4c8bc2                 mov r8, rdx
+  0x141724d20 4885d2                 test rdx, rdx
+  0x141724d23 7446                   je 0x141724d6b
+  0x141724d25 33d2                   xor edx, edx
+  0x141724d27 4883c8ff               or rax, 0xffffffffffffffff
+  0x141724d2b 49f7f0                 div r8
+  0x141724d2e 4883f804               cmp rax, 4
+  0x141724d32 7337                   jae 0x141724d6b
+  0x141724d34 4533c0                 xor r8d, r8d
+  0x141724d37 4c89442458             mov qword ptr [rsp + 0x58], r8
+  0x141724d3c 488d542458             lea rdx, [rsp + 0x58]
+  0x141724d41 488d4c2428             lea rcx, [rsp + 0x28]
+  0x141724d46 ff159ce60f00           call qword ptr [rip + 0xfe69c]
+  0x141724d4c 90                     nop 
+  0x141724d4d 488d05ecfe0f00         lea rax, [rip + 0xffeec]
+  0x141724d54 4889442428             mov qword ptr [rsp + 0x28], rax
+  0x141724d59 488d1590d01500         lea rdx, [rip + 0x15d090]
+  0x141724d60 488d4c2428             lea rcx, [rsp + 0x28]
+  0x141724d65 e8eae30c00             call 0x1417f3154
+  0x141724d6a cc                     int3 
+  0x141724d6b 4a8d0c8500000000       lea rcx, [r8*4]
+  0x141724d73 e8eee30c00             call 0x1417f3166
+  0x141724d78 4883c448               add rsp, 0x48
+  0x141724d7c c3                     ret 
+=== 0x14172acb0 -> 0x14172acec  (60 bytes, 18 instructions) callees: 0x1418232a8
+  0x14172acb0 4053                   push rbx
+  0x14172acb2 4883ec20               sub rsp, 0x20
+  0x14172acb6 4c2bc2                 sub r8, rdx
+  0x14172acb9 4c8bd2                 mov r10, rdx
+  0x14172acbc 498bc1                 mov rax, r9
+  0x14172acbf 49c1f802               sar r8, 2
+  0x14172acc3 4a8d148500000000       lea rdx, [r8*4]
+  0x14172accb 4a8d1c0a               lea rbx, [rdx + r9]
+  0x14172accf 4d85c0                 test r8, r8
+  0x14172acd2 740f                   je 0x14172ace3
+  0x14172acd4 4c8bca                 mov r9, rdx
+  0x14172acd7 4d8bc2                 mov r8, r10
+  0x14172acda 488bc8                 mov rcx, rax
+  0x14172acdd ff15c5850f00           call qword ptr [rip + 0xf85c5]
+  0x14172ace3 488bc3                 mov rax, rbx
+  0x14172ace6 4883c420               add rsp, 0x20
+  0x14172acea 5b                     pop rbx
+  0x14172aceb c3                     ret 
+=== 0x141727380 -> 0x1417273bb  (59 bytes, 18 instructions) callees: 0x1418232a8
+  0x141727380 4053                   push rbx
+  0x141727382 4883ec20               sub rsp, 0x20
+  0x141727386 482bd1                 sub rdx, rcx
+  0x141727389 498bd8                 mov rbx, r8
+  0x14172738c 48c1fa02               sar rdx, 2
+  0x141727390 488d049500000000       lea rax, [rdx*4]
+  0x141727398 482bd8                 sub rbx, rax
+  0x14172739b 4885d2                 test rdx, rdx
+  0x14172739e 7e12                   jle 0x1417273b2
+  0x1417273a0 4c8bc1                 mov r8, rcx
+  0x1417273a3 4c8bc8                 mov r9, rax
+  0x1417273a6 488bd0                 mov rdx, rax
+  0x1417273a9 488bcb                 mov rcx, rbx
+  0x1417273ac ff15f6be0f00           call qword ptr [rip + 0xfbef6]
+  0x1417273b2 488bc3                 mov rax, rbx
+  0x1417273b5 4883c420               add rsp, 0x20
+  0x1417273b9 5b                     pop rbx
+  0x1417273ba c3                     ret 
+=== 0x1417f2fdc NOT A ROW

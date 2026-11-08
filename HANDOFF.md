@@ -136,6 +136,22 @@ itself, the seam list taken from the header, and one line on what the next batch
 number here you did not just measure, and never describe a body as done before its compile line came
 back clean.
 
+
+### Evidence for the five seams of 0x14172d120
+
+Full disassembly of each callee is saved in `docs/evidence/14172d120_callees.txt`, so the next batch
+does not need to re-survey. Sizes, all small enough to port together:
+
+- `0x141722c70` 106 bytes, 21 instructions, calls `0x1417f3154`, `0x141823270`, `0x141823288`, `0x1418233f8`
+- `0x141724d10` 109 bytes, 26 instructions, calls `0x1417f3154`, `0x1417f3166`, `0x1418233e8`
+- `0x14172acb0` 60 bytes, 18 instructions, calls `0x1418232a8` (`memmove_s`)
+- `0x141727380` 59 bytes, 18 instructions, calls `0x1418232a8` (`memmove_s`)
+- `0x1417f2fdc` is **not a `.pdata` row start**; it lives inside another row, so locate the containing
+  row before transcribing it. Do not invent a body for it.
+
+That is 9-ish instructions of real work per body: the batch is a single sitting if the containing row
+for `0x1417f2fdc` is found first.
+
 ## Bugs that were mine, not the port's (so the next agent does not repeat them)
 
 Every one of these was in the test scaffolding:
