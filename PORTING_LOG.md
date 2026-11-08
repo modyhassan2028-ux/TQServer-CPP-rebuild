@@ -9831,3 +9831,31 @@ that is not the end node".
 Batteries: 264 assertions (9 new): present at 5/6/7/8 with the candidate the walk records, absent at
 4 and 0 where the walk goes right from the root and never records one, the empty map, and the null-word
 run. 6/6 runs, sanitizers clean.
+
+## 2026-11-08 — 0x14179a020 ported (the last call of the destroy chain)
+
+72 instructions, `ret` at 0x14179a140. It clears the container at `this+0x2a0` through
+`0x141727640`, then walks the id range `0x19..0x27` (`inc ebx / cmp 0x28 / jl`) and for every id:
+
+- `[this+0x428]` is m_pRec; slot `0x10` is called with the id and its answer's slot `0x40` gives the
+  stored id. A zero answer skips the rest of the iteration (`test eax,eax / je 14179a126`).
+- The id is looked up with the already-ported `0x1417cad00` on the map at `this+0x438`.
+- A miss (`test rax,rax / je`) goes to the release path.
+- A hit whose `+0x428` is null is reported as `"IF_OK(m_pRec)"` at line `0x956` (2390) through
+  `CQBase.dll!log_InlineLogERROR`, then takes the erase path (`jmp 14179a0e1`).
+- Otherwise the hit's record is read through its slots `0x10` then `0x48`, and a non-zero answer
+  (`setne al / test al,al / jne`) also goes to the release path.
+- Erase path: `0x14172ae00(this+0x2a0, &[rsp+0x30], &[rsp+0x60])`.
+- Release path: slots `0xb0` (with edx = 0) and `0x38` (with edx = 0) on the two objects.
+
+Two callees stay seams, null by default: `0x141727640` (the +0x2a0 clear) and `0x14172ae00` (the
+erase). `0x1417cad00` was already ported, so it is called through its injectable pointer.
+
+Batteries: 274 assertions (10 new), each mode of the loop exercised separately: zero id (no lookup),
+miss (release), hit with a null record (report then erase), hit whose slot 0x48 answers zero (erase),
+hit whose slot 0x48 answers non-zero (release), with the id sequence and the lookup argument checked.
+6/6 runs, sanitizers clean.
+
+Test-scaffolding faults in this batch: the fixture put the vtable itself at `+0x428` instead of an
+object whose first word is the vtable, and the slot-2 handler sat in the wrong table (it belongs to
+m_pRec, not to the record it returns). Both were fixed in the fixture; no check was relaxed.

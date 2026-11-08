@@ -1209,6 +1209,103 @@ int main() {
         g_pfn_invalid_parameter_noinfo = nullptr;
     }
 
+    // ------------------------------------------------------------------
+    // 0x14179a020 — the last destroy call. It walks ids 0x19..0x27, reads the record
+    // through vtable slot 2, takes the id from slot 8, looks it up on the map at +0x438,
+    // and either erases from the +0x2a0 container or releases through slots 0x16 and 7.
+    {
+        static int nSlot2, nSlot8, nSlot9, nSlot16, nSlot7, nLog3, nLookup, nErase, nClear;
+        static uint32_t aIds[64]; static int nIds;
+        static uint32_t uMode;              // what slot 8 answers
+        static uint32_t aLookupArg[64]; static int nLookupArg;
+
+        static void* aObj1Vt[40];
+        static void* aRecVt[40];            // m_pRec's own table
+        static void* aHitRecVt[40];
+        static void* pObj1;                 // what slot 2 hands back
+        static void* pHitObj;               // the lookup's answer, +0x428 inside it
+
+        static uint64_t aHit[0x90];
+        static uint64_t aHit2[0x90];        // a hit whose +0x428 is null
+        static uint64_t aRec2[2];           // the record inside aHit
+        static uint64_t aRec4[2];           // what slot 2 gives for the +0x428 of aHit
+
+        static void* pObj1Self[1];
+        aRecVt[0x10 / 8] = (void*)(void* (*)(void*, uint32_t)) + [](void*, uint32_t) -> void* {
+            ++nSlot2; return pObj1; };                      // slot 2 on m_pRec answers the record
+        aObj1Vt[0x40 / 8] = (void*)(uint32_t (*)(void*)) + [](void*) -> uint32_t {
+            ++nSlot8; if (nIds < 64) aIds[nIds++] = uMode; return uMode; };
+        aObj1Vt[0xb0 / 8] = (void*)(uint32_t (*)(void*, uint32_t)) + [](void*, uint32_t) -> uint32_t {
+            ++nSlot16; return 0; };
+        aRecVt[0x38 / 8] = (void*)(uint32_t (*)(void*, uint32_t)) + [](void*, uint32_t) -> uint32_t {
+            ++nSlot7; return 0; };
+        static void* pRec2Self[1];
+        aHitRecVt[0x10 / 8] = (void*)(void* (*)(void*, uint32_t)) + [](void*, uint32_t) -> void* {
+            return pRec2Self; };                            // an object whose vtable is the same
+        aHitRecVt[0x48 / 8] = (void*)(uint32_t (*)(void*)) + [](void*) -> uint32_t {
+            ++nSlot9; return uMode == 8 ? 1u : 0u; };       // only mode 8 sends it to release
+
+        pObj1 = pObj1Self;
+        pObj1Self[0] = (void*)aObj1Vt;
+        pRec2Self[0] = (void*)aHitRecVt;
+        pHitObj = aHit;
+        aRec2[0] = (uint64_t)aHitRecVt;                       // aHit's record: word 0 = vtable
+        *(uint64_t*)((uint8_t*)aHit + 0x428) = (uint64_t)aRec2;
+
+        static void* aRecObj[1];                              // m_pRec itself: word 0 = vtable
+        aRecObj[0] = (void*)aRecVt;
+        static uint64_t aSelf3[0x90];
+        std::memset(aSelf3, 0, sizeof aSelf3);
+        *(uint64_t*)((uint8_t*)aSelf3 + 0x428) = (uint64_t)aRecObj;
+        *(uint64_t*)((uint8_t*)aSelf3 + 0x438) = 0x1111;
+
+        g_pfnLogic_141727640 = +[](void* p) { ++nClear; (void)p; };
+        g_pfnLogic_14172ae00 = +[](void* c, void* o, void* k) { ++nErase; (void)c; (void)o; (void)k; };
+        g_pfn_log_141823030 = +[](const char* f, const char* e, const char* w,
+                                  const char* fi, int l) { ++nLog3; (void)f; (void)e; (void)w; (void)fi; (void)l; };
+        g_pfnLogic_1417cad00 = +[](uint64_t, uint64_t id, uint64_t, uint64_t) -> uint64_t {
+            ++nLookup; if (nLookupArg < 64) aLookupArg[nLookupArg++] = (uint32_t)id;
+            if (uMode == 1) return 0;                        // a miss
+            if (uMode == 2) return (uint64_t)(uintptr_t)aHit2;   // a hit with a null record
+            return (uint64_t)(uintptr_t)pHitObj; };
+
+        auto run = [](uint32_t mode) {
+            uMode = mode; nSlot2 = nSlot8 = nSlot9 = nSlot16 = nSlot7 = 0;
+            nLog3 = nLookup = nErase = nClear = 0; nIds = 0; nLookupArg = 0;
+            Slot_14179a020(aSelf3);
+        };
+
+        // mode 0: slot 8 answers zero for every id, so nothing is looked up
+        run(0);
+        CHECK(nClear == 1);                  // the +0x2a0 clear always runs first
+        CHECK(nSlot2 == 15 && nSlot8 == 15);  // ids 0x19..0x27
+        CHECK(nIds == 15 && aIds[0] == 0 && aIds[14] == 0);
+        CHECK(nLookup == 0 && nErase == 0 && nSlot16 == 0 && nSlot7 == 0 && nLog3 == 0);
+
+        // mode 1: a miss sends every id to release
+        run(1);
+        CHECK(nLookup == 15 && nErase == 0 && nLog3 == 0);
+        CHECK(nSlot16 == 15 && nSlot7 == 15);
+        CHECK(nLookupArg == 15 && aLookupArg[0] == 1 && aLookupArg[14] == 1);
+
+        // mode 2: a hit whose +0x428 is null is reported, then erased
+        run(2);
+        CHECK(nLog3 == 15 && nErase == 15 && nSlot16 == 0 && nSlot7 == 0);
+
+        // mode 3: a hit whose slot 9 answers zero goes to the erase as well
+        run(3);
+        CHECK(nErase == 15 && nSlot9 == 15 && nSlot16 == 0 && nSlot7 == 0 && nLog3 == 0);
+
+        // mode 8: a hit whose slot 9 answers non-zero is released instead
+        run(8);
+        CHECK(nErase == 0 && nSlot9 == 15 && nSlot16 == 15 && nSlot7 == 15);
+
+        g_pfnLogic_141727640 = nullptr;
+        g_pfnLogic_14172ae00 = nullptr;
+        g_pfn_log_141823030 = nullptr;
+        g_pfnLogic_1417cad00 = nullptr;
+    }
+
     std::printf("%s checks=%d fails=%d\n", g_fails ? "LOGIC_SLOTS_FAIL" : "LOGIC_SLOTS_OK",
                 g_checks, g_fails);
     return g_fails ? 1 : 0;

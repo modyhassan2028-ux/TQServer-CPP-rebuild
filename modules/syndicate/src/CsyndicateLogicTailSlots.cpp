@@ -1159,3 +1159,80 @@ bool Slot_141797e00(void* self, uint32_t id) {
 }
 
 }  // namespace tq
+
+namespace tq {
+
+// ============================================================================
+// 0x14179a020 — the last destroy call. Every load, slot and jump the bytes perform:
+//   14179a02f  rdi = this
+//   14179a032  rcx = this+0x2a0 ; 14179a039 call 0x141727640
+//   14179a03e  ebx = 0x19, then the loop 14179a050 .. 14179a12b (`inc ebx / cmp 0x28 / jl`)
+//   14179a050  rcx = [rdi+0x428] (m_pRec), edx = ebx, rax = [rcx], call *0x10  -> p1
+//   14179a062  rdx = [p1], call *0x40                                          -> eax
+//   14179a068  the answer is spilled at [rsp+0x60]; zero means next id
+//   14179a074  rcx = [rdi+0x438], edx = eax, call 0x1417cad00                  -> hit
+//   14179a085  hit null -> 0x14179a0f9
+//   14179a087  [hit+0x428] null -> the report at 0x14179a091 and then 0x14179a0e1
+//   14179a0bd  otherwise rcx = [hit+0x428], edx = 9, call *0x10 -> p2, call *0x48 -> eax
+//   14179a0d8  test eax,eax / setne al / test al,al / jne 0x14179a0f9
+//   14179a0e1  rcx = this+0x2a0, rdx = &[rsp+0x30], r8 = &[rsp+0x60], call 0x14172ae00
+//   14179a0f9  rcx = [rdi+0x428], edx = ebx, call *0x10 -> p3, then call *0xb0 with edx = 0
+//   14179a117  rcx = [rdi+0x428], edx = 0, call *0x38
+// 0x141727640 and 0x14172ae00 are not ported: two seams, null by default. 0x1417cad00 is
+// ported, so it is called through its own injectable pointer.
+void (*g_pfnLogic_141727640)(void* p) = nullptr;
+void (*g_pfnLogic_14172ae00)(void* container, void* out, void* key) = nullptr;
+
+void Slot_14179a020(void* self) {
+    uint8_t* p = (uint8_t*)self;                              // mov rdi,rcx
+    if (g_pfnLogic_141727640 != nullptr)                      // 14179a039 call 0x141727640
+        g_pfnLogic_141727640(p + 0x2a0);                      // lea rcx,[rcx+0x2a0]
+
+    for (uint32_t i = 0x19; i < 0x28; ++i) {                  // mov ebx,0x19 / cmp 0x28 / jl
+        void* pRec = *(void**)(p + 0x428);                    // 14179a050 mov rcx,[rdi+0x428]
+        void*** vtRec = *(void****)pRec;                      // mov rax,[rcx]
+        void* p1 = ((void* (*)(void*, uint32_t))vtRec[0x10 / 8])(pRec, i);   // call *0x10
+        void*** vt1 = *(void****)p1;                          // mov rdx,[rax]
+        uint32_t uId = ((uint32_t (*)(void*))vt1[0x40 / 8])(p1);             // call *0x40
+        uint32_t uKey = uId;                                  // mov [rsp+0x60],eax
+        if (uId == 0) continue;                               // test eax,eax / je 14179a126
+
+        void* pHit = (void*)(uintptr_t)g_pfnLogic_1417cad00(
+            (uint64_t)(uintptr_t)(p + 0x438), (uint64_t)uId, 0, 0);          // call 0x1417cad00
+        if (pHit == nullptr) goto release;                    // test rax,rax / je 14179a0f9
+
+        if (*(void**)((uint8_t*)pHit + 0x428) == nullptr) {   // cmpq $0,0x428(%rax) / jne
+            if (g_pfn_log_141823030 != nullptr)               // 14179a0b5 call *0x141823030
+                g_pfn_log_141823030(kDeadLoopFmt, "IF_OK", "m_pRec", kSyndicateFile, 0x956);
+            goto erase;                                       // 14179a0bb jmp 14179a0e1
+        }
+        {
+            void* pRec2 = *(void**)((uint8_t*)pHit + 0x428);  // 14179a0bd mov rcx,[rax+0x428]
+            void*** vt2 = *(void****)pRec2;                   // mov rax,[rcx]
+            void* p2 = ((void* (*)(void*, uint32_t))vt2[0x10 / 8])(pRec2, 9);  // edx = 9
+            void*** vt3 = *(void****)p2;                      // mov rdx,[rax]
+            uint32_t uRc = ((uint32_t (*)(void*))vt3[0x48 / 8])(p2);           // call *0x48
+            if (uRc != 0) goto release;                       // setne al / test / jne 14179a0f9
+        }
+    erase:
+        if (g_pfnLogic_14172ae00 != nullptr) {                // 14179a0f2 call 0x14172ae00
+            uint8_t aOut[0x30] = {0};                         // [rsp+0x30]
+            g_pfnLogic_14172ae00(p + 0x2a0, aOut, &uKey);      // lea r8,[rsp+0x60]
+        }
+        continue;                                             // jmp 14179a126
+
+    release:
+        {
+            void* pRec3 = *(void**)(p + 0x428);                // 14179a0f9
+            void*** vt4 = *(void****)pRec3;
+            void* p3 = ((void* (*)(void*, uint32_t))vt4[0x10 / 8])(pRec3, i);  // edx = ebx
+            void*** vt5 = *(void****)p3;
+            ((uint32_t (*)(void*, uint32_t))vt5[0xb0 / 8])(p3, 0);             // call *0xb0
+            void* pRec4 = *(void**)(p + 0x428);                // 14179a117
+            void*** vt6 = *(void****)pRec4;
+            ((uint32_t (*)(void*, uint32_t))vt6[0x38 / 8])(pRec4, 0);          // call *0x38
+        }
+    }
+}
+
+}  // namespace tq

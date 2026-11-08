@@ -290,4 +290,18 @@ extern bool Slot_141797e00(void* self, uint32_t id);
 
 }  // namespace tq
 
+namespace tq {
+
+// 0x14179a020 — the last call of the destroy chain. It clears the container at +0x2a0,
+// then walks the id range 0x19..0x27 (< 0x28) reading the record through vtable slot 2,
+// asking slot 8 for the id, looking that up with 0x1417cad00 on the map at +0x438, and
+// either erasing from the +0x2a0 container (0x14172ae00) or releasing the record through
+// slots 0x16 and 7. A hit whose +0x428 is null is reported as "IF_OK(m_pRec)" at line
+// 0x956 (2390) before the erase path runs.
+extern void (*g_pfnLogic_141727640)(void* p);                    // the +0x2a0 clear
+extern void (*g_pfnLogic_14172ae00)(void* container, void* out, void* key);  // the erase
+void Slot_14179a020(void* self);
+
+}  // namespace tq
+
 #endif
