@@ -23,6 +23,8 @@ void* Slot_14177ec90_ModuleCreate(void* pArg, uint32_t nArg2);
 void* Slot_14177ead0_ModuleCtor(void* pMem, void* pArg2, uint32_t nArg3);
 extern void (*g_pfnL_1417d9710)(void* pBase);                    // base sub-object at this+0x10
 extern void (*g_pfnL_1417d8390)(void*);  extern void (*g_pfnL_1417d9000)(void*);
+extern void (*g_pfnL_1417db330)(void*);  // the message destructor behind 0x1417db330
+extern void (*g_pfnL_1417da8b0)(void*);  // the message destructor behind 0x1417da8b0
 extern void (*g_pfnL_1417d6640)(void*);  extern void (*g_pfnL_1417d9e60)(void*);
 extern void (*g_pfnL_1417da860)(void*);  extern void (*g_pfnL_1417dac30)(void*);
 extern void (*g_pfnL_1417dae10)(void*);  extern void (*g_pfnL_1417db2b0)(void*);

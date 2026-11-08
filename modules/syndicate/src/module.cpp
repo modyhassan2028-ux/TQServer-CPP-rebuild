@@ -8,6 +8,8 @@ void (*g_pfn_checkf_module)(const char*, const char*, const char*, const char*, 
 void* (*g_pfnL_1417f3166)(uint64_t) = nullptr;
 void* (*g_pfnL_14177ead0)(void*, void*, uint32_t) = nullptr;
 bool (*g_pfnL_14177e890)(void*) = nullptr;
+void (*g_pfnL_1417db330)(void*) = nullptr;
+void (*g_pfnL_1417da8b0)(void*) = nullptr;
 
 // ============================================================================
 // 0x14177ec90. The allocator is called with the size in %ecx alone (`mov $0x4608,%ecx`), and the

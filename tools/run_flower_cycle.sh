@@ -7,7 +7,7 @@ set -u
 OBJ=/app/co_repo/.build_flower
 mkdir -p "$OBJ"
 find "$OBJ" -name "*.o" -delete
-for f in modules/analyst/src/*.cpp modules/title/src/*.cpp modules/training/src/*.cpp modules/peerage/src/*.cpp modules/syndicate/src/*.cpp modules/syndicate/src/msg/*.cpp modules/flower/src/*.cpp modules/flower/src/msg/*.cpp; do
+for f in modules/cqbase/src/*.cpp modules/analyst/src/*.cpp modules/title/src/*.cpp modules/training/src/*.cpp modules/peerage/src/*.cpp modules/syndicate/src/*.cpp modules/syndicate/src/msg/*.cpp modules/flower/src/*.cpp modules/flower/src/msg/*.cpp; do
   base=$(basename "$f" .cpp); dir=$(basename "$(dirname "$(dirname "$f")")")
   [ "$base" = "$dir" ] && continue
   o=$OBJ/$(echo "$f" | sed "s|/|_|g; s|\.cpp$|.o|")

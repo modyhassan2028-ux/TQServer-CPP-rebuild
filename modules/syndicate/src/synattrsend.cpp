@@ -145,9 +145,9 @@ void SynAttrInsertCore(void* pOwner, void* pUser, void* pAttrInfo, uint32_t uId,
         if (SynMsgSyndicateAnnounce(aAnnMsg, 0x1b, uNumber, pszAnnounce)) {
             ManagerInsert(pMgr, uId, aAnnMsg);
         }
-        ::syndicate::g_fnModMem0428(aAnnMsg);      // 0x1417db330
+        g_pfnL_1417db330(aAnnMsg);    // 0x1417db330
     }
-    ::syndicate::g_fnModMem1088(aAttrMsg);         // 0x1417da8b0
+    g_pfnL_1417da8b0(aAttrMsg);    // 0x1417da8b0
 }
 
 }  // namespace tq
