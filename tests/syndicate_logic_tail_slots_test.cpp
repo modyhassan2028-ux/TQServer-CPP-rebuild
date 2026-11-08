@@ -401,6 +401,71 @@ int main() {
         CHECK(g_calls == 0);
     }
 
+    // --- 0x14177c6c0 builds the map: proxy, end node, and the size
+    {
+        struct Head { uint8_t bytes[0x38]; };
+        static Head head;
+        static uint64_t map[8];
+        std::memset(&head, 0, sizeof(head));
+        std::memset(map, 0, sizeof(map));
+
+        g_pfnLogic_14177ace0 = [](void*) -> void* { return (void*)&head; };
+        CHECK(Slot_14177c6c0_ctor(map) == (void*)map);
+        uint64_t* proxy = (uint64_t*)map[0];
+        CHECK(proxy != nullptr);
+        CHECK(proxy[0] == (uint64_t)map);          // the proxy points back at the map
+        CHECK(map[6] == (uint64_t)&head);          // +0x30 the end node
+        CHECK(head.bytes[0x29] == 1);              // _Isnil
+        CHECK(*(uint64_t*)(head.bytes + 0x08) == (uint64_t)&head);   // parent
+        CHECK(*(uint64_t*)(head.bytes + 0x00) == (uint64_t)&head);   // left
+        CHECK(*(uint64_t*)(head.bytes + 0x10) == (uint64_t)&head);   // right
+        CHECK(map[7] == 0);                        // +0x38 size
+        g_pfnLogic_14177ace0 = nullptr;
+    }
+
+    // --- 0x1417a6960 walks the range and calls 0x141732040 per element
+    {
+        static uint64_t slots[3], box[0x0a];            // two live slots, the third is the end
+        static uint64_t proxy[1], map[0x0a];
+        static int prep_calls, elem_calls;
+        static void* seen_arg;
+        static uint64_t seen_elems[2];
+        prep_calls = 0; elem_calls = 0; seen_arg = nullptr; seen_elems[0] = seen_elems[1] = 0;
+
+        std::memset(box, 0, sizeof(box));
+        // the word at +0x20 is the proxy 0x14177c6c0 builds: *proxy is the map, and the map's own
+        // +0x20 is the bound every slot must stay under
+        box[4] = (uint64_t)&proxy[0];
+        box[7] = (uint64_t)&slots[0];              // +0x38 begin
+        box[8] = (uint64_t)&slots[2];              // +0x40 end, one past the second slot
+        proxy[0] = (uint64_t)&map[0];
+        map[4] = ~0ull;
+        slots[0] = 0xAA; slots[1] = 0xBB; slots[2] = 0;
+
+        g_pfn_invalid_parameter_noinfo = [] { };
+        g_pfnLogic_1417495d0 = [](void* a) -> void* { ++prep_calls; seen_arg = a; return a; };
+        g_pfnLogic_141732040 = [](void* a, void* e) {
+            if (elem_calls < 2) seen_elems[elem_calls] = (uint64_t)(uintptr_t)e;
+            ++elem_calls; seen_arg = a;
+        };
+
+        int marker = 5;
+        Slot_1417a6960_iterate(box, &marker);
+        CHECK(prep_calls == 1);
+        CHECK(elem_calls == 2);
+        CHECK(seen_arg == (void*)&marker);
+        CHECK(seen_elems[0] == 0xAA && seen_elems[1] == 0xBB);
+
+        // an empty range preps the argument and calls nothing
+        prep_calls = 0; elem_calls = 0;
+        box[8] = (uint64_t)&slots[0];              // end == begin
+        Slot_1417a6960_iterate(box, &marker);
+        CHECK(prep_calls == 1);
+        CHECK(elem_calls == 0);
+        g_pfnLogic_1417495d0 = nullptr;
+        g_pfnLogic_141732040 = nullptr;
+    }
+
     // --- 0x141779090 scans a slot range for the first (id, kind) match, and 0x141779400 takes it
     {
         static uint32_t want_id, want_kind, answer_kind;

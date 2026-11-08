@@ -99,6 +99,22 @@ void* Slot_1417b6210_singleton(void);                          // 0x88 bytes, in
 void Slot_14177c770_seed(void* value);                         // test hook: preload the static slot
 void Slot_1417b6210_seed(void* value);
 
+// Three callees still to port, kept as seams so neither body below invents anything:
+//   0x14177ace0 builds the end node of the map that 0x14177c6c0 constructs
+//   0x1417495d0 prepares the argument that 0x1417a6960 then hands to every element
+//   0x141732040 is the per-element call 0x1417a6960 makes
+extern void* (*g_pfnLogic_14177ace0)(void* self);
+extern void* (*g_pfnLogic_1417495d0)(void* arg);
+extern void (*g_pfnLogic_141732040)(void* arg, void* elem);
+
+// 0x14177c6c0 — constructor of the 0x40-byte map: an 8-byte proxy that points back at the map,
+// the end node at +0x30 with _Isnil set and left/parent/right pointing at itself, size 0 at +0x38.
+void* Slot_14177c6c0_ctor(void* self);
+
+// 0x1417a6960 — walks the range at [self+0x38]..[self+0x40] and calls 0x141732040 with the prepared
+// argument and each element. Bounds and the container word are re-checked every step, as written.
+void Slot_1417a6960_iterate(void* self, void* arg);
+
 // 0x141779090 — scans the range held at [self+0x20]..[self+0x28] (8-byte slots) for the first
 // element whose virtual answer at slot 0x40 equals id and whose answer at slot 0x48 equals kind.
 // Writes the iterator pair {container word, slot} into out and answers out.

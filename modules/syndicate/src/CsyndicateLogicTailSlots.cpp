@@ -197,6 +197,83 @@ void* Slot_1417b6210_singleton(void) {
     return g_singleton_1417b6210;                            // mov rax,rax at the shared tail
 }
 
+void* (*g_pfnLogic_14177ace0)(void* self) = nullptr;
+void* (*g_pfnLogic_1417495d0)(void* arg) = nullptr;
+void (*g_pfnLogic_141732040)(void* arg, void* elem) = nullptr;
+
+// 0x14177c6c0 — the map constructor. The 8-byte allocation is not padding: the byte store
+// `mov [rax],rbx` puts the map itself in it, so the word at [map] leads back to the owner, which is
+// exactly the shape the iterator checks in the ported walks expect.
+void* Slot_14177c6c0_ctor(void* self) {
+    uint8_t* s = (uint8_t*)self;
+    void** proxy = (void**)::operator new(8);                 // mov ecx,8 / call operator new
+    void* stored = nullptr;
+    if (proxy != nullptr) {                                   // test rax,rax / je
+        *proxy = self;                                        // mov qword [rax],rbx
+        stored = proxy;
+    }
+    *(void**)s = stored;                                      // mov qword [rbx],rax
+
+    void* head = (g_pfnLogic_14177ace0 != nullptr)            // call 0x14177ace0
+                     ? g_pfnLogic_14177ace0(self) : nullptr;
+    *(void**)(s + 0x30) = head;                               // mov [rbx+0x30],rax
+    *(uint8_t*)((uint8_t*)head + 0x29) = 1;                   // mov byte [rax+0x29],1  (_Isnil)
+    *(void**)((uint8_t*)head + 0x08) = head;                  // parent = itself
+    *(void**)head = head;                                     // left = itself
+    *(void**)((uint8_t*)head + 0x10) = head;                  // right = itself
+    *(uint64_t*)(s + 0x38) = 0;                               // mov qword [rbx+0x38],0
+    return self;                                              // mov rax,rbx
+}
+
+// 0x1417a6960 — per-element pass over the container at +0x38..+0x40.
+void Slot_1417a6960_iterate(void* self, void* arg) {
+    uint8_t* s = (uint8_t*)self;
+    if (g_pfnLogic_1417495d0 != nullptr)                      // mov rcx,rdx / call 0x1417495d0
+        g_pfnLogic_1417495d0(arg);
+
+    uint64_t cur = *(uint64_t*)(s + 0x38);                    // mov rbx,[rbp+0x38]
+    if (cur > *(uint64_t*)(s + 0x40))                         // cmp rbx,[rbp+0x40] / jbe
+        g_pfn_invalid_parameter_noinfo();
+    uint64_t word = *(uint64_t*)(s + 0x20);                   // mov rdi,[rbp+0x20]
+
+    for (;;) {
+        uint64_t end = *(uint64_t*)(s + 0x40);                // mov rsi,[rbp+0x40]
+        if (*(uint64_t*)(s + 0x38) > end)                     // cmp [rbp+0x38],rsi / jbe
+            g_pfn_invalid_parameter_noinfo();
+        if (word != 0 && word != *(uint64_t*)(s + 0x20))      // test rdi / cmp rdi,[rbp+0x20] / je
+            g_pfn_invalid_parameter_noinfo();
+        if (cur == end)                                       // cmp rbx,rsi / je done
+            break;
+
+        uint64_t owner;
+        if (word == 0) {                                      // test rdi,rdi / jne
+            g_pfn_invalid_parameter_noinfo();
+            owner = 0;                                        // xor r11d,r11d
+        } else {
+            owner = *(uint64_t*)word;                         // mov r11,[rdi]
+        }
+        if (!(cur < *(uint64_t*)(owner + 0x20)))              // cmp rbx,[r11+0x20] / jb
+            g_pfn_invalid_parameter_noinfo();
+
+        uint64_t elem = *(uint64_t*)cur;                      // mov rdx,[rbx]
+        if (elem != 0) {                                      // test rdx,rdx / je skip
+            if (g_pfnLogic_141732040 != nullptr)              // mov rcx,r12 / call 0x141732040
+                g_pfnLogic_141732040(arg, (void*)elem);
+        }
+
+        uint64_t owner2;
+        if (word == 0) {                                      // the same check again before the step
+            g_pfn_invalid_parameter_noinfo();
+            owner2 = 0;
+        } else {
+            owner2 = *(uint64_t*)word;
+        }
+        if (!(cur < *(uint64_t*)(owner2 + 0x20)))             // cmp rbx,[r11+0x20] / jb
+            g_pfn_invalid_parameter_noinfo();
+        cur += 8;                                             // add rbx,8
+    }
+}
+
 // 0x141779090 — range scan. Every failed bound re-checks through the same
 // __invalid_parameter_noinfo the other walks use, and the element answering zero is skipped, not
 // treated as a match.
