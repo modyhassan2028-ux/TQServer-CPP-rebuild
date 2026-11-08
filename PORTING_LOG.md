@@ -9736,3 +9736,7 @@ Full three-path decode of _Insert_n, and MSVCR90!memmove_s identified at 0x14182
 ## 2026-11-08 — 0x14172d120 ported (_Insert_n, three paths)
 
 Transcribed from the decode in HANDOFF.md: reallocate path with the cmovb growth clamp and two MSVCR90!memmove_s calls, shift-right path, and the fill-past-the-end path. Five callees stay seams. Batteries 203 assertions, 6/6 runs, sanitizers clean.
+
+### 2026-11-08 correction
+
+Commit f1ceb18 said 17 bodies in its message; measured on that tree it is 18 bodies with 27 seam pointers declared in the header. HANDOFF.md carries the measured number. Rule stands: take counts from the command, not from the message I am writing.
