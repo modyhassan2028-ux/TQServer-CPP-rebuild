@@ -90,6 +90,52 @@ the build output, not just the test output.
    its record, take them from the next record's start or from Capstone over the physical image, and
    write down which evidence you used.
 
+
+## Next batch, fully decoded: 0x14172d120 (the one-element insert)
+
+This body is read out and resolved, so the next agent can transcribe it without another survey. It is
+662 bytes, 187 instructions, `std::vector::_Insert_n` with three paths.
+
+Signature: `(self /*rcx*/, it /*rdx, pair*/, count /*r8*/, value /*r9*/)`.
+
+Setup: capacity = `begin ? (cap_end - begin) >> 2 : 0`; if `count == 0` there is nothing to do; size =
+`(finish - begin) >> 2`; `max_size = 0x3fffffffffffffff` (`movabs`), so `max_size - size < count`
+throws through `0x141722c70` and the bytes put an `int3` right after that call.
+
+Path A — reallocate (`cap < count + size`):
+  `half = cap >> 1`; `grown = (max_size - half < cap) ? 0 : cap + half`; then `grown = max(grown,
+  count + size)` (`cmovb`). Allocate with `0x141724d10(self + 0x10, grown)`. Offset =
+  `(it[1] - begin) >> 2`. Fill `count` copies of `*value` at `buffer + offset*4`, then two
+  `memmove_s` calls: the head (`begin`, `offset*4` bytes) into `buffer`, and the tail (`it[1]`,
+  `(old_finish - it[1]) >> 2 * 4` bytes) into `buffer + (offset + count)*4`. The old buffer goes to
+  `0x1417f2fdc` when it is non-null. Then `cap_end = buffer + grown*4`, `finish = buffer +
+  (count+size)*4`, `begin = buffer`.
+
+Path B — room exists (`cap >= count + size`), and there are at least `count` elements after the
+insertion point (`(finish - it[1]) >> 2 >= count`): save `*value`; `tail_bytes = count*4`;
+`new_finish = finish - tail_bytes`; call `0x14172acb0(self, new_finish, finish, finish)` and store its
+return in `finish`; call `0x141727380(it[1], new_finish, finish)`; then fill `count` elements from
+`it[1]` with the saved value.
+
+Path C — room exists but fewer than `count` elements sit after the point: call
+`0x14172acb0(self, it[1], finish, it[1] + count*4)`; fill the gap from `it[1]` to the old finish, then
+`finish += count*4` and fill the remaining `count - moved` copies after the fact.
+
+Resolved callers, so nothing here needs guessing:
+
+  - `0x1418232a8` (both memmove-looking calls) is **`MSVCR90.dll!memmove_s`** — that is why the calls
+    carry four arguments (dst, dst size, src, count). Keep the four-argument shape, and let the seam
+    forward to `::memmove` on Linux, noting that the valid-argument path is identical.
+  - `0x141722c70` length error, `0x141724d10` allocate, `0x14172acb0` and `0x141727380` element
+    moves, `0x1417f2fdc` deallocate: all five are code rows, all five still unported, all five seams.
+
+## How to keep this file honest
+
+Update it at the end of every batch: the ported count, the assertion count taken from the test binary
+itself, the seam list taken from the header, and one line on what the next batch is. Never write a
+number here you did not just measure, and never describe a body as done before its compile line came
+back clean.
+
 ## Bugs that were mine, not the port's (so the next agent does not repeat them)
 
 Every one of these was in the test scaffolding:
