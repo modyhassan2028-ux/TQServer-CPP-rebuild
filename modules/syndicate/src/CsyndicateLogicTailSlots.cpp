@@ -50,19 +50,19 @@ bool Slot_1417a8a50(void* self, uint32_t id, uint64_t arg3, uint64_t /*r9*/) {
     uint8_t* scary = it[0];                              // mov rdi,[rsp+0x20]
     uint8_t* head = *(uint8_t**)(map + kEndNode);        // mov rbp,[rbx+0x30]
     if (scary == nullptr || scary != *(uint8_t**)(map + kScary))
-        g_pfnLogic_1418233c0();                          // the iterator check
+        g_pfn_invalid_parameter_noinfo();                          // the iterator check
 
     uint8_t* node = it[1];                               // mov rbx,[rsp+0x28]
     if (node != head) {                                  // cmp rbx,rbp / je tail
         uint8_t* owner;
         if (scary == nullptr) {                          // test rdi,rdi / jne
-            g_pfnLogic_1418233c0();
+            g_pfn_invalid_parameter_noinfo();
             owner = nullptr;                             // xor r11d,r11d
         } else {
             owner = *(uint8_t**)(scary + 0x00);          // mov r11,[rdi]
         }
         if (node == *(uint8_t**)(owner + kEndNode))      // cmp rbx,[r11+0x30]
-            g_pfnLogic_1418233c0();
+            g_pfn_invalid_parameter_noinfo();
 
         void* value = *(void**)(node + 0x20);            // mov rcx,[rbx+0x20]
         if (value != nullptr) {                          // test rcx,rcx / je tail
@@ -75,7 +75,7 @@ uint64_t (*g_pfnLogic_141797e00)(uint64_t, uint64_t) = none2;
 uint64_t (*g_pfnLogic_14178f470)(uint64_t) = none1;
 
 static void noop_void() {}
-void (*g_pfnLogic_1418233c0)(void) = noop_void;
+void (*g_pfn_invalid_parameter_noinfo)(void) = noop_void;
 
 // 0x1417c8f70 — std::_Tree lower_bound. Static member offsets are the ones the bytes use;
 // they are named structurally because no symbol survives to name them.
@@ -108,7 +108,7 @@ void* Slot_1417c8f70_lower_bound(void* container_void, void* out_void, const uin
     uint8_t* scary = *(uint8_t**)(container + kScary);   // mov rax,[rcx]
     uint8_t* head = *(uint8_t**)(container + kEndNode);  // mov rdi,[rcx+0x30]
     if (!scary)                                          // test rax,rax / jz L30
-        g_pfnLogic_1418233c0();                          // L30: the error path, then continue
+        g_pfn_invalid_parameter_noinfo();                          // L30: the error path, then continue
 
     uint8_t** pair;                                      // rcx in the original: rsp+0x20 or +0x30
     uint8_t* slot[2];
@@ -141,7 +141,7 @@ uint64_t Slot_1417cad00_lookup(void* self, uint32_t id, uint64_t /*r8*/, uint64_
     uint8_t* scary = it[0];                              // mov rdi,[rsp+0x20]
     uint8_t* head = *(uint8_t**)(container + kEndNode);  // mov rsi,[rbx+0x30]
     if (scary == nullptr || scary != *(uint8_t**)(container + kScary))
-        g_pfnLogic_1418233c0();                          // L18
+        g_pfn_invalid_parameter_noinfo();                          // L18
 
     uint8_t* node = it[1];                               // mov rbx,[rsp+0x28]
     if (node == head)                                    // cmp rbx,rsi / jz L37
@@ -149,13 +149,13 @@ uint64_t Slot_1417cad00_lookup(void* self, uint32_t id, uint64_t /*r8*/, uint64_
 
     uint8_t* owner;
     if (scary == nullptr) {                              // test rdi,rdi / jz
-        g_pfnLogic_1418233c0();
+        g_pfn_invalid_parameter_noinfo();
         owner = nullptr;                                 // xor r11d,r11d
     } else {
         owner = *(uint8_t**)(scary + 0x00);              // mov r11,[rdi]
     }
     if (node == *(uint8_t**)(owner + kEndNode))          // cmp rbx,[r11+0x30]
-        g_pfnLogic_1418233c0();
+        g_pfn_invalid_parameter_noinfo();
 
     return *(uint64_t*)(node + 0x20);                    // mov rax,[rbx+0x20]
 }

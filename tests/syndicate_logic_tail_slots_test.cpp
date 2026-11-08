@@ -234,7 +234,7 @@ int main() {
         *(void**)(container + 0x00) = &head;   // the word carried into the iterator
 
         int err = 0;
-        g_pfnLogic_1418233c0 = [] { /* error path must not fire with a live container */ };
+        g_pfn_invalid_parameter_noinfo = [] { /* error path must not fire with a live container */ };
 
         // leaves point at the nil node
         Node* live[5] = {n2, n3, n4, n5, n6};
@@ -311,7 +311,7 @@ int main() {
         *(void**)((uint8_t*)&other_head + 0x00) = &owner;
         *(void**)((uint8_t*)&owner + 0x30) = &head;   // node == owner->head would error
 
-        g_pfnLogic_1418233c0 = [] { };
+        g_pfn_invalid_parameter_noinfo = [] { };
 
         void* self = obj.pre;                          // container lives at self+8
 
@@ -327,12 +327,12 @@ int main() {
         // [r11+0x30] and call the error path when they are equal)
         static int g_err;
         g_err = 0;
-        g_pfnLogic_1418233c0 = [] { ++g_err; };
+        g_pfn_invalid_parameter_noinfo = [] { ++g_err; };
         *(void**)((uint8_t*)&owner + 0x30) = &n[1];     // owner->head == the found node
         CHECK(Slot_1417cad00_lookup(self, 5, 0, 0) == 0xBBBB);   // still returns the value
         CHECK(g_err == 1);
         *(void**)((uint8_t*)&owner + 0x30) = &head;      // restore
-        g_pfnLogic_1418233c0 = [] { };
+        g_pfn_invalid_parameter_noinfo = [] { };
 
         // the wrappers now run through the ported lookup by default
         g_pfnLogic_1417cad00 = shipped_lookup;

@@ -69,7 +69,12 @@ extern uint64_t (*g_pfnLogic_14178f470)(uint64_t);                              
 // The routine is `lower_bound`: it descends by comparing node[0x18] against *(u32*)key,
 // remembering the last node it turned left at, and answers the end node when the walk
 // overshoots. 0x1418233c0 is the error path taken when container[0x00] is null.
-extern void (*g_pfnLogic_1418233c0)(void);                                        // error path
+// 0x1418233c0 is not an unknown: it is the IAT slot for MSVCR90.dll!__invalid_parameter_noinfo,
+// resolved from the import directory (tools/bulk/iat_slots.json). That matters for fidelity: this
+// entry point RETURNS in the CRT's contract, which is why the bytes keep executing after the call,
+// and why a port that "helpfully" treated it as noreturn would be wrong. With the default handler
+// in place it terminates, so the following dereference of a zeroed r11 never actually happens.
+extern void (*g_pfn_invalid_parameter_noinfo)(void);                              // MSVCR90 import
 void* Slot_1417c8f70_lower_bound(void* container, void* out, const uint32_t* key);
 
 // 0x1417a8520 is the SAME routine as 0x1417c8f70: 55 instructions, identical mnemonics, and
