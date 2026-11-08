@@ -9678,3 +9678,31 @@ Result, measured across every file in the module:
 
 Remaining lift refusals are 15 rows: 7 whose branch target lies in another chunk, 7 data rows and 1
 `scas` data row. Batteries: 24/24 across six ASan/UBSan rounds.
+
+### Census: there is no bulk shortcut left
+
+Before investing in a generator for "trivially shaped" rows, the shapes were counted across all
+10,727 row starts, decoding from the image:
+
+| shape | rows |
+| --- | --- |
+| `jmp rel32` alone | 22 |
+| `mov rcx,[rcx+disp] / jmp rel32` | 5 |
+| `mov eax,imm32 / ret` | 3 |
+| everything else | 10,697 |
+
+So 30 rows out of 10,727 are trivial. A generator would touch 0.3% of the work, and the remaining
+10,697 are real functions that need their callees identified first. Manual porting stays the only
+path; that is a measurement, not a preference.
+
+### Remaining seams on the CSyndicateLogic slots
+
+`0x1417cad00` (the shared lookup) stays a seam for a specific reason: it walks a container at
+`this+8` through `0x1417c8f70`, compares against `[rbx+0x30]` and `[rbx+0]`, treats
+`0x1418233c0` as the invalid-iterator path and returns `[rbx+0x20]`. Which of those addresses is
+the container end and which is the head is not yet proven, and guessing it would silently invert
+every lookup this family performs. It needs `0x1417c8f70` ported first.
+
+The other five (`0x1417caa00` iterator loop, `0x1417873a0` id switch, `0x1417a8a50`,
+`0x1417a8940`, `0x14177f980`) are untouched for the same reason: each calls rows that are not
+ported yet.
