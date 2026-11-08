@@ -135,6 +135,65 @@ int main() {
         CHECK(g_a == 0xBEEF);
     }
 
+    // --- the lookup wrappers 0x1417cad90 / 0x1417cadb0 / 0x1417cb000
+    {
+        static uint64_t g_lookup_ret;
+        static uint64_t g_l_a, g_l_b, g_l_c, g_l_d;
+        static int g_l_n;
+        static uint64_t g_tail2[2];
+        static int g_tail2_n;
+        static uint64_t g_tail1;
+        static int g_tail1_n;
+
+        auto lookup = [](uint64_t a, uint64_t b, uint64_t c, uint64_t d) -> uint64_t {
+            ++g_l_n; g_l_a = a; g_l_b = b; g_l_c = c; g_l_d = d;
+            return g_lookup_ret;
+        };
+        auto tail2 = [](uint64_t a, uint64_t b) -> uint64_t {
+            ++g_tail2_n; g_tail2[0] = a; g_tail2[1] = b; return 0x777;
+        };
+        auto tail1 = [](uint64_t a) -> uint64_t {
+            ++g_tail1_n; g_tail1 = a; return 0x888;
+        };
+        g_pfnLogic_1417cad00 = lookup;
+        g_pfnLogic_141797e00 = tail2;
+        g_pfnLogic_14178f470 = tail1;
+
+        // 0x1417cad90: boolean answer, no tail call either way
+        g_l_n = g_tail2_n = g_tail1_n = 0;
+        g_lookup_ret = 0;
+        CHECK(Slot_1417cad90((void*)0x1000, 5, 6, 7) == 0);
+        CHECK(g_l_n == 1 && g_l_a == 0x1000 && g_l_b == 5 && g_l_c == 6 && g_l_d == 7);
+        g_lookup_ret = 0x141860000ULL;
+        CHECK(Slot_1417cad90((void*)0x1000, 5, 6, 7) == 1);
+        CHECK(g_tail2_n == 0 && g_tail1_n == 0);
+
+        // 0x1417cadb0: r8 truncated for the lookup, the ORIGINAL id goes to the tail call
+        g_l_n = g_tail2_n = 0;
+        g_lookup_ret = 0;
+        CHECK(Slot_1417cadb0((void*)0x2000, 0x1FFFFFFFFULL, 0x2AAAAAAAAULL, 9) == 0);
+        CHECK(g_l_n == 1);
+        CHECK(g_l_b == 0xAAAAAAAALL);            // edx = r8d
+        CHECK(g_l_c == 0x2AAAAAAAAULL);          // r8 itself untouched
+        CHECK(g_tail2_n == 0);                   // a miss calls nothing
+
+        g_lookup_ret = 0x141860123ULL;
+        CHECK(Slot_1417cadb0((void*)0x2000, 0x1FFFFFFFFULL, 0x2AAAAAAAAULL, 9) == 0x777);
+        CHECK(g_tail2_n == 1);
+        CHECK(g_tail2[0] == 0x141860123ULL);     // rcx = the hit
+        CHECK(g_tail2[1] == 0xFFFFFFFFULL);      // edx = the original id, truncated
+
+        // 0x1417cb000: a hit is passed on, a miss substitutes 0x141827409
+        g_l_n = g_tail1_n = 0;
+        g_lookup_ret = 0x141860456ULL;
+        CHECK(Slot_1417cb000((void*)0x3000, 1, 2, 3) == 0x888);
+        CHECK(g_tail1_n == 1 && g_tail1 == 0x141860456ULL);
+
+        g_lookup_ret = 0;
+        CHECK(Slot_1417cb000((void*)0x3000, 1, 2, 3) == 0x888);
+        CHECK(g_tail1_n == 2 && g_tail1 == 0x141827409ULL);   // the substituted default
+    }
+
     std::printf("%s checks=%d fails=%d\n", g_fails ? "LOGIC_SLOTS_FAIL" : "LOGIC_SLOTS_OK",
                 g_checks, g_fails);
     return g_fails ? 1 : 0;

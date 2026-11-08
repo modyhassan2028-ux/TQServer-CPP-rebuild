@@ -47,6 +47,20 @@ extern uint64_t (*g_pfnLogic_1417a8a50)(uint64_t, uint64_t, uint64_t, uint64_t);
 extern uint64_t (*g_pfnLogic_1417a8940)(uint64_t, uint64_t, uint64_t, uint64_t);
 extern uint64_t (*g_pfnLogic_14177f980)(uint64_t, uint64_t, uint64_t, uint64_t);
 
+// The three lookup wrappers these forwarders land on, and the lookup itself. 0x1417cad00
+// walks a container at this+8 (it calls 0x1417c8f70 and 0x1418233c0) and is not ported yet,
+// so it stays a seam; the three wrappers around it are ported here.
+extern uint64_t (*g_pfnLogic_1417cad00)(uint64_t, uint64_t, uint64_t, uint64_t);  // the lookup
+extern uint64_t (*g_pfnLogic_141797e00)(uint64_t, uint64_t);                      // 2-arg tail
+extern uint64_t (*g_pfnLogic_14178f470)(uint64_t);                                // 1-arg tail
+
+// 0x1417cad90: call lookup / return (result != 0)
+int      Slot_1417cad90(void* self, uint64_t rdx, uint64_t r8, uint64_t r9);
+// 0x1417cadb0: call lookup(this, (u32)r8, ...) / on hit tail-call (hit, (u32)rdx) / on miss 0
+uint64_t Slot_1417cadb0(void* self, uint64_t rdx, uint64_t r8, uint64_t r9);
+// 0x1417cb000: call lookup / on miss substitute 0x141827409 / tail-call it
+uint64_t Slot_1417cb000(void* self, uint64_t rdx, uint64_t r8, uint64_t r9);
+
 uint64_t Slot_1417abe60(void* self, uint64_t rdx, uint64_t r8, uint64_t r9);
 uint64_t Slot_1417ac010(void* self, uint64_t rdx, uint64_t r8, uint64_t r9);
 uint64_t Slot_1417ab1d0(void* self, uint64_t rdx, uint64_t r8, uint64_t r9);

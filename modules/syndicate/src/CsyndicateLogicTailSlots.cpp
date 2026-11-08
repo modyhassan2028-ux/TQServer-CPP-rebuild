@@ -5,6 +5,8 @@
 namespace tq {
 
 static uint64_t none4(uint64_t, uint64_t, uint64_t, uint64_t) { return 0; }
+static uint64_t none2(uint64_t, uint64_t) { return 0; }
+static uint64_t none1(uint64_t) { return 0; }
 
 uint64_t (*g_pfnLogic_1417cadb0)(uint64_t, uint64_t, uint64_t, uint64_t) = none4;
 uint64_t (*g_pfnLogic_1417caa00)(uint64_t, uint64_t, uint64_t, uint64_t) = none4;
@@ -14,6 +16,38 @@ uint64_t (*g_pfnLogic_1417873a0)(uint64_t, uint64_t, uint64_t, uint64_t) = none4
 uint64_t (*g_pfnLogic_1417a8a50)(uint64_t, uint64_t, uint64_t, uint64_t) = none4;
 uint64_t (*g_pfnLogic_1417a8940)(uint64_t, uint64_t, uint64_t, uint64_t) = none4;
 uint64_t (*g_pfnLogic_14177f980)(uint64_t, uint64_t, uint64_t, uint64_t) = none4;
+
+uint64_t (*g_pfnLogic_1417cad00)(uint64_t, uint64_t, uint64_t, uint64_t) = none4;
+uint64_t (*g_pfnLogic_141797e00)(uint64_t, uint64_t) = none2;
+uint64_t (*g_pfnLogic_14178f470)(uint64_t) = none1;
+
+// 0x1417cad90: sub rsp,0x28 / call 0x1417cad00 / test rax,rax / setne al
+int Slot_1417cad90(void* self, uint64_t rdx, uint64_t r8, uint64_t r9) {
+    uint64_t r = g_pfnLogic_1417cad00((uint64_t)(uintptr_t)self, rdx, r8, r9);
+    return r != 0;
+}
+
+// 0x1417cadb0: mov ebx,edx / mov edx,r8d / call 0x1417cad00 / test rax,rax / jz 0
+//              mov edx,ebx / mov rcx,rax / jmp 0x141797e00
+// The second argument is truncated to 32 bits before the lookup, and the hit is passed on
+// with the ORIGINAL id (also 32-bit) as the second argument.
+uint64_t Slot_1417cadb0(void* self, uint64_t rdx, uint64_t r8, uint64_t r9) {
+    uint32_t id = (uint32_t)rdx;
+    uint64_t hit = g_pfnLogic_1417cad00((uint64_t)(uintptr_t)self, (uint64_t)(uint32_t)r8, r8, r9);
+    if (!hit)
+        return 0;
+    return g_pfnLogic_141797e00(hit, (uint64_t)id);
+}
+
+// 0x1417cb000: call 0x1417cad00 / test rax,rax / jnz L7 / mov rax,0x141827409
+//              L7: mov rcx,rax / jmp 0x14178f470
+// Only rcx is meaningful at the tail jump: rdx/r8/r9 still hold whatever the lookup left in
+// them, which is volatile state, so the seam takes rcx alone rather than forwarding garbage.
+uint64_t Slot_1417cb000(void* self, uint64_t rdx, uint64_t r8, uint64_t r9) {
+    uint64_t hit = g_pfnLogic_1417cad00((uint64_t)(uintptr_t)self, rdx, r8, r9);
+    uint64_t arg = hit ? hit : (uint64_t)(uintptr_t)0x141827409;
+    return g_pfnLogic_14178f470(arg);
+}
 
 // 0x1417abe60: mov rcx,[rcx+0x10] / jmp 0x1417cadb0
 uint64_t Slot_1417abe60(void* self, uint64_t rdx, uint64_t r8, uint64_t r9) {
