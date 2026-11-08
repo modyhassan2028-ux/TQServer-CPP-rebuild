@@ -1,33 +1,56 @@
-// ============================================================================
-// msgleagueopt.h — RAW Syndicate.dll v6159 · tq::CMsg message
-//   original path: modules/syndicate/src/msg/msgleagueopt.cpp
-//   vtable 0x14183c5a8 (SIX slots) · base tq::CMsg::vftable 0x14182e368
-//     slot 0  0x1417d7260 deleting dtor — also destroys the CStringPacker
-//             sub-object at +0x410 (tq::CStringPacker::~CStringPacker)
-//     slot 1  0x1417e7fda base Create thunk — NOT overridden
-//     slot 2  0x14177e2f0 base Process(OBJID, void*) stub
-//     slot 3  0x1417d68d0 Process(OBJID)
-//     slot 4  0x14177e2d0 base Process(void*) stub
-//     slot 5  0x1417d6700 CreateBufMsg — base Create then msg type 0xa3e
-// ============================================================================
-#ifndef SYNDICATE_MSGLEAGUEOPT_H
-#define SYNDICATE_MSGLEAGUEOPT_H
+// msgleagueopt.h — the dispatcher at 0x1417d68d0. The path is not guessed: the CHECK below carries
+// f:\version\cqserver-78.0.11-1204\modules\syndicate\src\msg\msgleagueopt.cpp, which is where the
+// original kept this body, so the port keeps it there too.
+#pragma once
 #include <cstdint>
-#include "modules/syndicate/src/msg/msgseams.h"
-namespace syndicate {
 
-class CMsgLeagueOpt {
-public:
-    static constexpr uintptr_t kClassVft = 0x14183c5a8;
-    static constexpr uintptr_t kBaseCMsgVft = 0x14182e368;
-    static constexpr uint32_t kOffMsgType = 0x0A;
-    static constexpr uint32_t kOffPacker = 0x410;
-    static constexpr uint16_t kBufMsgType = 0xa3e;
+namespace tq {
 
-    static void* DeleteDtor(void* self, uint32_t uFlag);  // 0x1417d7260
-    static void Process(void* self, uint32_t idActor);    // 0x1417d68d0
-    static bool CreateBufMsg(void* self, char* pData, uint16_t uType);
-};
+// CQBase.dll!tq::CStringPacker::GetString(unsigned int, char*, unsigned int) — IAT 0x141823010.
+// The packer lives at this+0x410 and every read passes index 0.
+extern bool (*g_pfnCStringPacker_GetString)(void* pPacker, uint32_t nIndex, char* pOut,
+                                            uint32_t nLen);
+// CQBase.dll!tq::CStringPacker::GetStrAmount() — IAT 0x141823018, used by one case only.
+extern uint32_t (*g_pfnCStringPacker_GetStrAmount)(void* pPacker);
+// CQBase.dll!log_InlineLogERROR — IAT 0x141823030. This call is the CHECK macro: format, "CHECK",
+// "m_pInfo", the file, and the line number pushed on the stack (0x54 = 84).
+extern void (*g_pfn_check_msgleagueopt)(const char* pFmt, const char* pExpr, const char* pName,
+                                       const char* pFile, uint32_t nLine);
 
-}  // namespace syndicate
-#endif
+// ---- callees with no transcribed body yet, each with the arity this body uses -------------------
+extern bool (*g_pfnL_1417ac700)(void* pObj, uint32_t nId);
+extern void (*g_pfnL_1417ac7d0)(void* pObj, uint32_t nId, void* pThis);
+extern bool (*g_pfnL_1417b0a40)(void* pObj, uint32_t nId, uint32_t nCfg6, void* pBuf);
+extern bool (*g_pfnL_1417b03b0)(void* pObj, uint32_t nId, uint32_t nCfg6, void* pBuf);
+extern void (*g_pfnL_1417b0db0)(void* pObj, uint32_t nId, void* pBuf, uint32_t nCfg6, uint32_t nCfg4);
+extern void (*g_pfnL_1417b0e20)(void* pObj, uint32_t nId, void* pBuf, uint32_t nCfgE, uint32_t nCfg6,
+                                uint32_t nCfg4);
+extern void (*g_pfnL_1417b14c0)(void* pObj, uint32_t nId, void* pBuf, uint32_t nCfgE, uint32_t nCfg6,
+                                uint32_t nCfg4);
+extern void (*g_pfnL_1417b1660)(void* pObj, uint32_t nId, uint32_t nCfg6, uint32_t nCfgE,
+                                uint32_t nCfgA, uint32_t nCfg4);
+extern void (*g_pfnL_1417bf4d0)(void* pObj, uint32_t nId, uint32_t nCfg6, uint32_t nFlagE,
+                                uint32_t nCfgA, uint32_t nFlag);
+extern void (*g_pfnL_1417b48b0)(void* pObj, uint32_t nA2, uint32_t nA3, uint32_t nFlag,
+                                uint32_t nZeroE);
+extern void (*g_pfnL_1417b4d60)(void* pObj, uint32_t nA2, uint32_t nA3, uint32_t nFlag,
+                                uint32_t nZeroE);
+extern void (*g_pfnL_1417b0de0)(void* pObj, uint32_t nId, uint32_t nCfgA);
+extern void (*g_pfnL_1417b0e00)(void* pObj, uint32_t nId);
+extern void (*g_pfnL_1417b0e50)(void* pObj, uint32_t nId, uint32_t nCfgA);
+extern void (*g_pfnL_1417b0e70)(void* pObj, uint32_t nId);
+extern void (*g_pfnL_1417b15b0)(void* pObj, uint32_t nId, uint32_t nCfg6, uint32_t nCfgE);
+extern void (*g_pfnL_1417b1690)(void* pObj, uint32_t nId, uint32_t nCfgA);
+extern void (*g_pfnL_1417b4310)(void* pObj, uint32_t nId, uint32_t nCfgE);
+extern void (*g_pfnL_1417b98e0)(void* pObj, uint32_t nId);
+extern void (*g_pfnL_1417b1980)(void* pObj, uint32_t nId, uint32_t nCfgE);
+extern void (*g_pfnL_1417b19c0)(void* pObj, uint32_t nId, uint32_t nZero);
+extern void (*g_pfnL_1417b1a40)(void* pObj, uint32_t nId, uint32_t nCfgE);
+extern void (*g_pfnL_1417b0680)(void* pObj, uint32_t nId, void* pBuf);
+extern void (*g_pfnL_1417f30c0)(void* pDst, int nValue, uint32_t nCount);      // the memset fill
+
+// 0x1417d68d0 — CMsgLeagueOpt::Process. cfg is this+0x408; its u16 at +0x4 is the message type that
+// selects the case, and the u32s at +0x6, +0xa and +0xe are the case arguments.
+void Slot_1417d68d0_Process(void* pThis, uint32_t nId);
+
+}  // namespace tq

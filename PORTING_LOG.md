@@ -10309,3 +10309,58 @@ Testing: the same `tests/syndicate_cmsglog_test.cpp`, now 125 assertions, 6/6 ru
 The width checks are the point of several of them: the header halves live at unaligned `+0x0`/`+0x2`
 so the test reads them with 16-bit loads, and the first draft of the test that read them as dwords
 failed while the port was right.
+
+## 2026-11-08 — D90: 0x1417d68d0, the CMsgLeagueOpt dispatcher (msgleagueopt.cpp)
+
+The roadmap named `0x1417d68d0` (LeagueOpt) next, and the image names its file for us: the CHECK it
+runs carries `f:\version\cqserver-78.0.11-1204\modules\syndicate\src\msg\msgleagueopt.cpp`, so the
+port lives at `modules/syndicate/src/msg/msgleagueopt.cpp` and the line number it logs (`0x54` = 84)
+is kept in the transcription.
+
+Shape: `__security_cookie` at `0x141886c40` (compiler guard, noted, not reproduced), a `CHECK(m_pInfo)`
+on `this+0x408` through `log_InlineLogERROR` (IAT `0x141823030`, arity five: format, "CHECK",
+"m_pInfo", file, line), then `singleton()`, then `0x1417ac700(pObj, id)`.
+
+The dispatch is a **two-table** switch, and the reason it looks like two switches is worth writing
+down. The first table is a 79-byte gate at `0x1417b70cc` whose entries are only 0 and 1, indexed by
+the u16 at `cfg+0x4`; its two targets are `0x1417d6990` (label 0) and `0x1417d6984` (label 1, straight
+to the epilogue). So when the predicate answers *known*, the gate decides whether the type is one of
+the already-handled ones and only label 0 continues. Both paths then converge on the 79-entry, 32-bit
+offset table at `0x1417b711c` (target = `0x141720000 + dword`), which is the real 79-case switch. Note
+the base is `0x141720000`, this DLL's own image base, not the `0x140000000` one keeps assuming.
+
+The 79 entries resolve to 52 distinct blocks. Twenty-three of them (`5,17,21,22,35,36,52..59,61..63,
+65,67..70,73`) are the epilogue and do nothing. The rest are one or two instructions of argument
+loading plus either a vtable call on the singleton (slots `+0x478`, `+0x4e8`, `+0x4f8`, `+0x500`,
+`+0x508`, `+0x578`, `+0x580`, `+0x588`, `+0x590`, `+0x598`, `+0x5b0`, `+0x5b8`, `+0x5c0`, `+0x5c8`,
+`+0x5d0`, `+0x5d8`, `+0x5e0`, `+0x5e8`, `+0x5f0`, `+0x5f8`, `+0x6c0`, `+0x6c8`, `+0x700`, `+0x708`,
+`+0x718`, `+0x720`, `+0x728`, `+0x738`) or a direct call to one of twenty unported callees.
+
+Details that are easy to get wrong, all taken from the bytes:
+
+- The arguments come from `cfg+0x6`, `cfg+0xa` and `cfg+0xe` (u32) and from `cfg+0x4`/`cfg+0x6`/
+  `cfg+0xe` as **u16** in several cases. `0x1417d6c3d` loads `cfg+0xe` with `movzbl`, so case 23 takes
+  one byte of it.
+- Cases 74 and 76 compare `cfg+0x4` with `0x4c`, cases 75 and 77 with `0x4d`, and 38/45 with `0x2d`,
+  each into `%r9b`; 74/75 put the id in `%edx`, while **76/77 swap the two** (`mov %edi,%r8d;
+  mov 0xa(%rdx),%edx`), so the callee receives `(pObj, cfg+0xa, id, flag, cfg+0xe == 0)`.
+- The last argument of 74..77 is `(cfg+0xe == 0)` as a byte on the stack, not `cfg+0xe` itself.
+- Five cases read a string first: `GetString(&this+0x410, 0, buf, len)` with lengths `0x10`, `0xa` and
+  `0x100`, and the `0x100` case (`20`) zeroes the buffer and its `0xff`-byte tail first. The import is
+  `CQBase.dll!tq::CStringPacker::GetString` at IAT `0x141823010`; case 66 also asks
+  `CStringPacker::GetStrAmount` at `0x141823018` and only then reads, and it calls vtable `+0x5b0`
+  *outside* that branch.
+- Cases 6 and 51 rewrite the type (`0x16`, `0x33`) and then report through `0x1417ac7d0(pObj, id, this)`
+  only when their predicate answered true; a false answer changes nothing.
+
+Misalignment is real here: `cfg+0x6`/`0xa`/`0xe` are not 4-byte aligned, so the port reads them with
+`memcpy` helpers instead of a cast. UBSan flagged the cast version immediately, and the flag belongs in
+the log because the original simply does `mov 0xe(%rdx),%r9d` and does not care.
+
+Testing: `tests/syndicate_msgleagueopt_test.cpp`, 491 assertions, 6/6 runs, sanitizers clean. It sweeps
+all 79 ids through a fake vtable and records the slot plus the arguments, so a case dispatched to the
+wrong slot or handed the wrong field fails; then the gate sweep over the same 79 bytes, the bounds
+(`0x4f`, `0x50`, `0xffff`), the three flag compares, the two type-rewriting tails, case 66 with and
+without strings, and the CHECK's five arguments including the exact file path and line 84.
+
+Suites now: 14711 + 1284 + 125 + 491.
