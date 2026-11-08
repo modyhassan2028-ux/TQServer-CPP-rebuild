@@ -432,4 +432,68 @@ void SynAccNoop_1417c66f0() {}
 // 0x1417c6700 — mov %rcx,%rax / ret
 void* SynAccRetThis_1417c6700(void* pThis) { return pThis; }
 
+// 0x1417c6780 — mov %rcx,%rax / ret
+void* SynAccRetThis_1417c6780(void* pThis) { return pThis; }
+
+// 0x1417c6800 — mov %rcx,%rax / ret
+void* SynAccRetThis_1417c6800(void* pThis) { return pThis; }
+
+// 0x1417c6880 — mov %rcx,%rax / ret
+void* SynAccRetThis_1417c6880(void* pThis) { return pThis; }
+
+// 0x1417c6890 — mov %rcx,%rax / ret
+void* SynAccRetThis_1417c6890(void* pThis) { return pThis; }
+
+// 0x1417c68a0 — test %rcx,%rcx / je out / mov (%rdx),%rax / mov %rax,(%rcx) / repz ret
+// A null destination writes nothing; the body answers nothing.
+void SynAccAssign1_1417c68a0(void* pDst, const void* pSrc) {
+    if (pDst != nullptr)                                   // test %rcx,%rcx / je
+        *(void**)pDst = *(void**)pSrc;                     // mov (%rdx),%rax / mov %rax,(%rcx)
+}
+
+// 0x1417c68b0 — mov %rcx,%rax / ret
+void* SynAccRetThis_1417c68b0(void* pThis) { return pThis; }
+
+// 0x1417c68c0 — the same guarded single-qword store, its own start
+void SynAccAssign1_1417c68c0(void* pDst, const void* pSrc) {
+    if (pDst != nullptr)
+        *(void**)pDst = *(void**)pSrc;
+}
+
+// 0x1417c68d0 — mov %rcx,%rax / ret
+void* SynAccRetThis_1417c68d0(void* pThis) { return pThis; }
+
+// 0x1417c68e0 — ret $0x0
+void SynAccNoop_1417c68e0() {}
+
+// 0x1417c68f0 — the same guarded single-qword store again
+void SynAccAssign1_1417c68f0(void* pDst, const void* pSrc) {
+    if (pDst != nullptr)
+        *(void**)pDst = *(void**)pSrc;
+}
+
+// 0x1417c6900 — mov %rcx,%rax / ret
+void* SynAccRetThis_1417c6900(void* pThis) { return pThis; }
+
+// 0x1417c6980 — ret $0x0
+void SynAccNoop_1417c6980() {}
+
+// 0x1417c6990 — and once more, its own start
+void SynAccAssign1_1417c6990(void* pDst, const void* pSrc) {
+    if (pDst != nullptr)
+        *(void**)pDst = *(void**)pSrc;
+}
+
+// 0x1417c69a0 — mov %rcx,%rax / ret
+void* SynAccRetThis_1417c69a0(void* pThis) { return pThis; }
+
+// 0x1417c69b0 — mov %rcx,%rax / ret
+void* SynAccRetThis_1417c69b0(void* pThis) { return pThis; }
+
+// 0x1417c69c0 — mov %rcx,%rax / ret
+void* SynAccRetThis_1417c69c0(void* pThis) { return pThis; }
+
+// 0x1417c69d0 — mov %rcx,%rax / ret
+void* SynAccRetThis_1417c69d0(void* pThis) { return pThis; }
+
 }  // namespace tq

@@ -149,3 +149,20 @@ holds the two seams these bodies need), inside `namespace tq`.
 - Next: 0x1417c6710, the divide-bearing body whose dump must be taken whole (it calls
   `*0x1418233e8` after `div %rcx` and a `cmp $0x30,%rax`), and 0x1417c62e0, which needs the
   `0x141823288` seam modelled (`g_fnLIFT_141823288` in synlift.cpp).
+
+## D134 — seventeen bodies, 0x1417c6780..0x1417c69d0
+
+- The eleven "this back" returns: 0x1417c6780, 0x1417c6800, 0x1417c6880, 0x1417c6890,
+  0x1417c68b0, 0x1417c68d0, 0x1417c6900, 0x1417c69a0, 0x1417c69b0, 0x1417c69c0, 0x1417c69d0.
+- The four guarded single-qword stores 0x1417c68a0, 0x1417c68c0, 0x1417c68f0, 0x1417c6990:
+  `test %rcx,%rcx / je out / mov (%rdx),%rax / mov %rax,(%rcx) / repz ret`. A null destination
+  writes nothing and the body answers nothing.
+- The two `ret $0x0` bodies 0x1417c68e0 and 0x1417c6980.
+- `tests/syndicate_d134_test.cpp`: 22 checks, 6 passes, ASan+UBSan clean. The cluster now
+  stands at 105 bodies (D129 41, D130 9, D131 7, D132 16, D133 15, D134 17).
+- Held back on purpose, all four the same shape: 0x1417c6710, 0x1417c6790, 0x1417c6810 and
+  0x1417c6910. Each takes an element count, divides `-1` by it for the overflow test
+  (`cmp $0x30,%rax` / `$0x48` / `$0x28`), and on the failing side builds a `length_error`
+  through three seams this file does not model: the object constructor at 0x1418233e8, the
+  vtable store `0x141824c40`, and the throw helper at 0x1417f3154. The good side is
+  `lea (%rcx,%rcx,N)` / `shl $0x3` and then `jmp 0x1417f3166`.

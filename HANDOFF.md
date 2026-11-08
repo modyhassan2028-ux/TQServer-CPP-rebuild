@@ -283,3 +283,12 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   The cluster now stands at 88 bodies (D129 41, D130 9, D131 7, D132 16, D133 15).
 - Next: 0x1417c6710 (`div %rcx`, `cmp $0x30,%rax`, then `call *0x1418233e8`) needs a whole
   dump; 0x1417c62e0 needs the `0x141823288` seam modelled first.
+
+## D134 (latest)
+
+- Seventeen more bodies: `SYNDICATE_D134_OK ... 22 checks`, 6 passes under ASan+UBSan.
+  Cluster total 105 bodies.
+- Next: the four element-count allocators 0x1417c6710 / 0x1417c6790 / 0x1417c6810 /
+  0x1417c6910. They need the three length_error seams modelled first: 0x1418233e8 (object
+  constructor), the `0x141824c40` vtable store, and 0x1417f3154 (throw helper), with the good
+  path tail-calling 0x1417f3166.

@@ -278,34 +278,133 @@
 1417c5459  synlift.cpp
 1417c5464  synlift.cpp
 1417c57ff  synlift.cpp
-1417c5980  synrangeB.cpp
-1417c5990  synrangeB.cpp
-1417c59a0  synrangeB.cpp
-1417c59b0  synleaves.cpp
-1417c59c0  synleaves.cpp
-1417c59e0  synleaves.cpp
-1417c59f0  synleaves.cpp
-1417c5a00  synleaves.cpp
-1417c5a30  synleaves.cpp
-1417c5a90  synleaves.cpp
-1417c5ae0  synrangeB.cpp
-1417c5b00  synleaves.cpp
-1417c5c20  synleaves.cpp
-1417c5c30  synleaves.cpp
-1417c5c40  synleaves.cpp
-1417c5c50  synrangeB.cpp
-1417c5c70  synrangeB.cpp
-1417c5c80  synrangeB.cpp
-1417c5c90  synrangeB.cpp
-1417c5cd0  synleaves.cpp
-1417c5dd0  synleaves.cpp
-1417c5e60  synrangeB.cpp
-1417c5eb0  synleaves.cpp
-1417c5ec0  synrangeB.cpp
-1417c5ef0  synleaves.cpp
-1417c5f00  synrangeB.cpp
-1417c5f30  synrangeB.cpp
-1417c5f50  synrangeB.cpp
+1417c5980  synacc.cpp, synrangeB.cpp
+1417c5990  synacc.cpp, synrangeB.cpp
+1417c59a0  synacc.cpp, synrangeB.cpp
+1417c59b0  synacc.cpp, synleaves.cpp
+1417c59c0  synacc.cpp, synleaves.cpp
+1417c59d0  synacc.cpp
+1417c59e0  synacc.cpp, synleaves.cpp
+1417c59f0  synacc.cpp, synleaves.cpp
+1417c5a00  synacc.cpp, synleaves.cpp
+1417c5a10  synacc.cpp
+1417c5a20  synacc.cpp
+1417c5a30  synacc.cpp, synleaves.cpp
+1417c5a40  synacc.cpp
+1417c5a50  synacc.cpp
+1417c5a60  synacc.cpp
+1417c5a70  synacc.cpp
+1417c5a80  synacc.cpp
+1417c5a90  synacc.cpp, synleaves.cpp
+1417c5aa0  synacc.cpp
+1417c5ab0  synacc.cpp
+1417c5ac0  synacc.cpp
+1417c5ad0  synacc.cpp
+1417c5ae0  synacc.cpp, synrangeB.cpp
+1417c5b00  synacc.cpp, synleaves.cpp
+1417c5b10  synacc.cpp
+1417c5b4d  CsyndicateLogicTailSlots.cpp
+1417c5b53  CsyndicateLogicTailSlots.cpp
+1417c5b70  synacc.cpp
+1417c5bc0  synacc.cpp
+1417c5bd0  synacc.cpp
+1417c5c20  synacc.cpp, synleaves.cpp
+1417c5c30  synacc.cpp, synleaves.cpp
+1417c5c40  synacc.cpp, synleaves.cpp
+1417c5c50  CsyndicateLogicTailSlots.cpp, synrangeB.cpp
+1417c5c6c  CsyndicateLogicTailSlots.cpp
+1417c5c70  CsyndicateLogicTailSlots.cpp, synrangeB.cpp
+1417c5c80  CsyndicateLogicTailSlots.cpp, synrangeB.cpp
+1417c5c90  synacc.cpp, synrangeB.cpp
+1417c5ca0  synacc.cpp
+1417c5cb0  synacc.cpp
+1417c5cc0  CsyndicateLogicTailSlots.cpp
+1417c5cd0  synacc.cpp, synleaves.cpp
+1417c5ce0  synacc.cpp
+1417c5cf0  synacc.cpp
+1417c5d00  synacc.cpp
+1417c5dd0  synacc.cpp, synleaves.cpp
+1417c5de0  synacc.cpp
+1417c5df0  synacc.cpp
+1417c5e00  CsyndicateLogicTailSlots.cpp
+1417c5e50  synacc.cpp
+1417c5e60  synacc.cpp, synrangeB.cpp
+1417c5e80  synacc.cpp
+1417c5ea0  synacc.cpp
+1417c5eb0  synacc.cpp, synleaves.cpp
+1417c5ec0  synacc.cpp, synrangeB.cpp
+1417c5edd  synacc.cpp
+1417c5ef0  synacc.cpp, synleaves.cpp
+1417c5f00  CsyndicateLogicTailSlots.cpp, synrangeB.cpp
+1417c5f1d  CsyndicateLogicTailSlots.cpp
+1417c5f30  CsyndicateLogicTailSlots.cpp, synrangeB.cpp
+1417c5f4c  CsyndicateLogicTailSlots.cpp
+1417c5f50  CsyndicateLogicTailSlots.cpp, synrangeB.cpp
+1417c5f80  synacc.cpp
+1417c5fcd  CsyndicateLogicTailSlots.cpp
+1417c5fd9  CsyndicateLogicTailSlots.cpp
+1417c5ff0  CsyndicateLogicTailSlots.cpp
+1417c5ffd  CsyndicateLogicTailSlots.cpp
+1417c6007  CsyndicateLogicTailSlots.cpp
+1417c6011  CsyndicateLogicTailSlots.cpp
+1417c6028  CsyndicateLogicTailSlots.cpp
+1417c6036  CsyndicateLogicTailSlots.cpp
+1417c606d  CsyndicateLogicTailSlots.cpp
+1417c6090  CsyndicateLogicTailSlots.cpp
+1417c609d  CsyndicateLogicTailSlots.cpp
+1417c60a7  CsyndicateLogicTailSlots.cpp
+1417c60b1  CsyndicateLogicTailSlots.cpp
+1417c60c8  CsyndicateLogicTailSlots.cpp
+1417c60d6  CsyndicateLogicTailSlots.cpp
+1417c60e0  synacc.cpp
+1417c60f0  synacc.cpp
+1417c6160  synacc.cpp
+1417c61f2  CsyndicateLogicTailSlots.cpp
+1417c6250  synacc.cpp
+1417c6280  synacc.cpp
+1417c62b0  synacc.cpp
+1417c6330  synacc.cpp
+1417c6360  synacc.cpp
+1417c6370  synacc.cpp
+1417c63a0  synacc.cpp
+1417c63eb  CsyndicateLogicTailSlots.cpp
+1417c63f5  CsyndicateLogicTailSlots.cpp
+1417c6400  CsyndicateLogicTailSlots.cpp
+1417c640c  CsyndicateLogicTailSlots.cpp
+1417c6416  CsyndicateLogicTailSlots.cpp
+1417c6420  CsyndicateLogicTailSlots.cpp
+1417c6438  CsyndicateLogicTailSlots.cpp
+1417c6450  synacc.cpp
+1417c6480  synacc.cpp
+1417c64a0  synacc.cpp
+1417c64dd  CsyndicateLogicTailSlots.cpp
+1417c64e9  CsyndicateLogicTailSlots.cpp
+1417c6500  CsyndicateLogicTailSlots.cpp
+1417c650d  CsyndicateLogicTailSlots.cpp
+1417c6517  CsyndicateLogicTailSlots.cpp
+1417c6521  CsyndicateLogicTailSlots.cpp
+1417c6538  CsyndicateLogicTailSlots.cpp
+1417c6546  CsyndicateLogicTailSlots.cpp
+1417c6550  synacc.cpp
+1417c65ab  CsyndicateLogicTailSlots.cpp
+1417c65c0  CsyndicateLogicTailSlots.cpp
+1417c65cc  CsyndicateLogicTailSlots.cpp
+1417c65d6  CsyndicateLogicTailSlots.cpp
+1417c65e0  CsyndicateLogicTailSlots.cpp
+1417c65f8  CsyndicateLogicTailSlots.cpp
+1417c663b  CsyndicateLogicTailSlots.cpp
+1417c6650  CsyndicateLogicTailSlots.cpp
+1417c665c  CsyndicateLogicTailSlots.cpp
+1417c6666  CsyndicateLogicTailSlots.cpp
+1417c6670  CsyndicateLogicTailSlots.cpp
+1417c6688  CsyndicateLogicTailSlots.cpp
+1417c66a0  synacc.cpp
+1417c66b0  synacc.cpp
+1417c66c0  synacc.cpp
+1417c66d0  synacc.cpp
+1417c66e0  synacc.cpp
+1417c66f0  synacc.cpp
+1417c6700  synacc.cpp
 1417c6b0c  synlift.cpp
 1417c6bb2  synlift.cpp
 1417c8d52  synlift.cpp
