@@ -30,4 +30,29 @@ void Slot_1417d98d0_or10_u8_45(void* pThis, uint32_t v);     // orl $0x10 + mov 
 void Slot_1417d98e0_or20(void* pThis);                       // orl $0x20,0x30(%rcx)
 void Slot_1417d98f0_or20_u32_60(void* pThis, uint32_t v);    // orl $0x20 + mov %edx,0x60(%rcx)
 
+// ---- the rest of the class, 0x1417dae90..0x1417db010 -------------------------------------------
+// Four callees are still seams: 0x1417e8016 is the envelope each builder calls first, 0x1417e7fda
+// is the one 0x1417dafe0 gates on, 0x1417afb20 is the predicate 0x1417daee0 asks, and 0x1417ac7d0
+// is the report it ends with. None has a transcribed body yet.
+extern void (*g_pfnLogic_1417e8016)(void* pThis);
+extern bool (*g_pfnLogic_1417e7fda)(void* pThis);
+extern bool (*g_pfnLogic_1417afb20)(void* pObj, uint32_t nId, uint32_t nCfg4, void* pCfg8);
+extern void (*g_pfnLogic_1417ac7d0)(void* pObj, uint32_t nId, void* pThis);
+
+// 0x1417dae90 — writes 0x1c to cfg+0x0, 0x837 to cfg+0x2 and the arg to cfg+0x18. The bytes leave
+// rax holding the last cfg pointer and only overwrite %al with 1, so the return is that mix.
+uint64_t Slot_1417dae90_SetDom(void* pThis, uint32_t nDom);
+// 0x1417daee0 — the ChgDomName entry: predicate, then the two calls above with this as the 3rd arg.
+void Slot_1417daee0_ChgDomName(void* pThis, uint32_t nId);
+// 0x1417dafe0 — envelope gate, then "is the u16 at +0xa equal to 0x426". %al is rewritten but the
+// rest of %eax keeps 0x426, so the value is 0x401/0x400 rather than a clean 1/0.
+uint64_t Slot_1417dafe0_IsMsg426(void* pThis);
+// 0x1417daf60 / 0x1417dafb0 — constructor and destructor. Both store the CMsg table at +0x0 first
+// and the CMsgLog table last, so the destructor's second store is the one that survives; the
+// constructor then points +0x408 at its own +0x8.
+void* Slot_1417daf60_ctor(void* pThis);
+void  Slot_1417dafb0_dtor(void* pThis);
+// 0x1417db010 — the 0x48/0x426 builder: cfg gets 0x48, 0x426, the u16 arg, a zero Type and the id.
+uint64_t Slot_1417db010_Build48(void* pThis, uint32_t nId, uint32_t nArg3);
+
 }  // namespace tq

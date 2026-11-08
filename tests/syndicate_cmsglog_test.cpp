@@ -26,6 +26,22 @@ static int g_calls0, g_calls1, g_logs;
 static uint32_t g_arg0, g_arg1, g_log_id, g_log_type, g_log_msg;
 static char g_fmt[160];
 
+static int g_env, g_gate, g_pred, g_rep;
+static uint32_t g_predId, g_predCfg4, g_repId;
+static void* g_predSlot;
+static bool g_predAnswer, g_gateAnswer;
+
+static void Env(void* pThis) { ++g_env; CHECK(pThis == (void*)g_this); }
+static bool Gate(void* pThis) { ++g_gate; CHECK(pThis == (void*)g_this); return g_gateAnswer; }
+static bool Pred(void* pObj, uint32_t id, uint32_t cfg4, void* slot) {
+    ++g_pred; g_predId = id; g_predCfg4 = cfg4; g_predSlot = slot;
+    CHECK(pObj == g_expect_obj);
+    return g_predAnswer;
+}
+static void Rep(void* pObj, uint32_t id, void* pThis) {
+    ++g_rep; g_repId = id; CHECK(pObj == g_expect_obj); CHECK(pThis == (void*)g_this);
+}
+
 static void Sink0(void* pObj, uint32_t id) {
     ++g_calls0; g_arg0 = id; CHECK(pObj == g_expect_obj);
 }
@@ -50,6 +66,13 @@ static void reset() {
     g_pfnLogic_1417b7010 = Sink0;
     g_pfnLogic_1417ac620 = Sink1;
     g_pfn_log_1417d97c0 = Log;
+    g_env = g_gate = g_pred = g_rep = 0;
+    g_predId = g_predCfg4 = g_repId = 0; g_predSlot = nullptr;
+    g_predAnswer = false; g_gateAnswer = false;
+    g_pfnLogic_1417e8016 = Env;
+    g_pfnLogic_1417e7fda = Gate;
+    g_pfnLogic_1417afb20 = Pred;
+    g_pfnLogic_1417ac7d0 = Rep;
 }
 
 int main() {
@@ -125,6 +148,87 @@ int main() {
     CHECK(B(g_this, 0x45) == 0x42);
     CHECK(B(g_this, 0x43) == 0xA5 && B(g_this, 0x44) == 0xFF && B(g_this, 0x46) == 0xA5);
     CHECK(D(g_this, 0x64) == 0 && D(g_this, 0x48) == 0);        // no stray dword stores nearby
+
+    // ---------------- 0x1417dae90: the domain builder
+    reset();
+    {
+        const uint64_t r = Slot_1417dae90_SetDom(g_this, 0x12345678u);
+        CHECK(g_env == 1);
+        CHECK(W(g_cfg, 0x0) == 0x1c);          // the header half
+        CHECK(W(g_cfg, 0x2) == 0x837);         // stored as a 16-bit word at an unaligned offset
+        CHECK(W(g_cfg, 0x18) == 0x5678);       // only the low 16 bits of the argument
+        CHECK(D(g_cfg, 0x14) == 0);            // the word before the field is untouched
+        CHECK((uint8_t)(r & 0xFF) == 0x1);     // %al only
+        CHECK((r & ~(uint64_t)0xFF) == ((uint64_t)(uintptr_t)g_cfg & ~(uint64_t)0xFF));
+    }
+
+    // ---------------- 0x1417daee0: predicate answer drives the flag, then both calls
+    for (bool answer : { false, true }) {
+        reset();
+        D(g_cfg, 0x4) = 0xABCDu;
+        D(g_cfg, 0x8) = 0x77u;                 // the Type the predicate is handed by address
+        g_predAnswer = answer;
+        Slot_1417daee0_ChgDomName(g_this, 0x55aa55aau);
+        CHECK(g_pred == 1);
+        CHECK(g_predId == 0x55aa55aau);
+        CHECK(g_predCfg4 == 0xABCDu);
+        CHECK(g_predSlot == (void*)(g_cfg + 0x8));
+        CHECK(g_env == 1);                     // the 0x1417dae90 body ran
+        CHECK(W(g_cfg, 0x0) == 0x1c && W(g_cfg, 0x2) == 0x837);
+        CHECK(W(g_cfg, 0x18) == (answer ? 1u : 0u));   // movzwl of the flag
+        CHECK(D(g_cfg, 0x8) == 0x77u);         // the Type is read, not written
+        CHECK(g_rep == 1); CHECK(g_repId == 0x55aa55aau);
+    }
+
+    // ---------------- 0x1417dafe0: the gate, then the 0x426 test with its 0x400 base
+    reset();
+    g_gateAnswer = false;
+    W(g_this, 0xa) = 0x426;
+    CHECK(Slot_1417dafe0_IsMsg426(g_this) == 0);        // the gate said no
+    CHECK(g_gate == 1);
+    reset();
+    g_gateAnswer = true;
+    W(g_this, 0xa) = 0x426;
+    CHECK(Slot_1417dafe0_IsMsg426(g_this) == 0x401u);   // %eax kept 0x426, %al became 1
+    W(g_this, 0xa) = 0x425;
+    CHECK(Slot_1417dafe0_IsMsg426(g_this) == 0x400u);
+    W(g_this, 0xa) = 0x0426;
+    B(g_this, 0xc) = 0xFF;
+    CHECK(Slot_1417dafe0_IsMsg426(g_this) == 0x401u);   // 16-bit compare, the next byte is ignored
+
+    // ---------------- 0x1417daf60 / 0x1417dafb0
+    reset();
+    {
+        void* r = Slot_1417daf60_ctor(g_this);
+        CHECK(r == (void*)g_this);
+        CHECK(g_env == 2);                              // CMsg envelope, then CMsgLog's
+        CHECK(Q(g_this, 0x0) == (void*)0x14183dad0ULL); // the last table store wins
+        CHECK(Q(g_this, 0x408) == (void*)(g_this + 0x8));
+    }
+    reset();
+    Q(g_this, 0x0) = (void*)0xDEADBEEFULL;
+    Slot_1417dafb0_dtor(g_this);
+    CHECK(Q(g_this, 0x0) == (void*)0x14182e368ULL);     // second store, first table
+    CHECK(g_env == 0);                                  // the destructor calls nothing
+
+    // ---------------- 0x1417db010: the 0x48/0x426 builder
+    reset();
+    {
+        D(g_cfg, 0x8) = 0x99;                            // must be overwritten with 0
+        const uint64_t r = Slot_1417db010_Build48(g_this, 0x11223344u, 0xAABBCCDDu);
+        CHECK(g_env == 1);
+        CHECK(W(g_cfg, 0x0) == 0x48);
+        CHECK(W(g_cfg, 0x2) == 0x426);                   // unaligned: 26 04 at +0x2
+        CHECK(W(g_cfg, 0x4) == 0xCCDD);                  // the u16 of the third argument
+        CHECK(D(g_cfg, 0x8) == 0);                       // Type 0: Process takes its first branch
+        CHECK(D(g_cfg, 0xc) == 0x11223344u);             // the id as a dword
+        CHECK((uint8_t)(r & 0xFF) == 0x1);
+    }
+    // and the message it builds really does route through Process's first branch
+    reset();
+    Slot_1417db010_Build48(g_this, 0x1234u, 0x9u);
+    Slot_1417d97c0_Process(g_this, 0x1234u);
+    CHECK(g_calls0 == 1 && g_calls1 == 0 && g_logs == 0);
 
     std::printf("CMSGLOG_OK checks=%d fails=%d\n", checks, failures);
     return failures ? 1 : 0;

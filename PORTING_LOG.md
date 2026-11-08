@@ -10275,3 +10275,37 @@ Testing: `tests/syndicate_cmsglog_test.cpp`, 61 assertions, 6/6 runs, sanitizers
 of Process with its exact argument, four Type values that must log, a null-seam pass that must not
 crash, all twelve setters with their bit accumulation, and byte-store neighbour checks at
 `0x43/0x44/0x45/0x46` so a too-wide store cannot pass. Suite totals now 14711 + 1284 + 61.
+
+### D89 continued — the rest of the class, 0x1417dae90..0x1417db010 (six bodies)
+
+`0x1417dae90` builds a domain-name message: the u16 argument goes to `cfg+0x18`, then `0x837` at
+`cfg+0x2` and `0x1c` at `cfg+0x0`, each store preceded by its own reload of `this+0x408`. Only `%al`
+is overwritten with 1 at the end, so the return value is "the last cfg pointer with a 1 in its low
+byte" — the port composes it exactly that way rather than pretending it is a bool.
+
+`0x1417daee0` is the ChgDomName entry. `xor %esi,%esi`, then the predicate decides between 0 and 1,
+then `movzwl %si,%edx` hands that flag to `0x1417dae90`, then `0x1417ac7d0(pObj, id, this)` closes.
+The predicate's fourth argument is `&cfg->8`, the *address* of the Type field, not its value, and the
+port passes the address.
+
+`0x1417dafe0` gates on `0x1417e7fda(this)` and then compares the u16 at `+0xa` with `0x426`. Since
+`%eax` still holds `0x426` when `sete %al` lands, the answer is `0x401` or `0x400`, not 1 or 0. The
+test asserts those exact values: an earlier draft expected 1 and 0 and was wrong.
+
+`0x1417daf60` / `0x1417dafb0` are the constructor and destructor. Both store `CMsg`'s table at `+0x0`
+first and `CMsgLog`'s (`0x14183dad0`) last, so the destructor's surviving store is the *first*
+table; and the constructor ends by pointing `+0x408` at its own `+0x8`, which is why every body in
+this family reloads `this+0x408` instead of caching it.
+
+`0x1417db010` is the `0x48`/`0x426` builder: `0x48` at `cfg+0x0`, `0x426` at `cfg+0x2`, the u16 of the
+third argument at `cfg+0x4`, a zeroed `Type` at `cfg+0x8` and the id as a dword at `cfg+0xc`. That
+zero is the link between the two halves of this batch: the test feeds a message built here straight
+into `Slot_1417d97c0_Process` and watches it take the first branch.
+
+Four seams, all still null by default: `0x1417e8016` (the envelope each builder calls first),
+`0x1417e7fda` (the gate), `0x1417afb20` (the predicate), `0x1417ac7d0` (the report).
+
+Testing: the same `tests/syndicate_cmsglog_test.cpp`, now 125 assertions, 6/6 runs, sanitizers clean.
+The width checks are the point of several of them: the header halves live at unaligned `+0x0`/`+0x2`
+so the test reads them with 16-bit loads, and the first draft of the test that read them as dwords
+failed while the port was right.
