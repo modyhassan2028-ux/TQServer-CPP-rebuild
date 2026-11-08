@@ -1709,3 +1709,40 @@ void Slot_1417929f0(void* pFirst, int64_t nIndex, int64_t nCount, void* pElem) {
 }
 
 }  // namespace tq
+
+namespace tq {
+
+// ============================================================================
+// 0x1417917a0 — the up pass 0x1417929f0 hands its last step to. Five arguments; the fifth
+// (the caller's out slot) is never read in this body, so it is carried and unnamed here.
+//   1417917bd  lea -0x1(%rdx),%rax / cqto / sub / sar    parent = (hole-1)/2, sign adjusted
+//   1417917d2  cmp %rdi,%r8 / jge                        nothing to climb when orig >= hole
+//   1417917e0  mov (%rbx,%rbp,8),%rdx                    the parent's value into rdx
+//   1417917e4  lea 0x50(%rsp),%rcx                       the comparator's own out slot
+//   1417917ec  call 0x141787c60                          (out, parent, elem)
+//   1417917f3  je 0x141791814                            a false answer ends the climb
+//   1417917f9  mov %rax,(%rbx,%rdi,8)                    the parent slides into the hole
+//   141791812  jl                                        while orig < hole
+//   141791814 / 14179181a  the element lands at the hole either way
+void Slot_1417917a0(void* pFirst, int64_t nHole, int64_t nOrig, void* pElem, uint64_t) {
+    uint64_t* p = (uint64_t*)pFirst;                              // mov %rcx,%rbx
+    int64_t nParent = SignAdjustedHalf(nHole - 1);                // 1417917bd..cf
+    if (nOrig >= nHole) {                                         // 1417917d2 cmp/jge
+        p[nHole] = (uint64_t)(uintptr_t)pElem;                    // 14179181a mov %r9,(%rcx,%rdi,8)
+        return;
+    }
+    uint64_t uOut = 0;                                            // the 0x50(%rsp) slot
+    for (;;) {
+        uint64_t uParent = p[nParent];                            // 1417917e0
+        if (g_pfnLogic_141787c60 == nullptr) break;
+        if (!g_pfnLogic_141787c60(&uOut, (void*)uParent, pElem))  // 1417917ec / je
+            break;
+        p[nHole] = uParent;                                       // 1417917f9
+        nHole = nParent;                                          // 141791801 mov %rbp,%rdi
+        nParent = SignAdjustedHalf(nParent - 1);                  // 1417917fd..809
+        if (nOrig >= nHole) break;                                // 14179180c cmp/jl
+    }
+    p[nHole] = (uint64_t)(uintptr_t)pElem;                        // 141791814 mov %rsi,(%rbx,%rdi,8)
+}
+
+}  // namespace tq

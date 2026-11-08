@@ -413,6 +413,7 @@ namespace tq {
 extern bool (*g_pfnLogic_141787c60)(void* out, void* right, void* left);
 extern void (*g_pfnLogic_1417917a0)(void* first, int64_t hole, int64_t orig, void* elem,
                                    uint64_t outValue);
+void Slot_1417917a0(void* pFirst, int64_t nHole, int64_t nOrig, void* pElem, uint64_t outSlot);
 void Slot_1417929f0(void* pFirst, int64_t nIndex, int64_t nCount, void* pElem);
 
 }  // namespace tq

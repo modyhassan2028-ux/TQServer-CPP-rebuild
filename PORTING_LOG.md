@@ -10021,3 +10021,19 @@ same mistake in reading the walk: I stopped it after one level. The child loop c
 `child < count`, so a five-element range from index 0 visits index 2 and then index 4 before the
 hand-off, which is why the hole lands at 4 rather than at 1. The port was right both times; the
 assertions were the thing that needed fixing, and they are now written from the trace.
+
+## 2026-11-08 — 0x1417917a0 ported (the up pass)
+
+Forty-four instructions. Five arguments; the fifth (the caller's out slot) is never read in this
+body, which the last test proves by passing a wild value and getting the same behaviour.
+
+    parent = (hole-1)/2 by lea/cqto/sub/sar
+    if (orig >= hole) store the element and return       1417917d2 jge
+    loop: load the parent, compare (parent, elem) through 0x141787c60 with its own 0x50(%rsp) slot;
+          a false answer ends the climb (1417917f3 je), otherwise the parent slides into the hole,
+          the hole becomes the parent, the parent is halved again, and the loop continues while
+          orig < hole (141791812 jl)
+    the element lands at the hole on every exit path (141791814 and 14179181a)
+
+Batteries: 390 assertions, 6/6 runs, sanitizers clean. The climb is checked with two levels, with a
+stop at the second parent, with the orig >= hole short circuit, and with the inert fifth argument.

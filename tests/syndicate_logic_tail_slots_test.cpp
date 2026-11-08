@@ -1796,6 +1796,48 @@ int main() {
         g_pfnLogic_1417917a0 = nullptr;
     }
 
+    // ------------------------------------------------------------------
+    // 0x1417917a0 — the up pass: climb the parents while the element is the larger, and land
+    // it in the hole either way. The fifth argument is never read, so it is only carried.
+    {
+        static uint64_t aU[4];
+        static int nCmpUp;
+
+        g_pfnLogic_141787c60 = +[](void* out, void* right, void* left) -> bool {
+            ++nCmpUp; (void)out;
+            return (uint64_t)(uintptr_t)right < (uint64_t)(uintptr_t)left; };
+
+        // --- the element climbs past both parents
+        aU[0] = 10; aU[1] = 20; aU[2] = 30; aU[3] = 40;
+        nCmpUp = 0;
+        Slot_1417917a0(aU, 3, 0, (void*)99, 0);
+        CHECK(nCmpUp == 2);                       // parents 1 and 0, in that order
+        CHECK(aU[0] == 99 && aU[1] == 10 && aU[3] == 20);
+        CHECK(aU[2] == 30);                       // untouched
+
+        // --- a false answer ends the climb and the element lands below that parent
+        aU[0] = 50; aU[1] = 20; aU[2] = 30; aU[3] = 40;
+        nCmpUp = 0;
+        Slot_1417917a0(aU, 3, 0, (void*)25, 0);
+        CHECK(nCmpUp == 2);                       // 20 < 25 climbs, 50 < 25 stops
+        CHECK(aU[1] == 25 && aU[3] == 20 && aU[0] == 50);
+
+        // --- orig >= hole: no comparator at all, the element just lands
+        aU[0] = 10; aU[1] = 20; aU[2] = 30; aU[3] = 40;
+        nCmpUp = 0;
+        Slot_1417917a0(aU, 1, 1, (void*)77, 0);
+        CHECK(nCmpUp == 0);
+        CHECK(aU[1] == 77);
+
+        // --- the fifth argument is inert: the same call with a wild value behaves the same
+        aU[0] = 10; aU[1] = 20; aU[2] = 30; aU[3] = 40;
+        nCmpUp = 0;
+        Slot_1417917a0(aU, 3, 0, (void*)99, 0xDEADBEEFDEADBEEFull);
+        CHECK(nCmpUp == 2 && aU[0] == 99);
+
+        g_pfnLogic_141787c60 = nullptr;
+    }
+
     std::printf("%s checks=%d fails=%d\n", g_fails ? "LOGIC_SLOTS_FAIL" : "LOGIC_SLOTS_OK",
                 g_checks, g_fails);
     return g_fails ? 1 : 0;
