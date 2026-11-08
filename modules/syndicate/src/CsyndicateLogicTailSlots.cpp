@@ -130,6 +130,20 @@ void* Slot_1417c8f70_lower_bound(void* container_void, void* out_void, const uin
 // 0x1417cad00 — the lookup the three wrappers call. Every load, compare and offset below is
 // the one the bytes perform; both branches that reach 0x1418233c0 are the _DEBUG iterator
 // checks, and like the original they continue rather than throw.
+// 0x141724850 — mov rcx,[rcx] / jmp 0x1417f2fdc, and 0x1417f2fdc is MSVCR90's
+// ??3@YAXPEAX@Z, operator delete(void*). This frees the object the holder points at.
+void Slot_141724850_delete_through(void* holder) {
+    delete (void*)*(void**)holder;                       // mov rcx,[rcx] / jmp operator delete
+}
+
+// 0x1417ac810 — mov rcx,[rcx+8] / mov rax,[rcx] / jmp qword ptr [rax+0x1f8]
+uint64_t Slot_1417ac810_vcall_1f8(void* self, uint32_t id) {
+    uint8_t* inner = *(uint8_t**)((uint8_t*)self + 0x8);  // mov rcx,[rcx+8]
+    void** vtbl = *(void***)inner;                        // mov rax,[rcx]
+    auto fn = (uint64_t (*)(void*, uint32_t))(vtbl[0x1f8 / 8]);
+    return fn(inner, id);                                 // jmp [rax+0x1f8], edx unchanged
+}
+
 uint64_t Slot_1417cad00_lookup(void* self, uint32_t id, uint64_t /*r8*/, uint64_t /*r9*/) {
     if (id == 0)                                        // test edx,edx / jz L37
         return 0;

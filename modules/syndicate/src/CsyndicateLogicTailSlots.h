@@ -87,6 +87,14 @@ extern void (*g_pfnLogic_1417a6960)(void* value, uint64_t arg);                 
 // that is not 0, whether or not the key was found.
 bool Slot_1417a8a50(void* self, uint32_t id, uint64_t arg3, uint64_t r9);
 
+// 0x141724850 — 168 call sites. Two instructions: reload the pointer from [rcx] and tail-call
+// operator delete on it. Nothing is null-checked, exactly as in the bytes.
+void Slot_141724850_delete_through(void* holder);
+
+// 0x1417ac810 — 51 call sites. Dispatch through a vtable reached as [self+8] -> [inner] ->
+// slot 0x1f8. The id in edx is forwarded unchanged.
+uint64_t Slot_1417ac810_vcall_1f8(void* self, uint32_t id);
+
 // 0x1417cad90: call lookup / return (result != 0)
 int      Slot_1417cad90(void* self, uint64_t rdx, uint64_t r8, uint64_t r9);
 // 0x1417cadb0: call lookup(this, (u32)r8, ...) / on hit tail-call (hit, (u32)rdx) / on miss 0

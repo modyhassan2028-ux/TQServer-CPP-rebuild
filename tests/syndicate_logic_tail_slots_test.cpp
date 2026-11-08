@@ -401,6 +401,36 @@ int main() {
         CHECK(g_calls == 0);
     }
 
+    // --- 0x141724850 frees the object its argument points at
+    {
+        void* obj = ::operator new(16);
+        void* holder[1] = {obj};
+        Slot_141724850_delete_through(holder);            // ASan/LSan prove the free happened
+    }
+
+    // --- 0x1417ac810 dispatches through [self+8] -> [inner] -> slot 0x1f8
+    {
+        static int slot_hits;
+        static void* seen_self;
+        static uint32_t seen_id;
+        slot_hits = 0; seen_self = nullptr; seen_id = 0;
+
+        struct Fake { void* vt[0x40]; };                   // vt[0x3f] sits at +0x1f8
+        static Fake inner;
+        static void* vtbl[0x40];
+        for (int i = 0; i < 0x40; ++i) vtbl[i] = nullptr;
+        vtbl[0x3f] = (void*)+[](void* self, uint32_t id) -> uint64_t {
+            ++slot_hits; seen_self = self; seen_id = id; return 0x99;
+        };
+        inner.vt[0] = vtbl;                                // [inner] -> the table
+
+        void* selfbuf[2] = {nullptr, &inner};               // [self+8] -> inner
+        CHECK(Slot_1417ac810_vcall_1f8(selfbuf, 42) == 0x99);
+        CHECK(slot_hits == 1);
+        CHECK(seen_self == (void*)&inner);
+        CHECK(seen_id == 42);
+    }
+
     std::printf("%s checks=%d fails=%d\n", g_fails ? "LOGIC_SLOTS_FAIL" : "LOGIC_SLOTS_OK",
                 g_checks, g_fails);
     return g_fails ? 1 : 0;
