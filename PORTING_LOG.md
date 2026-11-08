@@ -9513,3 +9513,37 @@ is the first evidence of real depth rather than one frame per test. The remainin
 treated as bugs: 7,890 of them read at address 0, which is what a body does when it dereferences a
 field a caller would have filled in. They are recorded per body in `tools/bulk/smoke_status.csv`
 with the accessed address, so a body can be picked up later and given a real object.
+
+## Fidelity audit against an independent decoder (2026-11-08)
+
+The lift was verified only against itself: the batteries check a handful of families with fixtures,
+and the smoke run reports whether a body executes, not whether it computes what the original did.
+`tools/bulk/audit_decode.py` and `tools/bulk/audit_integrity.py` add verification that does not
+depend on the pipeline that produced the rows: they decode the same bytes with capstone and compare.
+
+What they found, all of it in the row text rather than in the lifter:
+
+1. **Rip-relative targets were wrong in 326 instructions.** The earlier pipeline computed the
+   absolute target with its own idea of instruction length, so a body read or wrote a global one to
+   four bytes off, and some targets even carried a `0x10000000` prefix (`[rip@0x1000000014174e1e0]`).
+   The repair recomputes `address + size + displacement` from capstone, which is the definition of
+   the addressing mode.
+2. **Single-byte padding had been dropped** from the address lists (22,216 slots across 2,138 rows),
+   so a branch could target an address that no longer had a label. Padding is re-inserted exactly as
+   capstone decodes it.
+3. **344 rows were corrupt**: carved bodies whose recorded end was up to 850 KB past their start,
+   carrying 78 to 117 instructions spread across the whole image. All 344 also have a `.pdata`
+   record, so the record is authoritative and the override was dropped.
+4. **17,140 instruction slots were jump-table data**, reached by no path; they are pruned by the
+   same rule the earlier prune used (nothing between an unconditional transfer and the next label
+   is reachable).
+
+The repairs live in `tools/bulk/rows_fixed.json`, which the lifter now prefers over the raw rows.
+
+Two real gaps were exposed by removing the corrupt overrides, and they are honest gaps rather than
+regressions:
+
+- **358 rows** end in `jmp` into the code region at `0x1417f3xxx`, which has no `.pdata` records at
+  all, so no row exists there to call;
+- **41 rows** are fragments whose conditional branch leaves the `.pdata` range, i.e. one function
+  split across several records.

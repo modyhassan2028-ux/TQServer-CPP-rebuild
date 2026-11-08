@@ -407,10 +407,11 @@ def lift(addr, funcs):
             continue
         if op == 'lea':
             d, s = [enc(x) for x in rest.replace(', ', ',').split(',', 1)]
+            _lw = d[2] if d[0] in ('reg', 'sub') else 8
             if s[0] == 'mem':
-                body.append('    ' + wr(d[1], 8, '%s + 0x%x' % (s[1], s[2]) if s[2] >= 0 else '%s - 0x%x' % (s[1], -s[2])))
+                body.append('    ' + wr(d[1], _lw, '%s + 0x%x' % (s[1], s[2]) if s[2] >= 0 else '%s - 0x%x' % (s[1], -s[2])))
             elif s[0] == 'iat':
-                body.append('    ' + wr(d[1], 8, '(uintptr_t)0x%x' % s[1]))
+                body.append('    ' + wr(d[1], _lw, '(uintptr_t)0x%x' % s[1]))
             else:
                 raise SystemExit('lea form: %r' % ins)
             continue
@@ -572,6 +573,12 @@ def main():
         for k, v in json.load(open(extra_path)).items():
             v['a'] = int(k, 16)
             funcs[v['a']] = v
+    # rows repaired by fix_rows.py: padding re-inserted, rip targets recomputed, unreachable
+    # slots pruned. They win over the raw rows because the repair is what the audit verifies.
+    fixed_path = os.path.join(REPO, 'tools/bulk/rows_fixed.json')
+    if os.path.exists(fixed_path):
+        for k, v in json.load(open(fixed_path)).items():
+            funcs[int(k, 16)] = v
     hdr = ['// Lifted mechanically by tools/bulk/lift.py - one C++ statement per x86 instruction.',
            '// Registers are uint64_t, memory goes through width-tagged accessors, flags are computed explicitly.',
            '#pragma once', '#include <cstdint>', '#include <cstring>', '',
@@ -693,6 +700,9 @@ def operand_read(e):
 def operand_write(e, expr):
     if e and e[0] == 'sub':
         m = (1 << (8 * e[2])) - 1
+        if e[2] == 4:
+            # writing a 32-bit register clears the upper half, it does not read-modify-write
+            return '%s = (uint64_t)(uint32_t)(%s);' % (e[1], expr)
         return '%s = (%s & ~0x%xULL) | ((uint64_t)(%s) & 0x%xULL);' % (e[1], e[1], m, expr, m)
     return _orig_operand_write(e, expr)
 
