@@ -9616,20 +9616,40 @@ than papered over.
 The hand port itself: 596 of 10,660 rows are referenced by hand-written code (5.6%), and 76 classes
 have vtables of which 52 names are already declared in `modules/`.
 
-### Correction: the interior-entry gap is closed
+### The interior-entry gap, measured properly
 
-The 64 slots recorded above were resolved in the same session, not left open. `carve_targets.py` now
-also treats a vtable slot as a target on the same footing as a call target, which carved 68 bodies;
-`fix_rows.py` then repaired the rows they split. Re-checked against the regenerated module:
+The counts in the section above came from a body list scraped out of `synlift.h` alone, which misses
+the bodies that live in `synlift_stage.h` and the thunk files. Re-measured by scanning every file in
+`modules/syndicate/src` for `SynLift_<addr>`:
 
 | | count |
 | --- | --- |
 | vtable slots | 393 |
-| with a body in the module | 392 |
-| `jmp qword ptr [rip+x]` import thunks, expressed inline by the model | 1 |
-| unexplained | 0 |
+| slot addresses with a body | 389 |
+| `jmp qword ptr [rip+x]` import thunk, expressed inline as `ML_IAT` | 1 |
+| rows that cannot be lifted yet | 3 |
 
-The single remaining address (`0x1417f2fe8`, a slot of the `bad_alloc` vtable) is a three-instruction
-run of import thunks; the model writes those as `ML_IAT(...)` inside the calling expression rather
-than as a body, so it needs no body of its own. Accounting is in `tools/bulk/vslot_accounting.json`.
-Batteries on the regenerated module: 24/24 across six rounds.
+The three that remain are diagnosed, not unknown:
+
+* `0x141721090` - `cmp [rcx+0x38],0x10 / jb 0x14172109c / mov rax,[rcx+0x20] / ret`; the branch lands
+  one byte past the `.pdata` end, where `lea rax,[rcx+0x20] / ret` decodes cleanly, so the record
+  stops inside the function.
+* `0x1417c5860` - the record cuts `mov [rcx+0xa8],r8d` in half; the chain continues at `0x1417c5870`
+  with `cmp edx,0x3e8`, i.e. the same setter testing a second id.
+* `0x1417d8920` - a real function followed by a jump table (`a2 89 0b 00 27 8a 0b 00 ...`) and then
+  more code; the lifter stops on the table's impossible operand forms.
+
+`tools/bulk/vslot_state.json` records the classification.
+
+### Rows that used to run off their end
+
+`tools/bulk/extend_rows.py` addresses a wider version of the same problem: 726 rows end on an
+instruction that is neither `ret` nor a jump, so a body lifted from them falls into whatever follows.
+The tool decodes forward until a terminator, accepting the extension only when the bytes decode
+cleanly the whole way and every branch in the extended body still lands inside it; otherwise the tail
+belongs to another chunk and is left alone. Result: 309 rows given their real end, 408 left alone
+because the tail is another chunk, 9 because the bytes stop decoding as code. The corrected rows are
+merged into `rows_fixed.json`, which the lifter and the ledger both read.
+
+Module after the correction: 10,708 bodies; rows 10,216/10,224, routines 9,437/9,445, code 246,395 of
+246,621. Batteries: 24/24 across six ASan/UBSan rounds.
