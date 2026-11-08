@@ -293,7 +293,10 @@ uint64_t Slot_141779400(void* found, uint32_t id, uint32_t kind) {
 void Slot_14177c770_seed(void* value) { g_singleton_14177c770 = value; }
 void Slot_1417b6210_seed(void* value) { g_singleton_1417b6210 = value; }
 
-uint64_t (*g_pfnLogic_141779400)(void* found, uint32_t id, uint32_t kind) = nullptr;
+// The tail target is ported now, so the seam defaults to the real body instead of nothing. Nothing
+// about 0x14177f980 changes: it still calls through this pointer, which is what makes the chain
+// testable, but it no longer stops at a null.
+uint64_t (*g_pfnLogic_141779400)(void* found, uint32_t id, uint32_t kind) = Slot_141779400;
 
 // 0x14177f980 — kind-gated dispatch. The `lea eax,[r8-1] / cmp eax,2 / ja` is an unsigned range
 // test, so kinds 1, 2 and 3 take the work path and everything else, including 0, is reported.

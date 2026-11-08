@@ -448,6 +448,11 @@ int main() {
         answer_kind = 2;
         CHECK(Slot_141779400(found, 0xB, 2) == 2);
         CHECK(last_self == (void*)&elem);
+
+        // the tail seam defaults to the ported body, so the same call goes through the pointer
+        g_pfnLogic_141779400 = Slot_141779400;
+        CHECK(g_pfnLogic_141779400(found, 0xB, 2) == 2);
+        g_pfnLogic_141779400 = Slot_141779400;   // restore the default for the rest of the file
     }
 
     // --- 0x14177f980 gates on the kind, then chains vtable -> find -> tail call

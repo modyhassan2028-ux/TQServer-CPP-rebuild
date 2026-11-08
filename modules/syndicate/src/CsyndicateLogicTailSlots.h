@@ -111,7 +111,8 @@ uint64_t Slot_141779400(void* found, uint32_t id, uint32_t kind);
 // 0x14177f980 — the seam itself. Kinds 1..3 ask the 0x88-byte singleton's vtable slot 0x1f8 for an
 // id, look that id up in the 0x40-byte singleton's map, and tail-call 0x141779400 with the found
 // object, the original id and the kind. Any other kind logs through CQBase and answers 0. The tail
-// call is a seam until 0x141779400 is ported; while the seam is null this body answers 0 there.
+// call goes through this pointer; it now defaults to the ported 0x141779400, so the chain runs end
+// to end, and it stays a pointer so a test can watch what gets forwarded.
 extern uint64_t (*g_pfnLogic_141779400)(void* found, uint32_t id, uint32_t kind);
 uint64_t Slot_14177f980(void* self, uint32_t id, uint32_t kind, uint64_t r9);
 
