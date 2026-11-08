@@ -40,8 +40,9 @@ the build output, not just the test output.
 - `modules/syndicate/src/msg/msgleagueroboptpb.cpp` / `msgleaguetokenpb.cpp`: the two `+0x408` protobuf constructors
 
 **Frontier, measured:** 1690 open addresses but only **26 function starts**; 1641 are inside already-ported
-functions. Quote the 26, not the 1690. Twenty of the 26 are the container accessors now ported (D99), so six
-starts remain: `0x14174e3a0`, `0x14177fa40`, `0x141780100`, `0x1417b0920`, `0x1417e0830`, `0x141821f80`.
+functions. Quote the 26, not the 1690. The twenty container accessors (D99) and four comparators (D100) are now ported, so **two starts
+remain**: `0x14177fa40` (0x86 bytes) and `0x141821f80` (0x600 bytes).
+- `modules/syndicate/src/syncomparators.cpp`: the four comparator leaves (`0x141780100`, `0x1417e0830`, `0x14174e3a0`, `0x1417b0920`)
 - `modules/syndicate/src/containeraccessors.cpp`: twenty container accessors (`0x1417c5980..0x1417c5f5a`)
 - `modules/syndicate/src/msg/msgfieldflags.cpp`: the twelve `+0x30` field setters (`0x1417d9840..0x1417d98f7`)
 - `modules/syndicate/src/msg/msgpbseams.cpp`: the twenty-one protobuf seams nothing defined, which is why the family now links (`0x1417ac700`, `0x1417ac710`, `0x1417ac720`, `0x1417ac730`, `0x1417ac5e0`)
@@ -51,7 +52,7 @@ starts remain: `0x14174e3a0`, `0x14177fa40`, `0x141780100`, `0x1417b0920`, `0x14
 - `modules/syndicate/src/msg/msgleaguerobopt.cpp`: 1 more (`0x1417d8920`, 7 cases, list build)
 - `modules/syndicate/src/CMsgLog.cpp`: 19 more (`0x1417d97c0`, twelve setters, then `0x1417dae90`,
   `0x1417daee0`, `0x1417dafe0`, the ctor/dtor and `0x1417db010`), same command.
-- Batteries: 14711 + 1284 + 125 + 491 + 198 + 125 + 33 + 27 + 33 + 24 + 142 assertions (eleven suites)
+- Batteries: 14711 + 1284 + 125 + 491 + 198 + 125 + 33 + 27 + 33 + 24 + 24 + 142 assertions (twelve suites)
 - `tools/run_syndicate_pbsuite.sh` = the protobuf constructor suite, 33 assertions x6 in `tests/syndicate_logic_tail_slots_test.cpp` (219 at 8c97b8d), `tests/syndicate_findoradd_test.cpp` and `tests/syndicate_cmsglog_test.cpp`, `tests/syndicate_msgleagueopt_test.cpp`, `tests/syndicate_leaguerobopt_test.cpp`, `tests/syndicate_module_test.cpp`, `tests/syndicate_slotforwarders_test.cpp`, `tests/syndicate_msgsynctors_test.cpp`, all passing, 6/6 runs, sanitizers clean. Each binary prints its own count: `LOGIC_SLOTS_OK checks=14711 fails=0`, `FINDORADD_OK checks=1284 fails=0`, `CMSGLOG_OK checks=125 fails=0`, `MSGLGOPT_OK checks=491 fails=0`, `LEAGUEROB_OK checks=198 fails=0`, `MODULE_OK checks=125 fails=0`, `SLOTFWD_OK checks=24 fails=0`, `MSGSYNCTOR_OK checks=142 fails=0`.
 - The `0x14177f980` family is complete and wired: `0x14177f980` -> `0x141779400` -> `0x141779090`,
   plus both singletons (`0x14177c770`, `0x1417b6210`), the map constructor `0x14177c6c0`, its end-node

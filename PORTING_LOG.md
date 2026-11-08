@@ -10714,3 +10714,40 @@ The other two traps: `0x1417c5ae0` copies eight bytes, then eight more, then exa
 Testing: `tests/syndicate_containeraccessors_test.cpp`, 33 assertions, six cycles, sanitizers clean.
 
 Suites now: 14711 + 1284 + 125 + 491 + 198 + 125 + 33 + 27 + 33 + 24 + 142.
+
+## 2026-11-08 — D100: four comparator leaves, and an ordering that is not monotonic
+
+| address | what it is |
+|---|---|
+| `0x141780100` | `setge` on the signed word at `+0x8` — true when `a >= b` |
+| `0x1417e0830` | four arguments stored to the home space and a `ret`; the body is empty |
+| `0x14174e3a0` | the three-key ordering predicate |
+| `0x1417b0920` | a flag at `+0xe` short-circuits, then the word at `+0x27` ascending |
+
+`0x14174e3a0` is the one that matters:
+
+```
+if (a[0] == 0) return true;          // zero first key == empty, sorts before everything
+if (b[0] == 0) return false;
+if (a[8] != b[8]) return a[8] > b[8];   // DESCENDING  (setg, not setb)
+if (a[4] != b[4]) return a[4] < b[4];   // ascending
+return a[0] < b[0];                     // ascending
+```
+
+Two consequences worth keeping: the primary sort key orders **downwards** while its neighbours order
+upwards, so a port that "cleans this up" produces a correctly-shaped sort in the wrong order; and the
+predicate is not irreflexive for an empty record, because the zero-key branch returns `true` before
+anything is compared. Both are the binary's behaviour and both are asserted in the test.
+
+`0x1417b0920` reads a dword at the **unaligned** offset `+0x27` (`cmp %ecx,0x27(%r8)`), so the port goes
+through `memcpy` rather than a `uint32_t*` cast, which is also what keeps UBSan quiet.
+
+`0x1417e0830` has an empty body: `mov %r9,0x20(%rsp)` and three more stores are the caller's own home
+space, and nothing is read or called. It is ported as an empty function with the same four-argument
+shape, so call sites keep theirs.
+
+Testing: `tests/syndicate_comparators_test.cpp`, 24 assertions, six cycles, sanitizers clean. My first
+run of it failed on two of my own assertions about the descending key — the object was right, my reading
+of `setg` was not.
+
+Suites now: 14711 + 1284 + 125 + 491 + 198 + 125 + 33 + 27 + 33 + 24 + 24 + 142.
