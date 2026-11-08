@@ -9935,3 +9935,34 @@ itself on all three links with size 0; an already-empty map frees nothing and st
 Scaffolding fault in this batch: the fixture's node struct put the nil byte at +0x21 (4 bytes of key
 plus a 5-byte pad) while the code reads +0x1d, so the recursion never saw a nil node and ran away.
 The sanitizer caught it; the struct was corrected to the layout the bytes use.
+
+## 2026-11-08 — 0x14179cde0 and 0x14179cf10 ported (the two range routines)
+
+Both take `(first, last, count, fn)` and return nothing. One transcription runs them; the two rows
+supply their own four callees, which is the only difference the listings show (the register
+allocation differs too — fn lives in rax in one and rbp in the other, the midpoint in rbp vs r10 —
+but the values, the 0x20 threshold, the offsets and the branch sense are the same):
+
+    partition  0x141795a30 / 0x141795d40
+    tail       0x141793d50 / 0x141793fd0
+    exhausted  0x141795ca0 + 0x141797670 / 0x141795f70 + 0x1417976e0
+
+The arithmetic that had to be read carefully is the count chain: `cqto / sub %rdx,%rax / sar 1`
+twice, which is "halve, then add a quarter" — kept as the instruction sequence
+(`(v - sign(v)) >> 1`) rather than a division, and written back into the loop's own variable, since
+the bytes reuse rsi for both.
+
+Two bugs in my own transcription, both caught by the tests rather than by review:
+
+1. The chain was computed into a fresh local and the loop variable was left untouched, so the count
+   never reached zero and the routine partitioned 32 times instead of 3. The bytes write rsi, which
+   *is* the loop's count.
+2. The shared body recursed into 0x14179cde0 unconditionally, so 0x14179cf10's recursion crossed into
+   the other family's seams. Each row recurses into itself, which the test asserts by checking that
+   the twin's four seams fire and the first family's stay at zero.
+
+Batteries: 340 assertions (15 new): the small range answers with one tail call and the exact
+(first, last, fn); a one-element range does nothing; a large range with count 0 takes the exhausted
+pair without partitioning; a large range with count 4 walks 4 -> 3 -> 1 -> 0 and produces exactly
+three partitions, three tail calls and one exhausted pair, with the element counts 0x60 and 0x5e
+recorded; and both entry points stay inside their own seam families. 6/6 runs, sanitizers clean.

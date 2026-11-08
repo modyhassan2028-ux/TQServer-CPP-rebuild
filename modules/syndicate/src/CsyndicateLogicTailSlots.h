@@ -347,4 +347,31 @@ void Slot_141727640(void* container);
 
 }  // namespace tq
 
+namespace tq {
+
+// 0x14179cde0 and 0x14179cf10 — the two range routines the tidy calls. Both take
+// (first, last, count, fn), return nothing, and are the same algorithm: while the range holds
+// more than 0x20 eight-byte elements, partition it through one helper and recurse into the
+// smaller side with count/2 + count/4, keeping the larger side for the loop; when the range
+// drops to <= 0x20 elements and the count still allows it, one tail call finishes the range;
+// when the count runs out first, two helpers run and the routine returns.
+//
+// The two rows differ only in the four callees they use (verified against the two listings):
+//   partition 0x141795a30 / 0x141795d40     tail 0x141793d50 / 0x141793fd0
+//   exhausted 0x141795ca0 / 0x141795f70 and 0x141797670 / 0x1417976e0
+// Their register allocation differs (fn in rax vs rbp, the midpoint in rbp vs r10) but the
+// values, offsets, threshold and branch sense are identical.
+extern void (*g_pfnLogic_141795a30)(void* out, void* first, void* last, void* fn);
+extern void (*g_pfnLogic_141795d40)(void* out, void* first, void* last, void* fn);
+extern void (*g_pfnLogic_141793d50)(void* first, void* last, void* fn, void* zero);
+extern void (*g_pfnLogic_141793fd0)(void* first, void* last, void* fn, void* zero);
+extern void (*g_pfnLogic_141795ca0)(void* first, void* last, void* fn);
+extern void (*g_pfnLogic_141795f70)(void* first, void* last, void* fn);
+extern void (*g_pfnLogic_141797670)(void* first, void* last, void* fn);
+extern void (*g_pfnLogic_1417976e0)(void* first, void* last, void* fn);
+void Slot_14179cde0(void* pFirst, void* pLast, int64_t nCount, void* pfn);
+void Slot_14179cf10(void* pFirst, void* pLast, int64_t nCount, void* pfn);
+
+}  // namespace tq
+
 #endif

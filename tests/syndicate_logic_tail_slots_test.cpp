@@ -1534,6 +1534,100 @@ int main() {
         g_pfnLogic_1417f2fdc = nullptr;
     }
 
+    // ------------------------------------------------------------------
+    // 0x14179cde0 / 0x14179cf10 — the two range routines and their four callees each.
+    // The fixtures below pin the threshold (0x20 elements), the count chain
+    // (count/2 + count/4), and which of the eight seams each entry point reaches.
+    {
+        static int nPartA, nTailA, nExA, nExB;      // the 0x14179cde0 seam family
+        static int nPartB, nTailB, nExAB, nExBB;    // the 0x14179cf10 seam family
+        static int64_t aPartCount[8]; static int nPartSeen;
+        static void* pTailFirst[8]; static void* pTailLast[8]; static void* pTailFn[8];
+        static int nTailSeen;
+        static void* pWantFn;
+
+        static uint64_t aBuf[0x60];
+        uint8_t* pBase = (uint8_t*)aBuf;
+
+        auto clear = []() {
+            nPartA = nTailA = nExA = nExB = 0;
+            nPartB = nTailB = nExAB = nExBB = 0;
+            nPartSeen = nTailSeen = 0;
+        };
+
+        // the partition stub splits 0x10 bytes from the front, so the right side stays large
+        g_pfnLogic_141795a30 = +[](void* out, void* first, void* last, void* fn) {
+            ++nPartA; if (nPartSeen < 8) aPartCount[nPartSeen++] = (int64_t)(((uint8_t*)last - (uint8_t*)first) >> 3);
+            ((void**)out)[0] = (uint8_t*)first + 0x10;
+            ((void**)out)[1] = (uint8_t*)first + 0x10;
+            (void)fn; };
+        g_pfnLogic_141795d40 = +[](void* out, void* first, void*, void*) {
+            ++nPartB;
+            ((void**)out)[0] = (uint8_t*)first + 0x10;
+            ((void**)out)[1] = (uint8_t*)first + 0x10; };
+        g_pfnLogic_141793d50 = +[](void* first, void* last, void* fn, void* zero) {
+            ++nTailA; if (nTailSeen < 8) { pTailFirst[nTailSeen] = first; pTailLast[nTailSeen] = last;
+                                           pTailFn[nTailSeen] = fn; ++nTailSeen; }
+            (void)zero; };
+        g_pfnLogic_141793fd0 = +[](void*, void*, void*, void* zero) { ++nTailB; (void)zero; };
+        g_pfnLogic_141795ca0 = +[](void*, void*, void*) { ++nExA; };
+        g_pfnLogic_141795f70 = +[](void*, void*, void*) { ++nExAB; };
+        g_pfnLogic_141797670 = +[](void*, void*, void*) { ++nExB; };
+        g_pfnLogic_1417976e0 = +[](void*, void*, void*) { ++nExBB; };
+
+        pWantFn = (void*)0xFEEDFACE;
+
+        // --- a range of three elements with a count of 2: one tail call, nothing else
+        clear();
+        Slot_14179cde0(pBase, pBase + 0x18, 2, pWantFn);
+        CHECK(nPartA == 0 && nExA == 0 && nExB == 0);
+        CHECK(nTailA == 1);
+        CHECK(pTailFirst[0] == (void*)pBase && pTailLast[0] == (void*)(pBase + 0x18));
+        CHECK(pTailFn[0] == pWantFn);
+
+        // --- one element is below the tail's own threshold: nothing at all
+        clear();
+        Slot_14179cde0(pBase, pBase + 8, 5, pWantFn);
+        CHECK(nPartA == 0 && nTailA == 0 && nExA == 0 && nExB == 0);
+
+        // --- a large range with a count of 0 takes the exhausted exit, not the partition
+        clear();
+        Slot_14179cde0(pBase, pBase + 0x300, 0, pWantFn);
+        CHECK(nPartA == 0 && nTailA == 0);
+        CHECK(nExA == 1 && nExB == 1);
+
+        // --- a large range with a count of 4 walks the chain 4 -> 3 -> 1 -> 0:
+        //     three partitions (each with its own recursion into the 2-element left side,
+        //     which its own call answers with the tail), then the exhausted pair.
+        clear();
+        Slot_14179cde0(pBase, pBase + 0x300, 4, pWantFn);
+        CHECK(nPartA == 3);
+        CHECK(nTailA == 3);            // one per recursion into the small left side
+        CHECK(nExA == 1 && nExB == 1);
+        CHECK(aPartCount[0] == 0x60);  // 0x300 bytes = 0x60 elements
+        CHECK(aPartCount[1] == 0x5e);  // 0x10 bytes were consumed between them
+
+        // --- the twin reaches its own four seams and none of the first family's
+        clear();
+        Slot_14179cf10(pBase, pBase + 0x300, 4, pWantFn);
+        CHECK(nPartB == 3 && nTailB == 3 && nExAB == 1 && nExBB == 1);
+        CHECK(nPartA == 0 && nTailA == 0 && nExA == 0 && nExB == 0);
+
+        // --- its small-range path is the same single tail call
+        clear();
+        Slot_14179cf10(pBase, pBase + 0x18, 2, pWantFn);
+        CHECK(nTailB == 1 && nPartB == 0);
+
+        g_pfnLogic_141795a30 = nullptr;
+        g_pfnLogic_141795d40 = nullptr;
+        g_pfnLogic_141793d50 = nullptr;
+        g_pfnLogic_141793fd0 = nullptr;
+        g_pfnLogic_141795ca0 = nullptr;
+        g_pfnLogic_141795f70 = nullptr;
+        g_pfnLogic_141797670 = nullptr;
+        g_pfnLogic_1417976e0 = nullptr;
+    }
+
     std::printf("%s checks=%d fails=%d\n", g_fails ? "LOGIC_SLOTS_FAIL" : "LOGIC_SLOTS_OK",
                 g_checks, g_fails);
     return g_fails ? 1 : 0;

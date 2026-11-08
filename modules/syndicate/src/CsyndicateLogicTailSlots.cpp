@@ -1413,3 +1413,129 @@ static void map_clear_bridge(void* p) { Slot_141727640(p); }
 static void* type_store_bridge(void* out, const void* type) { return Slot_141787c50(out, type); }
 
 }  // namespace tq
+
+namespace tq {
+
+// ============================================================================
+// 0x14179cde0 / 0x14179cf10 — the range routines. One transcription, four callees injected.
+// The 0x14179cde0 anchors, in order (the twin's flow is the same, only the targets differ):
+//   14179cdf9  rax = r9 (fn) ; 14179cdfc r9 = rdx ; 14179cdfc..ce0b (last-first)>>3
+//   14179ce0f  cmp $0x20 / jle 14179ceb6          a small range skips straight to the tail
+//   14179ce20  test %rsi,%rsi / jle 14179cee2     the count decides which exit is taken
+//   14179ce37  call partition(&out, first, last, fn)   out = [rsp+0x20], [rsp+0x28]
+//   14179ce46  rcx = (last - mid) & ~7             the byte width of the right part
+//   14179ce4c  cqto; sub %rdx,%rax; sar 1          the count halved, sign-adjusted
+//   14179ce5e  cqto; sub %rdx,%rax; sar 1; add     then a quarter of it is added
+//   14179ce6e  rax = (split - first) & ~7          the byte width of the left part
+//   14179ce7b  cmp %rcx,%rax / jge 14179ce8d       recurse into the smaller side only
+//   14179ce8d  call 0x14179cde0(mid, last, count, fn) then last = split
+//   14179ce83  call 0x14179cde0(first, split, count, fn) then first = mid
+//   14179ceac  cmp (last-first)>>3,0x20 / jg       the loop keeps the larger side
+//   14179ceb6  cmp $0x1 / jle                     nothing to do for one element
+//   14179cec8  call tail(first, last, fn, 0)
+//   14179cee2  cmp $0x20 / jle 14179ceb6          the exhausted exit re-checks the range
+//   14179cef1  call exhaustedA(first, last, fn) ; 14179cf01 call exhaustedB(...) ; return
+// The signed shifts are kept as the sequence, not as a division: (v - sign(v)) >> 1.
+
+struct RangeRoutine {
+    void (*pfnSelf)(void* first, void* last, int64_t count, void* fn);   // the row that recurses
+    void (*pfnPartition)(void* out, void* first, void* last, void* fn);
+    void (*pfnTail)(void* first, void* last, void* fn, void* zero);
+    void (*pfnExhaustedA)(void* first, void* last, void* fn);
+    void (*pfnExhaustedB)(void* first, void* last, void* fn);
+};
+
+static int64_t SignAdjustShift1(int64_t v) {                 // cqto ; sub %rdx,%rax ; sar 1
+    const int64_t nSign = (v < 0) ? -1 : 0;
+    return (v - nSign) >> 1;
+}
+
+static void RunRange(const RangeRoutine& r, void* pFirst, void* pLast, int64_t nCount,
+                     void* pfn) {
+    uint8_t* first = (uint8_t*)pFirst;                        // mov %rcx,%rdi
+    uint8_t* last = (uint8_t*)pLast;                          // mov %rdx,%rbx
+    int64_t nLeft = nCount;                                   // mov %r8,%rsi
+    int64_t nElems = (int64_t)((last - first) >> 3);           // sub/sar $3
+    uint8_t* aOut[2] = {nullptr, nullptr};                    // [rsp+0x20] / [rsp+0x28]
+
+    if (nElems <= 0x20) goto tail;                            // cmp $0x20 / jle
+
+    for (;;) {
+        if (nLeft <= 0) {                                     // 14179ce20 test/jle
+            if (nElems > 0x20) {                              // 14179cee2 cmp $0x20 / jle
+                if (r.pfnExhaustedA != nullptr)
+                    r.pfnExhaustedA(first, last, pfn);        // 14179cef1
+                if (r.pfnExhaustedB != nullptr)
+                    r.pfnExhaustedB(first, last, pfn);        // 14179cf01
+            }
+            return;                                           // jmp 14179cecd
+        }
+
+        if (r.pfnPartition != nullptr)                        // 14179ce37 call partition
+            r.pfnPartition(aOut, first, last, pfn);
+        uint8_t* pMid = aOut[1];                              // mov 0x28(%rsp),%rbp
+        uint8_t* pSplit = aOut[0];                            // mov 0x20(%rsp)
+        const int64_t nRightBytes = (int64_t)((last - pMid) & ~(int64_t)7);   // 14179ce4e/ce54
+        nLeft = SignAdjustShift1(nLeft);                       // 14179ce5b mov %rax,%rsi
+        nLeft = nLeft + SignAdjustShift1(nLeft);               // 14179ce6b add %rax,%rsi
+        const int64_t nLeftBytes = (int64_t)((pSplit - first) & ~(int64_t)7); // 14179ce6e..ce77
+
+        if (nLeftBytes >= nRightBytes) {                       // cmp %rcx,%rax / jge
+            r.pfnSelf(pMid, last, nLeft, pfn);                 // 14179ce93 (calls itself)
+            last = pSplit;                                     // 14179ce98
+        } else {
+            r.pfnSelf(first, pSplit, nLeft, pfn);              // 14179ce83 (calls itself)
+            first = pMid;                                      // 14179ce88
+        }
+        nElems = (int64_t)((last - first) >> 3);               // 14179cea2..cea8
+        if (nElems <= 0x20) break;                             // 14179ceb0 jg
+    }
+
+tail:
+    if (nElems <= 1) return;                                   // 14179ceb6 cmp $0x1 / jle
+    if (r.pfnTail != nullptr)                                  // 14179cec8
+        r.pfnTail(first, last, pfn, nullptr);                   // r8 = fn, r9 = 0
+}
+
+void (*g_pfnLogic_141795a30)(void* out, void* first, void* last, void* fn) = nullptr;
+void (*g_pfnLogic_141795d40)(void* out, void* first, void* last, void* fn) = nullptr;
+void (*g_pfnLogic_141793d50)(void* first, void* last, void* fn, void* zero) = nullptr;
+void (*g_pfnLogic_141793fd0)(void* first, void* last, void* fn, void* zero) = nullptr;
+void (*g_pfnLogic_141795ca0)(void* first, void* last, void* fn) = nullptr;
+void (*g_pfnLogic_141795f70)(void* first, void* last, void* fn) = nullptr;
+void (*g_pfnLogic_141797670)(void* first, void* last, void* fn) = nullptr;
+void (*g_pfnLogic_1417976e0)(void* first, void* last, void* fn) = nullptr;
+
+void Slot_14179cde0(void* pFirst, void* pLast, int64_t nCount, void* pfn);
+
+static RangeRoutine RangeOf_14179cde0() {
+    RangeRoutine r;
+    r.pfnSelf = Slot_14179cde0;
+    r.pfnPartition = g_pfnLogic_141795a30;
+    r.pfnTail = g_pfnLogic_141793d50;
+    r.pfnExhaustedA = g_pfnLogic_141795ca0;
+    r.pfnExhaustedB = g_pfnLogic_141797670;
+    return r;
+}
+
+void Slot_14179cf10(void* pFirst, void* pLast, int64_t nCount, void* pfn);
+
+static RangeRoutine RangeOf_14179cf10() {
+    RangeRoutine r;
+    r.pfnSelf = Slot_14179cf10;
+    r.pfnPartition = g_pfnLogic_141795d40;
+    r.pfnTail = g_pfnLogic_141793fd0;
+    r.pfnExhaustedA = g_pfnLogic_141795f70;
+    r.pfnExhaustedB = g_pfnLogic_1417976e0;
+    return r;
+}
+
+void Slot_14179cde0(void* pFirst, void* pLast, int64_t nCount, void* pfn) {
+    RunRange(RangeOf_14179cde0(), pFirst, pLast, nCount, pfn);
+}
+
+void Slot_14179cf10(void* pFirst, void* pLast, int64_t nCount, void* pfn) {
+    RunRange(RangeOf_14179cf10(), pFirst, pLast, nCount, pfn);
+}
+
+}  // namespace tq
