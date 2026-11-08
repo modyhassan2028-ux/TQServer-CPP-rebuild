@@ -10644,3 +10644,38 @@ Testing: `tests/syndicate_pbctors_test.cpp`, 33 assertions, six cycles, sanitize
 of my first three boundary checks were wrong and the object proved it.
 
 Suites now: 14711 + 1284 + 125 + 491 + 198 + 125 + 33 + 24 + 142.
+
+## 2026-11-08 — D98: the twelve field setters, and where the frontier really is
+
+`0x1417d9840..0x1417d98f7` is a run of twelve five-to-ten byte functions: the message base's field
+presence setters, which is exactly what an inline `set_<field>()` compiles to. Six only set a bit in the
+has-word at `+0x30`; six set the bit and store the value. The bit doubles each pair:
+
+| flag | set-only | set and store | offset | store width |
+|---|---|---|---|---|
+| `0x01` | `0x1417d9840` | `0x1417d9850` | `+0x38` | 32-bit |
+| `0x02` | `0x1417d9860` | `0x1417d9870` | `+0x3c` | 32-bit |
+| `0x04` | `0x1417d9880` | `0x1417d9890` | `+0x40` | 32-bit |
+| `0x08` | `0x1417d98a0` | `0x1417d98b0` | `+0x44` | **byte** |
+| `0x10` | `0x1417d98c0` | `0x1417d98d0` | `+0x45` | **byte** |
+| `0x20` | `0x1417d98e0` | `0x1417d98f0` | `+0x60` | 32-bit |
+
+The two byte stores are the whole reason this family was worth porting rather than waving through: `+0x44`
+and `+0x45` take `mov %dl`, and writing them as 32-bit would silently eat `+0x46` and `+0x47`. The test
+fills the object with `0xEE` and checks the neighbours survive.
+
+**The frontier measurement matters more than the twelve functions.** `tools/frontier.py` reports 1690
+open addresses, but almost none are functions: of the addresses my sources mention, 1641 fall *inside* a
+function I have already ported (loop bodies, epilogues, jump targets), and only 26 are actual function
+starts. So the honest remaining work in Syndicate is 27 units, not 1690, and the 1690 figure should not
+be quoted as progress without that split — it invites chasing fragments, which is exactly what
+`0x14172d390` looked like before I checked (it is an epilogue, not a function).
+
+Also settled: `0x1417e8050`, called and ignored by the token constructor, is
+`ShutdownProtobufLibrary`-shaped protobuf internals (`cmp $2` on a `.data` guard, then
+`FunctionClosure0` around `0x1417de4f0`). It is not game code and stays a seam, consistent with the
+policy that protobuf and STL are covered by standard replacements rather than ported.
+
+Testing: `tests/syndicate_fieldflags_test.cpp`, 27 assertions, six cycles, sanitizers clean.
+
+Suites now: 14711 + 1284 + 125 + 491 + 198 + 125 + 33 + 27 + 24 + 142.

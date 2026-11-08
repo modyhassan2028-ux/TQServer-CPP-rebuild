@@ -117,6 +117,7 @@
 14177db70  synlift.cpp
 14177db7b  synlift.cpp
 14177dfca  synlift.cpp
+14177eb0a  module.cpp
 14177ec78  synlift.cpp
 14177ed1b  synlift.cpp
 14177ed30  module.cpp
@@ -402,6 +403,7 @@
 1417ed4ef  synlift.cpp
 1417ed52d  synlift.cpp
 1417ed553  synlift.cpp
+1417ee110  msgpbseams.cpp
 1417eee36  synlift.cpp
 1417eee3f  synlift.cpp
 1417eee7d  synlift.cpp
@@ -561,6 +563,7 @@
 141823000  cmsgbase.cpp
 141823030  CsyndicateLogicTailSlots.cpp, msgleagueopt.cpp, synattrsend.cpp, synuserattr.cpp
 1418231f0  SyndicateDtorFamily.cpp
+141823280  msgleagueroboptpb.cpp, msgpbseams.cpp
 141823290  synlibdtors.cpp
 1418232a8  CsyndicateLogicTailSlots.cpp
 1418233c0  CsyndicateLogicTailSlots.cpp
@@ -781,7 +784,7 @@
 14182e2a8  synlift.cpp
 14182e2d8  synlift.cpp
 14182e308  synlift.cpp
-14182e368  synlift.cpp
+14182e368  msgsynctors.cpp, synlift.cpp
 14182e390  synlift.cpp
 14182e3b8  synlift.cpp
 14182e3e0  synlift.cpp
@@ -1655,7 +1658,7 @@
 141886e10  synlift.cpp
 141886e18  synlift.cpp
 141886e20  synlift.cpp
-141886ea0  synleaguemerge.cpp, synlift.cpp
+141886ea0  msgleaguetokenpb.cpp, synleaguemerge.cpp, synlift.cpp
 141886ea8  synlift.cpp
 141886eb0  synlift.cpp
 141886eb8  synlift.cpp
