@@ -235,4 +235,38 @@ int      Slot_1417afac0(void* self, uint64_t rdx, uint64_t r8, uint64_t r9);
 
 }  // namespace tq
 
+namespace tq {
+
+// ============================================================================
+// 0x1417caa00 — the manager's map clear (synmanager.cpp). Ported from the bytes.
+//
+// The body walks the map at this+8 from its begin to its end node, and calls the
+// element destructor chain on node[0x20] for every node it passes:
+//     0x14179db30(ptr, 0x3ff) -> 0x1417a1180(ptr) -> 0x14179a150(ptr) -> 0x14179a020(ptr)
+// None of the four is ported, so each is an injectable seam named by its address; the
+// default is null, which is the honest state ("nobody has transcribed this yet").
+//
+// Shape read off the bytes:
+//   +0x38  the map's end node, and the same word is the iterator's stop value
+//   +0x08  the proxy word the iterator carries; *(word) is the map itself (its +0x30 is
+//          the end node again, so the _DEBUG check compares the node against it)
+//   node   +0x00 left, +0x08 parent, +0x10 right, +0x20 the value pointer, +0x29 _Isnil
+//
+// The loop carries a dead-loop guard: ebp counts iterations, `cmp ebp,0xf4240 / ja` sends
+// the run to CQBase!log_InlineLogERROR at IAT 0x141823030 with the four strings the image
+// holds at 0x141824ca8 (format "\xa1\xef%s(%s)\xa1\xef in %s, %d"), 0x141832a18
+// ("DEAD_LOOP_BREAK"), 0x141832a28 ("uLoopCount") and 0x141839fe0 (the synmanager.cpp
+// path), with line 0x117 = 279. After reporting it returns true, exactly as the epilogue
+// at 0x1417cab65 does.
+// ============================================================================
+extern uint64_t (*g_pfnLogic_14179db30)(void* p, uint32_t n);
+extern uint64_t (*g_pfnLogic_1417a1180)(void* p);
+extern uint64_t (*g_pfnLogic_14179a150)(void* p);
+extern uint64_t (*g_pfnLogic_14179a020)(void* p);
+extern void (*g_pfn_log_141823030)(const char* fmt, const char* expr, const char* which,
+                                   const char* file, int line);
+bool Slot_1417caa00_erase_all(void* self);
+
+}  // namespace tq
+
 #endif

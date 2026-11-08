@@ -9748,3 +9748,46 @@ Commit f1ceb18 said 17 bodies in its message; measured on that tree it is 18 bod
 ## 2026-11-08 — 0x1417a8940 lookup ported
 
 Lower-bound walk from end->parent with the unsigned jae, candidate kept on the left turn, iterator pair rebuilt, miss answers 0. Container at +0x88/+0x58, node +0x18 key, +0x1c value, +0x21 _Isnil. Measured: 24 bodies, 219 assertions, 6/6 green.
+
+## 2026-11-08 — 0x1417caa00 ported (the manager's map clear)
+
+Decoded from the bytes: 0x182 bytes, `ret` at 0x1417cab81, `int3` padding after it, and a sibling at
+0x1417cab90 with the same shape. The body walks the map at `this+8` from `end->left` to the end node
+and runs the element destroy chain on `node[0x20]` for every node it passes.
+
+Instruction anchors kept in the port:
+
+  1417caa19 `rax=[rcx+0x38]` then `(%rax)` — the end node, then its left child: the begin iterator
+  1417caa25 `rax=[rcx+0x08]` — the iterator's container word; the pair is stashed, then reloaded
+  1417caa44 the loop top: `rdi=[r12+0x38]` is re-read on every pass
+  1417caa49 the `_DEBUG` iterator check: word null or word != `[this+8]` -> `0x1418233c0`
+  1417caa5b `cmp rdi,rbx / je` -> the epilogue that answers 1
+  1417caa64 `inc ebp` then `cmp ebp,0xf4240 / ja` -> the report at 0x1417cab3b
+  1417caa72 the second `_DEBUG` check, this time `[r11+0x30]` (the map's end node) against the node
+  1417caa91 `rdi=[rbx+0x20]` — the value; the four destroys sit behind a null test each
+  1417caaca `cmpb $0,0x29(%rbx)` — a set byte means `_invalid_parameter_noinfo` and straight back to
+           the loop, which is what the bytes do rather than treating it as an element
+  1417caadb the increment: right subtree's left spine (0x141cab00), else climb while the node is its
+           parent's right child (0x1417cab20), landing at 0x1417cab33 when the climb ends
+
+The dead-loop report is not a guess: 0x1417cab3b loads 0x141824ca8 (`\xa1\xef%s(%s)\xa1\xef in %s,
+%d`), 0x141832a18 (`DEAD_LOOP_BREAK`), 0x141832a28 (`uLoopCount`) and 0x141839fe0
+(`f:\version\cqserver-78.0.11-1204\modules\syndicate\src\synmanager.cpp`), puts 0x117 (=279) at
+`[rsp+0x20]` and calls IAT 0x141823030, which the import map resolves to `CQBase.dll!?log_InlineLogERROR`.
+That slot is a seam (`g_pfn_log_141823030`) so the call is never invented, only placed.
+
+Offsets used, all read off these instructions: end node `+0x38`, iterator word `+0x08`, value `+0x20`,
+`_Isnil` `+0x29`, left `+0x00`, parent `+0x08`, right `+0x10`.
+
+Four callees are not ported, so they stay injectable seams with a null default:
+0x14179db30(value, 0x3ff), 0x1417a1180(value), 0x14179a150(value), 0x14179a020(value).
+`g_pfnLogic_1417caa00` (the seam the 0x1417ac010 forwarder jumps through) now defaults to this body.
+
+Batteries: 240 assertions (`LOGIC_SLOTS_OK checks=240 fails=0`), 6/6 runs, ASan/UBSan/LSan clean.
+New cases: the three-node walk and its in-order destroy sequence with the 0x3ff argument, the empty
+map, a lone node whose value is null, and a two-node cycle that makes the increment alternate so the
+guard is proven to fire once with the four strings and line 279 and the body still answers 1.
+
+Scaffolding bugs in this batch (mine, not the port's): the destroy log was sized for 8 entries while
+a three-node walk writes 12, and one fixture reused a leaf whose parent still pointed at the root, so
+a "single node" case walked the whole map. Both were fixed against the bytes, not by relaxing checks.

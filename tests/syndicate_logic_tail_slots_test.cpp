@@ -1000,6 +1000,113 @@ int main() {
         CHECK(seen_id == 42);
     }
 
+
+    // ------------------------------------------------------------------
+    // 0x1417caa00 — the manager's map clear and its dead-loop guard.
+    // Fixtures are the shapes the bytes address: the end node at this+0x38, the
+    // proxy word at this+0x08 whose *word is the map, node {left,parent,right,
+    // value@0x20, _Isnil@0x29}.
+    // ------------------------------------------------------------------
+    {
+        struct Node {
+            void* pLeft; void* pParent; void* pRight;
+            uint64_t uPad18; void* pValue; uint8_t cPad28; uint8_t cIsNil; uint8_t aTail[6];
+        };
+        static Node A, B, C, End;
+        static uint64_t v1 = 11, v2 = 22, v3 = 33;
+
+        static int nDestroy; static void* aDestroyed[16]; static uint32_t uFlagSeen;
+        static int nLog; static const char* pFmt; static const char* pExpr;
+        static const char* pVar; static const char* pFile; static int nLine;
+        nDestroy = 0; nLog = 0; uFlagSeen = 0;
+        g_pfnLogic_14179db30 = +[](void* p, uint32_t n) -> uint64_t {
+            uFlagSeen = n;
+            if (nDestroy < 16) aDestroyed[nDestroy] = p;
+            ++nDestroy; return 0; };
+        g_pfnLogic_1417a1180 = +[](void* p) -> uint64_t {
+            if (nDestroy < 16) aDestroyed[nDestroy] = p;
+            ++nDestroy; return 0; };
+        g_pfnLogic_14179a150 = +[](void* p) -> uint64_t {
+            if (nDestroy < 16) aDestroyed[nDestroy] = p;
+            ++nDestroy; return 0; };
+        g_pfnLogic_14179a020 = +[](void* p) -> uint64_t {
+            if (nDestroy < 16) aDestroyed[nDestroy] = p;
+            ++nDestroy; return 0; };
+        g_pfn_log_141823030 = +[](const char* fmt, const char* ex, const char* va,
+                                  const char* fi, int ln) {
+            pFmt = fmt; pExpr = ex; pVar = va; pFile = fi; nLine = ln; ++nLog; };
+
+        // zero every byte first: the bodies read the links and the _Isnil byte
+        std::memset(&A, 0, sizeof A); std::memset(&B, 0, sizeof B);
+        std::memset(&C, 0, sizeof C); std::memset(&End, 0, sizeof End);
+        End.cIsNil = 1; End.pLeft = &A; End.pRight = &C; End.pParent = &B;
+        A.pLeft = A.pRight = &End; A.pParent = &B; A.pValue = &v1;
+        B.pLeft = &A; B.pRight = &C; B.pParent = &End; B.pValue = &v2;
+        C.pLeft = C.pRight = &End; C.pParent = &B; C.pValue = &v3;
+
+        static uint64_t aMap[8];                 // the map: +0x30 the end node
+        static void* pProxy[1];
+        std::memset(aMap, 0, sizeof aMap);
+        pProxy[0] = aMap;                        // *word leads back to the owner
+        aMap[0] = (uint64_t)pProxy;              // the map's +0x00 proxy word
+        aMap[6] = (uint64_t)&End;                // the map's +0x30 end node
+
+        static uint64_t aSelf[8];                // this+0x08 proxy, this+0x38 end node
+        std::memset(aSelf, 0, sizeof aSelf);
+        aSelf[1] = (uint64_t)pProxy;
+        aSelf[7] = (uint64_t)&End;
+
+        CHECK(Slot_1417caa00_erase_all(aSelf) == true);
+        CHECK(nDestroy == 12);                   // four destroys for each of the three nodes
+        CHECK(aDestroyed[0] == &v1 && aDestroyed[4] == &v2 && aDestroyed[8] == &v3);
+        CHECK(uFlagSeen == 0x3ff);               // the only call carrying an argument
+        CHECK(nLog == 0);                        // the guard did not fire
+
+        // the three-node walk leaves the map untouched: nothing is unlinked
+        CHECK(End.pLeft == &A && B.pLeft == &A && B.pRight == &C);
+
+        // --- an empty map answers true and touches nothing
+        nDestroy = 0;
+        End.pLeft = &End;
+        CHECK(Slot_1417caa00_erase_all(aSelf) == true);
+        CHECK(nDestroy == 0);
+
+        // --- a single node whose value is null: walked, so the guard sees one pass,
+        //     but no destroy runs
+        nDestroy = 0;
+        End.pLeft = &A; A.pValue = nullptr;
+        A.pLeft = A.pRight = &End; A.pParent = &End;   // a lone node, so the walk ends there
+        CHECK(Slot_1417caa00_erase_all(aSelf) == true);
+        CHECK(nDestroy == 0);
+        A.pValue = &v1;
+
+        // --- the guard: two nodes that point at each other make the increment
+        //     alternate forever; after 1,000,001 passes the report fires and the
+        //     body answers true, exactly like the epilogue at 0x1417cab65.
+        static Node N, M;
+        std::memset(&N, 0, sizeof N); std::memset(&M, 0, sizeof M);
+        N.pLeft = &End; N.pRight = &M; N.pValue = nullptr;
+        M.pLeft = &End; M.pRight = &N; M.pValue = nullptr;
+        End.pLeft = &N;
+        nDestroy = 0; nLog = 0; pFmt = pExpr = pVar = pFile = nullptr; nLine = 0;
+        CHECK(Slot_1417caa00_erase_all(aSelf) == true);
+        CHECK(nLog == 1);
+        CHECK(nDestroy == 0);
+        CHECK(std::strcmp(pExpr, "DEAD_LOOP_BREAK") == 0);
+        CHECK(std::strcmp(pVar, "uLoopCount") == 0);
+        CHECK(std::strstr(pFile, "synmanager.cpp") != nullptr);
+        CHECK(std::strstr(pFile, "cqserver-78.0.11-1204") != nullptr);
+        CHECK(nLine == 0x117);
+        CHECK(std::strcmp(pFmt, "\xa1\xef%s(%s)\xa1\xef in %s, %d") == 0);
+
+        // the guarded run still walks to the end when the structure is sane
+        End.pLeft = &A; End.pRight = &C;
+        A.pParent = &B;                        // put the leaf back on the root
+        nDestroy = 0; nLog = 0;
+        CHECK(Slot_1417caa00_erase_all(aSelf) == true);
+        CHECK(nDestroy == 12 && nLog == 0);
+    }
+
     std::printf("%s checks=%d fails=%d\n", g_fails ? "LOGIC_SLOTS_FAIL" : "LOGIC_SLOTS_OK",
                 g_checks, g_fails);
     return g_fails ? 1 : 0;

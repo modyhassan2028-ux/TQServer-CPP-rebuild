@@ -19,7 +19,8 @@ static uint64_t none2(uint64_t, uint64_t) { return 0; }
 static uint64_t none1(uint64_t) { return 0; }
 
 uint64_t (*g_pfnLogic_1417cadb0)(uint64_t, uint64_t, uint64_t, uint64_t) = none4;
-uint64_t (*g_pfnLogic_1417caa00)(uint64_t, uint64_t, uint64_t, uint64_t) = none4;
+static uint64_t erase_all_bridge(uint64_t, uint64_t, uint64_t, uint64_t);
+uint64_t (*g_pfnLogic_1417caa00)(uint64_t, uint64_t, uint64_t, uint64_t) = erase_all_bridge;
 uint64_t (*g_pfnLogic_1417cad90)(uint64_t, uint64_t, uint64_t, uint64_t) = none4;
 uint64_t (*g_pfnLogic_1417cb000)(uint64_t, uint64_t, uint64_t, uint64_t) = none4;
 uint64_t (*g_pfnLogic_1417873a0)(uint64_t, uint64_t, uint64_t, uint64_t) = none4;
@@ -927,6 +928,123 @@ int Slot_1417afac0(void* self, uint64_t rdx, uint64_t r8, uint64_t r9) {
     if (!m)
         return 0;
     return (int)g_pfnLogic_14177f980(m, rdx, r8, r9);
+}
+
+}  // namespace tq
+
+namespace tq {
+
+// ============================================================================
+// 0x1417caa00 — the manager's map clear. Instruction by instruction, the bytes are:
+//   1417caa19  rax=[rcx+0x38]; 1417caa22 rdx=[rax]        the end node, then end->left
+//   1417caa25  rax=[rcx+0x08]; stash {[this+8], the node}  the iterator
+//   1417caa44  rdi=[r12+0x38]                             re-read every pass
+//   1417caa49  iterator _DEBUG check: word null or != [this+8] -> invalid_parameter
+//   1417caa5b  rbx==rdi -> the epilogue that answers 1
+//   1417caa64  inc ebp / cmp 0xf4240 / ja -> the DEAD_LOOP_BREAK report
+//   1417caa72  the word again, then [r11+0x30] against the node: the second _DEBUG check
+//   1417caa91  rdi=[rbx+0x20] the value; the four destroys, each skipped when it is null
+//   1417caaca  cmpb $0,[rbx+0x29] -> set means invalid_parameter and straight to the loop
+//   1417caadb  the increment: right subtree's left spine, else climb while the node is a
+//              right child (1417cab20), landing on 1417cab33 when the climb ends
+// Every offset below is one of those.
+// ============================================================================
+uint64_t (*g_pfnLogic_14179db30)(void* p, uint32_t n) = nullptr;
+uint64_t (*g_pfnLogic_1417a1180)(void* p) = nullptr;
+uint64_t (*g_pfnLogic_14179a150)(void* p) = nullptr;
+uint64_t (*g_pfnLogic_14179a020)(void* p) = nullptr;
+void (*g_pfn_log_141823030)(const char* fmt, const char* expr, const char* which,
+                            const char* file, int line) = nullptr;
+
+// the four strings the image holds, byte for byte
+static const char kDeadLoopFmt[] = "\xa1\xef%s(%s)\xa1\xef in %s, %d";   // 0x141824ca8
+static const char kDeadLoopExpr[] = "DEAD_LOOP_BREAK";                   // 0x141832a18
+static const char kDeadLoopVar[] = "uLoopCount";                         // 0x141832a28
+static const char kDeadLoopFile[] =                                      // 0x141839fe0
+    "f:\\version\\cqserver-78.0.11-1204\\modules\\syndicate\\src\\synmanager.cpp";
+
+bool Slot_1417caa00_erase_all(void* self) {
+    uint8_t* p = (uint8_t*)self;
+    uint32_t uLoop = 0;                                   // xor ebp,ebp
+    void* pEnd = *(void**)(p + 0x38);                     // mov rax,[rcx+0x38]
+    void* pNode = *(void**)pEnd;                          // mov rdx,[rax]
+    void* pWord = *(void**)(p + 0x08);                    // mov rax,[rcx+0x08]
+    for (;;) {
+        void* pEndNow = *(void**)(p + 0x38);               // 1417caa44 mov rdi,[r12+0x38]
+        if (pWord == nullptr || pWord != *(void**)(p + 0x08)) {   // 1417caa49 + 1417caa4e
+            if (g_pfn_invalid_parameter_noinfo != nullptr)
+                g_pfn_invalid_parameter_noinfo();
+        }
+        if (pNode == pEndNow)                             // 1417caa5b cmp rdi,rbx / je
+            return true;
+
+        ++uLoop;                                          // 1417caa64 inc ebp
+        if (uLoop > 0xf4240u) {                           // 1417caa66 cmp / ja 1417cab3b
+            if (g_pfn_log_141823030 != nullptr)
+                g_pfn_log_141823030(kDeadLoopFmt, kDeadLoopExpr, kDeadLoopVar, kDeadLoopFile,
+                                    0x117);
+            return true;                                  // falls into the 1417cab65 epilogue
+        }
+
+        if (pWord == nullptr) {                           // 1417caa72 test rsi,rsi / jne
+            if (g_pfn_invalid_parameter_noinfo != nullptr)
+                g_pfn_invalid_parameter_noinfo();         // 1417caa77
+        }
+        void* pOwner = (pWord != nullptr) ? *(void**)pWord : nullptr;   // 1417caa82 mov r11,[rsi]
+        if (pNode == *(void**)((uint8_t*)pOwner + 0x30)) {            // 1417caa85 cmp [r11+0x30]
+            if (g_pfn_invalid_parameter_noinfo != nullptr)
+                g_pfn_invalid_parameter_noinfo();         // 1417caa8b
+        }
+
+        void* pValue = *(void**)((uint8_t*)pNode + 0x20);  // 1417caa91 mov rdi,[rbx+0x20]
+        if (pValue != nullptr) {                           // 1417caa95 test rdi,rdi / je
+            if (g_pfnLogic_14179db30 != nullptr)           // 1417caa9a edx=0x3ff
+                g_pfnLogic_14179db30(pValue, 0x3ff);
+            if (g_pfnLogic_1417a1180 != nullptr)           // 1417caaaa
+                g_pfnLogic_1417a1180(pValue);
+            if (g_pfnLogic_14179a150 != nullptr)           // 1417caab2
+                g_pfnLogic_14179a150(pValue);
+            if (g_pfnLogic_14179a020 != nullptr)           // 1417caaba
+                g_pfnLogic_14179a020(pValue);
+        }
+
+        if (pWord == nullptr) {                            // 1417caabf test rsi,rsi / jne
+            if (g_pfn_invalid_parameter_noinfo != nullptr)
+                g_pfn_invalid_parameter_noinfo();          // 1417caac4
+        }
+        if (*(uint8_t*)((uint8_t*)pNode + 0x29) != 0) {    // 1417caaca cmpb $0,0x29(%rbx) / je
+            if (g_pfn_invalid_parameter_noinfo != nullptr)
+                g_pfn_invalid_parameter_noinfo();          // 1417caad0
+            continue;                                      // 1417caad6 jmp 1417caa44
+        }
+
+        void* pRight = *(void**)((uint8_t*)pNode + 0x10);  // 1417caadb mov rax,[rbx+0x10]
+        if (*(uint8_t*)((uint8_t*)pRight + 0x29) != 0) {   // 1417caadf cmpb $0,0x29(%rax) / jne cab11
+            void* pUp = *(void**)((uint8_t*)pNode + 0x08); // 1417cab11 mov rax,[rbx+0x08]
+            if (*(uint8_t*)((uint8_t*)pUp + 0x29) != 0) {  // 1417cab15 / jne cab33
+                pNode = pUp;                               // 1417cab33 mov rbx,rax
+                continue;
+            }
+            while (pNode == *(void**)((uint8_t*)pUp + 0x10)) {   // 1417cab20 cmp [rax+0x10],rbx
+                pNode = pUp;                                     // 1417cab26 mov rbx,rax
+                pUp = *(void**)((uint8_t*)pUp + 0x08);           // 1417cab29 mov rax,[rax+0x08]
+                if (*(uint8_t*)((uint8_t*)pUp + 0x29) != 0)      // 1417cab2d / je cab20
+                    break;
+            }
+            pNode = pUp;                                   // 1417cab33
+            continue;
+        }
+        pNode = pRight;                                    // 1417caae5 mov rbx,rax
+        void* pLeft = *(void**)pRight;                     // 1417caae8 mov rax,[rax]
+        while (*(uint8_t*)((uint8_t*)pLeft + 0x29) == 0) { // 1417caaeb / je caa44 ; 1417cab0a
+            pNode = pLeft;                                 // 1417cab00 mov rbx,rax
+            pLeft = *(void**)pLeft;                        // 1417cab03 mov rax,[rax]
+        }
+    }
+}
+
+static uint64_t erase_all_bridge(uint64_t a, uint64_t, uint64_t, uint64_t) {
+    return Slot_1417caa00_erase_all((void*)(uintptr_t)a) ? 1u : 0u;
 }
 
 }  // namespace tq

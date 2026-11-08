@@ -31,8 +31,11 @@ the build output, not just the test output.
 
 ## Where the work stands
 
-- Ported bodies in `modules/syndicate/src/CsyndicateLogicTailSlots.cpp`: 24.
-- Batteries: 219 assertions in `tests/syndicate_logic_tail_slots_test.cpp`, all passing, 6/6 runs, sanitizers clean.
+- Ported bodies in `modules/syndicate/src/CsyndicateLogicTailSlots.cpp`: 25 (24 at 8c97b8d).
+  The command that produces it, widened to cover the `bool` body this batch added:
+  `grep -cE '^(void|void\*|uint64_t\*|uint64_t|bool|int|uint32_t) Slot_[0-9a-f]+_'`
+  (the older, narrower pattern in "Counts are cheap to check" misses `bool Slot_1417caa00_erase_all`).
+- Batteries: 240 assertions in `tests/syndicate_logic_tail_slots_test.cpp` (219 before `0x1417caa00`), all passing, 6/6 runs, sanitizers clean. The binary prints the count itself: `LOGIC_SLOTS_OK checks=240 fails=0`.
 - The `0x14177f980` family is complete and wired: `0x14177f980` -> `0x141779400` -> `0x141779090`,
   plus both singletons (`0x14177c770`, `0x1417b6210`), the map constructor `0x14177c6c0`, its end-node
   builder `0x14177ace0`, the key search `0x14177c0a0`, `lower_bound` `0x1417a8520`, the range pass
@@ -66,10 +69,14 @@ the build output, not just the test output.
 - `1417873a0`
 - `14178f470`
 - `141797e00`
+- `14179db30`   the value at node[0x20], first of the four; takes 0x3ff as its second argument
+- `1417a1180`   the value at node[0x20], second
+- `14179a150`   the value at node[0x20], third
+- `14179a020`   the value at node[0x20], fourth and last
+  (the four are the destroy chain 0x1417caa00 runs per node; each is a one-line seam, null by default)
 - `1417a6960`
 - `1417a8940`
 - `1417a8a50`
-- `1417caa00`
 - `1417cad00`
 - `1417cad90`
 - `1417cadb0`
@@ -168,7 +175,7 @@ Evidence for all three is in `docs/evidence/frontier_after_14172d120.txt`.
   tail-jumps through the object's vtable (`mov r8,[rax] / jmp qword ptr [r8]`). The table is indexed
   by `movzx` from a byte table, so the case count and the ids have to be extracted from the bytes
   before anything is transcribed. This needs its own batch with the jump table decoded first.
-- **`0x1417caa00`** was not reached in this survey; keep it in the queue.
+- **`0x1417caa00`** is ported now (`Slot_1417caa00_erase_all`); its four destroy callees are the seams above.
 
 ## Bugs that were mine, not the port's (so the next agent does not repeat them)
 
