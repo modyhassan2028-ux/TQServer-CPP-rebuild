@@ -31,8 +31,8 @@ the build output, not just the test output.
 
 ## Where the work stands
 
-- Ported bodies in `modules/syndicate/src/CsyndicateLogicTailSlots.cpp`: 17.
-- Batteries: 191 assertions in `tests/syndicate_logic_tail_slots_test.cpp`, all passing, 6/6 runs, sanitizers clean.
+- Ported bodies in `modules/syndicate/src/CsyndicateLogicTailSlots.cpp`: 18.
+- Batteries: 203 assertions in `tests/syndicate_logic_tail_slots_test.cpp`, all passing, 6/6 runs, sanitizers clean.
 - The `0x14177f980` family is complete and wired: `0x14177f980` -> `0x141779400` -> `0x141779090`,
   plus both singletons (`0x14177c770`, `0x1417b6210`), the map constructor `0x14177c6c0`, its end-node
   builder `0x14177ace0`, the key search `0x14177c0a0`, `lower_bound` `0x1417a8520`, the range pass
@@ -91,9 +91,9 @@ the build output, not just the test output.
    write down which evidence you used.
 
 
-## Next batch, fully decoded: 0x14172d120 (the one-element insert)
+## Decoded (already ported): 0x14172d120 (the one-element insert)
 
-This body is read out and resolved, so the next agent can transcribe it without another survey. It is
+This body was decoded first and then ported with its tests; the decode is kept here as the evidence trail. It is
 662 bytes, 187 instructions, `std::vector::_Insert_n` with three paths.
 
 Signature: `(self /*rcx*/, it /*rdx, pair*/, count /*r8*/, value /*r9*/)`.
@@ -166,3 +166,10 @@ assertions (the test binary prints its own count). Take numbers from the tool th
 from memory, because a handoff with wrong numbers is worse than one with none.
 
 Seams declared in the header: 19 (some are already defaulted to a ported body, some are still null).
+
+## Next batch
+
+`0x14172d120` is ported and tested, so the frontier moves to the five seams it still calls:
+`0x141722c70` (length error), `0x141724d10` (allocate), `0x14172acb0` and `0x141727380` (element
+moves), `0x1417f2fdc` (deallocate). Take them smallest first and wire each seam to its ported body the
+way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still watch the arguments.

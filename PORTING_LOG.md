@@ -9732,3 +9732,7 @@ The handoff first claimed 27 bodies and 193 assertions. Measured: 17 bodies, 19 
 ## 2026-11-08 — 0x14172d120 decoded and its callees resolved
 
 Full three-path decode of _Insert_n, and MSVCR90!memmove_s identified at 0x1418232a8 (four-argument calls). Five code-row callees remain seams: 0x141722c70, 0x141724d10, 0x14172acb0, 0x141727380, 0x1417f2fdc.
+
+## 2026-11-08 — 0x14172d120 ported (_Insert_n, three paths)
+
+Transcribed from the decode in HANDOFF.md: reallocate path with the cmovb growth clamp and two MSVCR90!memmove_s calls, shift-right path, and the fill-past-the-end path. Five callees stay seams. Batteries 203 assertions, 6/6 runs, sanitizers clean.

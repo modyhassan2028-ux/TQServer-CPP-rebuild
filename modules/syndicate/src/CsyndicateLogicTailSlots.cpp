@@ -201,6 +201,101 @@ void* (*g_pfnLogic_14177ace0)(void* self) = nullptr;
 void* (*g_pfnLogic_1417495d0)(void* arg) = nullptr;
 void (*g_pfnLogic_141732040)(void* arg, void* elem) = nullptr;
 
+// MSVCR90!memmove_s at 0x1418232a8. On the valid-argument path it is memmove, so the default keeps
+// that behaviour without needing a header for the _s form.
+static void memmove_s_default(void* dst, size_t /*dst_size*/, const void* src, size_t count) {
+    unsigned char* d = (unsigned char*)dst;
+    const unsigned char* q = (const unsigned char*)src;
+    if (d == q || count == 0) return;
+    if (d < q) { for (size_t i = 0; i < count; ++i) d[i] = q[i]; }
+    else { for (size_t i = count; i-- > 0;) d[i] = q[i]; }
+}
+
+void (*g_pfnLogic_141722c70)(void) = nullptr;
+void* (*g_pfnLogic_141724d10)(void* alloc, uint64_t count) = nullptr;
+uint64_t (*g_pfnLogic_14172acb0)(void* self, void* dst, void* src, void* src_end) = nullptr;
+void (*g_pfnLogic_141727380)(void* it, void* dst, void* src_end) = nullptr;
+void (*g_pfnLogic_1417f2fdc)(void* p) = nullptr;
+void (*g_pfn_memmove_s)(void* dst, size_t dst_size, const void* src, size_t count) = memmove_s_default;
+
+// 0x14172d120 — _Insert_n. Path A reallocates, path B shifts the tail right, path C fills past the end
+// and then closes the gap. The growth clamp and the order of the copies follow the bytes exactly.
+void Slot_14172d120_insert_n(void* self, const uint64_t* it, uint64_t count, const void* value) {
+    uint8_t* s = (uint8_t*)self;
+    uint64_t begin = *(uint64_t*)(s + 0x18);                  // mov rax,[rcx+0x18]
+    uint64_t cap = (begin == 0)                            // test rax,rax / jne
+                       ? 0
+                       : (*(uint64_t*)(s + 0x28) - begin) >> 2;
+    if (count == 0) return;                                   // test r8,r8 / je done
+
+    uint64_t finish = *(uint64_t*)(s + 0x20);                 // mov r13,[rcx+0x20]
+    uint64_t size = (finish - begin) >> 2;                    // sub rcx,rax / sar 2
+    const uint64_t max_size = 0x3fffffffffffffffULL;          // movabs rdx,0x3fff...
+    if (max_size - size < count) {                            // sub rax,rcx / cmp rax,r8 / jae
+        if (g_pfnLogic_141722c70 != nullptr) g_pfnLogic_141722c70();
+        return;                                               // the bytes put an int3 after the call
+    }
+    uint64_t new_size = count + size;                         // add r8,rcx
+
+    if (cap < new_size) {                                     // cmp rbx,r8 / jae no-realloc
+        uint64_t half = cap >> 1;                             // mov rax,rbx / shr 1
+        uint64_t grown = (max_size - half < cap) ? 0 : cap + half;
+        if (grown < new_size) grown = new_size;               // cmp rbx,r8 / cmovb
+        uint8_t* buf = (g_pfnLogic_141724d10 != nullptr)
+                           ? (uint8_t*)g_pfnLogic_141724d10(s + 0x10, grown)   // lea rcx,[rsi+0x10]
+                           : nullptr;
+        uint64_t offset = (it[1] - *(uint64_t*)(s + 0x18)) >> 2;   // sub rax,[rsi+0x18] / sar 2
+        uint8_t* dst = buf + offset * 4;                      // lea rdx,[r13+rax*4]
+        uint32_t v = *(const uint32_t*)value;                 // mov eax,[r14]
+        for (uint64_t n = count; n != 0; --n) {               // the fill loop at 0x14172d204
+            *(uint32_t*)dst = v;
+            dst += 4;
+        }
+        uint64_t head = (it[1] - *(uint64_t*)(s + 0x18)) >> 2;     // recomputed, as the bytes do
+        if (head != 0 && g_pfn_memmove_s != nullptr)               // call [rip+0xf605b]
+            g_pfn_memmove_s(buf, head * 4, (const void*)*(uint64_t*)(s + 0x18), head * 4);
+        uint64_t old_finish = *(uint64_t*)(s + 0x20);              // mov rdx,[rsi+0x20]
+        uint64_t tail = (old_finish - it[1]) >> 2;
+        if (tail != 0 && g_pfn_memmove_s != nullptr)               // the second memmove_s
+            g_pfn_memmove_s(buf + (offset + count) * 4, tail * 4, (const void*)it[1], tail * 4);
+        if (*(uint64_t*)(s + 0x18) != 0 && g_pfnLogic_1417f2fdc != nullptr)   // test rcx,rcx
+            g_pfnLogic_1417f2fdc((void*)*(uint64_t*)(s + 0x18));
+        *(uint64_t*)(s + 0x28) = (uint64_t)(buf + grown * 4);      // lea rax,[r13+rbx*4]
+        *(uint64_t*)(s + 0x20) = (uint64_t)(buf + new_size * 4);   // lea rax,[r13+rdi*4]
+        *(uint64_t*)(s + 0x18) = (uint64_t)buf;                    // mov [rsi+0x18],r13
+        return;
+    }
+
+    uint64_t after = (finish - it[1]) >> 2;                   // sub rax,[r15+8] / sar 2
+    if (after >= count) {                                     // cmp rax,rdi / jae
+        uint32_t v = *(const uint32_t*)value;                 // mov r12d,[r9]
+        uint64_t tail_bytes = count * 4;                      // shl rdi,2
+        uint64_t new_finish = finish - tail_bytes;            // mov rbx,r13 / sub rbx,rdi
+        uint64_t stored = (g_pfnLogic_14172acb0 != nullptr)   // call 0x14172acb0
+                              ? g_pfnLogic_14172acb0(self, (void*)new_finish, (void*)finish,
+                                                     (void*)finish)
+                              : new_finish;
+        *(uint64_t*)(s + 0x20) = stored;                      // mov [rsi+0x20],rax
+        if (g_pfnLogic_141727380 != nullptr)                  // call 0x141727380
+            g_pfnLogic_141727380((void*)it[1], (void*)new_finish, (void*)finish);
+        for (uint64_t p = it[1], end = it[1] + tail_bytes; p != end; p += 4)
+            *(uint32_t*)p = v;                                // the fill loop at 0x14172d390
+        return;
+    }
+
+    uint32_t v = *(const uint32_t*)value;                     // mov ebx,[r9]
+    if (g_pfnLogic_14172acb0 != nullptr)                      // call with it[1] + count*4
+        g_pfnLogic_14172acb0(self, (void*)it[1], (void*)finish, (void*)(it[1] + count * 4));
+    uint64_t fin = *(uint64_t*)(s + 0x20);                    // mov rdx,[rsi+0x20]
+    uint64_t moved = (fin - it[1]) >> 2;                      // sub rax,[r15+8] / sar 2
+    uint64_t missing = count - moved;                         // mov rcx,rdi / sub rcx,rax
+    uint64_t w = fin;
+    for (uint64_t n = missing; n != 0; --n) { *(uint32_t*)w = v; w += 4; }   // past the old end
+    *(uint64_t*)(s + 0x20) += count * 4;                      // add [rsi+0x20],rax
+    uint64_t stop = *(uint64_t*)(s + 0x20) - count * 4;       // rcx = finish - count*4
+    for (uint64_t p = it[1]; p != stop; p += 4) *(uint32_t*)p = v;           // close the gap
+}
+
 void (*g_pfnLogic_14172d120)(void* self, uint64_t* it, uint64_t count, const void* value) = nullptr;
 
 // 0x141730cd0 — grow and insert one. The `test rax,-4` is not a size comparison: it asks whether the

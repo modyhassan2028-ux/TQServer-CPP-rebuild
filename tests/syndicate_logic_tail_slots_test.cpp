@@ -453,6 +453,67 @@ int main() {
         g_pfnLogic_14172d120 = nullptr;
     }
 
+    // --- 0x14172d120 inserts: the three paths the bytes have
+    {
+        static uint32_t buf[16], newbuf[16];
+        static uint64_t vec[6];
+        static int deallocs, mm_calls;
+        static void* mm_src[2];
+        g_pfn_invalid_parameter_noinfo = [] { };
+
+        // Path B: room exists and enough elements sit after the point, so the tail shifts right
+        std::memset(buf, 0, sizeof(buf)); std::memset(vec, 0, sizeof(vec));
+        buf[0] = 0x11; buf[1] = 0x22; buf[2] = 0x33; buf[3] = 0x44;
+        vec[3] = (uint64_t)&buf[0];        // +0x18 begin
+        vec[4] = (uint64_t)&buf[4];        // +0x20 finish
+        vec[5] = (uint64_t)&buf[8];        // +0x28 capacity end
+        g_pfnLogic_14172acb0 = [](void*, void*, void* src, void*) -> uint64_t {
+            return (uint64_t)src; };       // pretend the tail moved and finish is unchanged
+        g_pfnLogic_141727380 = [](void*, void*, void*) { };
+        uint64_t it[2] = {0, (uint64_t)&buf[1]};
+        uint32_t v = 0x99;
+        Slot_14172d120_insert_n(vec, it, 2, &v);
+        CHECK(buf[1] == 0x99 && buf[2] == 0x99);      // the fill loop
+        CHECK(vec[4] == (uint64_t)&buf[4]);           // finish as the seam left it
+
+        // Path C: room exists but fewer than count elements sit after the point
+        std::memset(buf, 0, sizeof(buf));
+        vec[3] = (uint64_t)&buf[0];
+        vec[4] = (uint64_t)&buf[2];
+        vec[5] = (uint64_t)&buf[8];
+        it[1] = (uint64_t)&buf[1];
+        v = 0x77;
+        Slot_14172d120_insert_n(vec, it, 4, &v);
+        CHECK(buf[1] == 0x77 && buf[2] == 0x77 && buf[3] == 0x77 && buf[4] == 0x77);
+        CHECK(vec[4] == (uint64_t)&buf[6]);           // finish grew by count*4
+
+        // Path A: no room, so it allocates, copies head and tail, frees the old buffer
+        std::memset(buf, 0, sizeof(buf)); std::memset(newbuf, 0xEE, sizeof(newbuf));
+        buf[0] = 0xA1; buf[1] = 0xB2;
+        vec[3] = (uint64_t)&buf[0];
+        vec[4] = (uint64_t)&buf[2];                   // two elements in
+        vec[5] = (uint64_t)&buf[2];                   // capacity 2, so a third needs room
+        deallocs = 0; mm_calls = 0;
+        g_pfnLogic_141724d10 = [](void*, uint64_t) -> void* { return (void*)&newbuf[0]; };
+        g_pfn_memmove_s = [](void* d, size_t, const void* src, size_t n) {
+            ++mm_calls; if (mm_calls <= 2) mm_src[mm_calls-1] = (void*)src;
+            memmove(d, src, n); };
+        g_pfnLogic_1417f2fdc = [](void*) { ++deallocs; };
+        it[1] = (uint64_t)&buf[1];
+        v = 0x55;
+        Slot_14172d120_insert_n(vec, it, 1, &v);
+        CHECK(vec[3] == (uint64_t)&newbuf[0]);        // begin now the new buffer
+        CHECK(newbuf[0] == 0xA1);                     // head copied
+        CHECK(newbuf[1] == 0x55);                     // the inserted element
+        CHECK(newbuf[2] == 0xB2);                     // tail copied
+        CHECK(vec[4] == (uint64_t)&newbuf[3]);        // finish = buffer + 3 elements
+        CHECK(vec[5] == (uint64_t)&newbuf[3]);        // capacity = buffer + grown elements
+        CHECK(mm_calls == 2);
+        CHECK(deallocs == 1);
+        g_pfnLogic_141724d10 = nullptr; g_pfnLogic_1417f2fdc = nullptr;
+        g_pfn_memmove_s = nullptr; g_pfnLogic_14172acb0 = nullptr; g_pfnLogic_141727380 = nullptr;
+    }
+
     // --- 0x1417495d0 clears the vector by moving finish back to begin
     {
         static uint32_t buf[4];

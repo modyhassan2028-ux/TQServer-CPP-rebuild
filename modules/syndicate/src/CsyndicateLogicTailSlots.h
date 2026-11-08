@@ -1,3 +1,4 @@
+#include <cstddef>
 // ============================================================================
 // CsyndicateLogicTailSlots.h — the last twelve CSyndicateLogic vtable slots that no
 // hand-written file had mentioned. CSyndicateLogic holds 128 slots; 116 were already
@@ -120,6 +121,17 @@ extern void (*g_pfnLogic_14172d120)(void* self, uint64_t* it, uint64_t count, co
 // 0x141730cd0 — the grow-and-insert path: works out the element offset, calls the insert, then
 // re-reads begin and answers an iterator pointing at the element that was inserted.
 void* Slot_141730cd0_grow_insert(void* self, uint64_t* out, const uint64_t* pair, const void* value);
+// 0x14172d120 — std::vector::_Insert_n, 662 bytes and three paths. Its five code-row callees are all
+// unported, so each is a seam: 0x141722c70 throws for length, 0x141724d10 allocates, 0x14172acb0 and
+// 0x141727380 move elements, 0x1417f2fdc frees the old buffer. The two four-argument calls are
+// MSVCR90!memmove_s (dst, dst size, src, count), not the two-argument memmove they resemble.
+extern void (*g_pfnLogic_141722c70)(void);
+extern void* (*g_pfnLogic_141724d10)(void* alloc, uint64_t count);
+extern uint64_t (*g_pfnLogic_14172acb0)(void* self, void* dst, void* src, void* src_end);
+extern void (*g_pfnLogic_141727380)(void* it, void* dst, void* src_end);
+extern void (*g_pfnLogic_1417f2fdc)(void* p);
+extern void (*g_pfn_memmove_s)(void* dst, size_t dst_size, const void* src, size_t count);
+void Slot_14172d120_insert_n(void* self, const uint64_t* it, uint64_t count, const void* value);
 
 // 0x1417495d0 — clears the 4-byte vector at +0x18/+0x20/+0x28. The memmove the bytes would make is
 // a zero-length one, so the only effect is finish = begin; the port keeps the shape that shows it.
