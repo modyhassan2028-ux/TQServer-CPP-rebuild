@@ -198,6 +198,8 @@ def lift(addr, funcs):
         if ins in ('nop', 'int3') or re.match(r'^xchg ax,ax$', ins):
             body.append('    ;')
             continue
+        if _emit_early(op, rest, body, ins):
+            continue
         if op == 'push':
             body.append('    rsp -= 8; ML_M8(rsp, 0) = %s;' % operand_read(enc(rest)))
             continue
@@ -261,7 +263,7 @@ def lift(addr, funcs):
             d = enc(rest)
             if d is None:
                 raise SystemExit('neg form: %r' % ins)
-            w = d[2] if d[0] in ('reg', 'sub') else d[3]
+            w = d[2] if d[0] in ('reg', 'sub', 'iat') else d[3]
             bits = w * 8
             mask = '~0ULL' if bits == 64 else '0x%xULL' % ((1 << bits) - 1)
             body.append('    { const uint64_t m = %s; const uint64_t v = (%s) & m; const uint64_t r = (0 - v) & m;'
@@ -280,7 +282,7 @@ def lift(addr, funcs):
             s = enc(rest)
             if s is None:
                 raise SystemExit('mul form: %r' % ins)
-            w = s[2] if s[0] in ('reg', 'sub') else s[3]
+            w = s[2] if s[0] in ('reg', 'sub', 'iat') else s[3]
             src = operand_read(s)
             if w == 8:
                 body.append('    { const unsigned __int128 p = (unsigned __int128)rax * (uint64_t)(%s);' % src)
@@ -296,7 +298,7 @@ def lift(addr, funcs):
             d = enc(_shm.group(2))
             if d is None:
                 raise SystemExit('shift form: %r' % ins)
-            w = d[2] if d[0] in ('reg', 'sub') else d[3]
+            w = d[2] if d[0] in ('reg', 'sub', 'iat') else d[3]
             bits = w * 8
             mask = '~0ULL' if bits == 64 else '0x%xULL' % ((1 << bits) - 1)
             cmask = bits - 1
@@ -324,7 +326,7 @@ def lift(addr, funcs):
             d = enc(rest)
             if d is None:
                 raise SystemExit('not form: %r' % ins)
-            w = d[2] if d[0] in ('reg', 'sub') else d[3]
+            w = d[2] if d[0] in ('reg', 'sub', 'iat') else d[3]
             mask = '~0ULL' if w == 8 else '0x%xULL' % ((1 << (w * 8)) - 1)
             body.append('    %s' % operand_write(d, '(%s) ^ %s' % (operand_read(d), mask)))
             continue
@@ -797,6 +799,24 @@ def _cmps_body(body, bits, w, repeat, stop_on_zf):
 
 
 
+def _emit_early(op, rest, body, ins):
+    """Handlers that must run before the generic paths, which would otherwise claim the text."""
+    _gs = re.match(r'^mov\s+(r[a-z0-9]+),(BYTE|WORD|DWORD|QWORD) PTR (?:gs|fs):0x([0-9a-f]+)$', ins, re.I)
+    if _gs:
+        body.append('    %s = ML_GS(0x%x);   // %s' % (_gs.group(1), int(_gs.group(3), 16), ins))
+        return True
+    _cmv = re.match(r'^cmov([a-z]+)\s+(.+)$', ins, re.I)
+    if _cmv and _cmv.group(1).lower() in _CMOVC:
+        _a, _b = [x.strip() for x in _cmv.group(2).split(',', 1)]
+        _d, _src = enc(_a), enc(_b)
+        if _d is None or _src is None:
+            raise SystemExit('conditional move: %r' % ins)
+        body.append('    if (%s) { %s; }' % (_CMOVC[_cmv.group(1).lower()],
+                                             operand_write(_d, '(%s)' % operand_read(_src)).rstrip(';')))
+        return True
+    return False
+
+
 def _ptr(e):
     """Pointer to an operand's storage, in the shadow-model convention the header defines."""
     if e is None:
@@ -942,7 +962,7 @@ def _emit_extra(op, rest, body, ins):
         sb = enc(b1)
         if d is None or sb is None:
             raise SystemExit('cmpxchg form: %r' % ins)
-        w = d[2] if d[0] in ('reg', 'sub') else d[3]
+        w = d[2] if d[0] in ('reg', 'sub', 'iat') else d[3]
         mask = '~0ULL' if w == 8 else '0x%xULL' % ((1 << (w * 8)) - 1)
         body.append('    { const uint64_t m = %s; const uint64_t ax = rax & m;' % mask)
         body.append('      const uint64_t cur = (%s) & m;' % operand_read(d))
@@ -999,7 +1019,7 @@ def _emit_extra(op, rest, body, ins):
         d = enc(a1)
         if d is None:
             raise SystemExit('cvt form: %r' % ins)
-        w = d[2] if d[0] in ('reg', 'sub') else d[3]
+        w = d[2] if d[0] in ('reg', 'sub', 'iat') else d[3]
         cast = '(int64_t)' if w == 8 else '(int32_t)'
         body.append('    { double d; memcpy(&d, %s, 8); %s; }'
                     % (b1, operand_write(d, cast + 'd').rstrip(';')))
@@ -1057,7 +1077,7 @@ def _emit_extra(op, rest, body, ins):
         d = enc(a1)
         if d is None or b1.lower() not in ('cl',) and not re.match(r'^0x[0-9a-f]+$', b1, re.I):
             raise SystemExit('rol form: %r' % ins)
-        w = d[2] if d[0] in ('reg', 'sub') else d[3]
+        w = d[2] if d[0] in ('reg', 'sub', 'iat') else d[3]
         bits = w * 8
         mask = '~0ULL' if bits == 64 else '0x%xULL' % ((1 << bits) - 1)
         cnt = '(unsigned)(rcx & %d)' % (bits - 1) if b1.lower() == 'cl' else str(int(b1, 16) % bits)
@@ -1079,7 +1099,7 @@ def _emit_extra(op, rest, body, ins):
         sb = enc(b1)
         if d is None or sb is None:
             raise SystemExit('bt form: %r' % ins)
-        w = d[2] if d[0] in ('reg', 'sub') else d[3]
+        w = d[2] if d[0] in ('reg', 'sub', 'iat') else d[3]
         bits = w * 8
         mask = '~0ULL' if bits == 64 else '0x%xULL' % ((1 << bits) - 1)
         body.append('    { const uint64_t m = %s; const unsigned idx = (unsigned)(((%s) & m) %% %d);'
@@ -1105,7 +1125,7 @@ def _emit_extra(op, rest, body, ins):
             sb = enc(b1)
             if d is None or sb is None:
                 raise SystemExit('cmov form: %r' % ins)
-            w = d[2] if d[0] in ('reg', 'sub') else d[3]
+            w = d[2] if d[0] in ('reg', 'sub', 'iat') else d[3]
             mask = '~0ULL' if w == 8 else '0x%xULL' % ((1 << (w * 8)) - 1)
             body.append('    if (%s) { %s }' % (cond, operand_write(d, '(%s) & %s' % (operand_read(sb), mask)).rstrip(';')))
             return True

@@ -170,13 +170,13 @@ Flower.dll: +flower::CFlowerService (فتبل 0x140d9be08، 5 فتحات).
 
 | measure | ported | total | share |
 | --- | --- | --- | --- |
-| indexed rows | 10,213 | 10,224 | 99.9% |
-| routines | 9,435 | 9,445 | 99.9% |
-| instructions | 366,303 | 367,362 | 99.7% |
-| code instructions | 248,085 | 249,137 | 99.6% |
-| lifted bodies | 10,079 | | |
+| indexed rows | 10,216 | 10,224 | 99.9% |
+| routines | 9,438 | 9,445 | 99.9% |
+| instructions | 366,515 | 367,362 | 99.8% |
+| code instructions | 248,297 | 249,137 | 99.7% |
+| lifted bodies | 10,082 | | |
 
-The last 140 entries were the epilogue thunks and short fragments the earlier census filtered out
+The last entries were the epilogue thunks and short fragments the earlier census filtered out
 (rows under six instructions: `add rsp,0x48; pop r12; pop rdi; repz ret` and the like). They lift
 the same way as any other row; the filter, not the lifter, was what left them out.
 
