@@ -1165,6 +1165,50 @@ int main() {
         CHECK(pResSeen == pResObj);              // and slot 15 saw what came back
     }
 
+    // ------------------------------------------------------------------
+    // 0x141797e00 — the id predicate on the map at this+0x290. This layout puts the
+    // nil byte at +0x1d and the key at +0x18, and turns left when id >= node key.
+    {
+        struct Node { uint64_t uLeft, uParent, uRight; uint32_t uKey; uint8_t cPad1c, cNil, aPad[2]; };
+        static Node End, R5, N7;
+        std::memset(&End, 0, sizeof End); std::memset(&R5, 0, sizeof R5);
+        std::memset(&N7, 0, sizeof N7);
+        End.cNil = 1; End.uParent = (uint64_t)&R5;
+        R5.uKey = 5; R5.uParent = (uint64_t)&End; R5.uLeft = (uint64_t)&N7; R5.uRight = (uint64_t)&End;
+        N7.uKey = 7; N7.uParent = (uint64_t)&R5; N7.uLeft = (uint64_t)&End; N7.uRight = (uint64_t)&End;
+
+        static uint64_t aSelf2[0x80];
+        std::memset(aSelf2, 0, sizeof aSelf2);
+        *(uint64_t*)((uint8_t*)aSelf2 + 0x260) = (uint64_t)&aSelf2;   // the container word
+        *(uint64_t*)((uint8_t*)aSelf2 + 0x290) = (uint64_t)&End;      // the end node
+
+        // the walk records a candidate while id >= key, so these ids are present
+        CHECK(Slot_141797e00(aSelf2, 5) == true);
+        CHECK(Slot_141797e00(aSelf2, 6) == true);   // the candidate is 5, 5 <= 6
+        CHECK(Slot_141797e00(aSelf2, 7) == true);
+        CHECK(Slot_141797e00(aSelf2, 8) == true);   // the candidate is 7
+        // below the smallest key the walk goes right from the root and never records one
+        CHECK(Slot_141797e00(aSelf2, 4) == false);
+        CHECK(Slot_141797e00(aSelf2, 0) == false);
+
+        // an empty map: the end node's parent is itself, so the answer is false
+        End.uParent = (uint64_t)&End;
+        CHECK(Slot_141797e00(aSelf2, 5) == false);
+        End.uParent = (uint64_t)&R5;
+
+        // a null container word takes the two error paths and still answers without crashing
+        static int nInvalid;
+        nInvalid = 0;
+        g_pfn_invalid_parameter_noinfo = +[]() { ++nInvalid; };
+        *(uint64_t*)((uint8_t*)aSelf2 + 0x260) = 0;
+        // the null word does not change the answer: the pair is {0, candidate} and the
+        // candidate is still not the end node, so the predicate still says present
+        CHECK(Slot_141797e00(aSelf2, 5) == true);
+        CHECK(nInvalid == 2);                        // 141797e69 (the word) and 141797eca (the pair)
+        *(uint64_t*)((uint8_t*)aSelf2 + 0x260) = (uint64_t)&aSelf2;
+        g_pfn_invalid_parameter_noinfo = nullptr;
+    }
+
     std::printf("%s checks=%d fails=%d\n", g_fails ? "LOGIC_SLOTS_FAIL" : "LOGIC_SLOTS_OK",
                 g_checks, g_fails);
     return g_fails ? 1 : 0;

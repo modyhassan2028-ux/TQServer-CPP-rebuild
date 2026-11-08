@@ -9806,3 +9806,28 @@ slot 0x78 of the vtable of whatever came back. Both slots are read from the obje
 Batteries: 255 assertions (15 new). New cases: the miss reports exactly those four strings and that
 line, answers "", and touches neither vtable; the hit hands `1` to slot 0x10, receives the fake result
 and passes it to slot 0x78, whose answer is returned unchanged. 6/6 runs, sanitizers clean.
+
+## 2026-11-08 — 0x141797e00 ported (the id predicate on the second map layout)
+
+51 instructions, `ret` at 0x141797eec. This map sits at `this+0x290` with its container word at
+`this+0x260`, and its nodes are a **different layout** from the 0x40-byte map the earlier batches use:
+key at `+0x18` but the nil byte at `+0x1d`, left `+0x00`, parent `+0x08`, right `+0x10`. The walk is
+also mirrored: `cmp edx,[rax+0x18] / jae` turns **left** and records the node as the candidate, and the
+`else` side steps right.
+
+Two details are stated plainly instead of being given meaning the bytes do not carry:
+
+- 0x141797e5f is `test rax,rax / je 0x141797e69` followed by `cmp rax,rax / je 0x141797e6f`. The second
+  compare is rax against itself, so it is always taken: the only way into that error path is a null
+  container word, and the ported body says exactly that (the same `cmp rax,rax` shape the 0x1417a8940
+  batch documented).
+- A null word does not change the answer. The pair becomes `{0, candidate}`, the candidate is still not
+  the end node, so the predicate still answers true while both error paths fire. The test asserts the
+  return value and the count (2) rather than pretending the null makes it false.
+
+The answer itself is `setne` on `end node` against the chosen node, i.e. "the id resolved to a node
+that is not the end node".
+
+Batteries: 264 assertions (9 new): present at 5/6/7/8 with the candidate the walk records, absent at
+4 and 0 where the walk goes right from the root and never records one, the empty map, and the null-word
+run. 6/6 runs, sanitizers clean.

@@ -1089,3 +1089,73 @@ const char* Slot_14178f470(void* self) {
 }
 
 }  // namespace tq
+
+namespace tq {
+
+// ============================================================================
+// 0x141797e00 — the id predicate on the map at this+0x290. Instruction by instruction:
+//   141797e14  rbx = [rcx+0x290]        the end node
+//   141797e1b  edi = edx                the id is kept for the two comparisons below
+//   141797e1d  rbp = rcx                this
+//   141797e20  rax = [rbx+0x08]         the end node's parent: the root
+//   141797e24  cmpb $0,0x1d(%rax) / jne the nil byte of this layout is +0x1d
+//   141797e30  cmp edx,[rax+0x18] / jae -> left, and the node becomes the candidate
+//              (0x141797e3b: rbx = rax, rax = [rax]); below it, rax = [rax+0x10] (right)
+//   141797e41  cmpb $0,0x1d(%rax) / je  back to 0x141797e30
+//   141797e47  rax = [rcx+0x260]        the container word
+//   141797e4e  rsi = [rcx+0x290]        the end node again
+//   141797e55  the candidate and the word are stashed at [rsp+0x28] / [rsp+0x20]
+//   141797e5f  test rax,rax / je 0x141797e69, then cmp rax,rax / je 0x141797e6f.
+//              The second compare is rax against itself, so the only way into the error
+//              path is a null word; that is stated plainly here rather than given a
+//              meaning the bytes do not have.
+//   141797e6f  candidate == the end node            -> the end-node pair
+//   141797e74  cmp [rbx+0x18],edi / jb              -> the end-node pair (id below the key)
+//   141797e79  otherwise the stashed {word, candidate} pair
+//   141797e9d  the chosen pair is copied to [rsp+0x40]/[rsp+0x48]
+//   141797eb7  the word is re-read: null, or not the pair's first word -> error path
+//   141797ed0  cmp 0x48(%rsp),%rbx with rbx = [rbp+0x290]: setne al
+// So the answer is "the chosen node is not the end node".
+
+bool Slot_141797e00(void* self, uint32_t id) {
+    uint8_t* p = (uint8_t*)self;
+    const uint64_t uEnd = *(uint64_t*)(p + 0x290);          // mov rbx,[rcx+0x290]
+    const uint32_t uId = id;                                // mov edi,edx
+    uint64_t uCand = uEnd;                                  // rbx starts as the end node
+    uint64_t uNode = *(uint64_t*)(uEnd + 0x08);             // mov rax,[rbx+0x08]
+    while (*(uint8_t*)(uNode + 0x1d) == 0) {                // cmpb $0,0x1d(%rax) / jne
+        if (uId >= *(uint32_t*)(uNode + 0x18)) {            // cmp edx,[rax+0x18] / jae
+            uCand = uNode;                                  // mov rbx,rax
+            uNode = *(uint64_t*)uNode;                      // mov rax,[rax]  (left)
+        } else {
+            uNode = *(uint64_t*)(uNode + 0x10);             // mov rax,[rax+0x10]  (right)
+        }
+    }
+
+    const uint64_t uWord = *(uint64_t*)(p + 0x260);         // mov rax,[rcx+0x260]
+    const uint64_t uEnd2 = *(uint64_t*)(p + 0x290);         // mov rsi,[rcx+0x290]
+    if (uWord == 0) {                                      // test rax,rax / je
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();               // 141797e69
+        // cmp rax,rax / je 0x141797e6f is always taken, so execution continues
+    }
+    (void)uEnd2;
+
+    uint64_t uPair0, uPair1;
+    if (uCand == uEnd2 || uId < *(uint32_t*)(uCand + 0x18)) {   // 141797e6f / 141797e74 jb
+        uPair0 = *(uint64_t*)(p + 0x260);                  // [rsp+0x30] = [rbp+0x260]
+        uPair1 = *(uint64_t*)(p + 0x290);                  // [rsp+0x38] = [rbp+0x290]
+    } else {
+        uPair0 = uWord;                                    // [rsp+0x20]
+        uPair1 = uCand;                                    // [rsp+0x28]
+    }
+
+    const uint64_t uWord2 = *(uint64_t*)(p + 0x260);       // 141797eb7
+    if (uWord2 == 0 || uWord2 != uPair0) {                 // test rax,rax / je, cmp 0x40(%rsp)
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();               // 141797eca
+    }
+    return *(uint64_t*)(p + 0x290) != uPair1;              // cmp 0x48(%rsp),%rbx / setne
+}
+
+}  // namespace tq

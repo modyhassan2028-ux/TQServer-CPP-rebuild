@@ -279,4 +279,15 @@ extern const char* Slot_14178f470(void* self);
 
 }  // namespace tq
 
+namespace tq {
+
+// 0x141797e00 — the id predicate from the map at this+0x290 (a second layout: the node's
+// nil byte is at +0x1d and the key at +0x18, not the +0x29/+0x18 the count map uses).
+// The walk turns left (and records the candidate) when id >= node key, right otherwise;
+// a candidate equal to the end node, or one whose key is above the id, selects the
+// end-node pair instead. The answer is whether the chosen node differs from the end node.
+extern bool Slot_141797e00(void* self, uint32_t id);
+
+}  // namespace tq
+
 #endif
