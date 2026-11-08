@@ -10173,3 +10173,31 @@ battery's split check. The backward scan and both seeding walks were right.
 Batteries: 14650 assertions, 6/6 runs, sanitizers clean. The nodes in the battery are real three-level
 records (slot -> node -> record -> vtable) because the comparator walks them for the second key, so
 equal keys really exercise that path; six named shapes plus the same 12 x 40 pseudo-random sweep.
+
+## 2026-11-08 — 0x141793bf0 and 0x141792950 ported: the key rows' median, and the sort path closes
+
+Two rows, and with them nothing is left open on the sort path: the partition, its median, the triple,
+the comparator and the sift are all ported code now.
+
+**0x141792950** is the triple ordering for the key rows: `0x141792ae0`'s three comparisons with
+`0x141787c60` in place of the predicate and, as its context, the address of the r9 slot
+(`lea 0x48(%rsp),%rcx`). Three calls, each with its same-iterator guard, same tail.
+
+**0x141793bf0** is the median guess above it, `0x141793e70`'s shape exactly: `nCount = (Last-First)>>3`,
+one triple while `nCount <= 0x28`, otherwise `step = (nCount+1)/8` and four triples at the front, the
+middle, the back and then the three medians. The one difference from its predicate twin: r9 is
+re-read from its stack slot before each call (`mov 0x58(%rsp),%r9`), so the key function is reloaded
+rather than kept live.
+
+The seam `g_pfnLogic_141793bf0` now initialises to the ported row and `0x141795a30` calls it plainly,
+so the key-reader partition runs entirely on ported code.
+
+One test bug worth remembering: the median and triple take *pointers into the slot array*, not the
+slot contents. Passing `aSlots[0]` instead of `&aSlots[0]` made the comparator read a record where
+it expected a node and fault at 0x10, inside the second-key walk. The ported code was right; the
+battery was wrong.
+
+Batteries: 14711 assertions, 6/6 runs, sanitizers clean. New checks pin the triple on three
+arrangements, the plain-triple guess below the threshold (6, the median of 7/5/6), the 41/42 boundary
+either side of `nCount == 0x28`, the ninther against its own definition read through the key, and
+every node's survival.

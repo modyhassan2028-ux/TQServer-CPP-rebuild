@@ -97,7 +97,7 @@ static void PartKeyMed3(void* pF, void* pM, void* pL, void* pfnKey) {
 static int32_t PartKeyPivotOf(void** pSlots, int nCount) {
     void* aCopy[16];
     for (int i = 0; i < nCount; ++i) aCopy[i] = pSlots[i];
-    PartKeyMed3(&aCopy[0], &aCopy[nCount / 2], &aCopy[nCount - 1], g_pPartKeyFn);
+    tq::Slot_141793bf0(&aCopy[0], &aCopy[nCount / 2], &aCopy[nCount - 1], g_pPartKeyFn);
     return ((PKeyNode*)aCopy[nCount / 2])->nKey;
 }
 
@@ -2236,7 +2236,7 @@ int main() {
     // and the median through a stub of 0x141793bf0, so the ordering here is descending by key:
     // above the pivot in front, the equal block, then below it.
     {
-        g_pfnLogic_141793bf0 = &PartKeyMed3;
+        g_pfnLogic_141793bf0 = &tq::Slot_141793bf0;
         static void* aSlots[16];
         static PKeyNode aNodes[16];
         static PKeyRec aRecs[16];
@@ -2279,7 +2279,80 @@ int main() {
         // --- the wiring this row depends on: the comparator is the ported synattr body
         CHECK(g_pfnLogic_141787c60 == &tq::Slot_141787c60);
 
-        g_pfnLogic_141793bf0 = nullptr;
+        CHECK(g_pfnLogic_141793bf0 == &tq::Slot_141793bf0);
+    }
+
+    // ------------------------------------------------------------------
+    // 0x141792950 — the triple ordering for the key rows, and 0x141793bf0 — the median guess on
+    // top of it: one triple below 0x29 elements, the nine-sample ninther above.
+    {
+        static void* aSlots[64];
+        static PKeyNode aNodes[64];
+        static PKeyRec aRecs[64];
+        static int32_t aKeys[64];
+
+        // --- the triple: three arrangements, ordered by the comparator and nothing lost
+        {
+            static const int32_t aTriple[3][3] = {{3, 1, 2}, {2, 3, 1}, {1, 1, 2}};
+            for (int n = 0; n < 3; ++n) {
+                for (int i = 0; i < 3; ++i) aKeys[i] = aTriple[n][i];
+                PartKeySetup(aSlots, aNodes, aRecs, aKeys, 3);
+                tq::Slot_141792950(&aSlots[0], &aSlots[1], &aSlots[2], g_pPartKeyFn);
+                const int32_t a = ((PKeyNode*)aSlots[0])->nKey;
+                const int32_t b = ((PKeyNode*)aSlots[1])->nKey;
+                const int32_t c2 = ((PKeyNode*)aSlots[2])->nKey;
+                CHECK(a >= b && b >= c2);            // the comparator's order, so descending keys
+                CHECK(a + b + c2 == aTriple[n][0] + aTriple[n][1] + aTriple[n][2]);
+                CHECK(b == aTriple[n][0] || b == aTriple[n][1] || b == aTriple[n][2]);
+            }
+        }
+
+        // --- below the threshold the guess is one triple
+        {
+            for (int i = 0; i < 8; ++i) aKeys[i] = (int32_t[]){7, 3, 9, 1, 5, 8, 2, 6}[i];
+            PartKeySetup(aSlots, aNodes, aRecs, aKeys, 8);
+            tq::Slot_141793bf0(&aSlots[0], &aSlots[4], &aSlots[7], g_pPartKeyFn);   // nCount = 7
+            const int32_t nFirst = ((PKeyNode*)aSlots[0])->nKey;
+            const int32_t nMid = ((PKeyNode*)aSlots[4])->nKey;
+            const int32_t nLast = ((PKeyNode*)aSlots[7])->nKey;
+            CHECK(nFirst >= nMid && nMid >= nLast);
+            CHECK(nMid == 6);                        // the median of 7, 5, 6
+        }
+
+        // --- 41 elements stay on the triple (nCount == 40), 42 take the nine samples
+        {
+            for (int i = 0; i < 41; ++i) aKeys[i] = (i * 17) % 41;
+            PartKeySetup(aSlots, aNodes, aRecs, aKeys, 41);
+            tq::Slot_141793bf0(&aSlots[0], &aSlots[20], &aSlots[40], g_pPartKeyFn);
+            CHECK(((PKeyNode*)aSlots[0])->nKey >= ((PKeyNode*)aSlots[20])->nKey);
+            CHECK(((PKeyNode*)aSlots[20])->nKey >= ((PKeyNode*)aSlots[40])->nKey);
+
+            for (int i = 0; i < 42; ++i) aKeys[i] = (i * 11) % 42;
+            PartKeySetup(aSlots, aNodes, aRecs, aKeys, 42);
+            void* aBefore[42];
+            for (int i = 0; i < 42; ++i) aBefore[i] = aSlots[i];
+            tq::Slot_141793bf0(&aSlots[0], &aSlots[21], &aSlots[41], g_pPartKeyFn);
+            const int nStep = 42 / 8;
+            auto keyAt = [&](int i) { return ((PKeyNode*)aSlots[i])->nKey; };
+            CHECK(keyAt(0) >= keyAt(nStep) && keyAt(nStep) >= keyAt(2 * nStep));
+            CHECK(keyAt(21 - nStep) >= keyAt(21) && keyAt(21) >= keyAt(21 + nStep));
+            CHECK(keyAt(41 - 2 * nStep) >= keyAt(41 - nStep) && keyAt(41 - nStep) >= keyAt(41));
+            // the three medians are ordered among themselves, so the middle of the range is one
+            CHECK(keyAt(nStep) >= keyAt(21) && keyAt(21) >= keyAt(41 - nStep));
+            int32_t aMed[3] = {keyAt(nStep), keyAt(21), keyAt(41 - nStep)};
+            for (int i = 1; i < 3; ++i)
+                for (int j = i; j > 0 && aMed[j - 1] < aMed[j]; --j) {   // descending
+                    int32_t t2 = aMed[j - 1]; aMed[j - 1] = aMed[j]; aMed[j] = t2; }
+            CHECK(keyAt(21) == aMed[1]);             // the ninther, read through the key
+            for (int i = 0; i < 42; ++i) {           // and every node is still there
+                int nLeft = 0, nRight = 0;
+                for (int j = 0; j < 42; ++j) {
+                    if (aBefore[j] == aBefore[i]) ++nLeft;
+                    if (aSlots[j] == aBefore[i]) ++nRight;
+                }
+                CHECK(nLeft == nRight);
+            }
+        }
     }
 
     std::printf("%s checks=%d fails=%d\n", g_fails ? "LOGIC_SLOTS_FAIL" : "LOGIC_SLOTS_OK",

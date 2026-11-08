@@ -388,6 +388,11 @@ void Slot_141795d40(void** pOut, void* pFirst, void* pLast, bool (*pfnLess)(void
 // 0x141795a30 — the same partition for a key reader: the comparisons go through 0x141787c60
 // and the median through 0x141793bf0, both handed the key function in r9.
 extern void (*g_pfnLogic_141793bf0)(void* first, void* mid, void* last, void* pfnKey);
+// 0x141792950 — the triple ordering for the key-reader rows (the shape of 0x141792ae0 with the
+// key function in place of the predicate).
+void Slot_141792950(void* pFirst, void* pMid, void* pLast, void* pfnKey);
+// 0x141793bf0 — the median guess for the key-reader rows.
+void Slot_141793bf0(void* pFirst, void* pMid, void* pLast, void* pfnKey);
 void* Slot_141795a30(void** pOut, void* pFirst, void* pLast, void* pfnKey);
 
 }  // namespace tq

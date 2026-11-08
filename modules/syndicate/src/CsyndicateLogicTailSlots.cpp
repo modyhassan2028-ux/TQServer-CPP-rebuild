@@ -1971,7 +1971,6 @@ namespace tq {
 // The shape is 0x141795d40's, statement for statement; what changes is how "a sorts before b"
 // is asked, and that the answer pair is written through rcx and handed back in rax.
 //   r14 First, r13 Last, r15 out, rbx A (_Pfirst), rbp B (_Plast), r12 Glast, rdi Gfirst
-void (*g_pfnLogic_141793bf0)(void* first, void* mid, void* last, void* pfnKey) = nullptr;
 
 void* Slot_141795a30(void** pOut, void* pFirstArg, void* pLastArg, void* pfnKey) {
     void* pKeySlot = pfnKey;                                   // 141795a3f, the address is the ctx
@@ -1983,8 +1982,7 @@ void* Slot_141795a30(void** pOut, void* pFirstArg, void* pLastArg, void* pfnKey)
     uint8_t* Last = (uint8_t*)pLastArg;                         // 141795a57 mov %r8,%r13
     const int64_t nHalf = SignAdjustedHalf((int64_t)(Last - First) >> 3);   // 141795a5a..a70
     uint8_t* A = First + (nHalf << 3);                          // 141795a73, the pivot slot
-    if (g_pfnLogic_141793bf0 != nullptr)                        // 141795a7a
-        g_pfnLogic_141793bf0(First, A, Last - 8, pfnKey);
+    g_pfnLogic_141793bf0(First, A, Last - 8, pfnKey);           // 141795a7a
     uint8_t* B = A + 8;                                         // 141795a7f
 
     while (First < A) {                                         // 141795a83..ac3
@@ -2048,6 +2046,60 @@ void* Slot_141795a30(void** pOut, void* pFirstArg, void* pLastArg, void* pfnKey)
         }
         if (Gfirst != Glast) SwapWords(Gfirst, Glast);           // 141795c5c..c6b
         Gfirst += 8;                                            // 141795c6f
+    }
+}
+
+}  // namespace tq
+
+namespace tq {
+
+// ============================================================================
+// 0x141793bf0 — the median guess for the key-reader rows: the same nine-sample shape as
+// 0x141793e70, with 0x141792950 standing in for the triple ordering and the key function
+// carried in r9 (it is re-read from its stack slot before each of the four calls).
+void (*g_pfnLogic_141793bf0)(void* first, void* mid, void* last, void* pfnKey) = &Slot_141793bf0;
+
+void Slot_141793bf0(void* pFirst, void* pMid, void* pLast, void* pfnKey) {
+    const int64_t nCount = (int64_t)((uint8_t*)pLast - (uint8_t*)pFirst) >> 3;   // 141793bfd..c09
+    if (nCount <= 0x28) {                                       // 141793c11 jle
+        Slot_141792950(pFirst, pMid, pLast, pfnKey);            // 141793cbc
+        return;
+    }
+    const int64_t nStep = (nCount + 1) / 8;                     // 141793c17..c36
+    uint8_t* pOne = (uint8_t*)pFirst + (nStep << 3);            // 141793c3d..c49
+    uint8_t* pTwo = (uint8_t*)pFirst + (nStep << 4);            // 141793c45..c4d
+    Slot_141792950(pFirst, pOne, pTwo, pfnKey);                 // 141793c54
+    Slot_141792950((uint8_t*)pMid - (nStep << 3), pMid,
+                   (uint8_t*)pMid + (nStep << 3), pfnKey);      // 141793c6b
+    Slot_141792950((uint8_t*)pLast - (nStep << 4),
+                   (uint8_t*)pLast - (nStep << 3), pLast, pfnKey);   // 141793c87
+    Slot_141792950(pOne, pMid, (uint8_t*)pLast - (nStep << 3), pfnKey);   // 141793c9a
+}
+
+}  // namespace tq
+
+namespace tq {
+
+// ============================================================================
+// 0x141792950 — the triple ordering for the key-reader rows: 0x141792ae0's three comparisons
+// with 0x141787c60 in place of the predicate and the address of the r9 slot as its context
+// (lea 0x48(%rsp),%rcx).
+void Slot_141792950(void* pFirst, void* pMid, void* pLast, void* pfnKey) {
+    void* pKeySlot = pfnKey;
+    const auto less = [&pKeySlot](void* a, void* b) -> bool {
+        return g_pfnLogic_141787c60(&pKeySlot, a, b);
+    };
+    if (less(*(void**)pMid, *(void**)pFirst)) {                 // 141792967..297f
+        if (pMid != pFirst)                                     // 141792981 cmp %rdi,%rbx
+            SwapWords(pMid, pFirst);                            // 141792986..298f
+    }
+    if (less(*(void**)pLast, *(void**)pMid)) {                  // 141792992..299d
+        if (pLast != pMid)                                      // 1417929a6 cmp %rbx,%rsi
+            SwapWords(pLast, pMid);                             // 1417929ab..29b4
+        if (less(*(void**)pMid, *(void**)pFirst)) {             // 1417929b7..29c2
+            if (pMid != pFirst)                                 // 1417929cb
+                SwapWords(pMid, pFirst);                        // 1417929d0..29d9
+        }
     }
 }
 
