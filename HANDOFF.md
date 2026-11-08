@@ -31,11 +31,11 @@ the build output, not just the test output.
 
 ## Where the work stands
 
-- Ported bodies in `modules/syndicate/src/CsyndicateLogicTailSlots.cpp`: 25 (24 at 8c97b8d).
-  The command that produces it, widened to cover the `bool` body this batch added:
-  `grep -cE '^(void|void\*|uint64_t\*|uint64_t|bool|int|uint32_t) Slot_[0-9a-f]+_'`
-  (the older, narrower pattern in "Counts are cheap to check" misses `bool Slot_1417caa00_erase_all`).
-- Batteries: 240 assertions in `tests/syndicate_logic_tail_slots_test.cpp` (219 before `0x1417caa00`), all passing, 6/6 runs, sanitizers clean. The binary prints the count itself: `LOGIC_SLOTS_OK checks=240 fails=0`.
+- Ported bodies in `modules/syndicate/src/CsyndicateLogicTailSlots.cpp`: 26 (24 at 8c97b8d).
+  Two commands, because two bodies do not start with the four original types:
+  `grep -cE '^(void|void\*|uint64_t\*|uint64_t|bool|int|uint32_t) Slot_[0-9a-f]+_'` = 25
+  plus `grep -cE '^const char\* Slot_'` = 1 (`Slot_14178f470`).
+- Batteries: 255 assertions in `tests/syndicate_logic_tail_slots_test.cpp` (219 at 8c97b8d, 240 after 0x1417caa00), all passing, 6/6 runs, sanitizers clean. The binary prints the count itself: `LOGIC_SLOTS_OK checks=255 fails=0`.
 - The `0x14177f980` family is complete and wired: `0x14177f980` -> `0x141779400` -> `0x141779090`,
   plus both singletons (`0x14177c770`, `0x1417b6210`), the map constructor `0x14177c6c0`, its end-node
   builder `0x14177ace0`, the key search `0x14177c0a0`, `lower_bound` `0x1417a8520`, the range pass
@@ -67,7 +67,6 @@ the build output, not just the test output.
 - `14177c6c0`
 - `14177f980`
 - `1417873a0`
-- `14178f470`
 - `141797e00`
 - `14179db30`   the value at node[0x20], first of the four; takes 0x3ff as its second argument
 - `1417a1180`   the value at node[0x20], second

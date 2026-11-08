@@ -9791,3 +9791,18 @@ guard is proven to fire once with the four strings and line 279 and the body sti
 Scaffolding bugs in this batch (mine, not the port's): the destroy log was sized for 8 entries while
 a three-node walk writes 12, and one fixture reused a leaf whose parent still pointed at the root, so
 a "single node" case walked the whole map. Both were fixed against the bytes, not by relaxing checks.
+
+## 2026-11-08 — 0x14178f470 ported (the IF_OK(m_pRec) gate)
+
+Fourteen instructions from syndicate.cpp, line 0x8a8 (2216). The guard is `cmpq $0,0x428(%rcx)`; the
+miss loads the four report operands out of .rdata — "%s(%s) in %s, %d" at 0x141824ca8, "IF_OK" at
+0x14182666c, "m_pRec" at 0x141828944, `f:\version\cqserver-78.0.11-1204\modules\syndicate\src\syndicate.cpp`
+at 0x1418319b0, 0x8a8 on the stack — and calls CQBase.dll!log_InlineLogERROR (IAT 0x141823030), then
+answers 0x141827409, which is read out of .rdata as a single NUL: the empty string.
+
+The hit takes `[rcx+0x428]` as m_pRec, calls its vtable slot 0x10 with edx = 1, then tail-jumps through
+slot 0x78 of the vtable of whatever came back. Both slots are read from the objects, not named here.
+
+Batteries: 255 assertions (15 new). New cases: the miss reports exactly those four strings and that
+line, answers "", and touches neither vtable; the hit hands `1` to slot 0x10, receives the fake result
+and passes it to slot 0x78, whose answer is returned unchanged. 6/6 runs, sanitizers clean.

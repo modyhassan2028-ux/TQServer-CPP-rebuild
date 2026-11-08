@@ -962,6 +962,8 @@ static const char kDeadLoopExpr[] = "DEAD_LOOP_BREAK";                   // 0x14
 static const char kDeadLoopVar[] = "uLoopCount";                         // 0x141832a28
 static const char kDeadLoopFile[] =                                      // 0x141839fe0
     "f:\\version\\cqserver-78.0.11-1204\\modules\\syndicate\\src\\synmanager.cpp";
+static const char kSyndicateFile[] =                                     // 0x1418319b0
+    "f:\\version\\cqserver-78.0.11-1204\\modules\\syndicate\\src\\syndicate.cpp";
 
 bool Slot_1417caa00_erase_all(void* self) {
     uint8_t* p = (uint8_t*)self;
@@ -1045,6 +1047,45 @@ bool Slot_1417caa00_erase_all(void* self) {
 
 static uint64_t erase_all_bridge(uint64_t a, uint64_t, uint64_t, uint64_t) {
     return Slot_1417caa00_erase_all((void*)(uintptr_t)a) ? 1u : 0u;
+}
+
+}  // namespace tq
+
+namespace tq {
+
+// ============================================================================
+// 0x14178f470 — "IF_OK(m_pRec)" from syndicate.cpp, line 0x8a8 (2216). Fourteen
+// instructions; the decode is:
+//   14178f474  cmpq $0,0x428(%rcx)        the guard
+//   14178f47c  jne 0x14178f4b4            -> the hit
+//   14178f47e  r9 = 0x1418319b0           the file string (syndicate.cpp)
+//   14178f485  r8 = 0x141828944           "m_pRec"
+//   14178f48c  rdx = 0x14182666c          "IF_OK"
+//   14178f493  rcx = 0x141824ca8          "%s(%s) in %s, %d"  (0xa1ef either side)
+//   14178f49a  [rsp+0x20] = 0x8a8         the line
+//   14178f4a2  call *0x141823030          CQBase.dll!log_InlineLogERROR
+//   14178f4a8  rax = 0x141827409          .rdata: a lone NUL, i.e. the empty string
+//   14178f4b4  rcx = [rcx+0x428]          m_pRec
+//   14178f4bb  edx = 1
+//   14178f4c0  rax = [rcx]                its vtable
+//   14178f4c3  call *0x10(%rax)           slot 2 with (m_pRec, 1)
+//   14178f4c9  rdx = [rax]                the vtable of what came back
+//   14178f4d0  jmp *0x78(%rdx)            slot 15, a tail jump: its answer is ours
+// 0x141827409 is read out of .rdata and is one zero byte, so the miss answers "".
+
+const char* Slot_14178f470(void* self) {
+    uint8_t* p = (uint8_t*)self;
+    if (*(void**)(p + 0x428) == nullptr) {                     // cmpq $0,0x428(%rcx)
+        if (g_pfn_log_141823030 != nullptr)                    // call *0x141823030
+            g_pfn_log_141823030(kDeadLoopFmt, "IF_OK", "m_pRec", kSyndicateFile, 0x8a8);
+        static const char kEmpty141827409[] = "";               // lea rax,[0x141827409]
+        return kEmpty141827409;
+    }
+    void* pRec = *(void**)(p + 0x428);                         // mov rcx,[rcx+0x428]
+    void*** vt = *(void****)pRec;                              // mov rax,[rcx]
+    void* rc = ((void* (*)(void*, uint32_t))vt[0x10 / 8])(pRec, 1);   // call *0x10(%rax)
+    void*** vt2 = *(void****)rc;                               // mov rdx,[rax]
+    return (const char*)((void* (*)(void*))vt2[0x78 / 8])(rc); // jmp *0x78(%rdx)
 }
 
 }  // namespace tq

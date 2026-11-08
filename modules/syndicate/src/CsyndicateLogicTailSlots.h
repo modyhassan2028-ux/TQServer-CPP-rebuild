@@ -269,4 +269,14 @@ bool Slot_1417caa00_erase_all(void* self);
 
 }  // namespace tq
 
+namespace tq {
+
+// 0x14178f470 — the "IF_OK(m_pRec)" gate from syndicate.cpp, line 0x8a8 (2216).
+// Bytes: cmpq $0,[rcx+0x428] / jne; the miss reports through 0x141823030 and answers
+// the empty string at 0x141827409. The hit loads m_pRec, calls its vtable slot 0x10
+// with edx = 1, then tail-jumps through slot 0x78 of the vtable of what came back.
+extern const char* Slot_14178f470(void* self);
+
+}  // namespace tq
+
 #endif

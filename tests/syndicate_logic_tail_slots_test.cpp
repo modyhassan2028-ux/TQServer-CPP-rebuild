@@ -1107,6 +1107,64 @@ int main() {
         CHECK(nDestroy == 12 && nLog == 0);
     }
 
+    // ------------------------------------------------------------------
+    // 0x14178f470 — the "IF_OK(m_pRec)" gate. Miss reports and answers the empty
+    // string; hit goes m_pRec -> vtable[2](m_pRec, 1) -> vtable[15] of the answer.
+    {
+        // the reporter, captured
+        static const char* pFmt2; static const char* pExpr2; static const char* pVar2;
+        static const char* pFile2; static int nLine2; static int nLog2;
+        g_pfn_log_141823030 = +[](const char* f, const char* e, const char* w,
+                                  const char* fi, int l) {
+            pFmt2 = f; pExpr2 = e; pVar2 = w; pFile2 = fi; nLine2 = l; ++nLog2;
+        };
+
+        // m_pRec and what its first call hands back
+        static void* pRecSeen; static uint32_t uRecArg; static int nRecCalls;
+        static void* pResSeen; static int nResCalls;
+        static const char kAnswer[] = "answer";
+        static void* pResObj;
+        static void* aResVt[16];
+        static void* aRecVt[16];
+        aRecVt[0x10 / 8] = (void*)(void* (*)(void*, uint32_t)) + [](void* self, uint32_t n) -> void* {
+            pRecSeen = self; uRecArg = n; ++nRecCalls; return pResObj;
+        };
+        aResVt[0x78 / 8] = (void*)(void* (*)(void*)) + [](void* self) -> void* {
+            pResSeen = self; ++nResCalls; return (void*)kAnswer;
+        };
+        static void* pRes = aResVt;
+        pResObj = &pRes;
+        static void* aRecObj[1];                 // the object: word 0 is its vtable
+        aRecObj[0] = (void*)aRecVt;
+
+        static uint64_t aGate[0x90];
+        std::memset(aGate, 0, sizeof aGate);
+
+        // the miss: +0x428 is null
+        nLog2 = 0; nRecCalls = nResCalls = 0;
+        const char* pszMiss = Slot_14178f470(aGate);
+        CHECK(pszMiss != nullptr && pszMiss[0] == '\0');   // 0x141827409 is a lone NUL
+        CHECK(nLog2 == 1);
+        CHECK(std::strcmp(pExpr2, "IF_OK") == 0);
+        CHECK(std::strcmp(pVar2, "m_pRec") == 0);
+        CHECK(std::strstr(pFile2, "syndicate.cpp") != nullptr);
+        CHECK(std::strstr(pFile2, "cqserver-78.0.11-1204") != nullptr);
+        CHECK(nLine2 == 0x8a8);
+        CHECK(std::strcmp(pFmt2, "\xa1\xef%s(%s)\xa1\xef in %s, %d") == 0);
+        CHECK(nRecCalls == 0 && nResCalls == 0);
+
+        // the hit: +0x428 carries an object whose word 0 is its vtable
+        *(void**)((uint8_t*)aGate + 0x428) = (void*)aRecObj;
+        nLog2 = 0; nRecCalls = nResCalls = 0;
+        const char* pszHit = Slot_14178f470(aGate);
+        CHECK(std::strcmp(pszHit, kAnswer) == 0);
+        CHECK(nLog2 == 0);
+        CHECK(nRecCalls == 1 && nResCalls == 1);
+        CHECK(pRecSeen == (void*)aRecObj);       // edx = 1 went with it
+        CHECK(uRecArg == 1);
+        CHECK(pResSeen == pResObj);              // and slot 15 saw what came back
+    }
+
     std::printf("%s checks=%d fails=%d\n", g_fails ? "LOGIC_SLOTS_FAIL" : "LOGIC_SLOTS_OK",
                 g_checks, g_fails);
     return g_fails ? 1 : 0;
