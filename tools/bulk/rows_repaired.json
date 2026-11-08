@@ -1,0 +1,7156 @@
+{
+ "extended": {
+  "0x141721090": {
+   "a": 5392961680,
+   "b": 5392961697,
+   "addr": [
+    5392961680,
+    5392961685,
+    5392961687,
+    5392961691,
+    5392961692,
+    5392961696
+   ],
+   "text": [
+    "cmp QWORD PTR [rcx+0x38], 0x10",
+    "jb 0x14172109c",
+    "mov rax, QWORD PTR [rcx+0x20]",
+    "ret",
+    "lea rax, QWORD PTR [rcx+0x20]",
+    "ret"
+   ]
+  },
+  "0x1417213b0": {
+   "a": 5392962480,
+   "b": 5392962495,
+   "addr": [
+    5392962480,
+    5392962483,
+    5392962486,
+    5392962488,
+    5392962491,
+    5392962492,
+    5392962494
+   ],
+   "text": [
+    "mov rax, QWORD PTR [rcx]",
+    "test rax, rax",
+    "je 0x1417213bc",
+    "mov rax, QWORD PTR [rax]",
+    "ret",
+    "xor eax, eax",
+    "ret"
+   ]
+  },
+  "0x1417253c0": {
+   "a": 5392978880,
+   "b": 5392978954,
+   "addr": [
+    5392978880,
+    5392978884,
+    5392978887,
+    5392978891,
+    5392978894,
+    5392978898,
+    5392978900,
+    5392978904,
+    5392978908,
+    5392978912,
+    5392978916,
+    5392978920,
+    5392978922,
+    5392978926,
+    5392978929,
+    5392978933,
+    5392978934,
+    5392978938,
+    5392978941,
+    5392978943,
+    5392978946,
+    5392978949,
+    5392978953
+   ],
+   "text": [
+    "mov r8, QWORD PTR [rdx+0x10]",
+    "mov rax, QWORD PTR [r8]",
+    "mov QWORD PTR [rdx+0x10], rax",
+    "mov rax, QWORD PTR [r8]",
+    "cmp BYTE PTR [rax+0x51], 0x0",
+    "jne 0x1417253d8",
+    "mov QWORD PTR [rax+0x8], rdx",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "mov QWORD PTR [r8+0x8], rax",
+    "mov rax, QWORD PTR [rcx+0x30]",
+    "cmp rdx, QWORD PTR [rax+0x8]",
+    "jne 0x1417253f6",
+    "mov QWORD PTR [rax+0x8], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax]",
+    "jne 0x14172540a",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x1417253f6": {
+   "a": 5392978934,
+   "b": 5392978966,
+   "addr": [
+    5392978934,
+    5392978938,
+    5392978941,
+    5392978943,
+    5392978946,
+    5392978949,
+    5392978953,
+    5392978954,
+    5392978958,
+    5392978961,
+    5392978965
+   ],
+   "text": [
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax]",
+    "jne 0x14172540a",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x141725420": {
+   "a": 5392978976,
+   "b": 5392979054,
+   "addr": [
+    5392978976,
+    5392978979,
+    5392978983,
+    5392978986,
+    5392978990,
+    5392978994,
+    5392978996,
+    5392979000,
+    5392979004,
+    5392979008,
+    5392979012,
+    5392979016,
+    5392979018,
+    5392979022,
+    5392979026,
+    5392979030,
+    5392979031,
+    5392979035,
+    5392979039,
+    5392979041,
+    5392979045,
+    5392979049,
+    5392979053
+   ],
+   "text": [
+    "mov r8, QWORD PTR [rdx]",
+    "mov rax, QWORD PTR [r8+0x10]",
+    "mov QWORD PTR [rdx], rax",
+    "mov rax, QWORD PTR [r8+0x10]",
+    "cmp BYTE PTR [rax+0x51], 0x0",
+    "jne 0x141725438",
+    "mov QWORD PTR [rax+0x8], rdx",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "mov QWORD PTR [r8+0x8], rax",
+    "mov rax, QWORD PTR [rcx+0x30]",
+    "cmp rdx, QWORD PTR [rax+0x8]",
+    "jne 0x141725457",
+    "mov QWORD PTR [rax+0x8], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax+0x10]",
+    "jne 0x14172546e",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x141725457": {
+   "a": 5392979031,
+   "b": 5392979066,
+   "addr": [
+    5392979031,
+    5392979035,
+    5392979039,
+    5392979041,
+    5392979045,
+    5392979049,
+    5392979053,
+    5392979054,
+    5392979057,
+    5392979061,
+    5392979065
+   ],
+   "text": [
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax+0x10]",
+    "jne 0x14172546e",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x14173b830": {
+   "a": 5393070128,
+   "b": 5393070202,
+   "addr": [
+    5393070128,
+    5393070132,
+    5393070135,
+    5393070139,
+    5393070142,
+    5393070146,
+    5393070148,
+    5393070152,
+    5393070156,
+    5393070160,
+    5393070164,
+    5393070168,
+    5393070170,
+    5393070174,
+    5393070177,
+    5393070181,
+    5393070182,
+    5393070186,
+    5393070189,
+    5393070191,
+    5393070194,
+    5393070197,
+    5393070201
+   ],
+   "text": [
+    "mov r8, QWORD PTR [rdx+0x10]",
+    "mov rax, QWORD PTR [r8]",
+    "mov QWORD PTR [rdx+0x10], rax",
+    "mov rax, QWORD PTR [r8]",
+    "cmp BYTE PTR [rax+0x61], 0x0",
+    "jne 0x14173b848",
+    "mov QWORD PTR [rax+0x8], rdx",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "mov QWORD PTR [r8+0x8], rax",
+    "mov rax, QWORD PTR [rcx+0x30]",
+    "cmp rdx, QWORD PTR [rax+0x8]",
+    "jne 0x14173b866",
+    "mov QWORD PTR [rax+0x8], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax]",
+    "jne 0x14173b87a",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x14173b866": {
+   "a": 5393070182,
+   "b": 5393070214,
+   "addr": [
+    5393070182,
+    5393070186,
+    5393070189,
+    5393070191,
+    5393070194,
+    5393070197,
+    5393070201,
+    5393070202,
+    5393070206,
+    5393070209,
+    5393070213
+   ],
+   "text": [
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax]",
+    "jne 0x14173b87a",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x14173b890": {
+   "a": 5393070224,
+   "b": 5393070302,
+   "addr": [
+    5393070224,
+    5393070227,
+    5393070231,
+    5393070234,
+    5393070238,
+    5393070242,
+    5393070244,
+    5393070248,
+    5393070252,
+    5393070256,
+    5393070260,
+    5393070264,
+    5393070266,
+    5393070270,
+    5393070274,
+    5393070278,
+    5393070279,
+    5393070283,
+    5393070287,
+    5393070289,
+    5393070293,
+    5393070297,
+    5393070301
+   ],
+   "text": [
+    "mov r8, QWORD PTR [rdx]",
+    "mov rax, QWORD PTR [r8+0x10]",
+    "mov QWORD PTR [rdx], rax",
+    "mov rax, QWORD PTR [r8+0x10]",
+    "cmp BYTE PTR [rax+0x61], 0x0",
+    "jne 0x14173b8a8",
+    "mov QWORD PTR [rax+0x8], rdx",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "mov QWORD PTR [r8+0x8], rax",
+    "mov rax, QWORD PTR [rcx+0x30]",
+    "cmp rdx, QWORD PTR [rax+0x8]",
+    "jne 0x14173b8c7",
+    "mov QWORD PTR [rax+0x8], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax+0x10]",
+    "jne 0x14173b8de",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x14173b8c7": {
+   "a": 5393070279,
+   "b": 5393070314,
+   "addr": [
+    5393070279,
+    5393070283,
+    5393070287,
+    5393070289,
+    5393070293,
+    5393070297,
+    5393070301,
+    5393070302,
+    5393070305,
+    5393070309,
+    5393070313
+   ],
+   "text": [
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax+0x10]",
+    "jne 0x14173b8de",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x14174ed80": {
+   "a": 5393149312,
+   "b": 5393149332,
+   "addr": [
+    5393149312,
+    5393149319,
+    5393149322,
+    5393149324,
+    5393149326,
+    5393149327
+   ],
+   "text": [
+    "mov rcx, QWORD PTR [rcx+0x4f0]",
+    "test rcx, rcx",
+    "jne 0x14174ed8f",
+    "xor al, al",
+    "ret",
+    "jmp 0x141739200"
+   ]
+  },
+  "0x14174eda0": {
+   "a": 5393149344,
+   "b": 5393149364,
+   "addr": [
+    5393149344,
+    5393149351,
+    5393149354,
+    5393149356,
+    5393149358,
+    5393149359
+   ],
+   "text": [
+    "mov rcx, QWORD PTR [rcx+0x4f0]",
+    "test rcx, rcx",
+    "jne 0x14174edaf",
+    "xor al, al",
+    "ret",
+    "jmp 0x1417394f0"
+   ]
+  },
+  "0x14174ee00": {
+   "a": 5393149440,
+   "b": 5393149460,
+   "addr": [
+    5393149440,
+    5393149447,
+    5393149450,
+    5393149452,
+    5393149454,
+    5393149455
+   ],
+   "text": [
+    "mov rcx, QWORD PTR [rcx+0x4f0]",
+    "test rcx, rcx",
+    "jne 0x14174ee0f",
+    "xor al, al",
+    "ret",
+    "jmp 0x141738bc0"
+   ]
+  },
+  "0x14174ee20": {
+   "a": 5393149472,
+   "b": 5393149492,
+   "addr": [
+    5393149472,
+    5393149479,
+    5393149482,
+    5393149484,
+    5393149486,
+    5393149487
+   ],
+   "text": [
+    "mov rcx, QWORD PTR [rcx+0x4f0]",
+    "test rcx, rcx",
+    "jne 0x14174ee2f",
+    "xor al, al",
+    "ret",
+    "jmp 0x141738ed0"
+   ]
+  },
+  "0x14174ef40": {
+   "a": 5393149760,
+   "b": 5393149780,
+   "addr": [
+    5393149760,
+    5393149767,
+    5393149770,
+    5393149772,
+    5393149774,
+    5393149775
+   ],
+   "text": [
+    "mov rcx, QWORD PTR [rcx+0x4f0]",
+    "test rcx, rcx",
+    "jne 0x14174ef4f",
+    "xor eax, eax",
+    "ret",
+    "jmp 0x141721b40"
+   ]
+  },
+  "0x14174f060": {
+   "a": 5393150048,
+   "b": 5393150068,
+   "addr": [
+    5393150048,
+    5393150055,
+    5393150058,
+    5393150060,
+    5393150062,
+    5393150063
+   ],
+   "text": [
+    "mov rcx, QWORD PTR [rcx+0x4f0]",
+    "test rcx, rcx",
+    "jne 0x14174f06f",
+    "xor eax, eax",
+    "ret",
+    "jmp 0x141721b50"
+   ]
+  },
+  "0x14174f930": {
+   "a": 5393152304,
+   "b": 5393152382,
+   "addr": [
+    5393152304,
+    5393152307,
+    5393152311,
+    5393152314,
+    5393152318,
+    5393152322,
+    5393152324,
+    5393152328,
+    5393152332,
+    5393152336,
+    5393152340,
+    5393152344,
+    5393152346,
+    5393152350,
+    5393152354,
+    5393152358,
+    5393152359,
+    5393152363,
+    5393152367,
+    5393152369,
+    5393152373,
+    5393152377,
+    5393152381
+   ],
+   "text": [
+    "mov r8, QWORD PTR [rdx]",
+    "mov rax, QWORD PTR [r8+0x10]",
+    "mov QWORD PTR [rdx], rax",
+    "mov rax, QWORD PTR [r8+0x10]",
+    "cmp BYTE PTR [rax+0x61], 0x0",
+    "jne 0x14174f948",
+    "mov QWORD PTR [rax+0x8], rdx",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "mov QWORD PTR [r8+0x8], rax",
+    "mov rax, QWORD PTR [rcx+0x30]",
+    "cmp rdx, QWORD PTR [rax+0x8]",
+    "jne 0x14174f967",
+    "mov QWORD PTR [rax+0x8], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax+0x10]",
+    "jne 0x14174f97e",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x14174f967": {
+   "a": 5393152359,
+   "b": 5393152394,
+   "addr": [
+    5393152359,
+    5393152363,
+    5393152367,
+    5393152369,
+    5393152373,
+    5393152377,
+    5393152381,
+    5393152382,
+    5393152385,
+    5393152389,
+    5393152393
+   ],
+   "text": [
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax+0x10]",
+    "jne 0x14174f97e",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x141752760": {
+   "a": 5393164128,
+   "b": 5393164202,
+   "addr": [
+    5393164128,
+    5393164132,
+    5393164135,
+    5393164139,
+    5393164142,
+    5393164146,
+    5393164148,
+    5393164152,
+    5393164156,
+    5393164160,
+    5393164164,
+    5393164168,
+    5393164170,
+    5393164174,
+    5393164177,
+    5393164181,
+    5393164182,
+    5393164186,
+    5393164189,
+    5393164191,
+    5393164194,
+    5393164197,
+    5393164201
+   ],
+   "text": [
+    "mov r8, QWORD PTR [rdx+0x10]",
+    "mov rax, QWORD PTR [r8]",
+    "mov QWORD PTR [rdx+0x10], rax",
+    "mov rax, QWORD PTR [r8]",
+    "cmp BYTE PTR [rax+0x61], 0x0",
+    "jne 0x141752778",
+    "mov QWORD PTR [rax+0x8], rdx",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "mov QWORD PTR [r8+0x8], rax",
+    "mov rax, QWORD PTR [rcx+0x30]",
+    "cmp rdx, QWORD PTR [rax+0x8]",
+    "jne 0x141752796",
+    "mov QWORD PTR [rax+0x8], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax]",
+    "jne 0x1417527aa",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x141752796": {
+   "a": 5393164182,
+   "b": 5393164214,
+   "addr": [
+    5393164182,
+    5393164186,
+    5393164189,
+    5393164191,
+    5393164194,
+    5393164197,
+    5393164201,
+    5393164202,
+    5393164206,
+    5393164209,
+    5393164213
+   ],
+   "text": [
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax]",
+    "jne 0x1417527aa",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x1417531c0": {
+   "a": 5393166784,
+   "b": 5393166858,
+   "addr": [
+    5393166784,
+    5393166788,
+    5393166791,
+    5393166795,
+    5393166798,
+    5393166802,
+    5393166804,
+    5393166808,
+    5393166812,
+    5393166816,
+    5393166820,
+    5393166824,
+    5393166826,
+    5393166830,
+    5393166833,
+    5393166837,
+    5393166838,
+    5393166842,
+    5393166845,
+    5393166847,
+    5393166850,
+    5393166853,
+    5393166857
+   ],
+   "text": [
+    "mov r8, QWORD PTR [rdx+0x10]",
+    "mov rax, QWORD PTR [r8]",
+    "mov QWORD PTR [rdx+0x10], rax",
+    "mov rax, QWORD PTR [r8]",
+    "cmp BYTE PTR [rax+0x61], 0x0",
+    "jne 0x1417531d8",
+    "mov QWORD PTR [rax+0x8], rdx",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "mov QWORD PTR [r8+0x8], rax",
+    "mov rax, QWORD PTR [rcx+0x30]",
+    "cmp rdx, QWORD PTR [rax+0x8]",
+    "jne 0x1417531f6",
+    "mov QWORD PTR [rax+0x8], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax]",
+    "jne 0x14175320a",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x1417531f6": {
+   "a": 5393166838,
+   "b": 5393166870,
+   "addr": [
+    5393166838,
+    5393166842,
+    5393166845,
+    5393166847,
+    5393166850,
+    5393166853,
+    5393166857,
+    5393166858,
+    5393166862,
+    5393166865,
+    5393166869
+   ],
+   "text": [
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax]",
+    "jne 0x14175320a",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x141753220": {
+   "a": 5393166880,
+   "b": 5393166958,
+   "addr": [
+    5393166880,
+    5393166883,
+    5393166887,
+    5393166890,
+    5393166894,
+    5393166898,
+    5393166900,
+    5393166904,
+    5393166908,
+    5393166912,
+    5393166916,
+    5393166920,
+    5393166922,
+    5393166926,
+    5393166930,
+    5393166934,
+    5393166935,
+    5393166939,
+    5393166943,
+    5393166945,
+    5393166949,
+    5393166953,
+    5393166957
+   ],
+   "text": [
+    "mov r8, QWORD PTR [rdx]",
+    "mov rax, QWORD PTR [r8+0x10]",
+    "mov QWORD PTR [rdx], rax",
+    "mov rax, QWORD PTR [r8+0x10]",
+    "cmp BYTE PTR [rax+0x61], 0x0",
+    "jne 0x141753238",
+    "mov QWORD PTR [rax+0x8], rdx",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "mov QWORD PTR [r8+0x8], rax",
+    "mov rax, QWORD PTR [rcx+0x30]",
+    "cmp rdx, QWORD PTR [rax+0x8]",
+    "jne 0x141753257",
+    "mov QWORD PTR [rax+0x8], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax+0x10]",
+    "jne 0x14175326e",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x141753257": {
+   "a": 5393166935,
+   "b": 5393166970,
+   "addr": [
+    5393166935,
+    5393166939,
+    5393166943,
+    5393166945,
+    5393166949,
+    5393166953,
+    5393166957,
+    5393166958,
+    5393166961,
+    5393166965,
+    5393166969
+   ],
+   "text": [
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax+0x10]",
+    "jne 0x14175326e",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x14177c4f0": {
+   "a": 5393335536,
+   "b": 5393335742,
+   "addr": [
+    5393335536,
+    5393335541,
+    5393335542,
+    5393335546,
+    5393335548,
+    5393335551,
+    5393335556,
+    5393335559,
+    5393335561,
+    5393335568,
+    5393335575,
+    5393335582,
+    5393335589,
+    5393335597,
+    5393335603,
+    5393335605,
+    5393335610,
+    5393335614,
+    5393335615,
+    5393335616,
+    5393335618,
+    5393335623,
+    5393335625,
+    5393335630,
+    5393335633,
+    5393335635,
+    5393335642,
+    5393335649,
+    5393335656,
+    5393335663,
+    5393335671,
+    5393335677,
+    5393335679,
+    5393335684,
+    5393335689,
+    5393335693,
+    5393335694,
+    5393335695,
+    5393335700,
+    5393335705,
+    5393335708,
+    5393335712,
+    5393335717,
+    5393335722,
+    5393335727,
+    5393335729,
+    5393335731,
+    5393335736,
+    5393335740,
+    5393335741
+   ],
+   "text": [
+    "mov QWORD PTR [rsp+0x10],rsi",
+    "push rdi",
+    "sub rsp,0x60",
+    "mov edi,edx",
+    "mov rsi,rcx",
+    "call 0x14177c0a0",
+    "test rax,rax",
+    "je 0x14177c540",
+    "lea r9,[rip@0x14182db40]",
+    "lea r8,[rip@0x14182dce0]",
+    "lea rdx,[rip@0x141827b98]",
+    "lea rcx,[rip@0x141824ca8]",
+    "mov DWORD PTR [rsp+0x20],0x4c",
+    "call QWORD PTR [rip@0x141823030]",
+    "xor al,al",
+    "mov rsi,QWORD PTR [rsp+0x78]",
+    "add rsp,0x60",
+    "pop rdi",
+    "ret",
+    "mov ecx,edi",
+    "mov QWORD PTR [rsp+0x70], rbx",
+    "xor bl, bl",
+    "call 0x1417791e0",
+    "test rax, rax",
+    "jne 0x14177c58f",
+    "lea r9, QWORD PTR [rip@0x14182db40]",
+    "lea r8, QWORD PTR [rip@0x14182d6c0]",
+    "lea rdx, QWORD PTR [rip@0x14182666c]",
+    "lea rcx, QWORD PTR [rip@0x141824ca8]",
+    "mov DWORD PTR [rsp+0x20], 0x51",
+    "call QWORD PTR [rip@0x141823030]",
+    "mov al, bl",
+    "mov rbx, QWORD PTR [rsp+0x70]",
+    "mov rsi, QWORD PTR [rsp+0x78]",
+    "add rsp, 0x60",
+    "pop rdi",
+    "ret",
+    "lea r8, QWORD PTR [rsp+0x30]",
+    "lea rdx, QWORD PTR [rsp+0x40]",
+    "mov rcx, rsi",
+    "mov DWORD PTR [rsp+0x30], edi",
+    "mov QWORD PTR [rsp+0x38], rax",
+    "call 0x14177b650",
+    "mov rsi, QWORD PTR [rsp+0x78]",
+    "mov bl, 0x1",
+    "mov al, bl",
+    "mov rbx, QWORD PTR [rsp+0x70]",
+    "add rsp, 0x60",
+    "pop rdi",
+    "ret"
+   ]
+  },
+  "0x14177caa0": {
+   "a": 5393336992,
+   "b": 5393337031,
+   "addr": [
+    5393336992,
+    5393336994,
+    5393336996,
+    5393337002,
+    5393337004,
+    5393337006,
+    5393337009,
+    5393337011,
+    5393337014,
+    5393337016,
+    5393337019,
+    5393337021,
+    5393337023,
+    5393337025,
+    5393337027,
+    5393337028,
+    5393337030
+   ],
+   "text": [
+    "test edx, edx",
+    "js 0x14177cac4",
+    "mov eax, DWORD PTR [rip@0x141886d48]",
+    "cmp edx, eax",
+    "jge 0x14177cac4",
+    "test r8d, r8d",
+    "js 0x14177cac4",
+    "cmp r8d, eax",
+    "jge 0x14177cac4",
+    "test r8d, r8d",
+    "jg 0x14177cac1",
+    "test edx, edx",
+    "jle 0x14177cac4",
+    "mov al, 0x1",
+    "ret",
+    "xor al, al",
+    "ret"
+   ]
+  },
+  "0x1417869f0": {
+   "a": 5393377776,
+   "b": 5393377814,
+   "addr": [
+    5393377776,
+    5393377782,
+    5393377784,
+    5393377790,
+    5393377792,
+    5393377798,
+    5393377800,
+    5393377806,
+    5393377808,
+    5393377810,
+    5393377811,
+    5393377813
+   ],
+   "text": [
+    "cmp ecx, 0x3d4",
+    "je 0x141786a13",
+    "cmp ecx, 0x370",
+    "je 0x141786a13",
+    "cmp ecx, 0x348",
+    "je 0x141786a13",
+    "cmp ecx, 0x2a8",
+    "je 0x141786a13",
+    "xor al, al",
+    "ret",
+    "mov al, 0x1",
+    "ret"
+   ]
+  },
+  "0x141788c20": {
+   "a": 5393386528,
+   "b": 5393386637,
+   "addr": [
+    5393386528,
+    5393386530,
+    5393386531,
+    5393386535,
+    5393386539,
+    5393386542,
+    5393386545,
+    5393386547,
+    5393386549,
+    5393386553,
+    5393386554,
+    5393386555,
+    5393386556,
+    5393386558,
+    5393386560,
+    5393386565,
+    5393386570,
+    5393386572,
+    5393386574,
+    5393386576,
+    5393386581,
+    5393386585,
+    5393386586,
+    5393386587,
+    5393386588,
+    5393386591,
+    5393386596,
+    5393386601,
+    5393386605,
+    5393386607,
+    5393386612,
+    5393386615,
+    5393386618,
+    5393386620,
+    5393386625,
+    5393386630,
+    5393386634,
+    5393386635,
+    5393386636
+   ],
+   "text": [
+    "push rsi",
+    "push rdi",
+    "sub rsp,0x28",
+    "cmp QWORD PTR [rcx],0x0",
+    "movsxd rsi,edx",
+    "mov rdi,rcx",
+    "jne 0x141788c3c",
+    "xor al,al",
+    "add rsp,0x28",
+    "pop rdi",
+    "pop rsi",
+    "ret",
+    "test edx,edx",
+    "jle 0x141788c33",
+    "mov QWORD PTR [rsp+0x48], rbp",
+    "call 0x141785dc0",
+    "mov ebp, eax",
+    "test eax, eax",
+    "jne 0x141788c5c",
+    "mov rbp, QWORD PTR [rsp+0x48]",
+    "add rsp, 0x28",
+    "pop rdi",
+    "pop rsi",
+    "ret",
+    "mov rcx, rdi",
+    "mov QWORD PTR [rsp+0x50], r12",
+    "call 0x141785ea0",
+    "mov rcx, QWORD PTR [rdi+0x10]",
+    "mov edx, eax",
+    "call 0x1417cad00",
+    "mov r12, rax",
+    "test rax, rax",
+    "jne 0x141788c8d",
+    "mov r12, QWORD PTR [rsp+0x50]",
+    "mov rbp, QWORD PTR [rsp+0x48]",
+    "add rsp, 0x28",
+    "pop rdi",
+    "pop rsi",
+    "ret"
+   ]
+  },
+  "0x141789fe0": {
+   "a": 5393391584,
+   "b": 5393391658,
+   "addr": [
+    5393391584,
+    5393391588,
+    5393391591,
+    5393391595,
+    5393391598,
+    5393391602,
+    5393391604,
+    5393391608,
+    5393391612,
+    5393391616,
+    5393391620,
+    5393391624,
+    5393391626,
+    5393391630,
+    5393391633,
+    5393391637,
+    5393391638,
+    5393391642,
+    5393391645,
+    5393391647,
+    5393391650,
+    5393391653,
+    5393391657
+   ],
+   "text": [
+    "mov r8, QWORD PTR [rdx+0x10]",
+    "mov rax, QWORD PTR [r8]",
+    "mov QWORD PTR [rdx+0x10], rax",
+    "mov rax, QWORD PTR [r8]",
+    "cmp BYTE PTR [rax+0x49], 0x0",
+    "jne 0x141789ff8",
+    "mov QWORD PTR [rax+0x8], rdx",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "mov QWORD PTR [r8+0x8], rax",
+    "mov rax, QWORD PTR [rcx+0x30]",
+    "cmp rdx, QWORD PTR [rax+0x8]",
+    "jne 0x14178a016",
+    "mov QWORD PTR [rax+0x8], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax]",
+    "jne 0x14178a02a",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x14178a016": {
+   "a": 5393391638,
+   "b": 5393391670,
+   "addr": [
+    5393391638,
+    5393391642,
+    5393391645,
+    5393391647,
+    5393391650,
+    5393391653,
+    5393391657,
+    5393391658,
+    5393391662,
+    5393391665,
+    5393391669
+   ],
+   "text": [
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax]",
+    "jne 0x14178a02a",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x14178a040": {
+   "a": 5393391680,
+   "b": 5393391758,
+   "addr": [
+    5393391680,
+    5393391683,
+    5393391687,
+    5393391690,
+    5393391694,
+    5393391698,
+    5393391700,
+    5393391704,
+    5393391708,
+    5393391712,
+    5393391716,
+    5393391720,
+    5393391722,
+    5393391726,
+    5393391730,
+    5393391734,
+    5393391735,
+    5393391739,
+    5393391743,
+    5393391745,
+    5393391749,
+    5393391753,
+    5393391757
+   ],
+   "text": [
+    "mov r8, QWORD PTR [rdx]",
+    "mov rax, QWORD PTR [r8+0x10]",
+    "mov QWORD PTR [rdx], rax",
+    "mov rax, QWORD PTR [r8+0x10]",
+    "cmp BYTE PTR [rax+0x49], 0x0",
+    "jne 0x14178a058",
+    "mov QWORD PTR [rax+0x8], rdx",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "mov QWORD PTR [r8+0x8], rax",
+    "mov rax, QWORD PTR [rcx+0x30]",
+    "cmp rdx, QWORD PTR [rax+0x8]",
+    "jne 0x14178a077",
+    "mov QWORD PTR [rax+0x8], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax+0x10]",
+    "jne 0x14178a08e",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x14178a077": {
+   "a": 5393391735,
+   "b": 5393391770,
+   "addr": [
+    5393391735,
+    5393391739,
+    5393391743,
+    5393391745,
+    5393391749,
+    5393391753,
+    5393391757,
+    5393391758,
+    5393391761,
+    5393391765,
+    5393391769
+   ],
+   "text": [
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax+0x10]",
+    "jne 0x14178a08e",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x14178f1a0": {
+   "a": 5393412512,
+   "b": 5393412714,
+   "addr": [
+    5393412512,
+    5393412517,
+    5393412518,
+    5393412522,
+    5393412525,
+    5393412528,
+    5393412531,
+    5393412533,
+    5393412535,
+    5393412540,
+    5393412544,
+    5393412545,
+    5393412546,
+    5393412549,
+    5393412551,
+    5393412553,
+    5393412558,
+    5393412562,
+    5393412563,
+    5393412564,
+    5393412569,
+    5393412571,
+    5393412573,
+    5393412576,
+    5393412581,
+    5393412583,
+    5393412585,
+    5393412588,
+    5393412593,
+    5393412595,
+    5393412597,
+    5393412600,
+    5393412605,
+    5393412607,
+    5393412609,
+    5393412612,
+    5393412617,
+    5393412622,
+    5393412625,
+    5393412627,
+    5393412632,
+    5393412634,
+    5393412636,
+    5393412639,
+    5393412644,
+    5393412647,
+    5393412649,
+    5393412654,
+    5393412656,
+    5393412661,
+    5393412664,
+    5393412669,
+    5393412673,
+    5393412674,
+    5393412675,
+    5393412678,
+    5393412683,
+    5393412686,
+    5393412688,
+    5393412693,
+    5393412698,
+    5393412700,
+    5393412705,
+    5393412708,
+    5393412712,
+    5393412713
+   ],
+   "text": [
+    "mov QWORD PTR [rsp+0x10],rsi",
+    "push rdi",
+    "sub rsp,0x20",
+    "mov rdi,rdx",
+    "mov rsi,rcx",
+    "test rcx,rcx",
+    "jne 0x14178f1c2",
+    "xor al,al",
+    "mov rsi,QWORD PTR [rsp+0x38]",
+    "add rsp,0x20",
+    "pop rdi",
+    "ret",
+    "test rdx,rdx",
+    "jne 0x14178f1d4",
+    "mov al,0x1",
+    "mov rsi,QWORD PTR [rsp+0x38]",
+    "add rsp,0x20",
+    "pop rdi",
+    "ret",
+    "call 0x141787300",
+    "test al,al",
+    "jne 0x14178f1e9",
+    "mov rcx,rdi",
+    "call 0x141787300",
+    "test al,al",
+    "jne 0x14178f1b5",
+    "mov rcx,rsi",
+    "call 0x141787300",
+    "test al,al",
+    "je 0x14178f201",
+    "mov rcx,rdi",
+    "call 0x141787300",
+    "test al,al",
+    "je 0x14178f1c7",
+    "mov rcx,rsi",
+    "mov QWORD PTR [rsp+0x30], rbx",
+    "call 0x1417867d0",
+    "mov rcx, rdi",
+    "mov ebx, eax",
+    "call 0x1417867d0",
+    "cmp ebx, eax",
+    "je 0x14178f243",
+    "mov rcx, rsi",
+    "call 0x1417867d0",
+    "mov rcx, rdi",
+    "mov ebx, eax",
+    "call 0x1417867d0",
+    "cmp ebx, eax",
+    "mov rbx, QWORD PTR [rsp+0x30]",
+    "setg al",
+    "mov rsi, QWORD PTR [rsp+0x38]",
+    "add rsp, 0x20",
+    "pop rdi",
+    "ret",
+    "mov rcx, rsi",
+    "call 0x141785dc0",
+    "mov rcx, rdi",
+    "mov ebx, eax",
+    "call 0x141785dc0",
+    "mov rsi, QWORD PTR [rsp+0x38]",
+    "cmp ebx, eax",
+    "mov rbx, QWORD PTR [rsp+0x30]",
+    "setb al",
+    "add rsp, 0x20",
+    "pop rdi",
+    "ret"
+   ]
+  },
+  "0x14178f790": {
+   "a": 5393414032,
+   "b": 5393414052,
+   "addr": [
+    5393414032,
+    5393414039,
+    5393414042,
+    5393414044,
+    5393414046,
+    5393414047
+   ],
+   "text": [
+    "mov rcx, QWORD PTR [rcx+0x3e0]",
+    "test rcx, rcx",
+    "jne 0x14178f79f",
+    "xor eax, eax",
+    "ret",
+    "jmp 0x1417c4770"
+   ]
+  },
+  "0x14178f7b0": {
+   "a": 5393414064,
+   "b": 5393414084,
+   "addr": [
+    5393414064,
+    5393414071,
+    5393414074,
+    5393414076,
+    5393414078,
+    5393414079
+   ],
+   "text": [
+    "mov rcx, QWORD PTR [rcx+0x3e0]",
+    "test rcx, rcx",
+    "jne 0x14178f7bf",
+    "xor al, al",
+    "ret",
+    "jmp 0x1417c4790"
+   ]
+  },
+  "0x141792010": {
+   "a": 5393424400,
+   "b": 5393424474,
+   "addr": [
+    5393424400,
+    5393424404,
+    5393424407,
+    5393424411,
+    5393424414,
+    5393424418,
+    5393424420,
+    5393424424,
+    5393424428,
+    5393424432,
+    5393424436,
+    5393424440,
+    5393424442,
+    5393424446,
+    5393424449,
+    5393424453,
+    5393424454,
+    5393424458,
+    5393424461,
+    5393424463,
+    5393424466,
+    5393424469,
+    5393424473
+   ],
+   "text": [
+    "mov r8, QWORD PTR [rdx+0x10]",
+    "mov rax, QWORD PTR [r8]",
+    "mov QWORD PTR [rdx+0x10], rax",
+    "mov rax, QWORD PTR [r8]",
+    "cmp BYTE PTR [rax+0x61], 0x0",
+    "jne 0x141792028",
+    "mov QWORD PTR [rax+0x8], rdx",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "mov QWORD PTR [r8+0x8], rax",
+    "mov rax, QWORD PTR [rcx+0x30]",
+    "cmp rdx, QWORD PTR [rax+0x8]",
+    "jne 0x141792046",
+    "mov QWORD PTR [rax+0x8], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax]",
+    "jne 0x14179205a",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x141792046": {
+   "a": 5393424454,
+   "b": 5393424486,
+   "addr": [
+    5393424454,
+    5393424458,
+    5393424461,
+    5393424463,
+    5393424466,
+    5393424469,
+    5393424473,
+    5393424474,
+    5393424478,
+    5393424481,
+    5393424485
+   ],
+   "text": [
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax]",
+    "jne 0x14179205a",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x141792070": {
+   "a": 5393424496,
+   "b": 5393424574,
+   "addr": [
+    5393424496,
+    5393424499,
+    5393424503,
+    5393424506,
+    5393424510,
+    5393424514,
+    5393424516,
+    5393424520,
+    5393424524,
+    5393424528,
+    5393424532,
+    5393424536,
+    5393424538,
+    5393424542,
+    5393424546,
+    5393424550,
+    5393424551,
+    5393424555,
+    5393424559,
+    5393424561,
+    5393424565,
+    5393424569,
+    5393424573
+   ],
+   "text": [
+    "mov r8, QWORD PTR [rdx]",
+    "mov rax, QWORD PTR [r8+0x10]",
+    "mov QWORD PTR [rdx], rax",
+    "mov rax, QWORD PTR [r8+0x10]",
+    "cmp BYTE PTR [rax+0x61], 0x0",
+    "jne 0x141792088",
+    "mov QWORD PTR [rax+0x8], rdx",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "mov QWORD PTR [r8+0x8], rax",
+    "mov rax, QWORD PTR [rcx+0x30]",
+    "cmp rdx, QWORD PTR [rax+0x8]",
+    "jne 0x1417920a7",
+    "mov QWORD PTR [rax+0x8], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax+0x10]",
+    "jne 0x1417920be",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x1417920a7": {
+   "a": 5393424551,
+   "b": 5393424586,
+   "addr": [
+    5393424551,
+    5393424555,
+    5393424559,
+    5393424561,
+    5393424565,
+    5393424569,
+    5393424573,
+    5393424574,
+    5393424577,
+    5393424581,
+    5393424585
+   ],
+   "text": [
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax+0x10]",
+    "jne 0x1417920be",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x1417aabf0": {
+   "a": 5393525744,
+   "b": 5393525884,
+   "addr": [
+    5393525744,
+    5393525746,
+    5393525750,
+    5393525753,
+    5393525755,
+    5393525757,
+    5393525764,
+    5393525771,
+    5393525778,
+    5393525785,
+    5393525793,
+    5393525799,
+    5393525801,
+    5393525805,
+    5393525806,
+    5393525807,
+    5393525811,
+    5393525816,
+    5393525821,
+    5393525824,
+    5393525827,
+    5393525829,
+    5393525832,
+    5393525837,
+    5393525841,
+    5393525843,
+    5393525848,
+    5393525851,
+    5393525853,
+    5393525855,
+    5393525860,
+    5393525864,
+    5393525865,
+    5393525866,
+    5393525869,
+    5393525874,
+    5393525878,
+    5393525879
+   ],
+   "text": [
+    "push rdi",
+    "sub rsp,0x30",
+    "mov rdi,rcx",
+    "test edx,edx",
+    "jne 0x1417aac2f",
+    "lea r9,[rip@0x141835bd0]",
+    "lea r8,[rip@0x141827b90]",
+    "lea rdx,[rip@0x141827b98]",
+    "lea rcx,[rip@0x141824ca8]",
+    "mov DWORD PTR [rsp+0x20],0x425",
+    "call QWORD PTR [rip@0x141823030]",
+    "xor eax,eax",
+    "add rsp,0x30",
+    "pop rdi",
+    "ret",
+    "mov rcx,QWORD PTR [rcx+0x18]",
+    "mov QWORD PTR [rsp+0x40], rbx",
+    "call 0x14178c8e0",
+    "mov rbx, rax",
+    "test rax, rax",
+    "je 0x1417aac5d",
+    "mov rcx, rax",
+    "call 0x141785ea0",
+    "mov rcx, QWORD PTR [rdi+0x10]",
+    "mov edx, eax",
+    "call 0x1417cad00",
+    "test rax, rax",
+    "jne 0x1417aac6a",
+    "xor eax, eax",
+    "mov rbx, QWORD PTR [rsp+0x40]",
+    "add rsp, 0x30",
+    "pop rdi",
+    "ret",
+    "mov rcx, rbx",
+    "mov rbx, QWORD PTR [rsp+0x40]",
+    "add rsp, 0x30",
+    "pop rdi",
+    "jmp 0x1417867d0"
+   ]
+  },
+  "0x1417aac33": {
+   "a": 5393525811,
+   "b": 5393525884,
+   "addr": [
+    5393525811,
+    5393525816,
+    5393525821,
+    5393525824,
+    5393525827,
+    5393525829,
+    5393525832,
+    5393525837,
+    5393525841,
+    5393525843,
+    5393525848,
+    5393525851,
+    5393525853,
+    5393525855,
+    5393525860,
+    5393525864,
+    5393525865,
+    5393525866,
+    5393525869,
+    5393525874,
+    5393525878,
+    5393525879
+   ],
+   "text": [
+    "mov QWORD PTR [rsp+0x40],rbx",
+    "call 0x14178c8e0",
+    "mov rbx,rax",
+    "test rax,rax",
+    "je 0x1417aac5d",
+    "mov rcx,rax",
+    "call 0x141785ea0",
+    "mov rcx,QWORD PTR [rdi+0x10]",
+    "mov edx,eax",
+    "call 0x1417cad00",
+    "test rax,rax",
+    "jne 0x1417aac6a",
+    "xor eax,eax",
+    "mov rbx,QWORD PTR [rsp+0x40]",
+    "add rsp,0x30",
+    "pop rdi",
+    "ret",
+    "mov rcx, rbx",
+    "mov rbx, QWORD PTR [rsp+0x40]",
+    "add rsp, 0x30",
+    "pop rdi",
+    "jmp 0x1417867d0"
+   ]
+  },
+  "0x1417af4d0": {
+   "a": 5393544400,
+   "b": 5393544564,
+   "addr": [
+    5393544400,
+    5393544402,
+    5393544406,
+    5393544409,
+    5393544411,
+    5393544413,
+    5393544420,
+    5393544427,
+    5393544434,
+    5393544441,
+    5393544449,
+    5393544455,
+    5393544457,
+    5393544461,
+    5393544462,
+    5393544463,
+    5393544466,
+    5393544468,
+    5393544470,
+    5393544474,
+    5393544475,
+    5393544476,
+    5393544480,
+    5393544485,
+    5393544490,
+    5393544493,
+    5393544496,
+    5393544498,
+    5393544501,
+    5393544506,
+    5393544510,
+    5393544513,
+    5393544515,
+    5393544525,
+    5393544528,
+    5393544530,
+    5393544532,
+    5393544537,
+    5393544541,
+    5393544542,
+    5393544543,
+    5393544546,
+    5393544549,
+    5393544554,
+    5393544558,
+    5393544559
+   ],
+   "text": [
+    "push rbx",
+    "sub rsp,0x30",
+    "mov rbx,r8",
+    "test edx,edx",
+    "jne 0x1417af50f",
+    "lea r9,[rip@0x141835bd0]",
+    "lea r8,[rip@0x141827ba0]",
+    "lea rdx,[rip@0x141827b98]",
+    "lea rcx,[rip@0x141824ca8]",
+    "mov DWORD PTR [rsp+0x20],0x1425",
+    "call QWORD PTR [rip@0x141823030]",
+    "xor al,al",
+    "add rsp,0x30",
+    "pop rbx",
+    "ret",
+    "test rbx,rbx",
+    "jne 0x1417af51c",
+    "mov al,0x1",
+    "add rsp,0x30",
+    "pop rbx",
+    "ret",
+    "mov rcx,QWORD PTR [rcx+0x10]",
+    "mov QWORD PTR [rsp+0x40], rdi",
+    "call 0x1417cad00",
+    "mov rdi, rax",
+    "test rax, rax",
+    "je 0x1417af552",
+    "mov rcx, rax",
+    "call 0x14178f4f0",
+    "lea rcx, QWORD PTR [rax+rbx]",
+    "test rcx, rcx",
+    "js 0x1417af552",
+    "movabs rax, 0x2e90edd000",
+    "cmp rcx, rax",
+    "jle 0x1417af55f",
+    "xor al, al",
+    "mov rdi, QWORD PTR [rsp+0x40]",
+    "add rsp, 0x30",
+    "pop rbx",
+    "ret",
+    "mov rdx, rbx",
+    "mov rcx, rdi",
+    "mov rdi, QWORD PTR [rsp+0x40]",
+    "add rsp, 0x30",
+    "pop rbx",
+    "jmp 0x14179bf80"
+   ]
+  },
+  "0x1417af580": {
+   "a": 5393544576,
+   "b": 5393544727,
+   "addr": [
+    5393544576,
+    5393544578,
+    5393544582,
+    5393544585,
+    5393544587,
+    5393544589,
+    5393544596,
+    5393544603,
+    5393544610,
+    5393544617,
+    5393544625,
+    5393544631,
+    5393544633,
+    5393544637,
+    5393544638,
+    5393544639,
+    5393544641,
+    5393544643,
+    5393544645,
+    5393544649,
+    5393544650,
+    5393544651,
+    5393544655,
+    5393544660,
+    5393544665,
+    5393544668,
+    5393544671,
+    5393544673,
+    5393544676,
+    5393544681,
+    5393544684,
+    5393544686,
+    5393544688,
+    5393544694,
+    5393544696,
+    5393544698,
+    5393544703,
+    5393544707,
+    5393544708,
+    5393544709,
+    5393544712,
+    5393544717,
+    5393544721,
+    5393544722
+   ],
+   "text": [
+    "push rbx",
+    "sub rsp,0x30",
+    "mov ebx,r8d",
+    "test edx,edx",
+    "jne 0x1417af5bf",
+    "lea r9,[rip@0x141835bd0]",
+    "lea r8,[rip@0x141827ba0]",
+    "lea rdx,[rip@0x141827b98]",
+    "lea rcx,[rip@0x141824ca8]",
+    "mov DWORD PTR [rsp+0x20],0x1446",
+    "call QWORD PTR [rip@0x141823030]",
+    "xor al,al",
+    "add rsp,0x30",
+    "pop rbx",
+    "ret",
+    "test ebx,ebx",
+    "jne 0x1417af5cb",
+    "mov al,0x1",
+    "add rsp,0x30",
+    "pop rbx",
+    "ret",
+    "mov rcx,QWORD PTR [rcx+0x10]",
+    "mov QWORD PTR [rsp+0x40], rdi",
+    "call 0x1417cad00",
+    "mov rdi, rax",
+    "test rax, rax",
+    "je 0x1417af5f8",
+    "mov rcx, rax",
+    "call 0x14178f550",
+    "lea edx, DWORD PTR [rax+rbx]",
+    "test edx, edx",
+    "js 0x1417af5f8",
+    "cmp edx, 0x3b9aca00",
+    "jle 0x1417af605",
+    "xor al, al",
+    "mov rdi, QWORD PTR [rsp+0x40]",
+    "add rsp, 0x30",
+    "pop rbx",
+    "ret",
+    "mov rcx, rdi",
+    "mov rdi, QWORD PTR [rsp+0x40]",
+    "add rsp, 0x30",
+    "pop rbx",
+    "jmp 0x14178fa70"
+   ]
+  },
+  "0x1417b07c0": {
+   "a": 5393549248,
+   "b": 5393549325,
+   "addr": [
+    5393549248,
+    5393549250,
+    5393549254,
+    5393549257,
+    5393549259,
+    5393549261,
+    5393549263,
+    5393549267,
+    5393549268,
+    5393549269,
+    5393549272,
+    5393549277,
+    5393549283,
+    5393549285,
+    5393549287,
+    5393549289,
+    5393549294,
+    5393549298,
+    5393549299,
+    5393549300,
+    5393549304,
+    5393549309,
+    5393549311,
+    5393549316,
+    5393549319,
+    5393549323,
+    5393549324
+   ],
+   "text": [
+    "push rbx",
+    "sub rsp,0x20",
+    "mov rbx,rcx",
+    "test edx,edx",
+    "jne 0x1417b07d5",
+    "xor al,al",
+    "add rsp,0x20",
+    "pop rbx",
+    "ret",
+    "mov rax,QWORD PTR [rcx]",
+    "mov QWORD PTR [rsp+0x30], rdi",
+    "call QWORD PTR [rax+0x510]",
+    "mov edi, eax",
+    "test eax, eax",
+    "jne 0x1417b07f4",
+    "mov rdi, QWORD PTR [rsp+0x30]",
+    "add rsp, 0x20",
+    "pop rbx",
+    "ret",
+    "mov rcx, QWORD PTR [rbx+0x50]",
+    "call 0x14174e3f0",
+    "cmp edi, eax",
+    "mov rdi, QWORD PTR [rsp+0x30]",
+    "sete al",
+    "add rsp, 0x20",
+    "pop rbx",
+    "ret"
+   ]
+  },
+  "0x1417b5510": {
+   "a": 5393569040,
+   "b": 5393569220,
+   "addr": [
+    5393569040,
+    5393569045,
+    5393569046,
+    5393569050,
+    5393569052,
+    5393569055,
+    5393569057,
+    5393569059,
+    5393569061,
+    5393569066,
+    5393569070,
+    5393569071,
+    5393569072,
+    5393569076,
+    5393569079,
+    5393569085,
+    5393569087,
+    5393569089,
+    5393569093,
+    5393569095,
+    5393569098,
+    5393569104,
+    5393569106,
+    5393569108,
+    5393569112,
+    5393569114,
+    5393569119,
+    5393569122,
+    5393569128,
+    5393569130,
+    5393569132,
+    5393569134,
+    5393569137,
+    5393569140,
+    5393569146,
+    5393569148,
+    5393569150,
+    5393569152,
+    5393569154,
+    5393569156,
+    5393569158,
+    5393569163,
+    5393569168,
+    5393569172,
+    5393569173,
+    5393569174,
+    5393569178,
+    5393569181,
+    5393569187,
+    5393569191,
+    5393569197,
+    5393569200,
+    5393569205,
+    5393569210,
+    5393569214,
+    5393569215
+   ],
+   "text": [
+    "mov QWORD PTR [rsp+0x10],rbx",
+    "push rdi",
+    "sub rsp,0x20",
+    "mov edi,edx",
+    "mov rbx,rcx",
+    "test edx,edx",
+    "jne 0x1417b5530",
+    "xor al,al",
+    "mov rbx,QWORD PTR [rsp+0x38]",
+    "add rsp,0x20",
+    "pop rdi",
+    "ret",
+    "mov rcx,QWORD PTR [rcx+0x8]",
+    "mov rax,QWORD PTR [rcx]",
+    "call QWORD PTR [rax+0x278]",
+    "test al,al",
+    "jne 0x1417b5523",
+    "mov rcx,QWORD PTR [rbx+0x8]",
+    "mov edx,edi",
+    "mov rax,QWORD PTR [rcx]",
+    "call QWORD PTR [rax+0x280]",
+    "test al,al",
+    "jne 0x1417b5523",
+    "mov rcx,QWORD PTR [rbx+0x8]",
+    "mov edx,edi",
+    "mov QWORD PTR [rsp+0x30], rsi",
+    "mov rax, QWORD PTR [rcx]",
+    "call QWORD PTR [rax+0x4a8]",
+    "mov esi, eax",
+    "test eax, eax",
+    "je 0x1417b5584",
+    "mov rax, QWORD PTR [rbx]",
+    "mov rcx, rbx",
+    "call QWORD PTR [rax+0x440]",
+    "mov edi, eax",
+    "test eax, eax",
+    "je 0x1417b5584",
+    "cmp esi, eax",
+    "je 0x1417b5596",
+    "xor al, al",
+    "mov rsi, QWORD PTR [rsp+0x30]",
+    "mov rbx, QWORD PTR [rsp+0x38]",
+    "add rsp, 0x20",
+    "pop rdi",
+    "ret",
+    "mov rcx, QWORD PTR [rbx+0x8]",
+    "mov rax, QWORD PTR [rcx]",
+    "call QWORD PTR [rax+0x3f0]",
+    "mov rcx, QWORD PTR [rbx+0x50]",
+    "imul eax, eax, 0xf4240",
+    "lea edx, DWORD PTR [rdi+rax]",
+    "mov rsi, QWORD PTR [rsp+0x30]",
+    "mov rbx, QWORD PTR [rsp+0x38]",
+    "add rsp, 0x20",
+    "pop rdi",
+    "jmp 0x141765540"
+   ]
+  },
+  "0x1417c45b0": {
+   "a": 5393630640,
+   "b": 5393630654,
+   "addr": [
+    5393630640,
+    5393630643,
+    5393630645,
+    5393630647,
+    5393630648,
+    5393630651,
+    5393630653
+   ],
+   "text": [
+    "test rdx, rdx",
+    "jne 0x1417c45b8",
+    "xor al, al",
+    "ret",
+    "mov QWORD PTR [rcx], rdx",
+    "mov al, 0x1",
+    "ret"
+   ]
+  },
+  "0x1417c4cb0": {
+   "a": 5393632432,
+   "b": 5393632446,
+   "addr": [
+    5393632432,
+    5393632435,
+    5393632437,
+    5393632439,
+    5393632440,
+    5393632443,
+    5393632445
+   ],
+   "text": [
+    "test rdx, rdx",
+    "jne 0x1417c4cb8",
+    "xor al, al",
+    "ret",
+    "mov QWORD PTR [rcx], rdx",
+    "mov al, 0x1",
+    "ret"
+   ]
+  },
+  "0x1417c5830": {
+   "a": 5393635376,
+   "b": 5393635406,
+   "addr": [
+    5393635376,
+    5393635382,
+    5393635384,
+    5393635390,
+    5393635391,
+    5393635397,
+    5393635399,
+    5393635405
+   ],
+   "text": [
+    "cmp edx, 0x40e",
+    "jne 0x1417c583f",
+    "mov eax, DWORD PTR [rcx+0xa8]",
+    "ret",
+    "cmp edx, 0x3e8",
+    "jne 0x1417c584e",
+    "mov eax, DWORD PTR [rcx+0xac]",
+    "ret"
+   ]
+  },
+  "0x1417c583f": {
+   "a": 5393635391,
+   "b": 5393635409,
+   "addr": [
+    5393635391,
+    5393635397,
+    5393635399,
+    5393635405,
+    5393635406,
+    5393635408
+   ],
+   "text": [
+    "cmp edx, 0x3e8",
+    "jne 0x1417c584e",
+    "mov eax, DWORD PTR [rcx+0xac]",
+    "ret",
+    "xor eax, eax",
+    "ret"
+   ]
+  },
+  "0x1417c5860": {
+   "a": 5393635424,
+   "b": 5393635480,
+   "addr": [
+    5393635424,
+    5393635430,
+    5393635432,
+    5393635439,
+    5393635440,
+    5393635446,
+    5393635448,
+    5393635455,
+    5393635457,
+    5393635458,
+    5393635459,
+    5393635460,
+    5393635461,
+    5393635462,
+    5393635463,
+    5393635464,
+    5393635465,
+    5393635466,
+    5393635467,
+    5393635468,
+    5393635469,
+    5393635470,
+    5393635471,
+    5393635472,
+    5393635479
+   ],
+   "text": [
+    "cmp edx, 0x40e",
+    "jne 0x1417c5870",
+    "mov DWORD PTR [rcx+0xa8], r8d",
+    "ret",
+    "cmp edx, 0x3e8",
+    "jne 0x1417c587f",
+    "mov DWORD PTR [rcx+0xac], r8d",
+    "repz ret",
+    "int3",
+    "int3",
+    "int3",
+    "int3",
+    "int3",
+    "int3",
+    "int3",
+    "int3",
+    "int3",
+    "int3",
+    "int3",
+    "int3",
+    "int3",
+    "int3",
+    "int3",
+    "lea rax, QWORD PTR [rcx+0x98]",
+    "ret"
+   ]
+  },
+  "0x1417c6100": {
+   "a": 5393637632,
+   "b": 5393637706,
+   "addr": [
+    5393637632,
+    5393637636,
+    5393637639,
+    5393637643,
+    5393637646,
+    5393637650,
+    5393637652,
+    5393637656,
+    5393637660,
+    5393637664,
+    5393637668,
+    5393637672,
+    5393637674,
+    5393637678,
+    5393637681,
+    5393637685,
+    5393637686,
+    5393637690,
+    5393637693,
+    5393637695,
+    5393637698,
+    5393637701,
+    5393637705
+   ],
+   "text": [
+    "mov r8, QWORD PTR [rdx+0x10]",
+    "mov rax, QWORD PTR [r8]",
+    "mov QWORD PTR [rdx+0x10], rax",
+    "mov rax, QWORD PTR [r8]",
+    "cmp BYTE PTR [rax+0x29], 0x0",
+    "jne 0x1417c6118",
+    "mov QWORD PTR [rax+0x8], rdx",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "mov QWORD PTR [r8+0x8], rax",
+    "mov rax, QWORD PTR [rcx+0x30]",
+    "cmp rdx, QWORD PTR [rax+0x8]",
+    "jne 0x1417c6136",
+    "mov QWORD PTR [rax+0x8], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax]",
+    "jne 0x1417c614a",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x1417c6136": {
+   "a": 5393637686,
+   "b": 5393637718,
+   "addr": [
+    5393637686,
+    5393637690,
+    5393637693,
+    5393637695,
+    5393637698,
+    5393637701,
+    5393637705,
+    5393637706,
+    5393637710,
+    5393637713,
+    5393637717
+   ],
+   "text": [
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax]",
+    "jne 0x1417c614a",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x1417c6170": {
+   "a": 5393637744,
+   "b": 5393637822,
+   "addr": [
+    5393637744,
+    5393637747,
+    5393637751,
+    5393637754,
+    5393637758,
+    5393637762,
+    5393637764,
+    5393637768,
+    5393637772,
+    5393637776,
+    5393637780,
+    5393637784,
+    5393637786,
+    5393637790,
+    5393637794,
+    5393637798,
+    5393637799,
+    5393637803,
+    5393637807,
+    5393637809,
+    5393637813,
+    5393637817,
+    5393637821
+   ],
+   "text": [
+    "mov r8, QWORD PTR [rdx]",
+    "mov rax, QWORD PTR [r8+0x10]",
+    "mov QWORD PTR [rdx], rax",
+    "mov rax, QWORD PTR [r8+0x10]",
+    "cmp BYTE PTR [rax+0x29], 0x0",
+    "jne 0x1417c6188",
+    "mov QWORD PTR [rax+0x8], rdx",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "mov QWORD PTR [r8+0x8], rax",
+    "mov rax, QWORD PTR [rcx+0x30]",
+    "cmp rdx, QWORD PTR [rax+0x8]",
+    "jne 0x1417c61a7",
+    "mov QWORD PTR [rax+0x8], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax+0x10]",
+    "jne 0x1417c61be",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x1417c61a7": {
+   "a": 5393637799,
+   "b": 5393637834,
+   "addr": [
+    5393637799,
+    5393637803,
+    5393637807,
+    5393637809,
+    5393637813,
+    5393637817,
+    5393637821,
+    5393637822,
+    5393637825,
+    5393637829,
+    5393637833
+   ],
+   "text": [
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax+0x10]",
+    "jne 0x1417c61be",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x1417c6f90": {
+   "a": 5393641360,
+   "b": 5393641434,
+   "addr": [
+    5393641360,
+    5393641364,
+    5393641367,
+    5393641371,
+    5393641374,
+    5393641378,
+    5393641380,
+    5393641384,
+    5393641388,
+    5393641392,
+    5393641396,
+    5393641400,
+    5393641402,
+    5393641406,
+    5393641409,
+    5393641413,
+    5393641414,
+    5393641418,
+    5393641421,
+    5393641423,
+    5393641426,
+    5393641429,
+    5393641433
+   ],
+   "text": [
+    "mov r8, QWORD PTR [rdx+0x10]",
+    "mov rax, QWORD PTR [r8]",
+    "mov QWORD PTR [rdx+0x10], rax",
+    "mov rax, QWORD PTR [r8]",
+    "cmp BYTE PTR [rax+0x29], 0x0",
+    "jne 0x1417c6fa8",
+    "mov QWORD PTR [rax+0x8], rdx",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "mov QWORD PTR [r8+0x8], rax",
+    "mov rax, QWORD PTR [rcx+0x30]",
+    "cmp rdx, QWORD PTR [rax+0x8]",
+    "jne 0x1417c6fc6",
+    "mov QWORD PTR [rax+0x8], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax]",
+    "jne 0x1417c6fda",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x1417c6fc6": {
+   "a": 5393641414,
+   "b": 5393641446,
+   "addr": [
+    5393641414,
+    5393641418,
+    5393641421,
+    5393641423,
+    5393641426,
+    5393641429,
+    5393641433,
+    5393641434,
+    5393641438,
+    5393641441,
+    5393641445
+   ],
+   "text": [
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax]",
+    "jne 0x1417c6fda",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x1417c6ff0": {
+   "a": 5393641456,
+   "b": 5393641534,
+   "addr": [
+    5393641456,
+    5393641459,
+    5393641463,
+    5393641466,
+    5393641470,
+    5393641474,
+    5393641476,
+    5393641480,
+    5393641484,
+    5393641488,
+    5393641492,
+    5393641496,
+    5393641498,
+    5393641502,
+    5393641506,
+    5393641510,
+    5393641511,
+    5393641515,
+    5393641519,
+    5393641521,
+    5393641525,
+    5393641529,
+    5393641533
+   ],
+   "text": [
+    "mov r8, QWORD PTR [rdx]",
+    "mov rax, QWORD PTR [r8+0x10]",
+    "mov QWORD PTR [rdx], rax",
+    "mov rax, QWORD PTR [r8+0x10]",
+    "cmp BYTE PTR [rax+0x29], 0x0",
+    "jne 0x1417c7008",
+    "mov QWORD PTR [rax+0x8], rdx",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "mov QWORD PTR [r8+0x8], rax",
+    "mov rax, QWORD PTR [rcx+0x30]",
+    "cmp rdx, QWORD PTR [rax+0x8]",
+    "jne 0x1417c7027",
+    "mov QWORD PTR [rax+0x8], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax+0x10]",
+    "jne 0x1417c703e",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x1417c7027": {
+   "a": 5393641511,
+   "b": 5393641546,
+   "addr": [
+    5393641511,
+    5393641515,
+    5393641519,
+    5393641521,
+    5393641525,
+    5393641529,
+    5393641533,
+    5393641534,
+    5393641537,
+    5393641541,
+    5393641545
+   ],
+   "text": [
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax+0x10]",
+    "jne 0x1417c703e",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x1417c70e0": {
+   "a": 5393641696,
+   "b": 5393641770,
+   "addr": [
+    5393641696,
+    5393641700,
+    5393641703,
+    5393641707,
+    5393641710,
+    5393641714,
+    5393641716,
+    5393641720,
+    5393641724,
+    5393641728,
+    5393641732,
+    5393641736,
+    5393641738,
+    5393641742,
+    5393641745,
+    5393641749,
+    5393641750,
+    5393641754,
+    5393641757,
+    5393641759,
+    5393641762,
+    5393641765,
+    5393641769
+   ],
+   "text": [
+    "mov r8, QWORD PTR [rdx+0x10]",
+    "mov rax, QWORD PTR [r8]",
+    "mov QWORD PTR [rdx+0x10], rax",
+    "mov rax, QWORD PTR [r8]",
+    "cmp BYTE PTR [rax+0x41], 0x0",
+    "jne 0x1417c70f8",
+    "mov QWORD PTR [rax+0x8], rdx",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "mov QWORD PTR [r8+0x8], rax",
+    "mov rax, QWORD PTR [rcx+0x30]",
+    "cmp rdx, QWORD PTR [rax+0x8]",
+    "jne 0x1417c7116",
+    "mov QWORD PTR [rax+0x8], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax]",
+    "jne 0x1417c712a",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x1417c7116": {
+   "a": 5393641750,
+   "b": 5393641782,
+   "addr": [
+    5393641750,
+    5393641754,
+    5393641757,
+    5393641759,
+    5393641762,
+    5393641765,
+    5393641769,
+    5393641770,
+    5393641774,
+    5393641777,
+    5393641781
+   ],
+   "text": [
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax]",
+    "jne 0x1417c712a",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x1417c7140": {
+   "a": 5393641792,
+   "b": 5393641870,
+   "addr": [
+    5393641792,
+    5393641795,
+    5393641799,
+    5393641802,
+    5393641806,
+    5393641810,
+    5393641812,
+    5393641816,
+    5393641820,
+    5393641824,
+    5393641828,
+    5393641832,
+    5393641834,
+    5393641838,
+    5393641842,
+    5393641846,
+    5393641847,
+    5393641851,
+    5393641855,
+    5393641857,
+    5393641861,
+    5393641865,
+    5393641869
+   ],
+   "text": [
+    "mov r8, QWORD PTR [rdx]",
+    "mov rax, QWORD PTR [r8+0x10]",
+    "mov QWORD PTR [rdx], rax",
+    "mov rax, QWORD PTR [r8+0x10]",
+    "cmp BYTE PTR [rax+0x41], 0x0",
+    "jne 0x1417c7158",
+    "mov QWORD PTR [rax+0x8], rdx",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "mov QWORD PTR [r8+0x8], rax",
+    "mov rax, QWORD PTR [rcx+0x30]",
+    "cmp rdx, QWORD PTR [rax+0x8]",
+    "jne 0x1417c7177",
+    "mov QWORD PTR [rax+0x8], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax+0x10]",
+    "jne 0x1417c718e",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x1417c7177": {
+   "a": 5393641847,
+   "b": 5393641882,
+   "addr": [
+    5393641847,
+    5393641851,
+    5393641855,
+    5393641857,
+    5393641861,
+    5393641865,
+    5393641869,
+    5393641870,
+    5393641873,
+    5393641877,
+    5393641881
+   ],
+   "text": [
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax+0x10]",
+    "jne 0x1417c718e",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x1417c71f0": {
+   "a": 5393641968,
+   "b": 5393642042,
+   "addr": [
+    5393641968,
+    5393641972,
+    5393641975,
+    5393641979,
+    5393641982,
+    5393641986,
+    5393641988,
+    5393641992,
+    5393641996,
+    5393642000,
+    5393642004,
+    5393642008,
+    5393642010,
+    5393642014,
+    5393642017,
+    5393642021,
+    5393642022,
+    5393642026,
+    5393642029,
+    5393642031,
+    5393642034,
+    5393642037,
+    5393642041
+   ],
+   "text": [
+    "mov r8, QWORD PTR [rdx+0x10]",
+    "mov rax, QWORD PTR [r8]",
+    "mov QWORD PTR [rdx+0x10], rax",
+    "mov rax, QWORD PTR [r8]",
+    "cmp BYTE PTR [rax+0x21], 0x0",
+    "jne 0x1417c7208",
+    "mov QWORD PTR [rax+0x8], rdx",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "mov QWORD PTR [r8+0x8], rax",
+    "mov rax, QWORD PTR [rcx+0x30]",
+    "cmp rdx, QWORD PTR [rax+0x8]",
+    "jne 0x1417c7226",
+    "mov QWORD PTR [rax+0x8], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax]",
+    "jne 0x1417c723a",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x1417c7226": {
+   "a": 5393642022,
+   "b": 5393642054,
+   "addr": [
+    5393642022,
+    5393642026,
+    5393642029,
+    5393642031,
+    5393642034,
+    5393642037,
+    5393642041,
+    5393642042,
+    5393642046,
+    5393642049,
+    5393642053
+   ],
+   "text": [
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax]",
+    "jne 0x1417c723a",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x1417c7250": {
+   "a": 5393642064,
+   "b": 5393642142,
+   "addr": [
+    5393642064,
+    5393642067,
+    5393642071,
+    5393642074,
+    5393642078,
+    5393642082,
+    5393642084,
+    5393642088,
+    5393642092,
+    5393642096,
+    5393642100,
+    5393642104,
+    5393642106,
+    5393642110,
+    5393642114,
+    5393642118,
+    5393642119,
+    5393642123,
+    5393642127,
+    5393642129,
+    5393642133,
+    5393642137,
+    5393642141
+   ],
+   "text": [
+    "mov r8, QWORD PTR [rdx]",
+    "mov rax, QWORD PTR [r8+0x10]",
+    "mov QWORD PTR [rdx], rax",
+    "mov rax, QWORD PTR [r8+0x10]",
+    "cmp BYTE PTR [rax+0x21], 0x0",
+    "jne 0x1417c7268",
+    "mov QWORD PTR [rax+0x8], rdx",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "mov QWORD PTR [r8+0x8], rax",
+    "mov rax, QWORD PTR [rcx+0x30]",
+    "cmp rdx, QWORD PTR [rax+0x8]",
+    "jne 0x1417c7287",
+    "mov QWORD PTR [rax+0x8], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax+0x10]",
+    "jne 0x1417c729e",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x1417c7287": {
+   "a": 5393642119,
+   "b": 5393642154,
+   "addr": [
+    5393642119,
+    5393642123,
+    5393642127,
+    5393642129,
+    5393642133,
+    5393642137,
+    5393642141,
+    5393642142,
+    5393642145,
+    5393642149,
+    5393642153
+   ],
+   "text": [
+    "mov rax, QWORD PTR [rdx+0x8]",
+    "cmp rdx, QWORD PTR [rax+0x10]",
+    "jne 0x1417c729e",
+    "mov QWORD PTR [rax+0x10], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret",
+    "mov QWORD PTR [rax], r8",
+    "mov QWORD PTR [r8+0x10], rdx",
+    "mov QWORD PTR [rdx+0x8], r8",
+    "ret"
+   ]
+  },
+  "0x1417e88e0": {
+   "a": 5393778912,
+   "b": 5393778946,
+   "addr": [
+    5393778912,
+    5393778916,
+    5393778920,
+    5393778922,
+    5393778925,
+    5393778927,
+    5393778929,
+    5393778932,
+    5393778934,
+    5393778938,
+    5393778940,
+    5393778941
+   ],
+   "text": [
+    "mov rax, QWORD PTR [rcx+0x8]",
+    "cmp rax, QWORD PTR [rcx+0x10]",
+    "jae 0x1417e88fd",
+    "movzx eax, BYTE PTR [rax]",
+    "cmp al, 0x80",
+    "jae 0x1417e88fd",
+    "movzx eax, al",
+    "mov DWORD PTR [rdx], eax",
+    "inc QWORD PTR [rcx+0x8]",
+    "mov al, 0x1",
+    "ret",
+    "jmp 0x1417e3a50"
+   ]
+  },
+  "0x1417e90e0": {
+   "a": 5393780960,
+   "b": 5393781149,
+   "addr": [
+    5393780960,
+    5393780965,
+    5393780966,
+    5393780970,
+    5393780974,
+    5393780977,
+    5393780980,
+    5393780984,
+    5393780986,
+    5393780989,
+    5393780992,
+    5393780994,
+    5393780997,
+    5393781000,
+    5393781004,
+    5393781008,
+    5393781010,
+    5393781015,
+    5393781018,
+    5393781023,
+    5393781025,
+    5393781027,
+    5393781029,
+    5393781034,
+    5393781038,
+    5393781039,
+    5393781040,
+    5393781044,
+    5393781047,
+    5393781050,
+    5393781053,
+    5393781055,
+    5393781058,
+    5393781063,
+    5393781068,
+    5393781071,
+    5393781074,
+    5393781076,
+    5393781081,
+    5393781083,
+    5393781085,
+    5393781089,
+    5393781091,
+    5393781093,
+    5393781098,
+    5393781103,
+    5393781107,
+    5393781108,
+    5393781109,
+    5393781111,
+    5393781114,
+    5393781119,
+    5393781122,
+    5393781124,
+    5393781126,
+    5393781128,
+    5393781131,
+    5393781136,
+    5393781141,
+    5393781143,
+    5393781147,
+    5393781148
+   ],
+   "text": [
+    "mov QWORD PTR [rsp+0x18],rbx",
+    "push rsi",
+    "sub rsp,0x20",
+    "mov rax,QWORD PTR [rcx+0x8]",
+    "mov rsi,rdx",
+    "mov rbx,rcx",
+    "cmp rax,QWORD PTR [rcx+0x10]",
+    "jae 0x1417e9112",
+    "movzx ecx,BYTE PTR [rax]",
+    "cmp cl,0x80",
+    "jae 0x1417e9112",
+    "movzx edx,cl",
+    "inc rax",
+    "mov DWORD PTR [rsp+0x30],edx",
+    "mov QWORD PTR [rbx+0x8],rax",
+    "jmp 0x1417e9134",
+    "lea rdx,[rsp+0x30]",
+    "mov rcx,rbx",
+    "call 0x1417e3a50",
+    "test al,al",
+    "jne 0x1417e9130",
+    "xor al,al",
+    "mov rbx,QWORD PTR [rsp+0x40]",
+    "add rsp,0x20",
+    "pop rsi",
+    "ret",
+    "mov edx,DWORD PTR [rsp+0x30]",
+    "inc DWORD PTR [rbx+0x38]",
+    "mov eax,DWORD PTR [rbx+0x38]",
+    "cmp eax,DWORD PTR [rbx+0x3c]",
+    "jg 0x1417e9123",
+    "mov rcx,rbx",
+    "mov QWORD PTR [rsp+0x38], rdi",
+    "call 0x1417e3240",
+    "mov rdx, rbx",
+    "mov rcx, rsi",
+    "mov edi, eax",
+    "call 0x1417e8ea0",
+    "test al, al",
+    "je 0x1417e9163",
+    "cmp BYTE PTR [rbx+0x24], 0x0",
+    "jne 0x1417e9175",
+    "xor al, al",
+    "mov rdi, QWORD PTR [rsp+0x38]",
+    "mov rbx, QWORD PTR [rsp+0x40]",
+    "add rsp, 0x20",
+    "pop rsi",
+    "ret",
+    "mov edx, edi",
+    "mov rcx, rbx",
+    "call 0x1417e32e0",
+    "mov eax, DWORD PTR [rbx+0x38]",
+    "test eax, eax",
+    "jle 0x1417e918b",
+    "dec eax",
+    "mov DWORD PTR [rbx+0x38], eax",
+    "mov rdi, QWORD PTR [rsp+0x38]",
+    "mov rbx, QWORD PTR [rsp+0x40]",
+    "mov al, 0x1",
+    "add rsp, 0x20",
+    "pop rsi",
+    "ret"
+   ]
+  },
+  "0x1417e9810": {
+   "a": 5393782800,
+   "b": 5393782914,
+   "addr": [
+    5393782800,
+    5393782802,
+    5393782806,
+    5393782814,
+    5393782817,
+    5393782820,
+    5393782823,
+    5393782825,
+    5393782827,
+    5393782829,
+    5393782833,
+    5393782834,
+    5393782835,
+    5393782838,
+    5393782843,
+    5393782846,
+    5393782849,
+    5393782851,
+    5393782864,
+    5393782868,
+    5393782872,
+    5393782875,
+    5393782878,
+    5393782880,
+    5393782882,
+    5393782886,
+    5393782888,
+    5393782890,
+    5393782895,
+    5393782899,
+    5393782900,
+    5393782901,
+    5393782903,
+    5393782908,
+    5393782912,
+    5393782913
+   ],
+   "text": [
+    "push rdi",
+    "sub rsp,0x20",
+    "mov DWORD PTR [rsp+0x30],0x0",
+    "mov eax,DWORD PTR [rcx+0x30]",
+    "mov rdi,rcx",
+    "and eax,0xf",
+    "cmp al,0xf",
+    "je 0x1417e9833",
+    "xor al,al",
+    "add rsp,0x20",
+    "pop rdi",
+    "ret",
+    "mov eax,DWORD PTR [rcx+0x50]",
+    "mov QWORD PTR [rsp+0x38], rbx",
+    "sub eax, 0x1",
+    "movsxd rbx, eax",
+    "js 0x1417e9868",
+    "nop WORD PTR [rax+rax]",
+    "mov rax, QWORD PTR [rdi+0x48]",
+    "mov rcx, QWORD PTR [rax+rbx*8]",
+    "mov rax, QWORD PTR [rcx]",
+    "call QWORD PTR [rax+0x20]",
+    "test al, al",
+    "je 0x1417e9875",
+    "sub rbx, 0x1",
+    "jns 0x1417e9850",
+    "mov al, 0x1",
+    "mov rbx, QWORD PTR [rsp+0x38]",
+    "add rsp, 0x20",
+    "pop rdi",
+    "ret",
+    "xor al, al",
+    "mov rbx, QWORD PTR [rsp+0x38]",
+    "add rsp, 0x20",
+    "pop rdi",
+    "ret"
+   ]
+  },
+  "0x1417eb540": {
+   "a": 5393790272,
+   "b": 5393790461,
+   "addr": [
+    5393790272,
+    5393790277,
+    5393790278,
+    5393790282,
+    5393790286,
+    5393790289,
+    5393790292,
+    5393790296,
+    5393790298,
+    5393790301,
+    5393790304,
+    5393790306,
+    5393790309,
+    5393790312,
+    5393790316,
+    5393790320,
+    5393790322,
+    5393790327,
+    5393790330,
+    5393790335,
+    5393790337,
+    5393790339,
+    5393790341,
+    5393790346,
+    5393790350,
+    5393790351,
+    5393790352,
+    5393790356,
+    5393790359,
+    5393790362,
+    5393790365,
+    5393790367,
+    5393790370,
+    5393790375,
+    5393790380,
+    5393790383,
+    5393790386,
+    5393790388,
+    5393790393,
+    5393790395,
+    5393790397,
+    5393790401,
+    5393790403,
+    5393790405,
+    5393790410,
+    5393790415,
+    5393790419,
+    5393790420,
+    5393790421,
+    5393790423,
+    5393790426,
+    5393790431,
+    5393790434,
+    5393790436,
+    5393790438,
+    5393790440,
+    5393790443,
+    5393790448,
+    5393790453,
+    5393790455,
+    5393790459,
+    5393790460
+   ],
+   "text": [
+    "mov QWORD PTR [rsp+0x18],rbx",
+    "push rsi",
+    "sub rsp,0x20",
+    "mov rax,QWORD PTR [rcx+0x8]",
+    "mov rsi,rdx",
+    "mov rbx,rcx",
+    "cmp rax,QWORD PTR [rcx+0x10]",
+    "jae 0x1417eb572",
+    "movzx ecx,BYTE PTR [rax]",
+    "cmp cl,0x80",
+    "jae 0x1417eb572",
+    "movzx edx,cl",
+    "inc rax",
+    "mov DWORD PTR [rsp+0x30],edx",
+    "mov QWORD PTR [rbx+0x8],rax",
+    "jmp 0x1417eb594",
+    "lea rdx,[rsp+0x30]",
+    "mov rcx,rbx",
+    "call 0x1417e3a50",
+    "test al,al",
+    "jne 0x1417eb590",
+    "xor al,al",
+    "mov rbx,QWORD PTR [rsp+0x40]",
+    "add rsp,0x20",
+    "pop rsi",
+    "ret",
+    "mov edx,DWORD PTR [rsp+0x30]",
+    "inc DWORD PTR [rbx+0x38]",
+    "mov eax,DWORD PTR [rbx+0x38]",
+    "cmp eax,DWORD PTR [rbx+0x3c]",
+    "jg 0x1417eb583",
+    "mov rcx,rbx",
+    "mov QWORD PTR [rsp+0x38], rdi",
+    "call 0x1417e3240",
+    "mov rdx, rbx",
+    "mov rcx, rsi",
+    "mov edi, eax",
+    "call 0x1417eafa0",
+    "test al, al",
+    "je 0x1417eb5c3",
+    "cmp BYTE PTR [rbx+0x24], 0x0",
+    "jne 0x1417eb5d5",
+    "xor al, al",
+    "mov rdi, QWORD PTR [rsp+0x38]",
+    "mov rbx, QWORD PTR [rsp+0x40]",
+    "add rsp, 0x20",
+    "pop rsi",
+    "ret",
+    "mov edx, edi",
+    "mov rcx, rbx",
+    "call 0x1417e32e0",
+    "mov eax, DWORD PTR [rbx+0x38]",
+    "test eax, eax",
+    "jle 0x1417eb5eb",
+    "dec eax",
+    "mov DWORD PTR [rbx+0x38], eax",
+    "mov rdi, QWORD PTR [rsp+0x38]",
+    "mov rbx, QWORD PTR [rsp+0x40]",
+    "mov al, 0x1",
+    "add rsp, 0x20",
+    "pop rsi",
+    "ret"
+   ]
+  },
+  "0x1417ebac0": {
+   "a": 5393791680,
+   "b": 5393791778,
+   "addr": [
+    5393791680,
+    5393791682,
+    5393791686,
+    5393791694,
+    5393791698,
+    5393791701,
+    5393791703,
+    5393791705,
+    5393791709,
+    5393791710,
+    5393791711,
+    5393791714,
+    5393791719,
+    5393791722,
+    5393791725,
+    5393791727,
+    5393791728,
+    5393791732,
+    5393791736,
+    5393791739,
+    5393791742,
+    5393791744,
+    5393791746,
+    5393791750,
+    5393791752,
+    5393791754,
+    5393791759,
+    5393791763,
+    5393791764,
+    5393791765,
+    5393791767,
+    5393791772,
+    5393791776,
+    5393791777
+   ],
+   "text": [
+    "push rdi",
+    "sub rsp,0x20",
+    "mov DWORD PTR [rsp+0x30],0x0",
+    "test BYTE PTR [rcx+0x30],0x1",
+    "mov rdi,rcx",
+    "jne 0x1417ebadf",
+    "xor al,al",
+    "add rsp,0x20",
+    "pop rdi",
+    "ret",
+    "mov eax,DWORD PTR [rcx+0x40]",
+    "mov QWORD PTR [rsp+0x38], rbx",
+    "sub eax, 0x1",
+    "movsxd rbx, eax",
+    "js 0x1417ebb08",
+    "nop",
+    "mov rax, QWORD PTR [rdi+0x38]",
+    "mov rcx, QWORD PTR [rax+rbx*8]",
+    "mov rax, QWORD PTR [rcx]",
+    "call QWORD PTR [rax+0x20]",
+    "test al, al",
+    "je 0x1417ebb15",
+    "sub rbx, 0x1",
+    "jns 0x1417ebaf0",
+    "mov al, 0x1",
+    "mov rbx, QWORD PTR [rsp+0x38]",
+    "add rsp, 0x20",
+    "pop rdi",
+    "ret",
+    "xor al, al",
+    "mov rbx, QWORD PTR [rsp+0x38]",
+    "add rsp, 0x20",
+    "pop rdi",
+    "ret"
+   ]
+  },
+  "0x1417ece60": {
+   "a": 5393796704,
+   "b": 5393796893,
+   "addr": [
+    5393796704,
+    5393796709,
+    5393796710,
+    5393796714,
+    5393796718,
+    5393796721,
+    5393796724,
+    5393796728,
+    5393796730,
+    5393796733,
+    5393796736,
+    5393796738,
+    5393796741,
+    5393796744,
+    5393796748,
+    5393796752,
+    5393796754,
+    5393796759,
+    5393796762,
+    5393796767,
+    5393796769,
+    5393796771,
+    5393796773,
+    5393796778,
+    5393796782,
+    5393796783,
+    5393796784,
+    5393796788,
+    5393796791,
+    5393796794,
+    5393796797,
+    5393796799,
+    5393796802,
+    5393796807,
+    5393796812,
+    5393796815,
+    5393796818,
+    5393796820,
+    5393796825,
+    5393796827,
+    5393796829,
+    5393796833,
+    5393796835,
+    5393796837,
+    5393796842,
+    5393796847,
+    5393796851,
+    5393796852,
+    5393796853,
+    5393796855,
+    5393796858,
+    5393796863,
+    5393796866,
+    5393796868,
+    5393796870,
+    5393796872,
+    5393796875,
+    5393796880,
+    5393796885,
+    5393796887,
+    5393796891,
+    5393796892
+   ],
+   "text": [
+    "mov QWORD PTR [rsp+0x18],rbx",
+    "push rsi",
+    "sub rsp,0x20",
+    "mov rax,QWORD PTR [rcx+0x8]",
+    "mov rsi,rdx",
+    "mov rbx,rcx",
+    "cmp rax,QWORD PTR [rcx+0x10]",
+    "jae 0x1417ece92",
+    "movzx ecx,BYTE PTR [rax]",
+    "cmp cl,0x80",
+    "jae 0x1417ece92",
+    "movzx edx,cl",
+    "inc rax",
+    "mov DWORD PTR [rsp+0x30],edx",
+    "mov QWORD PTR [rbx+0x8],rax",
+    "jmp 0x1417eceb4",
+    "lea rdx,[rsp+0x30]",
+    "mov rcx,rbx",
+    "call 0x1417e3a50",
+    "test al,al",
+    "jne 0x1417eceb0",
+    "xor al,al",
+    "mov rbx,QWORD PTR [rsp+0x40]",
+    "add rsp,0x20",
+    "pop rsi",
+    "ret",
+    "mov edx,DWORD PTR [rsp+0x30]",
+    "inc DWORD PTR [rbx+0x38]",
+    "mov eax,DWORD PTR [rbx+0x38]",
+    "cmp eax,DWORD PTR [rbx+0x3c]",
+    "jg 0x1417ecea3",
+    "mov rcx,rbx",
+    "mov QWORD PTR [rsp+0x38], rdi",
+    "call 0x1417e3240",
+    "mov rdx, rbx",
+    "mov rcx, rsi",
+    "mov edi, eax",
+    "call 0x1417ecb40",
+    "test al, al",
+    "je 0x1417ecee3",
+    "cmp BYTE PTR [rbx+0x24], 0x0",
+    "jne 0x1417ecef5",
+    "xor al, al",
+    "mov rdi, QWORD PTR [rsp+0x38]",
+    "mov rbx, QWORD PTR [rsp+0x40]",
+    "add rsp, 0x20",
+    "pop rsi",
+    "ret",
+    "mov edx, edi",
+    "mov rcx, rbx",
+    "call 0x1417e32e0",
+    "mov eax, DWORD PTR [rbx+0x38]",
+    "test eax, eax",
+    "jle 0x1417ecf0b",
+    "dec eax",
+    "mov DWORD PTR [rbx+0x38], eax",
+    "mov rdi, QWORD PTR [rsp+0x38]",
+    "mov rbx, QWORD PTR [rsp+0x40]",
+    "mov al, 0x1",
+    "add rsp, 0x20",
+    "pop rsi",
+    "ret"
+   ]
+  },
+  "0x1417ed450": {
+   "a": 5393798224,
+   "b": 5393798322,
+   "addr": [
+    5393798224,
+    5393798226,
+    5393798230,
+    5393798238,
+    5393798242,
+    5393798245,
+    5393798247,
+    5393798249,
+    5393798253,
+    5393798254,
+    5393798255,
+    5393798258,
+    5393798263,
+    5393798266,
+    5393798269,
+    5393798271,
+    5393798272,
+    5393798276,
+    5393798280,
+    5393798283,
+    5393798286,
+    5393798288,
+    5393798290,
+    5393798294,
+    5393798296,
+    5393798298,
+    5393798303,
+    5393798307,
+    5393798308,
+    5393798309,
+    5393798311,
+    5393798316,
+    5393798320,
+    5393798321
+   ],
+   "text": [
+    "push rdi",
+    "sub rsp,0x20",
+    "mov DWORD PTR [rsp+0x30],0x0",
+    "test BYTE PTR [rcx+0x30],0x1",
+    "mov rdi,rcx",
+    "jne 0x1417ed46f",
+    "xor al,al",
+    "add rsp,0x20",
+    "pop rdi",
+    "ret",
+    "mov eax,DWORD PTR [rcx+0x40]",
+    "mov QWORD PTR [rsp+0x38], rbx",
+    "sub eax, 0x1",
+    "movsxd rbx, eax",
+    "js 0x1417ed498",
+    "nop",
+    "mov rax, QWORD PTR [rdi+0x38]",
+    "mov rcx, QWORD PTR [rax+rbx*8]",
+    "mov rax, QWORD PTR [rcx]",
+    "call QWORD PTR [rax+0x20]",
+    "test al, al",
+    "je 0x1417ed4a5",
+    "sub rbx, 0x1",
+    "jns 0x1417ed480",
+    "mov al, 0x1",
+    "mov rbx, QWORD PTR [rsp+0x38]",
+    "add rsp, 0x20",
+    "pop rdi",
+    "ret",
+    "xor al, al",
+    "mov rbx, QWORD PTR [rsp+0x38]",
+    "add rsp, 0x20",
+    "pop rdi",
+    "ret"
+   ]
+  },
+  "0x1417ee710": {
+   "a": 5393803024,
+   "b": 5393803213,
+   "addr": [
+    5393803024,
+    5393803029,
+    5393803030,
+    5393803034,
+    5393803038,
+    5393803041,
+    5393803044,
+    5393803048,
+    5393803050,
+    5393803053,
+    5393803056,
+    5393803058,
+    5393803061,
+    5393803064,
+    5393803068,
+    5393803072,
+    5393803074,
+    5393803079,
+    5393803082,
+    5393803087,
+    5393803089,
+    5393803091,
+    5393803093,
+    5393803098,
+    5393803102,
+    5393803103,
+    5393803104,
+    5393803108,
+    5393803111,
+    5393803114,
+    5393803117,
+    5393803119,
+    5393803122,
+    5393803127,
+    5393803132,
+    5393803135,
+    5393803138,
+    5393803140,
+    5393803145,
+    5393803147,
+    5393803149,
+    5393803153,
+    5393803155,
+    5393803157,
+    5393803162,
+    5393803167,
+    5393803171,
+    5393803172,
+    5393803173,
+    5393803175,
+    5393803178,
+    5393803183,
+    5393803186,
+    5393803188,
+    5393803190,
+    5393803192,
+    5393803195,
+    5393803200,
+    5393803205,
+    5393803207,
+    5393803211,
+    5393803212
+   ],
+   "text": [
+    "mov QWORD PTR [rsp+0x18],rbx",
+    "push rsi",
+    "sub rsp,0x20",
+    "mov rax,QWORD PTR [rcx+0x8]",
+    "mov rsi,rdx",
+    "mov rbx,rcx",
+    "cmp rax,QWORD PTR [rcx+0x10]",
+    "jae 0x1417ee742",
+    "movzx ecx,BYTE PTR [rax]",
+    "cmp cl,0x80",
+    "jae 0x1417ee742",
+    "movzx edx,cl",
+    "inc rax",
+    "mov DWORD PTR [rsp+0x30],edx",
+    "mov QWORD PTR [rbx+0x8],rax",
+    "jmp 0x1417ee764",
+    "lea rdx,[rsp+0x30]",
+    "mov rcx,rbx",
+    "call 0x1417e3a50",
+    "test al,al",
+    "jne 0x1417ee760",
+    "xor al,al",
+    "mov rbx,QWORD PTR [rsp+0x40]",
+    "add rsp,0x20",
+    "pop rsi",
+    "ret",
+    "mov edx,DWORD PTR [rsp+0x30]",
+    "inc DWORD PTR [rbx+0x38]",
+    "mov eax,DWORD PTR [rbx+0x38]",
+    "cmp eax,DWORD PTR [rbx+0x3c]",
+    "jg 0x1417ee753",
+    "mov rcx,rbx",
+    "mov QWORD PTR [rsp+0x38], rdi",
+    "call 0x1417e3240",
+    "mov rdx, rbx",
+    "mov rcx, rsi",
+    "mov edi, eax",
+    "call 0x1417ee450",
+    "test al, al",
+    "je 0x1417ee793",
+    "cmp BYTE PTR [rbx+0x24], 0x0",
+    "jne 0x1417ee7a5",
+    "xor al, al",
+    "mov rdi, QWORD PTR [rsp+0x38]",
+    "mov rbx, QWORD PTR [rsp+0x40]",
+    "add rsp, 0x20",
+    "pop rsi",
+    "ret",
+    "mov edx, edi",
+    "mov rcx, rbx",
+    "call 0x1417e32e0",
+    "mov eax, DWORD PTR [rbx+0x38]",
+    "test eax, eax",
+    "jle 0x1417ee7bb",
+    "dec eax",
+    "mov DWORD PTR [rbx+0x38], eax",
+    "mov rdi, QWORD PTR [rsp+0x38]",
+    "mov rbx, QWORD PTR [rsp+0x40]",
+    "mov al, 0x1",
+    "add rsp, 0x20",
+    "pop rsi",
+    "ret"
+   ]
+  },
+  "0x1417eeda0": {
+   "a": 5393804704,
+   "b": 5393804802,
+   "addr": [
+    5393804704,
+    5393804706,
+    5393804710,
+    5393804718,
+    5393804722,
+    5393804725,
+    5393804727,
+    5393804729,
+    5393804733,
+    5393804734,
+    5393804735,
+    5393804738,
+    5393804743,
+    5393804746,
+    5393804749,
+    5393804751,
+    5393804752,
+    5393804756,
+    5393804760,
+    5393804763,
+    5393804766,
+    5393804768,
+    5393804770,
+    5393804774,
+    5393804776,
+    5393804778,
+    5393804783,
+    5393804787,
+    5393804788,
+    5393804789,
+    5393804791,
+    5393804796,
+    5393804800,
+    5393804801
+   ],
+   "text": [
+    "push rdi",
+    "sub rsp,0x20",
+    "mov DWORD PTR [rsp+0x30],0x0",
+    "test BYTE PTR [rcx+0x30],0x1",
+    "mov rdi,rcx",
+    "jne 0x1417eedbf",
+    "xor al,al",
+    "add rsp,0x20",
+    "pop rdi",
+    "ret",
+    "mov eax,DWORD PTR [rcx+0x40]",
+    "mov QWORD PTR [rsp+0x38], rbx",
+    "sub eax, 0x1",
+    "movsxd rbx, eax",
+    "js 0x1417eede8",
+    "nop",
+    "mov rax, QWORD PTR [rdi+0x38]",
+    "mov rcx, QWORD PTR [rax+rbx*8]",
+    "mov rax, QWORD PTR [rcx]",
+    "call QWORD PTR [rax+0x20]",
+    "test al, al",
+    "je 0x1417eedf5",
+    "sub rbx, 0x1",
+    "jns 0x1417eedd0",
+    "mov al, 0x1",
+    "mov rbx, QWORD PTR [rsp+0x38]",
+    "add rsp, 0x20",
+    "pop rdi",
+    "ret",
+    "xor al, al",
+    "mov rbx, QWORD PTR [rsp+0x38]",
+    "add rsp, 0x20",
+    "pop rdi",
+    "ret"
+   ]
+  },
+  "0x1417f0330": {
+   "a": 5393810224,
+   "b": 5393810413,
+   "addr": [
+    5393810224,
+    5393810229,
+    5393810230,
+    5393810234,
+    5393810238,
+    5393810241,
+    5393810244,
+    5393810248,
+    5393810250,
+    5393810253,
+    5393810256,
+    5393810258,
+    5393810261,
+    5393810264,
+    5393810268,
+    5393810272,
+    5393810274,
+    5393810279,
+    5393810282,
+    5393810287,
+    5393810289,
+    5393810291,
+    5393810293,
+    5393810298,
+    5393810302,
+    5393810303,
+    5393810304,
+    5393810308,
+    5393810311,
+    5393810314,
+    5393810317,
+    5393810319,
+    5393810322,
+    5393810327,
+    5393810332,
+    5393810335,
+    5393810338,
+    5393810340,
+    5393810345,
+    5393810347,
+    5393810349,
+    5393810353,
+    5393810355,
+    5393810357,
+    5393810362,
+    5393810367,
+    5393810371,
+    5393810372,
+    5393810373,
+    5393810375,
+    5393810378,
+    5393810383,
+    5393810386,
+    5393810388,
+    5393810390,
+    5393810392,
+    5393810395,
+    5393810400,
+    5393810405,
+    5393810407,
+    5393810411,
+    5393810412
+   ],
+   "text": [
+    "mov QWORD PTR [rsp+0x18],rbx",
+    "push rsi",
+    "sub rsp,0x20",
+    "mov rax,QWORD PTR [rcx+0x8]",
+    "mov rsi,rdx",
+    "mov rbx,rcx",
+    "cmp rax,QWORD PTR [rcx+0x10]",
+    "jae 0x1417f0362",
+    "movzx ecx,BYTE PTR [rax]",
+    "cmp cl,0x80",
+    "jae 0x1417f0362",
+    "movzx edx,cl",
+    "inc rax",
+    "mov DWORD PTR [rsp+0x30],edx",
+    "mov QWORD PTR [rbx+0x8],rax",
+    "jmp 0x1417f0384",
+    "lea rdx,[rsp+0x30]",
+    "mov rcx,rbx",
+    "call 0x1417e3a50",
+    "test al,al",
+    "jne 0x1417f0380",
+    "xor al,al",
+    "mov rbx,QWORD PTR [rsp+0x40]",
+    "add rsp,0x20",
+    "pop rsi",
+    "ret",
+    "mov edx,DWORD PTR [rsp+0x30]",
+    "inc DWORD PTR [rbx+0x38]",
+    "mov eax,DWORD PTR [rbx+0x38]",
+    "cmp eax,DWORD PTR [rbx+0x3c]",
+    "jg 0x1417f0373",
+    "mov rcx,rbx",
+    "mov QWORD PTR [rsp+0x38], rdi",
+    "call 0x1417e3240",
+    "mov rdx, rbx",
+    "mov rcx, rsi",
+    "mov edi, eax",
+    "call 0x1417f0010",
+    "test al, al",
+    "je 0x1417f03b3",
+    "cmp BYTE PTR [rbx+0x24], 0x0",
+    "jne 0x1417f03c5",
+    "xor al, al",
+    "mov rdi, QWORD PTR [rsp+0x38]",
+    "mov rbx, QWORD PTR [rsp+0x40]",
+    "add rsp, 0x20",
+    "pop rsi",
+    "ret",
+    "mov edx, edi",
+    "mov rcx, rbx",
+    "call 0x1417e32e0",
+    "mov eax, DWORD PTR [rbx+0x38]",
+    "test eax, eax",
+    "jle 0x1417f03db",
+    "dec eax",
+    "mov DWORD PTR [rbx+0x38], eax",
+    "mov rdi, QWORD PTR [rsp+0x38]",
+    "mov rbx, QWORD PTR [rsp+0x40]",
+    "mov al, 0x1",
+    "add rsp, 0x20",
+    "pop rsi",
+    "ret"
+   ]
+  },
+  "0x1417f0950": {
+   "a": 5393811792,
+   "b": 5393811906,
+   "addr": [
+    5393811792,
+    5393811794,
+    5393811798,
+    5393811806,
+    5393811809,
+    5393811812,
+    5393811815,
+    5393811817,
+    5393811819,
+    5393811821,
+    5393811825,
+    5393811826,
+    5393811827,
+    5393811830,
+    5393811835,
+    5393811838,
+    5393811841,
+    5393811843,
+    5393811856,
+    5393811860,
+    5393811864,
+    5393811867,
+    5393811870,
+    5393811872,
+    5393811874,
+    5393811878,
+    5393811880,
+    5393811882,
+    5393811887,
+    5393811891,
+    5393811892,
+    5393811893,
+    5393811895,
+    5393811900,
+    5393811904,
+    5393811905
+   ],
+   "text": [
+    "push rdi",
+    "sub rsp,0x20",
+    "mov DWORD PTR [rsp+0x30],0x0",
+    "mov eax,DWORD PTR [rcx+0x30]",
+    "mov rdi,rcx",
+    "and eax,0x3",
+    "cmp al,0x3",
+    "je 0x1417f0973",
+    "xor al,al",
+    "add rsp,0x20",
+    "pop rdi",
+    "ret",
+    "mov eax,DWORD PTR [rcx+0x48]",
+    "mov QWORD PTR [rsp+0x38], rbx",
+    "sub eax, 0x1",
+    "movsxd rbx, eax",
+    "js 0x1417f09a8",
+    "nop WORD PTR [rax+rax]",
+    "mov rax, QWORD PTR [rdi+0x40]",
+    "mov rcx, QWORD PTR [rax+rbx*8]",
+    "mov rax, QWORD PTR [rcx]",
+    "call QWORD PTR [rax+0x20]",
+    "test al, al",
+    "je 0x1417f09b5",
+    "sub rbx, 0x1",
+    "jns 0x1417f0990",
+    "mov al, 0x1",
+    "mov rbx, QWORD PTR [rsp+0x38]",
+    "add rsp, 0x20",
+    "pop rdi",
+    "ret",
+    "xor al, al",
+    "mov rbx, QWORD PTR [rsp+0x38]",
+    "add rsp, 0x20",
+    "pop rdi",
+    "ret"
+   ]
+  }
+ },
+ "split": {
+  "0x1417d8920": {
+   "a": 5393713440,
+   "b": 5393714180,
+   "addr": [
+    5393713440,
+    5393713442,
+    5393713448,
+    5393713453,
+    5393713458,
+    5393713459,
+    5393713463,
+    5393713465,
+    5393713467,
+    5393713470,
+    5393713474,
+    5393713479,
+    5393713484,
+    5393713487,
+    5393713489,
+    5393713492,
+    5393713497,
+    5393713499,
+    5393713501,
+    5393713507,
+    5393713510,
+    5393713516,
+    5393713519,
+    5393713521,
+    5393713524,
+    5393713527,
+    5393713533,
+    5393713540,
+    5393713544,
+    5393713550,
+    5393713557,
+    5393713565,
+    5393713568,
+    5393713632,
+    5393713636,
+    5393713638,
+    5393713645,
+    5393713648,
+    5393713651,
+    5393713654,
+    5393713659,
+    5393713662,
+    5393713666,
+    5393713668,
+    5393713671,
+    5393713676,
+    5393713679,
+    5393713681,
+    5393713684,
+    5393713688,
+    5393713692,
+    5393713698,
+    5393713760,
+    5393713763,
+    5393713765,
+    5393713772,
+    5393713775,
+    5393713777,
+    5393713780,
+    5393713785,
+    5393713788,
+    5393713792,
+    5393713794,
+    5393713800,
+    5393713803,
+    5393713808,
+    5393713812,
+    5393713815,
+    5393713817,
+    5393713820,
+    5393713825,
+    5393713832,
+    5393713904,
+    5393713908,
+    5393713910,
+    5393713917,
+    5393713920,
+    5393713923,
+    5393713926,
+    5393713931,
+    5393713934,
+    5393713938,
+    5393713940,
+    5393713943,
+    5393713948,
+    5393713951,
+    5393713953,
+    5393713956,
+    5393713960,
+    5393713964,
+    5393713970,
+    5393714032,
+    5393714035,
+    5393714037,
+    5393714044,
+    5393714047,
+    5393714049,
+    5393714052,
+    5393714057,
+    5393714060,
+    5393714064,
+    5393714066,
+    5393714072,
+    5393714075,
+    5393714080,
+    5393714084,
+    5393714087,
+    5393714089,
+    5393714092,
+    5393714097,
+    5393714104,
+    5393714154,
+    5393714159,
+    5393714164,
+    5393714168,
+    5393714172,
+    5393714175,
+    5393714176,
+    5393714178
+   ],
+   "text": [
+    "test edx,edx",
+    "je 0x1417d8c00",
+    "mov QWORD PTR [rsp+0x18],rbx",
+    "mov QWORD PTR [rsp+0x20],rbp",
+    "push rdi",
+    "sub rsp,0x60",
+    "xor ebx,ebx",
+    "mov ebp,edx",
+    "mov rdi,rcx",
+    "mov DWORD PTR [rsp+0x78],ebx",
+    "mov QWORD PTR [rsp+0x70],rsi",
+    "call 0x1417b6210",
+    "mov rcx,rax",
+    "mov edx,ebp",
+    "mov rsi,rax",
+    "call 0x1417ac700",
+    "test al,al",
+    "je 0x1417d897d",
+    "mov eax,DWORD PTR [rdi+0x440]",
+    "cmp eax,0x2",
+    "jb 0x1417d8bea",
+    "cmp eax,0x3",
+    "jbe 0x1417d897d",
+    "add eax,0xfffffffb",
+    "cmp eax,0x1",
+    "ja 0x1417d8bea",
+    "mov r8d,DWORD PTR [rdi+0x440]",
+    "cmp r8d,0x6",
+    "ja 0x1417d8bea",
+    "lea rdx,[rip@0x141720000]",
+    "mov ecx,DWORD PTR [rdx+r8*4+0xb8c04]",
+    "add rcx,rdx",
+    "jmp rcx",
+    "cmp r8d,0xa",
+    "jae 0x1417d8a04",
+    "mov rax,QWORD PTR [rdi+0x448]",
+    "inc rdx",
+    "inc r8d",
+    "cmp rdx,r10",
+    "mov rcx,QWORD PTR [rax+rdx*8-0x8]",
+    "mov eax,DWORD PTR [rcx+0x48]",
+    "mov DWORD PTR [rsp+rdx*4+0x2c],eax",
+    "jl 0x1417d89e0",
+    "mov rax,QWORD PTR [rsi]",
+    "lea r9,[rsp+0x30]",
+    "mov r8d,r10d",
+    "mov edx,ebp",
+    "mov rcx,rsi",
+    "mov DWORD PTR [rsp+0x28],ebx",
+    "mov BYTE PTR [rsp+0x20],bl",
+    "call QWORD PTR [rax+0x680]",
+    "jmp 0x1417d8bea",
+    "cmp ebx,0xa",
+    "jae 0x1417d8a82",
+    "mov rax,QWORD PTR [rdi+0x448]",
+    "inc rdx",
+    "inc ebx",
+    "cmp rdx,r11",
+    "mov rcx,QWORD PTR [rax+rdx*8-0x8]",
+    "mov eax,DWORD PTR [rcx+0x48]",
+    "mov DWORD PTR [rsp+rdx*4+0x2c],eax",
+    "jl 0x1417d8a60",
+    "mov eax,DWORD PTR [rdi+0x444]",
+    "mov r10,QWORD PTR [rsi]",
+    "lea r9,[rsp+0x30]",
+    "mov DWORD PTR [rsp+0x28],eax",
+    "mov r8d,r11d",
+    "mov edx,ebp",
+    "mov rcx,rsi",
+    "mov BYTE PTR [rsp+0x20],0x1",
+    "call QWORD PTR [r10+0x680]",
+    "jmp 0x1417d8bea",
+    "cmp r8d,0xa",
+    "jae 0x1417d8b14",
+    "mov rax,QWORD PTR [rdi+0x448]",
+    "inc rdx",
+    "inc r8d",
+    "cmp rdx,r10",
+    "mov rcx,QWORD PTR [rax+rdx*8-0x8]",
+    "mov eax,DWORD PTR [rcx+0x48]",
+    "mov DWORD PTR [rsp+rdx*4+0x2c],eax",
+    "jl 0x1417d8af0",
+    "mov rax,QWORD PTR [rsi]",
+    "lea r9,[rsp+0x30]",
+    "mov r8d,r10d",
+    "mov edx,ebp",
+    "mov rcx,rsi",
+    "mov DWORD PTR [rsp+0x28],ebx",
+    "mov BYTE PTR [rsp+0x20],bl",
+    "call QWORD PTR [rax+0x6e0]",
+    "jmp 0x1417d8bea",
+    "cmp ebx,0xa",
+    "jae 0x1417d8b92",
+    "mov rax,QWORD PTR [rdi+0x448]",
+    "inc rdx",
+    "inc ebx",
+    "cmp rdx,r11",
+    "mov rcx,QWORD PTR [rax+rdx*8-0x8]",
+    "mov eax,DWORD PTR [rcx+0x48]",
+    "mov DWORD PTR [rsp+rdx*4+0x2c],eax",
+    "jl 0x1417d8b70",
+    "mov eax,DWORD PTR [rdi+0x444]",
+    "mov r10,QWORD PTR [rsi]",
+    "lea r9,[rsp+0x30]",
+    "mov DWORD PTR [rsp+0x28],eax",
+    "mov r8d,r11d",
+    "mov edx,ebp",
+    "mov rcx,rsi",
+    "mov BYTE PTR [rsp+0x20],0x1",
+    "call QWORD PTR [r10+0x6e0]",
+    "jmp 0x1417d8bea",
+    "mov rsi,QWORD PTR [rsp+0x70]",
+    "lea r11,[rsp+0x60]",
+    "mov rbx,QWORD PTR [r11+0x20]",
+    "mov rbp,QWORD PTR [r11+0x28]",
+    "mov rsp,r11",
+    "pop rdi",
+    "repz ret",
+    "xchg ax,ax"
+   ]
+  },
+  "0x1417d8c20": {
+   "a": 5393714208,
+   "b": 5393714284,
+   "addr": [
+    5393714208,
+    5393714213,
+    5393714214,
+    5393714218,
+    5393714227,
+    5393714230,
+    5393714237,
+    5393714240,
+    5393714245,
+    5393714246,
+    5393714253,
+    5393714256,
+    5393714259,
+    5393714264,
+    5393714268,
+    5393714275,
+    5393714278,
+    5393714282,
+    5393714283
+   ],
+   "text": [
+    "mov QWORD PTR [rsp+0x8], rcx",
+    "push rbx",
+    "sub rsp, 0x30",
+    "mov QWORD PTR [rsp+0x20], 0xfffffffffffffffe",
+    "mov rbx, rcx",
+    "lea rax, QWORD PTR [rip@0x14182e368]",
+    "mov QWORD PTR [rcx], rax",
+    "call 0x1417e8016",
+    "nop",
+    "lea rax, QWORD PTR [rip@0x14183cec8]",
+    "mov QWORD PTR [rbx], rax",
+    "mov rcx, rbx",
+    "call 0x1417e8016",
+    "lea r11, QWORD PTR [rbx+0x8]",
+    "mov QWORD PTR [rbx+0x408], r11",
+    "mov rax, rbx",
+    "add rsp, 0x30",
+    "pop rbx",
+    "ret"
+   ]
+  },
+  "0x1417d8c04": {
+   "a": 5393714180,
+   "b": 5393714180,
+   "addr": [],
+   "text": []
+  }
+ },
+ "refused": [
+  [
+   "0x141722a60",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141722b80",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141722c50",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141723180",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141723280",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417232c0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141723600",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417238d0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141723940",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417239b0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141723cb0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417246d0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417247b0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141724850",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141724930",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141724a40",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417261f0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141727880",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141728e10",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141729000",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417293a0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14172c410",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14172c540",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14172d120",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14172da60",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14172db90",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14172f040",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141730240",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141730720",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141730ae0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141730b10",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141730c03",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141731340",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141731390",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141731c00",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141731d50",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417325c0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141733480",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141734580",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141735680",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141735c80",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14173abf0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14173db90",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14173dd10",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14173e160",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14173ef50",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14173f3e0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14173fe40",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141740c20",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141740e80",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141740ea3",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141740ee1",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141740f00",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417410f0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141741530",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141741730",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141741b10",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141741c50",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141741c9f",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141741cc6",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141741d50",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141741ff0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141742080",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141742170",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141742320",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141742351",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141742b10",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141742b30",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141742d20",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141742e50",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141742fc0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141743330",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141744860",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417448c0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141744ad0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141744d60",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141744dd0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141744f10",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141744f80",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417450c0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141745ab0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141745b30",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417465e0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141748040",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141749540",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14174a350",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14174c6d0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14174cf90",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14174cfc0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14174d3e0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14174d490",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14174e1e0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14174ebe0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14174ec50",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14174fbb0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14174fc50",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141750490",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141750510",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141751170",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417511e0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141751db0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141751df0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141752419",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417525a0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141752620",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141752740",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141752b20",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141755470",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141756f00",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141756fc7",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141757060",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141757072",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141757170",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14175724e",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141757600",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14175efe0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14175f4a0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14175f830",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141760570",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417606c0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141760700",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141762880",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417638e0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141763920",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141763c80",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141763e0f",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417647e0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141764810",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141764b04",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141764b10",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141764ef8",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417676e1",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141767713",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417677ee",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141767820",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417678fc",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14176792e",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141767a0e",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141767a40",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141767b1c",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141767b4e",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141767c2c",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141767c5e",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141767d3c",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141767d6e",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417689b0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141769640",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141769720",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417698a0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141769a00",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14176a210",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14176a990",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14176aa20",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14176acf0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14176b090",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14176e080",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14176e250",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14176e538",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14176e5b3",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14176e716",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14176e876",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14176e8be",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14176e990",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14176ee60",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14176efe8",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14176f190",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141770470",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417709e0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141770e60",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141771390",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141775650",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417757d0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141777d60",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417783a0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417783e0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417788c0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141778987",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141779090",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417792a0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417794c0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141779670",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417798b0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141779900",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141779cf0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141779d11",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141779f40",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141779f67",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14177a8c0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14177aec0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14177bc90",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14177c620",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14177c870",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14177cbd0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14177cc42",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14177cd40",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14177d040",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14177d180",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14177dfe0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14177e004",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14177fa60",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141780170",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417801f0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141780270",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417803c0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141780440",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417804d0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141780540",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141781ae0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141781afb",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141781b10",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141781c80",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417822b0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141782640",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14178272e",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141783a90",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141783b70",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141784260",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417842d0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141784cd0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417873a0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141787985",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141787995",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417879a5",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417879a9",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417879bd",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417879cd",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417879d1",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417879f9",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141788fd8",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141789158",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14178a3c0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14178b890",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14178d4d0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14178d820",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14178da90",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14178dac0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14178fbc0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141790660",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141790bf0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141790fe0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417913f0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141791a50",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141791cc0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141793160",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141793d50",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141793d65",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141793e70",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141793f37",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141794160",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141796080",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141797890",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141798160",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417983e0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x141798a20",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417991f0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141799320",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141799c60",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14179c201",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14179c28d",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14179cb00",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14179d060",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14179d140",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14179d1f0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14179d3c0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14179d6b0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14179e020",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14179e690",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x14179eb50",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417a06b6",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417a1bc0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417a2a10",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417a2ad0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417a2b80",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417a2c80",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417a2cc0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417a2d20",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417a2df0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417a2e70",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417a2ef0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417a2f60",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417a2fd0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417a3590",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417a3630",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417a3670",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417a3c20",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417a5370",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417a5610",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417a58c0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417a5c70",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417a64b0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417a6710",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417a6a40",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417a7380",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417a7590",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417a7930",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417a85f0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417a8e40",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417a8f70",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417a9150",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417a96f0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417aa4e0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417aac80",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417ab1e0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417ab220",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417ab2b0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417ab2e0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417ab310",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417ac240",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417ac510",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417ac9c0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417ae630",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417aeba0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417af480",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417af520",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417af55f",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417af5cf",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417af605",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417af620",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417af670",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417af720",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417af780",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417af940",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417af990",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417afc40",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417b0a40",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417b1bf0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417b1c30",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417b1c80",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417b1cf0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417b1d14",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417b1d5d",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417b1dd0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417b2661",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417b2668",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417b26f3",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417b2741",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417b276b",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417b5910",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417b5a20",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417b5af0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417b5bc0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417b6e30",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417b6f80",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417b90d1",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417b920c",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417b9bb0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417b9c70",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417b9d30",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417b9dd0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417b9de0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417b9e40",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417b9f30",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417bb630",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417bb920",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417bb980",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417bb9d0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417bbaae",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417bbba0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417bbc7a",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417bc150",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417bccd0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417bcd10",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417bd730",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417be310",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417be5f0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417bf4d0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417bf570",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417bfa40",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417c0430",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417c04a0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417c0510",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417c0860",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417c2470",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417c3230",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417c9120",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417cadb0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417cb000",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417cb450",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417cb480",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417cb4b0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417cb4e0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417cb510",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417cb540",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417cba70",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417cd870",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417cdfd0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ce6e0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417ceb50",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417cebf0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417cef20",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417d00d0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d0140",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d13d0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d150c",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d1790",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d18d0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d1930",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d19b0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417d1a20",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d1e30",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d1eb0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417d2260",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417d2590",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417d2657",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417d3100",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d3530",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417d3800",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d3980",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d4210",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417d4a10",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d53f0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d54f0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d551d",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d5820",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d58d0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d5ae0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d5d60",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d5f60",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d64c0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d73e0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d7650",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d7770",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d7910",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d7be0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d7d60",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d7e80",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d8160",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d8220",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d82b0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d84d0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d8810",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d8870",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d8d40",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d8f90",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d9140",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d9550",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d9b30",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417d9cc0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417da210",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417da310",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417da440",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417da723",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417da746",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417da7a4",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417da7d0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417dad20",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417db180",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417dd1c0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417de0b0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417de120",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417de610",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417dee40",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417defc0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417df350",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417df630",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417dff70",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e0070",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e1980",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e1b40",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e1ee0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e1fb0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e3190",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e3240",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e34e0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e4140",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e47d0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e4cb0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e4e90",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e4fd0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e5000",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e50a0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e5be0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e5ca0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e5f20",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e6160",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e6220",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e66f0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e6b70",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e6cc0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e6f60",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e7190",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e74c0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e7750",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e7770",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e81e0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e8250",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e8370",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e84d0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e8520",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e87d0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e8935",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e8a70",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417e8ea0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e8ff0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417e9200",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e9440",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417e9530",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e95ca",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e9675",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e9685",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e96b0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e977d",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e97f6",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e9a20",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417e9dc0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ea060",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ea0d0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ea380",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ea4c0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ea559",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ea660",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417eabe0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417eafa0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417eb450",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417eb660",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417eb830",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417eb930",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417eb99a",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417eb9f5",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417eba05",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417eba30",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417eba5d",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ebaae",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ebc90",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ebf80",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ec290",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ec320",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ec334",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ec38b",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ec3b0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ec800",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417ecb40",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ecd70",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417ecf80",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ed1a0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417ed2a0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ed31a",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ed375",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ed385",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ed3b0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ed3ef",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ed43e",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ed620",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ed880",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417eda90",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417edb00",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417edca0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417edd10",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417edd24",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417edd80",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417edd85",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417edda0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ee160",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417ee450",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ee620",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417ee830",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417eea60",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417eeb60",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417eebda",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417eec35",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417eec45",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417eec70",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417eecbd",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417eed86",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417eef70",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ef230",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ef430",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ef4a0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ef520",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ef590",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ef7a0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ef830",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ef848",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ef8d9",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417ef8f0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417efce0",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417eff20",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417eff34",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417eff66",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f0010",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f0260",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417f0270",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f0284",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417f02b6",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f0450",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f0660",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417f0760",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f07da",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f0855",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f0865",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f0890",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f08f3",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f093e",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f0b30",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f0e60",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f10a0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f1110",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f1270",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f1330",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f1348",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f140e",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f1413",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f1430",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f1710",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417f19a0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f2010",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f204c",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f20e0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f2210",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f224c",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f2400",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417f24d0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f2550",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f293a",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f2a15",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f2a25",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f2a50",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f2b1a",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f2b70",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f2b80",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f30cc",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f32ac",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f33ac",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f37a0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f3a00",
+   "tail does not decode to a terminator"
+  ],
+  [
+   "0x1417f3ae8",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f48a0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f49c0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f4b00",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f4c20",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f4e30",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f4fe0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1417f52d0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141805fe0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141806740",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181e450",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181e480",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181e4b0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181e570",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181e670",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181e6b0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181e6e0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181e760",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181e790",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181e7d0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181e800",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181e860",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181e8b0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181ea50",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181ef50",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181efa0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181efe0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181f070",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181f0a0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181f0d0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181f110",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181f180",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181f1b0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181f1e0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181f280",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181f2b0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181f390",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181f3c0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181f3f0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181f430",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181f460",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181f530",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181f560",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181f590",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181f660",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181f690",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181f6c0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181f890",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181fb40",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181fc10",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181fc40",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181fc70",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x14181fdc0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141820070",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141820100",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141820130",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141820160",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141820330",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1418205e0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1418206b0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1418206e0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141820710",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141820880",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141820b70",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141820c80",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141820cb0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141820ce0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141820e70",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141821160",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141821230",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141821260",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1418213f0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141821420",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141821570",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141821780",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1418217b0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x1418217e0",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141821810",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141821840",
+   "data run not provably a jump table"
+  ],
+  [
+   "0x141821880",
+   "data run not provably a jump table"
+  ]
+ ]
+}

@@ -1,12 +1,8 @@
 {
  "state": {
-  "body": 389,
+  "body": 392,
   "iat_thunk": 1,
-  "other": 3
+  "other": 0
  },
- "uncovered": [
-  5392961680,
-  5393635424,
-  5393713440
- ]
+ "uncovered": []
 }

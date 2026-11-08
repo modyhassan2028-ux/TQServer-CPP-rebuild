@@ -9653,3 +9653,28 @@ merged into `rows_fixed.json`, which the lifter and the ledger both read.
 
 Module after the correction: 10,708 bodies; rows 10,216/10,224, routines 9,437/9,445, code 246,395 of
 246,621. Batteries: 24/24 across six ASan/UBSan rounds.
+
+### The three refused rows, repaired from the bytes
+
+`tools/bulk/repair_rows.py` handles the shapes the lifter refused, each decided by something the image
+states:
+
+| row | what the bytes say | repair |
+| --- | --- | --- |
+| `0x141721090` | `cmp [rcx+0x38],0x10 / jb 0x14172109c / mov rax,[rcx+0x20] / ret`, and the branch lands on the byte after the record, where `lea rax,[rcx+0x20] / ret` decodes | row extended to `0x1417210a1`, 6 instructions, both arms inside |
+| `0x1417c5860` | the record ends on `mov [rcx+0xa8],r8d`; the chain continues at `0x1417c5870` with `cmp edx,0x3e8` and a second store | row extended to `0x1417c5898`, 25 instructions, every branch inside |
+| `0x1417d8920` | code, then seven 32-bit values that each resolve into `.text`, then code again | row truncated at `0x1417d8c04` (119 instructions); the code after the table becomes the row at `0x1417d8c20` (19 instructions) |
+
+The jump-table test is the strong one: an entry counts only if `image_base + entry` lands inside
+`.text`, which is why the seven values are a switch table and the eight bytes after them are not.
+
+Result, measured across every file in the module:
+
+| | before | after |
+| --- | --- | --- |
+| bodies | 10,708 | **10,712** |
+| vtable slots with a body | 389 | **392 of 393** |
+| vtable slots unexplained | 3 | **0** (the last is an import thunk) |
+
+Remaining lift refusals are 15 rows: 7 whose branch target lies in another chunk, 7 data rows and 1
+`scas` data row. Batteries: 24/24 across six ASan/UBSan rounds.
