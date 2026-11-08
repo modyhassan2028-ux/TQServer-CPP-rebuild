@@ -152,6 +152,24 @@ does not need to re-survey. Sizes, all small enough to port together:
 That is 9-ish instructions of real work per body: the batch is a single sitting if the containing row
 for `0x1417f2fdc` is found first.
 
+
+## Frontier after the 0x14172d120 family (surveyed 2026-11-08)
+
+Evidence for all three is in `docs/evidence/frontier_after_14172d120.txt`.
+
+- **`0x1417a8940` (268 bytes, 73 instructions) — next port.** A map lookup that answers a 32-bit
+  value. Container reads: end node at `+0x88`, container word at `+0x58`, node `_Isnil` at `+0x21`,
+  key at `+0x18`, and the answered value at `+0x1c`. The walk is the usual one (`cmp [rax+0x18],edx /
+  jae` then right or left), the candidate check is `edi < [rbx+0x18]` against the searched key, and a
+  miss returns 0. Note the differing offsets from the 0x40-byte map (`+0x58`/`+0x88`/`+0x21`), so do
+  not reuse the other map's constants.
+- **`0x1417873a0` (2051 bytes, 345 instructions) — do not start as a single unit.** It is a jump-table
+  dispatcher: a chain of `cmp ecx,<id>` selects a case, each case calls a singleton getter and then
+  tail-jumps through the object's vtable (`mov r8,[rax] / jmp qword ptr [r8]`). The table is indexed
+  by `movzx` from a byte table, so the case count and the ids have to be extracted from the bytes
+  before anything is transcribed. This needs its own batch with the jump table decoded first.
+- **`0x1417caa00`** was not reached in this survey; keep it in the queue.
+
 ## Bugs that were mine, not the port's (so the next agent does not repeat them)
 
 Every one of these was in the test scaffolding:
