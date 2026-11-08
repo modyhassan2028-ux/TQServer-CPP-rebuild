@@ -2366,4 +2366,179 @@ bool SynAccIterNe_1417c6210(void* pThis, void* pOther) {
     return *(void**)(t + 8) != *(void**)(o + 8);                   // cmp %rdx,0x8(%rdi) / setne
 }
 
+// 0x1417c63c0 — the decrement on the 0x41 flag: the node's 0x10 side decides, then either
+// the left climb out of it (0x1417c63f5) or the parent climb (0x1417c6416).
+void SynAccDec41_1417c63c0(void* pIter) {
+    unsigned char* it = (unsigned char*)pIter;                     // rbx
+    if (*(void**)it == nullptr) {                                  // cmpq $0x0,(%rcx) / jne
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();
+    }
+    unsigned char* n = *(unsigned char**)(it + 8);                 // mov 0x8(%rbx),%rcx
+    if (*(unsigned char*)(n + 0x41) != 0) {                        // cmpb $0x0,0x41(%rcx) / je 0x1417c63eb
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();                      // jmp *0x1418233c0
+        return;
+    }
+    unsigned char* r = *(unsigned char**)(n + 0x10);               // mov 0x10(%rcx),%rax
+    if (*(unsigned char*)(r + 0x41) == 0) {                        // cmpb / jne 0x1417c6416
+        unsigned char* l = *(unsigned char**)(r);                  // mov (%rax),%rcx
+        if (*(unsigned char*)(l + 0x41) != 0) {                    // cmpb / jne 0x1417c640c
+            *(void**)(it + 8) = r;                                 // mov %rax,0x8(%rbx)
+            return;
+        }
+        for (;;) {                                                 // 0x1417c6400
+            r = l;                                                 // mov %rcx,%rax
+            l = *(unsigned char**)(l);                             // mov (%rcx),%rcx
+            if (*(unsigned char*)(l + 0x41) != 0) break;            // cmpb / je 0x1417c6400
+        }
+        *(void**)(it + 8) = r;                                     // mov %rax,0x8(%rbx)
+        return;
+    }
+    unsigned char* p = *(unsigned char**)(n + 8);                  // 0x1417c6416: mov 0x8(%rcx),%rcx
+    if (*(unsigned char*)(p + 0x41) == 0) {                        // cmpb / jne 0x1417c6438
+        for (;;) {                                                 // 0x1417c6420
+            unsigned char* pr = *(unsigned char**)(p + 0x10);      // mov 0x10(%rcx),%rax
+            if (*(void**)(it + 8) != (void*)pr) break;              // cmp %rax,0x8(%rbx) / jne 0x1417c6438
+            *(void**)(it + 8) = p;                                 // mov %rcx,0x8(%rbx)
+            p = *(unsigned char**)(p + 8);                         // mov 0x8(%rcx),%rcx
+            if (*(unsigned char*)(p + 0x41) != 0) break;            // cmpb / je 0x1417c6420
+        }
+    }
+    *(void**)(it + 8) = p;                                         // 0x1417c6438: mov %rcx,0x8(%rbx)
+}
+
+// 0x1417c64b0 — the 0x29 increment again, its own start: the same three routes as
+// 0x1417c5fa0, the header's 0x10 child first.
+void SynAccInc29_1417c64b0(void* pIter) {
+    unsigned char* it = (unsigned char*)pIter;                     // rbx
+    if (*(void**)it == nullptr) {                                  // cmpq $0x0,(%rcx) / jne
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();
+    }
+    unsigned char* n = *(unsigned char**)(it + 8);                 // mov 0x8(%rbx),%rcx
+    if (*(unsigned char*)(n + 0x29) != 0) {                        // cmpb / je 0x1417c64e9
+        unsigned char* r = *(unsigned char**)(n + 0x10);           // mov 0x10(%rcx),%rax
+        *(void**)(it + 8) = r;                                     // mov %rax,0x8(%rbx)
+        if (*(unsigned char*)(r + 0x29) == 0) return;              // cmpb / je 0x1417c6546
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();                      // jmp *0x1418233c0
+        return;
+    }
+    unsigned char* l = *(unsigned char**)(n);                      // mov (%rcx),%rax
+    if (*(unsigned char*)(l + 0x29) != 0) {                        // cmpb / jne 0x1417c6517
+        unsigned char* p = *(unsigned char**)(n + 8);              // mov 0x8(%rcx),%rcx
+        if (*(unsigned char*)(p + 0x29) == 0) {                    // cmpb / jne 0x1417c6538
+            for (;;) {                                             // 0x1417c6521
+                unsigned char* lp = *(unsigned char**)(p);         // mov (%rcx),%rax
+                if (*(void**)(it + 8) != (void*)lp) break;          // cmp %rax,0x8(%rbx) / jne
+                *(void**)(it + 8) = p;                             // mov %rcx,0x8(%rbx)
+                p = *(unsigned char**)(p + 8);                     // mov 0x8(%rcx),%rcx
+                if (*(unsigned char*)(p + 0x29) != 0) break;        // cmpb / je back
+            }
+        }
+        unsigned char* cur = *(unsigned char**)(it + 8);           // mov 0x8(%rbx),%rax
+        if (*(unsigned char*)(cur + 0x29) != 0) {                  // cmpb / jne 0x1417c64dd
+            if (g_pfn_invalid_parameter_noinfo != nullptr)
+                g_pfn_invalid_parameter_noinfo();
+            return;
+        }
+        *(void**)(it + 8) = p;                                     // mov %rcx,0x8(%rbx)
+        return;                                                    // 0x1417c6546
+    }
+    unsigned char* q = *(unsigned char**)(l + 0x10);               // mov 0x10(%rax),%rcx
+    if (*(unsigned char*)(q + 0x29) != 0) {                        // cmpb / jne 0x1417c650d
+        *(void**)(it + 8) = l;                                     // mov %rax,0x8(%rbx)
+        return;
+    }
+    for (;;) {                                                     // 0x1417c6500
+        l = q;                                                     // mov %rcx,%rax
+        q = *(unsigned char**)(q + 0x10);                          // mov 0x10(%rcx),%rcx
+        if (*(unsigned char*)(q + 0x29) != 0) break;                // cmpb / je back
+    }
+    *(void**)(it + 8) = l;                                         // mov %rax,0x8(%rbx)
+}
+
+// 0x1417c6580 — the decrement on the 0x21 flag, the same two climbs as 0x1417c63c0.
+void SynAccDec21_1417c6580(void* pIter) {
+    unsigned char* it = (unsigned char*)pIter;                     // rbx
+    if (*(void**)it == nullptr) {                                  // cmpq $0x0,(%rcx) / jne
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();
+    }
+    unsigned char* n = *(unsigned char**)(it + 8);                 // mov 0x8(%rbx),%rcx
+    if (*(unsigned char*)(n + 0x21) != 0) {                        // cmpb / je 0x1417c65ab
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();                      // jmp *0x1418233c0
+        return;
+    }
+    unsigned char* r = *(unsigned char**)(n + 0x10);               // mov 0x10(%rcx),%rax
+    if (*(unsigned char*)(r + 0x21) == 0) {                        // cmpb / jne 0x1417c65d6
+        unsigned char* l = *(unsigned char**)(r);                  // mov (%rax),%rcx
+        if (*(unsigned char*)(l + 0x21) != 0) {                    // cmpb / jne 0x1417c65cc
+            *(void**)(it + 8) = r;                                 // mov %rax,0x8(%rbx)
+            return;
+        }
+        for (;;) {                                                 // 0x1417c65c0
+            r = l;                                                 // mov %rcx,%rax
+            l = *(unsigned char**)(l);                             // mov (%rcx),%rcx
+            if (*(unsigned char*)(l + 0x21) != 0) break;            // cmpb / je back
+        }
+        *(void**)(it + 8) = r;                                     // mov %rax,0x8(%rbx)
+        return;
+    }
+    unsigned char* p = *(unsigned char**)(n + 8);                  // 0x1417c65d6: mov 0x8(%rcx),%rcx
+    if (*(unsigned char*)(p + 0x21) == 0) {                        // cmpb / jne 0x1417c65f8
+        for (;;) {                                                 // 0x1417c65e0
+            unsigned char* pr = *(unsigned char**)(p + 0x10);      // mov 0x10(%rcx),%rax
+            if (*(void**)(it + 8) != (void*)pr) break;              // cmp %rax,0x8(%rbx) / jne
+            *(void**)(it + 8) = p;                                 // mov %rcx,0x8(%rbx)
+            p = *(unsigned char**)(p + 8);                         // mov 0x8(%rcx),%rcx
+            if (*(unsigned char*)(p + 0x21) != 0) break;            // cmpb / je back
+        }
+    }
+    *(void**)(it + 8) = p;                                         // 0x1417c65f8: mov %rcx,0x8(%rbx)
+}
+
+// 0x1417c6610 — the decrement on the 0x29 flag.
+void SynAccDec29_1417c6610(void* pIter) {
+    unsigned char* it = (unsigned char*)pIter;                     // rbx
+    if (*(void**)it == nullptr) {                                  // cmpq $0x0,(%rcx) / jne
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();
+    }
+    unsigned char* n = *(unsigned char**)(it + 8);                 // mov 0x8(%rbx),%rcx
+    if (*(unsigned char*)(n + 0x29) != 0) {                        // cmpb / je 0x1417c663b
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();                      // jmp *0x1418233c0
+        return;
+    }
+    unsigned char* r = *(unsigned char**)(n + 0x10);               // mov 0x10(%rcx),%rax
+    if (*(unsigned char*)(r + 0x29) == 0) {                        // cmpb / jne 0x1417c6666
+        unsigned char* l = *(unsigned char**)(r);                  // mov (%rax),%rcx
+        if (*(unsigned char*)(l + 0x29) != 0) {                    // cmpb / jne 0x1417c665c
+            *(void**)(it + 8) = r;                                 // mov %rax,0x8(%rbx)
+            return;
+        }
+        for (;;) {                                                 // 0x1417c6650
+            r = l;                                                 // mov %rcx,%rax
+            l = *(unsigned char**)(l);                             // mov (%rcx),%rcx
+            if (*(unsigned char*)(l + 0x29) != 0) break;            // cmpb / je back
+        }
+        *(void**)(it + 8) = r;                                     // mov %rax,0x8(%rbx)
+        return;
+    }
+    unsigned char* p = *(unsigned char**)(n + 8);                  // 0x1417c6666: mov 0x8(%rcx),%rcx
+    if (*(unsigned char*)(p + 0x29) == 0) {                        // cmpb / jne 0x1417c6688
+        for (;;) {                                                 // 0x1417c6670
+            unsigned char* pr = *(unsigned char**)(p + 0x10);      // mov 0x10(%rcx),%rax
+            if (*(void**)(it + 8) != (void*)pr) break;              // cmp %rax,0x8(%rbx) / jne
+            *(void**)(it + 8) = p;                                 // mov %rcx,0x8(%rbx)
+            p = *(unsigned char**)(p + 8);                         // mov 0x8(%rcx),%rcx
+            if (*(unsigned char*)(p + 0x29) != 0) break;            // cmpb / je back
+        }
+    }
+    *(void**)(it + 8) = p;                                         // 0x1417c6688: mov %rcx,0x8(%rbx)
+}
+
 }  // namespace tq

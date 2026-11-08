@@ -127,3 +127,25 @@ holds the two seams these bodies need), inside `namespace tq`.
   read rather than guarding it.
 - Excluded on purpose: 0x1417c62e0 (calls `*0x141823288`, a seam not yet modelled in the file)
   and 0x1417c63c0 (dump cut at 0x1417c63fe).
+
+## D133 — fifteen more bodies, 0x1417c63c0..0x1417c6700
+
+- The decrement family, each on its own flag and each its own start: 0x1417c63c0 (0x41),
+  0x1417c6580 (0x21) and 0x1417c6610 (0x29). All three take the 0x10 side first: if that
+  side carries the flag the parent climb runs (0x1417c6416 / 0x1417c65d6 / 0x1417c6666),
+  otherwise the walk goes down the 0x0 lead of the 0x10 child (0x1417c63f5 and friends).
+  The climb stores the node it stopped at unconditionally, which is why the loop's exit and
+  the entry case share one store.
+- 0x1417c64b0: the 0x29 increment, the same three routes as 0x1417c5fa0 (header, flagged
+  left child, climb), its own start.
+- `synacc.cpp`: 0x1417c6450 and 0x1417c6480 (the two 0x29 walks, +0x10 and lead),
+  0x1417c64a0 (`movabs $0xfffffffffffffff`), 0x1417c6550 (the 0x29 node build, the pair from
+  the fifth argument, the byte from the sixth, the sentinel cleared between the two pair
+  stores), 0x1417c66a0 (two word copies, so the four bytes between them are never assumed to
+  move together), the five `ret $0x0` bodies 0x1417c66b0..0x1417c66f0 and 0x1417c6700.
+- `tests/syndicate_d133_test.cpp`: 34 checks, 6 passes, ASan+UBSan clean. One test-side fix
+  on the way: the buffer handed to the 0x29 build has to be 0x60 bytes, the body writes at
+  +0x28 and +0x29.
+- Next: 0x1417c6710, the divide-bearing body whose dump must be taken whole (it calls
+  `*0x1418233e8` after `div %rcx` and a `cmp $0x30,%rax`), and 0x1417c62e0, which needs the
+  `0x141823288` seam modelled (`g_fnLIFT_141823288` in synlift.cpp).

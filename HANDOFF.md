@@ -276,3 +276,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   cluster now stands at 73 bodies (D129 41, D130 9, D131 7, D132 16).
 - Next: 0x1417c62e0 needs the seam at `0x141823288` modelled first; 0x1417c63c0 needs a whole
   dump from its start past 0x1417c63fe before a line is written.
+
+## D133 (latest)
+
+- Fifteen more bodies: `SYNDICATE_D133_OK ... 34 checks`, 6 passes under ASan+UBSan.
+  The cluster now stands at 88 bodies (D129 41, D130 9, D131 7, D132 16, D133 15).
+- Next: 0x1417c6710 (`div %rcx`, `cmp $0x30,%rax`, then `call *0x1418233e8`) needs a whole
+  dump; 0x1417c62e0 needs the `0x141823288` seam modelled first.

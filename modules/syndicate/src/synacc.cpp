@@ -361,4 +361,75 @@ void* SynAccWalk21_1417c63a0(void* pThis) {
     return pRet;
 }
 
+// 0x1417c6450 — mov 0x10(%rcx),%rax / cmpb $0x0,0x29(%rax) / jne out /
+//               mov %rax,%rcx / mov 0x10(%rax),%rax / cmpb / je back
+void* SynAccWalk10_29_1417c6450(void* pThis) {
+    unsigned char* pRet = (unsigned char*)pThis;                       // rcx
+    unsigned char* pNode = *(unsigned char**)((unsigned char*)pThis + 0x10);
+    if (*(unsigned char*)(pNode + 0x29) == 0) {
+        for (;;) {
+            pRet = pNode;                                              // mov %rax,%rcx
+            pNode = *(unsigned char**)(pNode + 0x10);                  // mov 0x10(%rax),%rax
+            if (*(unsigned char*)(pNode + 0x29) != 0) break;
+        }
+    }
+    return pRet;
+}
+
+// 0x1417c6480 — the same walk through the lead
+void* SynAccWalk29_1417c6480(void* pThis) {
+    unsigned char* pRet = (unsigned char*)pThis;
+    unsigned char* pNode = *(unsigned char**)pThis;                    // mov (%rcx),%rax
+    if (*(unsigned char*)(pNode + 0x29) == 0) {
+        for (;;) {
+            pRet = pNode;
+            pNode = *(unsigned char**)pNode;                           // mov (%rax),%rax
+            if (*(unsigned char*)(pNode + 0x29) != 0) break;
+        }
+    }
+    return pRet;
+}
+
+// 0x1417c64a0 — movabs $0xfffffffffffffff,%rax / ret
+uint64_t SynAccConst_1417c64a0() { return 0x0fffffffffffffffULL; }
+
+// 0x1417c6550 — the 0x29 node build again, its own start, the pair the fifth argument
+// and the byte the sixth: (%rdx) into +0x18, 0x8(%rdx) into +0x20, the sentinel cleared
+// between the two stores exactly where the bytes put it.
+void* SynAccCtor_1417c6550(void* pThis, void* a, void* b, void* c, const void* pPair,
+                           unsigned char uFlag) {
+    unsigned char* s = (unsigned char*)pThis;
+    *(void**)(s) = a;                                     // mov %rdx,(%rcx)
+    *(void**)(s + 8) = b;                                 // mov %r8,0x8(%rcx)
+    *(void**)(s + 0x10) = c;                              // mov %r9,0x10(%rcx)
+    *(void**)(s + 0x18) = *(void**)pPair;                 // mov (%rdx),%rax / mov %rax,0x18(%rcx)
+    *(unsigned char*)(s + 0x29) = 0;                      // movb $0x0,0x29(%rcx)
+    *(void**)(s + 0x20) = *(void**)((const unsigned char*)pPair + 8);
+    *(unsigned char*)(s + 0x28) = uFlag;                  // movzbl 0x30(%rsp),%eax / mov %al,0x28(%rcx)
+    return pThis;
+}
+
+// 0x1417c66a0 — mov (%rdx),%eax / mov %eax,(%rcx) / mov 0x4(%rdx),%eax / mov %eax,0x4(%rcx)
+// The two halves are copied as words, not as one qword, so nothing is assumed about the
+// four bytes between them.
+void* SynAccCopy8_1417c66a0(void* pThis, const void* pSrc) {
+    std::memcpy(pThis, pSrc, 4);                          // mov (%rdx),%eax / mov %eax,(%rcx)
+    std::memcpy((unsigned char*)pThis + 4, (const unsigned char*)pSrc + 4, 4);
+    return pThis;                                         // mov %rcx,%rax
+}
+
+// 0x1417c66b0 — ret $0x0
+void SynAccNoop_1417c66b0() {}
+// 0x1417c66c0 — ret $0x0
+void SynAccNoop_1417c66c0() {}
+// 0x1417c66d0 — ret $0x0
+void SynAccNoop_1417c66d0() {}
+// 0x1417c66e0 — ret $0x0
+void SynAccNoop_1417c66e0() {}
+// 0x1417c66f0 — ret $0x0
+void SynAccNoop_1417c66f0() {}
+
+// 0x1417c6700 — mov %rcx,%rax / ret
+void* SynAccRetThis_1417c6700(void* pThis) { return pThis; }
+
 }  // namespace tq

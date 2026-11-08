@@ -68,5 +68,17 @@ void* SynAccCtor_1417c6330(void* pThis, void* a, void* b, void* c, const void* p
 void* SynAccZeroQword_1417c6360(void* pThis);                              // 0x1417c6360
 void* SynAccWalk10_21_1417c6370(void* pThis);                              // 0x1417c6370
 void* SynAccWalk21_1417c63a0(void* pThis);                                 // 0x1417c63a0
+void* SynAccWalk10_29_1417c6450(void* pThis);                              // 0x1417c6450
+void* SynAccWalk29_1417c6480(void* pThis);                                 // 0x1417c6480
+uint64_t SynAccConst_1417c64a0();                                          // 0x1417c64a0
+void* SynAccCtor_1417c6550(void* pThis, void* a, void* b, void* c, const void* pPair,
+                           unsigned char uFlag);                           // 0x1417c6550
+void* SynAccCopy8_1417c66a0(void* pThis, const void* pSrc);                // 0x1417c66a0
+void SynAccNoop_1417c66b0();                                               // 0x1417c66b0
+void SynAccNoop_1417c66c0();                                               // 0x1417c66c0
+void SynAccNoop_1417c66d0();                                               // 0x1417c66d0
+void SynAccNoop_1417c66e0();                                               // 0x1417c66e0
+void SynAccNoop_1417c66f0();                                               // 0x1417c66f0
+void* SynAccRetThis_1417c6700(void* pThis);                                // 0x1417c6700
 }  // namespace tq
 #endif
