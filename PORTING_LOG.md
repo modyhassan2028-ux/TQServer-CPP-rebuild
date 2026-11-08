@@ -10242,3 +10242,36 @@ Correction to the line above, from the next batch: `0x14172d120` already had its
 had nothing left open. `tools/frontier.py` now checks that claim mechanically: it collects every
 address a readable row annotates as `call`/`jmp`/`tail` and compares it against the `Slot_<addr>` and
 `SynLift_<addr>` definitions in `modules/`. The answer is 75 mentions, 0 open.
+
+## 2026-11-08 — D89: 0x1417d97c0 (syndicate::CMsgLog::Process) and twelve leaf setters
+
+The next wave after the readable tier closed: the CMsg handlers the roadmap points at. First unit is
+`0x1417d97c0`, which the image itself names — its log string is
+`syndicate::CMsgLog::Process(idActor), idActor:%d, Type:%d, MsgType:%d` — and which sits at vtable
+slot `+0x150` of the table at `0x14182e368`.
+
+Twenty-eight instructions. `call 0x1417b6210` with `rcx` still holding `this` (the ported singleton
+getter ignores it), then `Type = *(int*)(*(this+0x408) + 8)`. Type 0 goes to `0x1417b7010(pObj,
+idActor)`, Type 1 to `0x1417ac620(pObj, idActor)`, and anything else logs `(format, idActor, Type,
+*(uint16_t*)(this+0xa))`. Two details worth keeping: the `movzwl 0xa(%rdi)` is a 16-bit load, so the
+byte at `+0xc` must not leak into the value; and the frame writes `0xfffffffffffffffe` to
+`0x30(%rsp)` and never reads it, a leftover of inlined machinery that the port keeps visible as a
+`volatile` store instead of silently dropping.
+
+The log import is `CQBase.dll!log_InlineLogERROR`, confirmed by walking the PE import directory for
+the slot the call names: the call is `call *0x141823030`, the image base is `0x141720000` (not the
+usual `0x140000000`), so that address is RVA `0x103030` inside `.rdata`, and the descriptor it belongs
+to is CQBase's, index 6, `?log_InlineLogERROR@@YAXPEBDZZ`. Its arity here is four (format + three
+ints), so the unit declares its own seam with that exact shape rather than reusing the four-pointer
+plus line-number shape the other rows need.
+
+Then the twelve leaf setters that follow it, `0x1417d9840`..`0x1417d98f7`: six `orl $bit,0x30(%rcx)`
+bodies and six that also store their argument. The bits are `1,2,4,8,0x10,0x20` in address order. The
+store widths differ and that is the parity that matters: `+0x38`, `+0x3c`, `+0x40` and `+0x60` take a
+dword (`mov %edx`), while `+0x44` and `+0x45` take only `%dl`. `0x1417d9900` is the next function
+(`tq::CMsg::CMsg`, vtable `0x14182e368` at `+0x0` then `tq::CMsg::Init`), not part of this batch.
+
+Testing: `tests/syndicate_cmsglog_test.cpp`, 61 assertions, 6/6 runs, sanitizers clean. Every branch
+of Process with its exact argument, four Type values that must log, a null-seam pass that must not
+crash, all twelve setters with their bit accumulation, and byte-store neighbour checks at
+`0x43/0x44/0x45/0x46` so a too-wide store cannot pass. Suite totals now 14711 + 1284 + 61.

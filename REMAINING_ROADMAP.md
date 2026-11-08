@@ -131,7 +131,7 @@
 
 - **المسترجع الجديد يغير القواعد**: Syndicate.dll الأصلي بين أيدينا الآن (+ أرشيف المصدر الكامل v6159 فيه MsgServer/NpcServer وكل الـ DLLs الأصلية) — أي دالة فشل فيها الـ decompiler تُفك يدوياً بـ capstone (تم بنجاح مع SendLeaveAward: 812 بايت). جرد 66 vtable كامل في `tools/syndicate_vtables.json`.
 - **الدولة**: 62/62 × 6 أخضر. D58 مقفول بكل أجزائه (بما كان TBD: SendLeaveAward).
-- **الأولوية التالية (D59+)**: أجسام Process لفئات CMsg (39 عنوان معلوم من الجرد؛ ابدأ CMsgLog 0x1417d97c0 ثم ChgDomName 0x1417daee0 ثم LeagueOpt 0x1417d68d0/LeagueRobOpt 0x1417d8920) → إغلاق ModuleCreate (14177ec90) → الفشلان المتبقيان في الفهرس (1417ab8c0/1417ac2d0، كلاهما بجدول CSyndicateLogic) → جدول CSyndicateLogic كوحدات منطق (232 فتحة).
+- **الأولوية التالية (D59+)**: أجسام Process لفئات CMsg (39 عنوان معلوم من الجرد؛ CMsgLog 0x1417d97c0 **[منفّذ D89 ✔]** ثم ChgDomName 0x1417daee0 ثم LeagueOpt 0x1417d68d0/LeagueRobOpt 0x1417d8920) → إغلاق ModuleCreate (14177ec90) → الفشلان المتبقيان في الفهرس (1417ab8c0/1417ac2d0، كلاهما بجدول CSyndicateLogic) → جدول CSyndicateLogic كوحدات منطق (232 فتحة).
 - **المسار الأطول نفسه**: بقية واجهة المدير (~65 دالة) + 172 نوع cq_action المتبقي + CQCrossServer.
 
 

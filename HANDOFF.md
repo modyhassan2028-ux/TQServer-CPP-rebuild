@@ -35,7 +35,8 @@ the build output, not just the test output.
   The command, which no longer depends on the return type or a `_name` suffix:
   `grep -cE '^[A-Za-z_][A-Za-z0-9_<>:*& ]* Slot_141[0-9a-f]{6}'` on that file.
   (Earlier patterns here missed `bool` and `const char*` bodies; this one counts them all.)
-- Batteries: 14711 + 1284 assertions (two suites) in `tests/syndicate_logic_tail_slots_test.cpp` (219 at 8c97b8d), all passing, 6/6 runs, sanitizers clean. The binary prints its own count: `LOGIC_SLOTS_OK checks=14711 fails=0`.
+- `modules/syndicate/src/CMsgLog.cpp`: 13 more (`0x1417d97c0` and twelve setters), same command.
+- Batteries: 14711 + 1284 + 61 assertions (three suites) in `tests/syndicate_logic_tail_slots_test.cpp` (219 at 8c97b8d), `tests/syndicate_findoradd_test.cpp` and `tests/syndicate_cmsglog_test.cpp`, all passing, 6/6 runs, sanitizers clean. Each binary prints its own count: `LOGIC_SLOTS_OK checks=14711 fails=0`, `FINDORADD_OK checks=1284 fails=0`, `CMSGLOG_OK checks=61 fails=0`.
 - The `0x14177f980` family is complete and wired: `0x14177f980` -> `0x141779400` -> `0x141779090`,
   plus both singletons (`0x14177c770`, `0x1417b6210`), the map constructor `0x14177c6c0`, its end-node
   builder `0x14177ace0`, the key search `0x14177c0a0`, `lower_bound` `0x1417a8520`, the range pass
