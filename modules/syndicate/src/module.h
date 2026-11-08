@@ -1,72 +1,23 @@
-// ============================================================================
-// module.h — RAW Syndicate.dll v6159
-//   original path: modules/syndicate/src/module.cpp
-//   (the CHECKF logs carry exactly this path, line 0x1e / 0x22)
-//   three class shapes live here:
-//     tq::CMsg      vftable 0x14182e368 (5 slots)
-//     gs::IModule   vftable 0x14182e428 (9 slots)
-//     syndicate::CModule vftable 0x14182e5a8 (9 slots)
-// ============================================================================
-#ifndef SYNDICATE_MODULE_H
-#define SYNDICATE_MODULE_H
+// module.h — 0x14177ec90. Its CHECKF names the file:
+// f:\version\cqserver-78.0.11-1204\modules\syndicate\src\module.cpp
+#pragma once
 #include <cstdint>
-#include "modules/syndicate/src/msg/msgseams.h"
-#include "modules/syndicate/src/msg/cmsgbase.h"
-namespace syndicate {
 
-// ---- gs::IModule — the module interface
-class IModule {
-public:
-    static constexpr uintptr_t kClassVft = 0x14182e428;
-    static constexpr uintptr_t kPureCallThunk = 0x1417f3374;
+namespace tq {
 
-    static void* DeleteDtor(void* self, uint32_t uFlag);  // 0x14177e380
-    static bool PureVirtual();
-    static bool Off340();  // 0x14177e340
-    static bool Off350();  // 0x14177e350
-    static bool Off360();  // 0x14177e360
-    static bool Off370();  // 0x14177e370
-};
+// CQBase.dll!log_InlineLogERROR, IAT 0x141823030. This site is the CHECKF macro, not CHECK: the
+// second string is "CHECKF" and the third is the expression name.
+extern void (*g_pfn_checkf_module)(const char* pFmt, const char* pMacro, const char* pExpr,
+                                   const char* pFile, uint32_t nLine);
+extern void* (*g_pfnL_1417f3166)(uint64_t nBytes);          // the allocator behind `mov $0x4608,%ecx`
+extern void* (*g_pfnL_14177ead0)(void* pMem, void* pArg, uint32_t nArg2);
+extern bool (*g_pfnL_14177e890)(void* pModule);
 
-// ---- syndicate::CModule — the module root (member messages at fixed offsets)
-class CModule {
-public:
-    static constexpr uintptr_t kClassVft = 0x14182e5a8;
-    static constexpr uintptr_t kBaseIModuleVft = 0x14182e428;
-    static constexpr uint32_t kOffConsumer = 0x420;
+// 0x14177ec90 — allocate 0x4608 bytes, construct into them, CHECKF pModule, then verify through
+// 0x14177e890 and destroy through vtable +0x8 when that says no. Returns the module or null.
+void* Slot_14177ec90_ModuleCreate(void* pArg, uint32_t nArg2);
+// 0x14177ed30 / 0x14177ed40 — the two neighbours with no strings of their own.
+void** Slot_14177ed30_StoreNull(void** ppOut);
+void   Slot_14177ed40_NoOp();
 
-    static void* DeleteDtor(void* self, uint32_t uFlag);  // 0x14177ec00
-    static void MemberDtor(void* self);                   // 0x14177e4c0
-    static bool Slot600(void* self, void* pObj);          // 0x14177e600
-    static bool Init(void* self);                          // 0x14177e620
-    static void* SlotAA0(void* self);                      // 0x14177eaa0
-    static void* CreateMsg(void* self, uint32_t uCount32,
-                           void* pPacket,
-                           uint16_t uCount16);             // 0x14177ec30
-    static void* CreateMsgCore(void* self, void* pPacket,
-                               uint16_t uCount);           // 0x14177e6c0
-};
-
-// ---- the member-destructor seams (called with only `this` in rcx)
-extern void (*g_fnModBaseDtor)(void*);        // 0x1417a9ed0
-extern void (*g_fnModMem41a8)(void*);         // 0x1417d83e0
-extern void (*g_fnModMem3d50)(void*);         // 0x1417d9050
-extern void (*g_fnModMem3928)(void*);         // 0x1417d66c0
-extern void (*g_fnModMem3518)(void*);         // 0x1417ddfa0
-extern void (*g_fnModMem3108)(void*);         // 0x1417de290
-extern void (*g_fnModMem2cf8)(void*);         // 0x1417ddcb0
-extern void (*g_fnModMem28e8)(void*);         // 0x1417d9eb0
-extern void (*g_fnModMem24d8)(void*);         // 0x1417dda40
-extern void (*g_fnModMem20c8)(void*);         // 0x1417dac80
-extern void (*g_fnModMem1cb8)(void*);         // 0x1417dd280
-extern void (*g_fnModMem18a8)(void*);         // 0x1417dd0a0
-extern void (*g_fnModMem1088)(void*);         // 0x1417da8b0
-extern void (*g_fnModMem0c78)(void*);         // 0x1417dd730
-extern void (*g_fnModMem0850)(void*);         // 0x1417dcaf0
-extern void (*g_fnModMem0428)(void*);         // 0x1417db330
-extern void (*g_fnModPureCall)();             // 0x1418232b8 (the purecall slot)
-extern bool (*g_fnModProviderInit)(void* pMgr, void* pProvider);  // 0x1417a96f0
-extern void* (*g_fnModSlotAA0Tail)(void* pMgr);  // 0x1417ac5e0
-
-}  // namespace syndicate
-#endif
+}  // namespace tq

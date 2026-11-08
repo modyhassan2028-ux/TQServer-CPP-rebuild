@@ -10408,3 +10408,34 @@ two extra words, the ten-slot clamp at 11 and 15 entries, a negative and a zero 
 by 1000 for 0, 999, 1000, 4321, 123456789 and 0xffffffff in both modes 2 and 3.
 
 Suites now: 14711 + 1284 + 125 + 491 + 198.
+
+## 2026-11-08 — D92: 0x14177ec90 ModuleCreate, with 0x14177ed30/0x14177ed40/0x14177ed50
+
+The CHECKF in `0x14177ec90` names its file: `modules\syndicate\src\module.cpp`, expression
+`pModule`, line `0xcb` = 203. Note the macro string is **CHECKF**, not CHECK, and the argument order is
+(rcx format, rdx macro name, r8 expression, r9 file, stack line) — the line is written to `0x20(%rsp)`
+*after* the four register moves, which is why it looks out of order in the listing.
+
+The body: `mov $0x4608,%ecx` (17928 bytes) then `call 0x1417f3166`, the allocator. The result is kept
+both in `%rax` and in a stack slot, then `0x14177ead0(mem, arg1, arg2)` constructs. A null from either
+step converges on the same `test %rbx,%rbx` and the same CHECKF, so the port collapses them the way
+the bytes do rather than inventing an early return. Then `0x14177e890(module)`; false means
+`call *0x8(%rax)` on the module's own table (a virtual destructor, slot index 1) and a null return,
+true returns the module.
+
+Two neighbours follow with no strings of their own: `0x14177ed30` writes a null through the out
+pointer and returns it (`movq $0x0,(%rcx) / mov %rcx,%rax`), and `0x14177ed40` is `ret $0x0`, a body
+with nothing in it. They are filed with module.cpp on position alone, which the header says.
+
+`0x14177ed50` belongs to a different file, and its own CHECKF proves it:
+`...\modules\syndicate\src\pointrecordmgr.cpp`, expression `pConsumer`, line `0x1c` = 28. It stores
+its second argument through the first and returns true, or logs and returns false when the consumer is
+null — and on that path the out pointer is left untouched.
+
+Testing: `tests/syndicate_module_test.cpp`, 52 assertions, 6/6 runs, sanitizers clean. The allocator is
+checked for the exact 0x4608 size and the constructor for both arguments; alloc-null and ctor-null both
+reach the CHECKF with macro/expression/file/line verified, the verify-failure path is proven to call
+vtable slot index 1 and nothing else, a missing seam cannot fake success, and the attach unit's failure
+path is checked to leave the out pointer alone.
+
+Suites now: 14711 + 1284 + 125 + 491 + 198 + 52.
