@@ -30,7 +30,10 @@ def main() -> int:
 
     def is_return(ins) -> bool:
         m = ins.mnemonic
-        return 'ret' in m or m in ('jmp', 'hlt', 'ud2')
+        # int3 is the alignment fill MSVC puts after a function, so a row ending on it is
+        # finished, not cut. `rep ret` / `repz ret` are returns and are matched by mnemonic
+        # because their operand string is empty.
+        return 'ret' in m or m in ('jmp', 'hlt', 'ud2', 'int3')
 
     terminal = chunked = 0
     cut = []

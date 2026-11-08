@@ -5,6 +5,15 @@
 
 namespace tq {
 
+namespace {
+constexpr size_t kLeft = 0x00, kParent = 0x08, kRight = 0x10, kKey = 0x18, kIsNil = 0x29;
+constexpr size_t kScary = 0x00, kEndNode = 0x30;
+inline uint8_t* node_at(uint8_t* p, size_t off) {
+    return p ? *(uint8_t**)(p + off) : nullptr;
+}
+}  // namespace
+
+
 static uint64_t none4(uint64_t, uint64_t, uint64_t, uint64_t) { return 0; }
 static uint64_t none2(uint64_t, uint64_t) { return 0; }
 static uint64_t none1(uint64_t) { return 0; }
@@ -22,6 +31,46 @@ static uint64_t lookup_bridge(uint64_t a, uint64_t b, uint64_t c, uint64_t d) {
     return Slot_1417cad00_lookup((void*)(uintptr_t)a, (uint32_t)b, c, d);
 }
 uint64_t (*g_pfnLogic_1417cad00)(uint64_t, uint64_t, uint64_t, uint64_t) = lookup_bridge;
+
+static void noop_method(void*, uint64_t) {}
+void (*g_pfnLogic_1417a6960)(void* value, uint64_t arg) = noop_method;
+
+// 0x1417a8a50 — the guard used by the CSyndicateLogic slots that forward at +0x20.
+// Its own record stops at 0x1417a8a7e, so the body below was carved from the bytes through the
+// real ending at 0x1417a8af6: the early `xor al,al / ret`, the second half that calls the walk,
+// and the `mov al,1` tail. Nothing here comes from the truncated record.
+bool Slot_1417a8a50(void* self, uint32_t id, uint64_t arg3, uint64_t /*r9*/) {
+    if (id == 0)                                        // test edx,edx / jne
+        return false;                                   // xor al,al
+
+    uint8_t* map = (uint8_t*)self + 0x18;               // lea rbx,[rcx+0x18]
+    uint8_t* it[2] = {nullptr, nullptr};                 // rsp+0x20 / rsp+0x28
+    Slot_1417c8f70_lower_bound(map, it, &id);            // call 0x1417a8520 (same routine)
+
+    uint8_t* scary = it[0];                              // mov rdi,[rsp+0x20]
+    uint8_t* head = *(uint8_t**)(map + kEndNode);        // mov rbp,[rbx+0x30]
+    if (scary == nullptr || scary != *(uint8_t**)(map + kScary))
+        g_pfnLogic_1418233c0();                          // the iterator check
+
+    uint8_t* node = it[1];                               // mov rbx,[rsp+0x28]
+    if (node != head) {                                  // cmp rbx,rbp / je tail
+        uint8_t* owner;
+        if (scary == nullptr) {                          // test rdi,rdi / jne
+            g_pfnLogic_1418233c0();
+            owner = nullptr;                             // xor r11d,r11d
+        } else {
+            owner = *(uint8_t**)(scary + 0x00);          // mov r11,[rdi]
+        }
+        if (node == *(uint8_t**)(owner + kEndNode))      // cmp rbx,[r11+0x30]
+            g_pfnLogic_1418233c0();
+
+        void* value = *(void**)(node + 0x20);            // mov rcx,[rbx+0x20]
+        if (value != nullptr) {                          // test rcx,rcx / je tail
+            g_pfnLogic_1417a6960(value, arg3);           // mov rdx,rsi / call 0x1417a6960
+        }
+    }
+    return true;                                         // mov al,1
+}
 uint64_t (*g_pfnLogic_141797e00)(uint64_t, uint64_t) = none2;
 uint64_t (*g_pfnLogic_14178f470)(uint64_t) = none1;
 
@@ -30,13 +79,6 @@ void (*g_pfnLogic_1418233c0)(void) = noop_void;
 
 // 0x1417c8f70 — std::_Tree lower_bound. Static member offsets are the ones the bytes use;
 // they are named structurally because no symbol survives to name them.
-namespace {
-constexpr size_t kLeft = 0x00, kParent = 0x08, kRight = 0x10, kKey = 0x18, kIsNil = 0x29;
-constexpr size_t kScary = 0x00, kEndNode = 0x30;
-inline uint8_t* node_at(uint8_t* p, size_t off) {
-    return p ? *(uint8_t**)(p + off) : nullptr;
-}
-}  // namespace
 
 void* Slot_1417c8f70_lower_bound(void* container_void, void* out_void, const uint32_t* key_in) {
     uint8_t* container = (uint8_t*)container_void;

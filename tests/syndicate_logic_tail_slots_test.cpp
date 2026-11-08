@@ -343,6 +343,64 @@ int main() {
         CHECK(Slot_1417cb000(self, 5, 0, 0) == 0x888);  // hit, forwards to the 1-arg tail
     }
 
+    // --- 0x1417a8a50, the +0x20 guard, carved from bytes past its truncated record
+    {
+        struct M {
+            M* left = nullptr; M* parent = nullptr; M* right = nullptr;
+            uint32_t key = 0;
+            uint8_t pad1[4] = {0};
+            uint64_t value = 0;
+            uint8_t pad2 = 0;
+            uint8_t isnil = 0;
+            uint8_t tail[0x38 - 0x2a] = {0};   // room for the +0x30 pointer the check reads
+        };
+        static_assert(offsetof(M, value) == 0x20 && offsetof(M, isnil) == 0x29,
+                      "map node layout must match the bytes");
+        static M node, nil, head, other_head, scaryobj, ownerobj;
+        static struct { uint8_t pre[0x18]; uint8_t map[0x40]; } obj;
+
+        node = M(); nil = M(); nil.isnil = 1; head = M(); head.isnil = 1;
+        other_head = M(); other_head.isnil = 1; scaryobj = M(); ownerobj = M();
+        node.key = 5; node.value = 0xCAFE; node.left = &nil; node.right = &nil;
+        head.parent = &node;
+
+        std::memset(&obj, 0, sizeof(obj));
+        *(void**)(obj.map + 0x30) = &head;
+        *(void**)(obj.map + 0x00) = &scaryobj;            // the iterator's scary word
+        *(M**)&scaryobj.left = &ownerobj;                 // *(scary) -> owner
+        *(void**)((uint8_t*)&ownerobj + 0x30) = &other_head;
+
+        void* self = obj.pre;                              // the map lives at self+0x18
+
+        static uint64_t g_got_value;
+        static int g_calls;
+        g_calls = 0; g_got_value = 0;
+        g_pfnLogic_1417a6960 = [](void* v, uint64_t arg) {
+            ++g_calls; g_got_value = (uint64_t)(uintptr_t)v;
+            if (arg == 0x1234) g_got_value |= 1ull << 63;  // remember the forwarded argument
+        };
+
+        // id 0 answers false and never walks
+        CHECK(Slot_1417a8a50(self, 0, 0x1234, 0) == false);
+        CHECK(g_calls == 0);
+
+        // a hit with a live pointer calls the method with (pointer, arg3) and answers true
+        CHECK(Slot_1417a8a50(self, 5, 0x1234, 0) == true);
+        CHECK(g_calls == 1);
+        CHECK((g_got_value & ~(1ull << 63)) == 0xCAFE);
+        CHECK((g_got_value >> 63) == 1);                   // arg3 reached the callee
+
+        // past the end: still true, no call
+        g_calls = 0;
+        CHECK(Slot_1417a8a50(self, 9, 0x1234, 0) == true);
+        CHECK(g_calls == 0);
+
+        // a hit with a null stored pointer: still true, no call
+        node.value = 0;
+        CHECK(Slot_1417a8a50(self, 5, 0x1234, 0) == true);
+        CHECK(g_calls == 0);
+    }
+
     std::printf("%s checks=%d fails=%d\n", g_fails ? "LOGIC_SLOTS_FAIL" : "LOGIC_SLOTS_OK",
                 g_checks, g_fails);
     return g_fails ? 1 : 0;

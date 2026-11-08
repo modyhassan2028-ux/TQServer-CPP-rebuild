@@ -72,6 +72,16 @@ extern uint64_t (*g_pfnLogic_14178f470)(uint64_t);                              
 extern void (*g_pfnLogic_1418233c0)(void);                                        // error path
 void* Slot_1417c8f70_lower_bound(void* container, void* out, const uint32_t* key);
 
+// 0x1417a8520 is the SAME routine as 0x1417c8f70: 55 instructions, identical mnemonics, and
+// operands that differ only in jump/call targets, which must differ because the code sits at a
+// different address. Verified by comparing the two disassemblies instruction by instruction, so
+// the ported walk serves both and no second port is written.
+extern void (*g_pfnLogic_1417a6960)(void* value, uint64_t arg);                    // 2-arg method
+// 0x1417a8a50: id 0 answers false; otherwise lower_bound over the map at this+0x18, and on a hit
+// whose stored pointer is non-null, call 0x1417a6960(pointer, arg3). Answers true for every id
+// that is not 0, whether or not the key was found.
+bool Slot_1417a8a50(void* self, uint32_t id, uint64_t arg3, uint64_t r9);
+
 // 0x1417cad90: call lookup / return (result != 0)
 int      Slot_1417cad90(void* self, uint64_t rdx, uint64_t r8, uint64_t r9);
 // 0x1417cadb0: call lookup(this, (u32)r8, ...) / on hit tail-call (hit, (u32)rdx) / on miss 0
