@@ -108,5 +108,9 @@ void* SynAccNew48_1417c6710(uint64_t nElems);                              // 0x
 void* SynAccNew72_1417c6790(uint64_t nElems);                              // 0x1417c6790
 void* SynAccNew40_1417c6810(uint64_t nElems);                              // 0x1417c6810
 void* SynAccNew48_1417c6910(uint64_t nElems);                              // 0x1417c6910
+void* SynAccCopy2Ints_1417c6a10(void* pThis, const void* pA, const void* pB); // 0x1417c6a10
+void* SynAccRetThis_1417c6a20(void* pThis);                                // 0x1417c6a20
+void* SynAccRetThis_1417c6a30(void* pThis);                                // 0x1417c6a30
+void* SynAccCopy16To_1417c6a40(void* pSrc, void* pDst);                    // 0x1417c6a40
 }  // namespace tq
 #endif

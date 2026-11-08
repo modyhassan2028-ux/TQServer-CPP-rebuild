@@ -189,3 +189,17 @@ The four bodies that were held back at D134 are in, each read straight off its o
   operator new the good path tail-jumps to). No behaviour is invented when a seam is unset.
 - `tests/syndicate_d135_test.cpp`: 30 checks including the limit boundary, 6 passes,
   ASan+UBSan clean. Cluster total 109 bodies.
+
+## D136 — the head of the 0x1417c69e0 stretch, 0x1417c6a10 / 0x1417c6a20 / 0x1417c6a30 / 0x1417c6a40
+
+- 0x1417c6a10: two words from two separate arguments — `(%rdx)` into `(%rcx)` and `(%r8)`
+  into `0x4(%rcx)` — then `this` back. Two 4-byte moves, so the word between them is never
+  assumed to travel with either.
+- 0x1417c6a20 and 0x1417c6a30: `mov %rcx,%rax / ret`.
+- 0x1417c6a40: the direction is reversed against its neighbours — the two qwords come out of
+  `(%rcx)` and land in `(%rdx)`, and the answer is `rdx`, not `rcx`.
+- `tests/syndicate_d136_test.cpp`: 12 checks, 6 passes, ASan+UBSan clean. Cluster 113 bodies.
+- Still to come from the same dump (`Docs/ASM/1417c69e0.txt`, 227 lines): 0x1417c69e0, the
+  `add $0x18,%rcx` tail jump through the slot at 0x141823290, and 0x1417c6a60, which asserts
+  twice through `*0x141823030` with lines 0x32a and 0x32b and paths 0x14182664c,
+  0x141824ca8, 0x141836e5c and 0x141839fe0 before calling 0x141785dc0 and 0x1417c5640.

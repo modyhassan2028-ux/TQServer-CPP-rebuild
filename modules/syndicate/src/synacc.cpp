@@ -599,4 +599,28 @@ void* SynAccNew48_1417c6910(uint64_t nElems) {
     return nullptr;
 }
 
+// 0x1417c6a10 — mov (%rdx),%eax / mov %eax,(%rcx) / mov (%r8),%eax /
+//               mov %eax,0x4(%rcx) / mov %rcx,%rax / ret
+// Two words from two different arguments, the second landing at +0x4.
+void* SynAccCopy2Ints_1417c6a10(void* pThis, const void* pA, const void* pB) {
+    std::memcpy(pThis, pA, 4);                                  // mov (%rdx),%eax / mov %eax,(%rcx)
+    std::memcpy((unsigned char*)pThis + 4, pB, 4);              // mov (%r8),%eax / mov %eax,0x4(%rcx)
+    return pThis;                                               // mov %rcx,%rax
+}
+
+// 0x1417c6a20 — mov %rcx,%rax / ret
+void* SynAccRetThis_1417c6a20(void* pThis) { return pThis; }
+
+// 0x1417c6a30 — mov %rcx,%rax / ret
+void* SynAccRetThis_1417c6a30(void* pThis) { return pThis; }
+
+// 0x1417c6a40 — mov (%rcx),%rax / mov %rax,(%rdx) / mov 0x8(%rcx),%rax /
+//               mov %rax,0x8(%rdx) / mov %rdx,%rax / ret
+// The source is the first argument here and the answer is the second, unlike the
+// neighbouring bodies that build into rcx.
+void* SynAccCopy16To_1417c6a40(void* pSrc, void* pDst) {
+    std::memcpy(pDst, pSrc, 0x10);                              // the two qword stores
+    return pDst;                                                // mov %rdx,%rax
+}
+
 }  // namespace tq

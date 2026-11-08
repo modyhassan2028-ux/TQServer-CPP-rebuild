@@ -299,3 +299,11 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   three null-by-default seams: `SYNDICATE_D135_OK ... 30 checks`, 6 passes. Cluster 109 bodies.
 - Next: the stretch past 0x1417c69d0 was cut at 0x1417c69ff, so the next unit starts with a
   whole dump from 0x1417c69e0 (the `add $0x18,%rcx` tail jump) onward.
+
+## D136 (latest)
+
+- Four bodies at the head of the 0x1417c69e0 stretch: `SYNDICATE_D136_OK ... 12 checks`,
+  6 passes. Cluster 113 bodies.
+- Next from the saved dump: 0x1417c6a60 (two `*0x141823030` asserts with lines 0x32a/0x32b,
+  then 0x141785dc0 and 0x1417c5640) and 0x1417c69e0 (tail jump through 0x141823290, whose
+  slot still holds an unresolved RVA 0x1628a6).
