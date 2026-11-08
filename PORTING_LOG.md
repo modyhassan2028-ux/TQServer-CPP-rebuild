@@ -10476,3 +10476,44 @@ checked for all eighteen, four and one constants in order, for the `+0x16` answe
 false, and for the sub-package being read through `this+0x420`.
 
 Suites now: 14711 + 1284 + 125 + 491 + 198 + 104.
+
+## 2026-11-08 — D94: 0x1417ac700 and its three neighbours, plus 0x1417ac5e0
+
+The predicate both league dispatchers ask turned out to be the smallest unit yet, and the most
+consequential: `0x1417ac700` is three instructions.
+
+```
+mov 0x8(%rcx),%rcx      ; the sub-object
+mov (%rcx),%rax         ; its table
+jmp *0x278(%rax)        ; and out — a tail call, not a call
+```
+
+So it is a transparent forwarder into slot `+0x278` of the sub-object's table, with every register
+argument passed along untouched. `0x1417ac710` and `0x1417ac720` are the same shape on `+0x2d8` and
+`+0x2c8`. Because the original transfers control with `jmp`, the callee returns straight to the
+forwarder's caller in whatever register the callee's return type uses, so the port declares
+`uintptr_t` and says so, rather than pretending the answer is a bool.
+
+`0x1417ac730` is the one that is not a thunk: it builds a frame (`sub $0x28,%rsp`), calls slot
+`+0x1f8`, and returns `test %eax,%eax / sete %al` — a real boolean, and it tests `%eax`, so a 64-bit
+return with a zero low half still counts as zero.
+
+Both dispatchers now fall back to this body when their seam is unwired, so the default path runs real
+code instead of assuming "unknown":
+
+```
+const bool bKnown = (g_pfnL_1417ac700 != nullptr) ? g_pfnL_1417ac700(pObj, nId)
+                                                 : (Slot_1417ac700_Forward(pObj, nId) != 0);
+```
+
+`0x1417ac5e0` is three identical shapes in a row: load `this+0x20`, call `0x1417a7d70` when it is
+non-null; then `+0x48` with `0x1417d4a10`; then `+0x50` with `0x14176aa20`. The calls return normally,
+there is no tail jump, and each field is independent of the others.
+
+Testing: `tests/syndicate_slotforwarders_test.cpp`, 24 assertions, 6/6 runs, sanitizers clean. Each
+thunk is proven to reach its own slot, on the sub-object rather than the holder, with the id intact and
+the answer passed back; the inversion is checked both ways and across the 32-bit boundary; the release
+is checked for field order and for each field being skipped on its own. The two dispatcher suites were
+rebuilt against the new fallback and still pass at 491 and 198.
+
+Suites now: 14711 + 1284 + 125 + 491 + 198 + 104 + 24.

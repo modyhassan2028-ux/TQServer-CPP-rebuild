@@ -1,4 +1,5 @@
 #include <cstring>
+#include "modules/syndicate/src/slotforwarders.h"
 #include "modules/syndicate/src/msg/msgleagueopt.h"
 #include "modules/syndicate/src/CsyndicateLogicTailSlots.h"   // Slot_1417b6210_singleton
 

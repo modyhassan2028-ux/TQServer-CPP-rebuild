@@ -1,4 +1,5 @@
 #include <cstring>
+#include "modules/syndicate/src/slotforwarders.h"
 #include "modules/syndicate/src/msg/msgleaguerobopt.h"
 #include "modules/syndicate/src/msg/msgleagueopt.h"          // g_pfnL_1417ac700
 #include "modules/syndicate/src/CsyndicateLogicTailSlots.h"  // Slot_1417b6210_singleton
@@ -30,7 +31,8 @@ void Slot_1417d8920_Process(void* pThis, uint32_t nId) {
     if (nId == 0) return;                                    // 1417d8920
     void* pObj = Slot_1417b6210_singleton();                  // 1417d8947
     const bool bKnown = (g_pfnL_1417ac700 != nullptr)         // 1417d8954
-                            ? g_pfnL_1417ac700(pObj, nId) : false;
+                            ? g_pfnL_1417ac700(pObj, nId)
+                            : (Slot_1417ac700_Forward(pObj, nId) != 0);
     if (bKnown) {
         const uint32_t nFirst = RB_D(pThis, 0x440);           // 1417d895d
         if (nFirst < 2) return;                               // 1417d8963 jb
