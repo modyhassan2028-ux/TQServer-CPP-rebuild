@@ -1,33 +1,18 @@
-// ============================================================================
-// msgleaguerobopt.h — RAW Syndicate.dll v6159 · tq::CMsg message
-//   original path: modules/syndicate/src/msg/msgleaguerobopt.cpp
-//   vtable 0x14183cc78 · base tq::CMsg::vftable 0x14182e368
-//     slot 0  0x1417d86a0 deleting dtor (PB sub-object at +0x408)
-//     slot 1  0x1417d8420 Create — type 0xa52 then PB ParseFromArray
-//     slot 2  0x14177e2f0 base Process(OBJID, void*) stub
-//     slot 3  0x1417d8920 Process(OBJID)
-//     slot 4  0x14177e2d0 base Process(void*) stub
-// ============================================================================
-#ifndef SYNDICATE_MSGLEAGUEROBOPT_H
-#define SYNDICATE_MSGLEAGUEROBOPT_H
+// msgleaguerobopt.h — 0x1417d8920. Unlike 0x1417d68d0 there is no CHECK string in this body, so the
+// original file name is not recoverable from the image; the unit is filed next to msgleagueopt.cpp
+// because it dispatches the neighbouring league message on the same singleton.
+#pragma once
 #include <cstdint>
-#include "modules/syndicate/src/msg/msgseams.h"
-namespace syndicate {
 
-class CMsgLeagueRobOpt {
-public:
-    static constexpr uintptr_t kClassVft = 0x14183cc78;
-    static constexpr uintptr_t kBaseCMsgVft = 0x14182e368;
-    static constexpr uint32_t kOffMsgType = 0x0A;
-    static constexpr uint32_t kOffPayload = 0x408;
-    static constexpr uint16_t kMsgType = 0xa52;
-    static constexpr uintptr_t kFmtParseErr = 0x14183cd30;  // "...,error：%s"
-    static constexpr uintptr_t kFmtParseFail = 0x14183ccf0; // "failed."
+namespace tq {
 
-    static void* DeleteDtor(void* self, uint32_t uFlag);          // 0x1417d86a0
-    static bool Create(void* self, char* pData, uint16_t uType);  // 0x1417d8420
-    static void Process(void* self, uint32_t idActor);            // 0x1417d8920
-};
+// The predicate is the same 0x1417ac700 the LeagueOpt dispatcher asks, so the seam is shared with
+// msgleagueopt.h rather than declared twice.
+struct CMsgLeagueRobOpt;
 
-}  // namespace syndicate
-#endif
+// 0x1417d8920 — dispatches on the u32 at this+0x440. Cases 0/1/5/6 build a ten-slot array from the
+// u32 at +0x48 of each pointer in the array at this+0x448 (length at this+0x450) and hand it to a
+// vtable slot; cases 2 and 3 split the u32 at +0x444 into quotient and remainder by 1000.
+void Slot_1417d8920_Process(void* pThis, uint32_t nId);
+
+}  // namespace tq

@@ -10364,3 +10364,47 @@ wrong slot or handed the wrong field fails; then the gate sweep over the same 79
 without strings, and the CHECK's five arguments including the exact file path and line 84.
 
 Suites now: 14711 + 1284 + 125 + 491.
+
+## 2026-11-08 — D91: 0x1417d8920, the CMsgLeagueRobOpt dispatcher
+
+No CHECK string in this body, so the original file name is not recoverable from the image; the unit is
+filed as `modules/syndicate/src/msg/msgleaguerobopt.cpp` next to `msgleagueopt.cpp`, and that
+inference is written into the header rather than passed off as evidence.
+
+Ninety-something instructions. Structure, in the order the bytes do it:
+
+- `test %edx,%edx / je 0x1417d8c00` — an id of 0 returns through the `repz ret` past the frame
+  teardown, i.e. before the frame exists. Nothing else runs.
+- The predicate `0x1417ac700(pObj, nId)` (the same seam LeagueOpt uses), and when it answers *known*
+  the mode at `this+0x440` must be 2..3 or 5..6: `< 2` returns (`jb`), `2..3` continues (`jbe`), and
+  `mode-5` is compared against 1 so 5..6 continues and 4 or anything above 6 returns. When the
+  predicate answers *unknown* the gate is skipped entirely.
+- The mode is then reloaded and only `> 6` returns (`cmp $0x6 / ja`), and a seven-entry table at
+  `0x1417b8c04` (base `0x141720000`) selects the case. Note entry 4 is the epilogue target itself, so
+  mode 4 falls straight out with no work, and entries 2 and 3 share one block.
+
+Cases 0, 1, 5 and 6 all build the same local array: ten `uint32_t` slots zeroed at `rsp+0x30`, then
+for each pointer in the array at `this+0x448` (signed length at `this+0x450`) the `uint32_t` at
+`+0x48` of the pointed-to object copied in, stopping after ten writes. Two things are easy to miss:
+the write index is `rsp+0x2c+4*i`, i.e. element `i-1` because the index is pre-incremented, and the
+count handed to the callee is the **raw signed count**, not the clamped one (`mov %r10d,%r8d`), so a
+list of fifteen sends ten values and the number fifteen. Then:
+
+- case 0 → vtable `+0x680`, extra words `0` and `0`
+- case 1 → vtable `+0x680`, extra words `1` and `this+0x444`
+- case 5 → vtable `+0x6e0`, extra words `0` and `0`
+- case 6 → vtable `+0x6e0`, extra words `1` and `this+0x444`
+
+Cases 2 and 3 (one block) do no list work: they split the `uint32_t` at `this+0x444` by 1000 using the
+`0x10624dd3` magic (`mul`, then `shr $6` of the high half) into a quotient stored to the `rsp+0x20`
+home slot and a remainder left in `%r9d`, and call vtable `+0x730` with `%r8d` never written — so the
+third argument is the *switch value itself*. That callee takes five arguments; this block never writes
+the `rsp+0x28` home slot, which is why the port declares it with five instead of six.
+
+Testing: `tests/syndicate_leaguerobopt_test.cpp`, 198 assertions, 6/6 runs, sanitizers clean. The id-0
+early exit (no singleton, no predicate), the known-path gate over 0,1,4,7,8,0xffffffff returning and
+2,3,5,6 dispatching, the unknown path over every mode 0..6 plus 7 and 0xffff, each case's slot and its
+two extra words, the ten-slot clamp at 11 and 15 entries, a negative and a zero count, and the divide
+by 1000 for 0, 999, 1000, 4321, 123456789 and 0xffffffff in both modes 2 and 3.
+
+Suites now: 14711 + 1284 + 125 + 491 + 198.
