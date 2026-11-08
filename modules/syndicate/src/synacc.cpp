@@ -750,4 +750,28 @@ bool SynAccChecked4_1417c6bd0(void* pThis, void* a2, void* a3, unsigned char uFl
     return true;                                           // mov $0x1,%al
 }
 
+// The slot-0 tail call the two bodies below take. The target read out of the vtable is handed
+// to the seam together with the object, so nothing is invented about what it does.
+void* (*g_pfnSynVirt0_1417c6c80)(void*, void*) = nullptr;       // jmp *(%rax)
+
+// 0x1417c6c80 — add $0x98,%rcx / mov (%rcx),%rax / jmp *(%rax)
+// The object is the one at this+0x98, its vtable slot 0 the target.
+void* SynAccVirt0At98_1417c6c80(void* pThis) {
+    unsigned char* pObj = *(unsigned char**)((unsigned char*)pThis + 0x98);   // add $0x98,%rcx
+    void* pFn = *(void**)pObj;                                                // mov (%rcx),%rax
+    if (g_pfnSynVirt0_1417c6c80 != nullptr)
+        return g_pfnSynVirt0_1417c6c80(pObj, pFn);                            // jmp *(%rax)
+    return nullptr;
+}
+
+// 0x1417c6c90 — mov (%rcx),%rax / jmp *(%rax)
+// The same jump, with this itself as the object.
+void* SynAccVirt0_1417c6c90(void* pThis) {
+    unsigned char* pObj = (unsigned char*)pThis;                              // rcx unchanged
+    void* pFn = *(void**)pObj;                                                // mov (%rcx),%rax
+    if (g_pfnSynVirt0_1417c6c80 != nullptr)
+        return g_pfnSynVirt0_1417c6c80(pObj, pFn);                            // jmp *(%rax)
+    return nullptr;
+}
+
 }  // namespace tq

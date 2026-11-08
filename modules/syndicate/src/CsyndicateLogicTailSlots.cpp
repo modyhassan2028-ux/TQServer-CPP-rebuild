@@ -2541,4 +2541,17 @@ void SynAccDec29_1417c6610(void* pIter) {
     *(void**)(it + 8) = p;                                         // 0x1417c6688: mov %rcx,0x8(%rbx)
 }
 
+// 0x1417c6ca0 — the same iterator comparison as 0x1417c6210: the DEBUG check runs unless the
+// two leads name one node, and the answer is setne on the two +0x8 words.
+bool SynAccIterNe_1417c6ca0(void* pThis, void* pOther) {
+    unsigned char* t1 = (unsigned char*)pThis;                    // rdi
+    unsigned char* o1 = (unsigned char*)pOther;                   // rbx
+    void* lead = *(void**)t1;                                     // mov (%rcx),%rax
+    if (lead == nullptr || lead != *(void**)o1) {                 // test / je, cmp (%rdx),%rax / je
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();                     // call *0x1418233c0
+    }
+    return *(void**)(t1 + 8) != *(void**)(o1 + 8);                // cmp %rdx,0x8(%rdi) / setne %al
+}
+
 }  // namespace tq

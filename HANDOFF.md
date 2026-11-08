@@ -328,3 +328,12 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   Cluster 117 bodies.
 - Next from the dump: 0x1417c6c80 / 0x1417c6c90 (the two `jmp *(%rax)` bodies, one after
   `add $0x98,%rcx`) and 0x1417c6ca0 / 0x1417c6ce0, the `setne` comparisons.
+
+## D140 (latest)
+
+- Three bodies: `SYNDICATE_D140_OK ... 15 checks`, 6 passes. Cluster 120 bodies.
+- The dump now runs to 0x1417c6dff. Ready and fully captured for the next unit:
+  0x1417c6ce0 (setne), 0x1417c6d20, 0x1417c6d30 / 0x1417c6d40, 0x1417c6d50 (thunk to
+  0x1417f2fdc), the repeats at 0x1417c6d60 / 0x1417c6d70 / 0x1417c6d80, 0x1417c6d90 /
+  0x1417c6da0 / 0x1417c6db0, and 0x1417c6dc0 (the iterator `+0x18` accessor with two DEBUG
+  checks).

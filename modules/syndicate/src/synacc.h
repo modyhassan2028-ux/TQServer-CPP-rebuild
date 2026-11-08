@@ -135,5 +135,9 @@ extern bool (*g_pfnSynPrepBool_141787300)(void* pArg);                     // 0x
 extern void (*g_pfnSynVirt_1417c6bd0)(void* pSlot, void* pFn, int nArg,
                                       unsigned char uFlag);                // call *0x1a0(%r9)
 bool SynAccChecked4_1417c6bd0(void* pThis, void* a2, void* a3, unsigned char uFlag); // 0x1417c6bd0
+// The vtable-slot-0 tail the two bodies below take, and the two bodies themselves.
+extern void* (*g_pfnSynVirt0_1417c6c80)(void* pSlot, void* pFn);            // jmp *(%rax)
+void* SynAccVirt0At98_1417c6c80(void* pThis);                              // 0x1417c6c80
+void* SynAccVirt0_1417c6c90(void* pThis);                                  // 0x1417c6c90
 }  // namespace tq
 #endif

@@ -247,3 +247,14 @@ The four bodies that were held back at D134 are in, each read straight off its o
   and 0x141785dc0 therefore runs twice on this path: once for the dispatch and once inside
   0x1417c6a60. The test pins that count.
 - `tests/syndicate_d139_test.cpp`: 22 checks, 6 passes, ASan+UBSan clean. Cluster 117 bodies.
+
+## D140 — 0x1417c6c80 / 0x1417c6c90 / 0x1417c6ca0
+
+- 0x1417c6c80: `add $0x98,%rcx` / `mov (%rcx),%rax` / `jmp *(%rax)`. The disassembly settles the
+  indirection: the jump target is the value **at** `*(this+0x98)`, so the slot holds the code
+  pointer itself and there is no vtable dereference beyond it. The port reads exactly those two
+  levels and hands the object and the target to `g_pfnSynVirt0_1417c6c80`.
+- 0x1417c6c90: the identical jump with `this` as the object — `mov (%rcx),%rax` / `jmp *(%rax)`.
+- 0x1417c6ca0: the `setne` iterator comparison again, the DEBUG check at 0x1418233c0 running
+  unless both leads name one node.
+- `tests/syndicate_d140_test.cpp`: 15 checks, 6 passes, ASan+UBSan clean. Cluster 120 bodies.
