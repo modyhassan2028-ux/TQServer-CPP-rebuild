@@ -9615,3 +9615,21 @@ than papered over.
 
 The hand port itself: 596 of 10,660 rows are referenced by hand-written code (5.6%), and 76 classes
 have vtables of which 52 names are already declared in `modules/`.
+
+### Correction: the interior-entry gap is closed
+
+The 64 slots recorded above were resolved in the same session, not left open. `carve_targets.py` now
+also treats a vtable slot as a target on the same footing as a call target, which carved 68 bodies;
+`fix_rows.py` then repaired the rows they split. Re-checked against the regenerated module:
+
+| | count |
+| --- | --- |
+| vtable slots | 393 |
+| with a body in the module | 392 |
+| `jmp qword ptr [rip+x]` import thunks, expressed inline by the model | 1 |
+| unexplained | 0 |
+
+The single remaining address (`0x1417f2fe8`, a slot of the `bad_alloc` vtable) is a three-instruction
+run of import thunks; the model writes those as `ML_IAT(...)` inside the calling expression rather
+than as a body, so it needs no body of its own. Accounting is in `tools/bulk/vslot_accounting.json`.
+Batteries on the regenerated module: 24/24 across six rounds.
