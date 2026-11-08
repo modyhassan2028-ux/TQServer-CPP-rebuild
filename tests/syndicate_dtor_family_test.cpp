@@ -168,6 +168,82 @@ int main() {
         CHECK(g_log.empty());
     }
 
+    // --- CopyingInputStream::Skip 0x1417e6900
+    {
+        struct Fake { void** vft; };
+        // the slot is called as (this, buffer, length) and returns how much it "read"
+        static int g_call, g_last_len, g_total_len;
+        g_call = g_total_len = 0;
+        g_last_len = -1;
+        static int g_mode;          // 0 = full, 1 = one byte, 2 = zero, 3 = negative, 4 = one extra
+        struct Hooks {
+            static int read(void* self, void* buf, int len) {
+                (void)self; (void)buf;
+                ++g_call;
+                g_last_len = len;
+                switch (g_mode) {
+                    case 1: ++g_total_len; return 1;
+                    case 2: return 0;
+                    case 3: return -7;
+                    case 4: ++g_total_len; return len + 1;
+                    default: g_total_len += len; return len;
+                }
+            }
+        };
+        void* slots[2] = {(void*)(uintptr_t)0x1, (void*)&Hooks::read};
+        Fake fake;
+        fake.vft = slots;
+        CopyingInputStream* self = (CopyingInputStream*)&fake;
+
+        g_mode = 0;
+        CHECK(CopyingInputStream_Skip(self, 0) == 0);          // no iteration at all
+        CHECK(g_call == 0);
+        CHECK(CopyingInputStream_Skip(self, -5) == 0);         // `total < count` is false up front
+        CHECK(g_call == 0);
+
+        g_mode = 0; g_call = 0; g_total_len = 0;
+        CHECK(CopyingInputStream_Skip(self, 0x2500) == 0x2500);
+        CHECK(g_call == 3);                                    // 0x1000 + 0x1000 + 0x500
+        CHECK(g_last_len == 0x500);                            // the last request is the remainder
+        CHECK(g_total_len == 0x2500);
+
+        g_mode = 0; g_call = 0;
+        CHECK(CopyingInputStream_Skip(self, 0x1000) == 0x1000);
+        CHECK(g_call == 1);
+        CHECK(g_last_len == 0x1000);                           // capped by the buffer, not by count
+
+        g_mode = 0; g_call = 0;
+        CHECK(CopyingInputStream_Skip(self, 0x1001) == 0x1001);
+        CHECK(g_call == 2);
+        CHECK(g_last_len == 1);
+
+        g_mode = 2; g_call = 0;
+        CHECK(CopyingInputStream_Skip(self, 100) == 0);         // a zero read ends the loop
+        CHECK(g_call == 1);
+
+        g_mode = 3; g_call = 0;
+        CHECK(CopyingInputStream_Skip(self, 100) == 0);         // a negative read ends the loop too
+        CHECK(g_call == 1);
+
+        g_mode = 4; g_call = 0;
+        // the body adds what it was told without clamping, so an over-reporting read overshoots
+        CHECK(CopyingInputStream_Skip(self, 10) == 11);
+        CHECK(g_call == 1);
+
+        g_mode = 1; g_call = 0;
+        CHECK(CopyingInputStream_Skip(self, 5) == 5);           // byte at a time still lands exactly
+        CHECK(g_call == 5);
+        CHECK(g_last_len == 1);
+
+        for (int i = 0; i < 5; ++i)                            // the small helper on its own
+            CHECK(g_pfnSySmallerOf(&i, &i) == &i);             // ties go to the first argument
+        int lo = 3, hi = 9;
+        CHECK(g_pfnSySmallerOf(&hi, &lo) == &lo);
+        CHECK(g_pfnSySmallerOf(&lo, &hi) == &lo);
+        int neg = -1, pos = 2;
+        CHECK(g_pfnSySmallerOf(&pos, &neg) == &neg);           // the compare is signed
+    }
+
     std::printf("%s checks=%d fails=%d\n", g_fails ? "DTOR_FAMILY_FAIL" : "DTOR_FAMILY_OK",
                 g_checks, g_fails);
     return g_fails ? 1 : 0;

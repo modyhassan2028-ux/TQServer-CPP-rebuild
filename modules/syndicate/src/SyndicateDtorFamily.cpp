@@ -22,6 +22,13 @@ void (*g_pfnFatalExceptionDtor)(void*) = noop_dtor;                 // 0x1417e13
 void (*g_pfnTypeInfoBaseDtor)(void*) = noop_dtor;                   // 0x1417f3b9c
 void (*g_pfnTypeInfoDestroy)(void*, unsigned, unsigned, const void*) = noop_typeinfo_destroy;  // 0x1417f32ac
 
+// 0x1417e5aa0
+//   mov rcx,[rsp+0x28] / mov rax,[rsp+0x20]     ; arg2, arg1
+//   cmp [rcx],eax ...                           ; *arg1 - *arg2
+//   sf == of  -> return arg1 (arg1 <= arg2), else arg2
+static int* smaller_of(int* a, int* b) { return (*b >= *a) ? a : b; }   // ties go to `a`
+int* (*g_pfnSySmallerOf)(int*, int*) = smaller_of;
+
 // 0x14173f950
 //   mov [rcx],0x141828048        ; refresh its own vftable
 //   lea rbx,[rcx+8] / mov rcx,rbx / call 0x14173ecf0
@@ -87,6 +94,33 @@ void* TypeInfo_ScalarDeletingDtor(TypeInfo* self, unsigned flags) {
     if (flags & 1u)
         g_pfnSyRelease(self);
     return self;
+}
+
+// 0x1417e6900 — CopyingInputStream::Skip
+//   sub rsp,0x1058 (0x1000-byte buffer at rsp+0x30, stack cookie at rsp+0x1048)
+//   L9: cmp total,count / jns L40
+//       mov dword [rsp+0x1038],0x1000 / call 0x1417e7c40   ; avail = 0x1000
+//       eax = count - total / call 0x1417e5aa0             ; &min(avail, remaining)
+//       r8d = (int)*that / rdx = buffer / rcx = this / call [vft+8]
+//       got = eax ; if (got != 0 && got > 0) goto L35 ; else return total
+//   L35: total += got / jmp L9
+//   L40: return total
+// The buffer is read into and never inspected: the bytes are discarded, which is what
+// makes this Skip rather than Read. A read of exactly 0 ends the loop, so a stream that
+// returns 0 early leaves `total` short, and a negative count returns 0 without reading.
+int CopyingInputStream_Skip(CopyingInputStream* self, int count) {
+    char buffer[0x1000];
+    int total = 0;
+    while (total < count) {
+        int avail = 0x1000;
+        int remaining = count - total;
+        int* limit = g_pfnSySmallerOf(&avail, &remaining);
+        int got = ((int (*)(void*, void*, int))(*(void***)self)[1])(self, buffer, *limit);
+        if (!(got != 0 && got > 0))
+            break;
+        total += got;
+    }
+    return total;
 }
 
 // 0x1417f3bc0 — three bytes, `c2 00 00`: an empty slot that returns to its caller.

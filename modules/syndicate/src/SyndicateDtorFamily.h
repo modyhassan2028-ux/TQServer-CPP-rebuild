@@ -30,11 +30,15 @@
 // module.cpp), which is why four of these classes hold it: their interfaces declare
 // virtuals they never define.
 //
-// NOT ported here, and why: CopyingInputStream's third slot 0x1417e6900 is a real
-// 0x1058-byte-frame loop whose three callees (0x1417e7c40, 0x1417e5aa0 and a virtual
-// call through [rax+8]) are not yet identified from the image. Writing it now would
-// mean guessing what those callees do, so it stays with the lifted body until they
-// are proven.
+// CopyingInputStream's third slot 0x1417e6900 was held back until its callees were
+// proven; both now are:
+//   0x1417e7c40  `mov rax,[rsp+8] / mov eax,[rax]`            -> reads the int it is given
+//   0x1417e5aa0  returns whichever of two int* holds the smaller value (ties -> arg1);
+//                0x1417e6900 only ever reads that result, so it is the min of the two
+//   [rax+8]      the object's own vtable slot 1, called as (this, buffer, length)
+// The loop reads `min(0x1000, count - total)` bytes at a time and stops when a read
+// returns <= 0, so the slot is protobuf io::CopyingInputStream::Skip. The method name
+// is taken from that interface's shape and the proven behaviour, not from a symbol.
 // ============================================================================
 #ifndef SYNDICATE_DTOR_FAMILY_H
 #define SYNDICATE_DTOR_FAMILY_H
@@ -60,6 +64,8 @@ extern void (*g_pfnFatalExceptionDtor)(void* self);  // 0x1417e13e0
 // type_info's two callees
 extern void (*g_pfnTypeInfoBaseDtor)(void* self);    // 0x1417f3b9c
 extern void (*g_pfnTypeInfoDestroy)(void* self, unsigned size, unsigned data, const void* name); // 0x1417f32ac
+// 0x1417e5aa0: pointer to whichever int is smaller, ties to the first argument.
+extern int* (*g_pfnSySmallerOf)(int* a, int* b);
 
 struct CCrossMeritMgr {
     void*   vft;        // +0x00, set to 0x141828048 by the destructor
@@ -94,6 +100,7 @@ void* FatalException_ScalarDeletingDtor(FatalException* self, unsigned flags);  
 void  FatalException_BaseDtor(FatalException* self);                             // 0x1417e1430
 void* TypeInfo_ScalarDeletingDtor(TypeInfo* self, unsigned flags);               // 0x1417f2f6c
 void  ThankYou_EmptySlot(void* self);                                            // 0x1417f3bc0
+int   CopyingInputStream_Skip(CopyingInputStream* self, int count);              // 0x1417e6900
 
 }  // namespace tq
 
