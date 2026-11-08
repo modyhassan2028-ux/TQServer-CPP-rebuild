@@ -1689,6 +1689,52 @@ int main() {
         g_pfnLogic_141792b70 = nullptr;
     }
 
+    // ------------------------------------------------------------------
+    // 0x141792b70 — the sift the 0xb70 family calls, handed its comparator as a fifth
+    // argument. The stubs record the exact pair order so the two passes are visible.
+    {
+        static uint64_t aH[5];
+        static int nLess;
+        static uint64_t aA[8], aB[8];
+        auto less = +[](void* a, void* b) -> bool {
+            if (nLess < 8) { aA[nLess] = (uint64_t)(uintptr_t)a; aB[nLess] = (uint64_t)(uintptr_t)b; }
+            ++nLess;
+            return (uint64_t)(uintptr_t)a < (uint64_t)(uintptr_t)b; };
+
+        // --- a right child that is not preferred: p[2] > p[1], so the hole takes index 2
+        aH[0] = 10; aH[1] = 20; aH[2] = 30; aH[3] = 40; aH[4] = 50;
+        nLess = 0;
+        Slot_141792b70(aH, 0, 5, (void*)99, less);
+        CHECK(nLess == 2);                       // (30,20) at the child, then (30,99) on the way up
+        CHECK(aA[0] == 30 && aB[0] == 20);
+        CHECK(aA[1] == 30 && aB[1] == 99);       // the element that moved up is the parent's value
+        CHECK(aH[0] == 99);                      // the saved element lands in the hole
+        CHECK(aH[1] == 20 && aH[3] == 40 && aH[4] == 50);
+
+        // --- a left child that is preferred: p[2] < p[1], so the hole takes index 1
+        aH[0] = 10; aH[1] = 50; aH[2] = 20; aH[3] = 40; aH[4] = 60;
+        nLess = 0;
+        Slot_141792b70(aH, 0, 5, (void*)99, less);
+        CHECK(aA[0] == 20 && aB[0] == 50);       // (right, left) as the bytes load them
+        CHECK(aH[0] == 99);                      // 50 rose, then 99 took the root
+
+        // --- the lone child: count odd makes child == count, so the last element is promoted
+        // child 4 == count 4 promotes the last element, then the up pass compares it
+        aH[0] = 10; aH[1] = 20; aH[2] = 30; aH[3] = 40;
+        nLess = 0;
+        Slot_141792b70(aH, 1, 4, (void*)77, less);
+        CHECK(nLess == 1);                       // only the up pass compares
+        CHECK(aA[0] == 40 && aB[0] == 77);       // (the promoted element, the saved one)
+        CHECK(aH[1] == 77 && aH[3] == 40);       // 40 slid into the hole, 77 landed at index 1
+
+        // no children at all: index 1 of a three-element range has none, so nothing compares
+        aH[0] = 10; aH[1] = 20; aH[2] = 30;
+        nLess = 0;
+        Slot_141792b70(aH, 1, 3, (void*)77, less);
+        CHECK(nLess == 0);
+        CHECK(aH[1] == 77 && aH[0] == 10 && aH[2] == 30);
+    }
+
     std::printf("%s checks=%d fails=%d\n", g_fails ? "LOGIC_SLOTS_FAIL" : "LOGIC_SLOTS_OK",
                 g_checks, g_fails);
     return g_fails ? 1 : 0;

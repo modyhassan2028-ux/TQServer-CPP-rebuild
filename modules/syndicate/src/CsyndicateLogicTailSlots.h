@@ -396,4 +396,13 @@ void Slot_1417976e0(void* pFirst, void* pLast, void* pfn);
 
 }  // namespace tq
 
+namespace tq {
+
+// 0x141792b70 — the sift handed a comparator as a fifth argument (stack slot 0x60 at entry).
+// It walks the child pair down, then walks the hole back up against the saved element.
+void Slot_141792b70(void* pFirst, int64_t nIndex, int64_t nCount, void* pElem,
+                    bool (*pfnLess)(void* a, void* b));
+
+}  // namespace tq
+
 #endif

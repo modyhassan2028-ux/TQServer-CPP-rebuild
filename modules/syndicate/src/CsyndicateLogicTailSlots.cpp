@@ -1606,3 +1606,57 @@ void Slot_141797670(void* pFirst, void* pLast, void* /*pfn*/) { SortHeapAt(pFirs
 void Slot_1417976e0(void* pFirst, void* pLast, void* /*pfn*/) { SortHeapAt(pFirst, pLast, true); }
 
 }  // namespace tq
+
+namespace tq {
+
+// ============================================================================
+// 0x141792b70 — the sift behind 0x141795f70 / 0x1417976e0. Unlike its twin below, it is
+// handed the comparator as a fifth argument (`mov 0x60(%rsp),%r13`, then `call *%r13`), so
+// it needs no out-slot and no tail call. Every step is one instruction:
+//   141792b93  lea 0x2(%rdx,%rdx,1),%rbx        child = 2*index + 2
+//   141792bb0  mov -0x8(%rdi,%rbx,8),%rdx       the child pair, larger index first in rcx
+//   141792bb9  call *%r13                       the comparator: (child, child-1)
+//   141792bc0  dec %rbx                         a true answer prefers the left child
+//   141792bc7  mov %rax,(%rdi,%rsi,8)           the child moves into the hole
+//   141792bd8  cmp %rbp,%rbx / jne               one lone child is still promoted
+//   141792bf0  cqto / sub %rdx,%rax / sar        (hole-1)/2, the sign adjusted halving
+//   141792c07  call *%r13                       the up pass: (parent, elem)
+//   141792c37  mov %r12,(%rdi,%rsi,8)           the saved element lands in the hole
+void Slot_141792b70(void* pFirst, int64_t nIndex, int64_t nCount, void* pElem,
+                    bool (*pfnLess)(void* a, void* b)) {
+    uint64_t* p = (uint64_t*)pFirst;                              // mov %rcx,%rdi
+    const int64_t nStart = nIndex;                                // mov %rdx,%r14
+    int64_t nHole = nIndex;                                       // mov %rdx,%rsi
+    int64_t nChild = 2 * nIndex + 2;                              // 141792b93
+    if (nChild < nCount) {                                        // 141792b9b cmp/jge
+        for (;;) {
+            uint64_t uRight = p[nChild];                          // 141792bb5 mov (%rdi,%rbx,8),%rcx
+            uint64_t uLeft = p[nChild - 1];                       // 141792bb0 mov -0x8(...),%rdx
+            if (pfnLess != nullptr && pfnLess((void*)uRight, (void*)uLeft))
+                --nChild;                                         // 141792bc0 dec %rbx
+            p[nHole] = p[nChild];                                 // 141792bc7
+            nHole = nChild;                                       // 141792bcb mov %rbx,%rsi
+            nChild = 2 * nChild + 2;                              // 141792bce
+            if (nChild >= nCount) break;                          // 141792bd6 jl
+        }
+    }
+    if (nChild == nCount) {                                       // 141792bd8 cmp/jne
+        p[nHole] = p[nCount - 1];                                 // 141792be2
+        nHole = nCount - 1;                                       // 141792be6 lea -0x1(%rbp),%rsi
+    }
+    int64_t nParent = SignAdjustedHalf(nHole - 1);                // 141792bea..bf3
+    if (nStart < nHole) {                                         // 141792bf6 cmp/jge
+        for (;;) {
+            uint64_t uParent = p[nParent];                        // 141792c00 mov (%rdi,%rbx,8),%rcx
+            if (pfnLess == nullptr || !pfnLess((void*)uParent, pElem))
+                break;                                            // 141792c0c je
+            p[nHole] = uParent;                                   // 141792c18
+            nHole = nParent;                                      // 141792c1c mov %rbx,%rsi
+            nParent = SignAdjustedHalf(nParent - 1);              // 141792c12..c25
+            if (nStart >= nHole) break;                           // 141792c28 jl
+        }
+    }
+    p[nHole] = (uint64_t)(uintptr_t)pElem;                         // 141792c37 mov %r12,(%rdi,%rsi,8)
+}
+
+}  // namespace tq

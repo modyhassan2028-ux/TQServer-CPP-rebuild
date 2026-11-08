@@ -9989,3 +9989,20 @@ so the port carries it and ignores it, exactly as the bytes do.
 Batteries: 354 assertions, 6/6 runs, sanitizers clean. The drain case proves the count chain
 3, 2, 1 and that the head value lands on every tail slot; the build case proves the element is
 the parent's own, loaded before the decrement.
+
+## 2026-11-08 — 0x141792b70 ported (the comparator sift)
+
+Sixty-eight instructions, self-contained: the comparator arrives as a fifth argument
+(`mov 0x60(%rsp),%r13`, then `call *%r13` twice), so this row needs no out-slot and no tail
+call, unlike its twin `0x1417929f0` which builds an out-slot at `[rsp+0x70]` and hands the
+last step to `0x1417917a0`.
+
+The child walk loads the pair at `(%rdi,%rbx,8)` and `-0x8(%rdi,%rbx,8)`, i.e. the larger
+index first in rcx; a true answer decrements the child, so the comparator's convention is
+(left, right) with rcx holding the right. When `child == count` the last element is promoted
+and the hole becomes `count-1`. The up pass halves with `cqto / sub %rdx,%rax / sar`, i.e.
+`(hole-1)/2` sign-adjusted, and repeats while the start index is still below the hole. The
+saved element lands at `(%rdi,%rsi,8)` last.
+
+Batteries: 366 assertions, 6/6. The three cases pin the child choice both ways, the lone-child
+promotion, and the "no children at all" path that compares nothing.
