@@ -10236,4 +10236,9 @@ that checks every answer's flag against what the sweep already saw, then the in-
 count at `+0x38`, the red root, no red-red and the black height. Only the node factory, the throw
 hook and `_invalid_parameter_noinfo` are stubs.
 
-That leaves two rows on the frontier: `0x1417873a0` (the jump table) and `0x14172d120`.
+Correction to the line above, from the next batch: `0x14172d120` already had its body in
+`CsyndicateLogicTailSlots.cpp`, and `0x1417873a0` was ported as D86 in `SyndicateRankName.cpp`
+(49 ranks through `IStringManager` plus the `STR_ERROR` default). So the readable tier of this wave
+had nothing left open. `tools/frontier.py` now checks that claim mechanically: it collects every
+address a readable row annotates as `call`/`jmp`/`tail` and compares it against the `Slot_<addr>` and
+`SynLift_<addr>` definitions in `modules/`. The answer is 75 mentions, 0 open.

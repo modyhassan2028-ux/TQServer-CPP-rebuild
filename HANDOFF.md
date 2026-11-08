@@ -58,6 +58,11 @@ the build output, not just the test output.
 
 ### Seams still open (each is a callee nobody has ported yet)
 
+Checked with `python3 tools/frontier.py`: every callee a readable row annotates as `call 0x…`,
+`jmp 0x…` or `tail 0x…` now has a body (75 mentions, 0 open). The readable tier of this wave is
+closed; `0x1417873a0` is no longer a seam (D86 ported it in `SyndicateRankName.cpp`) and
+`0x14172d120` has its body in `CsyndicateLogicTailSlots.cpp`.
+
 - `14172d120`
 - `141730cd0`
 - `141732040`
@@ -66,8 +71,7 @@ the build output, not just the test output.
 - `14177ace0`
 - `14177c6c0`
 - `14177f980`
-- `1417873a0`
-  (the four are the destroy chain 0x1417caa00 runs per node; each is a one-line seam, null by default)
+- (the four are the destroy chain 0x1417caa00 runs per node; each is a one-line seam, null by default)
 - `1417a6960`
 - `1417a8940`
 - `1417a8a50`
