@@ -412,7 +412,11 @@ int main() {
         std::memset(buf, 0, sizeof(buf));
         std::memset(vec, 0, sizeof(vec));
         std::memset(owner, 0, sizeof(owner));
-        vec[0] = (uint64_t)&owner[0];        // the container word
+        // the container word is the proxy shape 0x14177c6c0 builds: [word] leads to the map, and
+        // the map's own +0x18/+0x20 are the bounds
+        static uint64_t proxy[1];
+        proxy[0] = (uint64_t)&owner[0];
+        vec[0] = (uint64_t)&proxy[0];
         vec[3] = (uint64_t)&buf[0];          // +0x18 begin
         vec[4] = (uint64_t)&buf[2];          // +0x20 finish, two elements in
         vec[5] = (uint64_t)&buf[8];          // +0x28 capacity end
@@ -429,14 +433,14 @@ int main() {
             *(uint64_t*)(s + 0x20) = fin + 4;
         };
 
-        uint64_t pair[2] = {(uint64_t)&owner[0], (uint64_t)&buf[2]};   // scary, finish
+        uint64_t pair[2] = {vec[0], (uint64_t)&buf[2]};   // the container word, then finish
         uint64_t out[2] = {0, 0};
         uint32_t v = 0xBEEF;
         void* r = Slot_141730cd0_grow_insert(vec, out, pair, &v);
         CHECK(r == (void*)out);
         CHECK(insert_calls == 1);
         CHECK(inserted == 0xBEEF);
-        CHECK(out[0] == (uint64_t)&owner[0]);          // the container word
+        CHECK(out[0] == vec[0]);                      // the container word
         CHECK(out[1] == (uint64_t)&buf[2]);            // the element offset the bytes computed
 
         // an empty vector takes the zero-offset path and still lands on begin

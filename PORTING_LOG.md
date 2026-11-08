@@ -9706,3 +9706,21 @@ every lookup this family performs. It needs `0x1417c8f70` ported first.
 The other five (`0x1417caa00` iterator loop, `0x1417873a0` id switch, `0x1417a8a50`,
 `0x1417a8940`, `0x14177f980`) are untouched for the same reason: each calls rows that are not
 ported yet.
+
+## 2026-11-08 — 0x14177f980 family closed, plus the vector helpers
+
+  - ported 141724850
+  - ported 141730cd0
+  - ported 141732040
+  - ported 1417495d0
+  - ported 141779090
+  - ported 14177ace0
+  - ported 14177c0a0
+  - ported 14177c6c0
+  - ported 14177c770
+  - ported 1417a6960
+  - ported 1417a8520
+  - ported 1417ac810
+  - ported 1417b6210
+  - ported 1417c8f70
+  - ported 1417cad00

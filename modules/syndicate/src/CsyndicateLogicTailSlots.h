@@ -112,6 +112,14 @@ extern void (*g_pfnLogic_141732040)(void* arg, void* elem);
 // never writes, so the port passes a zeroed buffer of the same width and says so rather than
 // pretending to know what the callee stores there.
 extern void (*g_pfnLogic_141730cd0)(void* self, void* out_or_arg, void* pair, const void* value);
+// 0x14172d120 is the actual one-element insert that 0x141730cd0 calls with (self, iterator, 1, value).
+// It is unported, so it stays a seam; the port re-reads begin afterwards exactly as the bytes do,
+// because an insert may move the buffer.
+extern void (*g_pfnLogic_14172d120)(void* self, uint64_t* it, uint64_t count, const void* value);
+
+// 0x141730cd0 — the grow-and-insert path: works out the element offset, calls the insert, then
+// re-reads begin and answers an iterator pointing at the element that was inserted.
+void* Slot_141730cd0_grow_insert(void* self, uint64_t* out, const uint64_t* pair, const void* value);
 
 // 0x1417495d0 — clears the 4-byte vector at +0x18/+0x20/+0x28. The memmove the bytes would make is
 // a zero-length one, so the only effect is finish = begin; the port keeps the shape that shows it.
