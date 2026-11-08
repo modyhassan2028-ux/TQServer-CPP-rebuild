@@ -203,3 +203,20 @@ The four bodies that were held back at D134 are in, each read straight off its o
   `add $0x18,%rcx` tail jump through the slot at 0x141823290, and 0x1417c6a60, which asserts
   twice through `*0x141823030` with lines 0x32a and 0x32b and paths 0x14182664c,
   0x141824ca8, 0x141836e5c and 0x141839fe0 before calling 0x141785dc0 and 0x1417c5640.
+
+## D137 — the two checked forwarders 0x1417c6a60 and 0x1417c6b30, with the 0x141823030 assertion modelled
+
+- The assertion seam `g_pfnSynAssert_141823030` takes the four pointers the bytes put in
+  rcx/rdx/r8/r9 and the line number they put on the stack. The failing branches carry:
+  file 0x141824ca8 and function 0x14182664c in every case, expression 0x141839fe0 in every
+  case, and the third pointer differs by branch — 0x141836e5c for the second argument at line
+  0x32a, 0x141831610 for the third at line 0x32b, and 0x141836e5c again at line 0x339 in
+  0x1417c6b30.
+- 0x1417c6a60 forwards `(this, a2, a3, <int from 0x141785dc0>, flag)`; the flag reaches the
+  callee as a stack byte (`mov %sil,0x20(%rsp)`), not as a register.
+- 0x1417c6b30 forwards `(this, a2, <result of 0x14178c8e0>, a3 as int, flag)`, and the slot
+  that prepare step reads is `0x90(%rcx)` on the original `this`, which the test pins by
+  giving `this` a distinguishable 0x90 pointer.
+- Three more seams, all null by default with the call guarded: `g_pfnSynPrep_141785dc0`,
+  `g_pfnSynPrep_14178c8e0` and the shared `g_pfnSynFwd_1417c5640`.
+- `tests/syndicate_d137_test.cpp`: 34 checks, 6 passes, ASan+UBSan clean. Cluster 115 bodies.

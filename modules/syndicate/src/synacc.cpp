@@ -623,4 +623,72 @@ void* SynAccCopy16To_1417c6a40(void* pSrc, void* pDst) {
     return pDst;                                                // mov %rdx,%rax
 }
 
+// The assertion and forward seams. Null by default: every body checks first, so an unset
+// seam removes nothing but the side effect.
+void (*g_pfnSynAssert_141823030)(const void*, const void*, const void*, const void*,
+                                 uint32_t) = nullptr;          // 0x141823030
+int (*g_pfnSynPrep_141785dc0)(void*) = nullptr;                // 0x141785dc0
+void* (*g_pfnSynPrep_14178c8e0)(void*, uint32_t) = nullptr;    // 0x14178c8e0
+void (*g_pfnSynFwd_1417c5640)(void*, void*, void*, int, unsigned char) = nullptr;  // 0x1417c5640
+
+// 0x1417c6a60 — the checked forwarder:
+//   movzbl %r9b,%esi / mov %r8,%rbx / mov %rdx,%rdi / mov %rcx,%r12 /
+//   test %rdx,%rdx / jne 0x1417c6abc / line 0x32a, 0x141824ca8, 0x14182664c,
+//   0x141836e5c, 0x141839fe0 / call *0x141823030 / jmp end /
+//   test %rbx,%rbx / jne 0x1417c6aed / line 0x32b with 0x141831610 in the third slot /
+//   mov %rbx,%rcx / call 0x141785dc0 / mov %eax,%r9d / mov %sil,0x20(%rsp) /
+//   mov %rbx,%r8 / mov %rdi,%rdx / mov %r12,%rcx / call 0x1417c5640
+// The two failing branches differ in one pointer only: the text 0x141836e5c for the second
+// argument, 0x141831610 for the third.
+void* SynAccChecked2_1417c6a60(void* pThis, void* a2, void* a3, unsigned char uFlag) {
+    volatile int64_t sentinel = -2;                  // movq $0xfffffffffffffffe,0x30(%rsp)
+    (void)sentinel;
+    if (a2 == nullptr) {                             // test %rdx,%rdx / jne
+        if (g_pfnSynAssert_141823030 != nullptr)
+            g_pfnSynAssert_141823030((const void*)(uintptr_t)0x141824ca8ULL,
+                                     (const void*)(uintptr_t)0x14182664cULL,
+                                     (const void*)(uintptr_t)0x141836e5cULL,
+                                     (const void*)(uintptr_t)0x141839fe0ULL, 0x32a);
+        return pThis;                                // jmp 0x1417c6b0c
+    }
+    if (a3 == nullptr) {                             // test %rbx,%rbx / jne
+        if (g_pfnSynAssert_141823030 != nullptr)
+            g_pfnSynAssert_141823030((const void*)(uintptr_t)0x141824ca8ULL,
+                                     (const void*)(uintptr_t)0x14182664cULL,
+                                     (const void*)(uintptr_t)0x141831610ULL,
+                                     (const void*)(uintptr_t)0x141839fe0ULL, 0x32b);
+        return pThis;                                // jmp 0x1417c6b0c
+    }
+    int nFrom = 0;                                   // mov %eax,%r9d
+    if (g_pfnSynPrep_141785dc0 != nullptr)
+        nFrom = g_pfnSynPrep_141785dc0(a3);          // mov %rbx,%rcx / call 0x141785dc0
+    if (g_pfnSynFwd_1417c5640 != nullptr)            // mov %sil,0x20(%rsp) is the stack flag
+        g_pfnSynFwd_1417c5640(pThis, a2, a3, nFrom, uFlag);
+    return pThis;
+}
+
+// 0x1417c6b30 — the same frame, one argument fewer checked and a slot read first:
+//   movzbl %r9b,%r12d / mov %r8d,%edi / test %rdx,%rdx / jne 0x1417c6b8c /
+//   line 0x339 with 0x141836e5c / call *0x141823030 / jmp end /
+//   mov %r8d,%edx / mov 0x90(%rcx),%rcx / call 0x14178c8e0 / mov %r12b,0x20(%rsp) /
+//   mov %edi,%r9d / mov %rax,%r8 / mov %rbx,%rdx / mov %rsi,%rcx / call 0x1417c5640
+void* SynAccChecked3_1417c6b30(void* pThis, void* a2, uint32_t uA3, unsigned char uFlag) {
+    volatile int64_t sentinel = -2;
+    (void)sentinel;
+    if (a2 == nullptr) {                             // test %rdx,%rdx / jne
+        if (g_pfnSynAssert_141823030 != nullptr)
+            g_pfnSynAssert_141823030((const void*)(uintptr_t)0x141824ca8ULL,
+                                     (const void*)(uintptr_t)0x14182664cULL,
+                                     (const void*)(uintptr_t)0x141836e5cULL,
+                                     (const void*)(uintptr_t)0x141839fe0ULL, 0x339);
+        return pThis;                                // jmp 0x1417c6bb2
+    }
+    void* pFrom = nullptr;                           // mov %rax,%r8
+    if (g_pfnSynPrep_14178c8e0 != nullptr)           // mov 0x90(%rcx),%rcx / call 0x14178c8e0
+        pFrom = g_pfnSynPrep_14178c8e0(*(void**)((unsigned char*)pThis + 0x90), uA3);
+    if (g_pfnSynFwd_1417c5640 != nullptr)            // mov %r12b,0x20(%rsp) is the stack flag
+        g_pfnSynFwd_1417c5640(pThis, a2, pFrom, (int)uA3, uFlag);
+    return pThis;
+}
+
 }  // namespace tq

@@ -112,5 +112,17 @@ void* SynAccCopy2Ints_1417c6a10(void* pThis, const void* pA, const void* pB); //
 void* SynAccRetThis_1417c6a20(void* pThis);                                // 0x1417c6a20
 void* SynAccRetThis_1417c6a30(void* pThis);                                // 0x1417c6a30
 void* SynAccCopy16To_1417c6a40(void* pSrc, void* pDst);                    // 0x1417c6a40
+// The three seams the two checked forwarders need: the assertion at 0x141823030 (which the
+// bytes reach with four pointers and the line number on the stack), the prepare step at
+// 0x141785dc0 / 0x14178c8e0, and the shared forward target 0x1417c5640.
+extern void (*g_pfnSynAssert_141823030)(const void* pFile, const void* pFunc, const void* pText,
+                                        const void* pExpr, uint32_t line);   // 0x141823030
+extern int (*g_pfnSynPrep_141785dc0)(void* pArg);                            // 0x141785dc0
+extern void* (*g_pfnSynPrep_14178c8e0)(void* pSlot90, uint32_t uA3);         // 0x14178c8e0
+extern void (*g_pfnSynFwd_1417c5640)(void* pThis, void* a2, void* a3, int nFrom,
+                                     unsigned char uFlag);                   // 0x1417c5640
+
+void* SynAccChecked2_1417c6a60(void* pThis, void* a2, void* a3, unsigned char uFlag); // 0x1417c6a60
+void* SynAccChecked3_1417c6b30(void* pThis, void* a2, uint32_t uA3, unsigned char uFlag); // 0x1417c6b30
 }  // namespace tq
 #endif

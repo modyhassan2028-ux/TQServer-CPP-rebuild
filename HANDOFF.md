@@ -307,3 +307,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - Next from the saved dump: 0x1417c6a60 (two `*0x141823030` asserts with lines 0x32a/0x32b,
   then 0x141785dc0 and 0x1417c5640) and 0x1417c69e0 (tail jump through 0x141823290, whose
   slot still holds an unresolved RVA 0x1628a6).
+
+## D137 (latest)
+
+- The 0x141823030 assertion is modelled and the two checked forwarders 0x1417c6a60 / 0x1417c6b30
+  are ported: `SYNDICATE_D137_OK ... 34 checks`, 6 passes. Cluster 115 bodies.
+- The same family continues in `Docs/ASM/1417c69e0.txt` at 0x1417c6bd0 (it starts
+  `mov %r9d,%esi`), which the next unit takes next, using the seams that are now in place.
