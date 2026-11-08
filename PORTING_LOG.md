@@ -9724,3 +9724,7 @@ ported yet.
   - ported 1417b6210
   - ported 1417c8f70
   - ported 1417cad00
+
+### 2026-11-08 correction
+
+The handoff first claimed 27 bodies and 193 assertions. Measured: 17 bodies, 19 seams, 191 assertions.

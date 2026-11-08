@@ -31,8 +31,8 @@ the build output, not just the test output.
 
 ## Where the work stands
 
-- Ported bodies in `modules/syndicate/src/CsyndicateLogicTailSlots.cpp`: 27 (see the Slot_ list below).
-- Batteries: 193 assertions, all passing, 6/6 runs, sanitizers clean.
+- Ported bodies in `modules/syndicate/src/CsyndicateLogicTailSlots.cpp`: 17.
+- Batteries: 191 assertions in `tests/syndicate_logic_tail_slots_test.cpp`, all passing, 6/6 runs, sanitizers clean.
 - The `0x14177f980` family is complete and wired: `0x14177f980` -> `0x141779400` -> `0x141779090`,
   plus both singletons (`0x14177c770`, `0x1417b6210`), the map constructor `0x14177c6c0`, its end-node
   builder `0x14177ace0`, the key search `0x14177c0a0`, `lower_bound` `0x1417a8520`, the range pass
@@ -111,3 +111,12 @@ against the bytes before changing either.
 `port: <what>` for a batch, with the body explaining what the bytes do, the seams that remain, the
 assertion count, and any bug that was the test's fault rather than the port's. `fix: <hash> <what>`
 when an earlier commit was wrong. Push every successful batch immediately.
+
+## Counts are cheap to check, so check them
+
+The first draft of this file said 27 bodies and 193 assertions. The real numbers on the commit that
+carries it are 17 bodies (`grep -cE '^(void|uint64_t\*|uint64_t|void\*) Slot_[0-9a-f]+_'`) and 191
+assertions (the test binary prints its own count). Take numbers from the tool that produced them, not
+from memory, because a handoff with wrong numbers is worse than one with none.
+
+Seams declared in the header: 19 (some are already defaulted to a ported body, some are still null).
