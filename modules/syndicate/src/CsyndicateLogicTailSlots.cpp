@@ -1,6 +1,7 @@
 // Instruction-by-instruction port of the twelve CSyndicateLogic slots described in the
 // header. Nothing is inferred beyond the registers the bytes read.
 #include "CsyndicateLogicTailSlots.h"
+#include <cstddef>
 
 namespace tq {
 
@@ -21,7 +22,66 @@ uint64_t (*g_pfnLogic_1417cad00)(uint64_t, uint64_t, uint64_t, uint64_t) = none4
 uint64_t (*g_pfnLogic_141797e00)(uint64_t, uint64_t) = none2;
 uint64_t (*g_pfnLogic_14178f470)(uint64_t) = none1;
 
-// 0x1417cad90: sub rsp,0x28 / call 0x1417cad00 / test rax,rax / setne al
+static void noop_void() {}
+void (*g_pfnLogic_1418233c0)(void) = noop_void;
+
+// 0x1417c8f70 — std::_Tree lower_bound. Static member offsets are the ones the bytes use;
+// they are named structurally because no symbol survives to name them.
+namespace {
+constexpr size_t kLeft = 0x00, kParent = 0x08, kRight = 0x10, kKey = 0x18, kIsNil = 0x29;
+constexpr size_t kScary = 0x00, kEndNode = 0x30;
+inline uint8_t* node_at(uint8_t* p, size_t off) {
+    return p ? *(uint8_t**)(p + off) : nullptr;
+}
+}  // namespace
+
+void* Slot_1417c8f70_lower_bound(void* container_void, void* out_void, const uint32_t* key_in) {
+    uint8_t* container = (uint8_t*)container_void;
+    uint8_t** out = (uint8_t**)out_void;
+
+    uint8_t* end = *(uint8_t**)(container + kEndNode);   // mov rbx,[rcx+0x30]
+    uint8_t* node = *(uint8_t**)(end + kParent);         // mov rax,[rbx+0x8]  (the root)
+    // rbx in the original starts as the END node (`mov rbx,[rcx+0x30]` before the walk) and is
+    // only moved when the walk turns left, which is why an untouched candidate answers "end".
+    uint8_t* candidate = end;
+    uint32_t key = 0;
+
+    if (*(uint8_t*)(node + kIsNil) == 0) {               // cmp byte [rax+0x29],0 / jne L22
+        key = *key_in;                                   // mov r9d,[r8]
+        for (;;) {
+            if (*(uint32_t*)(node + kKey) < key) {       // cmp [rax+0x18],r9d / jb  -> right
+                node = *(uint8_t**)(node + kRight);
+            } else {                                     // else remember and go left
+                candidate = node;
+                node = *(uint8_t**)(node + kLeft);
+            }
+            if (*(uint8_t*)(node + kIsNil) != 0)         // cmp byte [rax+0x29],0 / je loop
+                break;
+        }
+    }
+
+    uint8_t* scary = *(uint8_t**)(container + kScary);   // mov rax,[rcx]
+    uint8_t* head = *(uint8_t**)(container + kEndNode);  // mov rdi,[rcx+0x30]
+    if (!scary)                                          // test rax,rax / jz L30
+        g_pfnLogic_1418233c0();                          // L30: the error path, then continue
+
+    uint8_t** pair;                                      // rcx in the original: rsp+0x20 or +0x30
+    uint8_t* slot[2];
+    if (candidate == head || *(uint32_t*)(candidate + kKey) < key) {
+        slot[0] = scary;                                 // the end iterator: {scary, head}
+        slot[1] = head;
+        pair = slot;
+    } else {
+        slot[0] = scary;                                 // {scary, the found node}
+        slot[1] = candidate;
+        pair = slot;
+    }
+
+    out[0] = pair[0];                                    // mov rax,[rcx]  / mov [rbp],rax
+    out[1] = pair[1];                                    // mov rax,[rcx+8] / mov [rbp+8],rax
+    return out;                                          // mov rax,rbp
+}
+
 int Slot_1417cad90(void* self, uint64_t rdx, uint64_t r8, uint64_t r9) {
     uint64_t r = g_pfnLogic_1417cad00((uint64_t)(uintptr_t)self, rdx, r8, r9);
     return r != 0;

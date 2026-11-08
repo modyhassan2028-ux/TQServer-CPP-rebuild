@@ -194,6 +194,76 @@ int main() {
         CHECK(g_tail1_n == 2 && g_tail1 == 0x141827409ULL);   // the substituted default
     }
 
+    // --- 0x1417c8f70 lower_bound over the proven layout
+    {
+        // node: left +0x00, parent +0x08, right +0x10, key +0x18, _Isnil +0x29
+        struct Node {
+            Node* left = nullptr;
+            Node* parent = nullptr;
+            Node* right = nullptr;
+            uint32_t key = 0;
+            uint8_t pad[0x29 - 0x1c] = {0};
+            uint8_t isnil = 0;
+        };
+        static Node nodes[8];
+        static Node head;
+        static Node nil;
+        // tree: 4 (root) with left 2 and right 6; 2 has right 3; 6 has left 5
+        for (int i = 0; i < 8; ++i) { nodes[i] = Node(); }
+        Node* n2 = &nodes[2]; Node* n3 = &nodes[3]; Node* n4 = &nodes[4];
+        Node* n5 = &nodes[5]; Node* n6 = &nodes[6];
+        n4->left = n2; n4->right = n6;
+        n2->parent = n4; n6->parent = n4;
+        n2->right = n3; n3->parent = n2;
+        n6->left = n5; n5->parent = n6;
+        n4->key = 4; n2->key = 2; n3->key = 3; n5->key = 5; n6->key = 6;
+
+        nil = Node();
+        nil.isnil = 1;
+        head = Node();
+        head.parent = n4;                 // container[0x30] -> head; root is head->parent
+        head.isnil = 1;
+
+        static uint8_t container[0x40];
+        std::memset(container, 0, sizeof(container));
+        *(void**)(container + 0x30) = &head;
+        *(void**)(container + 0x00) = &head;   // the word carried into the iterator
+
+        int err = 0;
+        g_pfnLogic_1418233c0 = [] { /* error path must not fire with a live container */ };
+
+        // leaves point at the nil node
+        Node* live[5] = {n2, n3, n4, n5, n6};
+        for (int i = 0; i < 5; ++i) {
+            if (!live[i]->left) live[i]->left = &nil;
+            if (!live[i]->right) live[i]->right = &nil;
+        }
+
+        void* out[2] = {nullptr, nullptr};
+        // exact hit: lower_bound(5) finds 5
+        uint32_t k = 5;
+        CHECK(Slot_1417c8f70_lower_bound(container, out, &k) == (void*)out);
+        CHECK(out[1] == (void*)n5);
+        // between 3 and 4 -> 4
+        k = 3;
+        Slot_1417c8f70_lower_bound(container, out, &k);
+        CHECK(out[1] == (void*)n3);
+        k = 1;
+        Slot_1417c8f70_lower_bound(container, out, &k);
+        CHECK(out[1] == (void*)n2);        // smallest node
+        k = 7;
+        Slot_1417c8f70_lower_bound(container, out, &k);
+        CHECK(out[1] == (void*)&head);     // past the end -> the end node
+        CHECK(out[0] == (void*)&head);     // the first member is carried from container[0]
+
+        // an empty tree (root is the nil node) answers the end node without walking
+        head.parent = &nil;
+        k = 4;
+        Slot_1417c8f70_lower_bound(container, out, &k);
+        CHECK(out[1] == (void*)&head);
+        CHECK(err == 0);
+    }
+
     std::printf("%s checks=%d fails=%d\n", g_fails ? "LOGIC_SLOTS_FAIL" : "LOGIC_SLOTS_OK",
                 g_checks, g_fails);
     return g_fails ? 1 : 0;

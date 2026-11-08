@@ -54,6 +54,16 @@ extern uint64_t (*g_pfnLogic_1417cad00)(uint64_t, uint64_t, uint64_t, uint64_t);
 extern uint64_t (*g_pfnLogic_141797e00)(uint64_t, uint64_t);                      // 2-arg tail
 extern uint64_t (*g_pfnLogic_14178f470)(uint64_t);                                // 1-arg tail
 
+// 0x1417c8f70 — the tree walk 0x1417cad00 uses. Proven layout, straight from the bytes:
+//   node +0x00 left, +0x08 parent, +0x10 right, +0x18 key (u32), +0x29 _Isnil byte
+//   container +0x00 the word carried into the returned iterator, +0x30 the end node
+//   iterator written to `out` = { container[0x30] or the found node, paired with container[0] }
+// The routine is `lower_bound`: it descends by comparing node[0x18] against *(u32*)key,
+// remembering the last node it turned left at, and answers the end node when the walk
+// overshoots. 0x1418233c0 is the error path taken when container[0x00] is null.
+extern void (*g_pfnLogic_1418233c0)(void);                                        // error path
+void* Slot_1417c8f70_lower_bound(void* container, void* out, const uint32_t* key);
+
 // 0x1417cad90: call lookup / return (result != 0)
 int      Slot_1417cad90(void* self, uint64_t rdx, uint64_t r8, uint64_t r9);
 // 0x1417cadb0: call lookup(this, (u32)r8, ...) / on hit tail-call (hit, (u32)rdx) / on miss 0
