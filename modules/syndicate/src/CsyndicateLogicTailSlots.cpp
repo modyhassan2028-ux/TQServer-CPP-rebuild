@@ -2207,4 +2207,25 @@ void* SynAccWalk41_1417c5f30(void* pThis) {
 // 0x1417c5f50 — movabs $0x1fffffffffffffff,%rax / ret
 uint64_t SynAccConst_1417c5f50() { return 0x1fffffffffffffffULL; }
 
+// 0x1417c5e00 — mov %rdx,%rcx / jmp 0x1417f2fdc : the deallocate thunk again, the
+// forwarded pointer the second argument.
+void SynAccDealloc_1417c5e00(void* pAlloc, void* pMem) {
+    (void)pAlloc;                                          // rcx is overwritten, never read
+    g_pfnLogic_1417f2fdc(pMem);                            // jmp 0x1417f2fdc
+}
+
+// 0x1417c5f60 — the 0x1417c5b30 comparison word for word, but the answer is setne:
+//               mov (%rcx),%rax / test / je seam / cmp (%rdx),%rax / je seam /
+//               call *0x1418233c0 / cmp %rdx,0x8(%rdi) / setne %al / ret
+bool SynAccIterNe_1417c5f60(void* pThis, void* pOther) {
+    uint8_t* t = (uint8_t*)pThis;                          // rdi
+    uint8_t* o = (uint8_t*)pOther;                         // rbx
+    void* lead = *(void**)t;                               // mov (%rcx),%rax
+    if (lead == nullptr || lead != *(void**)o) {           // test / je, cmp (%rdx),%rax / je
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();              // call *0x1418233c0
+    }
+    return *(void**)(t + 8) != *(void**)(o + 8);           // cmp %rdx,0x8(%rdi) / setne %al
+}
+
 }  // namespace tq

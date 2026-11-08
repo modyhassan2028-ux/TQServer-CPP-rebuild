@@ -261,3 +261,11 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   `SYNDICATE_D130_OK ... 24 checks`, 6 passes under ASan+UBSan.
 - Next: 0x1417c5e00 / 0x1417c5e80 (re-dump, the earlier reads were truncated) and
   0x1417c5f60, the next iterator comparison on the same seam.
+
+## D131 (latest)
+
+- The accessor cluster is closed: `SYNDICATE_D131_OK ... 20 checks`, 6 passes under
+  ASan+UBSan. 57 bodies across D129/D130/D131.
+- Next: 0x1417c5fa0, the tree increment (`cmpq $0x0,(%rcx)` / the sentinel check on `0x8(%rbx)`
+  / the `0x29` climbs at 0x1417c5fd9 and 0x1417c6007). Its dump must be taken whole this time,
+  from 0x1417c5fa0 to the `ret` past 0x1417c6028 before any line is written.

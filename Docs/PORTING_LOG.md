@@ -94,3 +94,16 @@ holds the two seams these bodies need), inside `namespace tq`.
 - `tests/syndicate_d130_test.cpp`: 24 checks, 6 passes, ASan+UBSan clean.
 - Left: 0x1417c5e00 and 0x1417c5e80 (their dumps were cut) and the comparison at 0x1417c5f60,
   whose body continues past the same seam.
+
+## D131 — the accessor cluster closed: 0x1417c5e00, 0x1417c5e50, 0x1417c5e80, 0x1417c5ea0, 0x1417c5eb0, 0x1417c5ec0, 0x1417c5f60
+
+- `synacc.cpp` / `synacc.h`: 0x1417c5e50 (`mov 0x8(%rcx),%rax`), 0x1417c5e80 (both qwords then
+  `movzbl (%r8)` into +0x10), 0x1417c5ea0 (`movq $0x0,(%rcx)`), 0x1417c5eb0
+  (`movabs $0x666666666666666`), 0x1417c5ec0 (the `0x29` walk stepping through `+0x10`).
+- `CsyndicateLogicTailSlots.cpp`: 0x1417c5e00 (`mov %rdx,%rcx / jmp 0x1417f2fdc`) and
+  0x1417c5f60, which is 0x1417c5b30 word for word except the final `setne` instead of `sete`.
+- `tests/syndicate_d131_test.cpp`: 20 checks, 6 passes, ASan+UBSan clean.
+- The cluster now stands at 57 bodies over three units (D129 41, D130 9, D131 7). Still open in
+  the same run of code: 0x1417c5fa0, the tree increment, whose body continues past 0x1417c601e
+  (`cmp %rax,0x8(%rbx)` / `jne` / `mov %rcx,0x8(%rbx)`) and needs a full dump before it can be
+  written verbatim.

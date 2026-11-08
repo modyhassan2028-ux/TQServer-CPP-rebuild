@@ -49,5 +49,10 @@ void* SynAccRetThis_1417c5de0(void* pThis);                                // 0x
 void* SynAccRetThis_1417c5df0(void* pThis);                                // 0x1417c5df0
 void* SynAccTwoQwords_1417c5e60(void* pThis, const void* pSrc);            // 0x1417c5e60
 uint64_t SynAccConst_1417c5ef0();                                          // 0x1417c5ef0
+void* SynAccSlot8_1417c5e50(void* pThis);                                  // 0x1417c5e50
+void* SynAccTwoQwordsByte_1417c5e80(void* pThis, const void* pSrc, void* pArg); // 0x1417c5e80
+void* SynAccZeroQword_1417c5ea0(void* pThis);                              // 0x1417c5ea0
+uint64_t SynAccConst_1417c5eb0();                                          // 0x1417c5eb0
+void* SynAccWalk10_29_1417c5ec0(void* pThis);                              // 0x1417c5ec0
 }  // namespace tq
 #endif

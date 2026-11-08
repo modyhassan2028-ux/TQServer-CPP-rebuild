@@ -172,4 +172,39 @@ void* SynAccTwoQwords_1417c5e60(void* pThis, const void* pSrc) {
 // 0x1417c5ef0 — movabs $0xfffffffffffffff,%rax / ret
 uint64_t SynAccConst_1417c5ef0() { return 0x0fffffffffffffffULL; }
 
+// 0x1417c5e50 — mov 0x8(%rcx),%rax / ret
+void* SynAccSlot8_1417c5e50(void* pThis) { return *(void**)((unsigned char*)pThis + 8); }
+
+// 0x1417c5e80 — mov (%rdx),%rax / mov %rax,(%rcx) / mov 0x8(%rdx),%rax /
+//               mov %rax,0x8(%rcx) / movzbl (%r8),%eax / mov %al,0x10(%rcx) / ret rcx
+void* SynAccTwoQwordsByte_1417c5e80(void* pThis, const void* pSrc, void* pArg) {
+    std::memcpy(pThis, pSrc, 0x10);
+    *(unsigned char*)((unsigned char*)pThis + 0x10) = *(const unsigned char*)pArg;
+    return pThis;
+}
+
+// 0x1417c5ea0 — movq $0x0,(%rcx) / ret rcx
+void* SynAccZeroQword_1417c5ea0(void* pThis) {
+    *(void**)pThis = nullptr;
+    return pThis;
+}
+
+// 0x1417c5eb0 — movabs $0x666666666666666,%rax / ret
+uint64_t SynAccConst_1417c5eb0() { return 0x0666666666666666ULL; }
+
+// 0x1417c5ec0 — mov 0x10(%rcx),%rax / cmpb $0x0,0x29(%rax) / jne 0x1417c5edd /
+//               mov %rax,%rcx / mov 0x10(%rax),%rax / cmpb $0x0,0x29(%rax) / je back
+void* SynAccWalk10_29_1417c5ec0(void* pThis) {
+    unsigned char* pRet = (unsigned char*)pThis;                        // rcx
+    unsigned char* pNode = *(unsigned char**)((unsigned char*)pThis + 0x10);  // mov 0x10(%rcx),%rax
+    if (*(unsigned char*)(pNode + 0x29) == 0) {                         // cmpb $0x0,0x29(%rax) / jne
+        for (;;) {
+            pRet = pNode;                                               // mov %rax,%rcx
+            pNode = *(unsigned char**)(pNode + 0x10);                   // mov 0x10(%rax),%rax
+            if (*(unsigned char*)(pNode + 0x29) != 0) break;             // cmpb $0x0,0x29(%rax) / je back
+        }
+    }
+    return pRet;                                                        // mov %rcx,%rax
+}
+
 }  // namespace tq
