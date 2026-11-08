@@ -3,6 +3,26 @@
 // jumped to, whether `this` survives the tail jump, and what the comparison answers for
 // the boundary and negative arguments.
 #include "modules/syndicate/src/CsyndicateLogicTailSlots.h"
+#include "modules/syndicate/src/synattr.h"
+
+#include <cstdarg>
+#include <cstdio>
+#include <cstring>
+
+// The log seam, recorded instead of written: the comparator's guard is the only caller here,
+// and the battery checks the exact text it produced.
+namespace tq {
+char g_szLastLog[512];
+int g_nLogCalls = 0;
+void log_InlineLogERROR(const char* pszFormat, ...) {
+    va_list ap;
+    va_start(ap, pszFormat);
+    std::vsnprintf(g_szLastLog, sizeof g_szLastLog, pszFormat, ap);
+    va_end(ap);
+    ++g_nLogCalls;
+}
+}  // namespace tq
+
 #include <cstdio>
 #include <cstring>
 #include <cstddef>
@@ -928,7 +948,11 @@ int main() {
         CHECK(*(uint64_t*)((uint8_t*)c + 0x08) == 0);
         CHECK(*(uint64_t*)((uint8_t*)c + 0x58) == 0);
         CHECK(*(uint8_t *)((uint8_t*)c + 0x60) == 0);
-        CHECK(*(uint64_t*)((uint8_t*)c + 0x79) == 0);
+        {   // 0x79 is not an aligned word: read it the way the bytes would, without UB
+            uint64_t uWord = 0;
+            std::memcpy(&uWord, (uint8_t*)c + 0x79, sizeof uWord);
+            CHECK(uWord == 0);
+        }
         g_pfnLogic_14177c6c0 = nullptr;
     }
 
@@ -1792,8 +1816,8 @@ int main() {
         CHECK(nCmp == 0 && nUp == 1);
         CHECK(aUpHole[0] == 1 && aUpOrig[0] == 1 && aT[1] == 20);
 
-        g_pfnLogic_141787c60 = nullptr;
-        g_pfnLogic_1417917a0 = nullptr;
+        g_pfnLogic_141787c60 = &tq::Slot_141787c60;   // the ported body, not a stub
+        g_pfnLogic_1417917a0 = &tq::Slot_1417917a0;
     }
 
     // ------------------------------------------------------------------
@@ -1835,7 +1859,7 @@ int main() {
         Slot_1417917a0(aU, 3, 0, (void*)99, 0xDEADBEEFDEADBEEFull);
         CHECK(nCmpUp == 2 && aU[0] == 99);
 
-        g_pfnLogic_141787c60 = nullptr;
+        g_pfnLogic_141787c60 = &tq::Slot_141787c60;   // the ported body
     }
 
     // ------------------------------------------------------------------
@@ -1877,6 +1901,77 @@ int main() {
         uint64_t aDup[5] = {2, 1, 2, 1, 2};
         Slot_141793fd0(aDup, aDup + 5, lessS, nullptr);
         CHECK(aDup[0] == 1 && aDup[1] == 1 && aDup[2] == 2 && aDup[3] == 2 && aDup[4] == 2);
+    }
+
+    // ------------------------------------------------------------------
+    // 0x141787c60 — the synattr comparator: the context's key reader decides first (signed),
+    // and equal keys fall through to each record's second key (unsigned). A fake record is a
+    // pointer to its vtable at +0 and its key at +8, which is the layout the two paths need.
+    {
+        struct FakeNode { void* pRec; int32_t nKey; };
+
+        static void* gpCtx[1];
+        int32_t (*pfnKey)(void*) = +[](void* pNode) -> int32_t {
+            return ((FakeNode*)pNode)->nKey; };
+        gpCtx[0] = (void*)(int32_t (*)(void*))pfnKey;
+
+        // the second key lives behind two slots: record -> 0x10 (sub-record) -> 0x40 (value)
+        static int32_t nSubVal;
+        static void* aSubA[1];
+        static void* aSubB[1];
+        static void* vftRecA[16];
+        static void* vftRecB[16];
+        static void* vftSubA[16];
+        static void* vftSubB[16];
+
+        void* (*pfnSubA)(void*, int32_t) = +[](void*, int32_t) -> void* { return (void*)aSubA; };
+        void* (*pfnSubB)(void*, int32_t) = +[](void*, int32_t) -> void* { return (void*)aSubB; };
+        int32_t (*pfnSubKeyA)(void*) = +[](void*) -> int32_t { return nSubVal; };
+        int32_t (*pfnSubKeyB)(void*) = +[](void*) -> int32_t { return nSubVal + 1; };
+
+        vftRecA[0x10 / 8] = (void*)(void* (*)(void*, int32_t))pfnSubA;
+        vftRecB[0x10 / 8] = (void*)(void* (*)(void*, int32_t))pfnSubB;
+        vftSubA[0x40 / 8] = (void*)(int32_t (*)(void*))pfnSubKeyA;
+        vftSubB[0x40 / 8] = (void*)(int32_t (*)(void*))pfnSubKeyB;
+        aSubA[0] = (void*)vftSubA;                 // the sub-record's own vtable
+        aSubB[0] = (void*)vftSubB;
+
+        static void* aRecA[1];
+        static void* aRecB[1];
+        aRecA[0] = (void*)vftRecA;                 // the record's vtable at +0
+        aRecB[0] = (void*)vftRecB;
+
+        static FakeNode aN1, aN2, aN3, aN4, aNull;
+        aN1.pRec = (void*)aRecA; aN1.nKey = 5;
+        aN2.pRec = (void*)aRecB; aN2.nKey = 3;
+        aN3.pRec = (void*)aRecA; aN3.nKey = 5;
+        aN4.pRec = (void*)aRecB; aN4.nKey = 5;
+        aNull.pRec = nullptr;     aNull.nKey = 5;   // equal keys, so the second key runs
+
+        // --- different keys: signed order, larger is "after"
+        CHECK(tq::Slot_141787c60(gpCtx, &aN1, &aN2) == true);          // 5 after 3
+        CHECK(tq::Slot_141787c60(gpCtx, &aN2, &aN1) == false);         // 3 is not after 5
+        static FakeNode aNeg, aPos;
+        aNeg.pRec = (void*)aRecA; aNeg.nKey = -1;
+        aPos.pRec = (void*)aRecA; aPos.nKey = 1;
+        CHECK(tq::Slot_141787c60(gpCtx, &aNeg, &aPos) == false);       // -1 is not after 1 (setg)
+        CHECK(tq::Slot_141787c60(gpCtx, &aPos, &aNeg) == true);
+
+        // --- equal keys: the second key decides, and it is compared unsigned
+        nSubVal = 10;
+        CHECK(tq::Slot_141787c60(gpCtx, &aN3, &aN3) == false);         // 10 is not below 10
+        CHECK(tq::Slot_141787c60(gpCtx, &aN3, &aN4) == true);          // 10 < 11
+        CHECK(tq::Slot_141787c60(gpCtx, &aN4, &aN3) == false);         // 11 is not below 10
+
+        // --- a null record logs the guard, answers zero, and the comparison still answers
+        const int nLogsBefore = tq::g_nLogCalls;
+        CHECK(tq::Slot_141787c60(gpCtx, &aNull, &aN3) == true);        // 0 < 10
+        CHECK(tq::Slot_141787c60(gpCtx, &aN3, &aNull) == false);       // 10 is not below 0
+        CHECK(tq::Slot_141787c60(gpCtx, &aNull, &aNull) == false);     // 0 is not below 0
+        CHECK(tq::g_nLogCalls == nLogsBefore + 4);                     // one per null record compared
+        CHECK(std::strstr(tq::g_szLastLog, "IF_OK(m_pRec)") != nullptr);
+        CHECK(std::strstr(tq::g_szLastLog, "synattr.cpp") != nullptr);
+        CHECK(std::strstr(tq::g_szLastLog, ", 607") != nullptr);
     }
 
     std::printf("%s checks=%d fails=%d\n", g_fails ? "LOGIC_SLOTS_FAIL" : "LOGIC_SLOTS_OK",

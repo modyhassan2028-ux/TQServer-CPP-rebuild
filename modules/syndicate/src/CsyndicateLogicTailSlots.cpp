@@ -1,6 +1,7 @@
 // Instruction-by-instruction port of the twelve CSyndicateLogic slots described in the
 // header. Nothing is inferred beyond the registers the bytes read.
 #include "CsyndicateLogicTailSlots.h"
+#include "modules/syndicate/src/synattr.h"
 
 #include <cstring>
 #include <cstddef>
@@ -1678,9 +1679,9 @@ namespace tq {
 //   141792a62  mov 0x70(%rsp),%rax            the out slot, carried into the fifth argument
 //   141792a73  mov %rax,0x20(%rsp)            ... which is where stack arguments start
 //   141792a78  call 0x1417917a0               (first, hole, original index, elem, out slot)
-bool (*g_pfnLogic_141787c60)(void* out, void* right, void* left) = nullptr;
+bool (*g_pfnLogic_141787c60)(void* out, void* right, void* left) = &Slot_141787c60;
 void (*g_pfnLogic_1417917a0)(void* first, int64_t hole, int64_t orig, void* elem,
-                             uint64_t outValue) = nullptr;
+                             uint64_t outValue) = &Slot_1417917a0;
 
 void Slot_1417929f0(void* pFirst, int64_t nIndex, int64_t nCount, void* pElem) {
     uint64_t* p = (uint64_t*)pFirst;                              // mov %rcx,%rdi

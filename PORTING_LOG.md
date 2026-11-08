@@ -10056,3 +10056,31 @@ Batteries: 397 assertions, 6/6. Unsorted, empty, single, sorted, descending and 
 covered. One expectation of mine was wrong (I predicted 3 comparisons on an already sorted run of
 four; every element compares against the front *and* its neighbour, so it is 6). The port was right,
 the assertion was not.
+
+## 2026-11-08 — 0x141787c60 ported (the synattr comparator) and its unit created
+
+Sixty-seven instructions and a new unit, `modules/syndicate/src/synattr.cpp`, because the guard's
+own __FILE__ string names it: `f:\version\cqserver-78.0.11-1204\modules\syndicate\src\synattr.cpp`.
+
+The row is the two-key ordering the sifts call:
+
+    key of A and key of B through the context's reader   141787c80 / 141787c87, call *(%rdi)
+    different  -> signed "A after B"                     141787c9b setg
+    equal      -> the second key of each record          141787ca3 (A, kept in ebx) and
+                                                         141787cef (B, left in eax)
+                  then *unsigned* less                   141787d3a setb
+
+The second key is the walk synattrget.cpp already performs with slot 0x48, here with slot 0x40:
+`pRec = *(ppRec)` guarded by IF_OK(m_pRec), the sub-record at slot 0x10 called with kind 0, and
+that sub-record's slot 0x40 read as the value. A null record logs the guard, answers zero, and the
+comparison continues, exactly as the bytes do.
+
+The assert blob, read out of the image: format `\xa1\xef%s(%s)\xa1\xef in %s, %d`, macro `IF_OK`,
+expression `m_pRec`, file the source above, line `0x25f` = 607. I first wrote 615 in the constants
+and in this log; the test caught it because it asserts the printed line, and 0x25f is 607.
+
+The two seams this unit closes are now wired: `g_pfnLogic_141787c60` and `g_pfnLogic_1417917a0`
+initialise to the ported bodies, so the sift chain is real when nothing overrides it.
+
+Batteries: 411 assertions, 6/6 runs, sanitizers clean. Also fixed a pre-existing misaligned read in
+an older battery (a 0x79 offset read as a word), which had been printing a UBSan note every run.
