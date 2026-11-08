@@ -87,6 +87,12 @@ extern void (*g_pfnLogic_1417a6960)(void* value, uint64_t arg);                 
 // that is not 0, whether or not the key was found.
 bool Slot_1417a8a50(void* self, uint32_t id, uint64_t arg3, uint64_t r9);
 
+// 0x14177c0a0 — exact-key search over the same node layout as the ported walk
+// (right +0x10, key +0x18, value +0x20, _Isnil +0x29). Answers the stored value, or 0 when the
+// key is absent; the candidate is the smallest node whose key is >= the wanted one, so
+// `key < candidate->key` is how the bytes decide "absent".
+uint64_t Slot_14177c0a0_find(void* self, uint32_t key);
+
 // 0x141724850 — 168 call sites. Two instructions: reload the pointer from [rcx] and tail-call
 // operator delete on it. Nothing is null-checked, exactly as in the bytes.
 void Slot_141724850_delete_through(void* holder);

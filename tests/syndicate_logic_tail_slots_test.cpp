@@ -401,6 +401,45 @@ int main() {
         CHECK(g_calls == 0);
     }
 
+    // --- 0x14177c0a0 finds a key and answers the stored value
+    {
+        struct K {
+            K* left = nullptr; K* parent = nullptr; K* right = nullptr;
+            uint32_t key = 0;
+            uint8_t pad1[4] = {0};
+            uint64_t value = 0;
+            uint8_t pad2 = 0;
+            uint8_t isnil = 0;
+            uint8_t tail[0x38 - 0x2a] = {0};
+        };
+        static K root, right_child, nil, head, scaryholder, owner;
+        static struct { uint8_t words[0x38]; } map;
+        root = K(); right_child = K(); nil = K(); nil.isnil = 1;
+        head = K(); head.isnil = 1; scaryholder = K(); owner = K();
+
+        root.key = 5; root.value = 0x1111;
+        root.left = &nil; root.right = &right_child; right_child.parent = &root;
+        right_child.key = 7; right_child.value = 0x2222;
+        right_child.left = &nil; right_child.right = &nil;
+        head.parent = &root;
+
+        std::memset(&map, 0, sizeof(map));
+        *(void**)(map.words + 0x30) = &head;
+        *(void**)(map.words + 0x00) = &scaryholder;
+        *(K**)&scaryholder.left = &owner;
+        *(void**)((uint8_t*)&owner + 0x30) = &head;
+
+        g_pfn_invalid_parameter_noinfo = [] { };
+        CHECK(Slot_14177c0a0_find(map.words, 5) == 0x1111);   // the root
+        CHECK(Slot_14177c0a0_find(map.words, 7) == 0x2222);   // through the right walk
+        CHECK(Slot_14177c0a0_find(map.words, 1) == 0);        // smaller than everything
+        CHECK(Slot_14177c0a0_find(map.words, 9) == 0);        // larger than everything
+        CHECK(Slot_14177c0a0_find(map.words, 6) == 0);        // between two keys
+
+        head.parent = &nil;                                   // an empty tree
+        CHECK(Slot_14177c0a0_find(map.words, 5) == 0);
+    }
+
     // --- 0x141724850 frees the object its argument points at
     {
         void* obj = ::operator new(16);

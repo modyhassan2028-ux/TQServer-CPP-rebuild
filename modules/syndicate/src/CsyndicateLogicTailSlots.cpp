@@ -130,6 +130,54 @@ void* Slot_1417c8f70_lower_bound(void* container_void, void* out_void, const uin
 // 0x1417cad00 — the lookup the three wrappers call. Every load, compare and offset below is
 // the one the bytes perform; both branches that reach 0x1418233c0 are the _DEBUG iterator
 // checks, and like the original they continue rather than throw.
+// 0x14177c0a0 — find by key. The walk keeps its candidate in rbx starting at the head, exactly
+// like 0x1417c8f70, but this one answers the stored value and decides "absent" by comparing the
+// wanted key with the candidate's key rather than by reaching the end node.
+uint64_t Slot_14177c0a0_find(void* self, uint32_t key) {
+    uint8_t* head = *(uint8_t**)((uint8_t*)self + kEndNode);       // mov rbx,[rcx+0x30]
+    uint8_t* node = *(uint8_t**)(head + kParent);                  // mov rax,[rbx+8]
+    uint8_t* candidate = head;                                     // rbx = the head
+    if (*(uint8_t*)(node + kIsNil) == 0) {                         // cmp byte [rax+0x29],sil
+        do {
+            if (*(uint32_t*)(node + kKey) < key)                   // cmp [rax+0x18],edx / jae
+                node = *(uint8_t**)(node + kRight);                 // mov rax,[rax+0x10]
+            else {
+                candidate = node;                                   // mov rbx,rax
+                node = *(uint8_t**)(node + kLeft);                  // mov rax,[rax+0]
+            }
+        } while (*(uint8_t*)(node + kIsNil) == 0);                  // cmp byte [rax+0x29],sil / jne
+    }
+
+    uint8_t* scary = *(uint8_t**)((uint8_t*)self + kScary);         // mov rax,[rcx]
+    uint8_t* end = *(uint8_t**)((uint8_t*)self + kEndNode);         // mov rbp,[rcx+0x30]
+    if (scary == nullptr)                                           // test rax,rax / jz
+        g_pfn_invalid_parameter_noinfo();
+    // the bytes then compare rax with itself and always fall through, so no second check happens
+    if (candidate == end)                                           // cmp rbx,rbp / jz end
+        return 0;
+    if (key < *(uint32_t*)(candidate + kKey))                       // cmp edx,[rbx+0x18] / jb
+        return 0;
+
+    uint8_t* copy0 = scary;                                         // the second iterator copy
+    uint8_t* copy1 = candidate;
+    if (*(uint8_t**)((uint8_t*)self + kScary) == nullptr ||
+        *(uint8_t**)((uint8_t*)self + kScary) != copy0)
+        g_pfn_invalid_parameter_noinfo();
+    if (end == copy1)                                               // cmp rbp,rbx / jz
+        return 0;
+
+    uint8_t* owner;
+    if (copy0 == nullptr) {
+        g_pfn_invalid_parameter_noinfo();
+        owner = nullptr;                                            // xor r11d,r11d path
+    } else {
+        owner = *(uint8_t**)(copy0 + 0x00);                          // mov rsi,[rdi]
+    }
+    if (copy1 == *(uint8_t**)(owner + kEndNode))                    // cmp rbx,[rsi+0x30]
+        g_pfn_invalid_parameter_noinfo();
+    return *(uint64_t*)(copy1 + 0x20);                              // mov rax,[rbx+0x20]
+}
+
 // 0x141724850 — mov rcx,[rcx] / jmp 0x1417f2fdc, and 0x1417f2fdc is MSVCR90's
 // ??3@YAXPEAX@Z, operator delete(void*). This frees the object the holder points at.
 void Slot_141724850_delete_through(void* holder) {
