@@ -10439,3 +10439,40 @@ vtable slot index 1 and nothing else, a missing seam cannot fake success, and th
 path is checked to leave the out pointer alone.
 
 Suites now: 14711 + 1284 + 125 + 491 + 198 + 52.
+
+## 2026-11-08 — D93: 0x14177ead0 the module constructor, 0x14177e890 its registration pass
+
+`0x14177ead0` opens with two stores to the same address and at first sight looks like a mistake:
+
+```
+mov %rax,(%rcx)     ; 0x14182e428   the base sub-object's table
+mov %rax,(%rcx)     ; 0x14182e5a8   the most-derived table, written straight over it
+```
+
+That ordering is what the compiler emits for the base/most-derived pair, so the port keeps both writes
+and the test asserts only the second survives. Then `%r8d` goes to `this+0x8` as a 32-bit field, the
+base sub-object is constructed at `this+0x10` (`0x1417d9710`), the second argument becomes the pointer
+at `this+0x420` — the very field `0x14177e890` later registers through — and sixteen member
+constructors run at fixed offsets `0x428, 0x850, 0xc78, 0x1088, 0x1498, 0x18a8, 0x1cb8, 0x20c8, 0x24d8,
+0x28e8, 0x2cf8, 0x3108, 0x3518, 0x3928, 0x3d50, 0x41a8`. Note the strides are not uniform: 0x428 twice
+then 0x410 for the rest, which is why the offsets are transcribed rather than generated. Returns `this`
+in `%rax`.
+
+`0x14177e890` is the registration pass. It calls the singleton and discards it, then re-reads
+`this+0x420` before *every* call, so a registration that replaces the sub-package would be picked up by
+the next one. The calls are all `vt[slot](sub, constant, this)`: eighteen through slot `+0x8` with
+`0x3ea, 0x3eb, 0x452, 0x425, 0x453, 0x458, 0x836, 0x422, 0x835, 0x427, 0x837, 0x9ce, 0x8b1, 0x8b3,
+0x8b2, 0xa3e, 0xa49, 0xa52`; four through `+0x10` with `0x453, 0xa49, 0xa3e, 0xa52`; and one through
+`+0x18` with `0x16` whose answer is the function's answer (`test %al,%al` and straight out, no
+`movzbl`). The `+0x8` and `+0x10` answers are discarded, which the port keeps.
+
+Also noted: `0x1417f3166`, the allocator ModuleCreate calls, is not a custom function at all — it is a
+thunk, `jmp *0x1418232a0`, i.e. the CRT allocator through the import table.
+
+Testing: `tests/syndicate_module_test.cpp` grew to 104 assertions, 6/6 runs, sanitizers clean. The
+constructor is checked for the surviving derived table, the 32-bit store at +0x8, the pointer at
++0x420, the base sub-object at +0x10 and all sixteen member offsets in order; the registration pass is
+checked for all eighteen, four and one constants in order, for the `+0x16` answer being both true and
+false, and for the sub-package being read through `this+0x420`.
+
+Suites now: 14711 + 1284 + 125 + 491 + 198 + 104.

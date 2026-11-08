@@ -35,7 +35,30 @@ static void CheckF(const char* fmt, const char* macro_, const char* expr, const 
 }
 static void ResetLog() { g_checkCalls = 0; g_macro[0] = g_expr[0] = g_file[0] = 0; g_line = 0; }
 
+static uint32_t g_seq[3][24]; static int g_n[3];
+static unsigned char g_holder[0x480], g_vt2[0x40]; static void* g_vt2Ptr[8];
+static bool g_lastAnswer;
+static void R8(void* s, uint32_t k, void* t) { (void)s;(void)t; g_seq[0][g_n[0]++] = k; }
+static void R10(void* s, uint32_t k, void* t) { (void)s;(void)t; g_seq[1][g_n[1]++] = k; }
+static bool R18(void* s, uint32_t k, void* t) {
+    (void)s;(void)t; g_seq[2][g_n[2]++] = k; return g_lastAnswer;
+}
+
+static unsigned char g_mem2[0x4608];
+static int g_ctorOrder; static uint32_t g_ctorOff[64]; static void* g_ctorBase; static uint32_t g_ctorBaseOff;
+static void MkCtor(uint32_t off) {
+    // each member constructor must receive this+off, so the offset is recovered from the pointer
+    static void (*const fns[])(void*) = {};
+    (void)fns;
+    g_ctorOff[g_ctorOrder++] = off;
+}
+static void CM(void* p) { g_ctorOff[g_ctorOrder++] = (uint32_t)((uint8_t*)p - g_mem2); }
+static void Base(void* p) { g_ctorBase = p; g_ctorBaseOff = (uint32_t)((uint8_t*)p - g_mem2); }
+
 int main() {
+    g_vt2Ptr[0] = (void*)&Wrong; g_vt2Ptr[1] = (void*)&R8;
+    g_vt2Ptr[2] = (void*)&R10;   g_vt2Ptr[3] = (void*)&R18;
+    *(void**)g_vt2 = g_vt2Ptr;
     g_pfn_checkf_module = CheckF;
     g_pfn_checkf_pointrecordmgr = CheckF;
     g_pfnL_1417f3166 = [](uint64_t n) -> void* {
@@ -106,6 +129,53 @@ int main() {
     g_pfnL_1417f3166 = [](uint64_t n) -> void* {
         ++g_allocCalls; g_allocSize = n; return g_allocNull ? nullptr : (void*)g_mem;
     };
+
+    // ---- 0x14177ead0: the tables, both stored fields, the base sub-object then sixteen members
+    std::memset(g_mem2, 0xEE, sizeof g_mem2);
+    g_ctorOrder = 0; g_ctorBase = nullptr; g_ctorBaseOff = 0;
+    g_pfnL_1417d9710 = &Base;
+    g_pfnL_1417db2b0 = &CM; g_pfnL_1417dca60 = &CM; g_pfnL_1417dd6e0 = &CM;
+    g_pfnL_1417da860 = &CM; g_pfnL_1417dae10 = &CM; g_pfnL_1417dd050 = &CM;
+    g_pfnL_1417dd230 = &CM; g_pfnL_1417dac30 = &CM; g_pfnL_1417dd9f0 = &CM;
+    g_pfnL_1417d9e60 = &CM; g_pfnL_1417ddc60 = &CM; g_pfnL_1417de240 = &CM;
+    g_pfnL_1417ddf50 = &CM; g_pfnL_1417d6640 = &CM; g_pfnL_1417d9000 = &CM;
+    g_pfnL_1417d8390 = &CM;
+    CHECK(Slot_14177ead0_ModuleCtor(g_mem2, (void*)0x9999, 0x4242u) == (void*)g_mem2);
+    CHECK(*(void**)g_mem2 == (void*)0x14182E5A8ULL);          // the derived table wins
+    CHECK(g_mem2[8] == 0x42 && g_mem2[9] == 0x42);            // r8d stored as 32 bits at +8
+    CHECK(*(void**)(g_mem2 + 0x420) == (void*)0x9999);
+    CHECK(g_ctorBaseOff == 0x10);                             // the base sub-object
+    static const uint32_t wantOff[] = {
+        0x428, 0x850, 0xC78, 0x1088, 0x1498, 0x18A8, 0x1CB8, 0x20C8,
+        0x24D8, 0x28E8, 0x2CF8, 0x3108, 0x3518, 0x3928, 0x3D50, 0x41A8,
+    };
+    CHECK(g_ctorOrder == 16);
+    for (int i = 0; i < 16; ++i) CHECK(g_ctorOff[i] == wantOff[i]);
+    // the base table is written first and then overwritten, so only the derived address survives
+    std::memset(g_mem2, 0, sizeof g_mem2);
+    g_ctorOrder = 0; g_ctorBase = nullptr; g_ctorBaseOff = 0;
+    Slot_14177ead0_ModuleCtor(g_mem2, nullptr, 0);
+    CHECK(*(void**)g_mem2 == (void*)0x14182E5A8ULL);
+    CHECK(*(void**)(g_mem2 + 0x420) == nullptr);
+
+    // ---- 0x14177e890: eighteen registrations through +0x8, four through +0x10, one through +0x18
+    std::memset(g_seq, 0, sizeof g_seq); g_n[0] = g_n[1] = g_n[2] = 0;
+    std::memset(g_holder, 0, sizeof g_holder);
+    *(void**)(g_holder + 0x420) = g_vt2;
+    g_lastAnswer = true;
+    CHECK(Slot_14177e890_Init(g_holder) == true);
+    static const uint32_t want8[] = {
+        0x3ea, 0x3eb, 0x452, 0x425, 0x453, 0x458, 0x836, 0x422, 0x835,
+        0x427, 0x837, 0x9ce, 0x8b1, 0x8b3, 0x8b2, 0xa3e, 0xa49, 0xa52,
+    };
+    static const uint32_t want10[] = { 0x453, 0xa49, 0xa3e, 0xa52 };
+    CHECK(g_n[0] == 18); CHECK(g_n[1] == 4); CHECK(g_n[2] == 1);
+    for (int i = 0; i < 18; ++i) CHECK(g_seq[0][i] == want8[i]);
+    for (int i = 0; i < 4; ++i) CHECK(g_seq[1][i] == want10[i]);
+    CHECK(g_seq[2][0] == 0x16);
+    // the last answer is the function's answer, both ways round
+    g_n[0] = g_n[1] = g_n[2] = 0; g_lastAnswer = false;
+    CHECK(Slot_14177e890_Init(g_holder) == false);
 
     // ---- 0x14177ed30
     void* pSaved = (void*)0xDEAD;

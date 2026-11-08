@@ -1,4 +1,5 @@
 #include "modules/syndicate/src/module.h"
+#include "modules/syndicate/src/CsyndicateLogicTailSlots.h"   // Slot_1417b6210_singleton
 
 namespace tq {
 
@@ -36,6 +37,80 @@ void* Slot_14177ec90_ModuleCreate(void* pArg, uint32_t nArg2) {
         return nullptr;                                             // 14177ed1b
     }
     return pModule;                                                 // 14177ed1f
+}
+
+// ---------------------------------------------------------------------------------------------
+// 0x14177ead0. The two `mov %rax,(%rcx)` at the top are not a mistake: the compiler writes the base
+// sub-object's table first and the most-derived one immediately after, and both land on this+0. The
+// third argument is stored as a 32-bit value at +0x8, the second as a pointer at +0x420 (the same
+// field 0x14177e890 registers through), and the base sub-object is constructed at +0x10 before the
+// sixteen members at their fixed offsets.
+void (*g_pfnL_1417d9710)(void*) = nullptr;
+void (*g_pfnL_1417d8390)(void*) = nullptr;  void (*g_pfnL_1417d9000)(void*) = nullptr;
+void (*g_pfnL_1417d6640)(void*) = nullptr;  void (*g_pfnL_1417d9e60)(void*) = nullptr;
+void (*g_pfnL_1417da860)(void*) = nullptr;  void (*g_pfnL_1417dac30)(void*) = nullptr;
+void (*g_pfnL_1417dae10)(void*) = nullptr;  void (*g_pfnL_1417db2b0)(void*) = nullptr;
+void (*g_pfnL_1417dca60)(void*) = nullptr;  void (*g_pfnL_1417dd050)(void*) = nullptr;
+void (*g_pfnL_1417dd230)(void*) = nullptr;  void (*g_pfnL_1417dd6e0)(void*) = nullptr;
+void (*g_pfnL_1417dd9f0)(void*) = nullptr;  void (*g_pfnL_1417ddc60)(void*) = nullptr;
+void (*g_pfnL_1417ddf50)(void*) = nullptr;  void (*g_pfnL_1417de240)(void*) = nullptr;
+
+void* Slot_14177ead0_ModuleCtor(void* pMem, void* pArg2, uint32_t nArg3) {
+    volatile uint64_t uTag = 0xfffffffffffffffeULL;                  // 14177eada, never read
+    (void)uTag;
+    uint8_t* pThis = (uint8_t*)pMem;
+    *(void**)pThis = (void*)0x14182E428ULL;                         // 14177eaf5, base table
+    *(void**)pThis = (void*)0x14182E5A8ULL;                         // 14177eaff, then the derived
+    *(uint32_t*)(pThis + 0x8) = nArg3;                              // 14177eb02 mov %r8d,0x8(%rcx)
+    if (g_pfnL_1417d9710 != nullptr) g_pfnL_1417d9710(pThis + 0x10);  // 14177eb0a
+    *(void**)(pThis + 0x420) = pArg2;                               // 14177eb10 mov %rbx,0x420(%rdi)
+    // The sixteen members, in the order the constructor writes them.
+    struct Member { uint32_t nOffset; void (**ppFn)(void*); };
+    static const Member aMembers[] = {
+        { 0x428, &g_pfnL_1417db2b0 }, { 0x850, &g_pfnL_1417dca60 },
+        { 0xC78, &g_pfnL_1417dd6e0 }, { 0x1088, &g_pfnL_1417da860 },
+        { 0x1498, &g_pfnL_1417dae10 }, { 0x18A8, &g_pfnL_1417dd050 },
+        { 0x1CB8, &g_pfnL_1417dd230 }, { 0x20C8, &g_pfnL_1417dac30 },
+        { 0x24D8, &g_pfnL_1417dd9f0 }, { 0x28E8, &g_pfnL_1417d9e60 },
+        { 0x2CF8, &g_pfnL_1417ddc60 }, { 0x3108, &g_pfnL_1417de240 },
+        { 0x3518, &g_pfnL_1417ddf50 }, { 0x3928, &g_pfnL_1417d6640 },
+        { 0x3D50, &g_pfnL_1417d9000 }, { 0x41A8, &g_pfnL_1417d8390 },
+    };
+    for (const Member& m : aMembers) {
+        if (*m.ppFn != nullptr) (*m.ppFn)(pThis + m.nOffset);       // 14177eb1e .. 14177ec1c
+    }
+    return pThis;                                                   // 14177ec21 mov %rdi,%rax
+}
+
+// ---------------------------------------------------------------------------------------------
+// 0x14177e890. The sub-package at this+0x420 is re-read before every call (`mov 0x420(%rdi),%rcx`),
+// so a call that replaces it takes effect for the next registration. Every call is
+// vt[slot](sub, constant, this) and only the last one's answer is returned: the 0x8 and 0x10 calls
+// discard theirs.
+bool Slot_14177e890_Init(void* pThis) {
+    Slot_1417b6210_singleton();                                     // 14177e89d, result unused
+    // The eighteen through slot +0x8, in the exact order the table feeds them.
+    static const uint32_t anVt8[] = {
+        0x3ea, 0x3eb, 0x452, 0x425, 0x453, 0x458, 0x836, 0x422, 0x835,
+        0x427, 0x837, 0x9ce, 0x8b1, 0x8b3, 0x8b2, 0xa3e, 0xa49, 0xa52,
+    };
+    for (uint32_t nConst : anVt8) {                                 // 14177e8a2 .. 14177ea1e
+        void* pSub = *(void**)((uint8_t*)pThis + 0x420);
+        typedef void (*Reg)(void*, uint32_t, void*);
+        Reg f = (Reg)*(void**)(*(uint8_t**)pSub + 0x8);
+        f(pSub, nConst, pThis);
+    }
+    static const uint32_t anVt10[] = { 0x453, 0xa49, 0xa3e, 0xa52 };  // 14177ea21 .. 14177ea72
+    for (uint32_t nConst : anVt10) {
+        void* pSub = *(void**)((uint8_t*)pThis + 0x420);
+        typedef void (*Reg)(void*, uint32_t, void*);
+        Reg f = (Reg)*(void**)(*(uint8_t**)pSub + 0x10);
+        f(pSub, nConst, pThis);
+    }
+    void* pSub = *(void**)((uint8_t*)pThis + 0x420);                 // 14177ea75
+    typedef bool (*RegB)(void*, uint32_t, void*);
+    RegB f = (RegB)*(void**)(*(uint8_t**)pSub + 0x18);
+    return f(pSub, 0x16, pThis);                                    // 14177ea87, `test %al,%al`
 }
 
 // 0x14177ed30 — writes a null through the out pointer and hands the pointer back. No strings of its
