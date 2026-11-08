@@ -31,8 +31,8 @@ the build output, not just the test output.
 
 ## Where the work stands
 
-- Ported bodies in `modules/syndicate/src/CsyndicateLogicTailSlots.cpp`: 23.
-- Batteries: 215 assertions in `tests/syndicate_logic_tail_slots_test.cpp`, all passing, 6/6 runs, sanitizers clean.
+- Ported bodies in `modules/syndicate/src/CsyndicateLogicTailSlots.cpp`: 24.
+- Batteries: 219 assertions in `tests/syndicate_logic_tail_slots_test.cpp`, all passing, 6/6 runs, sanitizers clean.
 - The `0x14177f980` family is complete and wired: `0x14177f980` -> `0x141779400` -> `0x141779090`,
   plus both singletons (`0x14177c770`, `0x1417b6210`), the map constructor `0x14177c6c0`, its end-node
   builder `0x14177ace0`, the key search `0x14177c0a0`, `lower_bound` `0x1417a8520`, the range pass
@@ -157,7 +157,7 @@ for `0x1417f2fdc` is found first.
 
 Evidence for all three is in `docs/evidence/frontier_after_14172d120.txt`.
 
-- **`0x1417a8940` (268 bytes, 73 instructions) — next port.** A map lookup that answers a 32-bit
+- **`0x1417a8940` (268 bytes, 73 instructions) — ported.** A map lookup that answers a 32-bit
   value. Container reads: end node at `+0x88`, container word at `+0x58`, node `_Isnil` at `+0x21`,
   key at `+0x18`, and the answered value at `+0x1c`. The walk is the usual one (`cmp [rax+0x18],edx /
   jae` then right or left), the candidate check is `edi < [rbx+0x18]` against the searched key, and a

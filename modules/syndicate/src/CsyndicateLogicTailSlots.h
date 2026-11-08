@@ -153,6 +153,11 @@ uint64_t Slot_141727380_move_tail(void* src, void* mid, void* dst_end);
 // 0x1417f2fdc — jmp [0x1418233f0], which iat_slots.json resolves to MSVCR90!operator delete.
 void Slot_1417f2fdc_deallocate(void* p);
 
+// 0x1417a8940 — map lookup answering a 32-bit value. Container reads differ from the 0x40-byte map
+// already ported: end node at +0x88, container word at +0x58, node _Isnil at +0x21, key at +0x18 and
+// the answered value at +0x1c. Do not reuse the other map's offsets here.
+uint32_t Slot_1417a8940_lookup(void* self, uint32_t key);
+
 // 0x1417495d0 — clears the 4-byte vector at +0x18/+0x20/+0x28. The memmove the bytes would make is
 // a zero-length one, so the only effect is finish = begin; the port keeps the shape that shows it.
 void Slot_1417495d0_clear_vector(void* self);

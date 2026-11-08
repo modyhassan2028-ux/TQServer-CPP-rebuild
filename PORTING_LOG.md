@@ -9744,3 +9744,7 @@ Commit f1ceb18 said 17 bodies in its message; measured on that tree it is 18 bod
 ## 2026-11-08 — the five callees of 0x14172d120 ported
 
 0x141722c70 (length error; the throw is one seam over MSVC ABI), 0x141724d10 (allocate with the divide-based overflow guard), 0x14172acb0 (move block, answers dst+bytes), 0x141727380 (move tail, signed jle guard), 0x1417f2fdc (thunk to MSVCR90!operator delete, which is why it is not a .pdata row start). All five seams default to ported bodies. Measured: 23 bodies, 215 assertions, 6/6 green.
+
+## 2026-11-08 — 0x1417a8940 lookup ported
+
+Lower-bound walk from end->parent with the unsigned jae, candidate kept on the left turn, iterator pair rebuilt, miss answers 0. Container at +0x88/+0x58, node +0x18 key, +0x1c value, +0x21 _Isnil. Measured: 24 bodies, 219 assertions, 6/6 green.

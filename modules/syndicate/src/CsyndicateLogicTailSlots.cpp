@@ -252,6 +252,49 @@ void Slot_1417f2fdc_deallocate(void* p) {
     ::operator delete(p);                                      // jmp [MSVCR90!operator delete]
 }
 
+// 0x1417a8940 — lookup. Walks down from the root comparing the key unsigned (jae goes left), keeps
+// the last node the walk turned left at, then decides whether that candidate really is >= the key.
+// On a miss it answers 0. The container here is at +0x88 (end node) and +0x58 (word), which is not
+// the 0x40-byte map ported earlier.
+uint32_t Slot_1417a8940_lookup(void* self, uint32_t key) {
+    uint8_t* s = (uint8_t*)self;
+    uint64_t end_node = *(uint64_t*)(s + 0x88);                 // mov rbx,[rcx+0x88]
+    uint64_t cand = end_node;                                   // mov rbx,rcx's end
+    uint64_t n = *(uint64_t*)(end_node + 0x08);                 // mov rax,[rbx+8]
+    while (*(uint8_t*)(n + 0x21) == 0) {                        // cmp byte [rax+0x21],0 / jne
+        if (*(uint32_t*)(n + 0x18) >= key) {                    // cmp [rax+0x18],edx / jae
+            cand = n;                                           // mov rbx,rax
+            n = *(uint64_t*)(n + 0x00);                         // mov rax,[rax]
+        } else {
+            n = *(uint64_t*)(n + 0x10);                         // mov rax,[rax+0x10]
+        }
+    }
+    uint64_t word = *(uint64_t*)(s + 0x58);                     // mov rax,[rcx+0x58]
+    uint64_t end2 = *(uint64_t*)(s + 0x88);                     // mov rsi,[rcx+0x88]
+    if (word == 0 && g_pfn_invalid_parameter_noinfo != nullptr)  // test rax,rax / je
+        g_pfn_invalid_parameter_noinfo();
+    // The bytes follow with `cmp rax,rax / je`, which always takes the jump, so only the zero case
+    // can reach the failure path.
+    uint64_t it_word, it_node;
+    if (cand == end2 || key < *(uint32_t*)(cand + 0x18)) {      // cmp rbx,rsi / je, cmp edi,[rbx+0x18] / jb
+        it_word = *(uint64_t*)(s + 0x58);                       // the fresh pair at rsp+0x30
+        it_node = *(uint64_t*)(s + 0x88);
+    } else {
+        it_word = word;                                         // lea rcx,[rsp+0x20]
+        it_node = cand;
+    }
+    if (it_word == 0 || it_word != *(uint64_t*)(s + 0x58)) {    // test rdi,rdi / cmp rdi,[rbp+0x58]
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();
+    }
+    if (it_node == *(uint64_t*)(s + 0x88)) return 0;            // cmp rbx,rsi / je, xor eax,eax
+    uint64_t owner = (it_word != 0) ? *(uint64_t*)it_word : 0;  // mov r11,[rdi], else zero
+    if (it_node != *(uint64_t*)(owner + 0x30)                   // cmp rbx,[r11+0x30] / jne
+        && g_pfn_invalid_parameter_noinfo != nullptr)
+        g_pfn_invalid_parameter_noinfo();
+    return *(uint32_t*)(it_node + 0x1c);                        // mov eax,[rbx+0x1c]
+}
+
 // MSVCR90!memmove_s at 0x1418232a8. On the valid-argument path it is memmove, so the default keeps
 // that behaviour without needing a header for the _s form.
 static void memmove_s_default(void* dst, size_t /*dst_size*/, const void* src, size_t count) {

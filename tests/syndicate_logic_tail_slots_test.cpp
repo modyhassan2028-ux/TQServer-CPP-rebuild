@@ -502,6 +502,38 @@ int main() {
         Slot_1417f2fdc_deallocate(heap);                      // LSan fails the run if this leaks
     }
 
+    // --- 0x1417a8940 looks a key up and answers the 32-bit value
+    {
+        static uint8_t self[0xA0];
+        static uint64_t n5[8], n3[8], nil[8], endn[16], map[8], proxy[1];
+        std::memset(self, 0, sizeof(self)); std::memset(n5, 0, sizeof(n5));
+        std::memset(n3, 0, sizeof(n3)); std::memset(nil, 0, sizeof(nil));
+        std::memset(endn, 0, sizeof(endn)); std::memset(map, 0, sizeof(map));
+
+        ((uint8_t*)nil)[0x21] = 1;                       // _Isnil on the shared nil node
+        ((uint8_t*)endn)[0x21] = 1;                      // the map's end node is nil too
+        *(uint64_t*)((uint8_t*)endn + 0x08) = (uint64_t)&n5[0];   // end->parent is the root
+        *(uint32_t*)((uint8_t*)n5 + 0x18) = 5;           // key
+        *(uint32_t*)((uint8_t*)n5 + 0x1c) = 0xAA;        // value
+        *(uint64_t*)((uint8_t*)n5 + 0x00) = (uint64_t)&n3[0];     // left
+        *(uint64_t*)((uint8_t*)n5 + 0x10) = (uint64_t)&nil[0];    // right
+        *(uint32_t*)((uint8_t*)n3 + 0x18) = 3;
+        *(uint32_t*)((uint8_t*)n3 + 0x1c) = 0xBB;
+        *(uint64_t*)((uint8_t*)n3 + 0x00) = (uint64_t)&nil[0];
+        *(uint64_t*)((uint8_t*)n3 + 0x10) = (uint64_t)&nil[0];
+
+        proxy[0] = (uint64_t)&map[0];                    // the word leads to the map
+        *(uint64_t*)((uint8_t*)map + 0x30) = (uint64_t)&endn[0];
+        *(uint64_t*)(self + 0x58) = (uint64_t)proxy;     // container word
+        *(uint64_t*)(self + 0x88) = (uint64_t)&endn[0];  // end node
+        g_pfn_invalid_parameter_noinfo = [] { };
+
+        CHECK(Slot_1417a8940_lookup(self, 3) == 0xBB);   // walks left once and finds it
+        CHECK(Slot_1417a8940_lookup(self, 5) == 0xAA);   // the root itself
+        CHECK(Slot_1417a8940_lookup(self, 9) == 0);      // past the right edge: miss answers 0
+        CHECK(Slot_1417a8940_lookup(self, 1) == 0);      // below everything: candidate fails the key test
+    }
+
     // --- 0x14172d120 inserts: the three paths the bytes have
     {
         static uint32_t buf[16], newbuf[16];
