@@ -1660,3 +1660,52 @@ void Slot_141792b70(void* pFirst, int64_t nIndex, int64_t nCount, void* pElem,
 }
 
 }  // namespace tq
+
+namespace tq {
+
+// ============================================================================
+// 0x1417929f0 — the sift behind 0x141795ca0 / 0x141797670. Same child walk as 0x141792b70,
+// but the comparator is fixed (0x141787c60) and writes an out slot, and the up pass is a
+// separate row (0x1417917a0) that receives that out slot as its fifth argument.
+//   141792a08  lea 0x2(%rdx,%rdx,1),%rbx      child = 2*index + 2
+//   141792a1c  mov %rdx,%r13                  the original index is kept for the up pass
+//   141792a21  mov -0x8(%rdi,%rbx,8),%r8      left, then 141792a26 right into rdx
+//   141792a2a  lea 0x70(%rsp),%rcx            the comparator's out slot
+//   141792a36  test %al,%al / je              a true answer prefers the left child
+//   141792a50  cmp %rbp,%rbx / jne            one lone child is still promoted
+//   141792a62  mov 0x70(%rsp),%rax            the out slot, carried into the fifth argument
+//   141792a73  mov %rax,0x20(%rsp)            ... which is where stack arguments start
+//   141792a78  call 0x1417917a0               (first, hole, original index, elem, out slot)
+bool (*g_pfnLogic_141787c60)(void* out, void* right, void* left) = nullptr;
+void (*g_pfnLogic_1417917a0)(void* first, int64_t hole, int64_t orig, void* elem,
+                             uint64_t outValue) = nullptr;
+
+void Slot_1417929f0(void* pFirst, int64_t nIndex, int64_t nCount, void* pElem) {
+    uint64_t* p = (uint64_t*)pFirst;                              // mov %rcx,%rdi
+    const int64_t nOrig = nIndex;                                 // mov %rdx,%r13
+    int64_t nHole = nIndex;                                       // mov %rdx,%rsi
+    int64_t nChild = 2 * nIndex + 2;                              // 141792a08
+    uint64_t uOut = 0;                                            // the 0x70(%rsp) slot
+    if (nChild < nCount) {                                        // 141792a13 cmp/jge
+        for (;;) {
+            uint64_t uLeft = p[nChild - 1];                       // 141792a21 mov -0x8(...),%r8
+            uint64_t uRight = p[nChild];                          // 141792a26 mov (%rdi,%rbx,8),%rdx
+            bool bPreferLeft = false;
+            if (g_pfnLogic_141787c60 != nullptr)
+                bPreferLeft = g_pfnLogic_141787c60(&uOut, (void*)uRight, (void*)uLeft);
+            if (bPreferLeft) --nChild;                            // 141792a38 dec %rbx
+            p[nHole] = p[nChild];                                 // 141792a3b..a3f
+            nHole = nChild;                                       // 141792a43 mov %rbx,%rsi
+            nChild = 2 * nChild + 2;                              // 141792a46
+            if (nChild >= nCount) break;                          // 141792a4e jl
+        }
+    }
+    if (nChild == nCount) {                                       // 141792a50 cmp/jne
+        p[nHole] = p[nCount - 1];                                 // 141792a5a
+        nHole = nCount - 1;                                       // 141792a5e lea -0x1(%rbp),%rsi
+    }
+    if (g_pfnLogic_1417917a0 != nullptr)                          // 141792a78
+        g_pfnLogic_1417917a0(p, nHole, nOrig, pElem, uOut);
+}
+
+}  // namespace tq

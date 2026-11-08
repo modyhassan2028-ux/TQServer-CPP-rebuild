@@ -405,4 +405,16 @@ void Slot_141792b70(void* pFirst, int64_t nIndex, int64_t nCount, void* pElem,
 
 }  // namespace tq
 
+namespace tq {
+
+// 0x1417929f0 — the twin sift. Its comparator (0x141787c60) writes an out slot that the
+// up-pass row (0x1417917a0) then receives as a fifth argument, so both stay seams with their
+// real shapes: (out, right, left) returning a verdict, and (first, hole, orig, elem, out).
+extern bool (*g_pfnLogic_141787c60)(void* out, void* right, void* left);
+extern void (*g_pfnLogic_1417917a0)(void* first, int64_t hole, int64_t orig, void* elem,
+                                   uint64_t outValue);
+void Slot_1417929f0(void* pFirst, int64_t nIndex, int64_t nCount, void* pElem);
+
+}  // namespace tq
+
 #endif

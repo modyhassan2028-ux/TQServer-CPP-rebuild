@@ -10006,3 +10006,18 @@ saved element lands at `(%rdi,%rsi,8)` last.
 
 Batteries: 366 assertions, 6/6. The three cases pin the child choice both ways, the lone-child
 promotion, and the "no children at all" path that compares nothing.
+
+## 2026-11-08 — 0x1417929f0 ported (the twin sift, out slot and five arguments)
+
+The same child walk as 0x141792b70, two differences that matter:
+
+- its comparator is fixed at 0x141787c60 and takes an out pointer (`lea 0x70(%rsp),%rcx`), so the
+  row keeps a local out slot of its own;
+- the up pass is not inlined: it calls 0x1417917a0 with `(first, hole, original index, elem, out)`,
+  the out slot being copied to `0x20(%rsp)` — the first stack argument slot at the call site.
+
+Batteries: 382 assertions. Two of my expectations were wrong and the run corrected them, both the
+same mistake in reading the walk: I stopped it after one level. The child loop continues while
+`child < count`, so a five-element range from index 0 visits index 2 and then index 4 before the
+hand-off, which is why the hole lands at 4 rather than at 1. The port was right both times; the
+assertions were the thing that needed fixing, and they are now written from the trace.

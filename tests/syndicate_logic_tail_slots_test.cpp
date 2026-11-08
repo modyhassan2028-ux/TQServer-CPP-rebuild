@@ -1735,6 +1735,67 @@ int main() {
         CHECK(aH[1] == 77 && aH[0] == 10 && aH[2] == 30);
     }
 
+    // ------------------------------------------------------------------
+    // 0x1417929f0 — the twin sift: the child walk with the out-slot comparator, then the
+    // five-argument hand-off to the up-pass row.
+    {
+        static uint64_t aT[5];
+        static int nCmp, nUp;
+        static uint64_t aCmpR[4], aCmpL[4], aUpHole[4], aUpOrig[4], aUpOut[4];
+        static void* aUpElem[4];
+
+        g_pfnLogic_141787c60 = +[](void* out, void* right, void* left) -> bool {
+            if (nCmp < 4) { aCmpR[nCmp] = (uint64_t)(uintptr_t)right;
+                            aCmpL[nCmp] = (uint64_t)(uintptr_t)left; }
+            ++nCmp;
+            ((uint64_t*)out)[0] = 0xC0FFEE;                  // the out slot the row carries on
+            return (uint64_t)(uintptr_t)right < (uint64_t)(uintptr_t)left; };
+        g_pfnLogic_1417917a0 = +[](void* first, int64_t hole, int64_t orig, void* elem,
+                                   uint64_t outValue) {
+            if (nUp < 4) { aUpHole[nUp] = (uint64_t)hole; aUpOrig[nUp] = (uint64_t)orig;
+                           aUpElem[nUp] = elem; aUpOut[nUp] = outValue; }
+            ++nUp; (void)first; };
+
+        // --- right child not preferred: the hole follows index 2, orig stays 0, out is carried
+        aT[0] = 10; aT[1] = 20; aT[2] = 30; aT[3] = 40; aT[4] = 50;
+        nCmp = nUp = 0;
+        Slot_1417929f0(aT, 0, 5, (void*)99);
+        CHECK(nCmp == 1 && nUp == 1);
+        CHECK(aCmpR[0] == 30 && aCmpL[0] == 20);       // (right, left) as the bytes load them
+        CHECK(aT[0] == 30);                            // the child moved into the hole
+        CHECK(aUpHole[0] == 2 && aUpOrig[0] == 0);
+        CHECK(aUpElem[0] == (void*)99);
+        CHECK(aUpOut[0] == 0xC0FFEE);                  // the comparator's slot reaches the fifth argument
+
+        // --- left child preferred: the verified answer decrements the child first
+        aT[0] = 10; aT[1] = 50; aT[2] = 20; aT[3] = 40; aT[4] = 60;
+        nCmp = nUp = 0;
+        Slot_1417929f0(aT, 0, 5, (void*)99);
+        CHECK(nCmp == 2);                              // the walk continues down to the next child
+        CHECK(aCmpR[0] == 20 && aCmpL[0] == 50);
+        CHECK(aCmpR[1] == 60 && aCmpL[1] == 40);
+        CHECK(aT[0] == 50 && aT[1] == 60);             // index 1 rose, then index 4 into the new hole
+        CHECK(aUpHole[0] == 4);
+
+        // --- lone child: child == count promotes the last element and moves the hole there
+        aT[0] = 10; aT[1] = 20; aT[2] = 30; aT[3] = 40;
+        nCmp = nUp = 0;
+        Slot_1417929f0(aT, 1, 4, (void*)77);
+        CHECK(nCmp == 0);                              // child 4 is not below the count
+        CHECK(nUp == 1);
+        CHECK(aT[1] == 40 && aUpHole[0] == 3 && aUpOrig[0] == 1);
+
+        // --- no children at all: the hand-off still happens with the index untouched
+        aT[0] = 10; aT[1] = 20; aT[2] = 30;
+        nCmp = nUp = 0;
+        Slot_1417929f0(aT, 1, 3, (void*)77);
+        CHECK(nCmp == 0 && nUp == 1);
+        CHECK(aUpHole[0] == 1 && aUpOrig[0] == 1 && aT[1] == 20);
+
+        g_pfnLogic_141787c60 = nullptr;
+        g_pfnLogic_1417917a0 = nullptr;
+    }
+
     std::printf("%s checks=%d fails=%d\n", g_fails ? "LOGIC_SLOTS_FAIL" : "LOGIC_SLOTS_OK",
                 g_checks, g_fails);
     return g_fails ? 1 : 0;
