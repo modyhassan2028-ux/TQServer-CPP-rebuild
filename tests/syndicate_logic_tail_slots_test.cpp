@@ -401,6 +401,54 @@ int main() {
         CHECK(g_calls == 0);
     }
 
+    // --- 0x141730cd0 grows and inserts, then answers an iterator at the inserted element
+    {
+        static uint32_t buf[8];
+        static uint64_t vec[6], owner[6];
+        static int insert_calls;
+        static uint32_t inserted;
+        insert_calls = 0; inserted = 0;
+
+        std::memset(buf, 0, sizeof(buf));
+        std::memset(vec, 0, sizeof(vec));
+        std::memset(owner, 0, sizeof(owner));
+        vec[0] = (uint64_t)&owner[0];        // the container word
+        vec[3] = (uint64_t)&buf[0];          // +0x18 begin
+        vec[4] = (uint64_t)&buf[2];          // +0x20 finish, two elements in
+        vec[5] = (uint64_t)&buf[8];          // +0x28 capacity end
+        owner[3] = 0;                        // +0x18 lower bound
+        owner[4] = ~0ull;                    // +0x20 upper bound
+
+        g_pfn_invalid_parameter_noinfo = [] { };
+        g_pfnLogic_14172d120 = [](void* self, uint64_t*, uint64_t count, const void* v) {
+            ++insert_calls; inserted = *(const uint32_t*)v;
+            CHECK(count == 1);
+            uint8_t* s = (uint8_t*)self;
+            uint64_t fin = *(uint64_t*)(s + 0x20);
+            *(uint32_t*)fin = *(const uint32_t*)v;    // the fake insert appends
+            *(uint64_t*)(s + 0x20) = fin + 4;
+        };
+
+        uint64_t pair[2] = {(uint64_t)&owner[0], (uint64_t)&buf[2]};   // scary, finish
+        uint64_t out[2] = {0, 0};
+        uint32_t v = 0xBEEF;
+        void* r = Slot_141730cd0_grow_insert(vec, out, pair, &v);
+        CHECK(r == (void*)out);
+        CHECK(insert_calls == 1);
+        CHECK(inserted == 0xBEEF);
+        CHECK(out[0] == (uint64_t)&owner[0]);          // the container word
+        CHECK(out[1] == (uint64_t)&buf[2]);            // the element offset the bytes computed
+
+        // an empty vector takes the zero-offset path and still lands on begin
+        vec[4] = vec[3];
+        insert_calls = 0;
+        pair[1] = vec[3];
+        Slot_141730cd0_grow_insert(vec, out, pair, &v);
+        CHECK(insert_calls == 1);
+        CHECK(out[1] == (uint64_t)&buf[0]);
+        g_pfnLogic_14172d120 = nullptr;
+    }
+
     // --- 0x1417495d0 clears the vector by moving finish back to begin
     {
         static uint32_t buf[4];

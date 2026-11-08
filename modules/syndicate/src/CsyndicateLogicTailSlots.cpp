@@ -201,6 +201,53 @@ void* (*g_pfnLogic_14177ace0)(void* self) = nullptr;
 void* (*g_pfnLogic_1417495d0)(void* arg) = nullptr;
 void (*g_pfnLogic_141732040)(void* arg, void* elem) = nullptr;
 
+void (*g_pfnLogic_14172d120)(void* self, uint64_t* it, uint64_t count, const void* value) = nullptr;
+
+// 0x141730cd0 — grow and insert one. The `test rax,-4` is not a size comparison: it asks whether the
+// vector holds anything at all, since any whole number of 4-byte elements has those bits clear.
+void* Slot_141730cd0_grow_insert(void* self, uint64_t* out, const uint64_t* pair,
+                                 const void* value) {
+    uint8_t* s = (uint8_t*)self;
+    uint64_t finish = *(uint64_t*)(s + 0x20);                 // mov rcx,[rcx+0x20]
+    uint64_t begin = *(uint64_t*)(s + 0x18);                  // mov r12,[rbx+0x18]
+    int64_t byte_size = (int64_t)(finish - begin);            // sub rax,r12
+    uint64_t offset = 0;
+    if ((byte_size & ~(int64_t)3) != 0) {                      // test rax,-4 / jne
+        if (begin > finish)                                   // cmp r12,rcx / jbe
+            g_pfn_invalid_parameter_noinfo();
+        uint64_t scary = pair[0];                             // mov rax,[r13]
+        if (scary != 0 && scary != *(uint64_t*)(s + 0x00))    // test / cmp rax,[rbx] / je
+            g_pfn_invalid_parameter_noinfo();
+        offset = (pair[1] - begin) >> 2;                      // mov rdi,[r13+8] / sar 2
+    }
+
+    uint64_t it[2] = {pair[0], pair[1]};                      // the pair rebuilt on the frame
+    if (g_pfnLogic_14172d120 != nullptr)                      // call 0x14172d120
+        g_pfnLogic_14172d120(self, it, 1, value);
+
+    uint64_t begin2 = *(uint64_t*)(s + 0x18);                 // re-read: the insert may have moved it
+    if (begin2 > *(uint64_t*)(s + 0x20))                      // cmp r12,[rbx+0x20] / jbe
+        g_pfn_invalid_parameter_noinfo();
+    uint64_t scary2 = *(uint64_t*)(s + 0x00);                 // mov rbx,[rbx]
+    uint64_t owner;
+    if (scary2 == 0) {                                        // test rbx,rbx / jne
+        g_pfn_invalid_parameter_noinfo();
+        owner = 0;                                            // mov r11,rsi (rsi is zero)
+    } else {
+        owner = *(uint64_t*)scary2;                           // mov r11,[rbx]
+    }
+    uint64_t target = begin2 + offset * 4;                    // lea rdi,[r12+rdi*4]
+    if (target > *(uint64_t*)(owner + 0x20))                  // cmp rdi,[r11+0x20] / ja
+        g_pfn_invalid_parameter_noinfo();
+    uint64_t owner2 = (scary2 != 0) ? *(uint64_t*)scary2 : 0; // test rbx / je / mov rsi,[rbx]
+    if (target < *(uint64_t*)(owner2 + 0x18))                 // cmp rdi,[rsi+0x18] / jae
+        g_pfn_invalid_parameter_noinfo();
+
+    out[0] = scary2;                                          // mov [rbp],rax
+    out[1] = target;                                          // mov [rbp+8],rax
+    return out;                                               // mov rax,rbp
+}
+
 void (*g_pfnLogic_141730cd0)(void* self, void* out_or_arg, void* pair, const void* value) = nullptr;
 
 // 0x1417495d0 — clear the vector. Worth reading carefully: the byte count is computed from the
