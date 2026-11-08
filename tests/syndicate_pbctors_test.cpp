@@ -8,7 +8,6 @@
 #include "modules/syndicate/src/msg/msgleagueroboptpb.h"
 #include "modules/syndicate/src/msg/msgleaguetokenpb.h"
 
-namespace tq { void log_InlineLogERROR(const char*, ...) {} }
 namespace syndicate {
 extern void (*g_pfnMessageLiteCtor)(void*);
 extern void (*g_fn_1417e8050)();

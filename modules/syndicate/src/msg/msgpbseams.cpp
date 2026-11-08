@@ -18,4 +18,5 @@ namespace syndicate {
 void (*g_pfnMessageLiteCtor)(void*) = nullptr;   // the import at 0x141823280, patched into a test
 void (*g_fn_1417e8050)() = nullptr;   // 0x1417e8050, called by the token constructor and its answer discarded
 
+
 }  // namespace syndicate
