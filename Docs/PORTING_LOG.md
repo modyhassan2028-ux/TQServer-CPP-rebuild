@@ -166,3 +166,26 @@ holds the two seams these bodies need), inside `namespace tq`.
   through three seams this file does not model: the object constructor at 0x1418233e8, the
   vtable store `0x141824c40`, and the throw helper at 0x1417f3154. The good side is
   `lea (%rcx,%rcx,N)` / `shl $0x3` and then `jmp 0x1417f3166`.
+
+## D135 — the four element-count allocators and their three seams, 0x1417c6710 / 0x1417c6790 / 0x1417c6810 / 0x1417c6910
+
+The four bodies that were held back at D134 are in, each read straight off its own start.
+
+- The arithmetic is the bytes': `or $-1,%rax` then `xor %edx,%edx` then `div %rcx` gives
+  `0xFFFFFFFFFFFFFFFF / nElems`, and the limit each body compares it against is its own
+  (`cmp $0x30` at 0x1417c6710 and 0x1417c6910, `cmp $0x48` at 0x1417c6790, `cmp $0x28` at
+  0x1417c6810). `jae` means a quotient *at* the limit still allocates, which the test pins
+  with `edge = 0xFFFFFFFFFFFFFFFF / 0x30`.
+- The stride is the instruction sequence: `lea (%rcx,%rcx,2) / shl $0x4` = 48 bytes per
+  element at 0x1417c6710 and 0x1417c6910, `lea (%rcx,%rcx,8) / shl $0x3` = 72 at 0x1417c6790,
+  `lea (%rcx,%rcx,4) / shl $0x3` = 40 at 0x1417c6810.
+- The failing side builds the exception exactly where the bytes do: a `-2` sentinel in the
+  frame, a zeroed qword at `0x50(%rsp)` passed as the second argument, the object at
+  `0x28(%rsp)` given to 0x1418233e8, the `0x141824c40` vtable stored over its lead, then
+  0x1417f3154 with `0x141881df0` as the message. The bytes then fall through to the size, so
+  the port does too.
+- Three seams were added for that path, all null by default with the call guarded:
+  `g_pfnSynErrCtor_1418233e8`, `g_pfnSynThrow_1417f3154` and `g_pfnSynNew_1417f3166` (the
+  operator new the good path tail-jumps to). No behaviour is invented when a seam is unset.
+- `tests/syndicate_d135_test.cpp`: 30 checks including the limit boundary, 6 passes,
+  ASan+UBSan clean. Cluster total 109 bodies.

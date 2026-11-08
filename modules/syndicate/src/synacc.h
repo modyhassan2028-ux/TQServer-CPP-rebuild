@@ -97,5 +97,16 @@ void* SynAccRetThis_1417c69a0(void* pThis);                                // 0x
 void* SynAccRetThis_1417c69b0(void* pThis);                                // 0x1417c69b0
 void* SynAccRetThis_1417c69c0(void* pThis);                                // 0x1417c69c0
 void* SynAccRetThis_1417c69d0(void* pThis);                                // 0x1417c69d0
+// The three seams the element-count allocators need, plus the operator new they
+// tail-call. All four are null until a test or the runtime supplies them, and every
+// body below checks before calling, so a null seam changes nothing but the side effect.
+extern void (*g_pfnSynErrCtor_1418233e8)(void* pObj, void* pEmpty);   // 0x1418233e8
+extern void (*g_pfnSynThrow_1417f3154)(void* pObj, const void* pWhat); // 0x1417f3154
+extern void* (*g_pfnSynNew_1417f3166)(uint64_t cb);                    // 0x1417f3166
+
+void* SynAccNew48_1417c6710(uint64_t nElems);                              // 0x1417c6710
+void* SynAccNew72_1417c6790(uint64_t nElems);                              // 0x1417c6790
+void* SynAccNew40_1417c6810(uint64_t nElems);                              // 0x1417c6810
+void* SynAccNew48_1417c6910(uint64_t nElems);                              // 0x1417c6910
 }  // namespace tq
 #endif

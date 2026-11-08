@@ -496,4 +496,107 @@ void* SynAccRetThis_1417c69c0(void* pThis) { return pThis; }
 // 0x1417c69d0 — mov %rcx,%rax / ret
 void* SynAccRetThis_1417c69d0(void* pThis) { return pThis; }
 
+// The seams the element-count allocators run through. Null by default, exactly like the
+// rest of the port's seams: the bodies test before they call.
+void (*g_pfnSynErrCtor_1418233e8)(void*, void*) = nullptr;      // 0x1418233e8
+void (*g_pfnSynThrow_1417f3154)(void*, const void*) = nullptr;  // 0x1417f3154
+void* (*g_pfnSynNew_1417f3166)(uint64_t) = nullptr;             // 0x1417f3166
+
+// 0x1417c6710 — the 0x30-byte element allocator:
+//   movq $0xfffffffffffffffe,0x20(%rsp) / test %rcx,%rcx / je good /
+//   xor %edx,%edx / or $-1,%rax / div %rcx / cmp $0x30,%rax / jae good /
+//   xor %ecx,%ecx / mov %rcx,0x50(%rsp) / lea 0x50(%rsp),%rdx / lea 0x28(%rsp),%rcx /
+//   call *0x1418233e8 / lea 0x141824c40,%rax / mov %rax,0x28(%rsp) /
+//   lea 0x141881df0,%rdx / lea 0x28(%rsp),%rcx / call 0x1417f3154 /
+//   good: lea (%rcx,%rcx,2),%rcx / shl $0x4,%rcx / jmp 0x1417f3166
+void* SynAccNew48_1417c6710(uint64_t nElems) {
+    volatile int64_t sentinel = -2;                 // movq $0xfffffffffffffffe,0x20(%rsp)
+    (void)sentinel;
+    if (nElems != 0) {                              // test %rcx,%rcx / je good
+        uint64_t q = 0xFFFFFFFFFFFFFFFFull / nElems; // or $-1,%rax / xor %edx,%edx / div %rcx
+        if (q < 0x30) {                             // cmp $0x30,%rax / jae good
+            unsigned char obj[0x40] = {};
+            uint64_t empty = 0;                     // xor %ecx,%ecx / mov %rcx,0x50(%rsp)
+            if (g_pfnSynErrCtor_1418233e8 != nullptr)
+                g_pfnSynErrCtor_1418233e8(obj, &empty);        // call *0x1418233e8
+            *(const void**)obj = (const void*)(uintptr_t)0x141824c40ULL;  // the vtable store
+            if (g_pfnSynThrow_1417f3154 != nullptr)
+                g_pfnSynThrow_1417f3154(obj, (const void*)(uintptr_t)0x141881df0ULL);
+        }
+    }
+    uint64_t cb = nElems * 3 * 16;                  // lea (%rcx,%rcx,2) / shl $0x4
+    if (g_pfnSynNew_1417f3166 != nullptr)
+        return g_pfnSynNew_1417f3166(cb);           // jmp 0x1417f3166
+    return nullptr;
+}
+
+// 0x1417c6790 — the 0x48-byte element allocator: the same frame, `cmp $0x48,%rax`,
+//   `lea (%rcx,%rcx,8),%rcx / shl $0x3,%rcx`.
+void* SynAccNew72_1417c6790(uint64_t nElems) {
+    volatile int64_t sentinel = -2;
+    (void)sentinel;
+    if (nElems != 0) {
+        uint64_t q = 0xFFFFFFFFFFFFFFFFull / nElems;
+        if (q < 0x48) {
+            unsigned char obj[0x40] = {};
+            uint64_t empty = 0;
+            if (g_pfnSynErrCtor_1418233e8 != nullptr)
+                g_pfnSynErrCtor_1418233e8(obj, &empty);
+            *(const void**)obj = (const void*)(uintptr_t)0x141824c40ULL;
+            if (g_pfnSynThrow_1417f3154 != nullptr)
+                g_pfnSynThrow_1417f3154(obj, (const void*)(uintptr_t)0x141881df0ULL);
+        }
+    }
+    uint64_t cb = nElems * 9 * 8;                   // lea (%rcx,%rcx,8) / shl $0x3
+    if (g_pfnSynNew_1417f3166 != nullptr)
+        return g_pfnSynNew_1417f3166(cb);
+    return nullptr;
+}
+
+// 0x1417c6810 — the 0x28-byte element allocator: `cmp $0x28,%rax`,
+//   `lea (%rcx,%rcx,4),%rcx / shl $0x3,%rcx`.
+void* SynAccNew40_1417c6810(uint64_t nElems) {
+    volatile int64_t sentinel = -2;
+    (void)sentinel;
+    if (nElems != 0) {
+        uint64_t q = 0xFFFFFFFFFFFFFFFFull / nElems;
+        if (q < 0x28) {
+            unsigned char obj[0x40] = {};
+            uint64_t empty = 0;
+            if (g_pfnSynErrCtor_1418233e8 != nullptr)
+                g_pfnSynErrCtor_1418233e8(obj, &empty);
+            *(const void**)obj = (const void*)(uintptr_t)0x141824c40ULL;
+            if (g_pfnSynThrow_1417f3154 != nullptr)
+                g_pfnSynThrow_1417f3154(obj, (const void*)(uintptr_t)0x141881df0ULL);
+        }
+    }
+    uint64_t cb = nElems * 5 * 8;                   // lea (%rcx,%rcx,4) / shl $0x3
+    if (g_pfnSynNew_1417f3166 != nullptr)
+        return g_pfnSynNew_1417f3166(cb);
+    return nullptr;
+}
+
+// 0x1417c6910 — the 0x30-byte element allocator again, its own start: the body is
+//   byte for byte the one at 0x1417c6710, `cmp $0x30,%rax` and the 3*16 size included.
+void* SynAccNew48_1417c6910(uint64_t nElems) {
+    volatile int64_t sentinel = -2;
+    (void)sentinel;
+    if (nElems != 0) {
+        uint64_t q = 0xFFFFFFFFFFFFFFFFull / nElems;
+        if (q < 0x30) {
+            unsigned char obj[0x40] = {};
+            uint64_t empty = 0;
+            if (g_pfnSynErrCtor_1418233e8 != nullptr)
+                g_pfnSynErrCtor_1418233e8(obj, &empty);
+            *(const void**)obj = (const void*)(uintptr_t)0x141824c40ULL;
+            if (g_pfnSynThrow_1417f3154 != nullptr)
+                g_pfnSynThrow_1417f3154(obj, (const void*)(uintptr_t)0x141881df0ULL);
+        }
+    }
+    uint64_t cb = nElems * 3 * 16;
+    if (g_pfnSynNew_1417f3166 != nullptr)
+        return g_pfnSynNew_1417f3166(cb);
+    return nullptr;
+}
+
 }  // namespace tq

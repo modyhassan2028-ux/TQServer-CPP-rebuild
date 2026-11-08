@@ -292,3 +292,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   0x1417c6910. They need the three length_error seams modelled first: 0x1418233e8 (object
   constructor), the `0x141824c40` vtable store, and 0x1417f3154 (throw helper), with the good
   path tail-calling 0x1417f3166.
+
+## D135 (latest)
+
+- The four element-count allocators are ported, with the length_error path modelled through
+  three null-by-default seams: `SYNDICATE_D135_OK ... 30 checks`, 6 passes. Cluster 109 bodies.
+- Next: the stretch past 0x1417c69d0 was cut at 0x1417c69ff, so the next unit starts with a
+  whole dump from 0x1417c69e0 (the `add $0x18,%rcx` tail jump) onward.
