@@ -502,3 +502,15 @@ The four bodies that were held back at D134 are in, each read straight off its o
 - 0x1417c8980: the copied-temp comparison, `setne` here while 0x1417c7850 answers `sete`. The
   copy happens before the lead is read, so the check compares against the temp at 0x20(%rsp).
 - `tests/syndicate_d156_test.cpp`: 9 checks, 6 passes, ASan+UBSan clean. Cluster 234 bodies.
+
+## D157 — the iterator distance 0x1417c89d0
+
+- The counter at `(%rdi)` is bumped **once per step, after** the "are we there yet" test, so two
+  iterators already on the same node answer zero moves and no bump at all.
+- The step is the 0x41 climb/descend the decrement uses, with both DEBUG checks: the leads must
+  agree before anything moves (`test`/`je` then `cmp (%rsi),%rax`), and the lead is re-tested after
+  the bump (`cmpq $0x0,(%rbx)`).
+- Descend goes through `0x10` and then the left spine of that child (`mov (%rax),%rcx` and the
+  `0x1417c8a40` loop); climb walks `0x8` while the parent's `0x10` link names the node we came
+  from. Both land in `mov %rax,0x8(%rbx)` and jump back to the top of the walk.
+- `tests/syndicate_d157_test.cpp`: 5 checks, 6 passes, ASan+UBSan clean. Cluster 235 bodies.

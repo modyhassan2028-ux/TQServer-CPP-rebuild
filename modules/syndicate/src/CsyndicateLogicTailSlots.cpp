@@ -3165,4 +3165,54 @@ bool SynAccIterNeCopied_1417c8980(void* pThis, void* pOther) {
     return *(void**)(t + 8) != *(void**)(temp + 8);          // cmp %rcx,0x8(%rbx) / setne
 }
 
+// 0x1417c89d0 - the distance between two iterators: the counter at (%rdi) is bumped once per
+// step, and the step is the same 0x41 climb/descend the decrement uses. The leads must agree
+// before anything moves, and the walk ends when the two node slots name the same node.
+void SynAccDistance_1417c89d0(void* pThis, void* pOther, int64_t* pCount) {
+    unsigned char* it = (unsigned char*)pThis;
+    unsigned char* other = (unsigned char*)pOther;
+    for (;;) {
+        void* lead = *(void**)it;                              // mov (%rbx),%rax
+        if (lead == nullptr || lead != *(void**)other) {        // test / je ; cmp (%rsi),%rax / je
+            if (g_pfn_invalid_parameter_noinfo != nullptr) g_pfn_invalid_parameter_noinfo();
+        }
+        if (*(void**)(it + 8) == *(void**)(other + 8)) return;  // 0x1417c89fb / je 0x1417c8a81
+        ++*pCount;                                              // incq (%rdi)
+        if (*(void**)it == nullptr) {                           // cmpq $0x0,(%rbx) / jne
+            if (g_pfn_invalid_parameter_noinfo != nullptr) g_pfn_invalid_parameter_noinfo();
+        }
+        unsigned char* n = *(unsigned char**)(it + 8);          // mov 0x8(%rbx),%rcx
+        if (*(unsigned char*)(n + 0x41) != 0) {                 // cmpb $0.0x41(%rcx) / je
+            if (g_pfn_invalid_parameter_noinfo != nullptr) g_pfn_invalid_parameter_noinfo();
+            continue;                                          // jmp 0x1417c89e8
+        }
+        unsigned char* r = *(unsigned char**)(n + 0x10);         // mov 0x10(%rcx),%rax
+        if (*(unsigned char*)(r + 0x41) == 0) {                 // cmpb / jne 0x1417c8a52
+            unsigned char* l = *(unsigned char**)(r);            // mov (%rax),%rcx
+            if (*(unsigned char*)(l + 0x41) != 0) {              // cmpb / jne 0x1417c8a4c
+                *(void**)(it + 8) = r;                           // mov %rax,0x8(%rbx)
+                continue;
+            }
+            for (;;) {                                          // 0x1417c8a40
+                r = l;                                           // mov %rcx,%rax
+                l = *(unsigned char**)(l);                       // mov (%rcx),%rcx
+                if (*(unsigned char*)(l + 0x41) != 0) break;      // cmpb / je back
+            }
+            *(void**)(it + 8) = r;                               // mov %rax,0x8(%rbx)
+            continue;
+        }
+        unsigned char* p = *(unsigned char**)(n + 8);            // 0x1417c8a52: mov 0x8(%rcx),%rcx
+        if (*(unsigned char*)(p + 0x41) == 0) {                  // cmpb / jne 0x1417c8a78
+            for (;;) {                                           // 0x1417c8a60
+                unsigned char* pr = *(unsigned char**)(p + 0x10); // mov 0x10(%rcx),%rax
+                if (*(void**)(it + 8) != (void*)pr) break;        // cmp %rax,0x8(%rbx) / jne
+                *(void**)(it + 8) = p;                            // mov %rcx,0x8(%rbx)
+                p = *(unsigned char**)(p + 8);                    // mov 0x8(%rcx),%rcx
+                if (*(unsigned char*)(p + 0x41) != 0) break;      // cmpb / je back
+            }
+        }
+        *(void**)(it + 8) = p;                                    // 0x1417c8a78: mov %rcx,0x8(%rbx)
+    }
+}
+
 }  // namespace tq

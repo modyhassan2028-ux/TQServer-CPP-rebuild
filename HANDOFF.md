@@ -459,3 +459,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - `Docs/ASM/1417c8a70.txt` (193 lines) is captured: 0x1417c89d0 is the iterator **distance** —
   a loop that increments the counter at `(%rdi)` and steps 0x41-flagged nodes until the two
   iterators name the same node. Its own tail runs past the old capture, so work from the new file.
+
+## D157 (latest)
+
+- The distance is in: `SYNDICATE_D157_OK ... 5 checks`, 6 passes. Cluster 235 bodies.
+- Next in `Docs/ASM/1417c8a70.txt`: 0x1417c8aa0 is a checked body (assert at line 0x172 with
+  0x14183a778 and 0x141827b98) that then reads `0x38(%rcx)`, `0x8(%rcx)` and compares
+  `0x8(%rbp)` — the shape of a range/verify step. Read the file before starting it.
