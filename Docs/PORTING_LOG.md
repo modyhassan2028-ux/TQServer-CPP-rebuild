@@ -679,3 +679,27 @@ The four bodies that were held back at D134 are in, each read straight off its o
   `"CClientSocket::SendPacket, ..."` inside that same address range, so the region is not one class
   and no placement is inferred from it.
 - Both suites still pass 6 times each (D165 8 bodies / 20 checks, D166 6 bodies / 26 checks).
+
+## D168 — NpcServer.exe 0x1400014d0 and 0x140001520 (2 bodies)
+
+- `0x1400014d0`: frees `+0x820` when set, clears it, writes `-1` to `+0x818`, clears `+0x830`, then
+  `operator_delete(this)`. The test snapshots the object *inside* the delete seam and confirms those
+  three fields are already in their final state when the delete happens, which is the order the
+  decompiled body shows.
+- `0x140001520` is `CClientSocket::Open`, ported with its six strings intact:
+  `"CClientSocket::Open, bufferevent_socket_new error[%d], at %s, %d."`,
+  `"CClientSocket::Open, bufferevent_socket_connect error[%d], at %s, %d."`,
+  `"CClientSocket::Open, bufferevent_getfd error[%d], at %s, %d."`, plus `&DAT_1400be0b0` (three
+  sites) and `&DAT_1400be2d8`.
+- The sockaddr local is reproduced byte for byte: `family = 2` at +0, `Ordinal_9(*(u16*)(this+0x10))`
+  at +2, the resolved address at +4, and a zero qword at +8, passed with length `0x10`. The test
+  reads those bytes back through the connect seam.
+- Finding worth recording: `iVar3 = *(int *)**(undefined8 **)(lVar4 + 0x18)` is **three** reads
+  (the slot, then the pointer it holds, then the int). A first test fixture that stopped after two
+  made ASan report a stack overflow, which is how the extra dereference was caught.
+- Success path writes the original's byte stores: `+0x814..+0x817 = 0` and `+0x830 = 2`,
+  `+0x831..+0x833 = 0`, and returns 1. State 2 returns 1 immediately; any other state returns 0.
+- Seams added: `Ordinal_11`, `Ordinal_52`, `Ordinal_9`, `Ordinal_111`, `FUN_1400022c0`,
+  `FUN_14000b3e0`, `FUN_140005a50`, `FUN_14000b9f0`, `FUN_140006200`, and the value symbols
+  `DAT_140002370`, `FUN_1400022f0`, `FUN_140002380`, `DAT_1400be2d8`.
+- `tests/npcserver_d168_test.cpp`: 32 checks; D165, D166 and D168 each pass 6 times under ASan+UBSan.

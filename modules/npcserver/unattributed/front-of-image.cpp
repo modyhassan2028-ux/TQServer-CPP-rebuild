@@ -19,6 +19,19 @@ int (*g_pfnNpcWSACleanup)(void) = nullptr;
 void* (*g_pfnNpcFreeBufferevent)(void* p) = nullptr;
 int   (*g_pfnNpcBuffereventWrite)(void* p, void* pBuf, int nLen) = nullptr;
 int   (*g_pfnNpcSocketErrno)(long long hSocket) = nullptr;
+int   (*g_pfnNpcOrdinal11)(void* pThis) = nullptr;
+long long (*g_pfnNpcOrdinal52)(void* pThis) = nullptr;
+unsigned short (*g_pfnNpcOrdinal9)(unsigned short uValue) = nullptr;
+void  (*g_pfnNpcOrdinal111)(void) = nullptr;
+long long (*g_pfnNpcEventBase_1400022c0)(long long hBase) = nullptr;
+void* (*g_pfnNpcBevSockNew_14000b3e0)(long long hBase, void* hSocket, int nOptions) = nullptr;
+void  (*g_pfnNpcBevSetCallbacks_140005a50)(void* pBev, void* pRead, void* pWrite, void* pEvent, void* pArg) = nullptr;
+int   (*g_pfnNpcBevSockConnect_14000b9f0)(void* pBev, void* pAddr, int nLen, void* pCb) = nullptr;
+long long (*g_pfnNpcBevGetFd_140006200)(void* pBev) = nullptr;
+unsigned char g_symNpcStr_1400be2d8 = 0;
+unsigned char g_symNpcData_140002370 = 0;
+unsigned char g_symNpcFn_1400022f0 = 0;
+unsigned char g_symNpcFn_140002380 = 0;
 
 void* g_symNpcVftbl_1400be090 = nullptr;
 unsigned char g_symNpcStr_1400be0b0 = 0;
@@ -181,6 +194,106 @@ int FUN_140001390(void* pThis, void* pBuf, int nLen) {
 // FUN_140001440 @ 0x140001440 — return *(int *)(param_1 + 0x830) == 2;
 bool FUN_140001440(void* pThis) {
     return *(int*)((unsigned char*)pThis + 0x830) == 2;
+}
+
+
+// FUN_1400014d0 @ 0x1400014d0 - release the bufferevent, drop the handle, then delete this
+void FUN_1400014d0(void* pThis) {
+    unsigned char* p = (unsigned char*)pThis;
+    if (*(void**)(p + 0x820) != (void*)0x0) {
+        if (g_pfnNpcFreeBufferevent != nullptr) g_pfnNpcFreeBufferevent(*(void**)(p + 0x820));
+        *(void**)(p + 0x820) = nullptr;
+    }
+    *(uint64_t*)(p + 0x818) = 0xffffffffffffffffULL;
+    *(uint32_t*)(p + 0x830) = 0;
+    if (g_pfnNpcOperatorDelete != nullptr) g_pfnNpcOperatorDelete(pThis);
+}
+
+// FUN_140001520 @ 0x140001520 - CClientSocket::Open; 1 on an open (or already open) socket, 0 on failure
+int FUN_140001520(char* pThis) {
+    char* p = pThis;
+    int iVar3 = 0;
+    long long lVar4 = 0;
+    unsigned char sockaddr[0x10];
+
+    if (*p == '\0') {
+        if (g_pfnNpcInlineLogError != nullptr) g_pfnNpcInlineLogError(&g_symNpcStr_1400be0b0);
+    }
+    if (*(long long*)(p + 0x828) == 0) {
+        if (g_pfnNpcInlineLogError != nullptr) g_pfnNpcInlineLogError(&g_symNpcStr_1400be0b0);
+        return 0;
+    }
+    unsigned int uVar1 = *(unsigned int*)(p + 0x830);
+    if (uVar1 == 2) {
+        return 1;
+    }
+    if (uVar1 == 0) {
+        if (*(long long*)(p + 0x818) != -1) {
+            if (g_pfnNpcInlineLogError != nullptr) g_pfnNpcInlineLogError(&g_symNpcStr_1400be0b0);
+        }
+        iVar3 = g_pfnNpcOrdinal11 != nullptr ? g_pfnNpcOrdinal11(p) : -1;
+        if (iVar3 == -1) {
+            lVar4 = g_pfnNpcOrdinal52 != nullptr ? g_pfnNpcOrdinal52(p) : 0;
+            if (lVar4 == 0) {
+                if (g_pfnNpcInlineLogError != nullptr) g_pfnNpcInlineLogError(&g_symNpcStr_1400be2d8);
+                FUN_140001340(p);
+                return 0;
+            }
+            // *(int *)**(undefined8 **)(lVar4 + 0x18)
+            void* pInner = *(void**)((unsigned char*)lVar4 + 0x18);
+            iVar3 = *(int*)(*(void**)pInner);
+        }
+        // the 16-byte sockaddr local_28 .. local_20, built in the original's order
+        *(uint16_t*)(sockaddr + 0) = 2;
+        unsigned short uVar2 = g_pfnNpcOrdinal9 != nullptr
+                                    ? g_pfnNpcOrdinal9(*(unsigned short*)(p + 0x10)) : 0;
+        *(uint16_t*)(sockaddr + 2) = uVar2;
+        *(uint32_t*)(sockaddr + 4) = (uint32_t)iVar3;
+        *(uint64_t*)(sockaddr + 8) = 0;
+
+        lVar4 = g_pfnNpcEventBase_1400022c0 != nullptr
+                    ? g_pfnNpcEventBase_1400022c0(*(long long*)(p + 0x828)) : 0;
+        void* pBev = g_pfnNpcBevSockNew_14000b3e0 != nullptr
+                         ? g_pfnNpcBevSockNew_14000b3e0(lVar4, (void*)0xffffffffffffffffULL, 3) : nullptr;
+        *(void**)(p + 0x820) = pBev;
+        const char* pszError = nullptr;
+        if (pBev == nullptr) {
+            if (g_pfnNpcOrdinal111 != nullptr) g_pfnNpcOrdinal111();
+            pszError = "CClientSocket::Open, bufferevent_socket_new error[%d], at %s, %d.";
+        } else {
+            void* pCb = &g_symNpcFn_140002380;
+            if (g_pfnNpcBevSetCallbacks_140005a50 != nullptr)
+                g_pfnNpcBevSetCallbacks_140005a50(pBev, &g_symNpcFn_1400022f0, &g_symNpcData_140002370,
+                                                  &g_symNpcFn_140002380, *(void**)(p + 0x828));
+            iVar3 = g_pfnNpcBevSockConnect_14000b9f0 != nullptr
+                        ? g_pfnNpcBevSockConnect_14000b9f0(*(void**)(p + 0x820), sockaddr, 0x10, pCb) : -1;
+            if (iVar3 < 0) {
+                if (g_pfnNpcOrdinal111 != nullptr) g_pfnNpcOrdinal111();
+                pszError = "CClientSocket::Open, bufferevent_socket_connect error[%d], at %s, %d.";
+            } else {
+                lVar4 = g_pfnNpcBevGetFd_140006200 != nullptr
+                            ? g_pfnNpcBevGetFd_140006200(*(void**)(p + 0x820)) : -1;
+                *(long long*)(p + 0x818) = lVar4;
+                if (-1 < lVar4) {
+                    p[0x814] = '\0';
+                    p[0x815] = '\0';
+                    p[0x816] = '\0';
+                    p[0x817] = '\0';
+                    p[0x830] = '\x02';
+                    p[0x831] = '\0';
+                    p[0x832] = '\0';
+                    p[0x833] = '\0';
+                    return 1;
+                }
+                if (g_pfnNpcOrdinal111 != nullptr) g_pfnNpcOrdinal111();
+                pszError = "CClientSocket::Open, bufferevent_getfd error[%d], at %s, %d.";
+            }
+        }
+        if (g_pfnNpcInlineLogError != nullptr) g_pfnNpcInlineLogError(pszError);
+        FUN_140001340(p);
+        return 0;
+    }
+    return 0;
 }
 
 }  // namespace tq

@@ -538,3 +538,9 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   attribution is unavailable from the image. `Docs/NPCSERVER_PATHS.md` says so in its note.
 - Next: continue by address from 0x1400014b0; when a body's class comes from the name index, record
   the index row in PORTING_LOG and still place the body by evidence only.
+
+## D168 (latest)
+
+- NpcServer: 16 bodies ported (0x140001020 .. 0x140001520). `NPCSERVER_D168_OK`, 6 passes, and the
+  earlier two suites re-run clean against the same object.
+- Next: continue by address from 0x1400016xx, same rules (decompiler names, no invented paths).
