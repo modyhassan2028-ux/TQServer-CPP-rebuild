@@ -149,6 +149,9 @@ void* (*g_pfnNpc_14001a880)(long long*, long long) = nullptr;
 long long (*g_pfnNpc_14001b590)(long long, unsigned long long, unsigned long long, unsigned long long) =
     nullptr;
 void (*g_pfnNpc_140008930)(int*, int) = nullptr;
+int (*g_pfnNpcWsaPoll_Ordinal18)(unsigned int, void*, void*, void*, int*) = nullptr;
+int (*g_pfnNpc_1400089a0)(unsigned int*, int) = nullptr;
+void (*g_pfnNpc_14001a5d0)(long long, long long, int) = nullptr;
 void* g_pNpcBase_140103f80 = nullptr;
 void  (*g_pfnNpc_140074d90)(void*, unsigned int) = nullptr;
 void  (*g_pfnNpc_140014300)(void*) = nullptr;
@@ -2376,6 +2379,80 @@ unsigned long long FUN_140075380(long long pMechanism, unsigned long long uKey, 
                 if (pNode != nullptr) *(int*)((char*)pNode + 4) = nCount;
             }
         }
+    }
+    return 0;
+}
+
+// Copy one index array into one poll buffer: the count word, then count * 8 bytes of entries from +8.
+static void NpcCopyQueue(unsigned int* pSrc, unsigned int* pDst) {
+    *pDst = *pSrc;
+    memcpy(pDst + 2, pSrc + 2, (size_t)(*pSrc) * 8);
+}
+
+// Walk one poll buffer once, starting the cycle at the rotated entry and stepping modulo the count.
+static void NpcDispatchList(long long pBase, unsigned int* pArr, int nFlag) {
+    unsigned int uCount = *pArr;
+    if (uCount == 0) return;
+    int nStart = g_pfnNpc_1400089a0 != nullptr
+                     ? g_pfnNpc_1400089a0((unsigned int*)(pBase + 0x2a0), (int)uCount) : 0;
+    unsigned long long uSlot = (unsigned long long)(unsigned int)nStart;
+    unsigned long long uNext = uSlot;
+    unsigned int uDone = 0;
+    do {
+        unsigned int uInc = (unsigned int)uNext + 1;
+        uNext = uInc;
+        uSlot = uSlot + 1;
+        if (uCount <= uInc) {
+            uNext = 0;
+            uSlot = 0;
+        }
+        if (g_pfnNpc_14001a5d0 != nullptr)
+            g_pfnNpc_14001a5d0(pBase, *(long long*)((unsigned char*)pArr + 8 + (size_t)uSlot * 8), nFlag);
+        ++uDone;
+    } while (uDone < *pArr);
+}
+
+// 0x140075480 - one poll cycle. When the queue object has the resize flag at +4 set, all three poll buffers
+// are resized to (cap - 1) * 8 + 0x10 first and the flag is cleared. The two live arrays are copied into the
+// three poll buffers (the first into the first buffer, the second into both the second and the third), the
+// higher of the last two counts decides between waiting and polling, and every non-empty buffer is walked
+// once, activating each fd it carries: the first buffer with flag 2, the other two with flag 4.
+int FUN_140075480(long long pBase, int* pTimeout) {
+    int* q = *(int**)(pBase + 8);
+    if (q[1] != 0) {
+        size_t nBytes = (size_t)(*q - 1) * 8 + 0x10;
+        const int aOffsets[3] = { 6, 10, 8 };
+        for (int i = 0; i < 3; ++i) {
+            long long p = g_pfnNpcRealloc_1400119a0 != nullptr
+                              ? (long long)g_pfnNpcRealloc_1400119a0(*(void**)(q + aOffsets[i]), nBytes) : 0;
+            *(long long*)(q + aOffsets[i]) = p;
+            if (p == 0) return -1;
+        }
+        q[1] = 0;
+    }
+    NpcCopyQueue(*(unsigned int**)(q + 2), *(unsigned int**)(q + 6));
+    NpcCopyQueue(*(unsigned int**)(q + 4), *(unsigned int**)(q + 10));
+    NpcCopyQueue(*(unsigned int**)(q + 4), *(unsigned int**)(q + 8));
+    unsigned int uMax = **(unsigned int**)(q + 8);
+    if (**(unsigned int**)(q + 8) < **(unsigned int**)(q + 6)) uMax = **(unsigned int**)(q + 6);
+    if (uMax == 0) {
+        if (pTimeout == nullptr) {
+            if (g_pfnNpcSleep != nullptr) g_pfnNpcSleep(0x7fffffff);
+        } else {
+            unsigned int uWait = g_pfnNpc_140016450 != nullptr ? g_pfnNpc_140016450(pTimeout) : 0;
+            if ((int)uWait < 0) uWait = 0x7fffffff;
+            if (g_pfnNpcSleep != nullptr) g_pfnNpcSleep(uWait);
+        }
+    } else {
+        if (*(long long*)(pBase + 0x1d0) != 0 && g_pfnNpc_140016e50 != nullptr) g_pfnNpc_140016e50();
+        int nReady = g_pfnNpcWsaPoll_Ordinal18 != nullptr
+                         ? g_pfnNpcWsaPoll_Ordinal18(uMax, *(void**)(q + 6), *(void**)(q + 8),
+                                                     *(void**)(q + 10), pTimeout) : 0;
+        if (*(long long*)(pBase + 0x1d0) != 0 && g_pfnNpc_140016e30 != nullptr) g_pfnNpc_140016e30();
+        if (nReady < 1) return nReady;
+        NpcDispatchList(pBase, *(unsigned int**)(q + 6), 2);
+        NpcDispatchList(pBase, *(unsigned int**)(q + 10), 4);
+        NpcDispatchList(pBase, *(unsigned int**)(q + 8), 4);
     }
     return 0;
 }

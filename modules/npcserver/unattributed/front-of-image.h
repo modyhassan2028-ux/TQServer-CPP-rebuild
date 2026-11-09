@@ -277,6 +277,10 @@ extern int   (*g_pfnNpcResetEvent)(void* hEvent);                            // 
 extern unsigned int (*g_pfnNpcWaitForSingleObject)(void* hHandle, unsigned int uMilliseconds);
 unsigned long long FUN_140074d90(void* pCtl, unsigned int dwTimeout);
 void FUN_140074780(void* pCtl);
+extern int (*g_pfnNpcWsaPoll_Ordinal18)(unsigned int uCount, void* pRead, void* pWrite, void* pExcept, int* pTimeout);   // Ordinal_18 poll
+extern int (*g_pfnNpc_1400089a0)(unsigned int* pField, int nCount);   // rotating start
+extern void (*g_pfnNpc_14001a5d0)(long long pBase, long long uKey, int nFlag);   // activate one fd
+int FUN_140075480(long long pBase, int* pTimeout);
 int  FUN_140074e80(void* pCtl, void* pOverlapped, unsigned long long uKey, unsigned int dwBytes);
 void* FUN_140074eb0(long long pBase);
 unsigned long long FUN_140074ec0(int* pQueue, int nSize);

@@ -1264,3 +1264,23 @@ closed, and the flag only being set on the path that got a socket.
   against `0x140075040`, which writes the first field when its `nWhich` is non-zero: the two functions take
   the flag the other way round relative to the queue index.
 - Two new seams: `0x14001b590` and `0x140008930`.
+
+## D195 — NpcServer.exe 0x140075480 (one poll cycle)
+
+- With the resize flag at `+4` of the queue object set, the three poll buffers at `+0x18`, `+0x20`, `+0x28`
+  are all resized to `(cap - 1) * 8 + 0x10` first, in the order `+0x18`, `+0x28`, `+0x20`; a failure at any of
+  them answers `-1` and leaves the flag set so the resize is retried next cycle.
+- The two live arrays are then copied into the three buffers: the first array (`+0x08`) into the first buffer
+  (`+0x18`), and the second array (`+0x10`) into **both** the second (`+0x20`) and the third (`+0x28`). Each
+  copy moves the count word and `count * 8` bytes of entries from `+8`.
+- The higher of the two last counts decides the branch: zero waits, through `0x140016450` when a timeout object
+  is given (a negative answer becomes `0x7fffffff`) and `Sleep(0x7fffffff)` when none is; otherwise the poll
+  runs with the count and the three buffers, bracketed by `0x140016e50` and `0x140016e30` when the base holds
+  a notification handle at `+0x1d0`. A poll answer below one is returned unchanged, so `-1` and `0` reach the
+  caller.
+- Every non-empty buffer is then walked exactly once, activating each fd through `0x14001a5d0`: the first
+  buffer with flag 2, the second and third with flag 4. The walk starts at `0x1400089a0`'s rotating index,
+  steps **past** it and wraps when the step reaches the count, so a list of two with a start of one activates
+  entry 0 and then entry 1, while a list of three with a start of one activates 2, 0, 1. The tests pin both.
+- Five new seams: `Sleep`, `Ordinal_18` (the poll), the timeout-to-milliseconds conversion at `0x140016450`,
+  the two notification hooks, the rotating index at `0x1400089a0` and the per-fd activation at `0x14001a5d0`.

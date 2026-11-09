@@ -726,3 +726,8 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - NpcServer: 113 bodies, 26 suites. The notification mechanism (queue object plus its hand-over and withdraw
   pair) is ported.
 - Next: 0x140075480 (700 bytes, the largest left in this cluster), then 0x140075740 onward.
+
+## D195 (latest)
+
+- NpcServer: 114 bodies, 27 suites green. The poll cycle is ported; the notification cluster's backbone is done.
+- Next: 0x140075740, 0x1400757e0, 0x140075840, 0x140075950, 0x140075a00 continuing in address order.
