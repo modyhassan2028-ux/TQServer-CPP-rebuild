@@ -67,6 +67,30 @@ extern const char g_symNpcStr_1400beb08[];                                  // C
 extern void (*g_pfnNpcTickAnalystCtor)(void* pScope, int nId);              // CTickAnalyst::CTickAnalyst
 extern void (*g_pfnNpcTickAnalystDtor)(void* pScope);                       // CTickAnalyst::~CTickAnalyst
 extern void (*g_pfnNpcInlineLogWARNING)(const void* pFmt, unsigned long long uValue);
+// the libevent-facing layer 0x140002b30 reaches into; none of these bodies is ported yet
+extern void* (*g_pfnNpc_140005750)(void* a, long long b, void* c, void* d);
+extern void* (*g_pfnNpcEventConfigNew_140012580)(void);
+extern void  (*g_pfnNpcEventConfigFlag_140010a00)(void* pConfig, long long nValue);
+extern void  (*g_pfnNpcGetSystemInfo)(void* pInfo);
+extern void  (*g_pfnNpcEventConfigCpu_140010a20)(void* pConfig, unsigned int uCount);
+extern void* (*g_pfnNpcEventBaseNew_140015ed0)(void* pConfig, unsigned long long uCpu, void* a3, void* a4);
+extern void  (*g_pfnNpcEventConfigFree_140012660)(void* pConfig);
+extern const char* (*g_pfnNpcEventBaseMethod_140010d80)(void* pBase);
+extern void  (*g_pfnNpcLogMessageFmt)(const char* pszFormat, ...);
+extern void* (*g_pfnNpc_14001d350)(void);
+extern void* (*g_pfnNpcBeginThreadEx)(void* pSec, unsigned int uStack, void* pStart, void* pArg,
+                                      unsigned int uFlags, unsigned int* pTid);
+extern unsigned long (*g_pfnNpcGetThreadId)(void* hThread);
+extern unsigned long (*g_pfnNpcGetCurrentThreadId)(void);
+extern int* (*g_pfnNpcErrno)(void);
+extern bool (*g_pfnNpcThreadBaseCreateThread)(void* pThis, const char* pszName, long long uFlag);
+extern const char g_symNpcStr_1400beca8[];   // libevent method: %s
+extern const char g_symNpcStr_1400bec78[];   // thread %u created libevent worker thread %u
+extern const char g_symNpcStr_1400bec60[];   // NPC Server KernelThread
+extern const char g_symNpcStr_1400bec20[];   // CSocketKernel::Create _beginthreadex failed with error code:%u
+extern const char g_symNpcStr_1400bebe0[];   // CNpcWorld::Create, cannot create NpcServer client socket.
+extern const char g_symNpcStr_1400bebb0[];   // CKernelThread::Create m_pEventBase is NULL
+extern const char g_symNpcStr_1400beb80[];   // CKernelThread::Create event_config_new failed
 extern int          g_nNpcLoopDelay_140102148;                              // DAT_140102148
 extern unsigned int g_nNpcTickClock_140103c60;                              // DAT_140103c60
 extern unsigned int g_nNpcTickClockInit_140103c64;                          // DAT_140103c64
@@ -139,6 +163,7 @@ int   FUN_140002760(unsigned int* pThis, unsigned int uValue);
 void* FUN_140002790(void* pThis);
 void* FUN_140002d70(void* pThis, long long hThread, const char* pszName);
 int   FUN_1400027f0(long long pThis);
+bool  FUN_140002b30(long long pThis, long long hSocketTable, long long pParam3, long long uFlag);
 int   FUN_140001520(char* pThis);
 
 }  // namespace tq

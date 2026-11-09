@@ -5,6 +5,7 @@
 // ties 0x140001000 to CChatThread::ctor_or_dtor through that same table, so the stored symbol is
 // named by its address here. No class name is asserted from the decompiler's library signature.
 #include "modules/npcserver/unattributed/front-of-image.h"
+#include "modules/npcserver/src/version/cqserver-78.0.11-1204/npcserver/clientsocket.h"
 
 #include <cstdint>
 #include <cstring>
@@ -57,6 +58,29 @@ unsigned int g_nNpcTickClockInit_140103c64 = 0;
 unsigned int g_nNpcStatCount_140103f28 = 0;
 unsigned int g_nNpcStatSum_140103f2c = 0;
 unsigned int g_nNpcStatMax_140103f30 = 0;
+void* (*g_pfnNpc_140005750)(void*, long long, void*, void*) = nullptr;
+void* (*g_pfnNpcEventConfigNew_140012580)(void) = nullptr;
+void  (*g_pfnNpcEventConfigFlag_140010a00)(void*, long long) = nullptr;
+void  (*g_pfnNpcGetSystemInfo)(void*) = nullptr;
+void  (*g_pfnNpcEventConfigCpu_140010a20)(void*, unsigned int) = nullptr;
+void* (*g_pfnNpcEventBaseNew_140015ed0)(void*, unsigned long long, void*, void*) = nullptr;
+void  (*g_pfnNpcEventConfigFree_140012660)(void*) = nullptr;
+const char* (*g_pfnNpcEventBaseMethod_140010d80)(void*) = nullptr;
+void  (*g_pfnNpcLogMessageFmt)(const char*, ...) = nullptr;
+void* (*g_pfnNpc_14001d350)(void) = nullptr;
+void* (*g_pfnNpcBeginThreadEx)(void*, unsigned int, void*, void*, unsigned int, unsigned int*) = nullptr;
+unsigned long (*g_pfnNpcGetThreadId)(void*) = nullptr;
+unsigned long (*g_pfnNpcGetCurrentThreadId)(void) = nullptr;
+int* (*g_pfnNpcErrno)(void) = nullptr;
+bool (*g_pfnNpcThreadBaseCreateThread)(void*, const char*, long long) = nullptr;
+const char g_symNpcStr_1400beca8[] = "libevent method: %s";
+const char g_symNpcStr_1400bec78[] = "thread %u created libevent worker thread %u";
+const char g_symNpcStr_1400bec60[] = "NPC Server KernelThread";
+const char g_symNpcStr_1400bec20[] = "CSocketKernel::Create _beginthreadex failed with error code:%u";
+const char g_symNpcStr_1400bebe0[] = "CNpcWorld::Create, cannot create NpcServer client socket.";
+const char g_symNpcStr_1400bebb0[] = "CKernelThread::Create m_pEventBase is NULL";
+const char g_symNpcStr_1400beb80[] = "CKernelThread::Create event_config_new failed";
+
 void (*g_pfnNpcThreadBaseDtor)(void* pThis) = nullptr;
 void (*g_pfnNpcEventBase_140016270)(void* pBase, long long a2, long long a3, long long a4) = nullptr;
 int  (*g_pfnNpcEventBaseLoopExit_140016280)(void* pBase, void* pArg) = nullptr;
@@ -918,6 +942,96 @@ int FUN_1400027f0(long long pThis) {
     if (g_nNpcLoopDelay_140102148 < 1) g_nNpcLoopDelay_140102148 = 1;
     if (g_pfnNpcTickAnalystDtor != nullptr) g_pfnNpcTickAnalystDtor(scopeLoop);
     return 1;
+}
+
+// 0x140002b30 - CKernelThread::Create(). The socket table arrives in the second argument and is stored at
+// +0x48; the object it opens is at +0x50. Every step below is the body's own sequence: open, configure,
+// read the processor count, build the base, publish the method name, build the engine, then the socket
+// and the worker thread.
+bool FUN_140002b30(long long pThis, long long hSocketTable, long long pParam3, long long uFlag) {
+    if (hSocketTable == 0 || pParam3 == 0) return false;
+    *(long long*)(pThis + 0x48) = hSocketTable;
+    *(long long*)(pThis + 0x50) = pParam3;
+    {
+        void** v1 = (void**)*(void**)pParam3;
+        ((void (*)(long long))((void**)v1)[7])(pParam3);                  // slot +0x38
+    }
+    {
+        long long hObj = *(long long*)(pThis + 0x50);
+        void** v2 = (void**)*(void**)hObj;
+        ((void (*)(long long, long long))((void**)v2)[8])(hObj, 0x1e);    // slot +0x40
+        if (g_pfnNpc_140005750 != nullptr)
+            g_pfnNpc_140005750((void*)hObj, 0x1e, (void*)pParam3, (void*)uFlag);
+    }
+    void* pConfig = g_pfnNpcEventConfigNew_140012580 != nullptr ? g_pfnNpcEventConfigNew_140012580() : nullptr;
+    if (pConfig == nullptr) {
+        if (g_pfnNpcInlineLogError != nullptr) g_pfnNpcInlineLogError(&g_symNpcStr_1400beb80);
+        return false;
+    }
+    if (g_pfnNpcEventConfigFlag_140010a00 != nullptr) g_pfnNpcEventConfigFlag_140010a00(pConfig, 4);
+    unsigned char si[0x40];
+    for (int i = 0; i < 0x40; ++i) si[i] = 0;
+    if (g_pfnNpcGetSystemInfo != nullptr) g_pfnNpcGetSystemInfo(si);
+    unsigned long long uCpu = *(unsigned int*)(si + 0x20);                // dwNumberOfProcessors
+    if (g_pfnNpcEventConfigCpu_140010a20 != nullptr)
+        g_pfnNpcEventConfigCpu_140010a20(pConfig, *(unsigned int*)(si + 0x20));
+    void* pBase = g_pfnNpcEventBaseNew_140015ed0 != nullptr
+                      ? g_pfnNpcEventBaseNew_140015ed0(pConfig, uCpu, (void*)pParam3, (void*)uFlag) : nullptr;
+    *(void**)(pThis + 0x58) = pBase;
+    if (g_pfnNpcEventConfigFree_140012660 != nullptr) g_pfnNpcEventConfigFree_140012660(pConfig);
+    if (*(void**)(pThis + 0x58) == nullptr) {
+        if (g_pfnNpcInlineLogError != nullptr) g_pfnNpcInlineLogError(&g_symNpcStr_1400bebb0);
+        return false;
+    }
+    const char* pszMethod = g_pfnNpcEventBaseMethod_140010d80 != nullptr
+                                ? g_pfnNpcEventBaseMethod_140010d80(*(void**)(pThis + 0x58)) : nullptr;
+    if (g_pfnNpcLogMessageFmt != nullptr) g_pfnNpcLogMessageFmt(g_symNpcStr_1400beca8, pszMethod);
+    void* pEngine = g_pfnNpc_14001d350 != nullptr ? g_pfnNpc_14001d350() : nullptr;
+    *(void**)(pThis + 0x68) = pEngine;
+    if (pEngine == nullptr) return false;
+    {
+        void** v3 = (void**)*(void**)pEngine;
+        bool bOk = ((bool (*)(void*, long long))((void**)v3)[0])(pEngine, pThis + 0x40);   // slot 0
+        if (!bOk) {
+            void** v4 = (void**)*(void**)pEngine;
+            ((void (*)(void*))((void**)v4)[2])(pEngine);                                    // slot +0x10
+            return false;
+        }
+    }
+    void* pNew = g_pfnNpcOperatorNew != nullptr ? g_pfnNpcOperatorNew(0x838) : nullptr;
+    void* pSocket = pNew != nullptr ? FUN_140001210(pNew) : nullptr;
+    *(void**)(pThis + 0x60) = pSocket;
+    bool bOpened = false;
+    if (pSocket != nullptr) bOpened = FUN_140001ba0((char*)pSocket, pThis);
+    if (pSocket == nullptr || !bOpened) {
+        if (g_pfnNpcInlineLogError != nullptr) g_pfnNpcInlineLogError(&g_symNpcStr_1400bebe0);
+        if (*(long long*)(pThis + 0x60) != 0) {
+            FUN_1400014d0(*(void**)(pThis + 0x60));
+            *(void**)(pThis + 0x60) = nullptr;
+        }
+        return false;
+    }
+    void* hThread = g_pfnNpcBeginThreadEx != nullptr
+                        ? g_pfnNpcBeginThreadEx(nullptr, 0, (void*)&FUN_1400024f0, (void*)pThis, 0, nullptr)
+                        : nullptr;
+    *(void**)(pThis + 0x70) = hThread;
+    if (hThread == nullptr) {
+        int* pErrno = g_pfnNpcErrno != nullptr ? g_pfnNpcErrno() : nullptr;
+        if (g_pfnNpcInlineLogError != nullptr)
+            g_pfnNpcInlineLogError(g_symNpcStr_1400bec20, (unsigned long long)(unsigned int)(pErrno ? *pErrno : 0));
+        return false;
+    }
+    {
+        unsigned long uThread = g_pfnNpcGetThreadId != nullptr ? g_pfnNpcGetThreadId(hThread) : 0;
+        unsigned long uCurrent = g_pfnNpcGetCurrentThreadId != nullptr ? g_pfnNpcGetCurrentThreadId() : 0;
+        if (g_pfnNpcLogMessageFmt != nullptr)
+            g_pfnNpcLogMessageFmt(g_symNpcStr_1400bec78, (unsigned long long)uCurrent, (unsigned long long)uThread);
+    }
+    *(unsigned int*)(pThis + 0x78) = 1;
+    unsigned long uNow = g_pfnNpcTimeGet != nullptr ? g_pfnNpcTimeGet(0) : 0;
+    *(unsigned int*)(pThis + 0x7c) = (unsigned int)(uNow / 1000);
+    return g_pfnNpcThreadBaseCreateThread != nullptr
+               ? g_pfnNpcThreadBaseCreateThread((void*)pThis, g_symNpcStr_1400bec60, uFlag) : false;
 }
 
 }  // namespace tq

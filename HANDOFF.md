@@ -595,3 +595,13 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - The packet header is modelled from the stack: two ints, the second is the type (0x1fbd1 / 0x1fbd2),
   and the body buffer is 0x418 with the fd in its first eight bytes.
 - Next: 0x140002b30 (thread launcher, `_SYSTEM_INFO`) now that the same objects are understood.
+
+## D176 (latest)
+
+- NpcServer: 67 bodies. Suites D165 to D176 all green.
+- `CKernelThread::Create` is in with fifteen null-checked seams for the libevent layer
+  (`0x140012580`, `0x140010a00`, `0x140010a20`, `0x140015ed0`, `0x140012660`, `0x140010d80`, `0x14001d350`,
+  `0x140005750`) and the thread API (`_beginthreadex`, `GetThreadId`, `GetCurrentThreadId`, `_errno`,
+  `CThreadBase::CreateThread`, `GetSystemInfo`).
+- Next: those eight libevent bodies in `0x140005750`..`0x140016xxx` are now the critical path, because
+  every remaining thread body leans on them.

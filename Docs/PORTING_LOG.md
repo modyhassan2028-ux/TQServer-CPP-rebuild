@@ -896,3 +896,26 @@ The four bodies that were held back at D134 are in, each read straight off its o
   order `4c/4d/4f/50`, four destructors, the single `packet[0x1234]` log, the fd-1 short circuit on both
   branches, the clock landing on 1300, the tick argument, and the three counters.
 - The analyst seams already live in `clientsocket.cpp`, so this unit only declares them.
+
+## D176 — NpcServer.exe 0x140002b30 CKernelThread::Create()
+
+- The body stores the socket table at `+0x48` and the object at `+0x50`, then calls slot `+0x38` of
+  `*(param_3)` and slot `+0x40` of `*(param_3)` with `0x1e`. Note both are one dereference only: the word
+  at `param_3` **is** the table, unlike the two-level objects in D172.
+- Then the libevent sequence: `event_config_new` (`0x140012580`), flag `4` (`0x140010a00`), `GetSystemInfo`,
+  the processor count read at `+0x20` of `_SYSTEM_INFO` and handed to `0x140010a20`, the base from
+  `0x140015ed0` stored at `+0x58`, the config freed by `0x140012660`, the method name from `0x140010d80`
+  logged as "libevent method: %s", the engine from `0x14001d350` stored at `+0x68` and asked to accept
+  `+0x40` through its slot 0 (slot `+0x10` on refusal).
+- Then the socket: `operator_new(0x838)`, `0x140001210` (the ctor), `0x140001ba0` (the open) with the
+  thread as its second argument; on either failure the message "CNpcWorld::Create, cannot create NpcServer
+  client socket." and the socket released through `0x1400014d0` and cleared.
+- Then the worker: `_beginthreadex(0, 0, 0x1400024f0, this, 0, 0)` into `+0x70`, `_errno()` on failure,
+  otherwise `GetThreadId` / `GetCurrentThreadId` logged as "thread %u created libevent worker thread %u"
+  (current id first), `+0x78 = 1`, `+0x7c = TimeGet(0) / 1000`, and `CThreadBase::CreateThread(this,
+  "NPC Server KernelThread", flag)`, whose result is the return value.
+- Fifteen seams were needed for the libevent layer and the thread API; none of those bodies is ported yet
+  and they are all null-checked, so the unit links and runs without them.
+- `tests/npcserver_d176_test.cpp` asserts the argument guard, the four failure messages, the engine
+  refusal path, and the full fifteen-step order up to the `0x838` allocation. The successful thread path
+  needs a live socket and is not exercised here.
