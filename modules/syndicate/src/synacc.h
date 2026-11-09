@@ -228,5 +228,6 @@ void* SynAccNew30Pair_1417c8680(void* pUnused, void* p2, void* p3, void* p4, con
 void* SynAccSelf8_1417c8810(void* pThis);                                   // 0x1417c8810
 void* SynAccSelf8_1417c8860(void* pThis);                                   // 0x1417c8860
 void* SynAccSelf8_1417c88b0(void* pThis);                                   // 0x1417c88b0
+void* SynAccSelf8_1417c8900(void* pThis);                                   // 0x1417c8900
 }  // namespace tq
 #endif

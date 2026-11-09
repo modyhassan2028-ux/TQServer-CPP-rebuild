@@ -493,3 +493,12 @@ The four bodies that were held back at D134 are in, each read straight off its o
   owner's first qword and the owner in the block. A null allocator answer leaves that qword zero,
   and the test drives both branches.
 - `tests/syndicate_d155_test.cpp`: 22 checks, 6 passes, ASan+UBSan clean. Cluster 231 bodies.
+
+## D156 — three bodies, 0x1417c8900 / 0x1417c8950 / 0x1417c8980
+
+- 0x1417c8900: the fourth eight-byte self node, own start, both allocator branches driven.
+- 0x1417c8950: the 0x18 tail call again (0x141823290), with the frame built and torn down before
+  the jump; the answer is the slot's, and the argument the test sees is `this+0x18`.
+- 0x1417c8980: the copied-temp comparison, `setne` here while 0x1417c7850 answers `sete`. The
+  copy happens before the lead is read, so the check compares against the temp at 0x20(%rsp).
+- `tests/syndicate_d156_test.cpp`: 9 checks, 6 passes, ASan+UBSan clean. Cluster 234 bodies.

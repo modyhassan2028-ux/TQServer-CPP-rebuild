@@ -3144,4 +3144,25 @@ void SynAccEraseAll29b_1417c87c0(void* pTree, unsigned char* pNode) {
     }
 }
 
+// 0x1417c8950 - the 0x18 tail call, its own start: the frame is built, rcx moves to this+0x18
+// and the slot does the jumping.
+void* SynAccTail18b_1417c8950(void* pThis) {
+    int64_t marker = -2; (void)marker;                     // movq $0xfffffffffffffffe,0x20(%rsp)
+    if (g_pfnSynTail_141823290 == nullptr) return nullptr;  // jmp *0x141823290
+    return g_pfnSynTail_141823290((unsigned char*)pThis + 0x18);
+}
+
+// 0x1417c8980 - the copied-temp comparison, answering setne this time.
+bool SynAccIterNeCopied_1417c8980(void* pThis, void* pOther) {
+    unsigned char* t = (unsigned char*)pThis;
+    unsigned char temp[16];
+    *(void**)(temp) = *(void**)pOther;                      // mov (%rdx),%rax into the temp first
+    *(void**)(temp + 8) = *(void**)((unsigned char*)pOther + 8);
+    void* lead = *(void**)t;
+    if (lead == nullptr || lead != *(void**)temp) {          // test / je, cmp 0x20(%rsp),%rax / je
+        if (g_pfn_invalid_parameter_noinfo != nullptr) g_pfn_invalid_parameter_noinfo();
+    }
+    return *(void**)(t + 8) != *(void**)(temp + 8);          // cmp %rcx,0x8(%rbx) / setne
+}
+
 }  // namespace tq

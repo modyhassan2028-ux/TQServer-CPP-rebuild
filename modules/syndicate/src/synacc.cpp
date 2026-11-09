@@ -1821,4 +1821,15 @@ void* SynAccSelf8_1417c88b0(void* pThis) {
     return pThis;
 }
 
+// 0x1417c8900 - the fourth eight-byte self node, own start.
+void* SynAccSelf8_1417c8900(void* pThis) {
+    int64_t marker = -2; (void)marker;
+    void* p = nullptr;
+    if (g_pfnSynNew_1417f3166 != nullptr) p = g_pfnSynNew_1417f3166(8);
+    if (p != nullptr) *(void**)p = pThis;
+    else p = nullptr;
+    *(void**)pThis = p;
+    return pThis;
+}
+
 }  // namespace tq

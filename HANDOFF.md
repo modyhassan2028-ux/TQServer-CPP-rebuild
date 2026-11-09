@@ -452,3 +452,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - `Docs/ASM/1417c8590.txt` still holds 0x1417c8900 onward (the fourth self node and whatever
   follows); read it before the next unit. Note that a `void*` and an `unsigned char*` parameter
   mangle differently — a test declaration that says void* will fail to link against these bodies.
+
+## D156 (latest)
+
+- Three bodies: `SYNDICATE_D156_OK ... 9 checks`, 6 passes. Cluster 234 bodies.
+- `Docs/ASM/1417c8a70.txt` (193 lines) is captured: 0x1417c89d0 is the iterator **distance** —
+  a loop that increments the counter at `(%rdi)` and steps 0x41-flagged nodes until the two
+  iterators name the same node. Its own tail runs past the old capture, so work from the new file.
