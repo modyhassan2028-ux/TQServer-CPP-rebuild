@@ -1046,3 +1046,29 @@ and `nWaitCount` at `+0x38` (the offsets the code itself uses: `param_1 + 6`, `p
 - `tests/npcserver_d182_test.cpp`: no memory, no selector (defaults, settle rule, tail pointer, release),
   one accepted selector, an avoided selector falling through to the next, a feature mismatch, IOCP with a
   failing launch, and the `0x20` flag suppressing the timer probe.
+
+## D183 — NpcServer.exe ten helper bodies (D182's seams, part 1)
+
+- `0x14001a190` clears `+0` and `+8` only; `0x14001ad50` clears `+0`, `+8`, `+0xc`; `0x14001a010` clears
+  `+0`..`+0x10` and marks `+0x14` as `0xffffffff`. Nothing beyond those words is touched, which the suite
+  checks with a `0xAA`-filled buffer.
+- `0x140016f00` is just the flag `DAT_140103fd0`; `0x140016df0` calls the hook `DAT_140103fc0` when set, and
+  `0x140016e70` calls the condition slot `DAT_140103ff0`. That last one is the **same word** the thread
+  registrar in D178 fills from the condition callbacks, so the port reuses `g_pNpcCondCopy_140103ff0`
+  instead of inventing a second global.
+- `0x140010860` formats `"EVENT_NO%s"` into a `0x40` buffer and upper-cases from `buf+8`, which is exactly
+  past the eight-character prefix, then asks the environment. The loop's exit test is on the *next* byte, so
+  the last name character is still folded; the port keeps that shape and the suite counts five folds for
+  "epoll".
+- `0x140016640` clears `0x50` bytes, takes `GetTickCount64` and `GetTickCount` from kernel32 when flag bit 1
+  is clear, stores the resolution routine's reading at both `+0x10` and `+0x20`, and with bit 0 set reads the
+  performance counter into `+0x28`, writes `1` at `+0x38` and scales `+0x30` with the `.rdata` double at
+  `0x1400c11b8`. That double is `1000000.0` (bits `0x412e848000000000`), read out of the image rather than
+  assumed from the shape of the formula.
+- `0x1400105b0` takes the notifier down when `+0x1d0` is set, answers the cached word at `+0x160` when it is
+  non-zero, otherwise asks `0x140016720` and returns `0xffffffff` on `-1`. When the cached second at
+  `+0x1c0` is more than five behind, it refreshes `+0x1b8` / `+0x1bc` from `0x1400163c0` and carries a
+  negative microsecond difference by borrowing a second and adding `1000000` back.
+- `0x140015e70` answers `0xffffffff` for a null base, cycles the notifier around `0x140014900`, and returns
+  the install result truncated to 32 bits, so `-1` survives the round trip.
+- `tests/npcserver_d183_test.cpp` covers all ten, including the borrow path and the timer scaling.

@@ -115,6 +115,34 @@ extern long long (*g_pfnNpc_140016e70)(void);
 extern unsigned int (*g_pfnNpc_140015e70)(void* pBase, unsigned long long a2);
 extern void* (*g_pfnNpc_140074b80)(unsigned int uThreads);
 extern void  (*g_pfnNpc_140014b30)(void* pBase, int nFlag);
+void FUN_140016640(void* pMonitor, unsigned int uFlag);
+unsigned long long FUN_1400105b0(long long pBase, int* pOut);
+void FUN_14001a010(void* p);
+void FUN_14001a190(void* p);
+void FUN_14001ad50(void* p);
+bool FUN_140010860(const char* pszName);
+bool FUN_140016f00(void);
+unsigned long long FUN_140016df0(void);
+unsigned long long FUN_140016e70(void);
+unsigned long long FUN_140015e70(void* pBase, unsigned long long a2, unsigned long long a3,
+                                  unsigned long long a4);
+extern int   g_nNpcFlag_140103fd0;                                           // DAT_140103fd0
+extern void* g_pfnNpc_140103fc0;                                             // DAT_140103fc0
+extern void* (*g_pfnNpcGetModuleHandle_140008b90)(const char* pszName);       // FUN_140008b90
+extern void* (*g_pfnNpcGetProcAddress)(void* hModule, const char* pszName);   // GetProcAddress
+extern int   (*g_pfnNpcQueryPerformanceFrequency)(void* pFreq);              // QueryPerformanceFrequency
+extern int   (*g_pfnNpcQueryPerformanceCounter)(void* pCount);               // QueryPerformanceCounter
+extern unsigned long long (*g_pfnNpc_1400165d0)(void* p);                    // FUN_1400165d0
+extern unsigned long long (*g_pfnNpc_140016720)(void* pMonitor, void* pOut);  // FUN_140016720
+extern void  (*g_pfnNpc_1400163c0)(void* pOut);                              // FUN_1400163c0
+extern void  (*g_pfnNpc_140016ef0)(void);                                    // FUN_140016ef0
+extern void  (*g_pfnNpc_140016e30)(void);                                    // FUN_140016e30
+extern void  (*g_pfnNpc_140016e50)(void);                                    // FUN_140016e50
+extern void* (*g_pfnNpc_140014900)(void* pBase, long long a2, unsigned long long a3,
+                                  unsigned long long a4);                     // FUN_140014900
+extern int   (*g_pfnNpc_140009250)(char* pBuf, unsigned long long uSize, const char* pszFmt,
+                                   const char* pszArg);                        // FUN_140009250
+extern unsigned char (*g_pfnNpc_140008820)(unsigned char ch);                 // FUN_140008820
 extern void* (*g_pfnNpcEventFree_140103fa8)(void* p);                        // DAT_140103fa8
 unsigned int FUN_140010a00(long long pConfig, unsigned int uFlag);
 unsigned int FUN_140010a20(long long pConfig, unsigned int uCount);

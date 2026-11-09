@@ -131,6 +131,22 @@ long long (*g_pfnNpc_140016e70)(void) = nullptr;
 unsigned int (*g_pfnNpc_140015e70)(void*, unsigned long long) = nullptr;
 void* (*g_pfnNpc_140074b80)(unsigned int) = nullptr;
 void  (*g_pfnNpc_140014b30)(void*, int) = nullptr;
+int   g_nNpcFlag_140103fd0 = 0;
+void* g_pfnNpc_140103fc0 = nullptr;
+void* (*g_pfnNpcGetModuleHandle_140008b90)(const char*) = nullptr;
+void* (*g_pfnNpcGetProcAddress)(void*, const char*) = nullptr;
+int   (*g_pfnNpcQueryPerformanceFrequency)(void*) = nullptr;
+int   (*g_pfnNpcQueryPerformanceCounter)(void*) = nullptr;
+unsigned long long (*g_pfnNpc_1400165d0)(void*) = nullptr;
+unsigned long long (*g_pfnNpc_140016720)(void*, void*) = nullptr;
+void  (*g_pfnNpc_1400163c0)(void*) = nullptr;
+void  (*g_pfnNpc_140016ef0)(void) = nullptr;
+void  (*g_pfnNpc_140016e30)(void) = nullptr;
+void  (*g_pfnNpc_140016e50)(void) = nullptr;
+void* (*g_pfnNpc_140014900)(void*, long long, unsigned long long, unsigned long long) = nullptr;
+int   (*g_pfnNpc_140009250)(char*, unsigned long long, const char*, const char*) = nullptr;
+unsigned char (*g_pfnNpc_140008820)(unsigned char) = nullptr;
+static const double g_dNpc_1400c11b8 = 1000000.0;   // the .rdata double the timer scaling divides by
 void* (*g_pfnNpcEventFree_140103fa8)(void*) = nullptr;
 const char g_symNpcStr_CondChange[] = "Can't change condition callbacks once they have been initialized.";
 
@@ -1581,6 +1597,135 @@ no_memory:
     }
     if (g_pfnNpc_140019050 != nullptr) g_pfnNpc_140019050("%s: calloc", "event_base_new_with_config");
     return nullptr;
+}
+
+// 0x14001a190 - two cleared words.
+void FUN_14001a190(void* p) {
+    *(unsigned int*)((char*)p + 0x08) = 0;
+    *(long long*)((char*)p + 0x00) = 0;
+}
+
+// 0x14001ad50 - the first 0x10 bytes cleared, as one word, one int and one int.
+void FUN_14001ad50(void* p) {
+    *(long long*)((char*)p + 0x00) = 0;
+    *(unsigned int*)((char*)p + 0x0c) = 0;
+    *(unsigned int*)((char*)p + 0x08) = 0;
+}
+
+// 0x14001a010 - clear 0x10 bytes, clear +0x10, and mark the slot at +0x14 empty.
+void FUN_14001a010(void* p) {
+    *(unsigned int*)((char*)p + 0x14) = 0xffffffff;
+    *(unsigned int*)((char*)p + 0x08) = 0;
+    *(long long*)((char*)p + 0x00) = 0;
+    *(unsigned int*)((char*)p + 0x0c) = 0;
+    *(unsigned int*)((char*)p + 0x10) = 0;
+}
+
+// 0x140016f00 - the "can be notifiable" flag.
+bool FUN_140016f00(void) { return g_nNpcFlag_140103fd0 != 0; }
+
+// 0x140016df0 - call the notifier hook when one is installed.
+unsigned long long FUN_140016df0(void) {
+    if (g_pfnNpc_140103fc0 != nullptr) return ((unsigned long long (*)(void))g_pfnNpc_140103fc0)();
+    return 0;
+}
+
+// 0x140016e70 - call the condition hook (the same slot the thread-callback registrar fills) when set.
+unsigned long long FUN_140016e70(void) {
+    if (g_pNpcCondCopy_140103ff0 != nullptr) return ((unsigned long long (*)(void))g_pNpcCondCopy_140103ff0)();
+    return 0;
+}
+
+// 0x140010860 - "EVENT_NO" + the method name, upper-cased from the ninth byte on, then looked up in the
+// environment. The up-casing starts at buf+8, which is exactly past the prefix.
+bool FUN_140010860(const char* pszName) {
+    char szBuf[0x40];
+    if (g_pfnNpc_140009250 != nullptr) g_pfnNpc_140009250(szBuf, 0x40, "EVENT_NO%s", pszName);
+    else szBuf[0] = '\0';
+    if (szBuf[8] != '\0') {
+        unsigned char* pbVar3 = (unsigned char*)szBuf + 8;
+        unsigned char* pbVar4;
+        do {
+            unsigned char bVar1 = g_pfnNpc_140008820 != nullptr ? g_pfnNpc_140008820(*pbVar3) : *pbVar3;
+            pbVar4 = pbVar3 + 1;
+            *pbVar3 = bVar1;
+            pbVar3 = pbVar4;
+        } while (*pbVar4 != 0);
+    }
+    const char* pszEnv = g_pfnNpcGetenv != nullptr ? g_pfnNpcGetenv(szBuf) : nullptr;
+    return pszEnv != nullptr;
+}
+
+// 0x140016640 - the timer monitor: 0x50 bytes cleared, the two tick entry points taken from kernel32 when
+// flag bit 1 is clear, the resolution routine asked for the current count, and with bit 0 set the
+// performance counter read and scaled by 1000000.0 / frequency.
+void FUN_140016640(void* pMonitor, unsigned int uFlag) {
+    unsigned char* p = (unsigned char*)pMonitor;
+    for (int i = 0; i < 0x50; ++i) p[i] = 0;
+    void* hModule = g_pfnNpcGetModuleHandle_140008b90 != nullptr
+                        ? g_pfnNpcGetModuleHandle_140008b90("kernel32.dll") : nullptr;
+    if (hModule != nullptr && (uFlag & 2) == 0) {
+        *(void**)(p + 0x00) = g_pfnNpcGetProcAddress != nullptr ? g_pfnNpcGetProcAddress(hModule, "GetTickCount64") : nullptr;
+        *(void**)(p + 0x08) = g_pfnNpcGetProcAddress != nullptr ? g_pfnNpcGetProcAddress(hModule, "GetTickCount") : nullptr;
+    }
+    unsigned long long uNow = g_pfnNpc_1400165d0 != nullptr ? g_pfnNpc_1400165d0(pMonitor) : 0;
+    *(unsigned long long*)(p + 0x10) = uNow;
+    *(unsigned long long*)(p + 0x20) = uNow;
+    if ((uFlag & 1) != 0 && (uFlag & 2) == 0) {
+        long long aFreq[2] = { 0, 0 };
+        int bOk = g_pfnNpcQueryPerformanceFrequency != nullptr ? g_pfnNpcQueryPerformanceFrequency(aFreq) : 0;
+        if (bOk != 0) {
+            long long aCount[2] = { 0, 0 };
+            if (g_pfnNpcQueryPerformanceCounter != nullptr) g_pfnNpcQueryPerformanceCounter(aCount);
+            *(unsigned int*)(p + 0x38) = 1;
+            *(long long*)(p + 0x28) = aCount[0];
+            *(double*)(p + 0x30) = g_dNpc_1400c11b8 / (double)aFreq[0];
+        }
+    }
+}
+
+// 0x1400105b0 - read the current time: with no cached value it asks the monitor, and when the cached
+// whole-second word is more than five behind it refreshes the pair at +0x1b8 / +0x1bc.
+unsigned long long FUN_1400105b0(long long pBase, int* pOut) {
+    if (*(long long*)(pBase + 0x1d0) != 0) {
+        if (g_pfnNpc_140016ef0 != nullptr) g_pfnNpc_140016ef0();
+    }
+    if (*(int*)(pBase + 0x160) != 0) {
+        *(long long*)pOut = *(long long*)(pBase + 0x160);
+        return 0;
+    }
+    unsigned long long uRes = g_pfnNpc_140016720 != nullptr
+                                  ? g_pfnNpc_140016720((void*)(pBase + 0x168), pOut) : 0;
+    if ((int)uRes == -1) return uRes & 0xffffffffull;
+    if (*(long long*)(pBase + 0x1c0) + 5 < (long long)*pOut) {
+        int aNow[2] = { 0, 0 };
+        if (g_pfnNpc_1400163c0 != nullptr) g_pfnNpc_1400163c0(aNow);
+        *(int*)(pBase + 0x1b8) = aNow[0] - *pOut;
+        int nMicro = aNow[1];
+        *(int*)(pBase + 0x1bc) = nMicro - pOut[1];
+        if (nMicro - pOut[1] < 0) {
+            *(int*)(pBase + 0x1b8) = *(int*)(pBase + 0x1b8) + -1;
+            *(int*)(pBase + 0x1bc) = *(int*)(pBase + 0x1bc) + 1000000;
+        }
+        *(long long*)(pBase + 0x1c0) = (long long)*pOut;
+    }
+    return 0;
+}
+
+// 0x140015e70 - make the base notifiable: the notifier is taken down, the callback installed, and the
+// notifier put back, with the result of the install passed through.
+unsigned long long FUN_140015e70(void* pBase, unsigned long long a2, unsigned long long a3,
+                                 unsigned long long a4) {
+    if (pBase == nullptr) return 0xffffffffull;
+    long long pOld = *(long long*)((char*)pBase + 0x1d0);
+    if (pOld != 0) {
+        if (g_pfnNpc_140016e30 != nullptr) g_pfnNpc_140016e30();
+    }
+    void* pRes = g_pfnNpc_140014900 != nullptr ? g_pfnNpc_140014900(pBase, pOld, a3, a4) : nullptr;
+    if (*(long long*)((char*)pBase + 0x1d0) != 0) {
+        if (g_pfnNpc_140016e50 != nullptr) g_pfnNpc_140016e50();
+    }
+    return (unsigned long long)(unsigned int)(unsigned long long)pRes;
 }
 
 }  // namespace tq

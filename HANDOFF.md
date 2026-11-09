@@ -653,3 +653,11 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - Next: the remaining seams of 0x140015ed0 (0x140016640, 0x1400105b0, 0x14001a010/190, 0x14001ad50,
   0x140010860, 0x1400127e0, 0x140016f00/df0/e70, 0x140015e70, 0x140074b80, 0x140014b30) and then rewiring
   0x140002b30 to the real bodies instead of its seams.
+
+## D183 (latest)
+
+- NpcServer: 96 bodies. Suites D165 to D183 all green.
+- D182's seams are now mostly real bodies. Still seams inside 0x140015ed0: 0x1400127e0 (302),
+  0x140074b80 (346) and 0x140014b30 (867), plus 0x140016720 / 0x1400163c0 / 0x1400165d0 which the new
+  timer code calls.
+- Next: those three larger ones, then rewire 0x140002b30 and 0x140015ed0 to call the real bodies directly.
