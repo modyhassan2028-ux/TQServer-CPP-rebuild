@@ -43,3 +43,13 @@ shape is only faithful for integer-only targets; `xmm` cases must not be added t
 
 The generated unit is now produced whole by `tools/family_gen.py` (832 bodies), which keeps the
 table and the bodies in step by construction.
+
+## D164 — correction and the slot family
+
+The D162 family was mislabelled: those 126 bodies are `jmp *0x..(%rip)`, so objdump's comment names
+the **slot**, not the callee. They are now `slot` thunks with one seam per slot (`g_synSlotAddr`,
+`g_synSlotFn`), and `Docs/SEAMS.md` shows why the slot layer matters: 99 slots carry 7,238 call
+sites, and the two heaviest direct targets in the image are themselves slot thunks.
+
+A destructor or allocator family needs this layer plus the vtable symbols, since those bodies store
+an absolute vtable address before calling through a slot.

@@ -599,3 +599,20 @@ The four bodies that were held back at D134 are in, each read straight off its o
   port has the original layout from its first unit, which is the same rule the Syndicate module
   followed.
 - The tree is 34 translation units and 16 headers today.
+
+## D164 — the slot family, and a correction to D162
+
+- Correction: the 126 bodies called forwarders in D162 are **not** direct tail jumps. Their operand
+  is `jmp *0x..(%rip)` and the resolved address objdump prints is the **slot**, not the callee, so
+  the family is an indirect-slot thunk. `0x1417f2fdc` is the clearest example: its body is
+  `jmp *0x3040e(%rip) # 0x1418233f0`, i.e. one load from a slot. The kind is now `slot` and the
+  seam is per slot, not per message.
+- `Docs/SEAMS.md` counts where the image calls out: **99** indirect slots with **7,238** call
+  sites, and **2,340** direct targets with **13,703** sites. Two slots dominate: `0x1418233c0`
+  (3,728 sites, `invalid_parameter_noinfo`) and `0x141823030` (776, the custom assert handler).
+  The heaviest direct targets are themselves slot thunks: `0x1417f2fdc` (875 sites) jumps through
+  `0x1418233f0`, and `0x1417f3166` (548) through `0x1418232a0`.
+- `g_synSlotAddr` / `g_synSlotFn` carry one seam per slot (126 today), so a build wires a slot once
+  and every thunk through it comes alive together.
+- 832 bodies, all walked: 223 address reads, 178 empty, 126 slot thunks, 120 field reads, 91
+  constants, 64 field-read-plus-bias, 30 zeros. 6 passes, ASan and UBSan clean.

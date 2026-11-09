@@ -506,3 +506,11 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 
 - NpcServer.exe scaffolded: 50 paths from the binary, `Docs/NPCSERVER_PATHS.md`, no bodies yet.
 - The work order is now written down in `Docs/REMAINING_ROADMAP.md`; `npckernel` is 34 of the 50.
+
+## D164 (latest)
+
+- Slot family in place: 126 thunks, 126 seams, `SYNDICATE_D161_OK ... 832 checked`, 6 passes.
+- D162's "forwarders" were slot thunks; the label is corrected in PORTING_LOG and TPL_FAMILIES.
+- `Docs/SEAMS.md` is the new map: 99 slots / 7,238 sites, 2,340 direct targets / 13,703 sites.
+- Next: the destructor and allocator families need the vtable symbols (`tools/read_vtable_slots.py`,
+  `Docs/SYNDICATE_CLASS_MAP.md`), then the NpcServer `npckernel` unit 1.

@@ -9,6 +9,19 @@ namespace tq {
 // Float registers are not carried; that limit is recorded in Docs/TPL_FAMILIES.md.
 void* (*g_pfnSynTailCall)(unsigned long long uTarget, void* a1, void* a2, void* a3, void* a4) = nullptr;
 
+// The slot family is one seam per indirect slot the image jumps through.
+const unsigned long long g_synSlotAddr[] = {
+    0x141823000ULL, 0x141823008ULL, 0x141823010ULL, 0x141823018ULL, 0x141823020ULL, 0x141823028ULL, 0x141823030ULL, 0x141823038ULL, 0x141823040ULL, 0x141823048ULL, 0x141823050ULL, 0x141823058ULL, 0x141823060ULL, 0x141823068ULL, 0x141823070ULL, 0x141823078ULL, 0x141823080ULL, 0x141823088ULL, 0x141823090ULL, 0x141823098ULL, 0x1418230a0ULL, 0x1418230a8ULL, 0x1418230b0ULL, 0x1418230b8ULL, 0x1418230c0ULL, 0x1418230c8ULL, 0x1418230d0ULL, 0x1418230d8ULL, 0x1418230e0ULL, 0x1418230e8ULL, 0x1418230f0ULL, 0x1418230f8ULL, 0x141823108ULL, 0x141823118ULL, 0x141823120ULL, 0x141823128ULL, 0x141823130ULL, 0x141823138ULL, 0x141823140ULL, 0x141823148ULL, 0x141823150ULL, 0x141823158ULL, 0x141823160ULL, 0x141823168ULL, 0x141823170ULL, 0x141823178ULL, 0x141823180ULL, 0x141823188ULL, 0x141823190ULL, 0x141823198ULL, 0x1418231a0ULL, 0x1418231a8ULL, 0x1418231b8ULL, 0x1418231c0ULL, 0x1418231c8ULL, 0x1418231d0ULL, 0x1418231d8ULL, 0x1418231e0ULL, 0x1418231e8ULL, 0x1418231f0ULL, 0x1418231f8ULL, 0x141823200ULL, 0x141823208ULL, 0x141823210ULL, 0x141823218ULL, 0x141823220ULL, 0x141823228ULL, 0x141823230ULL, 0x141823238ULL, 0x141823240ULL, 0x141823248ULL, 0x141823250ULL, 0x141823258ULL, 0x141823260ULL, 0x141823268ULL, 0x141823270ULL, 0x141823278ULL, 0x141823280ULL, 0x141823288ULL, 0x141823290ULL, 0x1418232a0ULL, 0x1418232a8ULL, 0x1418232b0ULL, 0x1418232b8ULL, 0x1418232c0ULL, 0x1418232c8ULL, 0x1418232d0ULL, 0x1418232d8ULL, 0x1418232e0ULL, 0x1418232e8ULL, 0x1418232f0ULL, 0x1418232f8ULL, 0x141823300ULL, 0x141823308ULL, 0x141823310ULL, 0x141823318ULL, 0x141823320ULL, 0x141823328ULL, 0x141823330ULL, 0x141823340ULL, 0x141823348ULL, 0x141823350ULL, 0x141823358ULL, 0x141823360ULL, 0x141823368ULL, 0x141823370ULL, 0x141823378ULL, 0x141823380ULL, 0x141823388ULL, 0x141823390ULL, 0x141823398ULL, 0x1418233a0ULL, 0x1418233a8ULL, 0x1418233b0ULL, 0x1418233b8ULL, 0x1418233c0ULL, 0x1418233c8ULL, 0x1418233d0ULL, 0x1418233d8ULL, 0x1418233e0ULL, 0x1418233e8ULL, 0x1418233f0ULL, 0x1418233f8ULL, 0x141823400ULL, 0x141823408ULL, 0x141823418ULL,
+};
+const unsigned int g_synSlotCount = 126u;
+void* (*g_synSlotFn[126])(void*, void*, void*, void*) = { nullptr };
+
+static unsigned int SynSlotIndex(unsigned long long uAddr) {
+    for (unsigned int i = 0; i < g_synSlotCount; ++i)
+        if (g_synSlotAddr[i] == uAddr) return i;
+    return ~0u;
+}
+
 void* SynLeaf_14172109c(void* p) { return (void*)((unsigned char*)p + 0x20); }
 void* SynLeaf_141721380(void* p) { return p; }
 void* SynLeaf_1417213bc(void* p) { return nullptr; }
@@ -659,157 +672,195 @@ void* SynLeaf_1417d22e0(void* p) { return p; }
 void* SynLeaf_1417d2510(void* p) { return *(void**)((unsigned char*)p + 0x8); }
 void* SynLeaf_1417dadb0(void* p) { return p; }
 void* SynLeaf_1417e1080(void* p) { return p; }
-void* SynThunk_1417e7f62(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823140ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e7f62(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823140ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e7f68(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823138ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e7f68(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823138ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e7f6e(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823130ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e7f6e(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823130ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e7f74(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823128ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e7f74(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823128ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e7f7a(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823120ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e7f7a(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823120ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e7f80(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823118ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e7f80(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823118ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e7f86(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823030ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e7f86(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823030ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e7f8c(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823038ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e7f8c(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823038ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e7f92(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823040ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e7f92(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823040ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e7f98(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823048ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e7f98(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823048ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e7f9e(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823050ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e7f9e(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823050ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e7fa4(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823058ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e7fa4(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823058ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e7faa(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823060ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e7faa(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823060ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e7fb0(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823068ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e7fb0(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823068ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e7fb6(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823070ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e7fb6(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823070ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e7fbc(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823078ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e7fbc(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823078ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e7fc2(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823080ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e7fc2(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823080ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e7fc8(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823088ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e7fc8(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823088ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e7fce(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823090ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e7fce(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823090ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e7fd4(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823098ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e7fd4(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823098ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e7fda(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823000ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e7fda(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823000ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e7fe0(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418230a8ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e7fe0(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418230a8ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e7fe6(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418230b0ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e7fe6(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418230b0ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e7fec(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418230b8ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e7fec(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418230b8ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e7ff2(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418230c0ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e7ff2(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418230c0ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e7ff8(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418230c8ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e7ff8(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418230c8ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e7ffe(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418230d0ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e7ffe(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418230d0ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e8004(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418230d8ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e8004(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418230d8ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e800a(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418230e0ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e800a(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418230e0ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e8010(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418230e8ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e8010(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418230e8ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e8016(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418230f0ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e8016(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418230f0ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e801c(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418230a0ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e801c(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418230a0ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e8022(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823008ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e8022(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823008ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e8028(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418230f8ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e8028(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418230f8ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e802e(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823028ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e802e(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823028ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e8034(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823020ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e8034(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823020ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e803a(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823018ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e803a(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823018ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417e8040(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823010ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417e8040(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823010ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
 void* SynLeaf_1417e8100(void* p) { return (void*)((unsigned char*)p + 0x8); }
 void* SynLeaf_1417e8110(void* p) { return (void*)((unsigned char*)p + 0x8); }
@@ -865,362 +916,450 @@ void* SynLeaf_1417f1190(void* p) { return p; }
 void* SynLeaf_1417f1ce0(void* p) { return (void*)((unsigned char*)p + 0x8); }
 void* SynLeaf_1417f1dd0(void* p) { return p; }
 void* SynLeaf_1417f1e20(void* p) { return p; }
-void* SynThunk_1417f2e96(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823108ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2e9c(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823290ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2ea2(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823288ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2ea8(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823280ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2eae(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823278ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2eb4(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823270ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2eba(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823268ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2ec0(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823260ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2ec6(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823258ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2ecc(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823250ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2ed2(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823248ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2ed8(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823240ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2ede(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823238ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2ee4(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823230ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2eea(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418231b8ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2ef0(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418231c0ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2ef6(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418231c8ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2efc(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418231d0ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2f02(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418231d8ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2f08(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418231e0ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2f0e(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418231e8ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2f1a(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418231f0ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2f20(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418231f8ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2f26(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823200ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2f2c(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823208ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2f32(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823210ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2f38(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823218ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2f3e(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823220ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2f44(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823228ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2f4a(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823408ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2f50(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823400ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2f56(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418233f8ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2fdc(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418233f0ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2fe2(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418233e8ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f2fe8(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418233e0ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f3080(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418233d8ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f30c0(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418233d0ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f30c6(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418233c8ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f314e(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418233c0ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f3154(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418233b8ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f315a(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418233b0ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f3160(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418233a8ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f3166(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418232a0ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f316c(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418232a8ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f323c(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418232b0ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f3374(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418232b8ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f337a(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418232c0ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f3380(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418232c8ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f3386(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418232d0ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f338c(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418232d8ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f3392(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418232e0ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f3398(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418232e8ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f37de(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418232f0ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f37e4(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418232f8ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f37ea(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823300ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f37f0(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823308ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f3942(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823310ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f3948(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823318ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f394e(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823320ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f3954(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823328ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f395a(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823330ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f3960(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823340ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f3966(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823348ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f396c(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823350ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f39f0(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823358ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f3ac2(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823360ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f3ac8(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823368ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f3ace(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823370ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f3ad4(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823378ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f3ada(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823380ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f3ae0(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823388ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f3b9c(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823390ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f3ba2(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823398ULL, a1, a2, a3, a4);
-}
-void* SynThunk_1417f3ba8(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418233a0ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417f2e96(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823108ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2e9c(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823290ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2ea2(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823288ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2ea8(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823280ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2eae(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823278ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2eb4(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823270ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2eba(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823268ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2ec0(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823260ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2ec6(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823258ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2ecc(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823250ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2ed2(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823248ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2ed8(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823240ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2ede(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823238ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2ee4(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823230ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2eea(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418231b8ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2ef0(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418231c0ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2ef6(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418231c8ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2efc(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418231d0ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2f02(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418231d8ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2f08(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418231e0ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2f0e(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418231e8ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2f1a(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418231f0ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2f20(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418231f8ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2f26(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823200ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2f2c(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823208ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2f32(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823210ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2f38(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823218ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2f3e(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823220ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2f44(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823228ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2f4a(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823408ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2f50(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823400ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2f56(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418233f8ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2fdc(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418233f0ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2fe2(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418233e8ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f2fe8(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418233e0ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f3080(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418233d8ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f30c0(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418233d0ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f30c6(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418233c8ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f314e(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418233c0ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f3154(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418233b8ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f315a(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418233b0ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f3160(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418233a8ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f3166(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418232a0ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f316c(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418232a8ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f323c(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418232b0ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f3374(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418232b8ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f337a(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418232c0ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f3380(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418232c8ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f3386(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418232d0ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f338c(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418232d8ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f3392(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418232e0ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f3398(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418232e8ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f37de(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418232f0ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f37e4(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418232f8ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f37ea(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823300ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f37f0(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823308ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f3942(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823310ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f3948(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823318ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f394e(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823320ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f3954(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823328ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f395a(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823330ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f3960(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823340ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f3966(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823348ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f396c(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823350ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f39f0(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823358ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f3ac2(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823360ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f3ac8(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823368ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f3ace(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823370ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f3ad4(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823378ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f3ada(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823380ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f3ae0(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823388ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f3b9c(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823390ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f3ba2(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823398ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
+}
+void* SynSlotThunk_1417f3ba8(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418233a0ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
 void* SynLeaf_1417f3bc0(void* p) { return p; }
-void* SynThunk_1417f59d6(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823148ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417f59d6(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823148ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417f59dc(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823150ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417f59dc(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823150ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417f59e2(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823158ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417f59e2(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823158ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417f59e8(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823160ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417f59e8(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823160ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417f59ee(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823168ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417f59ee(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823168ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417f59f4(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823170ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417f59f4(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823170ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417f59fa(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823178ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417f59fa(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823178ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417f5a00(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823180ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417f5a00(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823180ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417f5a06(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823188ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417f5a06(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823188ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417f5a0c(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823190ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417f5a0c(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823190ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417f5a12(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823198ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417f5a12(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823198ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417f5a18(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418231a0ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417f5a18(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418231a0ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417f5a1e(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x1418231a8ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417f5a1e(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x1418231a8ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
-void* SynThunk_1417f5a24(void* a1, void* a2, void* a3, void* a4) {
-    if (g_pfnSynTailCall == nullptr) return nullptr;
-    return g_pfnSynTailCall(0x141823418ULL, a1, a2, a3, a4);
+void* SynSlotThunk_1417f5a24(void* a1, void* a2, void* a3, void* a4) {
+    unsigned int i = SynSlotIndex(0x141823418ULL);
+    if (i == ~0u || g_synSlotFn[i] == nullptr) return nullptr;
+    return g_synSlotFn[i](a1, a2, a3, a4);
 }
 void* SynLeaf_1417f5a30(void* p) { return nullptr; }
 
-// kinds: 0 empty, 1 zero, 2 identity, 3 constant, 4 field, 5 field+bias, 6 lea, 7 zero-store, 8 forward
+// kinds: 0 empty, 1 zero, 2 identity, 3 constant, 4 field, 5 field+bias, 6 lea, 7 zero-store, 8 forward, 9 slot
 const SynLeafEntry g_synLeafTable[] = {
     { 0x14172109cULL, 6, 0x20ULL, 0x0ULL, SynLeaf_14172109c },
     { 0x141721380ULL, 0, 0x0ULL, 0x0ULL, SynLeaf_141721380 },
@@ -1872,44 +2011,44 @@ const SynLeafEntry g_synLeafTable[] = {
     { 0x1417d2510ULL, 4, 0x8ULL, 0x0ULL, SynLeaf_1417d2510 },
     { 0x1417dadb0ULL, 0, 0x0ULL, 0x0ULL, SynLeaf_1417dadb0 },
     { 0x1417e1080ULL, 0, 0x0ULL, 0x0ULL, SynLeaf_1417e1080 },
-    { 0x1417e7f62ULL, 8, 0x141823140ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e7f62 },
-    { 0x1417e7f68ULL, 8, 0x141823138ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e7f68 },
-    { 0x1417e7f6eULL, 8, 0x141823130ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e7f6e },
-    { 0x1417e7f74ULL, 8, 0x141823128ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e7f74 },
-    { 0x1417e7f7aULL, 8, 0x141823120ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e7f7a },
-    { 0x1417e7f80ULL, 8, 0x141823118ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e7f80 },
-    { 0x1417e7f86ULL, 8, 0x141823030ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e7f86 },
-    { 0x1417e7f8cULL, 8, 0x141823038ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e7f8c },
-    { 0x1417e7f92ULL, 8, 0x141823040ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e7f92 },
-    { 0x1417e7f98ULL, 8, 0x141823048ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e7f98 },
-    { 0x1417e7f9eULL, 8, 0x141823050ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e7f9e },
-    { 0x1417e7fa4ULL, 8, 0x141823058ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e7fa4 },
-    { 0x1417e7faaULL, 8, 0x141823060ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e7faa },
-    { 0x1417e7fb0ULL, 8, 0x141823068ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e7fb0 },
-    { 0x1417e7fb6ULL, 8, 0x141823070ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e7fb6 },
-    { 0x1417e7fbcULL, 8, 0x141823078ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e7fbc },
-    { 0x1417e7fc2ULL, 8, 0x141823080ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e7fc2 },
-    { 0x1417e7fc8ULL, 8, 0x141823088ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e7fc8 },
-    { 0x1417e7fceULL, 8, 0x141823090ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e7fce },
-    { 0x1417e7fd4ULL, 8, 0x141823098ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e7fd4 },
-    { 0x1417e7fdaULL, 8, 0x141823000ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e7fda },
-    { 0x1417e7fe0ULL, 8, 0x1418230a8ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e7fe0 },
-    { 0x1417e7fe6ULL, 8, 0x1418230b0ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e7fe6 },
-    { 0x1417e7fecULL, 8, 0x1418230b8ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e7fec },
-    { 0x1417e7ff2ULL, 8, 0x1418230c0ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e7ff2 },
-    { 0x1417e7ff8ULL, 8, 0x1418230c8ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e7ff8 },
-    { 0x1417e7ffeULL, 8, 0x1418230d0ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e7ffe },
-    { 0x1417e8004ULL, 8, 0x1418230d8ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e8004 },
-    { 0x1417e800aULL, 8, 0x1418230e0ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e800a },
-    { 0x1417e8010ULL, 8, 0x1418230e8ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e8010 },
-    { 0x1417e8016ULL, 8, 0x1418230f0ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e8016 },
-    { 0x1417e801cULL, 8, 0x1418230a0ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e801c },
-    { 0x1417e8022ULL, 8, 0x141823008ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e8022 },
-    { 0x1417e8028ULL, 8, 0x1418230f8ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e8028 },
-    { 0x1417e802eULL, 8, 0x141823028ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e802e },
-    { 0x1417e8034ULL, 8, 0x141823020ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e8034 },
-    { 0x1417e803aULL, 8, 0x141823018ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e803a },
-    { 0x1417e8040ULL, 8, 0x141823010ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417e8040 },
+    { 0x1417e7f62ULL, 9, 0x141823140ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e7f62 },
+    { 0x1417e7f68ULL, 9, 0x141823138ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e7f68 },
+    { 0x1417e7f6eULL, 9, 0x141823130ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e7f6e },
+    { 0x1417e7f74ULL, 9, 0x141823128ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e7f74 },
+    { 0x1417e7f7aULL, 9, 0x141823120ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e7f7a },
+    { 0x1417e7f80ULL, 9, 0x141823118ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e7f80 },
+    { 0x1417e7f86ULL, 9, 0x141823030ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e7f86 },
+    { 0x1417e7f8cULL, 9, 0x141823038ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e7f8c },
+    { 0x1417e7f92ULL, 9, 0x141823040ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e7f92 },
+    { 0x1417e7f98ULL, 9, 0x141823048ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e7f98 },
+    { 0x1417e7f9eULL, 9, 0x141823050ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e7f9e },
+    { 0x1417e7fa4ULL, 9, 0x141823058ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e7fa4 },
+    { 0x1417e7faaULL, 9, 0x141823060ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e7faa },
+    { 0x1417e7fb0ULL, 9, 0x141823068ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e7fb0 },
+    { 0x1417e7fb6ULL, 9, 0x141823070ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e7fb6 },
+    { 0x1417e7fbcULL, 9, 0x141823078ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e7fbc },
+    { 0x1417e7fc2ULL, 9, 0x141823080ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e7fc2 },
+    { 0x1417e7fc8ULL, 9, 0x141823088ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e7fc8 },
+    { 0x1417e7fceULL, 9, 0x141823090ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e7fce },
+    { 0x1417e7fd4ULL, 9, 0x141823098ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e7fd4 },
+    { 0x1417e7fdaULL, 9, 0x141823000ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e7fda },
+    { 0x1417e7fe0ULL, 9, 0x1418230a8ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e7fe0 },
+    { 0x1417e7fe6ULL, 9, 0x1418230b0ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e7fe6 },
+    { 0x1417e7fecULL, 9, 0x1418230b8ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e7fec },
+    { 0x1417e7ff2ULL, 9, 0x1418230c0ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e7ff2 },
+    { 0x1417e7ff8ULL, 9, 0x1418230c8ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e7ff8 },
+    { 0x1417e7ffeULL, 9, 0x1418230d0ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e7ffe },
+    { 0x1417e8004ULL, 9, 0x1418230d8ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e8004 },
+    { 0x1417e800aULL, 9, 0x1418230e0ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e800a },
+    { 0x1417e8010ULL, 9, 0x1418230e8ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e8010 },
+    { 0x1417e8016ULL, 9, 0x1418230f0ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e8016 },
+    { 0x1417e801cULL, 9, 0x1418230a0ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e801c },
+    { 0x1417e8022ULL, 9, 0x141823008ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e8022 },
+    { 0x1417e8028ULL, 9, 0x1418230f8ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e8028 },
+    { 0x1417e802eULL, 9, 0x141823028ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e802e },
+    { 0x1417e8034ULL, 9, 0x141823020ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e8034 },
+    { 0x1417e803aULL, 9, 0x141823018ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e803a },
+    { 0x1417e8040ULL, 9, 0x141823010ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417e8040 },
     { 0x1417e8100ULL, 6, 0x8ULL, 0x0ULL, SynLeaf_1417e8100 },
     { 0x1417e8110ULL, 6, 0x8ULL, 0x0ULL, SynLeaf_1417e8110 },
     { 0x1417e8120ULL, 6, 0x8ULL, 0x0ULL, SynLeaf_1417e8120 },
@@ -1964,95 +2103,95 @@ const SynLeafEntry g_synLeafTable[] = {
     { 0x1417f1ce0ULL, 6, 0x8ULL, 0x0ULL, SynLeaf_1417f1ce0 },
     { 0x1417f1dd0ULL, 0, 0x0ULL, 0x0ULL, SynLeaf_1417f1dd0 },
     { 0x1417f1e20ULL, 0, 0x0ULL, 0x0ULL, SynLeaf_1417f1e20 },
-    { 0x1417f2e96ULL, 8, 0x141823108ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2e96 },
-    { 0x1417f2e9cULL, 8, 0x141823290ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2e9c },
-    { 0x1417f2ea2ULL, 8, 0x141823288ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2ea2 },
-    { 0x1417f2ea8ULL, 8, 0x141823280ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2ea8 },
-    { 0x1417f2eaeULL, 8, 0x141823278ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2eae },
-    { 0x1417f2eb4ULL, 8, 0x141823270ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2eb4 },
-    { 0x1417f2ebaULL, 8, 0x141823268ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2eba },
-    { 0x1417f2ec0ULL, 8, 0x141823260ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2ec0 },
-    { 0x1417f2ec6ULL, 8, 0x141823258ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2ec6 },
-    { 0x1417f2eccULL, 8, 0x141823250ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2ecc },
-    { 0x1417f2ed2ULL, 8, 0x141823248ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2ed2 },
-    { 0x1417f2ed8ULL, 8, 0x141823240ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2ed8 },
-    { 0x1417f2edeULL, 8, 0x141823238ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2ede },
-    { 0x1417f2ee4ULL, 8, 0x141823230ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2ee4 },
-    { 0x1417f2eeaULL, 8, 0x1418231b8ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2eea },
-    { 0x1417f2ef0ULL, 8, 0x1418231c0ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2ef0 },
-    { 0x1417f2ef6ULL, 8, 0x1418231c8ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2ef6 },
-    { 0x1417f2efcULL, 8, 0x1418231d0ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2efc },
-    { 0x1417f2f02ULL, 8, 0x1418231d8ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2f02 },
-    { 0x1417f2f08ULL, 8, 0x1418231e0ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2f08 },
-    { 0x1417f2f0eULL, 8, 0x1418231e8ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2f0e },
-    { 0x1417f2f1aULL, 8, 0x1418231f0ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2f1a },
-    { 0x1417f2f20ULL, 8, 0x1418231f8ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2f20 },
-    { 0x1417f2f26ULL, 8, 0x141823200ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2f26 },
-    { 0x1417f2f2cULL, 8, 0x141823208ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2f2c },
-    { 0x1417f2f32ULL, 8, 0x141823210ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2f32 },
-    { 0x1417f2f38ULL, 8, 0x141823218ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2f38 },
-    { 0x1417f2f3eULL, 8, 0x141823220ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2f3e },
-    { 0x1417f2f44ULL, 8, 0x141823228ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2f44 },
-    { 0x1417f2f4aULL, 8, 0x141823408ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2f4a },
-    { 0x1417f2f50ULL, 8, 0x141823400ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2f50 },
-    { 0x1417f2f56ULL, 8, 0x1418233f8ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2f56 },
-    { 0x1417f2fdcULL, 8, 0x1418233f0ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2fdc },
-    { 0x1417f2fe2ULL, 8, 0x1418233e8ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2fe2 },
-    { 0x1417f2fe8ULL, 8, 0x1418233e0ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f2fe8 },
-    { 0x1417f3080ULL, 8, 0x1418233d8ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f3080 },
-    { 0x1417f30c0ULL, 8, 0x1418233d0ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f30c0 },
-    { 0x1417f30c6ULL, 8, 0x1418233c8ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f30c6 },
-    { 0x1417f314eULL, 8, 0x1418233c0ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f314e },
-    { 0x1417f3154ULL, 8, 0x1418233b8ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f3154 },
-    { 0x1417f315aULL, 8, 0x1418233b0ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f315a },
-    { 0x1417f3160ULL, 8, 0x1418233a8ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f3160 },
-    { 0x1417f3166ULL, 8, 0x1418232a0ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f3166 },
-    { 0x1417f316cULL, 8, 0x1418232a8ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f316c },
-    { 0x1417f323cULL, 8, 0x1418232b0ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f323c },
-    { 0x1417f3374ULL, 8, 0x1418232b8ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f3374 },
-    { 0x1417f337aULL, 8, 0x1418232c0ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f337a },
-    { 0x1417f3380ULL, 8, 0x1418232c8ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f3380 },
-    { 0x1417f3386ULL, 8, 0x1418232d0ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f3386 },
-    { 0x1417f338cULL, 8, 0x1418232d8ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f338c },
-    { 0x1417f3392ULL, 8, 0x1418232e0ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f3392 },
-    { 0x1417f3398ULL, 8, 0x1418232e8ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f3398 },
-    { 0x1417f37deULL, 8, 0x1418232f0ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f37de },
-    { 0x1417f37e4ULL, 8, 0x1418232f8ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f37e4 },
-    { 0x1417f37eaULL, 8, 0x141823300ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f37ea },
-    { 0x1417f37f0ULL, 8, 0x141823308ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f37f0 },
-    { 0x1417f3942ULL, 8, 0x141823310ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f3942 },
-    { 0x1417f3948ULL, 8, 0x141823318ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f3948 },
-    { 0x1417f394eULL, 8, 0x141823320ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f394e },
-    { 0x1417f3954ULL, 8, 0x141823328ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f3954 },
-    { 0x1417f395aULL, 8, 0x141823330ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f395a },
-    { 0x1417f3960ULL, 8, 0x141823340ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f3960 },
-    { 0x1417f3966ULL, 8, 0x141823348ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f3966 },
-    { 0x1417f396cULL, 8, 0x141823350ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f396c },
-    { 0x1417f39f0ULL, 8, 0x141823358ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f39f0 },
-    { 0x1417f3ac2ULL, 8, 0x141823360ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f3ac2 },
-    { 0x1417f3ac8ULL, 8, 0x141823368ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f3ac8 },
-    { 0x1417f3aceULL, 8, 0x141823370ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f3ace },
-    { 0x1417f3ad4ULL, 8, 0x141823378ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f3ad4 },
-    { 0x1417f3adaULL, 8, 0x141823380ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f3ada },
-    { 0x1417f3ae0ULL, 8, 0x141823388ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f3ae0 },
-    { 0x1417f3b9cULL, 8, 0x141823390ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f3b9c },
-    { 0x1417f3ba2ULL, 8, 0x141823398ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f3ba2 },
-    { 0x1417f3ba8ULL, 8, 0x1418233a0ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f3ba8 },
+    { 0x1417f2e96ULL, 9, 0x141823108ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2e96 },
+    { 0x1417f2e9cULL, 9, 0x141823290ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2e9c },
+    { 0x1417f2ea2ULL, 9, 0x141823288ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2ea2 },
+    { 0x1417f2ea8ULL, 9, 0x141823280ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2ea8 },
+    { 0x1417f2eaeULL, 9, 0x141823278ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2eae },
+    { 0x1417f2eb4ULL, 9, 0x141823270ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2eb4 },
+    { 0x1417f2ebaULL, 9, 0x141823268ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2eba },
+    { 0x1417f2ec0ULL, 9, 0x141823260ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2ec0 },
+    { 0x1417f2ec6ULL, 9, 0x141823258ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2ec6 },
+    { 0x1417f2eccULL, 9, 0x141823250ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2ecc },
+    { 0x1417f2ed2ULL, 9, 0x141823248ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2ed2 },
+    { 0x1417f2ed8ULL, 9, 0x141823240ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2ed8 },
+    { 0x1417f2edeULL, 9, 0x141823238ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2ede },
+    { 0x1417f2ee4ULL, 9, 0x141823230ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2ee4 },
+    { 0x1417f2eeaULL, 9, 0x1418231b8ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2eea },
+    { 0x1417f2ef0ULL, 9, 0x1418231c0ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2ef0 },
+    { 0x1417f2ef6ULL, 9, 0x1418231c8ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2ef6 },
+    { 0x1417f2efcULL, 9, 0x1418231d0ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2efc },
+    { 0x1417f2f02ULL, 9, 0x1418231d8ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2f02 },
+    { 0x1417f2f08ULL, 9, 0x1418231e0ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2f08 },
+    { 0x1417f2f0eULL, 9, 0x1418231e8ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2f0e },
+    { 0x1417f2f1aULL, 9, 0x1418231f0ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2f1a },
+    { 0x1417f2f20ULL, 9, 0x1418231f8ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2f20 },
+    { 0x1417f2f26ULL, 9, 0x141823200ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2f26 },
+    { 0x1417f2f2cULL, 9, 0x141823208ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2f2c },
+    { 0x1417f2f32ULL, 9, 0x141823210ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2f32 },
+    { 0x1417f2f38ULL, 9, 0x141823218ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2f38 },
+    { 0x1417f2f3eULL, 9, 0x141823220ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2f3e },
+    { 0x1417f2f44ULL, 9, 0x141823228ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2f44 },
+    { 0x1417f2f4aULL, 9, 0x141823408ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2f4a },
+    { 0x1417f2f50ULL, 9, 0x141823400ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2f50 },
+    { 0x1417f2f56ULL, 9, 0x1418233f8ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2f56 },
+    { 0x1417f2fdcULL, 9, 0x1418233f0ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2fdc },
+    { 0x1417f2fe2ULL, 9, 0x1418233e8ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2fe2 },
+    { 0x1417f2fe8ULL, 9, 0x1418233e0ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f2fe8 },
+    { 0x1417f3080ULL, 9, 0x1418233d8ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f3080 },
+    { 0x1417f30c0ULL, 9, 0x1418233d0ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f30c0 },
+    { 0x1417f30c6ULL, 9, 0x1418233c8ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f30c6 },
+    { 0x1417f314eULL, 9, 0x1418233c0ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f314e },
+    { 0x1417f3154ULL, 9, 0x1418233b8ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f3154 },
+    { 0x1417f315aULL, 9, 0x1418233b0ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f315a },
+    { 0x1417f3160ULL, 9, 0x1418233a8ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f3160 },
+    { 0x1417f3166ULL, 9, 0x1418232a0ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f3166 },
+    { 0x1417f316cULL, 9, 0x1418232a8ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f316c },
+    { 0x1417f323cULL, 9, 0x1418232b0ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f323c },
+    { 0x1417f3374ULL, 9, 0x1418232b8ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f3374 },
+    { 0x1417f337aULL, 9, 0x1418232c0ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f337a },
+    { 0x1417f3380ULL, 9, 0x1418232c8ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f3380 },
+    { 0x1417f3386ULL, 9, 0x1418232d0ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f3386 },
+    { 0x1417f338cULL, 9, 0x1418232d8ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f338c },
+    { 0x1417f3392ULL, 9, 0x1418232e0ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f3392 },
+    { 0x1417f3398ULL, 9, 0x1418232e8ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f3398 },
+    { 0x1417f37deULL, 9, 0x1418232f0ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f37de },
+    { 0x1417f37e4ULL, 9, 0x1418232f8ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f37e4 },
+    { 0x1417f37eaULL, 9, 0x141823300ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f37ea },
+    { 0x1417f37f0ULL, 9, 0x141823308ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f37f0 },
+    { 0x1417f3942ULL, 9, 0x141823310ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f3942 },
+    { 0x1417f3948ULL, 9, 0x141823318ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f3948 },
+    { 0x1417f394eULL, 9, 0x141823320ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f394e },
+    { 0x1417f3954ULL, 9, 0x141823328ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f3954 },
+    { 0x1417f395aULL, 9, 0x141823330ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f395a },
+    { 0x1417f3960ULL, 9, 0x141823340ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f3960 },
+    { 0x1417f3966ULL, 9, 0x141823348ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f3966 },
+    { 0x1417f396cULL, 9, 0x141823350ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f396c },
+    { 0x1417f39f0ULL, 9, 0x141823358ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f39f0 },
+    { 0x1417f3ac2ULL, 9, 0x141823360ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f3ac2 },
+    { 0x1417f3ac8ULL, 9, 0x141823368ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f3ac8 },
+    { 0x1417f3aceULL, 9, 0x141823370ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f3ace },
+    { 0x1417f3ad4ULL, 9, 0x141823378ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f3ad4 },
+    { 0x1417f3adaULL, 9, 0x141823380ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f3ada },
+    { 0x1417f3ae0ULL, 9, 0x141823388ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f3ae0 },
+    { 0x1417f3b9cULL, 9, 0x141823390ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f3b9c },
+    { 0x1417f3ba2ULL, 9, 0x141823398ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f3ba2 },
+    { 0x1417f3ba8ULL, 9, 0x1418233a0ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f3ba8 },
     { 0x1417f3bc0ULL, 0, 0x0ULL, 0x0ULL, SynLeaf_1417f3bc0 },
-    { 0x1417f59d6ULL, 8, 0x141823148ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f59d6 },
-    { 0x1417f59dcULL, 8, 0x141823150ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f59dc },
-    { 0x1417f59e2ULL, 8, 0x141823158ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f59e2 },
-    { 0x1417f59e8ULL, 8, 0x141823160ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f59e8 },
-    { 0x1417f59eeULL, 8, 0x141823168ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f59ee },
-    { 0x1417f59f4ULL, 8, 0x141823170ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f59f4 },
-    { 0x1417f59faULL, 8, 0x141823178ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f59fa },
-    { 0x1417f5a00ULL, 8, 0x141823180ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f5a00 },
-    { 0x1417f5a06ULL, 8, 0x141823188ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f5a06 },
-    { 0x1417f5a0cULL, 8, 0x141823190ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f5a0c },
-    { 0x1417f5a12ULL, 8, 0x141823198ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f5a12 },
-    { 0x1417f5a18ULL, 8, 0x1418231a0ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f5a18 },
-    { 0x1417f5a1eULL, 8, 0x1418231a8ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f5a1e },
-    { 0x1417f5a24ULL, 8, 0x141823418ULL, 0x0ULL, (void* (*)(void*))SynThunk_1417f5a24 },
+    { 0x1417f59d6ULL, 9, 0x141823148ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f59d6 },
+    { 0x1417f59dcULL, 9, 0x141823150ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f59dc },
+    { 0x1417f59e2ULL, 9, 0x141823158ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f59e2 },
+    { 0x1417f59e8ULL, 9, 0x141823160ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f59e8 },
+    { 0x1417f59eeULL, 9, 0x141823168ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f59ee },
+    { 0x1417f59f4ULL, 9, 0x141823170ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f59f4 },
+    { 0x1417f59faULL, 9, 0x141823178ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f59fa },
+    { 0x1417f5a00ULL, 9, 0x141823180ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f5a00 },
+    { 0x1417f5a06ULL, 9, 0x141823188ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f5a06 },
+    { 0x1417f5a0cULL, 9, 0x141823190ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f5a0c },
+    { 0x1417f5a12ULL, 9, 0x141823198ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f5a12 },
+    { 0x1417f5a18ULL, 9, 0x1418231a0ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f5a18 },
+    { 0x1417f5a1eULL, 9, 0x1418231a8ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f5a1e },
+    { 0x1417f5a24ULL, 9, 0x141823418ULL, 0x0ULL, (void* (*)(void*))SynSlotThunk_1417f5a24 },
     { 0x1417f5a30ULL, 1, 0x0ULL, 0x0ULL, SynLeaf_1417f5a30 },
 };
 const unsigned int g_synLeafCount = 832u;
