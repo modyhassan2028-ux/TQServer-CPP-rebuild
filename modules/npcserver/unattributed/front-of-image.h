@@ -151,6 +151,18 @@ extern unsigned long long (*g_pfnNpcBeginThread)(void (*pfnStart)(void*), unsign
                                                  void* pArg);
 extern unsigned long (*g_pfnNpcInitializeCriticalSectionAndSpinCount)(void* pSection, unsigned long uSpin);
 extern void  (*g_pfnNpcThreadProc_140074780)(void* pArg);                     // FUN_140074780
+void FUN_140014b30(long long* pBase, int nFlag);
+extern void* g_pNpcBase_140103f80;                                            // DAT_140103f80
+extern void  (*g_pfnNpc_140074d90)(void* pIocp, unsigned int uFlag);           // FUN_140074d90
+extern void  (*g_pfnNpc_140014300)(void* p);                                  // FUN_140014300
+extern long long (*g_pfnNpcOrdinal3)(long long hSocket);                      // Ordinal_3 (ws2_32)
+extern void  (*g_pfnNpc_14001acc0)(long long pBase);                          // FUN_14001acc0
+extern void  (*g_pfnNpc_140014a00)(long long pBase, void* pEvent, int nFlag);  // FUN_140014a00
+extern void  (*g_pfnNpc_14001a030)(void* p);                                  // FUN_14001a030
+extern void  (*g_pfnNpc_14001a1a0)(void* p);                                  // FUN_14001a1a0
+extern void  (*g_pfnNpc_14001af30)(void* p);                                  // FUN_14001af30
+extern void  (*g_pfnNpc_140016e10)(void);                                     // FUN_140016e10
+extern void  (*g_pfnNpc_140016e90)(void);                                     // FUN_140016e90
 extern unsigned long long (*g_pfnNpc_140016720)(void* pMonitor, void* pOut);  // FUN_140016720
 extern void  (*g_pfnNpc_1400163c0)(void* pOut);                              // FUN_1400163c0
 extern void  (*g_pfnNpc_140016ef0)(void);                                    // FUN_140016ef0

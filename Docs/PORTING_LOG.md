@@ -1117,3 +1117,31 @@ and `nWaitCount` at `+0x38` (the offsets the code itself uses: `param_1 + 6`, `p
 - `tests/npcserver_d185_test.cpp` covers the block failing before anything else, a full four-slot launch, the
   zero-request substitution, a worker failing on the third attempt (port, semaphore, array, block all
   released in that order) and the missing slot array.
+
+## D186 — NpcServer.exe 0x140014b30 (event_base_free, 867 bytes)
+
+The sweep order, straight from the body: the IOCP slot at `+0x1f0` (closed with `0xffffffff` and cleared),
+the socket pair at `+0x210` / `+0x218` with the lock at `+0x220` and the flags word at `+0x230` losing
+`0x80`, the active-queue reset, the active queue itself, the timeout entries, the priority queues, the
+once list at `+0x108`, the remainder list at `+0x2a8`, the selector's own release through
+`*(evsel + 0x28)`, then `+0x150`, the priority table at `+0xf8` (released **unconditionally**), the three
+sub-objects at `+0x128`, `+0x140` and `+0x10`, the two notifier sockets, the current-base slot, and finally
+the block.
+
+Two things the machine made clear and the pseudo-code did not:
+
+- The active-queue head at `+0x150` is a pointer **to** the slot holding the first entry, not the entry
+  itself: both the loop condition and the call dereference it a second time. Reading it as a single pointer
+  turns the loop into an endless one, which is exactly what the first run did.
+- The table at `+0x1f` is released without a null test, while `+0x2a` has one, so an empty base still
+  passes a null to the release path. The suite pins that as two releases, the first with `nullptr`.
+
+The release helper reproduces the reload behaviour: `DAT_140103fa8` is read again after every call, so a
+hook that replaces itself mid-sweep is honoured.
+
+A null base falls back to `DAT_140103f80`; when that is null too the only effect is
+"%s: no base to free" with "event_base_free_".
+
+`tests/npcserver_d186_test.cpp` walks a fully loaded base and checks all 21 steps in order, then the socket
+markers, the entry flags, the emptied remainder list, the cleared current-base slot, and the block going
+last.

@@ -158,6 +158,17 @@ unsigned long long (*g_pfnNpcBeginThread)(void (*)(void*), unsigned int, void*) 
 unsigned long (*g_pfnNpcInitializeCriticalSectionAndSpinCount)(void*, unsigned long) = nullptr;
 void  (*g_pfnNpcThreadProc_140074780)(void*) = nullptr;
 void  (*g_pfnNpc_140074930)(void*) = nullptr;
+void* g_pNpcBase_140103f80 = nullptr;
+void  (*g_pfnNpc_140074d90)(void*, unsigned int) = nullptr;
+void  (*g_pfnNpc_140014300)(void*) = nullptr;
+long long (*g_pfnNpcOrdinal3)(long long) = nullptr;
+void  (*g_pfnNpc_14001acc0)(long long) = nullptr;
+void  (*g_pfnNpc_140014a00)(long long, void*, int) = nullptr;
+void  (*g_pfnNpc_14001a030)(void*) = nullptr;
+void  (*g_pfnNpc_14001a1a0)(void*) = nullptr;
+void  (*g_pfnNpc_14001af30)(void*) = nullptr;
+void  (*g_pfnNpc_140016e10)(void) = nullptr;
+void  (*g_pfnNpc_140016e90)(void) = nullptr;
 void* (*g_pfnNpcEventFree_140103fa8)(void*) = nullptr;
 const char g_symNpcStr_CondChange[] = "Can't change condition callbacks once they have been initialized.";
 
@@ -1909,6 +1920,105 @@ threads_failed:
     }
     if (g_pfnNpcFree_1400119c0 != nullptr) g_pfnNpcFree_1400119c0(p);
     return nullptr;
+}
+
+// The release the base sweep uses everywhere: the hook when one is installed, otherwise the runtime free,
+// and the hook is re-read on every release because the machine reloads it after each call.
+static void NpcFreeBasePart(void* p) {
+    if (g_pfnNpcEventFree_140103fa8 == nullptr) {
+        if (g_pfnNpcCrtFree != nullptr) g_pfnNpcCrtFree(p);
+    } else {
+        g_pfnNpcEventFree_140103fa8(p);
+    }
+}
+
+// 0x140014b30 - event_base_free: IOCP, the socket pair, the active queue, the timeout entries with their
+// timers, the priority table, the deferred and once lists, the remaining entries, the selector's own
+// release, the three sub-objects and finally the block. A null base falls back to the current one, and a
+// missing one only reports.
+void FUN_140014b30(long long* pBase, int nFlag) {
+    if (pBase == nullptr) {
+        if (g_pNpcBase_140103f80 == nullptr) {
+            if (g_pfnNpcWarn_1400191c0 != nullptr)
+                g_pfnNpcWarn_1400191c0("%s: no base to free", "event_base_free_");
+            return;
+        }
+        pBase = (long long*)g_pNpcBase_140103f80;
+    }
+    unsigned char* q = (unsigned char*)pBase;
+    if (*(void**)(q + 0x1f0) != nullptr) {
+        if (g_pfnNpc_140074d90 != nullptr) g_pfnNpc_140074d90(*(void**)(q + 0x1f0), 0xffffffff);
+        *(void**)(q + 0x1f0) = nullptr;
+    }
+    if (*(long long*)(q + 0x210) != -1) {
+        if (g_pfnNpc_140014300 != nullptr) g_pfnNpc_140014300(q + 0x220);
+        if (g_pfnNpcOrdinal3 != nullptr) g_pfnNpcOrdinal3(*(long long*)(q + 0x210));
+        if (*(long long*)(q + 0x218) != -1) {
+            if (g_pfnNpcOrdinal3 != nullptr) g_pfnNpcOrdinal3(*(long long*)(q + 0x218));
+        }
+        *(long long*)(q + 0x210) = -1;
+        *(long long*)(q + 0x218) = -1;
+        *(unsigned short*)(q + 0x230) = *(unsigned short*)(q + 0x230) & 0xff7f;
+    }
+    if (g_pfnNpc_14001acc0 != nullptr) g_pfnNpc_14001acc0((long long)pBase);
+    // the head at +0x150 is a pointer to the slot holding the first queue entry, so the test and the call
+    // both go through it
+    while (*(int*)(q + 0x158) != 0 && *(void**)*(void**)(q + 0x150) != nullptr) {
+        if (g_pfnNpc_140014300 != nullptr) g_pfnNpc_140014300(*(void**)*(void**)(q + 0x150));
+    }
+    // the timeout entries: each carries a timer at +0x18 and a list of timers from +0, and the active flag
+    // at +0x10 of the entry decides whether a listed timer is released here
+    for (int i = 0; i < *(int*)(q + 0x120); ++i) {
+        unsigned char* pEntry = *(unsigned char**)(*(long long*)(q + 0x118) + (long long)i * 8);
+        if (g_pfnNpc_140014300 != nullptr) g_pfnNpc_140014300(pEntry + 0x18);
+        *(unsigned short*)(pEntry + 0x28) = *(unsigned short*)(pEntry + 0x28) & 0xff7f;
+        void* pTimer = *(void**)pEntry;
+        while (pTimer != nullptr) {
+            void* pNext = *(void**)((char*)pTimer + 0x28);
+            if ((*(unsigned char*)((char*)pTimer + 0x10) & 0x10) == 0) {
+                if (g_pfnNpc_140014300 != nullptr) g_pfnNpc_140014300(pTimer);
+            }
+            pTimer = pNext;
+        }
+        NpcFreeBasePart(pEntry);
+    }
+    if (*(void**)(q + 0x118) != nullptr) NpcFreeBasePart(*(void**)(q + 0x118));
+    // the priority queues, two words per slot
+    for (int i = 0; i < *(int*)(q + 0x100); ++i) {
+        void* pEvent = *(void**)(*(long long*)(q + 0xf8) + (long long)i * 0x10);
+        while (pEvent != nullptr) {
+            void* pNext = *(void**)pEvent;
+            if (g_pfnNpc_140014a00 != nullptr) g_pfnNpc_140014a00((long long)pBase, pEvent, nFlag);
+            pEvent = pNext;
+        }
+    }
+    while (*(void**)(q + 0x108) != nullptr) {
+        if (g_pfnNpc_140014a00 != nullptr) g_pfnNpc_140014a00((long long)pBase, *(void**)(q + 0x108), nFlag);
+    }
+    // the remainder list at +0x2a8, unlinked from both sides before the release
+    while (*(void**)(q + 0x2a8) != nullptr) {
+        long long* pNode = (long long*)*(void**)(q + 0x2a8);
+        if ((long long*)pNode[0] != nullptr) *(long long*)(pNode[0] + 0x08) = pNode[1];
+        *(long long*)pNode[1] = pNode[0];
+        NpcFreeBasePart(pNode);
+    }
+    if (*(long long*)q != 0) {
+        long long pfnRelease = *(long long*)(*(long long*)q + 0x28);
+        if (pfnRelease != 0) ((void (*)(long long*))pfnRelease)(pBase);
+    }
+    if (*(void**)(q + 0x150) != nullptr) NpcFreeBasePart(*(void**)(q + 0x150));
+    NpcFreeBasePart(*(void**)(q + 0xf8));
+    if (g_pfnNpc_14001a030 != nullptr) g_pfnNpc_14001a030(q + 0x128);
+    if (g_pfnNpc_14001a1a0 != nullptr) g_pfnNpc_14001a1a0(q + 0x140);
+    if (g_pfnNpc_14001af30 != nullptr) g_pfnNpc_14001af30(q + 0x10);
+    if (*(long long*)(q + 0x1d0) != 0) {
+        if (g_pfnNpc_140016e10 != nullptr) g_pfnNpc_140016e10();
+    }
+    if (*(long long*)(q + 0x1d8) != 0) {
+        if (g_pfnNpc_140016e90 != nullptr) g_pfnNpc_140016e90();
+    }
+    if (pBase == (long long*)g_pNpcBase_140103f80) g_pNpcBase_140103f80 = nullptr;
+    NpcFreeBasePart(pBase);
 }
 
 }  // namespace tq

@@ -674,3 +674,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - NpcServer: 101 bodies. Suites D165 to D185 all green.
 - One seam left in the base layer: 0x140014b30 (867, event_base_free).
 - Then rewire 0x140002b30 and 0x140015ed0 onto the real bodies and drop the duplicate seams.
+
+## D186 (latest)
+
+- NpcServer: 102 bodies. Suites D165 to D186 all green.
+- The libevent bootstrap layer is now complete: no seam remains inside 0x140015ed0 or 0x140014b30.
+- Next: rewire 0x140002b30 (CKernelThread::Create) and 0x140015ed0 onto these real bodies and delete the
+  duplicate seams they replace, then continue with the next cluster after 0x140074b80.
