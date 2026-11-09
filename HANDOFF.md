@@ -695,3 +695,9 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   argument list read out of the disassembly before it can be written, since the decompiler truncated the
   call.
 - After it: 0x140002b30 can be rewired onto the real bodies (its eight callees are all ported now).
+
+## D189 (latest)
+
+- NpcServer: 105 bodies, 23 suites. The IOCP cluster is complete; 0x140074930 is the last seam it had.
+- Next: rewire 0x140002b30 onto its eight real callees (all ported) and point 0x140074b80 at the real
+  0x140074930, adjusting suites D176 and D185 in the same commit.

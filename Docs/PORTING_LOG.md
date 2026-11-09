@@ -1180,3 +1180,24 @@ last.
   deleted only after the wait), a still-running worker reporting `-1`, both timeout pass-through cases, a
   completion routed through its routine with the exit flag set from inside it, the empty wait, and the
   `-1` key that must not call anything.
+
+## D189 — NpcServer.exe 0x140074930 (winsock extension resolution)
+
+The decompiler truncated every `WSAIoctl` argument list, so this one was written from the disassembly at
+`0x140074930` rather than guessed:
+
+- The socket comes from the import called with `ecx=2, edx=1, r8d=0`, that is a stream socket in the IPv4
+  family, and a `-1` result ends the body before anything else.
+- Each request is `WSAIoctl(socket, 0xc8000006, guid, 0x10, &out, 8, &bytes, NULL, NULL)`: the input is a
+  16-byte GUID, the output buffer is eight bytes, and both the overlapped pointer and the completion
+  routine are null.
+- The three GUIDs, in the order the body asks for them, with their bytes taken from the stack stores:
+  `b5367df1-cbac-11cf-95ca-00805f48a192` (AcceptEx) into `+0`, `25a207b9-ddf3-4660-8ee9-76e58c74063e`
+  (ConnectEx) into `+8`, `b5367df2-cbac-11cf-95ca-00805f48a192` (GetAcceptExSockaddrs) into `+0x10`.
+  Which is worth noting: the second slot is ConnectEx, not the sockaddr helper the ordering might suggest.
+- The socket is closed through the same ordinal the base teardown uses, and `DAT_140104cc8` is only set to
+  `1` when the socket opened.
+
+`tests/npcserver_d189_test.cpp` pins the socket family/type/protocol, the control code, both buffer sizes,
+the exact sixteen bytes of all three GUIDs, the three resolved values landing in order, the socket being
+closed, and the flag only being set on the path that got a socket.

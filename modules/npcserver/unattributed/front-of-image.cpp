@@ -145,6 +145,9 @@ unsigned long long (*g_pfnNpcBeginThread)(void (*)(void*), unsigned int, void*) 
 unsigned long (*g_pfnNpcInitializeCriticalSectionAndSpinCount)(void*, unsigned long) = nullptr;
 void  (*g_pfnNpcThreadProc_140074780)(void*) = nullptr;
 void  (*g_pfnNpc_140074930)(void*) = nullptr;
+unsigned long long (*g_pfnNpcWsaSocket)(int, int, int) = nullptr;
+int   (*g_pfnNpcWSAIoctl)(unsigned long long, unsigned int, void*, unsigned int, void*, unsigned int,
+                          unsigned int*, void*, void*) = nullptr;
 int   (*g_pfnNpcReleaseSemaphore)(void*, long, long*) = nullptr;
 int   (*g_pfnNpcPostQueuedCompletionStatus)(void*, unsigned int, unsigned long long, void*) = nullptr;
 int   (*g_pfnNpcGetQueuedCompletionStatus)(void*, unsigned int*, unsigned long long*, void**,
@@ -2116,6 +2119,30 @@ void FUN_140074780(void* pCtl) {
         if (g_pfnNpcEnterCS != nullptr) g_pfnNpcEnterCS(p + 0x08);
         nExit = *(short*)(p + 0x32);
     }
+}
+
+// 0x140074930 - the winsock extension resolution. The body builds three GUIDs on the stack, opens one
+// stream socket, asks SIO_GET_EXTENSION_FUNCTION_POINTER for each GUID in turn and stores the returned
+// pointer at +0, +8 and +0x10, then closes the socket and marks the once-init done. The GUIDs, in the order
+// the body uses them: b5367df1-cbac-11cf-95ca-00805f48a192 (AcceptEx), 25a207b9-ddf3-4660-8ee9-76e58c74063e
+// (ConnectEx) and b5367df2-cbac-11cf-95ca-00805f48a192 (GetAcceptExSockaddrs).
+void FUN_140074930(void* pOut) {
+    static const unsigned char aGuid1[16] = { 0xf1,0x7d,0x36,0xb5,0xac,0xcb,0xcf,0x11,0x95,0xca,0x00,0x80,0x5f,0x48,0xa1,0x92 };
+    static const unsigned char aGuid2[16] = { 0xb9,0x07,0xa2,0x25,0xf3,0xdd,0x60,0x46,0x8e,0xe9,0x76,0xe5,0x8c,0x74,0x06,0x3e };
+    static const unsigned char aGuid3[16] = { 0xf2,0x7d,0x36,0xb5,0xac,0xcb,0xcf,0x11,0x95,0xca,0x00,0x80,0x5f,0x48,0xa1,0x92 };
+    unsigned long long hSocket = g_pfnNpcWsaSocket != nullptr ? g_pfnNpcWsaSocket(2, 1, 0) : 0xffffffffffffffffull;
+    if (hSocket == 0xffffffffffffffffull) return;
+    const unsigned char* aGuids[3] = { aGuid1, aGuid2, aGuid3 };
+    for (int i = 0; i < 3; ++i) {
+        unsigned long long uOut = 0;
+        unsigned int cbBytes = 0;
+        if (g_pfnNpcWSAIoctl != nullptr)
+            g_pfnNpcWSAIoctl(hSocket, 0xc8000006u, (void*)aGuids[i], 0x10, &uOut, 8, &cbBytes, nullptr,
+                             nullptr);
+        ((unsigned long long*)pOut)[i] = uOut;
+    }
+    if (g_pfnNpcOrdinal3 != nullptr) g_pfnNpcOrdinal3((long long)hSocket);
+    g_nNpcFlag_140104cc8 = 1;
 }
 
 }  // namespace tq

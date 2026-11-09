@@ -130,7 +130,11 @@ extern void  (*g_pfnNpc_1400164f0)(long long pMonitor, int* pOut);            //
 extern void* (*g_pfnNpc_140011850)(long long nCount, long long nSize);        // FUN_140011850
 void* FUN_140074b80(unsigned int dwThreads);
 extern int   g_nNpcFlag_140104cc8;                                            // DAT_140104cc8
-extern void  (*g_pfnNpc_140074930)(void* pOnce);                              // FUN_140074930
+extern unsigned long long (*g_pfnNpcWsaSocket)(int nAf, int nType, int nProtocol);   // WSASocketA
+extern int   (*g_pfnNpcWSAIoctl)(unsigned long long hSocket, unsigned int dwCode, void* pIn,
+                                 unsigned int cbIn, void* pOut, unsigned int cbOut,
+                                 unsigned int* pcbBytes, void* pOverlapped, void* pCompletion);
+void FUN_140074930(void* pOut);
 extern void* (*g_pfnNpcCreateIoCompletionPort)(void* hFile, void* hExisting, unsigned long nKey,
                                                unsigned int dwThreads);
 extern void* (*g_pfnNpcCreateSemaphoreA)(void* pAttr, long nInitial, long nMax, const char* pszName);
