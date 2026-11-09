@@ -109,6 +109,9 @@ int   (*g_pfnNpcResetEvent)(void*) = nullptr;
 unsigned int (*g_pfnNpcWaitForSingleObject)(void*, unsigned int) = nullptr;
 unsigned int (*g_pfnNpcGetTickCount)(void) = nullptr;
 unsigned int (*g_pfnNpc_140016450)(int*) = nullptr;
+void* (*g_pfnNpcCalloc)(long long, long long) = nullptr;
+void* (*g_pfnNpcEventMalloc_140103f98)(long long) = nullptr;
+void* (*g_pfnNpc_14001ced0)(void*) = nullptr;
 const char g_symNpcStr_CondChange[] = "Can't change condition callbacks once they have been initialized.";
 
 void (*g_pfnNpc_140016880)(void*) = nullptr;
@@ -1313,6 +1316,65 @@ unsigned int FUN_1400055f0(void* pCond, void* pMutex, int* pTimeval) {
             return uResult;
         }
     }
+}
+
+// 0x140012580 - event_config_new: 0x30 bytes from the hook when one is installed (and zeroed by hand),
+// otherwise from calloc. Either failure sets errno to 0xc and answers nothing. The queue tail points at
+// the head itself, the interval is -1, the callback limit 0x7fffffff and the priority limit 1.
+void* FUN_140012580(void) {
+    if (g_pfnNpcEventMalloc_140103f98 == nullptr) {
+        void* p = g_pfnNpcCalloc != nullptr ? g_pfnNpcCalloc(1, 0x30) : nullptr;
+        if (p == nullptr) {
+            int* pErrno = g_pfnNpcErrno != nullptr ? g_pfnNpcErrno() : nullptr;
+            if (pErrno != nullptr) *pErrno = 0xc;
+            return nullptr;
+        }
+        *(long long*)((char*)p + 0x00) = 0;
+        *(void**)((char*)p + 0x08) = p;
+        *(unsigned int*)((char*)p + 0x14) = 0xffffffff;
+        *(unsigned int*)((char*)p + 0x1c) = 0x7fffffff;
+        *(unsigned int*)((char*)p + 0x20) = 1;
+        return p;
+    }
+    // the hook takes the same 0x30 the calloc path asks for; the decompiler dropped the register
+    void* p = g_pfnNpcEventMalloc_140103f98(0x30);
+    if (p == nullptr) {
+        int* pErrno = g_pfnNpcErrno != nullptr ? g_pfnNpcErrno() : nullptr;
+        if (pErrno != nullptr) *pErrno = 0xc;
+        return nullptr;
+    }
+    for (int i = 0; i < 6; ++i) ((void**)p)[i] = nullptr;
+    *(long long*)((char*)p + 0x00) = 0;
+    *(void**)((char*)p + 0x08) = p;
+    *(unsigned int*)((char*)p + 0x14) = 0xffffffff;
+    *(unsigned int*)((char*)p + 0x1c) = 0x7fffffff;
+    *(unsigned int*)((char*)p + 0x20) = 1;
+    return p;
+}
+
+// 0x140010a00 - event_config_set_flag: the word at +0x28 is OR-ed with the flag.
+unsigned int FUN_140010a00(long long pConfig, unsigned int uFlag) {
+    if (pConfig == 0) return 0xffffffff;
+    *(unsigned int*)(pConfig + 0x28) = *(unsigned int*)(pConfig + 0x28) | uFlag;
+    return 0;
+}
+
+// 0x140010a20 - event_config_set_num_cpus_hint: the hint lands at +0x10.
+unsigned int FUN_140010a20(long long pConfig, unsigned int uCount) {
+    if (pConfig == 0) return 0xffffffff;
+    *(unsigned int*)(pConfig + 0x10) = uCount;
+    return 0;
+}
+
+// 0x140010d80 - event_base_get_method: the base names its selector in the first word, and the selector
+// carries the method name first.
+void* FUN_140010d80(void* pBase) { return *(void**)*(void**)pBase; }
+
+// 0x14001d350 - a 0x68-byte object handed to 0x14001ced0; operator_new failing answers nothing.
+void* FUN_14001d350(void) {
+    void* p = g_pfnNpcOperatorNew != nullptr ? g_pfnNpcOperatorNew(0x68) : nullptr;
+    if (p == nullptr) return nullptr;
+    return g_pfnNpc_14001ced0 != nullptr ? g_pfnNpc_14001ced0(p) : p;
 }
 
 }  // namespace tq

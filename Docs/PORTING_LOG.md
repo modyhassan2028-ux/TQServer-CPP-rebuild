@@ -980,3 +980,22 @@ and `nWaitCount` at `+0x38` (the offsets the code itself uses: `param_1 + 6`, `p
   the registration is wired end to end; the D177 suite compares against the same symbols.
 - Tests: `tests/npcserver_d179_test.cpp` (allocation and failure paths, the try flag, the counters, signal and
   broadcast, and three wait outcomes: deadline, signalled, timeout plus a generic failure).
+
+## D180 — NpcServer.exe event_config and selector wrappers
+
+- `0x140012580` (`event_config_new`) takes `0x30` bytes either from `calloc(1, 0x30)` or, when the hook
+  `DAT_140103f98` is installed, from that hook followed by six cleared words; both paths write the same five
+  fields and both set errno to `0xc` on failure. The layout the body proves: entry-queue head at `+0` with
+  its tail pointer at `+8` pointing at the head **itself**, processor hint at `+0x10`, dispatch interval at
+  `+0x14` (`0xffffffff`), callback limit at `+0x1c` (`0x7fffffff`), priority limit at `+0x20` (`1`). That is
+  the 2.1 `event_config` with a TAILQ head first, which is why `+8` holds the object's own address.
+- `0x140010a00` OR-s the word at `+0x28` (the flags; `0x140015ed0` copies exactly that word to base `+0x1f8`
+  and tests bits `2` and `0x20`), answering `0xffffffff` for a null config.
+- `0x140010a20` stores the processor hint at `+0x10`, same null answer.
+- `0x140010d80` is `event_base_get_method`: the base's first word is the selector and the selector's first
+  word is the method name.
+- `0x14001d350` allocates `0x68` and hands it to `0x14001ced0`, answering nothing if the allocation fails.
+- The hook is typed as taking the size, because the calloc path asks for `0x30` and the hook replaces it
+  one-for-one; the decompiler dropped that register.
+- `tests/npcserver_d180_test.cpp` covers both allocation paths of the config (including errno `0xc`), the two
+  setters with their null answers, the selector indirection, and the factory with a failing allocation.

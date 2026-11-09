@@ -626,3 +626,12 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - The registered handlers are ported and wired: the lock and condition shims with spin count 2000.
 - Next in the layer: 0x140012580 (event_config_new), 0x140010a00, 0x140010a20, 0x140015ed0 (event_base_new),
   0x140012660, 0x140010d80, 0x14001d350, then 0x1400121b0 and 0x140016450 which the callbacks already call.
+
+## D180 (latest)
+
+- NpcServer: 84 bodies. Suites D165 to D180 all green.
+- event_config is understood end to end: the five fields, the tail pointer that points at the head, and the
+  flag word at +0x28 that the base copies to +0x1f8.
+- Next: 0x140012660 (event_config_free, needs the disassembly for its entry list) and 0x140015ed0
+  (event_base_new_with_config, 925 bytes). Then rewire 0x140002b30 and the other seam users to these real
+  bodies.
