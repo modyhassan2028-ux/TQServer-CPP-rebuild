@@ -1318,4 +1318,10 @@ void* SynAccZeroTwo_1417c7920(void* pThis) {
     return pThis;                                            // mov %rcx,%rax
 }
 
+// The four seams the erase body needs, null until something supplies them.
+void (*g_pfnSynTmp_141823270)(void*, void*) = nullptr;      // 0x141823270
+void (*g_pfnSyn_1418233f8)(void*) = nullptr;                // 0x1418233f8
+void (*g_pfnSyn_141823288)(void*, void*) = nullptr;         // 0x141823288
+
+
 }  // namespace tq

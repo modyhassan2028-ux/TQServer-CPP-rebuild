@@ -207,5 +207,10 @@ void* SynAccCurrPlus18_1417c7ae0(void* pIter);                             // 0x
 void* SynAccIncCall_1417c7b20(void* pIter);                                // 0x1417c7b20
 void* SynAccIncCall_1417c7bc0(void* pIter);                                // 0x1417c7bc0
 void* SynAccPair_1417c7be0(void* pThis, void* pOut, void* pArg3);          // 0x1417c7be0
+// The four seams the erase body reaches on its 0x29-sentinel path before it throws.
+extern void (*g_pfnSynTmp_141823270)(void* pObj, void* pWhat);              // 0x141823270
+extern void (*g_pfnSyn_1418233f8)(void* pObj);                              // 0x1418233f8
+extern void (*g_pfnSyn_141823288)(void* pDst, void* pSrc);                  // 0x141823288
+
 }  // namespace tq
 #endif
