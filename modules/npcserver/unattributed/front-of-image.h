@@ -60,6 +60,19 @@ extern unsigned long (*g_pfnNpcTimeGet)(unsigned long long uParam);         // t
 extern void  (*g_pfnNpcThreadBaseCtor)(void* pThis);                       // CThreadBase::CThreadBase
 extern void  (*g_pfnNpcSafeCopy)(char* pDst, const char* pSrc, unsigned long long uCapacity);  // tq::SafeCopy
 extern void* g_symNpcVftbl_1400bed00;                                       // stored at 0x140002d70
+extern const char g_symNpcStr_1400beab0[];                                  // CKernelThread::OnProcess(), pointer is null.
+extern const char g_symNpcStr_1400beb30[];                                  // CKernelThread::OnProcess(), packet[%d].
+extern const char g_symNpcStr_1400beae0[];                                  // the tick warning
+extern const char g_symNpcStr_1400beb08[];                                  // Connect to game server again . . .
+extern void (*g_pfnNpcTickAnalystCtor)(void* pScope, int nId);              // CTickAnalyst::CTickAnalyst
+extern void (*g_pfnNpcTickAnalystDtor)(void* pScope);                       // CTickAnalyst::~CTickAnalyst
+extern void (*g_pfnNpcInlineLogWARNING)(const void* pFmt, unsigned long long uValue);
+extern int          g_nNpcLoopDelay_140102148;                              // DAT_140102148
+extern unsigned int g_nNpcTickClock_140103c60;                              // DAT_140103c60
+extern unsigned int g_nNpcTickClockInit_140103c64;                          // DAT_140103c64
+extern unsigned int g_nNpcStatCount_140103f28;                              // _DAT_140103f28
+extern unsigned int g_nNpcStatSum_140103f2c;                                // DAT_140103f2c
+extern unsigned int g_nNpcStatMax_140103f30;                                // DAT_140103f30
 extern void* g_symNpcVftbl_1400be730;                                       // stored at 0x1400021f0/0x140002540
 extern void* g_symNpcVftbl_1400be6f8;                                       // the second store in both bodies                        // DAT_1400be0b0
 
@@ -125,6 +138,7 @@ unsigned long long FUN_140002700(int* pThis);
 int   FUN_140002760(unsigned int* pThis, unsigned int uValue);
 void* FUN_140002790(void* pThis);
 void* FUN_140002d70(void* pThis, long long hThread, const char* pszName);
+int   FUN_1400027f0(long long pThis);
 int   FUN_140001520(char* pThis);
 
 }  // namespace tq

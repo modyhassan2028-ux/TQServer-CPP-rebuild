@@ -866,3 +866,33 @@ The four bodies that were held back at D134 are in, each read straight off its o
   thing to pin down).
 - `0x140002b30` (thread launcher, `_SYSTEM_INFO`) follows it and is deferred for the same reason: it
   launches the worker and needs the same objects.
+
+## D175 — NpcServer.exe 0x1400027f0 CKernelThread::OnProcess()  (the D174 deferral, resolved)
+
+- The receive slot is pinned from the machine code at `0x140002887`..`0x1400028ab`: `rdx = r8 = -1`,
+  `r9 = 0x418`, and the two stack arguments are `lea 0xd0(%rsp)` and `lea 0x50(%rsp)`. So the call is
+  `slot+0x48(obj, -1, -1, 0x418, body, header)` where `body` is the `0x418`-byte buffer whose **first
+  eight bytes are the fd** (`cmpq $-1,0xd0(%rsp)`) and `header` is two ints, the second of which is the
+  packet type read at `0x54(%rsp)` and compared with `0x1fbd1` / `0x1fbd2`. That resolves the deferral:
+  no layout was guessed, the offsets are the body's own stack slots.
+- Strings, taken from the image's `.rdata`: `0x1400beab0` = "CKernelThread::OnProcess(), pointer is null.",
+  `0x1400beb30` = "CKernelThread::OnProcess(), packet[%d]." (the type is the argument),
+  `0x1400beb08` = "Connect to game server again . . .", and `0x1400beae0` is GBK, not ASCII:
+  the bytes are `ca b1 d6 d3 c6 ab d2 c6 25 64 c3 eb` = "时钟偏移%d秒" (clock drift %d seconds). It is
+  stored byte for byte, so the suite compares pointers, not text.
+- The work query is `slot+0x58(obj, DAT_140102148)`; the loop body is the packet dispatch; then
+  `0x140001440` is asked whether the link is still up and, only when it is not and `+0x7c` is set, the
+  deadline pair at `+0x78`/`+0x7c` is checked and the reconnect sequence runs: slot `+0x8` of `+0x68`,
+  slot `0` of `+0x48` with the message above, then `0x140001520`.
+- The tick: `DAT_140103c64` bit 0 guards the one-time `DAT_140103c60 = TimeGet(0)`. The delta is
+  `TimeGet(0) - DAT_140103c60`; when it exceeds 99 the clock advances by exactly 100 while it is under
+  `0x2711`, and past that the GBK warning is logged and the clock jumps to the current value. Either way
+  a `0x50` scope wraps the `slot+0x20(obj68, now)` tick call.
+- Statistics: `_DAT_140103f28` is incremented, `DAT_140103f2c` gets the elapsed time (`lock xadd`),
+  `DAT_140103f30` keeps the maximum, and `DAT_140102148 = 50 - DAT_140102148 - elapsed` clamps to 1.
+  The analyst scopes are `0x4c` for the loop, `0x4d` for type `0x1fbd1`, `0x4f` for `0x1fbd2`, `0x50`
+  for the tick; the body always returns 1.
+- `tests/npcserver_d175_test.cpp` asserts the null guard, the `0x418` bound, three packets, the scope id
+  order `4c/4d/4f/50`, four destructors, the single `packet[0x1234]` log, the fd-1 short circuit on both
+  branches, the clock landing on 1300, the tick argument, and the three counters.
+- The analyst seams already live in `clientsocket.cpp`, so this unit only declares them.

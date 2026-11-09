@@ -46,6 +46,17 @@ long long (*g_pfnNpcEvbufRemove_140005c30)(void* pBev, void* pDst, long long nBy
 void (*g_pfnNpcThreadBaseCtor)(void* pThis) = nullptr;
 void (*g_pfnNpcSafeCopy)(char* pDst, const char* pSrc, unsigned long long uCapacity) = nullptr;
 void* g_symNpcVftbl_1400bed00 = nullptr;
+const char g_symNpcStr_1400beab0[] = "CKernelThread::OnProcess(), pointer is null.";
+const char g_symNpcStr_1400beb30[] = "CKernelThread::OnProcess(), packet[%d].";
+const char g_symNpcStr_1400beae0[] = "CKernelThread::OnProcess\xca\xb1\xd6\xd3\xc6\xab\xd2\xc6%d\xc3\xeb";
+const char g_symNpcStr_1400beb08[] = "Connect to game server again . . .";
+void (*g_pfnNpcInlineLogWARNING)(const void* pFmt, unsigned long long uValue) = nullptr;
+int          g_nNpcLoopDelay_140102148 = 0;
+unsigned int g_nNpcTickClock_140103c60 = 0;
+unsigned int g_nNpcTickClockInit_140103c64 = 0;
+unsigned int g_nNpcStatCount_140103f28 = 0;
+unsigned int g_nNpcStatSum_140103f2c = 0;
+unsigned int g_nNpcStatMax_140103f30 = 0;
 void (*g_pfnNpcThreadBaseDtor)(void* pThis) = nullptr;
 void (*g_pfnNpcEventBase_140016270)(void* pBase, long long a2, long long a3, long long a4) = nullptr;
 int  (*g_pfnNpcEventBaseLoopExit_140016280)(void* pBase, void* pArg) = nullptr;
@@ -815,6 +826,98 @@ void* FUN_140002d70(void* pThis, long long hThread, const char* pszName) {
         if (g_pfnNpcSafeCopy != nullptr) g_pfnNpcSafeCopy((char*)pThis + 0x50, pszName, 0x80);
     }
     return pThis;
+}
+
+// 0x1400027f0 - CKernelThread::OnProcess(). The receive call (slot +0x48) is given the body buffer at
+// 0x418 bytes and a two-word header; word 0 of the body is the fd (-1 short-circuits both packet
+// branches) and header word 1 is the packet type. Every counter here is the body's own.
+int FUN_1400027f0(long long pThis) {
+    if (*(void**)(pThis + 0x60) == nullptr || *(void**)(pThis + 0x50) == nullptr) {
+        if (g_pfnNpcInlineLogError != nullptr) g_pfnNpcInlineLogError(&g_symNpcStr_1400beab0);
+        return 1;
+    }
+    void** pLoop = *(void***)(pThis + 0x50);
+    void** vLoop = *(void***)pLoop;
+    bool bWork = ((bool (*)(void*, int))((void**)vLoop)[11])(pLoop, g_nNpcLoopDelay_140102148);
+    unsigned long uStart = g_pfnNpcTimeGet != nullptr ? g_pfnNpcTimeGet(0) : 0;
+    alignas(8) unsigned char scopeLoop[24];
+    if (g_pfnNpcTickAnalystCtor != nullptr) g_pfnNpcTickAnalystCtor(scopeLoop, 0x4c);
+    if (bWork) {
+        for (;;) {
+            struct { int nLength; int nType; } hdr = { 0, 0 };
+            alignas(8) unsigned char body[0x418];
+            bool bMore = ((bool (*)(void*, long long, long long, long long, void*, void*))((void**)vLoop)[9])(
+                pLoop, -1, -1, 0x418, body, &hdr);
+            if (!bMore) break;
+            if (hdr.nType == 0x1fbd1) {
+                alignas(8) unsigned char scope[24];
+                if (g_pfnNpcTickAnalystCtor != nullptr) g_pfnNpcTickAnalystCtor(scope, 0x4d);
+                if (*(long long*)body == -1) {
+                    if (g_pfnNpcTickAnalystDtor != nullptr) g_pfnNpcTickAnalystDtor(scope);
+                } else {
+                    FUN_140001cb0(*(long long*)(pThis + 0x60));
+                    if (g_pfnNpcTickAnalystDtor != nullptr) g_pfnNpcTickAnalystDtor(scope);
+                }
+            } else if (hdr.nType == 0x1fbd2) {
+                alignas(8) unsigned char scope[24];
+                if (g_pfnNpcTickAnalystCtor != nullptr) g_pfnNpcTickAnalystCtor(scope, 0x4f);
+                if (*(long long*)body == -1) {
+                    if (g_pfnNpcTickAnalystDtor != nullptr) g_pfnNpcTickAnalystDtor(scope);
+                } else {
+                    FUN_140001340((void*)*(long long*)(pThis + 0x60));
+                    if (g_pfnNpcTickAnalystDtor != nullptr) g_pfnNpcTickAnalystDtor(scope);
+                }
+            } else {
+                if (g_pfnNpcInlineLogError != nullptr) g_pfnNpcInlineLogError(&g_symNpcStr_1400beb30, hdr.nType);
+            }
+        }
+    }
+    bool bConnected = FUN_140001440((void*)*(long long*)(pThis + 0x60));
+    if (!bConnected && *(int*)(pThis + 0x7c) != 0) {
+        unsigned long uNow = g_pfnNpcTimeGet != nullptr ? g_pfnNpcTimeGet(0) : 0;
+        if ((unsigned int)(*(int*)(pThis + 0x78) + *(int*)(pThis + 0x7c)) <= uNow / 1000) {
+            unsigned long uNow2 = g_pfnNpcTimeGet != nullptr ? g_pfnNpcTimeGet(0) : 0;
+            *(unsigned int*)(pThis + 0x7c) = (unsigned int)(uNow2 / 1000);
+            void** pTick = *(void***)(pThis + 0x68);
+            void** vTick = *(void***)pTick;
+            ((void (*)(void*))((void**)vTick)[1])(pTick);
+            void** pMsg = *(void***)(pThis + 0x48);
+            void** vMsg = *(void***)pMsg;
+            ((void (*)(void*, const char*))((void**)vMsg)[0])(pMsg, g_symNpcStr_1400beb08);
+            FUN_140001520(*(char**)(pThis + 0x60));
+        }
+    }
+    if ((g_nNpcTickClockInit_140103c64 & 1) == 0) {
+        g_nNpcTickClockInit_140103c64 |= 1;
+        g_nNpcTickClock_140103c60 = (unsigned int)(g_pfnNpcTimeGet != nullptr ? g_pfnNpcTimeGet(0) : 0);
+    }
+    unsigned long uTick = g_pfnNpcTimeGet != nullptr ? g_pfnNpcTimeGet(0) : 0;
+    int iDelta = (int)((unsigned int)uTick - g_nNpcTickClock_140103c60);
+    if (99 < iDelta) {
+        if (iDelta < 0x2711) {
+            g_nNpcTickClock_140103c60 = g_nNpcTickClock_140103c60 + 100;
+        } else {
+            if (g_pfnNpcInlineLogWARNING != nullptr)
+                g_pfnNpcInlineLogWARNING(&g_symNpcStr_1400beae0, (unsigned long long)(unsigned int)(iDelta / 1000));
+            g_nNpcTickClock_140103c60 = (unsigned int)uTick;
+        }
+        alignas(8) unsigned char scope[24];
+        if (g_pfnNpcTickAnalystCtor != nullptr) g_pfnNpcTickAnalystCtor(scope, 0x50);
+        void** pTick2 = *(void***)(pThis + 0x68);
+        void** vTick2 = *(void***)pTick2;
+        ((void (*)(void*, unsigned int))((void**)vTick2)[4])(pTick2, (unsigned int)uTick);
+        if (g_pfnNpcTickAnalystDtor != nullptr) g_pfnNpcTickAnalystDtor(scope);
+    }
+    unsigned long uEnd = g_pfnNpcTimeGet != nullptr ? g_pfnNpcTimeGet(0) : 0;
+    int iElapsed = (int)((unsigned int)uEnd - (unsigned int)uStart);
+    __atomic_add_fetch(&g_nNpcStatCount_140103f28, 1u, __ATOMIC_SEQ_CST);
+    __atomic_add_fetch(&g_nNpcStatSum_140103f2c, (unsigned int)iElapsed, __ATOMIC_SEQ_CST);
+    if ((int)g_nNpcStatMax_140103f30 < iElapsed)
+        __atomic_store_n(&g_nNpcStatMax_140103f30, (unsigned int)iElapsed, __ATOMIC_SEQ_CST);
+    g_nNpcLoopDelay_140102148 = (int)(0x32u - (unsigned int)g_nNpcLoopDelay_140102148 - (unsigned int)iElapsed);
+    if (g_nNpcLoopDelay_140102148 < 1) g_nNpcLoopDelay_140102148 = 1;
+    if (g_pfnNpcTickAnalystDtor != nullptr) g_pfnNpcTickAnalystDtor(scopeLoop);
+    return 1;
 }
 
 }  // namespace tq
