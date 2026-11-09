@@ -1014,3 +1014,35 @@ and `nWaitCount` at `+0x38` (the offsets the code itself uses: `param_1 + 6`, `p
   `je` skips the name release and lands straight on the node release.
 - `tests/npcserver_d181_test.cpp` checks the runtime path with one and two nodes (unlink arithmetic, the tail
   rewrite, the emptied queue), the hook path, and an empty config that releases only itself.
+
+## D182 — NpcServer.exe 0x140015ed0 (event_base_new_with_config, 925 bytes)
+
+- `0x2b0` bytes from the hook (then cleared by hand) or `calloc(1, 0x2b0)`; both failures set errno `0xc` and
+  go straight to the report "%s: calloc" with "event_base_new_with_config".
+- The config's flag word (`+0x28`) is copied to base `+0x1f8` **only on the branch that takes it**: the two
+  flag probes are `& 2` (which decides whether the precise-timer probe runs at all) and `& 0x20` (which
+  already claims precision). Only when neither holds is `EVENT_PRECISE_TIMER` read, and only then is `0x20`
+  OR-ed into the base word.
+- Fixed field map, all from the body: timer monitor `+0x168`, deferred queue `+0x150`/`+0x158`/`+0x15c`,
+  three `-1` sentinels at `+0xa0`, `+0xa8` and `+0x210`, the priority queue head `+0x108` with its tail
+  pointing at the head (`+0x110`), `+0x218`, then the three queue/registry constructors at `+0x128`,
+  `+0x140` and `+0x10`.
+- Dispatch limits: with no config the interval is `0xffffffff` and the callback limit 1; with a config the
+  interval is copied as one 8-byte word from `+0x14`, the limit comes from `+0x20`, and `+0x204` is
+  `0x7fffffff` when the config's `+0x1c` is negative. The settle rule then fires: a callback limit of
+  `0x7fffffff` together with an interval of `-1` sets the limit **and** the priority word at `+0x208` to
+  `0x7fffffff` (the priority word is read from `+0x20` first).
+- Selector walk: the table at `DAT_140102480` is itself the first element. A selector is skipped when the
+  config's avoid list holds its name (the byte loop with the delta index is preserved verbatim rather than
+  replaced by a library compare) or when `(sel->features & cfg->require_features) != cfg->require_features`.
+  Accepting it needs `!bVar4` or `0x140010860(name) == 0`, then base `+0` takes the selector and base `+8`
+  takes `sel->init(base)`.
+- No mechanism: "%s: no event mechanism available" and the selector word cleared, then the base is released
+  through `0x140014b30` and the call answers nothing. A working base first probes `EVENT_SHOW_METHOD`
+  (logged as "libevent using: %s"), calls `0x1400127e0(base, 1)`, and when `0x140016f00` agrees (and the
+  config does not set bit 1) installs the notifier through `0x140016df0` / `0x140016e70` / `0x140015e70`,
+  reporting "%s: Unable to make base notifiable." on failure. Finally flag bit 4 starts IOCP with the
+  config's `+0x10` as the thread count, reporting "%s: Couldn't launch IOCP".
+- `tests/npcserver_d182_test.cpp`: no memory, no selector (defaults, settle rule, tail pointer, release),
+  one accepted selector, an avoided selector falling through to the next, a feature mismatch, IOCP with a
+  failing launch, and the `0x20` flag suppressing the timer probe.

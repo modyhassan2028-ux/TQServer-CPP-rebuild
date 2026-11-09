@@ -89,6 +89,32 @@ extern bool (*g_pfnNpcThreadBaseCreateThread)(void* pThis, const char* pszName, 
 void* FUN_140012580(void);
 void  FUN_140012660(void* pConfig);
 extern void* (*g_pfnNpcCrtFree)(void* p);                                    // free (0x1400bd548)
+// a selector: the name first, the init entry at +8, the feature word at +0x34. 0x140015ed0 walks the table
+// at DAT_140102480, which is itself the first element.
+struct NpcEventSel {
+    const char* pszName;               // +0x00
+    void* (*pfnInit)(void* pBase);     // +0x08
+    unsigned char pad[0x24];           // +0x10
+    unsigned int nFeatures;            // +0x34
+};
+void* FUN_140015ed0(void* pConfig, unsigned long long a2, long long a3, void* a4);
+extern NpcEventSel* g_apNpcEventSelTable_140102480[8];                       // PTR_PTR_140102480
+extern void  (*g_pfnNpc_140019050)(const char* pszFmt, ...);                 // event_err
+extern void  (*g_pfnNpc_1400191f0)(const char* pszFmt, ...);                 // event_msgx
+extern char* (*g_pfnNpcGetenv)(const char* pszName);                         // getenv
+extern void  (*g_pfnNpc_140016640)(void* pMonitor, unsigned int uFlag);
+extern void  (*g_pfnNpc_1400105b0)(void* pBase, void* pOut);
+extern void  (*g_pfnNpc_14001a010)(void* p);
+extern void  (*g_pfnNpc_14001a190)(void* p);
+extern void  (*g_pfnNpc_14001ad50)(void* p);
+extern int   (*g_pfnNpc_140010860)(const char* pszName);
+extern unsigned int (*g_pfnNpc_1400127e0)(void* pBase, int nFlag);
+extern int   (*g_pfnNpc_140016f00)(void);
+extern long long (*g_pfnNpc_140016df0)(void);
+extern long long (*g_pfnNpc_140016e70)(void);
+extern unsigned int (*g_pfnNpc_140015e70)(void* pBase, unsigned long long a2);
+extern void* (*g_pfnNpc_140074b80)(unsigned int uThreads);
+extern void  (*g_pfnNpc_140014b30)(void* pBase, int nFlag);
 extern void* (*g_pfnNpcEventFree_140103fa8)(void* p);                        // DAT_140103fa8
 unsigned int FUN_140010a00(long long pConfig, unsigned int uFlag);
 unsigned int FUN_140010a20(long long pConfig, unsigned int uCount);

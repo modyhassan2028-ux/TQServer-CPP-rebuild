@@ -644,3 +644,12 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - Next: 0x140015ed0 event_base_new_with_config, 925 bytes, the largest body left in this layer. Its field map
   is already partly known from D180 (config flags land at base +0x1f8, the interval at +0x1fc, the callback
   limit at +0x204).
+
+## D182 (latest)
+
+- NpcServer: 86 bodies. Suites D165 to D182 all green.
+- The libevent bootstrap is now complete end to end: config new/free/set_flag/set_num_cpus_hint,
+  thread-callback registrars, the eight threading handlers, and event_base_new_with_config.
+- Next: the remaining seams of 0x140015ed0 (0x140016640, 0x1400105b0, 0x14001a010/190, 0x14001ad50,
+  0x140010860, 0x1400127e0, 0x140016f00/df0/e70, 0x140015e70, 0x140074b80, 0x140014b30) and then rewiring
+  0x140002b30 to the real bodies instead of its seams.
