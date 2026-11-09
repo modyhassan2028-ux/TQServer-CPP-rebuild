@@ -1523,4 +1523,152 @@ void* SynTreeErase_1417c7c30(void* pTree, void* pOut, void* pIter) {
     return out;
 }
 
+// the two seams these bodies reach: the DEBUG iterator check and the node comparator
+extern void (*g_pfn_invalid_parameter_noinfo)(void);
+extern bool (*g_pfnSynCmp_141823260)(void* pA, void* pB);
+// 0x1417c7ff0 - the two bounds in one pass, then four qwords out.
+void* SynAccLowerUpper_1417c7ff0(void* pTree, void* pOut, const void* pKey) {
+    unsigned char* t = (unsigned char*)pTree;
+    unsigned char* out = (unsigned char*)pOut;
+    unsigned char* h = *(unsigned char**)(t + 0x30);          // mov 0x30(%rcx),%r11
+    unsigned char* cand = h;                                  // mov %r11,%r9
+    unsigned char* n = *(unsigned char**)(h + 8);             // mov 0x8(%r11),%rax
+    if (*(unsigned char*)(n + 0x29) == 0) {                   // cmpb $0x0,0x29(%rax) / jne
+        for (;;) {
+            uint32_t key = *(const uint32_t*)pKey;            // mov (%r8),%r10d
+            uint32_t nk = *(uint32_t*)(n + 0x18);             // mov 0x18(%rax),%edx
+            if (nk < key) {                                   // cmp %r10d,%edx / jae
+                n = *(unsigned char**)(n + 0x10);             // mov 0x10(%rax),%rax
+            } else {
+                if (*(unsigned char*)(cand + 0x29) == 0) {     // cmpb $0x0,0x29(%r9) / je
+                    if (key < nk) cand = n;                    // cmp %edx,%r10d / cmovb
+                }
+                h = n;                                        // mov %rax,%r11
+                n = *(unsigned char**)n;                      // mov (%rax),%rax
+            }
+            if (*(unsigned char*)(n + 0x29) != 0) break;       // cmpb / je
+        }
+    }
+    unsigned char* q;
+    if (*(unsigned char*)(cand + 0x29) == 0) {                 // cmpb $0x0,0x29(%r9) / je
+        q = *(unsigned char**)cand;                            // mov (%r9),%rcx
+    } else {
+        unsigned char* a = *(unsigned char**)(t + 0x30);       // mov 0x30(%rcx),%rax
+        q = *(unsigned char**)(a + 8);                         // mov 0x8(%rax),%rcx
+    }
+    while (*(unsigned char*)(q + 0x29) == 0) {                 // cmpb / jne
+        uint32_t key = *(const uint32_t*)pKey;                // mov (%r8),%eax
+        if (key >= *(uint32_t*)(q + 0x18)) {                  // cmp 0x18(%rcx),%eax / jae
+            q = *(unsigned char**)(q + 0x10);                 // mov 0x10(%rcx),%rcx
+        } else {
+            cand = q;                                          // mov %rcx,%r9
+            q = *(unsigned char**)q;                           // mov (%rcx),%rcx
+        }
+    }
+    void* v0 = *(void**)t;                                     // mov (%rbx),%rax
+    *(void**)(out) = v0;                                       // mov %rax,(%rdi)
+    *(void**)(out + 8) = h;                                    // mov %r11,0x8(%rdi)
+    *(void**)(out + 0x10) = v0;                                // mov %rax,0x10(%rdi)
+    *(void**)(out + 0x18) = cand;                              // mov %r9,0x18(%rdi)
+    return out;                                                // mov %rdi,%rax
+}
+
+// 0x1417c80d0 - the 0x30-byte node: three words, the argument's two, the flag, then a clear 0x29.
+void* SynAccNew30_1417c80d0(void* pUnused, void* p2, void* p3, void* p4,
+                            const void* pPair, unsigned char uFlag) {
+    (void)pUnused;
+    int64_t s = -2; (void)s;                                   // movq $..fe,0x28(%rsp)
+    void* pBlk = nullptr;
+    if (g_pfnSynNew_1417f3166 != nullptr) pBlk = g_pfnSynNew_1417f3166(0x30);  // mov $0x30,%ecx
+    if (pBlk != nullptr) {
+        unsigned char* b = (unsigned char*)pBlk;
+        *(void**)(b) = p2;                                     // mov %rsi,(%rax)
+        *(void**)(b + 8) = p3;                                 // mov %rdi,0x8(%rax)
+        *(void**)(b + 0x10) = p4;                              // mov %rbx,0x10(%rax)
+        *(void**)(b + 0x18) = *(void**)pPair;                  // mov (%rcx),%rax
+        *(void**)(b + 0x20) = *(void**)((const unsigned char*)pPair + 8);  // mov 0x8(%rcx),%rax
+        *(unsigned char*)(b + 0x28) = uFlag;                   // mov %al,0x28(%r11)
+        *(unsigned char*)(b + 0x29) = 0;                       // movb $0x0,0x29(%r11)
+    }
+    return pBlk;                                               // mov %r11,%rax
+}
+
+// 0x1417c8150 - the header into +0x8 and the tree's first qword into +0x0.
+void* SynAccPairHeader_1417c8150(void* pTree, void* pOut) {
+    unsigned char* t = (unsigned char*)pTree;
+    unsigned char* out = (unsigned char*)pOut;
+    unsigned char* h = *(unsigned char**)(t + 0x30);           // mov 0x30(%rcx),%rax
+    *(void**)(out + 8) = h;                                    // mov %rax,0x8(%rdx)
+    *(void**)(out) = *(void**)t;                               // mov (%rcx),%rax
+    return out;                                                // mov %rdx,%rax
+}
+
+// 0x1417c8170 - the object's first qword and the argument's +0x8, through a temp, after the check.
+void* SynAccPairChecked_1417c8170(void* pThis, void* pOut, const void* pArg) {
+    int64_t s = -2; (void)s;
+    unsigned char* t = (unsigned char*)pThis;
+    unsigned char* out = (unsigned char*)pOut;
+    void* hi = *(void**)((const unsigned char*)pArg + 8);     // mov 0x8(%r8),%rax
+    if (pThis == nullptr) {                                    // test %rcx,%rcx / jne
+        if (g_pfn_invalid_parameter_noinfo != nullptr) g_pfn_invalid_parameter_noinfo();
+    }
+    *(void**)(out) = *(void**)t;                               // the temp then moves both qwords
+    *(void**)(out + 8) = hi;
+    return out;                                                // mov %rbx,%rax
+}
+
+// 0x1417c81c0 - the comparator range: 0x41 flags, two comparator calls per turn on the left side.
+void* SynAccRangeCmp_1417c81c0(void* pTree, void* pOut, void* pKey) {
+    unsigned char* t = (unsigned char*)pTree;
+    unsigned char* out = (unsigned char*)pOut;
+    unsigned char* h = *(unsigned char**)(t + 0x30);           // mov 0x30(%rcx),%rbp
+    unsigned char* cand = h;                                   // mov %rbp,%rdi
+    unsigned char* n = *(unsigned char**)(h + 8);              // mov 0x8(%rbp),%rbx
+    unsigned char* last = h;                                   // rbp doubles as the first bound
+    if (*(unsigned char*)(n + 0x41) == 0) {                    // cmpb $0x0,0x41(%rbx) / jne
+        for (;;) {
+            int a = 0;
+            if (g_pfnSynCmp_141823260 != nullptr)              // lea 0x18(%rbx),%rcx / call
+                a = g_pfnSynCmp_141823260(n + 0x18, pKey);
+            if (a != 0) {
+                n = *(unsigned char**)(n + 0x10);              // mov 0x10(%rbx),%rbx
+            } else {
+                if (*(unsigned char*)(cand + 0x41) == 0) {      // cmpb $0x0,0x41(%rdi) / je
+                    int b = 0;
+                    if (g_pfnSynCmp_141823260 != nullptr)      // mov %r12,%rcx / lea 0x18(%rbx),%rdx
+                        b = g_pfnSynCmp_141823260(pKey, n + 0x18);
+                    if (b != 0) cand = n;                      // cmovne %rbx,%rdi
+                }
+                last = n;                                      // mov %rbx,%rbp
+                n = *(unsigned char**)n;                       // mov (%rbx),%rbx
+            }
+            if (*(unsigned char*)(n + 0x41) != 0) break;       // cmpb / je
+        }
+    }
+    unsigned char* q;
+    if (*(unsigned char*)(cand + 0x41) == 0) {                 // cmpb $0x0,0x41(%rdi) / je
+        q = *(unsigned char**)cand;                            // mov (%rdi),%rbx
+    } else {
+        unsigned char* a = *(unsigned char**)(t + 0x30);       // mov 0x30(%r13),%rax
+        q = *(unsigned char**)(a + 8);                         // mov 0x8(%rax),%rbx
+    }
+    while (*(unsigned char*)(q + 0x41) == 0) {                 // cmpb / jne
+        int c = 0;
+        if (g_pfnSynCmp_141823260 != nullptr)                  // mov %r12,%rcx / lea 0x18(%rbx),%rdx
+            c = g_pfnSynCmp_141823260(pKey, q + 0x18);
+        if (c != 0) {
+            cand = q;                                          // mov %rbx,%rdi
+            q = *(unsigned char**)q;                           // mov (%rbx),%rbx
+        } else {
+            q = *(unsigned char**)(q + 0x10);                  // mov 0x10(%rbx),%rbx
+        }
+    }
+    void* v0 = *(void**)t;                                     // mov 0x0(%r13),%rax
+    *(void**)(out) = v0;                                       // mov %rax,(%r14)
+    *(void**)(out + 8) = last;                                 // mov %rbp,0x28(%rsp) pair
+    *(void**)(out + 0x10) = v0;                                // mov %rax,0x30(%rsp)
+    *(void**)(out + 0x18) = cand;                              // mov %rdi,0x38(%rsp)
+    return out;                                                // mov %r14,%rax
+}
+
 }  // namespace tq

@@ -419,3 +419,9 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   that changed, then link. Compile + link + six passes then fits in one call.
 - Next in `Docs/ASM/1417c7c30.txt`: 0x1417c7ff0 onward (the tail of that capture holds several
   small bodies and the 0x28-byte node builder at 0x1417c8370).
+
+## D151 (latest)
+
+- Five bodies, green six times: `SYNDICATE_D151_OK ... 22 checks`. Cluster 211 bodies.
+- Next from `Docs/ASM/1417c7c30.txt`: 0x1417c82e0 (the 0x48-byte node, its tail already captured
+  at 0x1417c8352) and 0x1417c8370 (the 0x28-byte node). Then re-capture past 0x1417c8400.

@@ -213,5 +213,10 @@ extern void (*g_pfnSyn_1418233f8)(void* pObj);                              // 0
 extern void (*g_pfnSyn_141823288)(void* pDst, void* pSrc);                  // 0x141823288
 
 void* SynTreeErase_1417c7c30(void* pTree, void* pOut, void* pIter);        // 0x1417c7c30
+void* SynAccLowerUpper_1417c7ff0(void* pTree, void* pOut, const void* pKey); // 0x1417c7ff0
+void* SynAccNew30_1417c80d0(void* pUnused, void* p2, void* p3, void* p4, const void* pPair, unsigned char uFlag); // 0x1417c80d0
+void* SynAccPairHeader_1417c8150(void* pTree, void* pOut);                 // 0x1417c8150
+void* SynAccPairChecked_1417c8170(void* pThis, void* pOut, const void* pArg); // 0x1417c8170
+void* SynAccRangeCmp_1417c81c0(void* pTree, void* pOut, void* pKey);        // 0x1417c81c0
 }  // namespace tq
 #endif

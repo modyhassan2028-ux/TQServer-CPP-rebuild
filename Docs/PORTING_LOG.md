@@ -421,3 +421,21 @@ The four bodies that were held back at D134 are in, each read straight off its o
   zero) which wiped the 0x29 flag beside it, so the decrement walked into an unflagged node and
   never returned. The body was right; the test was wrong. Fixed to one byte.
 - `tests/syndicate_d150_test.cpp`: 19 checks, 6 passes, ASan+UBSan clean. Cluster 206 bodies.
+
+## D151 — five bodies, 0x1417c7ff0 / 0x1417c80d0 / 0x1417c8150 / 0x1417c8170 / 0x1417c81c0
+
+- 0x1417c7ff0: both bounds in one walk. The first loop turns left on `jae` and only moves the
+  candidate while the candidate is still the header (its 0x29 is set), so an equal key keeps the
+  left-side node; the second walk starts from the candidate's `0x0` unless the candidate is still
+  the header, and it is the `0x0`/`0x10` choice that decides the right bound. The answer is four
+  qwords: `{ tree->0x0, left bound, tree->0x0, right bound }`.
+- 0x1417c80d0: the 0x30-byte node, three words then the argument's two qwords, the flag byte, and
+  a cleared 0x29.
+- 0x1417c8150 / 0x1417c8170: the header pair and the checked pair; the checked one runs its DEBUG
+  test on the object pointer before either qword is read.
+- 0x1417c81c0: the comparator range with 0x41 flags, two comparator calls per turn on the left
+  path — `cmp(node+0x18, key)` first, then `cmp(key, node+0x18)` — the first picks the branch and
+  the second only moves the candidate.
+- The same lesson as D150, again a test-side slip: the builder seam was never installed, so the
+  body had no allocator and returned nothing. Test fixed, body untouched.
+- `tests/syndicate_d151_test.cpp`: 22 checks, 6 passes, ASan+UBSan clean. Cluster 211 bodies.
