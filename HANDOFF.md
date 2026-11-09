@@ -365,3 +365,9 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - Still open from the captured range: 0x1417c7080 (the comparator-driven find-or-add; its
   `0x141823260` comparator is not modelled yet) and 0x1417c71f0, whose third link case is cut
   by the capture at 0x1417c723e — the range must be re-captured before that one is written.
+
+## D145 (latest)
+
+- Six bodies: `SYNDICATE_D145_OK ... 6 units`, 6 passes. Cluster 157 bodies.
+- Next: `Docs/ASM/1417c723a.txt` holds 0x1417c723a..0x1417c7600 (236 lines). The wrappers pattern
+  (a call to one cluster body, then the argument handed back) continues there, so batch them.

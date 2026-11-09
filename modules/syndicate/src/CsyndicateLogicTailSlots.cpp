@@ -2698,4 +2698,44 @@ void SynAccFreeLead_1417c6f10(void* pThis) {
     g_pfnLogic_1417f2fdc(*(void**)pThis);                          // mov (%rcx),%rcx / jmp
 }
 
+
+// ---------------------------------------------------------------------------
+// D145 — 0x1417c7080 (the comparator-driven descent) and the two wrappers
+// 0x1417c72c0 / 0x1417c72e0 that run an increment and hand the iterator back.
+
+// 0x141823260 — the comparator the descent calls with the node key and the argument.
+bool (*g_pfnSynCmp_141823260)(void* pNodeKey, void* pKey) = nullptr;
+
+// 0x1417c7080 — header from the 0x30 slot, root from its 0x8, the comparator deciding the
+// side; the answer is the last node the walk took the left link of.
+void* SynAccFindOrAdd_1417c7080(void* pTree, void* pKey) {
+    unsigned char* t = (unsigned char*)pTree;
+    unsigned char* cand = *(unsigned char**)(t + 0x30);      // mov 0x30(%rcx),%rdi
+    unsigned char* n = *(unsigned char**)(cand + 8);         // mov 0x8(%rdi),%rbx
+    while (*(unsigned char*)(n + 0x41) == 0) {               // cmpb $0x0,0x41(%rbx) / jne
+        bool bRight = false;                                 // lea 0x18(%rbx),%rcx / call *0x141823260
+        if (g_pfnSynCmp_141823260 != nullptr)
+            bRight = g_pfnSynCmp_141823260(n + 0x18, pKey);
+        if (bRight) {
+            n = *(unsigned char**)(n + 0x10);                // mov 0x10(%rbx),%rbx
+        } else {
+            cand = n;                                        // mov %rbx,%rdi
+            n = *(unsigned char**)(n);                       // mov (%rbx),%rbx
+        }
+    }
+    return cand;                                             // mov %rdi,%rax
+}
+
+// 0x1417c72c0 — call 0x1417c5fa0, then hand the iterator back
+void* SynAccIncIter_1417c72c0(void* pIter) {
+    SynAccInc29_1417c5fa0(pIter);
+    return pIter;
+}
+
+// 0x1417c72e0 — call 0x1417c6040, then hand the iterator back
+void* SynAccIncIter_1417c72e0(void* pIter) {
+    SynAccInc41_1417c6040(pIter);
+    return pIter;
+}
+
 }  // namespace tq

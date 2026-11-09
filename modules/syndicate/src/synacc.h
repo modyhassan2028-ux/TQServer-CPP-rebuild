@@ -160,5 +160,8 @@ void* SynAccRotLeft_1417c7140(void* pTree, void* pNode);                  // 0x1
 void SynAccNoop_1417c71a0();                                              // 0x1417c71a0
 uint64_t SynAccConst_1417c71b0();                                         // 0x1417c71b0
 void* SynAccSearch21_1417c71c0(void* pTree, const void* pKey);            // 0x1417c71c0
+void* SynAccRotRight21_1417c71f0(void* pTree, void* pNode);               // 0x1417c71f0
+void* SynAccRotLeft21_1417c7250(void* pTree, void* pNode);                 // 0x1417c7250
+void SynAccNoop_1417c72b0();                                              // 0x1417c72b0
 }  // namespace tq
 #endif

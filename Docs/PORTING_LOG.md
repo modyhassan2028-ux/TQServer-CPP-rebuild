@@ -317,3 +317,19 @@ The four bodies that were held back at D134 are in, each read straight off its o
   walk turned left at. Both the equal key (takes `jae`) and the never-turned-left case (the
   header comes back) are asserted.
 - `tests/syndicate_d144_test.cpp`: 5 groups, 6 passes, ASan+UBSan clean. Cluster 151 bodies.
+
+## D145 — six bodies, 0x1417c7080 / 0x1417c71f0 / 0x1417c7250 / 0x1417c72b0 / 0x1417c72c0 / 0x1417c72e0
+
+- 0x1417c7080: the comparator-driven descent. The 0x30 slot gives the header, `0x8` of it the
+  root, and the loop calls the comparator at 0x141823260 with `node+0x18` and the argument. A
+  true answer walks the `0x10` link and keeps the candidate where it was; a false answer takes
+  the node as the new candidate and walks the `0x0` link. The answer is the last left-link node,
+  the header when the walk never turned left. `g_pfnSynCmp_141823260` is a new seam, null by
+  default, and the test points it at a real `<` so the three cases (7, 3, 99) pin the sides.
+- 0x1417c71f0 / 0x1417c7250: the 0x21 rotations, identical shapes to the 0x29 and 0x41 pairs
+  already in the cluster, each at its own start.
+- 0x1417c72b0: `ret $0x0`.
+- 0x1417c72c0 / 0x1417c72e0: call 0x1417c5fa0 / 0x1417c6040 and hand the **iterator** back, so the
+  wrapper's return value is its own argument, not the increment's. The test drives both through
+  the header case and checks the node slot lands on the root while the answer is the iterator.
+- `tests/syndicate_d145_test.cpp`: 6 groups, 6 passes, ASan+UBSan clean. Cluster 157 bodies.

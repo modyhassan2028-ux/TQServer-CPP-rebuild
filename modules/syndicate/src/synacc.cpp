@@ -1013,4 +1013,78 @@ void* SynAccSearch21_1417c71c0(void* pTree, const void* pKey) {
     return cand;                                             // mov %r8,%rax
 }
 
+// ---------------------------------------------------------------------------
+// D145 — the two 0x21 rotations at 0x1417c71f0 / 0x1417c7250 and the stub 0x1417c72b0.
+
+// 0x1417c71f0 — the 0x10-side rotation with every link tested against the 0x21 byte.
+void* SynAccRotRight21_1417c71f0(void* pTree, void* pNode) {
+    unsigned char* t = (unsigned char*)pTree;
+    unsigned char* x = (unsigned char*)pNode;
+    unsigned char* y = *(unsigned char**)(x + 0x10);          // mov 0x10(%rdx),%r8
+    *(void**)(x + 0x10) = *(void**)(y);                      // mov (%r8),%rax / mov %rax,0x10(%rdx)
+    {
+        unsigned char* l = *(unsigned char**)(y);            // mov (%r8),%rax
+        if (*(unsigned char*)(l + 0x21) == 0)                // cmpb $0x0,0x21(%rax) / jne
+            *(void**)(l + 8) = x;                            // mov %rdx,0x8(%rax)
+    }
+    *(void**)(y + 8) = *(void**)(x + 8);                     // mov 0x8(%rdx),%rax / mov %rax,0x8(%r8)
+    {
+        unsigned char* hd = *(unsigned char**)(t + 0x30);    // mov 0x30(%rcx),%rax
+        if (x == *(unsigned char**)(hd + 8)) {               // cmp 0x8(%rax),%rdx / jne
+            *(void**)(hd + 8) = y;                           // mov %r8,0x8(%rax)
+            *(void**)(y) = x;                                // mov %rdx,(%r8)
+            *(void**)(x + 8) = y;                            // mov %r8,0x8(%rdx)
+            return y;
+        }
+        unsigned char* p = *(unsigned char**)(x + 8);        // mov 0x8(%rdx),%rax
+        if (x == *(unsigned char**)(p)) {                    // cmp (%rax),%rdx / jne
+            *(void**)(p) = y;                                // mov %r8,(%rax)
+            *(void**)(y) = x;                                // mov %rdx,(%r8)
+            *(void**)(x + 8) = y;                            // mov %r8,0x8(%rdx)
+            return y;
+        }
+        *(void**)(p + 0x10) = y;                             // mov %r8,0x10(%rax)
+        *(void**)(y) = x;                                    // mov %rdx,(%r8)
+        *(void**)(x + 8) = y;                                // mov %r8,0x8(%rdx)
+        return y;
+    }
+}
+
+// 0x1417c7250 — the mirror on the 0x0 side, last link case on 0x10, 0x21 byte throughout.
+void* SynAccRotLeft21_1417c7250(void* pTree, void* pNode) {
+    unsigned char* t = (unsigned char*)pTree;
+    unsigned char* x = (unsigned char*)pNode;
+    unsigned char* y = *(unsigned char**)(x);                // mov (%rdx),%r8
+    *(void**)(x) = *(void**)(y + 0x10);                      // mov 0x10(%r8),%rax / mov %rax,(%rdx)
+    {
+        unsigned char* r = *(unsigned char**)(y + 0x10);     // mov 0x10(%r8),%rax
+        if (*(unsigned char*)(r + 0x21) == 0)                // cmpb $0x0,0x21(%rax) / jne
+            *(void**)(r + 8) = x;                            // mov %rdx,0x8(%rax)
+    }
+    *(void**)(y + 8) = *(void**)(x + 8);                     // mov 0x8(%rdx),%rax / mov %rax,0x8(%r8)
+    {
+        unsigned char* hd = *(unsigned char**)(t + 0x30);    // mov 0x30(%rcx),%rax
+        if (x == *(unsigned char**)(hd + 8)) {               // cmp 0x8(%rax),%rdx / jne
+            *(void**)(hd + 8) = y;                           // mov %r8,0x8(%rax)
+            *(void**)(y + 0x10) = x;                         // mov %rdx,0x10(%r8)
+            *(void**)(x + 8) = y;                            // mov %r8,0x8(%rdx)
+            return y;
+        }
+        unsigned char* p = *(unsigned char**)(x + 8);        // mov 0x8(%rdx),%rax
+        if (x == *(unsigned char**)(p + 0x10)) {             // cmp 0x10(%rax),%rdx / jne
+            *(void**)(p + 0x10) = y;                         // mov %r8,0x10(%rax)
+            *(void**)(y + 0x10) = x;                         // mov %rdx,0x10(%r8)
+            *(void**)(x + 8) = y;                            // mov %r8,0x8(%rdx)
+            return y;
+        }
+        *(void**)(p) = y;                                    // mov %r8,(%rax)
+        *(void**)(y + 0x10) = x;                             // mov %rdx,0x10(%r8)
+        *(void**)(x + 8) = y;                                // mov %r8,0x8(%rdx)
+        return y;
+    }
+}
+
+// 0x1417c72b0 — ret $0x0
+void SynAccNoop_1417c72b0() {}
+
 }  // namespace tq
