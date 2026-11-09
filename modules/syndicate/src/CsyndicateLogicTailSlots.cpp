@@ -2609,4 +2609,93 @@ void* SynAccCurrPlus18_1417c6dc0(void* pIter) {
     return *(unsigned char**)(it + 8) + 0x18;                      // add $0x18,%rax
 }
 
+// 0x1417c6e00 — the iterator builder:
+//   mov %r8,%rdi / mov %rcx,%rbx / movq $0x0,(%rcx) / mov %rdx,0x8(%rcx) /
+//   test %r8,%r8 / jne 0x1417c6e26 / call *0x1418233c0 /
+//   mov (%rdi),%rax / mov %rax,(%rbx) / mov %rbx,%rax
+// The lead is cleared first and the node stored at +0x8 before the third argument is checked;
+// that argument's own lead then becomes the iterator's lead.
+void* SynAccIterCtor_1417c6e00(void* pThis, void* pNode, void* pLeadHolder) {
+    unsigned char* it = (unsigned char*)pThis;                    // rbx
+    *(void**)it = nullptr;                                        // movq $0x0,(%rcx)
+    *(void**)(it + 8) = pNode;                                    // mov %rdx,0x8(%rcx)
+    if (pLeadHolder == nullptr) {                                 // test %r8,%r8 / jne
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();                     // call *0x1418233c0
+    }
+    *(void**)it = *(void**)pLeadHolder;                           // mov (%rdi),%rax / mov %rax,(%rbx)
+    return pThis;                                                 // mov %rbx,%rax
+}
+
+// 0x1417c6e40 — the +0x18 accessor with both DEBUG checks, the third copy of the body at
+// 0x1417c6dc0: mov (%rcx),%rax / test / jne / call seam / mov (%rbx),%rax / test / je /
+//   mov (%rax),%rax / mov 0x30(%rax),%rax / cmp %rax,0x8(%rbx) / jne / call seam /
+//   mov 0x8(%rbx),%rax / add $0x18,%rax
+void* SynAccCurrPlus18_1417c6e40(void* pIter) {
+    unsigned char* it = (unsigned char*)pIter;                    // rbx
+    unsigned char* p = *(unsigned char**)it;                      // mov (%rcx),%rax
+    if (p == nullptr) {                                           // test %rax,%rax / jne
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();
+        p = *(unsigned char**)it;                                 // mov (%rbx),%rax
+        if (p != nullptr)                                         // test / je
+            p = *(unsigned char**)p;                              // mov (%rax),%rax
+    } else {
+        p = *(unsigned char**)p;                                  // mov (%rax),%rax
+    }
+    unsigned char* q = *(unsigned char**)(p + 0x30);              // mov 0x30(%rax),%rax
+    if (q == *(void**)(it + 8)) {                                 // cmp %rax,0x8(%rbx) / jne
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();
+    }
+    return *(unsigned char**)(it + 8) + 0x18;                     // add $0x18,%rax
+}
+
+// 0x1417c6e80 — the 0x29 decrement, the fourth copy of that body: the node's 0x10 side decides,
+// then either the left walk out of it (0x1417c6eab) or the parent climb (0x1417c6ed6).
+void SynAccDec29_1417c6e80(void* pIter) {
+    unsigned char* it = (unsigned char*)pIter;                    // rbx
+    if (*(void**)it == nullptr) {                                 // cmpq $0x0,(%rcx) / jne
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();
+    }
+    unsigned char* n = *(unsigned char**)(it + 8);                // mov 0x8(%rbx),%rcx
+    if (*(unsigned char*)(n + 0x29) != 0) {                       // cmpb / je 0x1417c6eab
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();                     // jmp *0x1418233c0
+        return;
+    }
+    unsigned char* r = *(unsigned char**)(n + 0x10);              // mov 0x10(%rcx),%rax
+    if (*(unsigned char*)(r + 0x29) == 0) {                       // cmpb / jne 0x1417c6ed6
+        unsigned char* l = *(unsigned char**)(r);                 // mov (%rax),%rcx
+        if (*(unsigned char*)(l + 0x29) != 0) {                   // cmpb / jne 0x1417c6ecc
+            *(void**)(it + 8) = r;                                // mov %rax,0x8(%rbx)
+            return;
+        }
+        for (;;) {                                                // 0x1417c6ec0
+            r = l;                                                // mov %rcx,%rax
+            l = *(unsigned char**)(l);                            // mov (%rcx),%rcx
+            if (*(unsigned char*)(l + 0x29) != 0) break;           // cmpb / je back
+        }
+        *(void**)(it + 8) = r;                                    // mov %rax,0x8(%rbx)
+        return;
+    }
+    unsigned char* p = *(unsigned char**)(n + 8);                 // 0x1417c6ed6: mov 0x8(%rcx),%rcx
+    if (*(unsigned char*)(p + 0x29) == 0) {                       // cmpb / jne 0x1417c6ef8
+        for (;;) {                                                // 0x1417c6ee0
+            unsigned char* pr = *(unsigned char**)(p + 0x10);     // mov 0x10(%rcx),%rax
+            if (*(void**)(it + 8) != (void*)pr) break;             // cmp %rax,0x8(%rbx) / jne
+            *(void**)(it + 8) = p;                                // mov %rcx,0x8(%rbx)
+            p = *(unsigned char**)(p + 8);                        // mov 0x8(%rcx),%rcx
+            if (*(unsigned char*)(p + 0x29) != 0) break;           // cmpb / je back
+        }
+    }
+    *(void**)(it + 8) = p;                                        // 0x1417c6ef8: mov %rcx,0x8(%rbx)
+}
+
+// 0x1417c6f10 — mov (%rcx),%rcx / jmp 0x1417f2fdc : the lead goes to the deallocate.
+void SynAccFreeLead_1417c6f10(void* pThis) {
+    g_pfnLogic_1417f2fdc(*(void**)pThis);                          // mov (%rcx),%rcx / jmp
+}
+
 }  // namespace tq

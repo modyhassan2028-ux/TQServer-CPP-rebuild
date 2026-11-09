@@ -804,4 +804,20 @@ void* SynAccSlot30Plus8_1417c6da0(void* pThis) {
     return (unsigned char*)*(void**)((unsigned char*)pThis + 0x30) + 8;
 }
 
+// 0x1417c6f20 — mov (%rdx),%rax / mov %rax,(%rcx) / mov 0x8(%rdx),%rax /
+//               mov %rax,0x8(%rcx) / mov %rcx,%rax / ret
+void* SynAccCopy16_1417c6f20(void* pThis, const void* pSrc) {
+    std::memcpy(pThis, pSrc, 0x10);                       // the two qword stores
+    return pThis;                                         // mov %rcx,%rax
+}
+
+// 0x1417c6f40 — movq $0x0,(%rcx) / mov %rcx,%rax / ret
+void* SynAccZeroLead_1417c6f40(void* pThis) {
+    *(void**)pThis = nullptr;
+    return pThis;
+}
+
+// 0x1417c6f50 — movabs $0xfffffffffffffff,%rax / ret
+uint64_t SynAccConst_1417c6f50() { return 0x0fffffffffffffffULL; }
+
 }  // namespace tq

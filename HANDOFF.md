@@ -344,3 +344,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   ASan+UBSan. Cluster 132 bodies.
 - The saved dump ends at 0x1417c6dff, so the next unit starts by extending
   `Docs/ASM/1417c69e0.txt` past 0x1417c6e00 before any line is written.
+
+## D142 (latest)
+
+- Seven bodies: `SYNDICATE_D142_OK ... 17 checks`, 6 passes. Cluster 139 bodies.
+- Next in `Docs/ASM/1417c6e00.txt`: 0x1417c6f60 (the keyed search — `mov 0x30(%rcx),%r8` then a
+  `cmp %ecx,0x18(%rax)` loop with `jae`, answering `r8`), then the two rebalance steps
+  0x1417c6f90 and 0x1417c6ff0.

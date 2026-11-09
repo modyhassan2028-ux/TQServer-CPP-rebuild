@@ -275,3 +275,19 @@ The four bodies that were held back at D134 are in, each read straight off its o
   on a lead that stays null after the seam and reads `0x30(%rax)` with rax zero, exactly as the
   bytes do; the port reproduces that read rather than guarding it.
 - `tests/syndicate_d141_test.cpp`: 20 checks, 6 passes, ASan+UBSan clean. Cluster 132 bodies.
+
+## D142 — seven bodies, 0x1417c6e00 .. 0x1417c6f50
+
+- 0x1417c6e00: the iterator builder. Its order matters and the port keeps it: the lead is cleared
+  first, the node goes to `+0x8` second, and only then is the third argument checked at
+  0x1418233c0 before **its** lead is copied in. A null third argument is a fault in the bytes as
+  well (`mov (%rdi),%rax` with rdi zero), so nothing is guarded that the original does not guard.
+- 0x1417c6e40: the `+0x18` accessor with both DEBUG checks, byte for byte the body at
+  0x1417c6dc0, its own start.
+- 0x1417c6e80: the `0x29` decrement, the fourth copy of that body — the node's `0x10` side
+  decides, then either the left walk from `0x1417c6eab` or the parent climb at `0x1417c6ed6`,
+  whose exit stores `rcx` unconditionally.
+- 0x1417c6f10: `mov (%rcx),%rcx` / `jmp 0x1417f2fdc`, the lead to the deallocate.
+- `synacc.cpp`: 0x1417c6f20 (two qword stores, this back), 0x1417c6f40 (`movq $0x0,(%rcx)`),
+  0x1417c6f50 (`movabs $0xfffffffffffffff`).
+- `tests/syndicate_d142_test.cpp`: 17 checks, 6 passes, ASan+UBSan clean. Cluster 139 bodies.

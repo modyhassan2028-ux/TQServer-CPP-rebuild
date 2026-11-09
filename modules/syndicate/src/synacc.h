@@ -146,5 +146,8 @@ void* SynAccPlus18_1417c6d60(void* pThis);                                 // 0x
 void* SynAccSlot30Plus8_1417c6d70(void* pThis);                            // 0x1417c6d70
 void* SynAccPlus18_1417c6d90(void* pThis);                                 // 0x1417c6d90
 void* SynAccSlot30Plus8_1417c6da0(void* pThis);                            // 0x1417c6da0
+void* SynAccCopy16_1417c6f20(void* pThis, const void* pSrc);               // 0x1417c6f20
+void* SynAccZeroLead_1417c6f40(void* pThis);                               // 0x1417c6f40
+uint64_t SynAccConst_1417c6f50();                                          // 0x1417c6f50
 }  // namespace tq
 #endif
