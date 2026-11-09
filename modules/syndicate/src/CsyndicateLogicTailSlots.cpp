@@ -3108,4 +3108,40 @@ void* SynAccIterCtor3_1417c8700(void* pThis, void* pNode, void* pLeadHolder) {
     return pThis;                                          // mov %rbx,%rax
 }
 
+// 0x1417c8740 - the pair out, then 0x1417c6610 steps the source iterator down.
+void* SynAccCopyThenDec29b_1417c8740(void* pSrc, void* pOut) {
+    *(void**)pOut = *(void**)pSrc;                          // mov (%rcx),%rax / mov %rax,(%rdx)
+    *(void**)((unsigned char*)pOut + 8) = *(void**)((unsigned char*)pSrc + 8);
+    SynAccDec29_1417c6610(pSrc);                            // call 0x1417c6610
+    return pOut;                                            // mov %rbx,%rax
+}
+
+// 0x1417c8770 - the whole subtree destroy on the 0x21 byte: right side first, then the node.
+void SynAccEraseAll21_1417c8770(void* pTree, unsigned char* pNode) {
+    unsigned char* n = pNode;                               // rbx
+    unsigned char* cur = pNode;                             // rdi
+    if (*(unsigned char*)(n + 0x21) != 0) return;           // cmpb $0x0,0x21(%rdx) / jne
+    for (;;) {
+        SynAccEraseAll21_1417c8770(pTree, *(unsigned char**)(n + 0x10));   // right first
+        n = *(unsigned char**)(n);                          // mov (%rbx),%rbx
+        if (g_pfnLogic_1417f2fdc != nullptr) g_pfnLogic_1417f2fdc(cur);     // call 0x1417f2fdc
+        cur = n;                                            // mov %rbx,%rdi
+        if (*(unsigned char*)(n + 0x21) != 0) return;       // je back
+    }
+}
+
+// 0x1417c87c0 - the same destroy on the 0x29 byte, its own start.
+void SynAccEraseAll29b_1417c87c0(void* pTree, unsigned char* pNode) {
+    unsigned char* n = pNode;
+    unsigned char* cur = pNode;
+    if (*(unsigned char*)(n + 0x29) != 0) return;
+    for (;;) {
+        SynAccEraseAll29b_1417c87c0(pTree, *(unsigned char**)(n + 0x10));
+        n = *(unsigned char**)(n);
+        if (g_pfnLogic_1417f2fdc != nullptr) g_pfnLogic_1417f2fdc(cur);
+        cur = n;
+        if (*(unsigned char*)(n + 0x29) != 0) return;
+    }
+}
+
 }  // namespace tq

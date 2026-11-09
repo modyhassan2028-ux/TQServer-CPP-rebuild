@@ -479,3 +479,17 @@ The four bodies that were held back at D134 are in, each read straight off its o
   iterator, so the answer and the moved iterator are both observable; the test pins the order.
 - 0x1417c8700: the iterator builder once more.
 - `tests/syndicate_d154_test.cpp`: 30 checks, 6 passes, ASan+UBSan clean. Cluster 225 bodies.
+
+## D155 — six bodies, 0x1417c8740 / 0x1417c8770 / 0x1417c87c0 / 0x1417c8810 / 0x1417c8860 / 0x1417c88b0
+
+- 0x1417c8740: the pair out first, then 0x1417c6610 steps the **source**. The step climbs to the
+  flagged parent in this arrangement, so the pair still holds the pre-step node while the source
+  slot moves on; the test asserts both facts separately.
+- 0x1417c8770 / 0x1417c87c0: the whole-subtree destroy on 0x21 and 0x29, own starts. Both walk the
+  `0x0` chain and recurse on `0x10`, so the free order is inner-first and the count for a two-node
+  chain with a shared stop node is **three**, which is what the test pins after the first estimate
+  of two was wrong.
+- 0x1417c8810 / 0x1417c8860 / 0x1417c88b0: the eight-byte node that stores the block in the
+  owner's first qword and the owner in the block. A null allocator answer leaves that qword zero,
+  and the test drives both branches.
+- `tests/syndicate_d155_test.cpp`: 22 checks, 6 passes, ASan+UBSan clean. Cluster 231 bodies.

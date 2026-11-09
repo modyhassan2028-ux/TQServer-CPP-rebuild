@@ -1788,4 +1788,37 @@ void* SynAccNew30Pair_1417c8680(void* pUnused, void* p2, void* p3, void* p4, con
     return b;
 }
 
+// 0x1417c8810 / 0x1417c8860 / 0x1417c88b0 - the eight-byte node that points back at its owner:
+// the block is stored in the owner's first qword and the owner in the block's. A null answer from
+// the allocator leaves that first qword zero.
+void* SynAccSelf8_1417c8810(void* pThis) {
+    int64_t marker = -2; (void)marker;                     // movq $0xfffffffffffffffe,0x20(%rsp)
+    void* p = nullptr;
+    if (g_pfnSynNew_1417f3166 != nullptr) p = g_pfnSynNew_1417f3166(8);   // mov $0x8,%ecx / call
+    if (p != nullptr) *(void**)p = pThis;                  // mov %rbx,(%rax) / jmp
+    else p = nullptr;                                      // xor %eax,%eax
+    *(void**)pThis = p;                                    // mov %rax,(%rbx)
+    return pThis;                                          // mov %rbx,%rax
+}
+
+void* SynAccSelf8_1417c8860(void* pThis) {
+    int64_t marker = -2; (void)marker;
+    void* p = nullptr;
+    if (g_pfnSynNew_1417f3166 != nullptr) p = g_pfnSynNew_1417f3166(8);
+    if (p != nullptr) *(void**)p = pThis;
+    else p = nullptr;
+    *(void**)pThis = p;
+    return pThis;
+}
+
+void* SynAccSelf8_1417c88b0(void* pThis) {
+    int64_t marker = -2; (void)marker;
+    void* p = nullptr;
+    if (g_pfnSynNew_1417f3166 != nullptr) p = g_pfnSynNew_1417f3166(8);
+    if (p != nullptr) *(void**)p = pThis;
+    else p = nullptr;
+    *(void**)pThis = p;
+    return pThis;
+}
+
 }  // namespace tq

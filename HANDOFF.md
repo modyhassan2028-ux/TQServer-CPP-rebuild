@@ -445,3 +445,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - `Docs/ASM/1417c8590.txt` (322 lines) still holds 0x1417c8740 onward: the copy-then-step family
   with 0x1417c6610, plus the iterator builders and the pair fills that follow, most of them cut
   by the capture's end at 0x1417c8a80. Read that file before starting the next unit.
+
+## D155 (latest)
+
+- Six bodies: `SYNDICATE_D155_OK ... 22 checks`, 6 passes. Cluster 231 bodies.
+- `Docs/ASM/1417c8590.txt` still holds 0x1417c8900 onward (the fourth self node and whatever
+  follows); read it before the next unit. Note that a `void*` and an `unsigned char*` parameter
+  mangle differently — a test declaration that says void* will fail to link against these bodies.
