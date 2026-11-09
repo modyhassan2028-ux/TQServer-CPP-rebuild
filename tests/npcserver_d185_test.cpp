@@ -16,8 +16,6 @@ static void* Alloc(long long n, long long sz) {
     if (n == 1 && sz == 0x50) return g_blockNull ? nullptr : (void*)g_block;
     return g_handlesNull ? nullptr : (void*)g_handles;
 }
-static int g_once = 0;
-static void Once(void* p) { (void)p; ++g_once; }
 static unsigned int g_iocpThreads = 0; static void* g_iocpRet = (void*)0x1000; static int g_iocpCalls = 0;
 static void* Iocp(void* a, void* b, unsigned long c, unsigned int d) {
     g_iocpThreads = d; ++g_iocpCalls;
@@ -47,7 +45,6 @@ static void ThreadProc(void* p) { (void)p; ++g_threadProcHits; }
 
 int main() {
     g_pfnNpc_140011850 = &Alloc;
-    g_pfnNpc_140074930 = &Once;
     g_pfnNpcCreateIoCompletionPort = &Iocp;
     g_pfnNpcCreateSemaphoreA = &Sem;
     g_pfnNpcBeginThread = &Begin;
@@ -58,10 +55,9 @@ int main() {
 
     // the block itself fails: nothing else is touched
     {
-        g_blockNull = true; g_allocN = 0; g_once = 0; g_iocpCalls = 0;
+        g_blockNull = true; g_allocN = 0; g_iocpCalls = 0;
         g_nNpcFlag_140104cc8 = 0;
         assert(FUN_140074b80(4) == nullptr);
-        assert(g_once == 1);                                     // the once-init still ran
         assert(g_allocN == 1 && g_iocpCalls == 0);
         g_blockNull = false;
     }
@@ -75,7 +71,6 @@ int main() {
         g_nNpcFlag_140104cc8 = 1;
         void* p = FUN_140074b80(2);
         assert(p == (void*)g_block);
-        assert(g_once == 1);                                     // the flag was already set
         assert(g_allocArgs[0][0] == 1 && g_allocArgs[0][1] == 0x50);
         assert(g_allocArgs[1][0] == 4 && g_allocArgs[1][1] == 8);  // two per thread
         assert(*(short*)(g_block + 0x30) == 4);

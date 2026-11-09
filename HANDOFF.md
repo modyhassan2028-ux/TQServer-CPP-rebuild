@@ -701,3 +701,9 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - NpcServer: 105 bodies, 23 suites. The IOCP cluster is complete; 0x140074930 is the last seam it had.
 - Next: rewire 0x140002b30 onto its eight real callees (all ported) and point 0x140074b80 at the real
   0x140074930, adjusting suites D176 and D185 in the same commit.
+
+## D190 (latest)
+
+- 105 bodies, 23 suites green. 0x140074b80 -> real 0x140074930.
+- Next: 0x140002b30 onto its eight ported callees (needs suite D176 rewritten to drive real internals:
+  0x140012580/0x140010a00/0x140010a20/0x140010d80/0x140012660/0x14001d350/0x140005750/0x140015ed0).

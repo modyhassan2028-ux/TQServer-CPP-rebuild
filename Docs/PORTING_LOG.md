@@ -1201,3 +1201,14 @@ The decompiler truncated every `WSAIoctl` argument list, so this one was written
 `tests/npcserver_d189_test.cpp` pins the socket family/type/protocol, the control code, both buffer sizes,
 the exact sixteen bytes of all three GUIDs, the three resolved values landing in order, the socket being
 closed, and the flag only being set on the path that got a socket.
+
+## D190 — the launch goes through the real resolution
+
+- D189 removed the `g_pfnNpc_140074930` seam from the header while the launch body still referenced it, so
+  suite D185 stopped compiling. The right repair was not to restore the seam: `0x140074b80` now calls
+  `FUN_140074930` directly, with the real destination the machine uses, the three-pointer block at
+  `DAT_140104cb0` (now `g_aNpcWsaFn_140104cb0`). The earlier stub was passing the once-flag as the output
+  pointer, which only worked because the stub ignored it.
+- Suite D185 no longer stubs the once-init; with the winsock seams left null the real body stops at the
+  failed socket, which is exactly the behaviour that path should have.
+- All 23 suites rebuilt and green against the trimmed unit.

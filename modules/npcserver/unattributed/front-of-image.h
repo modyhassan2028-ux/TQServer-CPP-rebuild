@@ -134,6 +134,7 @@ extern unsigned long long (*g_pfnNpcWsaSocket)(int nAf, int nType, int nProtocol
 extern int   (*g_pfnNpcWSAIoctl)(unsigned long long hSocket, unsigned int dwCode, void* pIn,
                                  unsigned int cbIn, void* pOut, unsigned int cbOut,
                                  unsigned int* pcbBytes, void* pOverlapped, void* pCompletion);
+extern unsigned long long g_aNpcWsaFn_140104cb0[3];                          // DAT_140104cb0
 void FUN_140074930(void* pOut);
 extern void* (*g_pfnNpcCreateIoCompletionPort)(void* hFile, void* hExisting, unsigned long nKey,
                                                unsigned int dwThreads);

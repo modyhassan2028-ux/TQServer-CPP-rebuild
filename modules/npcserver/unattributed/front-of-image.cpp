@@ -144,7 +144,7 @@ void* (*g_pfnNpcCreateSemaphoreA)(void*, long, long, const char*) = nullptr;
 unsigned long long (*g_pfnNpcBeginThread)(void (*)(void*), unsigned int, void*) = nullptr;
 unsigned long (*g_pfnNpcInitializeCriticalSectionAndSpinCount)(void*, unsigned long) = nullptr;
 void  (*g_pfnNpcThreadProc_140074780)(void*) = nullptr;
-void  (*g_pfnNpc_140074930)(void*) = nullptr;
+unsigned long long g_aNpcWsaFn_140104cb0[3] = { 0, 0, 0 };
 unsigned long long (*g_pfnNpcWsaSocket)(int, int, int) = nullptr;
 int   (*g_pfnNpcWSAIoctl)(unsigned long long, unsigned int, void*, unsigned int, void*, unsigned int,
                           unsigned int*, void*, void*) = nullptr;
@@ -1864,9 +1864,7 @@ unsigned long long FUN_1400127e0(long long pBase, int nPriorities, unsigned long
 // thread, the completion port, one semaphore, the workers, and a lock with a spin count of 1000. Every
 // failure unwinds only what was already created.
 void* FUN_140074b80(unsigned int dwThreads) {
-    if (g_nNpcFlag_140104cc8 == 0) {
-        if (g_pfnNpc_140074930 != nullptr) g_pfnNpc_140074930((void*)&g_nNpcFlag_140104cc8);
-    }
+    if (g_nNpcFlag_140104cc8 == 0) FUN_140074930(&g_aNpcWsaFn_140104cb0);
     unsigned char* p = (unsigned char*)(g_pfnNpc_140011850 != nullptr ? g_pfnNpc_140011850(1, 0x50) : nullptr);
     if (p == nullptr) return nullptr;
     if ((int)dwThreads < 1) dwThreads = 2;
