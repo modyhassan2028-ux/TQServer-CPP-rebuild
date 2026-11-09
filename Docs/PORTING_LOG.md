@@ -587,3 +587,15 @@ The four bodies that were held back at D134 are in, each read straight off its o
 - The table is 832 bodies: 223 address reads, 178 empty, 126 forwarders, 120 field reads, 91
   constants, 64 field-read-plus-bias, 30 zeros. All 832 are walked and checked, 6 passes, ASan and
   UBSan clean.
+
+## D163 — the NpcServer.exe scaffold
+
+- `Docs/NPCSERVER_PATHS.md` lists the **50** source paths the binary embeds, all extracted from
+  `NpcServer.exe` itself: 22 under `version/cqserver-78.0.11-1204/npcserver/npckernel`, 12 under
+  its `network` folder, 5 under `include/basecode`, 4 at the npcserver root, and the rest in
+  `include/db`, `comm`, `mapdata` and protobuf's `io` folder.
+- All 50 are scaffolded under `modules/npcserver/src/` with their exact relative paths, a header
+  guard and an empty `tq` namespace. No body is written: the scaffold only fixes the tree so the
+  port has the original layout from its first unit, which is the same rule the Syndicate module
+  followed.
+- The tree is 34 translation units and 16 headers today.

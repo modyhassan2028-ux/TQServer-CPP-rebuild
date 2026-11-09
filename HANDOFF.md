@@ -501,3 +501,8 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - `tools/family_gen.py` now emits the whole unit; never hand edit `genleaf.cpp`.
 - Next: the destructor and allocator families (need the `operator delete` / `operator new` seams),
   then the NpcServer.exe scaffold over its 50 embedded paths.
+
+## D163 (latest)
+
+- NpcServer.exe scaffolded: 50 paths from the binary, `Docs/NPCSERVER_PATHS.md`, no bodies yet.
+- The work order is now written down in `Docs/REMAINING_ROADMAP.md`; `npckernel` is 34 of the 50.
