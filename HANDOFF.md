@@ -409,3 +409,13 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   loop guard is the only unbounded construct in the body.
 - Note for the harness: compiling CsyndicateLogicTailSlots.cpp with ASan takes minutes, so build
   its object once and reuse it; a 300 s tool call is not enough for compile + link + six passes.
+
+## D150 (latest)
+
+- 0x1417c7c30 is in and green: `SYNDICATE_D150_OK ... 19 checks`, 6 passes. Cluster 206 bodies.
+- Lesson worth keeping: a whole-qword store at a byte offset inside a node wipes the flag byte
+  next to it. When a test builds nodes, write colour/flag bytes one at a time.
+- Harness: cache `CsyndicateLogicTailSlots.cpp`'s ASan object and reuse it; only rebuild the file
+  that changed, then link. Compile + link + six passes then fits in one call.
+- Next in `Docs/ASM/1417c7c30.txt`: 0x1417c7ff0 onward (the tail of that capture holds several
+  small bodies and the 0x28-byte node builder at 0x1417c8370).

@@ -212,5 +212,6 @@ extern void (*g_pfnSynTmp_141823270)(void* pObj, void* pWhat);              // 0
 extern void (*g_pfnSyn_1418233f8)(void* pObj);                              // 0x1418233f8
 extern void (*g_pfnSyn_141823288)(void* pDst, void* pSrc);                  // 0x141823288
 
+void* SynTreeErase_1417c7c30(void* pTree, void* pOut, void* pIter);        // 0x1417c7c30
 }  // namespace tq
 #endif

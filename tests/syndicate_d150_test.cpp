@@ -7,7 +7,10 @@
 #include "modules/syndicate/src/synacc.h"
 using namespace tq;
 
-namespace tq { extern void (*g_pfnLogic_1417f2fdc)(void* p); }
+namespace tq {
+extern void (*g_pfnLogic_1417f2fdc)(void* p);
+void* SynTreeErase_1417c7c30(void* pTree, void* pOut, void* pIter);
+}
 
 static int s_nFree; static void* s_pFreed;
 static int s_nTmp, s_nF3f8, s_nF288, s_nThrow;
@@ -76,7 +79,7 @@ int main() {
         s_nFree = 0; s_nTmp = s_nF3f8 = s_nF288 = s_nThrow = 0;
         *(uint64_t*)(tree + 0x38) = 1;
         *(void**)(h + 8) = stop;
-        *(void**)(stop + 0x28) = 0;                        // keeps the fix-up out of the loop
+        stop[0x28] = 0;                                     // one byte: the colour, not the 0x29 flag beside it
         *(void**)(it + 8) = stop;
         SynTreeErase_1417c7c30(tree, out, it);
         assert(s_nTmp == 1 && s_nF3f8 == 1 && s_nF288 == 1 && s_nThrow == 1);

@@ -405,3 +405,19 @@ The four bodies that were held back at D134 are in, each read straight off its o
   DEBUG check runs on the object pointer **before** either is read, so the two come through a
   stack temp in that order.
 - `tests/syndicate_d149_test.cpp`: 17 checks, 6 passes, ASan+UBSan clean. Cluster 205 bodies.
+
+## D150 — the subtree erase 0x1417c7c30, 19 checks x6
+
+- The whole body, 0x1417c7c30..0x1417c7fe1: the iterator steps first (0x1417c6e80) before a link
+  is read; the 0x29-sentinel path builds its throw through 0x141823270, 0x1418233f8,
+  0x141823288 and 0x1417f3154 with vtable 0x141824a60 then 0x141824ba0; the unlink keeps the
+  header's 0x0 and 0x10 ends by taking the smallest node on the replacement side (skipped when a
+  slot already holds the sentinel); the successor swap moves the +0x28 colour byte between the two
+  nodes; the fix-up walks up from the replacement while it is black, with the two rotations
+  already in the cluster (0x1417c6f90 and 0x1417c6ff0), and the final store always paints the
+  node it stopped on.
+- The answer is `{ tree->0x0, iter->0x8 }`, and the size at tree+0x38 drops by one.
+- Held back until now because the test cleared **eight** bytes at stop+0x28 (a pointer store of
+  zero) which wiped the 0x29 flag beside it, so the decrement walked into an unflagged node and
+  never returned. The body was right; the test was wrong. Fixed to one byte.
+- `tests/syndicate_d150_test.cpp`: 19 checks, 6 passes, ASan+UBSan clean. Cluster 206 bodies.
