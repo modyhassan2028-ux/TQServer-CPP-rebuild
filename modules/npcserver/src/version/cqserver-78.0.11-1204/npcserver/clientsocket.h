@@ -14,7 +14,14 @@ extern void* (*g_pfnNpcKernelFrom_1400022e0)(long long hKernelThread);   // FUN_
 extern void  (*g_pfnNpcTickAnalystCtor)(void* pThis, int nId);           // CTickAnalyst::CTickAnalyst
 extern void  (*g_pfnNpcTickAnalystDtor)(void* pThis);                    // CTickAnalyst::~CTickAnalyst
 
+extern unsigned char g_symNpcStr_1400be4c8;   // the message at 0x1400be4c8 (not ASCII)
+extern void (*g_pfnNpcIniCtor)(void* pThis, const char* pszFile, const char* pszSection);
+extern void (*g_pfnNpcIniGetString)(void* pThis, char* pszOut, const char* pszKey, int nLen);
+extern int  (*g_pfnNpcIniGetInt)(void* pThis, const char* pszKey);
+extern void (*g_pfnNpcIniDtor)(void* pThis);
+
 void FUN_1400017b0(long long pThis);
+int  FUN_140001ba0(char* pThis, long long hKernelThread);
 
 }  // namespace tq
 

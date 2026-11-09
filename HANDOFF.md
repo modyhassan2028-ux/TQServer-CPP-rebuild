@@ -552,3 +552,12 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   its own assert call. D165, D166, D168, D169 all pass 6 times.
 - Every seam is registered in one place; the log seam is variadic to carry the assert form.
 - Next: 0x140001990 and onward; any body whose assert text names a path joins that exact path.
+
+## D170 (latest)
+
+- NpcServer: 25 bodies across 0x140001020 .. 0x140001ba0. Two now sit in their original path
+  (`npckernel` D165..D170 helpers stay in `unattributed/`; clientsocket bodies in
+  `src/version/cqserver-78.0.11-1204/npcserver/clientsocket.cpp`).
+- All five suites pass 6 times (D165, D166, D168, D169, D170).
+- Next: 0x140001c00 onward. Watch for bodies whose assert text names a new path; those move into
+  that exact path.

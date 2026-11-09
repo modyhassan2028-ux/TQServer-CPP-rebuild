@@ -32,8 +32,11 @@ unsigned char g_symNpcStr_1400be2d8 = 0;
 unsigned char g_symNpcData_140002370 = 0;
 unsigned char g_symNpcFn_1400022f0 = 0;
 unsigned char g_symNpcFn_140002380 = 0;
-
 void* g_symNpcVftbl_1400be090 = nullptr;
+void* g_symNpcVftbl_1400be3f0 = nullptr;
+unsigned char g_symNpcRtti_140102090 = 0;
+bool (*g_pfnNpcTypeInfoEquals)(const void* pA, const void* pB) = nullptr;
+
 unsigned char g_symNpcStr_1400be0b0 = 0;
 
 // FUN_140001020 @ 0x140001020 - the table at 0x1400be090 is stored into the argument
@@ -294,6 +297,93 @@ int FUN_140001520(char* pThis) {
         return 0;
     }
     return 0;
+}
+
+// FUN_140001970 @ 0x140001970 - release the counted object at +8: one decrement at +0x10, then the
+// slot 0 call, then a decrement at +0x14 and the slot 1 call when each counter reaches zero.
+void FUN_140001970(void* pThis) {
+    void** plVar3 = *(void***)((unsigned char*)pThis + 8);
+    if (plVar3 != (void**)0x0) {
+        int* plVar1 = (int*)((unsigned char*)plVar3 + 0x10);
+        *plVar1 = *plVar1 + -1;
+        if (*plVar1 == 0) {
+            ((void (*)(void*))plVar3[0])(plVar3);
+            int* piVar2 = (int*)((unsigned char*)plVar3 + 0x14);
+            *piVar2 = *piVar2 + -1;
+            if (*piVar2 == 0) {
+                ((void (*)(void*))plVar3[1])(plVar3);
+            }
+        }
+    }
+}
+
+// FUN_1400019b0 @ 0x1400019b0 - assign a counted object: bump the new one's +0x10, release the old
+// one the way 0x140001970 does, and store both words in every branch.
+void FUN_1400019b0(void** pThis, void* pNew, long long hCounted) {
+    if (hCounted != 0) {
+        int* pCount = (int*)((unsigned char*)hCounted + 0x10);
+        *pCount = *pCount + 1;
+    }
+    void** plVar3 = (void**)pThis[1];
+    if (plVar3 == (void**)0x0) {
+        pThis[1] = (void*)hCounted;
+        pThis[0] = pNew;
+        return;
+    }
+    int* plVar1 = (int*)((unsigned char*)plVar3 + 0x10);
+    *plVar1 = *plVar1 + -1;
+    if (*plVar1 == 0) {
+        ((void (*)(void*))plVar3[0])(plVar3);
+        int* piVar2 = (int*)((unsigned char*)plVar3 + 0x14);
+        *piVar2 = *piVar2 + -1;
+        if (*piVar2 == 0) {
+            ((void (*)(void*))plVar3[1])(plVar3);
+        }
+    }
+    pThis[1] = (void*)hCounted;
+    pThis[0] = pNew;
+}
+
+// FUN_140001a50 @ 0x140001a50 - both table stores, the two counters, then the fourth word
+void* FUN_140001a50(void** pThis, void* pArg2, void* pArg3) {
+    *pThis = &g_symNpcVftbl_1400be090;
+    pThis[1] = pArg2;
+    *(uint32_t*)((unsigned char*)pThis + 0x10) = 0;
+    *(uint32_t*)((unsigned char*)pThis + 0x14) = 1;
+    *pThis = &g_symNpcVftbl_1400be3f0;
+    pThis[4] = pArg3;
+    return pThis;
+}
+
+// FUN_140001ab0 @ 0x140001ab0 - the type_info compare against the descriptor at 0x140102090
+long long FUN_140001ab0(long long pThis, const void* pTypeInfo) {
+    bool bVar1 = g_pfnNpcTypeInfoEquals != nullptr
+                     ? g_pfnNpcTypeInfoEquals(pTypeInfo, (const void*)&g_symNpcRtti_140102090)
+                     : false;
+    if (bVar1) {
+        return pThis + 0x20;
+    }
+    return 0;
+}
+
+// FUN_140001af0 @ 0x140001af0 - call the pointer held at +0x20 with the value at +8
+void FUN_140001af0(long long pThis) {
+    void (*pTarget)(void*) = *(void (**)(void*))(pThis + 0x20);
+    pTarget(*(void**)(pThis + 8));
+}
+
+// FUN_140001b00 @ 0x140001b00 - the table at 0x1400be090 is stored
+void FUN_140001b00(void** pThis) {
+    *pThis = &g_symNpcVftbl_1400be090;
+}
+
+// FUN_140001b40 @ 0x140001b40 - the same store, then delete when the low byte is set
+void* FUN_140001b40(void** pThis, unsigned char bDelete) {
+    *pThis = &g_symNpcVftbl_1400be090;
+    if ((bDelete & 1) != 0) {
+        if (g_pfnNpcOperatorDelete != nullptr) g_pfnNpcOperatorDelete(pThis);
+    }
+    return pThis;
 }
 
 }  // namespace tq

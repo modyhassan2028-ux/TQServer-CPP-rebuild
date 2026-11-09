@@ -726,3 +726,34 @@ The four bodies that were held back at D134 are in, each read straight off its o
   the same seam as the plain messages; the three earlier suites were rebuilt and re-run against it.
 - `tests/npcserver_d169_test.cpp` covers the two CHECK paths, four early returns, one full packet
   (analyst id `0x4e`, four-byte payload, twelve bytes consumed) and the IF_NOT path.
+
+## D170 — NpcServer.exe 0x140001970 .. 0x140001ba0 (8 bodies)
+
+- `0x140001970`: releases the counted object at `+8`. One decrement of the int at `+0x10`; on zero it
+  calls slot 0 of that object's table, then decrements the int at `+0x14` and calls slot 1 when that
+  reaches zero. The test pins the order (slot 0 before slot 1).
+- `0x1400019b0`: assignment. Bumps the incoming object's `+0x10` first, releases the old one exactly
+  as above, and stores both words in **every** branch (the decompiled body repeats the two stores
+  inside the branch and after it).
+- `0x140001a50`: stores the table at `0x1400be090`, then `param_2` at `[1]`, `0` at `+0x10`, `1` at
+  `+0x14`, then overwrites `[0]` with the table at `0x1400be3f0` and stores `param_3` at `[4]`. Both
+  table addresses come from the body's two `lea` instructions.
+- `0x140001ab0`: `type_info::operator==` against the descriptor at `0x140102090`; returns `this+0x20`
+  or 0. The descriptor address is the body's `lea` operand, not a decompiler annotation.
+- `0x140001af0`: calls the pointer at `+0x20` with the value at `+8`.
+- `0x140001b00` and `0x140001b40`: store the table at `0x1400be090`; `1b40` deletes on the low byte
+  and returns its argument.
+- `0x140001ba0` is `CClientSocket::Create`, and it is placed in
+  `src/version/cqserver-78.0.11-1204/npcserver/clientsocket.cpp` because its own log call passes
+  `"f:\version\cqserver-78.0.11-1204\npcserver\clientsocket.cpp"` with line `0x81`. Its other
+  strings, by address: `0x1400be540` `"CClientSocket::Create, m_pKernelThread is NULL."`,
+  `0x1400be520` `"config.ini"`, `0x1400be530` `"GameServer"`, `0x1400be510` `"GAMESERVER_IP"`,
+  `0x1400be500` `"GAMESERVER_PORT"`, `0x1400be488` `"CClientSocket::Create, NpcServer client socket
+  Open error."`, and `0x1400be4c8` the port message (GBK text, carried as an address symbol).
+- Behaviour recorded as found: `0x140001ba0` returns **1** on both post-open outcomes (open failed or
+  opened) and 0 only for a NULL kernel thread. It reads the port, defaults to `0x16b8` when the ini
+  gives 0, and stores `port + 4` at `+0x10`.
+- `0x1400be090` is the same table D165 ported at `0x140001020`; the symbol is shared by address, and
+  no class is claimed for it.
+- `tests/npcserver_d170_test.cpp` drives every branch above; D165, D166, D168, D169 and D170 each
+  pass 6 times against the same objects.

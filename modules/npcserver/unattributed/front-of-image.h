@@ -32,12 +32,16 @@ extern int   (*g_pfnNpcBevSockConnect_14000b9f0)(void* pBev, void* pAddr, int nL
 extern long long (*g_pfnNpcBevGetFd_140006200)(void* pBev);   // FUN_140006200
 
 // the vftable symbol the original stores first in these objects
-extern void* g_symNpcVftbl_1400be090;
+
 extern unsigned char g_symNpcStr_1400be0b0;
 extern unsigned char g_symNpcStr_1400be2d8;                  // DAT_1400be2d8
 extern unsigned char g_symNpcData_140002370;                 // DAT_140002370
 extern unsigned char g_symNpcFn_1400022f0;                   // FUN_1400022f0 used as a value
-extern unsigned char g_symNpcFn_140002380;                   // FUN_140002380 used as a value                        // DAT_1400be0b0
+extern unsigned char g_symNpcFn_140002380;                   // FUN_140002380 used as a value
+extern void* g_symNpcVftbl_1400be090;                        // the table stored at 0x140001020, 0x140001a50, 0x140001b00, 0x140001b40
+extern void* g_symNpcVftbl_1400be3f0;                        // the second table 0x140001a50 stores
+extern unsigned char g_symNpcRtti_140102090;                 // RTTI descriptor compared at 0x140001ab0
+extern bool (*g_pfnNpcTypeInfoEquals)(const void* pA, const void* pB);  // type_info::operator==                        // DAT_1400be0b0
 
 void  FUN_140001020(void** pThis);
 void  FUN_140001040(void** pThis);
@@ -54,6 +58,13 @@ void  FUN_140001340(void* pThis);
 int   FUN_140001390(void* pThis, void* pBuf, int nLen);
 bool  FUN_140001440(void* pThis);
 void  FUN_1400014d0(void* pThis);
+void  FUN_140001970(void* pThis);
+void  FUN_1400019b0(void** pThis, void* pNew, long long hCounted);
+void* FUN_140001a50(void** pThis, void* pArg2, void* pArg3);
+long long FUN_140001ab0(long long pThis, const void* pTypeInfo);
+void  FUN_140001af0(long long pThis);
+void  FUN_140001b00(void** pThis);
+void* FUN_140001b40(void** pThis, unsigned char bDelete);
 int   FUN_140001520(char* pThis);
 
 }  // namespace tq
