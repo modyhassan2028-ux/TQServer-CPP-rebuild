@@ -141,6 +141,16 @@ unsigned long long FUN_1400127e0(long long pBase, int nPriorities, unsigned long
 extern void  (*g_pfnNpcGetSystemTimeAsFileTime)(void* pFileTime);             // GetSystemTimeAsFileTime
 extern void  (*g_pfnNpc_1400164f0)(long long pMonitor, int* pOut);            // FUN_1400164f0
 extern void* (*g_pfnNpc_140011850)(long long nCount, long long nSize);        // FUN_140011850
+void* FUN_140074b80(unsigned int dwThreads);
+extern int   g_nNpcFlag_140104cc8;                                            // DAT_140104cc8
+extern void  (*g_pfnNpc_140074930)(void* pOnce);                              // FUN_140074930
+extern void* (*g_pfnNpcCreateIoCompletionPort)(void* hFile, void* hExisting, unsigned long nKey,
+                                               unsigned int dwThreads);
+extern void* (*g_pfnNpcCreateSemaphoreA)(void* pAttr, long nInitial, long nMax, const char* pszName);
+extern unsigned long long (*g_pfnNpcBeginThread)(void (*pfnStart)(void*), unsigned int uStack,
+                                                 void* pArg);
+extern unsigned long (*g_pfnNpcInitializeCriticalSectionAndSpinCount)(void* pSection, unsigned long uSpin);
+extern void  (*g_pfnNpcThreadProc_140074780)(void* pArg);                     // FUN_140074780
 extern unsigned long long (*g_pfnNpc_140016720)(void* pMonitor, void* pOut);  // FUN_140016720
 extern void  (*g_pfnNpc_1400163c0)(void* pOut);                              // FUN_1400163c0
 extern void  (*g_pfnNpc_140016ef0)(void);                                    // FUN_140016ef0

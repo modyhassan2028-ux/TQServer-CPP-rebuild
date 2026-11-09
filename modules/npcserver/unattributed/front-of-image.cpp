@@ -151,6 +151,13 @@ static const double g_dNpc_1400c11f0 = 9223372036854775808.0;   // 2^63, the cou
 void  (*g_pfnNpcGetSystemTimeAsFileTime)(void*) = nullptr;
 void  (*g_pfnNpc_1400164f0)(long long, int*) = nullptr;
 void* (*g_pfnNpc_140011850)(long long, long long) = nullptr;
+int   g_nNpcFlag_140104cc8 = 0;
+void* (*g_pfnNpcCreateIoCompletionPort)(void*, void*, unsigned long, unsigned int) = nullptr;
+void* (*g_pfnNpcCreateSemaphoreA)(void*, long, long, const char*) = nullptr;
+unsigned long long (*g_pfnNpcBeginThread)(void (*)(void*), unsigned int, void*) = nullptr;
+unsigned long (*g_pfnNpcInitializeCriticalSectionAndSpinCount)(void*, unsigned long) = nullptr;
+void  (*g_pfnNpcThreadProc_140074780)(void*) = nullptr;
+void  (*g_pfnNpc_140074930)(void*) = nullptr;
 void* (*g_pfnNpcEventFree_140103fa8)(void*) = nullptr;
 const char g_symNpcStr_CondChange[] = "Can't change condition callbacks once they have been initialized.";
 
@@ -1847,6 +1854,61 @@ unsigned long long FUN_1400127e0(long long pBase, int nPriorities, unsigned long
         if (g_pfnNpc_140016e50 != nullptr) g_pfnNpc_140016e50();
     }
     return uResult;
+}
+
+// 0x140074b80 - the IOCP backend: once-init, a 0x50-byte control block, two thread slots per requested
+// thread, the completion port, one semaphore, the workers, and a lock with a spin count of 1000. Every
+// failure unwinds only what was already created.
+void* FUN_140074b80(unsigned int dwThreads) {
+    if (g_nNpcFlag_140104cc8 == 0) {
+        if (g_pfnNpc_140074930 != nullptr) g_pfnNpc_140074930((void*)&g_nNpcFlag_140104cc8);
+    }
+    unsigned char* p = (unsigned char*)(g_pfnNpc_140011850 != nullptr ? g_pfnNpc_140011850(1, 0x50) : nullptr);
+    if (p == nullptr) return nullptr;
+    if ((int)dwThreads < 1) dwThreads = 2;
+    short nSlots = (short)((short)dwThreads * 2);
+    *(short*)(p + 0x30) = nSlots;
+    void* pHandles = g_pfnNpc_140011850 != nullptr ? g_pfnNpc_140011850(nSlots, 8) : nullptr;
+    *(void**)(p + 0x38) = pHandles;
+    if (pHandles != nullptr) {
+        void* hPort = g_pfnNpcCreateIoCompletionPort != nullptr
+                          ? g_pfnNpcCreateIoCompletionPort((void*)(long long)-1, nullptr, 0, dwThreads)
+                          : nullptr;
+        *(unsigned int*)(p + 0x34) = 0xffffffff;
+        *(void**)p = hPort;
+        if (hPort != nullptr) {
+            void* hSem = g_pfnNpcCreateSemaphoreA != nullptr
+                             ? g_pfnNpcCreateSemaphoreA(nullptr, 0, 1, nullptr) : nullptr;
+            *(void**)(p + 0x48) = hSem;
+            if (hSem != nullptr) {
+                int nStarted = 0;
+                for (int i = 0; i < (int)*(short*)(p + 0x30); ++i) {
+                    unsigned long long h = g_pfnNpcBeginThread != nullptr
+                                               ? g_pfnNpcBeginThread(g_pfnNpcThreadProc_140074780, 0, p)
+                                               : 0;
+                    if (h == 0xffffffffffffffffull) goto threads_failed;
+                    *(unsigned long long*)((char*)pHandles + i * 8) = h;
+                    *(short*)(p + 0x40) = *(short*)(p + 0x40) + 1;
+                    ++nStarted;
+                }
+                if (g_pfnNpcInitializeCriticalSectionAndSpinCount != nullptr)
+                    g_pfnNpcInitializeCriticalSectionAndSpinCount(p + 0x08, 1000);
+                return p;
+            }
+        }
+    }
+threads_failed:
+    if (*(void**)p != nullptr) {
+        if (g_pfnNpcCloseHandle != nullptr) g_pfnNpcCloseHandle(*(void**)p);
+    }
+    if (*(void**)(p + 0x38) != nullptr) {
+        if (g_pfnNpcFree_1400119c0 != nullptr) g_pfnNpcFree_1400119c0(*(void**)(p + 0x38));
+    }
+    if (*(void**)(p + 0x48) != nullptr) {
+        if (g_pfnNpcCloseHandle != nullptr) g_pfnNpcCloseHandle(*(void**)(p + 0x48));
+    }
+    if (g_pfnNpcFree_1400119c0 != nullptr) g_pfnNpcFree_1400119c0(p);
+    return nullptr;
 }
 
 }  // namespace tq

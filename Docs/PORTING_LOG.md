@@ -1098,3 +1098,22 @@ and `nWaitCount` at `+0x38` (the offsets the code itself uses: `param_1 + 6`, `p
   `-1`. The notifier is cycled around the work.
 - `tests/npcserver_d184_test.cpp` covers all four, including the tick wrap, the epoch guard, the exact
   seconds/microseconds of a 2026 FILETIME, the drift rebase, the table relinking and the failing allocation.
+
+## D185 — NpcServer.exe 0x140074b80 (the IOCP backend launch)
+
+- The once-init runs on `DAT_140104cc8` before anything else, so even a failed launch has already installed
+  it. The control block is `0x50` bytes from `0x140011850(1, 0x50)`.
+- Two worker slots are reserved per requested thread: `(short)threads * 2` is stored at `+0x30` and is the
+  count handed to the second allocation, `0x140011850(slots, 8)` into `+0x38`. A request below one becomes
+  `2` **before** both the doubling and the port call, which is why a zero request asks the port for two
+  workers and allocates four slots.
+- `CreateIoCompletionPort(-1, 0, 0, threads)` lands at `+0`, then `+0x34` is stamped `0xffffffff`, then one
+  semaphore `(0, 1, 0)` goes to `+0x48`. Each worker is started through `_beginthread` with the block as its
+  argument, its handle is stored in the slot array, and `+0x40` counts the ones that started.
+- A refused worker jumps straight to the unwinding path, which closes the port when it exists, releases the
+  slot array, closes the semaphore and finally releases the block. The handle array failing short-circuits
+  earlier: no port, no semaphore, and only the block is released.
+- The lock is `InitializeCriticalSectionAndSpinCount(block + 8, 1000)`.
+- `tests/npcserver_d185_test.cpp` covers the block failing before anything else, a full four-slot launch, the
+  zero-request substitution, a worker failing on the third attempt (port, semaphore, array, block all
+  released in that order) and the missing slot array.

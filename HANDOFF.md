@@ -668,3 +668,9 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - Remaining seams: 0x140074b80 (346, IOCP launch) and 0x140014b30 (867, event_base_free).
 - Then the payoff step: rewire 0x140002b30 (CKernelThread::Create) and 0x140015ed0 to call these real bodies
   instead of their seams.
+
+## D185 (latest)
+
+- NpcServer: 101 bodies. Suites D165 to D185 all green.
+- One seam left in the base layer: 0x140014b30 (867, event_base_free).
+- Then rewire 0x140002b30 and 0x140015ed0 onto the real bodies and drop the duplicate seams.
