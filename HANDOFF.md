@@ -605,3 +605,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   `CThreadBase::CreateThread`, `GetSystemInfo`).
 - Next: those eight libevent bodies in `0x140005750`..`0x140016xxx` are now the critical path, because
   every remaining thread body leans on them.
+
+## D177 (latest)
+
+- NpcServer: 68 bodies. Suites D165 to D177 all green.
+- The libevent layer has started: 0x140005750 registers the eight handlers at 0x140005400..0x1400055f0.
+- Next in that layer: the two registrar bodies it calls (0x140016890, 0x140016880, 0x140016990) and the
+  eight handlers themselves, which are the ones that actually touch `event_base`.

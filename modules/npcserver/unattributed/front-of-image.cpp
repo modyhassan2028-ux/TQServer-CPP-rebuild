@@ -80,6 +80,10 @@ const char g_symNpcStr_1400bec20[] = "CSocketKernel::Create _beginthreadex faile
 const char g_symNpcStr_1400bebe0[] = "CNpcWorld::Create, cannot create NpcServer client socket.";
 const char g_symNpcStr_1400bebb0[] = "CKernelThread::Create m_pEventBase is NULL";
 const char g_symNpcStr_1400beb80[] = "CKernelThread::Create event_config_new failed";
+unsigned char g_symNpcData_1400054c0[16] = {0};
+void (*g_pfnNpc_140016890)(void*, long long, long long, long long) = nullptr;
+void (*g_pfnNpc_140016880)(void*) = nullptr;
+void (*g_pfnNpc_140016990)(void*, long long, long long, long long) = nullptr;
 
 void (*g_pfnNpcThreadBaseDtor)(void* pThis) = nullptr;
 void (*g_pfnNpcEventBase_140016270)(void* pBase, long long a2, long long a3, long long a4) = nullptr;
@@ -1032,6 +1036,40 @@ bool FUN_140002b30(long long pThis, long long hSocketTable, long long pParam3, l
     *(unsigned int*)(pThis + 0x7c) = (unsigned int)(uNow / 1000);
     return g_pfnNpcThreadBaseCreateThread != nullptr
                ? g_pfnNpcThreadBaseCreateThread((void*)pThis, g_symNpcStr_1400bec60, uFlag) : false;
+}
+
+// 0x140005750 - the registration body: two 0x28-byte tables, each two ints (both 1) followed by four
+// handler addresses, handed to 0x140016890 and 0x140016990 around a call to 0x140016880. The eight
+// addresses are the body's own lea operands.
+namespace {
+struct NpcLibeventHandlers {
+    int nFirst;
+    int nSecond;
+    void (*pfnHandler[4])(void);
+};
+}
+
+unsigned long long FUN_140005750(unsigned long long a1, unsigned long long a2, unsigned long long a3,
+                                 unsigned long long a4) {
+    (void)a1;
+    NpcLibeventHandlers s1;
+    s1.nFirst = 1;
+    s1.nSecond = 1;
+    s1.pfnHandler[0] = (void (*)(void))NPCSERVER_HANDLER_ADDR_140005400;
+    s1.pfnHandler[1] = (void (*)(void))NPCSERVER_HANDLER_ADDR_140005450;
+    s1.pfnHandler[2] = (void (*)(void))NPCSERVER_HANDLER_ADDR_140005470;
+    s1.pfnHandler[3] = (void (*)(void))NPCSERVER_HANDLER_ADDR_1400054a0;
+    NpcLibeventHandlers s2;
+    s2.nFirst = 1;
+    s2.nSecond = 1;
+    s2.pfnHandler[0] = (void (*)(void))NPCSERVER_HANDLER_ADDR_1400054d0;
+    s2.pfnHandler[1] = (void (*)(void))NPCSERVER_HANDLER_ADDR_140005560;
+    s2.pfnHandler[2] = (void (*)(void))NPCSERVER_HANDLER_ADDR_140005590;
+    s2.pfnHandler[3] = (void (*)(void))NPCSERVER_HANDLER_ADDR_1400055f0;
+    if (g_pfnNpc_140016890 != nullptr) g_pfnNpc_140016890(&s1, (long long)a2, (long long)a3, (long long)a4);
+    if (g_pfnNpc_140016880 != nullptr) g_pfnNpc_140016880(g_symNpcData_1400054c0);
+    if (g_pfnNpc_140016990 != nullptr) g_pfnNpc_140016990(&s2, (long long)a2, (long long)a3, (long long)a4);
+    return 0;
 }
 
 }  // namespace tq

@@ -164,6 +164,22 @@ void* FUN_140002790(void* pThis);
 void* FUN_140002d70(void* pThis, long long hThread, const char* pszName);
 int   FUN_1400027f0(long long pThis);
 bool  FUN_140002b30(long long pThis, long long hSocketTable, long long pParam3, long long uFlag);
+unsigned long long FUN_140005750(unsigned long long a1, unsigned long long a2, unsigned long long a3,
+                                unsigned long long a4);
+// 0x140005750 stores the addresses of the eight handlers at 0x140005400 .. 0x1400055f0; none of those
+// bodies is ported yet, so the addresses are kept as the values the original stores.
+#define NPCSERVER_HANDLER_ADDR_140005400 0x140005400ull
+#define NPCSERVER_HANDLER_ADDR_140005450 0x140005450ull
+#define NPCSERVER_HANDLER_ADDR_140005470 0x140005470ull
+#define NPCSERVER_HANDLER_ADDR_1400054a0 0x1400054a0ull
+#define NPCSERVER_HANDLER_ADDR_1400054d0 0x1400054d0ull
+#define NPCSERVER_HANDLER_ADDR_140005560 0x140005560ull
+#define NPCSERVER_HANDLER_ADDR_140005590 0x140005590ull
+#define NPCSERVER_HANDLER_ADDR_1400055f0 0x1400055f0ull
+extern unsigned char g_symNpcData_1400054c0[16];                              // DAT_1400054c0
+extern void  (*g_pfnNpc_140016890)(void* pHandlers, long long a2, long long a3, long long a4);
+extern void  (*g_pfnNpc_140016880)(void* pData);
+extern void  (*g_pfnNpc_140016990)(void* pHandlers, long long a2, long long a3, long long a4);
 int   FUN_140001520(char* pThis);
 
 }  // namespace tq

@@ -919,3 +919,18 @@ The four bodies that were held back at D134 are in, each read straight off its o
 - `tests/npcserver_d176_test.cpp` asserts the argument guard, the four failure messages, the engine
   refusal path, and the full fifteen-step order up to the `0x838` allocation. The successful thread path
   needs a live socket and is not exercised here.
+
+## D177 — NpcServer.exe 0x140005750 (handler registration)
+
+- Two `0x28`-byte tables on the frame at `rsp+0x20` and `rsp+0x48`, each `{ int nFirst = 1; int nSecond = 1;
+  void (*pfnHandler[4])(void); }`, filled with the addresses `0x140005400`, `0x140005450`, `0x140005470`,
+  `0x1400054a0` and `0x1400054d0`, `0x140005560`, `0x140005590`, `0x1400055f0`.
+- `0x140016890(&s1, a2, a3, a4)`, then `0x140016880(&DAT_1400054c0)`, then `0x140016990(&s2, a2, a3, a4)`;
+  the body returns 0. Its first argument is dropped: the `lea` into `rcx` overwrites it.
+- `DAT_1400054c0` is a fixed image address, so it is modelled by `g_symNpcData_1400054c0`, the same
+  placeholder convention as the stored-table symbols.
+- The eight handler bodies are not ported yet, so their addresses are kept as the literal values the
+  original stores (the `NPCSERVER_HANDLER_ADDR_*` constants) rather than as symbols. This keeps the unit
+  linkable without inventing eight bodies; when they are ported the constants become their addresses.
+- `tests/npcserver_d177_test.cpp` checks the call order, both tables' two ones, all eight addresses, the
+  data pointer and the three forwarded arguments, plus the zero return with no seams wired.
