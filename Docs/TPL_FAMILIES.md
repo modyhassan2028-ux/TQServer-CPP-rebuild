@@ -34,3 +34,12 @@ its *entire* instruction list is one template, so the table is a transcription, 
 
 Next families in the same form: the deleting/scalar destructors, the `n*0x28`/`n*0x30`/`n*0x48`
 allocators, the `operator delete` thunks, and the iterator-construct-with-check shape.
+
+## D162 — forwarders
+
+126 single-`jmp` bodies became a family of their own. They forward `rcx`/`rdx`/`r8`/`r9` to the
+target printed by objdump and return its answer. **The float registers are not carried**, so this
+shape is only faithful for integer-only targets; `xmm` cases must not be added to this family.
+
+The generated unit is now produced whole by `tools/family_gen.py` (832 bodies), which keeps the
+table and the bodies in step by construction.

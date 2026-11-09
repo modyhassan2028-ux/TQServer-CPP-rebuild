@@ -3,6 +3,7 @@
 #define SYNDICATE_GENLEAF_H
 namespace tq {
 struct SynLeafEntry { unsigned long long uAddr; unsigned char uKind; unsigned long long uArg; unsigned long long uBias; void* (*pfn)(void*); };
+extern void* (*g_pfnSynTailCall)(unsigned long long uTarget, void* a1, void* a2, void* a3, void* a4);
 extern const SynLeafEntry g_synLeafTable[];
 extern const unsigned int g_synLeafCount;
 }

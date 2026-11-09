@@ -494,3 +494,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   `SYNDICATE_D161_OK ... 644 checked`, 6 passes. `Docs/TPL_FAMILIES.md` carries the family plan.
 - Rule to keep: a generated body must be the *whole* function and must avoid `(%rip)` operands.
 - Next: the destructor and allocator families in the same generated form, then the NpcServer scaffold.
+
+## D162 (latest)
+
+- 832 generated bodies, `SYNDICATE_D162` covered by `SYNDICATE_D161_OK ... 832 checked`, 6 passes.
+- `tools/family_gen.py` now emits the whole unit; never hand edit `genleaf.cpp`.
+- Next: the destructor and allocator families (need the `operator delete` / `operator new` seams),
+  then the NpcServer.exe scaffold over its 50 embedded paths.

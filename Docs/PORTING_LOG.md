@@ -573,3 +573,17 @@ The four bodies that were held back at D134 are in, each read straight off its o
 - The leaf table is one shape family written once and tabulated 644 times; it is the pattern for
   the remaining families (deleters, allocators, thunks).
 - 644 checks, 6 passes, ASan+UBSan clean. Cluster 241 hand bodies + 644 generated.
+
+## D162 — the forwarder family, 832 generated bodies
+
+- The generator now splits bodies at `jmp` as well as `ret`, so a tail call stands alone, and it
+  keeps a body as a **forwarder** when that body is a single forward jump whose resolved target
+  objdump prints. 126 such bodies came out of the image; the four integer argument registers are
+  handed to the target through `g_pfnSynTailCall` and the answer is returned unchanged.
+- Limit, stated plainly: the forwarder carries `rcx`/`rdx`/`r8`/`r9` only. A target that reads
+  `xmm` arguments is not reproduced by this shape, and those bodies stay for the hand pass.
+- The generator now writes a complete, compilable unit itself (include, seam, casts, 64-bit
+  literals), so `tools/family_gen.py` reproduces `genleaf.cpp` from the binary alone.
+- The table is 832 bodies: 223 address reads, 178 empty, 126 forwarders, 120 field reads, 91
+  constants, 64 field-read-plus-bias, 30 zeros. All 832 are walked and checked, 6 passes, ASan and
+  UBSan clean.

@@ -6,9 +6,15 @@
 #include <cstdint>
 #include "modules/syndicate/src/genleaf.h"
 
+static unsigned long long g_target = 0;
+static void* TailHook(unsigned long long t, void* a1, void* a2, void* a3, void* a4) {
+    g_target = t; (void)a2; (void)a3; (void)a4; return a1;
+}
+
 int main() {
     using namespace tq;
     assert(g_synLeafCount > 500);   // the exact count is printed below
+    g_pfnSynTailCall = &TailHook;
     int checked = 0;
     for (unsigned int i = 0; i < g_synLeafCount; ++i) {
         const SynLeafEntry& e = g_synLeafTable[i];
@@ -27,6 +33,13 @@ int main() {
             case 5: assert(r == (void*)((unsigned char*)sentinel + e.uBias)); break;
             case 6: assert(r == (void*)(buf + e.uArg)); break;          // the address
             case 7: assert(r == (void*)buf && *(void**)buf == nullptr); break;
+            case 8: {   // the forwarder: the seam saw the target and the first argument came back
+                g_target = 0;
+                void* f = ((void* (*)(void*, void*, void*, void*))e.pfn)(buf, (void*)1, (void*)2, (void*)3);
+                assert(g_target == e.uArg);
+                assert(f == (void*)buf);
+                break;
+            }
             default: assert(!"unknown kind"); break;
         }
         ++checked;
