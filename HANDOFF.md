@@ -487,3 +487,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - Next in `Docs/ASM/1417c8d80.txt`: 0x1417c8f70 is a keyed lower/upper pair that also asserts on its
   own lead (`cmp %rax,%rax`), and its tail runs beyond the capture's end at 0x1417c9200 — extend
   the capture before writing it.
+
+## D161 (latest)
+
+- The leaf generator works: `tools/family_gen.py` -> `modules/syndicate/src/genleaf.cpp`, 644 bodies,
+  `SYNDICATE_D161_OK ... 644 checked`, 6 passes. `Docs/TPL_FAMILIES.md` carries the family plan.
+- Rule to keep: a generated body must be the *whole* function and must avoid `(%rip)` operands.
+- Next: the destructor and allocator families in the same generated form, then the NpcServer scaffold.

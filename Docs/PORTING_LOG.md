@@ -556,3 +556,20 @@ The four bodies that were held back at D134 are in, each read straight off its o
   slots.
 - `g_pfnSynPerElem_14179bf60` is new (element, mode -> void, null by default).
 - `tests/syndicate_d160_test.cpp`: 12 checks, 6 passes, ASan+UBSan clean. Cluster 241 bodies.
+
+## D161 — the leaf generator, 644 bodies in one translation unit
+
+- `tools/family_gen.py` reads an objdump of the binary, splits bodies at `ret` and at padding gaps,
+  and keeps only the functions whose **whole** body is one leaf template: `ret`, `xor eax,eax`,
+  the identity move, a `movabs`/`mov $imm,%eax` constant, a `mov 0x..(%reg),%reg` field read, the
+  same read plus an `add $imm`, a `lea 0x..(%reg),%reg`, and the zero-store that returns its own
+  argument. Anything else is skipped, so nothing is guessed.
+- 644 bodies came out of 11,928 functions: 185 address reads, 166 empty, 117 field reads, 85
+  constants, 64 field-read-plus-bias, 27 zeros. `g_synLeafTable` carries each address, kind and
+  arguments, so `tests/syndicate_d161_test.cpp` walks all of them in one pass.
+- `(%rip)` reads are **excluded**: the first run crashed at 0x1417d5340 because
+  `mov 0xb1b59(%rip),%rax` was read as a field of the argument. A global read is not expressible
+  without the image loaded, so those bodies stay for the hand pass.
+- The leaf table is one shape family written once and tabulated 644 times; it is the pattern for
+  the remaining families (deleters, allocators, thunks).
+- 644 checks, 6 passes, ASan+UBSan clean. Cluster 241 hand bodies + 644 generated.
