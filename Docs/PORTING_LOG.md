@@ -656,3 +656,26 @@ The four bodies that were held back at D134 are in, each read straight off its o
 - `0x140001440` returns `*(int *)(param_1 + 0x830) == 2`.
 - `tests/npcserver_d166_test.cpp`: 26 checks over the success, failure, tolerated-errno and
   not-connected paths; 6 passes, ASan and UBSan clean.
+
+## D167 — attribution evidence, and three retractions
+
+- **The image cannot attribute a body to a translation unit.** Its 49 source-path strings
+  (`\version\cqserver-78.0.11-1204\...`, first `clientsocket.cpp`) are dead data: a grep over the
+  whole disassembly finds **zero** references to any of their addresses. So there is no evidence
+  linking 0x140001130.. to `clientsocket.cpp`, and no such placement is claimed.
+- Retraction 1: `modules/npcserver/src/npckernel/imagefront.cpp` was a path of ours, not the
+  original's. It is gone; the unit now lives at `modules/npcserver/unattributed/front-of-image.cpp`,
+  outside `src/`, so it cannot be mistaken for an original path. The header says why in its first
+  lines.
+- Retraction 2: the semantic symbol names (`NpcRefCountCtor`, `NpcSendPacket`, ...) were ours. Every
+  body is back to the decompiler's own `FUN_<address>`, which is the only name the evidence carries.
+- Retraction 3: `g_symNpcRefCountBaseVftbl` followed Ghidra's library signature for
+  `std::tr1::_Ref_count_base::vftable`. The instruction is `lea 0x1400be090,%rax`, and the name index
+  ties `0x140001000` to `CChatThread::ctor_or_dtor` through that same table, so the symbol is
+  `g_symNpcVftbl_1400be090` and no class name is asserted from a decompiler annotation.
+- What the name index does give, and is now used as-is: `0x140001000 CChatThread::ctor_or_dtor`,
+  `0x140001050 CChatThread::ctor_or_dtor`, `0x1400010e0/1110/11b0 CChatThread::vfunc_1..3`,
+  `0x1400013f0 CChatThread::ctor_or_dtor`. Note the mixture: `0x140001390` logs
+  `"CClientSocket::SendPacket, ..."` inside that same address range, so the region is not one class
+  and no placement is inferred from it.
+- Both suites still pass 6 times each (D165 8 bodies / 20 checks, D166 6 bodies / 26 checks).

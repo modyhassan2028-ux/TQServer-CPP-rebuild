@@ -529,3 +529,12 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   original memcpy range overlaps.
 - Next: continue by address from 0x1400014b0, and attribute bodies to their `__FILE__` paths as soon
   as a path shows up in the image.
+
+## D167 (latest)
+
+- Rule now enforced: no path, file name or symbol is invented. Unattributed bodies live in
+  `modules/npcserver/unattributed/` (outside `src/`), symbols keep the decompiler's `FUN_<address>`.
+- Evidence limits written down: the 49 path strings are unreferenced dead data, so per-TU
+  attribution is unavailable from the image. `Docs/NPCSERVER_PATHS.md` says so in its note.
+- Next: continue by address from 0x1400014b0; when a body's class comes from the name index, record
+  the index row in PORTING_LOG and still place the body by evidence only.

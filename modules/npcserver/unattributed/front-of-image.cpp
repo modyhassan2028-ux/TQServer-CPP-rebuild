@@ -1,5 +1,10 @@
-// NpcServer.exe — see imagefront.h. Every body below is FUN_<address> in the decompilation.
-#include "modules/npcserver/src/npckernel/imagefront.h"
+// NpcServer.exe — see front-of-image.h. Every body below is FUN_<address> in the decompilation.
+//
+// Correction over D165/D166: Ghidra labels the table stored at 0x140001020 as
+// std::tr1::_Ref_count_base::vftable, but the instruction is `lea 0x1400be090` and the name index
+// ties 0x140001000 to CChatThread::ctor_or_dtor through that same table, so the stored symbol is
+// named by its address here. No class name is asserted from the decompiler's library signature.
+#include "modules/npcserver/unattributed/front-of-image.h"
 
 #include <cstdint>
 #include <cstring>
@@ -15,16 +20,16 @@ void* (*g_pfnNpcFreeBufferevent)(void* p) = nullptr;
 int   (*g_pfnNpcBuffereventWrite)(void* p, void* pBuf, int nLen) = nullptr;
 int   (*g_pfnNpcSocketErrno)(long long hSocket) = nullptr;
 
-void* g_symNpcRefCountBaseVftbl = nullptr;
-unsigned char g_symNpcLogEmpty = 0;
+void* g_symNpcVftbl_1400be090 = nullptr;
+unsigned char g_symNpcStr_1400be0b0 = 0;
 
-// FUN_140001020 @ 0x140001020 — *param_1 = std::tr1::_Ref_count_base::vftable;
-void NpcRefCountCtor_140001020(void** pThis) {
-    *pThis = &g_symNpcRefCountBaseVftbl;
+// FUN_140001020 @ 0x140001020 - the table at 0x1400be090 is stored into the argument
+void FUN_140001020(void** pThis) {
+    *pThis = &g_symNpcVftbl_1400be090;
 }
 
 // FUN_140001040 @ 0x140001040 — interlocked decrement of *(this+0x14); at zero call slot 1 with this
-void NpcRefCountRelease_140001040(void** pThis) {
+void FUN_140001040(void** pThis) {
     int* piVar1 = (int*)((uintptr_t)pThis + 0x14);
     // LOCK(); ... UNLOCK();  the decrement is the only shared access the original performs
     *piVar1 = *piVar1 + -1;
@@ -35,13 +40,13 @@ void NpcRefCountRelease_140001040(void** pThis) {
 }
 
 // FUN_140001060 @ 0x140001060 — return 0;
-void* NpcReturnZero_140001060(void) {
+void* FUN_140001060(void) {
     return nullptr;
 }
 
 // FUN_140001070 @ 0x140001070 — store the vftable, delete when the low byte is set, return this
-void* NpcRefCountVtblDtor_140001070(void** pThis, unsigned char bDelete) {
-    *pThis = &g_symNpcRefCountBaseVftbl;
+void* FUN_140001070(void** pThis, unsigned char bDelete) {
+    *pThis = &g_symNpcVftbl_1400be090;
     if ((bDelete & 1) != 0) {
         if (g_pfnNpcOperatorDelete != nullptr) g_pfnNpcOperatorDelete(pThis);
     }
@@ -49,25 +54,25 @@ void* NpcRefCountVtblDtor_140001070(void** pThis, unsigned char bDelete) {
 }
 
 // FUN_1400010b0 @ 0x1400010b0 — log_InlineLogERROR(&DAT_1400be0b0);
-void NpcLogEmptyError_1400010b0(void) {
-    if (g_pfnNpcInlineLogError != nullptr) g_pfnNpcInlineLogError(&g_symNpcLogEmpty);
+void FUN_1400010b0(void) {
+    if (g_pfnNpcInlineLogError != nullptr) g_pfnNpcInlineLogError(&g_symNpcStr_1400be0b0);
 }
 
 // FUN_1400011d0 @ 0x1400011d0 — Ordinal_116(); return 1;
-int NpcWsaCleanup_1400011d0(void) {
+int FUN_1400011d0(void) {
     if (g_pfnNpcWSACleanup != nullptr) g_pfnNpcWSACleanup();
     return 1;
 }
 
 // FUN_1400011f0 @ 0x1400011f0 — if (param_1 != 0) operator_delete__(param_1);
-void NpcDeleteIfNotNull_1400011f0(void* p) {
+void FUN_1400011f0(void* p) {
     if (p != (void*)0x0) {
         if (g_pfnNpcOperatorDelete2 != nullptr) g_pfnNpcOperatorDelete2(p);
     }
 }
 
 // FUN_140001210 @ 0x140001210 — the field clears, in the original's order
-void* NpcBufferInit_140001210(void* pThis) {
+void* FUN_140001210(void* pThis) {
     unsigned char* p = (unsigned char*)pThis;
     *(uint32_t*)(p + 0x10) = 0;
     std::memset(p + 0x14, 0, 0x800);
@@ -81,8 +86,8 @@ void* NpcBufferInit_140001210(void* pThis) {
 }
 
 
-// FUN_140001130 @ 0x140001130 — WSAStartup(2, &data); 0 on failure, 1 on success
-int NpcWsaStartup_140001130(void) {
+// FUN_140001130 @ 0x140001130 - WSAStartup(2, &data); 0 on failure, 1 on success
+int FUN_140001130(void) {
     short local_1b8[208];
     std::memset(local_1b8, 0, sizeof local_1b8);
     int uVar1 = g_pfnNpcWSAStartup != nullptr ? g_pfnNpcWSAStartup(2, local_1b8) : -1;
@@ -98,7 +103,7 @@ int NpcWsaStartup_140001130(void) {
 }
 
 // FUN_140001280 @ 0x140001280 — delete when the low byte is set, always return
-void* NpcDeleteOnFlag_140001280(void* p, unsigned char bDelete) {
+void* FUN_140001280(void* p, unsigned char bDelete) {
     if ((bDelete & 1) != 0) {
         if (g_pfnNpcOperatorDelete != nullptr) g_pfnNpcOperatorDelete(p);
     }
@@ -106,10 +111,10 @@ void* NpcDeleteOnFlag_140001280(void* p, unsigned char bDelete) {
 }
 
 // FUN_1400012a0 @ 0x1400012a0 — consume nBytes from the receive buffer at +0x14
-int NpcConsumeBytes_1400012a0(void* pThis, int nBytes) {
+int FUN_1400012a0(void* pThis, int nBytes) {
     unsigned char* p = (unsigned char*)pThis;
     if (*(int*)(p + 0x814) < nBytes) {
-        if (g_pfnNpcInlineLogError != nullptr) g_pfnNpcInlineLogError(&g_symNpcLogEmpty);
+        if (g_pfnNpcInlineLogError != nullptr) g_pfnNpcInlineLogError(&g_symNpcStr_1400be0b0);
     }
     if (*(int*)(p + 0x830) == 2) {
         unsigned int uVar2 = *(unsigned int*)(p + 0x814);
@@ -133,7 +138,7 @@ int NpcConsumeBytes_1400012a0(void* pThis, int nBytes) {
 }
 
 // FUN_140001340 @ 0x140001340 — release the bufferevent and drop the handle
-void NpcResetBuffer_140001340(void* pThis) {
+void FUN_140001340(void* pThis) {
     unsigned char* p = (unsigned char*)pThis;
     if (*(void**)(p + 0x820) != (void*)0x0) {
         if (g_pfnNpcFreeBufferevent != nullptr) g_pfnNpcFreeBufferevent(*(void**)(p + 0x820));
@@ -144,7 +149,7 @@ void NpcResetBuffer_140001340(void* pThis) {
 }
 
 // FUN_140001390 @ 0x140001390 — CClientSocket::SendPacket
-int NpcSendPacket_140001390(void* pThis, void* pBuf, int nLen) {
+int FUN_140001390(void* pThis, void* pBuf, int nLen) {
     unsigned char* p = (unsigned char*)pThis;
     if (*(int*)(p + 0x830) == 2) {
         if (*(long long*)(p + 0x818) != -1) {
@@ -156,7 +161,7 @@ int NpcSendPacket_140001390(void* pThis, void* pBuf, int nLen) {
                     if (g_pfnNpcInlineLogError != nullptr)
                         g_pfnNpcInlineLogError("CClientSocket::SendPacket, bufferevent_write packet failed[%d].");
                 }
-                NpcResetBuffer_140001340(pThis);
+                FUN_140001340(pThis);
                 return 0;
             }
             return 1;
@@ -174,7 +179,7 @@ int NpcSendPacket_140001390(void* pThis, void* pBuf, int nLen) {
 }
 
 // FUN_140001440 @ 0x140001440 — return *(int *)(param_1 + 0x830) == 2;
-bool NpcIsConnected_140001440(void* pThis) {
+bool FUN_140001440(void* pThis) {
     return *(int*)((unsigned char*)pThis + 0x830) == 2;
 }
 
