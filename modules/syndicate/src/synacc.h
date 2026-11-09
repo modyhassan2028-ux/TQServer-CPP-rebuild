@@ -218,5 +218,7 @@ void* SynAccNew30_1417c80d0(void* pUnused, void* p2, void* p3, void* p4, const v
 void* SynAccPairHeader_1417c8150(void* pTree, void* pOut);                 // 0x1417c8150
 void* SynAccPairChecked_1417c8170(void* pThis, void* pOut, const void* pArg); // 0x1417c8170
 void* SynAccRangeCmp_1417c81c0(void* pTree, void* pOut, void* pKey);        // 0x1417c81c0
+void* SynAccNew48Node_1417c82e0(void* pUnused, void* p2, void* p3, void* p4, const void* pArg5, unsigned char uFlag); // 0x1417c82e0
+void* SynAccNew28Node_1417c8370(void* pUnused, void* p2, void* p3, void* p4, const void* pArg5, unsigned char uFlag); // 0x1417c8370
 }  // namespace tq
 #endif

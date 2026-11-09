@@ -1671,4 +1671,43 @@ void* SynAccRangeCmp_1417c81c0(void* pTree, void* pOut, void* pKey) {
     return out;                                                // mov %r14,%rax
 }
 
+// 0x1417c82e0 - the 0x48 node: three words, a sub-object built at +0x18 through 0x141823288,
+// the flag byte at +0x40 and a cleared +0x41.
+void* SynAccNew48Node_1417c82e0(void* pUnused, void* p2, void* p3, void* p4,
+                                const void* pArg5, unsigned char uFlag) {
+    (void)pUnused;
+    int64_t frame = -2; (void)frame;                      // movq $0xfffffffffffffffe,0x28(%rsp)
+    unsigned char* blk = nullptr;
+    if (g_pfnSynNew_1417f3166 != nullptr) blk = (unsigned char*)g_pfnSynNew_1417f3166(0x48);
+    if (blk != nullptr) {                                 // test %rax,%rax / je
+        *(void**)(blk) = p2;                              // mov %r12,(%rax)
+        *(void**)(blk + 8) = p3;                          // mov %rsi,0x8(%rax)
+        *(void**)(blk + 0x10) = p4;                       // mov %rdi,0x10(%rax)
+        if (g_pfnSyn_141823288 != nullptr)                // lea 0x18(%rax),%rcx / call *0x141823288
+            g_pfnSyn_141823288(blk + 0x18, (void*)pArg5);
+        *(unsigned char*)(blk + 0x40) = uFlag;            // mov %al,0x40(%rbx)
+        *(unsigned char*)(blk + 0x41) = 0;                // movb $0x0,0x41(%rbx)
+    }
+    return blk;                                           // mov %rbx,%rax
+}
+
+// 0x1417c8370 - the 0x28 node: three words, one qword from the argument, the flag byte at +0x20
+// and a cleared +0x21.
+void* SynAccNew28Node_1417c8370(void* pUnused, void* p2, void* p3, void* p4,
+                                const void* pArg5, unsigned char uFlag) {
+    (void)pUnused;
+    int64_t frame = -2; (void)frame;                      // movq $0xfffffffffffffffe,0x28(%rsp)
+    unsigned char* blk = nullptr;
+    if (g_pfnSynNew_1417f3166 != nullptr) blk = (unsigned char*)g_pfnSynNew_1417f3166(0x28);
+    if (blk != nullptr) {                                 // test %rax,%rax / je
+        *(void**)(blk) = p2;                              // mov %rsi,(%rax)
+        *(void**)(blk + 8) = p3;                          // mov %rdi,0x8(%rax)
+        *(void**)(blk + 0x10) = p4;                       // mov %rbx,0x10(%rax)
+        *(void**)(blk + 0x18) = *(void**)pArg5;           // mov (%rax),%rcx / mov %rcx,0x18(%r11)
+        *(unsigned char*)(blk + 0x20) = uFlag;            // mov %al,0x20(%r11)
+        *(unsigned char*)(blk + 0x21) = 0;                // movb $0x0,0x21(%r11)
+    }
+    return blk;                                           // mov %r11,%rax
+}
+
 }  // namespace tq

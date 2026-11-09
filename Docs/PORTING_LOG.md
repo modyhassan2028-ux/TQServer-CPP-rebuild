@@ -439,3 +439,15 @@ The four bodies that were held back at D134 are in, each read straight off its o
 - The same lesson as D150, again a test-side slip: the builder seam was never installed, so the
   body had no allocator and returned nothing. Test fixed, body untouched.
 - `tests/syndicate_d151_test.cpp`: 22 checks, 6 passes, ASan+UBSan clean. Cluster 211 bodies.
+
+## D152 — the two node builders, 0x1417c82e0 (0x48) and 0x1417c8370 (0x28)
+
+- 0x1417c82e0: three words at +0x0/+0x8/+0x10, then **a sub-object built in place** at +0x18
+  through 0x141823288 with the fifth argument (the one node builder in the family that calls out
+  while the block is half filled), the flag byte at +0x40 and a cleared +0x41.
+- 0x1417c8370: the same three words, then only the **first** qword of the fifth argument at
+  +0x18, the flag byte at +0x20 and a cleared +0x21. Nothing past those two bytes is written,
+  which the test pins with a 0xCD fill.
+- Both go through the 0x1417f3166 seam; an allocator that answers nothing leaves the block
+  untouched, so the builders return null with no partial writes.
+- `tests/syndicate_d152_test.cpp`: 19 checks, 6 passes, ASan+UBSan clean. Cluster 213 bodies.

@@ -425,3 +425,9 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - Five bodies, green six times: `SYNDICATE_D151_OK ... 22 checks`. Cluster 211 bodies.
 - Next from `Docs/ASM/1417c7c30.txt`: 0x1417c82e0 (the 0x48-byte node, its tail already captured
   at 0x1417c8352) and 0x1417c8370 (the 0x28-byte node). Then re-capture past 0x1417c8400.
+
+## D152 (latest)
+
+- The two builders are in: `SYNDICATE_D152_OK ... 19 checks`, 6 passes. Cluster 213 bodies.
+- Next: the capture `Docs/ASM/1417c7c30.txt` ends at 0x1417c8400, so extend past it before the
+  next unit; 0x1417c83f0 was already visible starting a body and stops mid-way.
