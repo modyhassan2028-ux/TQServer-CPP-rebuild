@@ -146,6 +146,9 @@ int   (*g_pfnNpcGetQueuedCompletionStatus)(void*, unsigned int*, unsigned long l
                                            unsigned int) = nullptr;
 void* (*g_pfnNpcRealloc_1400119a0)(void*, unsigned long long) = nullptr;
 void* (*g_pfnNpc_14001a880)(long long*, long long) = nullptr;
+long long (*g_pfnNpc_14001b590)(long long, unsigned long long, unsigned long long, unsigned long long) =
+    nullptr;
+void (*g_pfnNpc_140008930)(int*, int) = nullptr;
 void* g_pNpcBase_140103f80 = nullptr;
 void  (*g_pfnNpc_140074d90)(void*, unsigned int) = nullptr;
 void  (*g_pfnNpc_140014300)(void*) = nullptr;
@@ -2242,6 +2245,135 @@ unsigned long long FUN_140075040(long long pBase, long long pQueue, int* pActive
                     return 0;
                 }
                 pNode[1] = nCount;
+            }
+        }
+    }
+    return 0;
+}
+
+// 0x1400750d0 - build the 0x38 queue object used by the notification mechanism: capacity 0x20, five 0x108-byte
+// index buffers, each cleared through its first word, then the object is handed to 0x14001b590 with its size.
+// A negative answer marks the object with flag 1 at +0x30 and the caller's +0x2a0 field is cleared through
+// 0x140008930 either way. A failed allocation frees everything already taken, including the object itself.
+void* FUN_1400750d0(long long pBase, unsigned long long a2, unsigned long long a3, unsigned long long a4) {
+    (void)a2;
+    unsigned long long uSize = 0x38;
+    unsigned int* p = g_pfnNpc_140011850 != nullptr
+                          ? (unsigned int*)g_pfnNpc_140011850(1, 0x38) : nullptr;
+    if (p != nullptr) {
+        *p = 0x20;
+        const int aOffsets[5] = { 2, 4, 6, 8, 10 };
+        bool bOk = true;
+        for (int i = 0; i < 5; ++i) {
+            void* pBuf = g_pfnNpcMalloc_140011830 != nullptr
+                             ? g_pfnNpcMalloc_140011830(0x108) : nullptr;
+            *(void**)(p + aOffsets[i]) = pBuf;
+            if (pBuf == nullptr) { bOk = false; break; }
+        }
+        if (bOk) {
+            **(unsigned int**)(p + 4) = 0;
+            **(unsigned int**)(p + 2) = 0;
+            **(unsigned int**)(p + 10) = 0;
+            **(unsigned int**)(p + 8) = 0;
+            **(unsigned int**)(p + 6) = 0;
+            uSize = g_pfnNpc_14001b590 != nullptr ? g_pfnNpc_14001b590(pBase, uSize, a3, a4) : 0;
+            if ((int)uSize < 0) p[0xc] = p[0xc] | 1;
+            if (g_pfnNpc_140008930 != nullptr) g_pfnNpc_140008930((int*)(pBase + 0x2a0), 0);
+            return p;
+        }
+        for (int i = 0; i < 5; ++i) {
+            void* pBuf = *(void**)(p + aOffsets[i]);
+            if (pBuf != nullptr && g_pfnNpcFree_1400119c0 != nullptr) g_pfnNpcFree_1400119c0(pBuf);
+        }
+        if (g_pfnNpcFree_1400119c0 != nullptr) g_pfnNpcFree_1400119c0(p);
+    }
+    return nullptr;
+}
+
+// The append shape both halves of 0x140075210 share: the array carries its count in the first word and its
+// entries eight bytes in, a full array doubles, and both arrays are reallocated to (2n - 1) * 8 + 0x10.
+static long long NpcNotifyAppend(unsigned int* pQueue, unsigned long long uKey, int nWhich) {
+    int nOff = (nWhich == 1) ? 2 : 4;
+    unsigned int* pArr = *(unsigned int**)(pQueue + nOff);
+    if (*pArr == *pQueue) {
+        unsigned int uNew = *pQueue * 2;
+        size_t nBytes = (size_t)(uNew - 1) * 8 + 0x10;
+        long long pFirst = g_pfnNpcRealloc_1400119a0 != nullptr
+                               ? (long long)g_pfnNpcRealloc_1400119a0(*(void**)(pQueue + 2), nBytes) : 0;
+        *(long long*)(pQueue + 2) = pFirst;
+        if (pFirst == 0) return -1;
+        unsigned int* pSecond = g_pfnNpcRealloc_1400119a0 != nullptr
+                                    ? (unsigned int*)g_pfnNpcRealloc_1400119a0(*(void**)(pQueue + 4), nBytes)
+                                    : nullptr;
+        *(unsigned int**)(pQueue + 4) = pSecond;
+        if (pSecond == nullptr) return -1;
+        pQueue[1] = 1;
+        *pQueue = uNew;
+        pArr = *(unsigned int**)(pQueue + nOff);
+    }
+    *(unsigned long long*)((unsigned char*)pArr + 8 + (size_t)(*pArr) * 8) = uKey;
+    unsigned int uIndex = *pArr;
+    *pArr = uIndex + 1;
+    return (long long)(int)uIndex;
+}
+
+// 0x140075210 - hand a key to one or both queues. Flag 8 first refuses when the mechanism carries the "own"
+// flag at +0x30 of the queue object; flags 6 mean work of any kind. Flag 2 appends to the first queue when its
+// cursor is empty, flag 4 to the second when that cursor is empty, and each append records count + 1.
+unsigned long long FUN_140075210(long long pMechanism, unsigned long long uKey, unsigned long long a3,
+                                 unsigned short uFlags, int* pActive) {
+    (void)a3;
+    unsigned int* pQueue = *(unsigned int**)(pMechanism + 8);
+    if ((uFlags & 8) != 0 && (pQueue[0xc] & 1) != 0) return 0xffffffff;
+    if ((uFlags & 6) == 0) return 0;
+    if ((uFlags & 2) != 0 && *pActive < 1) {
+        long long iIndex = NpcNotifyAppend(pQueue, uKey, 1);
+        if (iIndex < 0 || (int)iIndex < 0) return 0xffffffff;
+        *pActive = (int)(iIndex + 1);
+    }
+    if ((uFlags & 4) == 0 || 0 < pActive[1]) return 0;
+    long long iSecond = NpcNotifyAppend(pQueue, uKey, 0);
+    if (iSecond < 0 || (int)iSecond < 0) return 0xffffffff;
+    pActive[1] = (int)(iSecond + 1);
+    return 0;
+}
+
+// 0x140075380 - withdraw a key from one or both queues: flag 2 clears the first cursor, flag 4 the second,
+// each bringing the array count down, moving the last entry into the hole when the counts disagree, and
+// correcting the tree node at +0x128 with the value the cursor held. Both halves write their own node field.
+unsigned long long FUN_140075380(long long pMechanism, unsigned long long uKey, unsigned long long a3,
+                                 unsigned short uFlags, int* pActive) {
+    (void)uKey; (void)a3;
+    long long pQueue = *(long long*)(pMechanism + 8);
+    if ((uFlags & 2) != 0) {
+        int nCount = *pActive;
+        unsigned int* pArr = *(unsigned int**)(pQueue + 8);
+        *pActive = 0;
+        unsigned int uIndex = (unsigned int)(nCount - 1);
+        if (-1 < (int)uIndex) {
+            *pArr = *pArr - 1;
+            if (*pArr != uIndex) {
+                long long uMoved = *(long long*)((unsigned char*)pArr + 8 + (size_t)(*pArr) * 8);
+                *(long long*)((unsigned char*)pArr + 8 + (long long)(int)uIndex * 8) = uMoved;
+                int* pNode = g_pfnNpc_14001a880 != nullptr
+                                 ? (int*)g_pfnNpc_14001a880((long long*)(pMechanism + 0x128), uMoved) : nullptr;
+                if (pNode != nullptr) *pNode = nCount;
+            }
+        }
+    }
+    if ((uFlags & 4) != 0) {
+        int nCount = pActive[1];
+        unsigned int* pArr = *(unsigned int**)(pQueue + 0x10);
+        pActive[1] = 0;
+        unsigned int uIndex = (unsigned int)(nCount - 1);
+        if (-1 < (int)uIndex) {
+            *pArr = *pArr - 1;
+            if (*pArr != uIndex) {
+                long long uMoved = *(long long*)((unsigned char*)pArr + 8 + (size_t)(*pArr) * 8);
+                *(long long*)((unsigned char*)pArr + 8 + (long long)(int)uIndex * 8) = uMoved;
+                void* pNode = g_pfnNpc_14001a880 != nullptr
+                                  ? g_pfnNpc_14001a880((long long*)(pMechanism + 0x128), uMoved) : nullptr;
+                if (pNode != nullptr) *(int*)((char*)pNode + 4) = nCount;
             }
         }
     }

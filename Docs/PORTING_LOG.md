@@ -1247,3 +1247,20 @@ closed, and the flag only being set on the path that got a socket.
   look the moved key up at `0x14001a880` with the tree at `+0x128`, writing the old cursor value into the node
   field for the side that withdrew.
 - Two new seams: the reallocator at `0x1400119a0` and the tree lookup at `0x14001a880`.
+
+## D193/D194 — NpcServer.exe 0x1400750d0, 0x140075210, 0x140075380
+
+- `0x1400750d0` builds the queue object: capacity `0x20` in the first word, five `0x108`-byte index buffers at
+  `+0x08, +0x10, +0x18, +0x20, +0x28` (each cleared through its first word), then the object is handed to
+  `0x14001b590` with size `0x38`. A negative answer sets flag 1 at `+0x30` and `+0x2a0` of the caller is
+  cleared through `0x140008930` on both the good and the bad path. A failed allocation releases everything
+  already taken, in offset order, and then the object itself.
+- `0x140075210` hands one key to one or both queues: flag 8 refuses outright when the object carries bit 1 at
+  `+0x30` (and on its own asks for nothing), flag 2 appends to the first queue when its cursor is empty, flag 4
+  to the second when that cursor is empty. Each append leaves the cursor at count + 1. Both halves share one
+  append shape, so it is one helper: full array doubles and reallocs both arrays, entries eight bytes apart.
+- `0x140075380` withdraws: flag 2 clears the first cursor, flag 4 the second, and each half writes its own
+  node field, the first half the node's first field, the second half the field at `+4`. Note the asymmetry
+  against `0x140075040`, which writes the first field when its `nWhich` is non-zero: the two functions take
+  the flag the other way round relative to the queue index.
+- Two new seams: `0x14001b590` and `0x140008930`.

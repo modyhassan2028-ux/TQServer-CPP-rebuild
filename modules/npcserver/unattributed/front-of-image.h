@@ -282,6 +282,14 @@ void* FUN_140074eb0(long long pBase);
 unsigned long long FUN_140074ec0(int* pQueue, int nSize);
 unsigned int FUN_140074f40(unsigned int* pQueue, int* pActive, unsigned long long uKey, int nWhich);
 unsigned long long FUN_140075040(long long pBase, long long pQueue, int* pActive, int nWhich);
+void* FUN_1400750d0(long long pBase, unsigned long long a2, unsigned long long a3, unsigned long long a4);
+unsigned long long FUN_140075210(long long pMechanism, unsigned long long uKey, unsigned long long a3,
+                                 unsigned short uFlags, int* pActive);
+unsigned long long FUN_140075380(long long pMechanism, unsigned long long uKey, unsigned long long a3,
+                                 unsigned short uFlags, int* pActive);
+extern long long (*g_pfnNpc_14001b590)(long long pBase, unsigned long long nSize, unsigned long long a3,
+                                       unsigned long long a4);                        // FUN_14001b590
+extern void (*g_pfnNpc_140008930)(int* pField, int nValue);                            // FUN_140008930
 extern void* (*g_pfnNpcRealloc_1400119a0)(void* pBlock, unsigned long long nBytes);   // FUN_1400119a0
 extern void* (*g_pfnNpc_14001a880)(long long* pTree, long long uKey);                 // tree find
 extern int   (*g_pfnNpcReleaseSemaphore)(void* hSemaphore, long nRelease, long* pPrevious);

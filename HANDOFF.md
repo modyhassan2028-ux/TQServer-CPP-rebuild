@@ -720,3 +720,9 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - NpcServer: 110 bodies, 24 suites. The notification queue pair is ported with its append/withdraw rules.
 - Next: 0x1400750d0 (the 0x38 queue object with five 0x108 buffers and 0x14001b590), whose failure path
   needs the rest of its body read, then 0x140075210 onward.
+
+## D194 (latest)
+
+- NpcServer: 113 bodies, 26 suites. The notification mechanism (queue object plus its hand-over and withdraw
+  pair) is ported.
+- Next: 0x140075480 (700 bytes, the largest left in this cluster), then 0x140075740 onward.
