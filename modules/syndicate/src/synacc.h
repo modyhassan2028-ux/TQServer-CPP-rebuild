@@ -229,5 +229,7 @@ void* SynAccSelf8_1417c8810(void* pThis);                                   // 0
 void* SynAccSelf8_1417c8860(void* pThis);                                   // 0x1417c8860
 void* SynAccSelf8_1417c88b0(void* pThis);                                   // 0x1417c88b0
 void* SynAccSelf8_1417c8900(void* pThis);                                   // 0x1417c8900
+void* SynAccPairLeftHeader_1417c8eb0(void* pTree, void* pOut);              // 0x1417c8eb0
+void* SynAccPairHeaderLeft_1417c8ed0(void* pTree, void* pOut);              // 0x1417c8ed0
 }  // namespace tq
 #endif

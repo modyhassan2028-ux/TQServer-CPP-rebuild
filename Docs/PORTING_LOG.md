@@ -542,3 +542,17 @@ The four bodies that were held back at D134 are in, each read straight off its o
 - Test note: the descend walks the left spine of the node it lands on, so a second node needs its
   `0x0` link set as well; the first attempt crashed on exactly that read.
 - 3 checks, 6 passes, ASan+UBSan clean. Cluster 237 bodies.
+
+## D160 — four bodies, 0x1417c8d80 / 0x1417c8eb0 / 0x1417c8ed0 / 0x1417c8ef0
+
+- 0x1417c8d80: the third of the three walks. It keeps **nothing**: every element at `0x20(cursor)`
+  goes to 0x14179bf60 with the mode at `edx` and the answer is dropped. Cursor, end and the DEBUG
+  checks are the same three the scored walk uses, and there is no assert on the mode.
+- 0x1417c8eb0 / 0x1417c8ed0: the pair is `*(tree)` and the header — the first takes the header's
+  **first qword**, the second the header **itself**, and the two stores are in opposite order.
+- 0x1417c8ef0: the clear. Each node on the `0x0` chain has its `0x10` subtree destroyed through
+  0x1417c7a50 first, then goes to 0x1417f2fdc; afterwards the header names itself in all three
+  links and `+0x38` is zeroed. The test counts two frees for a two-node chain and checks all four
+  slots.
+- `g_pfnSynPerElem_14179bf60` is new (element, mode -> void, null by default).
+- `tests/syndicate_d160_test.cpp`: 12 checks, 6 passes, ASan+UBSan clean. Cluster 241 bodies.

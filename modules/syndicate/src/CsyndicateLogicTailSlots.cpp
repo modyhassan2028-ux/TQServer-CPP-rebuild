@@ -3349,4 +3349,84 @@ void* SynAccBestMatch_1417c8c10(void* pThis, unsigned int uMode) {
     }
 }
 
+// 0x1417c8d80 - the walk that hands every element to 0x14179bf60 with the mode and keeps nothing.
+// Same cursor / end / DEBUG shape as its neighbours; no assert on the mode.
+// 0x14179bf60 - the per-element call this walk makes; it answers nothing the walk uses.
+void (*g_pfnSynPerElem_14179bf60)(void* pElem, unsigned int uMode) = nullptr;
+
+void SynAccEachWalk_1417c8d80(void* pThis, unsigned int uMode) {
+    unsigned char* t = (unsigned char*)pThis;
+    unsigned char* cursor = *(unsigned char**)(*(unsigned char**)(t + 0x38));   // holder's first qword
+    unsigned char* node = *(unsigned char**)(t + 8);
+    for (;;) {
+        unsigned char* end = *(unsigned char**)(t + 0x38);                      // mov 0x38(%r12),%rdi
+        unsigned char* now = *(unsigned char**)(t + 8);                          // mov 0x8(%r12),%rax
+        if (node == nullptr || node != now) {                                   // test / je, cmp %rax,%rsi
+            if (g_pfn_invalid_parameter_noinfo != nullptr) g_pfn_invalid_parameter_noinfo();
+        }
+        if (cursor == end) return;                                              // cmp %rdi,%rbx / je
+        unsigned char* lead;
+        if (node == nullptr) {
+            if (g_pfn_invalid_parameter_noinfo != nullptr) g_pfn_invalid_parameter_noinfo();
+            lead = nullptr;                                                     // mov %r14,%r11
+        } else lead = *(unsigned char**)node;                                    // mov (%rsi),%r11
+        if (cursor == *(unsigned char**)(lead + 0x30)) {                        // cmp 0x30(%r11),%rbx
+            if (g_pfn_invalid_parameter_noinfo != nullptr) g_pfn_invalid_parameter_noinfo();
+        }
+        unsigned char* elem = *(unsigned char**)(cursor + 0x20);                // mov 0x20(%rbx),%rcx
+        if (elem != nullptr) {
+            if (g_pfnSynPerElem_14179bf60 != nullptr) g_pfnSynPerElem_14179bf60(elem, uMode);
+        }
+        if (node == nullptr) {                                                  // test %rsi,%rsi
+            if (g_pfn_invalid_parameter_noinfo != nullptr) g_pfn_invalid_parameter_noinfo();
+        }
+        if (*(unsigned char*)(cursor + 0x29) != 0) {                            // cmp %r14b,0x29(%rbx)
+            if (g_pfn_invalid_parameter_noinfo != nullptr) g_pfn_invalid_parameter_noinfo();
+            continue;                                                           // jmp 0x1417c8dc0
+        }
+        unsigned char* r = *(unsigned char**)(cursor + 0x10);
+        if (*(unsigned char*)(r + 0x29) == 0) {                                 // the 0x10 side first
+            cursor = r;
+            for (;;) {
+                r = *(unsigned char**)cursor;
+                if (*(unsigned char*)(r + 0x29) != 0) break;
+                cursor = r;
+            }
+            continue;
+        }
+        unsigned char* par = *(unsigned char**)(cursor + 0x8);                  // then the climb
+        while (*(unsigned char*)(par + 0x29) == 0 && cursor == *(unsigned char**)(par + 0x10)) {
+            cursor = par;
+            par = *(unsigned char**)(par + 0x8);
+        }
+        cursor = par;
+    }
+}
+
+// 0x1417c8ef0 - the clear: every node on the 0x0 chain loses its 0x10 subtree first, then goes to
+// 0x1417f2fdc, and the header is left naming itself in all three links with the size at +0x38 zero.
+void* SynAccClear_1417c8ef0(void* pTree) {
+    unsigned char* t = (unsigned char*)pTree;
+    unsigned char* h = *(unsigned char**)(t + 0x30);            // mov 0x30(%rcx),%rax
+    unsigned char* node = *(unsigned char**)(h + 8);            // mov 0x8(%rax),%rsi
+    unsigned char* cur = node;
+    if (*(unsigned char*)(node + 0x29) == 0) {                  // cmpb $0x0,0x29(%rsi) / jne
+        for (;;) {
+            SynAccEraseAll_1417c7a50(pTree, *(unsigned char**)(cur + 0x10));   // call 0x1417c7a50
+            cur = *(unsigned char**)(cur);                                  // mov (%rdi),%rdi
+            if (g_pfnLogic_1417f2fdc != nullptr) g_pfnLogic_1417f2fdc(node);   // call 0x1417f2fdc
+            node = cur;
+            if (*(unsigned char*)(cur + 0x29) != 0) break;
+        }
+    }
+    h = *(unsigned char**)(t + 0x30);                           // mov 0x30(%rbx),%rax
+    *(void**)(h + 8) = h;                                       // mov %rax,0x8(%rax)
+    h = *(unsigned char**)(t + 0x30);
+    *(void**)(t + 0x38) = nullptr;                              // movq $0x0,0x38(%rbx)
+    *(void**)h = h;                                             // mov %rax,(%rax)
+    h = *(unsigned char**)(t + 0x30);
+    *(void**)(h + 0x10) = h;                                    // mov %rax,0x10(%rax)
+    return pTree;
+}
+
 }  // namespace tq

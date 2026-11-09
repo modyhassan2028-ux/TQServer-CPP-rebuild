@@ -1832,4 +1832,23 @@ void* SynAccSelf8_1417c8900(void* pThis) {
     return pThis;
 }
 
+// 0x1417c8eb0 - out[0] is the tree's first qword, out[8] is the header's first qword.
+void* SynAccPairLeftHeader_1417c8eb0(void* pTree, void* pOut) {
+    unsigned char* t = (unsigned char*)pTree;
+    unsigned char* h = *(unsigned char**)(t + 0x30);        // mov 0x30(%rcx),%rax
+    void* lead = *(void**)h;                                // mov (%rax),%r8
+    *(void**)pOut = *(void**)t;                             // mov (%rcx),%rax / mov %rax,(%rdx)
+    *(void**)((unsigned char*)pOut + 8) = lead;              // mov %r8,0x8(%rdx)
+    return pOut;
+}
+
+// 0x1417c8ed0 - the same pair with the two stores the other way round.
+void* SynAccPairHeaderLeft_1417c8ed0(void* pTree, void* pOut) {
+    unsigned char* t = (unsigned char*)pTree;
+    unsigned char* h = *(unsigned char**)(t + 0x30);
+    *(void**)((unsigned char*)pOut + 8) = h;                 // mov %rax,0x8(%rdx)
+    *(void**)pOut = *(void**)t;                             // mov (%rcx),%rax / mov %rax,(%rdx)
+    return pOut;
+}
+
 }  // namespace tq

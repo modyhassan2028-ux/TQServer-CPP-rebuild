@@ -480,3 +480,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - `g_pfnSynScore_141798060` is new (element, mode -> int, null by default).
 - Next: `Docs/ASM/1417c8a70.txt` ends at 0x1417c8d80 with the scored walk's epilogue, so extend the
   capture past 0x1417c8d80 before the next unit.
+
+## D160 (latest)
+
+- Four bodies: `SYNDICATE_D160_OK ... 12 checks`, 6 passes. Cluster 241 bodies.
+- Next in `Docs/ASM/1417c8d80.txt`: 0x1417c8f70 is a keyed lower/upper pair that also asserts on its
+  own lead (`cmp %rax,%rax`), and its tail runs beyond the capture's end at 0x1417c9200 — extend
+  the capture before writing it.
