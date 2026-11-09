@@ -1145,3 +1145,19 @@ A null base falls back to `DAT_140103f80`; when that is null too the only effect
 `tests/npcserver_d186_test.cpp` walks a fully loaded base and checks all 21 steps in order, then the socket
 markers, the entry flags, the emptied remainder list, the cleared current-base slot, and the block going
 last.
+
+## D187 — rewiring 0x140015ed0 onto the real bodies
+
+- The base constructor now calls `0x140016640`, `0x1400105b0`, `0x14001a010/190`, `0x14001ad50`,
+  `0x140010860`, `0x1400127e0`, `0x140016f00/df0/e70`, `0x140015e70`, `0x140074b80` and `0x140014b30`
+  directly. The thirteen temporary seam globals they replaced are deleted from both the header and the
+  translation unit.
+- One real defect surfaced during the rewire: the constructor's time read was being handed a null output
+  pointer where the machine passes a two-int local. With the seam stub that never mattered, but the real
+  `0x1400105b0` writes through it. The call now passes a local pair.
+- `tests/npcserver_d182_test.cpp` was rewritten to drive the real bodies through their own seams. It now
+  pins an ordering fact the seam version hid: the priority table is built **only** on the branch where a
+  mechanism was found, so a base that falls through "no event mechanism available" carries no priority
+  table at all and releases just the (empty) field at `+0xf8` and then the block.
+- All 21 suites were rebuilt against the trimmed translation unit (2011 lines) and pass, which is the check
+  that the deleted seams really had no other callers.

@@ -681,3 +681,9 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - The libevent bootstrap layer is now complete: no seam remains inside 0x140015ed0 or 0x140014b30.
 - Next: rewire 0x140002b30 (CKernelThread::Create) and 0x140015ed0 onto these real bodies and delete the
   duplicate seams they replace, then continue with the next cluster after 0x140074b80.
+
+## D187 (latest)
+
+- NpcServer: 102 bodies, 21 suites. 0x140015ed0 is fully wired to real bodies, no seams left inside it.
+- Next: the same treatment for 0x140002b30 (CKernelThread::Create), then continue the port after
+  0x140074b80 (the IOCP backend, 0x140074780 onwards).

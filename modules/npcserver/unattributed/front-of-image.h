@@ -102,19 +102,6 @@ extern NpcEventSel* g_apNpcEventSelTable_140102480[8];                       // 
 extern void  (*g_pfnNpc_140019050)(const char* pszFmt, ...);                 // event_err
 extern void  (*g_pfnNpc_1400191f0)(const char* pszFmt, ...);                 // event_msgx
 extern char* (*g_pfnNpcGetenv)(const char* pszName);                         // getenv
-extern void  (*g_pfnNpc_140016640)(void* pMonitor, unsigned int uFlag);
-extern void  (*g_pfnNpc_1400105b0)(void* pBase, void* pOut);
-extern void  (*g_pfnNpc_14001a010)(void* p);
-extern void  (*g_pfnNpc_14001a190)(void* p);
-extern void  (*g_pfnNpc_14001ad50)(void* p);
-extern int   (*g_pfnNpc_140010860)(const char* pszName);
-extern unsigned int (*g_pfnNpc_1400127e0)(void* pBase, int nFlag);
-extern int   (*g_pfnNpc_140016f00)(void);
-extern long long (*g_pfnNpc_140016df0)(void);
-extern long long (*g_pfnNpc_140016e70)(void);
-extern unsigned int (*g_pfnNpc_140015e70)(void* pBase, unsigned long long a2);
-extern void* (*g_pfnNpc_140074b80)(unsigned int uThreads);
-extern void  (*g_pfnNpc_140014b30)(void* pBase, int nFlag);
 void FUN_140016640(void* pMonitor, unsigned int uFlag);
 unsigned long long FUN_1400105b0(long long pBase, int* pOut);
 void FUN_14001a010(void* p);

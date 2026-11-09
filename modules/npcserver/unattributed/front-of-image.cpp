@@ -118,19 +118,6 @@ NpcEventSel* g_apNpcEventSelTable_140102480[8] = { nullptr, nullptr, nullptr, nu
 void  (*g_pfnNpc_140019050)(const char*, ...) = nullptr;
 void  (*g_pfnNpc_1400191f0)(const char*, ...) = nullptr;
 char* (*g_pfnNpcGetenv)(const char*) = nullptr;
-void  (*g_pfnNpc_140016640)(void*, unsigned int) = nullptr;
-void  (*g_pfnNpc_1400105b0)(void*, void*) = nullptr;
-void  (*g_pfnNpc_14001a010)(void*) = nullptr;
-void  (*g_pfnNpc_14001a190)(void*) = nullptr;
-void  (*g_pfnNpc_14001ad50)(void*) = nullptr;
-int   (*g_pfnNpc_140010860)(const char*) = nullptr;
-unsigned int (*g_pfnNpc_1400127e0)(void*, int) = nullptr;
-int   (*g_pfnNpc_140016f00)(void) = nullptr;
-long long (*g_pfnNpc_140016df0)(void) = nullptr;
-long long (*g_pfnNpc_140016e70)(void) = nullptr;
-unsigned int (*g_pfnNpc_140015e70)(void*, unsigned long long) = nullptr;
-void* (*g_pfnNpc_140074b80)(unsigned int) = nullptr;
-void  (*g_pfnNpc_140014b30)(void*, int) = nullptr;
 int   g_nNpcFlag_140103fd0 = 0;
 void* g_pfnNpc_140103fc0 = nullptr;
 void* (*g_pfnNpcGetModuleHandle_140008b90)(const char*) = nullptr;
@@ -1501,9 +1488,9 @@ void* FUN_140015ed0(void* pConfig, unsigned long long a2, long long a3, void* a4
             bPrecise = pszEnv != nullptr;
             *(unsigned int*)(pBase + 0x1f8) = *(unsigned int*)(pBase + 0x1f8) | 0x20;
         }
-        if (g_pfnNpc_140016640 != nullptr) g_pfnNpc_140016640(pBase + 0x168, bPrecise ? 1u : 0u);
+        FUN_140016640(pBase + 0x168, bPrecise ? 1u : 0u);
     }
-    if (g_pfnNpc_1400105b0 != nullptr) g_pfnNpc_1400105b0(pBase, (void*)0x0);
+    { int aTmp[2] = { 0, 0 }; FUN_1400105b0((long long)pBase, aTmp); }
     *(long long*)(pBase + 0x150) = 0;
     *(unsigned int*)(pBase + 0x158) = 0;
     *(unsigned int*)(pBase + 0x15c) = 0;
@@ -1513,9 +1500,9 @@ void* FUN_140015ed0(void* pConfig, unsigned long long a2, long long a3, void* a4
     *(long long*)(pBase + 0x108) = 0;
     *(long long*)(pBase + 0x218) = -1;
     *(void**)(pBase + 0x110) = (void*)(pBase + 0x108);
-    if (g_pfnNpc_14001a010 != nullptr) g_pfnNpc_14001a010(pBase + 0x128);
-    if (g_pfnNpc_14001a190 != nullptr) g_pfnNpc_14001a190(pBase + 0x140);
-    if (g_pfnNpc_14001ad50 != nullptr) g_pfnNpc_14001ad50(pBase + 0x10);
+    FUN_14001a010(pBase + 0x128);
+    FUN_14001a190(pBase + 0x140);
+    FUN_14001ad50(pBase + 0x10);
     *(long long*)(pBase + 0x08) = 0;
     if (pConfig == nullptr) {
         *(unsigned int*)(pBase + 0x1fc) = 0xffffffff;
@@ -1564,7 +1551,7 @@ void* FUN_140015ed0(void* pConfig, unsigned long long a2, long long a3, void* a4
                     }
                 }
                 if (bUse) {
-                    if (!bNoPrecise || (g_pfnNpc_140010860 != nullptr ? g_pfnNpc_140010860(pSel->pszName) : 0) == 0) {
+                    if (!bNoPrecise || FUN_140010860(pSel->pszName) == 0) {
                         *(void**)(pBase + 0x00) = pSel;
                         *(void**)(pBase + 0x08) = pSel->pfnInit != nullptr ? pSel->pfnInit(pBase) : nullptr;
                     }
@@ -1582,14 +1569,14 @@ void* FUN_140015ed0(void* pConfig, unsigned long long a2, long long a3, void* a4
             if (g_pfnNpc_1400191f0 != nullptr)
                 g_pfnNpc_1400191f0("libevent using: %s", *(void**)*(void**)pBase);
         }
-        unsigned int uOk = g_pfnNpc_1400127e0 != nullptr ? g_pfnNpc_1400127e0(pBase, 1) : 0;
+        unsigned int uOk = FUN_1400127e0((long long)pBase, 1, 0, 0);
         if ((int)uOk >= 0) {
-            int bNotifiable = g_pfnNpc_140016f00 != nullptr ? g_pfnNpc_140016f00() : 0;
+            int bNotifiable = FUN_140016f00() ? 1 : 0;
             if (bNotifiable != 0 &&
                 (pConfig == nullptr || (*(unsigned char*)((char*)pConfig + 0x28) & 1) == 0)) {
-                *(long long*)(pBase + 0x1d0) = g_pfnNpc_140016df0 != nullptr ? g_pfnNpc_140016df0() : 0;
-                *(long long*)(pBase + 0x1d8) = g_pfnNpc_140016e70 != nullptr ? g_pfnNpc_140016e70() : 0;
-                unsigned int uRes = g_pfnNpc_140015e70 != nullptr ? g_pfnNpc_140015e70(pBase, 1) : 0;
+                *(long long*)(pBase + 0x1d0) = (long long)FUN_140016df0();
+                *(long long*)(pBase + 0x1d8) = (long long)FUN_140016e70();
+                unsigned int uRes = (unsigned int)FUN_140015e70(pBase, 1, 0, 0);
                 if ((int)uRes < 0) {
                     if (g_pfnNpcWarn_1400191c0 != nullptr)
                         g_pfnNpcWarn_1400191c0("%s: Unable to make base notifiable.", "event_base_new_with_config");
@@ -1598,8 +1585,7 @@ void* FUN_140015ed0(void* pConfig, unsigned long long a2, long long a3, void* a4
             }
             if (pConfig != nullptr && (*(unsigned char*)((char*)pConfig + 0x28) & 4) != 0 &&
                 *(long long*)(pBase + 0x1f0) == 0) {
-                void* pIocp = g_pfnNpc_140074b80 != nullptr
-                                  ? g_pfnNpc_140074b80(*(unsigned int*)((char*)pConfig + 0x10)) : nullptr;
+                void* pIocp = FUN_140074b80(*(unsigned int*)((char*)pConfig + 0x10));
                 *(void**)(pBase + 0x1f0) = pIocp;
                 if (pIocp == nullptr) {
                     if (g_pfnNpcWarn_1400191c0 != nullptr)
@@ -1610,7 +1596,7 @@ void* FUN_140015ed0(void* pConfig, unsigned long long a2, long long a3, void* a4
         }
     }
 release:
-    if (g_pfnNpc_140014b30 != nullptr) g_pfnNpc_140014b30(pBase, 1);
+    FUN_140014b30((long long*)pBase, 1);
     return nullptr;
 no_memory:
     {
