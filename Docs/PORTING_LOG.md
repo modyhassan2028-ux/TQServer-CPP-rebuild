@@ -825,3 +825,17 @@ The four bodies that were held back at D134 are in, each read straight off its o
   itself; the audit found no such site elsewhere in the tree.
 - `tests/npcserver_d172_test.cpp` drives all 26; seven suites (D165, D166, D168, D169, D170, D171,
   D172) pass 6 times each against the same objects.
+
+## D173 — NpcServer.exe 0x140002700, 0x140002760, 0x140002790 (3 bodies)
+
+- `0x140002700` is the deadline helper. It reads `TimeGet(0)`; when the stored total
+  `*(int*)+*(int*)[1]` is at or past `uVar1 / 1000` it reads the clock a **second** time, writes that
+  second into `[1]` and returns the magic-multiply residue with the low byte set to 1. Otherwise it
+  returns the residue with that byte clear, so the low byte alone answers "was it due".
+- `0x140002760` stores the value and the current second (`TimeGet(0) / 1000`) and returns
+  `uVar1 * 0x10624dd3`, the residue the body leaves in `eax`.
+- `0x140002790` is `CKernelThread`'s constructor: `CThreadBase::CThreadBase` first (through the seam),
+  then the table at `0x1400be730` into the object, the table at `0x1400be6f8` into `+0x40`, both
+  half-words at `+0x78` and `+0x7c` to zero, and the six words at `+0x48`, `+0x50`, `+0x58`, `+0x60`,
+  `+0x68`, `+0x70` to zero. Those are eight-byte stores, so `+0x74` is inside the `+0x70` one.
+- `tests/npcserver_d173_test.cpp` drives all three; the whole NpcServer set (D165 to D173) passes.

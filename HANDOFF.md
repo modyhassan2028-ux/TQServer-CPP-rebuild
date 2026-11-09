@@ -574,3 +574,9 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - The thread class work is now grounded: object at +8 / +0x50 / +0x68 each carry their table in the
   first word, and the slots are reached through that word.
 - Next: 0x1400026xx onward.
+
+## D173 (latest)
+
+- NpcServer: 64 bodies, 0x140001020 .. 0x140002790. Eight suites green.
+- `0x1400027f0` is next and it is large (0x500-byte frame, `CTickAnalyst` temporaries), so it gets its
+  own unit with its full body read first.

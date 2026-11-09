@@ -43,6 +43,7 @@ void* (*g_pfnNpcOperatorNewUnderscore)(long long nBytes) = nullptr;
 void* (*g_pfnNpcBevInput_140005b70)(void* pBev) = nullptr;
 unsigned long long (*g_pfnNpcEvbufLen_14000c370)(void* pEvbuf) = nullptr;
 long long (*g_pfnNpcEvbufRemove_140005c30)(void* pBev, void* pDst, long long nBytes) = nullptr;
+void (*g_pfnNpcThreadBaseCtor)(void* pThis) = nullptr;
 void (*g_pfnNpcThreadBaseDtor)(void* pThis) = nullptr;
 void (*g_pfnNpcEventBase_140016270)(void* pBase, long long a2, long long a3, long long a4) = nullptr;
 int  (*g_pfnNpcEventBaseLoopExit_140016280)(void* pBase, void* pArg) = nullptr;
@@ -762,6 +763,42 @@ void FUN_140002630(long long pThis, long long a2, long long a3, long long a4) {
     void** pObj50 = *(void***)(pThis + 0x50);
     void** pVtbl50 = TableOf(pObj50);
     ((void (*)(void*))((void**)pVtbl50)[6])(pObj50);
+}
+
+// 0x140002700 - the deadline helper: when the stored total is reached it re-arms and returns 1 in the
+// low byte; otherwise the magic-multiply residue with that byte cleared.
+unsigned long long FUN_140002700(int* pThis) {
+    unsigned long uVar1 = g_pfnNpcTimeGet != nullptr ? g_pfnNpcTimeGet(0) : 0;
+    if ((unsigned int)(pThis[1] + *pThis) <= uVar1 / 1000) {
+        uVar1 = g_pfnNpcTimeGet != nullptr ? g_pfnNpcTimeGet(0) : 0;
+        pThis[1] = (int)(unsigned int)(uVar1 / 1000);
+        return ((unsigned long long)(uVar1 * 0x10624dd3u) & 0xffffff00ull) | 1ull;
+    }
+    return (unsigned long long)(uVar1 * 0x10624dd3u) & 0xffffff00ull;
+}
+
+// 0x140002760 - store the value and the current second
+int FUN_140002760(unsigned int* pThis, unsigned int uValue) {
+    *pThis = uValue;
+    unsigned long uVar1 = g_pfnNpcTimeGet != nullptr ? g_pfnNpcTimeGet(0) : 0;
+    pThis[1] = (unsigned int)(uVar1 / 1000);
+    return (int)(uVar1 * 0x10624dd3u);
+}
+
+// 0x140002790 - the thread constructor: base first, then both tables, then the eight cleared words
+void* FUN_140002790(void* pThis) {
+    if (g_pfnNpcThreadBaseCtor != nullptr) g_pfnNpcThreadBaseCtor(pThis);
+    *(void**)pThis = &g_symNpcVftbl_1400be730;
+    *(void**)((char*)pThis + 0x40) = &g_symNpcVftbl_1400be6f8;
+    *(unsigned int*)((char*)pThis + 0x78) = 0;
+    *(unsigned int*)((char*)pThis + 0x7c) = 0;
+    *(void**)((char*)pThis + 0x48) = nullptr;
+    *(void**)((char*)pThis + 0x68) = nullptr;
+    *(void**)((char*)pThis + 0x50) = nullptr;
+    *(void**)((char*)pThis + 0x58) = nullptr;
+    *(void**)((char*)pThis + 0x70) = nullptr;
+    *(void**)((char*)pThis + 0x60) = nullptr;
+    return pThis;
 }
 
 }  // namespace tq
