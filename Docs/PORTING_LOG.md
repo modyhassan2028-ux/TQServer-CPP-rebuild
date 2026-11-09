@@ -451,3 +451,18 @@ The four bodies that were held back at D134 are in, each read straight off its o
 - Both go through the 0x1417f3166 seam; an allocator that answers nothing leaves the block
   untouched, so the builders return null with no partial writes.
 - `tests/syndicate_d152_test.cpp`: 19 checks, 6 passes, ASan+UBSan clean. Cluster 213 bodies.
+
+## D153 — seven bodies, 0x1417c83f0 .. 0x1417c8530
+
+- 0x1417c83f0: the iterator builder again (lead cleared, node at +0x8, holder's first qword in).
+- 0x1417c8430 / 0x1417c84b0: 0x1417c74c0 and 0x1417c64b0 wrapped, the iterator handed back.
+- 0x1417c8450 / 0x1417c8480: the pair is copied out **before** the source iterator steps down, and
+  the step is applied to the *source*, so the caller's iterator moves while the answer is the out
+  pair. The test pins both orders with a node that carries every flag byte, so the step returns
+  without moving anything.
+- 0x1417c84d0 (0x30) / 0x1417c8530 (0x48): the zeroed nodes. Three slots cleared, colour 1 at the
+  node's own pair, the next byte cleared; the `$0x1` / `$0x2` spills at 0x20(%rsp) are dead and
+  are kept as locals. Nothing past the pair is written, which a 0xCD fill proves.
+- Test note worth keeping: each family reads its **own** byte, and the 0x29 increment reads
+  0x0 before 0x10 — the first two attempts crashed because the chain was built for one family
+  only. 25 checks, 6 passes, ASan+UBSan clean. Cluster 220 bodies.

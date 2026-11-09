@@ -3049,4 +3049,44 @@ void* SynAccPair_1417c7be0(void* pThis, void* pOut, void* pArg3) {
     return o;                                                 // mov %rbx,%rax
 }
 
+// 0x1417c83f0 - the iterator builder again: lead cleared, node at +0x8, holder's first qword in.
+void* SynAccIterCtor2_1417c83f0(void* pThis, void* pNode, void* pHolder) {
+    unsigned char* it = (unsigned char*)pThis;
+    *(void**)it = nullptr;                                   // movq $0x0,(%rcx)
+    *(void**)(it + 8) = pNode;                               // mov %rdx,0x8(%rcx)
+    if (pHolder == nullptr) {                                // test %r8,%r8 / jne
+        if (g_pfn_invalid_parameter_noinfo != nullptr) g_pfn_invalid_parameter_noinfo();
+    }
+    *(void**)it = *(void**)pHolder;                          // mov (%rdi),%rax / mov %rax,(%rbx)
+    return it;
+}
+
+// 0x1417c8430 - call 0x1417c74c0, hand the iterator back.
+void* SynAccInc21Call_1417c8430(void* pIter) {
+    SynAccInc21_1417c74c0(pIter);
+    return pIter;
+}
+
+// 0x1417c8450 - the pair is copied out FIRST, then the source iterator steps down.
+void* SynAccCopyAndDec_1417c8450(void* pIter, void* pOut) {
+    *(void**)pOut = *(void**)pIter;                          // mov (%rcx),%rax / mov %rax,(%rdx)
+    *(void**)((unsigned char*)pOut + 8) = *(void**)((unsigned char*)pIter + 8);
+    SynAccDec29_1417c6610(pIter);                            // call 0x1417c6e80 on the source
+    return pOut;
+}
+
+// 0x1417c8480 - the same shape with the 0x41 decrement.
+void* SynAccCopyAndDec41_1417c8480(void* pIter, void* pOut) {
+    *(void**)pOut = *(void**)pIter;
+    *(void**)((unsigned char*)pOut + 8) = *(void**)((unsigned char*)pIter + 8);
+    SynAccDec41_1417c63c0(pIter);
+    return pOut;
+}
+
+// 0x1417c84b0 - call 0x1417c64b0, hand the iterator back.
+void* SynAccInc29Call_1417c84b0(void* pIter) {
+    SynAccInc29_1417c64b0(pIter);
+    return pIter;
+}
+
 }  // namespace tq

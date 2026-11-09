@@ -1710,4 +1710,34 @@ void* SynAccNew28Node_1417c8370(void* pUnused, void* p2, void* p3, void* p4,
     return blk;                                           // mov %r11,%rax
 }
 
+// 0x1417c84d0 - the zeroed 0x30 node: three cleared slots, colour 1 at +0x28, +0x29 cleared.
+// The two 0x20(%rsp) markers (1 then 2) are spilled before each of the +0x8 and +0x10 stores;
+// they are dead afterwards, so they are kept here as locals and nothing reads them.
+void* SynAccNew30Zero_1417c84d0() {
+    int64_t marker = -2; (void)marker;
+    unsigned char* b = (unsigned char*)(g_pfnSynNew_1417f3166 != nullptr
+                                        ? g_pfnSynNew_1417f3166(0x30) : nullptr);
+    if (b != nullptr) *(void**)b = nullptr;                  // xor %ecx,%ecx / mov %rcx,(%rax)
+    { uint32_t m = 1; (void)m; }                             // movl bashx1,0x20(%rsp)
+    if (b + 8 != nullptr) *(void**)(b + 8) = nullptr;         // lea 0x8(%rax),%rdx / test / mov
+    { uint32_t m = 2; (void)m; }                             // movl bashx2,0x20(%rsp)
+    if (b + 0x10 != nullptr) *(void**)(b + 0x10) = nullptr;   // lea 0x10(%rax),%rdx / test / mov
+    if (b != nullptr) { b[0x28] = 1; b[0x29] = 0; }           // movb bashx1,0x28 / movb bashx0,0x29
+    return b;
+}
+
+// 0x1417c8530 - the same body for the 0x48 node: the pair of bytes sits at +0x40 / +0x41.
+void* SynAccNew48Zero_1417c8530() {
+    int64_t marker = -2; (void)marker;
+    unsigned char* b = (unsigned char*)(g_pfnSynNew_1417f3166 != nullptr
+                                        ? g_pfnSynNew_1417f3166(0x48) : nullptr);
+    if (b != nullptr) *(void**)b = nullptr;
+    { uint32_t m = 1; (void)m; }
+    if (b + 8 != nullptr) *(void**)(b + 8) = nullptr;
+    { uint32_t m = 2; (void)m; }
+    if (b + 0x10 != nullptr) *(void**)(b + 0x10) = nullptr;
+    if (b != nullptr) { b[0x40] = 1; b[0x41] = 0; }
+    return b;
+}
+
 }  // namespace tq
