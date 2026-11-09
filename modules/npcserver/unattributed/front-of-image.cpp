@@ -82,6 +82,22 @@ const char g_symNpcStr_1400bebb0[] = "CKernelThread::Create m_pEventBase is NULL
 const char g_symNpcStr_1400beb80[] = "CKernelThread::Create event_config_new failed";
 unsigned char g_symNpcData_1400054c0[16] = {0};
 void (*g_pfnNpc_140016890)(void*, long long, long long, long long) = nullptr;
+int  g_nNpcEvthreadDebug_140103fb0 = 0;
+NpcEvthreadCbs g_npcLockCbs_140103fb8;
+NpcEvthreadCbs g_npcLockCbsOrig_140104010;
+NpcEvthreadCbs g_npcCondCbs_140103fe8;
+NpcEvthreadCbs g_npcCondCbsOrig_140104038;
+void* g_pNpcCondCopy_140103ff0 = nullptr;
+void* g_pNpcCondCopy_140103ff8 = nullptr;
+void* g_pNpcCondCopy_140104000 = nullptr;
+void* g_pNpcData_140103fe0 = nullptr;
+void (*g_pfnNpcWarn_1400191c0)(const char*, ...) = nullptr;
+int  (*g_pfnNpc_1400121b0)(int, long long, unsigned long long, unsigned long long) = nullptr;
+const char g_symNpcStr_LockDisable[] = "Trying to disable lock functions after they have been set up will probaby not work.";
+const char g_symNpcStr_LockChange[] = "Can't change lock callbacks once they have been initialized.";
+const char g_symNpcStr_CondDisable[] = "Trying to disable condition functions after they have been set up will probaby not work.";
+const char g_symNpcStr_CondChange[] = "Can't change condition callbacks once they have been initialized.";
+
 void (*g_pfnNpc_140016880)(void*) = nullptr;
 void (*g_pfnNpc_140016990)(void*, long long, long long, long long) = nullptr;
 
@@ -1069,6 +1085,77 @@ unsigned long long FUN_140005750(unsigned long long a1, unsigned long long a2, u
     if (g_pfnNpc_140016890 != nullptr) g_pfnNpc_140016890(&s1, (long long)a2, (long long)a3, (long long)a4);
     if (g_pfnNpc_140016880 != nullptr) g_pfnNpc_140016880(g_symNpcData_1400054c0);
     if (g_pfnNpc_140016990 != nullptr) g_pfnNpc_140016990(&s2, (long long)a2, (long long)a3, (long long)a4);
+    return 0;
+}
+
+// 0x140016880 - stores the one pointer it is given.
+void FUN_140016880(void* pValue) { g_pNpcData_140103fe0 = pValue; }
+
+// 0x140016890 - the lock-callback registrar. The target table is the original one while the debug flag is
+// set, otherwise the live one. An empty request warns and clears; a first-time request requires all four
+// pointers and then follows with 0x1400121b0(1, 0); an identical repeat is a no-op; anything else warns
+// and answers -1.
+int FUN_140016890(NpcEvthreadCbs* pCbs, unsigned long long a2, unsigned long long a3, unsigned long long a4) {
+    NpcEvthreadCbs* pTarget = g_nNpcEvthreadDebug_140103fb0 != 0 ? &g_npcLockCbsOrig_140104010
+                                                                 : &g_npcLockCbs_140103fb8;
+    if (pCbs == nullptr) {
+        if (pTarget->pfn[0] != nullptr) {
+            if (g_pfnNpcWarn_1400191c0 != nullptr) g_pfnNpcWarn_1400191c0(g_symNpcStr_LockDisable, a2, a3, a4);
+        }
+        *pTarget = NpcEvthreadCbs();
+        return 0;
+    }
+    void* pAlloc = pTarget->pfn[0];
+    if (pAlloc == nullptr) {
+        if (pCbs->pfn[0] != nullptr && pCbs->pfn[1] != nullptr && pCbs->pfn[2] != nullptr && pCbs->pfn[3] != nullptr) {
+            *pTarget = *pCbs;
+            return g_pfnNpc_1400121b0 != nullptr ? g_pfnNpc_1400121b0(1, 0, a3, a4) : 0;
+        }
+    } else {
+        if (pTarget->nApiVersion == pCbs->nApiVersion && pTarget->nReserved == pCbs->nReserved &&
+            pTarget->pfn[0] == pCbs->pfn[0] && pTarget->pfn[1] == pCbs->pfn[1] &&
+            pTarget->pfn[2] == pCbs->pfn[2] && pTarget->pfn[3] == pCbs->pfn[3]) {
+            return 0;
+        }
+        if (g_pfnNpcWarn_1400191c0 != nullptr)
+            g_pfnNpcWarn_1400191c0(g_symNpcStr_LockChange, (unsigned long long)(unsigned long)pAlloc, a3, a4);
+    }
+    return -1;
+}
+
+// 0x140016990 - the condition-callback registrar. Same shape, except that the equality test ignores the
+// second header word, and while the debug flag is set the first three pointers are also copied to
+// DAT_140103ff0 / DAT_140103ff8 / DAT_140104000.
+unsigned long long FUN_140016990(NpcEvthreadCbs* pCbs, unsigned long long a2, unsigned long long a3,
+                                 unsigned long long a4) {
+    unsigned int uDebug = (unsigned int)g_nNpcEvthreadDebug_140103fb0;
+    NpcEvthreadCbs* pTarget = uDebug != 0 ? &g_npcCondCbsOrig_140104038 : &g_npcCondCbs_140103fe8;
+    if (pCbs == nullptr) {
+        if (pTarget->pfn[0] != nullptr) {
+            if (g_pfnNpcWarn_1400191c0 != nullptr)
+                g_pfnNpcWarn_1400191c0(g_symNpcStr_CondDisable, a2, (unsigned long long)uDebug, a4);
+        }
+        *pTarget = NpcEvthreadCbs();
+        return 0;
+    }
+    void* pAlloc = pTarget->pfn[0];
+    if (pAlloc == nullptr) {
+        if (pCbs->pfn[0] != nullptr && pCbs->pfn[1] != nullptr && pCbs->pfn[2] != nullptr && pCbs->pfn[3] != nullptr) {
+            *pTarget = *pCbs;
+        }
+        if (uDebug != 0) {
+            g_pNpcCondCopy_140103ff0 = pCbs->pfn[0];
+            g_pNpcCondCopy_140103ff8 = pCbs->pfn[1];
+            g_pNpcCondCopy_140104000 = pCbs->pfn[2];
+        }
+    } else if (pTarget->nApiVersion != pCbs->nApiVersion || pAlloc != pCbs->pfn[0] ||
+               pTarget->pfn[1] != pCbs->pfn[1] || pTarget->pfn[2] != pCbs->pfn[2] ||
+               pTarget->pfn[3] != pCbs->pfn[3]) {
+        if (g_pfnNpcWarn_1400191c0 != nullptr)
+            g_pfnNpcWarn_1400191c0(g_symNpcStr_CondChange, (unsigned long long)(unsigned long)pAlloc,
+                                   (unsigned long long)uDebug, a4);
+        return 0xffffffffull;
+    }
     return 0;
 }
 

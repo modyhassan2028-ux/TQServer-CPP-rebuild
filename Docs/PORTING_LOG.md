@@ -934,3 +934,23 @@ The four bodies that were held back at D134 are in, each read straight off its o
   linkable without inventing eight bodies; when they are ported the constants become their addresses.
 - `tests/npcserver_d177_test.cpp` checks the call order, both tables' two ones, all eight addresses, the
   data pointer and the three forwarded arguments, plus the zero return with no seams wired.
+
+## D178 — NpcServer.exe 0x140016880, 0x140016890, 0x140016990 (libevent thread callbacks)
+
+- The callback record is `0x28` bytes: two header ints then four handler pointers. `0x140016880` stores its
+  argument in `DAT_140103fe0` and returns.
+- `0x140016890` picks its target from `DAT_140103fb0`: `DAT_140104010` while the flag is set, otherwise
+  `DAT_140103fb8`. A null request warns with "Trying to disable lock functions after they have been set up
+  will probaby not work." (the original's spelling) when the table is already set, clears all `0x28` bytes
+  and answers 0. A first request needs all four pointers, is copied whole and is followed by
+  `0x1400121b0(1, 0)`; an identical repeat answers 0; anything else warns "Can't change lock callbacks
+  once they have been initialized." and answers -1.
+- `0x140016990` is the condition registrar against `DAT_140103fe8` / `DAT_140104038`. It differs in two
+  ways that the machine code makes explicit: the equality test compares the first header int and the four
+  pointers but **not** the second int, and while `DAT_140103fb0` is set the first three pointers are also
+  echoed to `DAT_140103ff0`, `DAT_140103ff8` and `DAT_140104000`. Its refusals answer `0xffffffff`.
+- The four messages were re-extracted from `.rdata`; the lock-change one sits behind a `0xE0` byte with no
+  terminator between, so the string is taken from its first byte onward.
+- `tests/npcserver_d178_test.cpp` covers the empty table, the first request plus follow-up, the identical
+  repeat, a changed pointer, a request with a hole, disabling a set table, both debug-flag targets, the
+  condition registrar's ignored second word and the three echoed pointers.

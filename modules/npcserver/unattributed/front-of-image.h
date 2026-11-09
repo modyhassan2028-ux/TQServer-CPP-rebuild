@@ -177,6 +177,27 @@ unsigned long long FUN_140005750(unsigned long long a1, unsigned long long a2, u
 #define NPCSERVER_HANDLER_ADDR_140005590 0x140005590ull
 #define NPCSERVER_HANDLER_ADDR_1400055f0 0x1400055f0ull
 extern unsigned char g_symNpcData_1400054c0[16];                              // DAT_1400054c0
+// libevent's thread-callback registrars: a two-int header followed by four handler pointers (0x28 bytes)
+struct NpcEvthreadCbs { int nApiVersion; int nReserved; void* pfn[4]; };
+void FUN_140016880(void* pValue);
+int  FUN_140016890(NpcEvthreadCbs* pCbs, unsigned long long a2, unsigned long long a3, unsigned long long a4);
+unsigned long long FUN_140016990(NpcEvthreadCbs* pCbs, unsigned long long a2, unsigned long long a3,
+                                 unsigned long long a4);
+extern int  g_nNpcEvthreadDebug_140103fb0;                                  // DAT_140103fb0
+extern NpcEvthreadCbs g_npcLockCbs_140103fb8;                               // DAT_140103fb8
+extern NpcEvthreadCbs g_npcLockCbsOrig_140104010;                           // DAT_140104010
+extern NpcEvthreadCbs g_npcCondCbs_140103fe8;                               // DAT_140103fe8
+extern NpcEvthreadCbs g_npcCondCbsOrig_140104038;                           // DAT_140104038
+extern void* g_pNpcCondCopy_140103ff0;                                      // DAT_140103ff0
+extern void* g_pNpcCondCopy_140103ff8;                                      // DAT_140103ff8
+extern void* g_pNpcCondCopy_140104000;                                      // DAT_140104000
+extern void* g_pNpcData_140103fe0;                                          // DAT_140103fe0
+extern void (*g_pfnNpcWarn_1400191c0)(const char* pszMessage, ...);         // event_warnx
+extern int  (*g_pfnNpc_1400121b0)(int nFlag, long long nZero, unsigned long long a3, unsigned long long a4);
+extern const char g_symNpcStr_LockDisable[];                                // Trying to disable lock functions...
+extern const char g_symNpcStr_LockChange[];                                 // Can't change lock callbacks...
+extern const char g_symNpcStr_CondDisable[];                                // Trying to disable condition functions...
+extern const char g_symNpcStr_CondChange[];                                 // Can't change condition callbacks...
 extern void  (*g_pfnNpc_140016890)(void* pHandlers, long long a2, long long a3, long long a4);
 extern void  (*g_pfnNpc_140016880)(void* pData);
 extern void  (*g_pfnNpc_140016990)(void* pHandlers, long long a2, long long a3, long long a4);
