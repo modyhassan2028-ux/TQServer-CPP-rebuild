@@ -398,3 +398,14 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   0x1417c7c30 runs past the cut. Re-capture 0x1417c7e30..0x1417c8200 before writing it, and note
   that test binaries under /tmp can outlive a unit: delete them before each build or a stale
   binary prints another unit's success line.
+
+## 0x1417c7c30 — parked, not claimed
+
+- The subtree erase is translated in full (Docs/PENDING/1417c7c30_erase.cpp) but it does not
+  return on the first path the test builds, so it is **out of the build** and no unit number is
+  claimed for it. `synacc.cpp` still carries the four seams the sentinel path needs.
+- Next step on it: run the body against a tree of one node plus the header before anything else,
+  and print the (`node`, `cur`, head->0x8) triple at each turn of the fix-up loop, because the
+  loop guard is the only unbounded construct in the body.
+- Note for the harness: compiling CsyndicateLogicTailSlots.cpp with ASan takes minutes, so build
+  its object once and reuse it; a 300 s tool call is not enough for compile + link + six passes.
