@@ -1288,4 +1288,34 @@ void* SynAcc2Words_1417c77d0(void* pThis, uint32_t uA, uint32_t uB) {
     return pThis;
 }
 
+// 0x1417c78a0 - the header's lead and the tree's first qword into the pair, the pair back.
+void* SynAccIterFromHeader_1417c78a0(void* pTree, void* pOut) {
+    unsigned char* t = (unsigned char*)pTree;
+    unsigned char* o = (unsigned char*)pOut;
+    unsigned char* h = *(unsigned char**)(t + 0x30);        // mov 0x30(%rcx),%rax
+    void* lead = *(void**)h;                                 // mov (%rax),%r8
+    *(void**)o = *(void**)t;                                 // mov (%rcx),%rax / mov %rax,(%rdx)
+    *(void**)(o + 8) = lead;                                 // mov %r8,0x8(%rdx)
+    return o;                                                // mov %rdx,%rax
+}
+
+// 0x1417c78c0 - the same pair as 0x1417c78a0, but the header itself is stored, not its lead,
+// and the two stores happen in the other order.
+void* SynAccIterHeaderPair_1417c78c0(void* pTree, void* pOut) {
+    unsigned char* t = (unsigned char*)pTree;
+    unsigned char* o = (unsigned char*)pOut;
+    unsigned char* h = *(unsigned char**)(t + 0x30);        // mov 0x30(%rcx),%rax
+    *(void**)(o + 8) = h;                                    // mov %rax,0x8(%rdx)
+    *(void**)o = *(void**)t;                                 // mov (%rcx),%rax / mov %rax,(%rdx)
+    return o;                                                // mov %rdx,%rax
+}
+
+// 0x1417c7920 - both qwords cleared through one register, the object back.
+void* SynAccZeroTwo_1417c7920(void* pThis) {
+    uint64_t zero = 0;                                       // xor %eax,%eax
+    *(uint64_t*)pThis = zero;                                // mov %rax,(%rcx)
+    *(uint64_t*)((unsigned char*)pThis + 8) = zero;          // mov %rax,0x8(%rcx)
+    return pThis;                                            // mov %rcx,%rax
+}
+
 }  // namespace tq

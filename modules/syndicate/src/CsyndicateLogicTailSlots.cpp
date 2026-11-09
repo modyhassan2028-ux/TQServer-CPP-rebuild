@@ -2846,4 +2846,107 @@ void* SynAccDtor_1417c77e0(void* pThis, uint32_t uFlags) {
     return pThis;
 }
 
+// 0x1417c7850 - the argument's sixteen bytes are copied to a temp first, then the lead is
+// checked and the answer is `sete` on the two +0x8 words.
+bool SynAccIterEq_1417c7850(void* pThis, void* pOther) {
+    unsigned char* t = (unsigned char*)pThis;
+    unsigned char* o = (unsigned char*)pOther;
+    unsigned char temp[0x10];
+    *(uint64_t*)temp = *(uint64_t*)o;                        // mov (%rdx),%rax / mov %rax,(%rcx)
+    *(uint64_t*)(temp + 8) = *(uint64_t*)(o + 8);            // mov 0x8(%rdx),%rax / mov %rax,0x8(%rcx)
+    void* lead = *(void**)t;                                 // mov (%rbx),%rax
+    if (lead == nullptr || lead != *(void**)temp) {          // test / je, cmp 0x20(%rsp),%rax / je
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();                // call *0x1418233c0
+    }
+    uint64_t w = *(uint64_t*)(temp + 8);                     // mov 0x28(%rsp),%rcx
+    return *(uint64_t*)(t + 8) == w;                         // cmp %rcx,0x8(%rbx) / sete
+}
+
+// 0x1417c78e0 - the +0x18 accessor with both DEBUG checks (the fifth start of it).
+void* SynAccCurrPlus18_1417c78e0(void* pIter) {
+    unsigned char* it = (unsigned char*)pIter;
+    void* lead = *(void**)it;                                // mov (%rcx),%rax
+    if (lead == nullptr) {                                   // test / jne
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();                // call *0x1418233c0
+        lead = *(void**)it;                                  // mov (%rbx),%rax
+        if (lead != nullptr) lead = *(void**)lead;           // test / je / mov (%rax),%rax
+    } else {
+        lead = *(void**)lead;                                // mov (%rax),%rax
+    }
+    unsigned char* q = *(unsigned char**)lead + 0x30;        // mov 0x30(%rax),%rax (a read, as the bytes do)
+    (void)q;
+    if (*(void**)((unsigned char*)lead + 0x30) == *(void**)(it + 8)) {
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();                // call *0x1418233c0
+    }
+    return *(unsigned char**)(it + 8) + 0x18;                // mov 0x8(%rbx),%rax / add $0x18
+}
+
+// 0x1417c7930 - the same body at its own start.
+void* SynAccCurrPlus18_1417c7930(void* pIter) {
+    unsigned char* it = (unsigned char*)pIter;
+    void* lead = *(void**)it;
+    if (lead == nullptr) {
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();
+        lead = *(void**)it;
+        if (lead != nullptr) lead = *(void**)lead;
+    } else {
+        lead = *(void**)lead;
+    }
+    if (*(void**)((unsigned char*)lead + 0x30) == *(void**)(it + 8)) {
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();
+    }
+    return *(unsigned char**)(it + 8) + 0x18;
+}
+
+// 0x1417c7970 - call 0x1417c6e80, hand the iterator back.
+void* SynAccDecCall_1417c7970(void* pIter) {
+    SynAccDec29_1417c6e80(pIter);
+    return pIter;
+}
+
+// 0x1417c7990 / 0x1417c79b0 / 0x1417c79d0 / 0x1417c79f0 - the lead to the deallocate, in a frame
+// that is torn down before the jump.
+void SynAccFreeLead_1417c7990(void* pThis) {
+    int64_t frame = -2; (void)frame;
+    if (g_pfnLogic_1417f2fdc != nullptr) g_pfnLogic_1417f2fdc(*(void**)pThis);
+}
+void SynAccFreeLead_1417c79b0(void* pThis) {
+    int64_t frame = -2; (void)frame;
+    if (g_pfnLogic_1417f2fdc != nullptr) g_pfnLogic_1417f2fdc(*(void**)pThis);
+}
+void SynAccFreeLead_1417c79d0(void* pThis) {
+    int64_t frame = -2; (void)frame;
+    if (g_pfnLogic_1417f2fdc != nullptr) g_pfnLogic_1417f2fdc(*(void**)pThis);
+}
+void SynAccFreeLead_1417c79f0(void* pThis) {
+    int64_t frame = -2; (void)frame;
+    if (g_pfnLogic_1417f2fdc != nullptr) g_pfnLogic_1417f2fdc(*(void**)pThis);
+}
+
+// 0x1417c7a10 - the keyed descent again, but here the answer fills a pair: the tree's first
+// qword at +0 and the last node the walk turned left at at +0x8.
+void* SynAccFindPair_1417c7a10(void* pTree, void* pOut, const void* pKey) {
+    unsigned char* t = (unsigned char*)pTree;
+    unsigned char* o = (unsigned char*)pOut;
+    unsigned char* cand = *(unsigned char**)(t + 0x30);      // mov 0x30(%rcx),%r9
+    unsigned char* n = *(unsigned char**)(cand + 8);          // mov 0x8(%r9),%rax
+    while (*(unsigned char*)(n + 0x29) == 0) {                // cmpb / jne end
+        uint32_t key = *(const uint32_t*)pKey;                // mov (%r8),%r8d
+        if (*(uint32_t*)(n + 0x18) >= key) {                  // cmp %r8d,0x18(%rax) / jae
+            cand = n;                                         // mov %rax,%r9
+            n = *(unsigned char**)(n);                        // mov (%rax),%rax
+        } else {
+            n = *(unsigned char**)(n + 0x10);                 // mov 0x10(%rax),%rax
+        }
+    }
+    *(void**)(o + 8) = cand;                                  // mov %r9,0x8(%rdx)
+    *(void**)o = *(void**)t;                                  // mov (%rcx),%rax / mov %rax,(%rdx)
+    return o;                                                 // mov %rdx,%rax
+}
+
 }  // namespace tq

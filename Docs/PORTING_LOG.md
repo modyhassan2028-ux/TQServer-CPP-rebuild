@@ -371,3 +371,22 @@ The four bodies that were held back at D134 are in, each read straight off its o
   of the flag decides whether `this` is handed to 0x1417f2fdc: the test pins flag 0, flag 3 and
   flag 0xFE (which frees nothing). This body needed `synacc.h` in the tail file for the slot seam.
 - `tests/syndicate_d147_test.cpp`: 30 checks, 6 passes, ASan+UBSan clean. Cluster 185 bodies.
+
+## D148 — twelve bodies, 0x1417c7850..0x1417c7a10
+
+- 0x1417c7850: the comparison copies the argument's sixteen bytes to a stack temp **before** it
+  touches the lead, then answers `sete` on the two +0x8 words. The copy is why its DEBUG check
+  compares against `0x20(%rsp)` and not `(%rdx)`.
+- 0x1417c78a0: the pair gets the tree's first qword and the **header's lead**; 0x1417c78c0 gets
+  the same first qword and the **header itself**, and stores the two in the other order.
+- 0x1417c7920: both qwords cleared through one zeroed register, nothing past them.
+- 0x1417c78e0 / 0x1417c7930: the fifth and sixth starts of the +0x18 accessor, both DEBUG
+  checks kept, the first check falling through on a lead that stays null.
+- 0x1417c7970: the 0x1417c6e80 wrapper, iterator back.
+- 0x1417c7990 / 0x1417c79b0 / 0x1417c79d0 / 0x1417c79f0: the four lead frees, each with the
+  `-2` frame that is torn down before the jump to 0x1417f2fdc.
+- 0x1417c7a10: the keyed descent filling a pair. Its comparison is a **32-bit** `cmp`/`jae`, so
+  equal keys turn left like greater ones, and the answer's +0x8 is the last node the walk turned
+  left at — the header when it never turned. The test builds two real stop nodes so keys 7, 3 and
+  99 land on the root, on n5 and on the header.
+- `tests/syndicate_d148_test.cpp`: 30 checks, 6 passes, ASan+UBSan clean. Cluster 197 bodies.

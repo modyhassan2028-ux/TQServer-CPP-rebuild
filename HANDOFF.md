@@ -384,3 +384,9 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - `Docs/ASM/1417c7600.txt` (196 lines, 0x1417c7600..0x1417c78ff) is read to the cut at
   0x1417c788d. The comparison at 0x1417c7850 is still open because its closing `ret` sits past
   that cut: re-capture 0x1417c7880..0x1417c7920 before writing it.
+
+## D148 (latest)
+
+- Twelve bodies: `SYNDICATE_D148_OK ... 30 checks`, 6 passes. Cluster 197 bodies.
+- `Docs/ASM/1417c7830.txt` holds 0x1417c7830..0x1417c7c3f (274 lines) and is read to the cut at
+  0x1417c7a5b. The body at 0x1417c7a50 continues past it, so re-capture from there before writing.
