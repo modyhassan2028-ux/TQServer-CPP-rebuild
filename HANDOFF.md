@@ -514,3 +514,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - `Docs/SEAMS.md` is the new map: 99 slots / 7,238 sites, 2,340 direct targets / 13,703 sites.
 - Next: the destructor and allocator families need the vtable symbols (`tools/read_vtable_slots.py`,
   `Docs/SYNDICATE_CLASS_MAP.md`), then the NpcServer `npckernel` unit 1.
+
+## D165 (latest)
+
+- NpcServer.exe first unit landed: 8 bodies, `NPCSERVER_D165_OK`, 6 passes.
+- Corpus: 832 generated Syndicate bodies + 241 hand bodies + 8 NpcServer bodies.
+- Next: continue NpcServer by address (0x140001280 onwards) and pick up the WSAStartup body
+  0x140001130, whose tail was cut in the listing — read the full body before porting it.

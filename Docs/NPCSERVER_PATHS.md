@@ -54,3 +54,10 @@ Extracted from the binary itself: **50** paths, **50** of them scaffolded under 
 | `version/cqserver-78.0.11-1204/npcserver/npckernel/usermanager.cpp` |
 | `version/cqserver-78.0.11-1204/npcserver/npckernel/usermanager.h` |
 | `version/cqserver-78.0.11-1204/npcserver/npcserverdlg.cpp` |
+
+## Attribution note
+
+The first unit (`D165`, `npckernel/imagefront.cpp`) covers bodies that carry **no** `__FILE__`
+string: 0x140001020 .. 0x140001210. The file name is ours, not the original's, and the bodies stay
+together by address until attribution is known. Every body ported from an attributed path goes into
+the tree above with the path exactly as the binary prints it.

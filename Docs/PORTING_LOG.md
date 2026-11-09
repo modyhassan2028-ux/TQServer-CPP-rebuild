@@ -616,3 +616,23 @@ The four bodies that were held back at D134 are in, each read straight off its o
   and every thunk through it comes alive together.
 - 832 bodies, all walked: 223 address reads, 178 empty, 126 slot thunks, 120 field reads, 91
   constants, 64 field-read-plus-bias, 30 zeros. 6 passes, ASan and UBSan clean.
+
+## D165 — NpcServer.exe, the front of the image (8 bodies)
+
+- `modules/npcserver/src/npckernel/imagefront.cpp`: the bodies that precede the first
+  `__FILE__`-attributed function, in address order.
+  - `0x140001020` stores `std::tr1::_Ref_count_base::vftable` into its argument.
+  - `0x140001040` is the refcount release: `--*(this+0x14)` and, at zero, slot 1 of the object's
+    table called with `this`.
+  - `0x140001060` returns 0.
+  - `0x140001070` stores the same vftable, then deletes when the low byte is set, returning `this`.
+  - `0x1400010b0` is `log_InlineLogERROR(&DAT_1400be0b0)`.
+  - `0x1400011d0` is `Ordinal_116(); return 1;` (WSA cleanup).
+  - `0x1400011f0` deletes a non-null pointer through `operator_delete__`.
+  - `0x140001210` clears `+0x10`, then `memset(this+0x14, 0, 0x800)`, then writes
+    `+0x818 = -1`, `+0x814 = 0`, `+0x830 = 0`, `+0x820 = 0`, `+0x828 = 0`, and `*this = 0`, in
+    that order; the test checks the bytes past `+0x830` stay untouched.
+- The file name is **ours**: the image prints no path for these bodies, so they are kept together
+  by address and the PORTING_LOG says so. Seams: `operator_delete`, `operator_delete__`,
+  `log_InlineLogERROR`, `Ordinal_115` (WSAStartup), `Ordinal_116` (WSACleanup).
+- `tests/npcserver_d165_test.cpp`: 20 checks, 6 passes, ASan+UBSan clean.
