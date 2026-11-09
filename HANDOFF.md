@@ -687,3 +687,11 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - NpcServer: 102 bodies, 21 suites. 0x140015ed0 is fully wired to real bodies, no seams left inside it.
 - Next: the same treatment for 0x140002b30 (CKernelThread::Create), then continue the port after
   0x140074b80 (the IOCP backend, 0x140074780 onwards).
+
+## D188 (latest)
+
+- NpcServer: 104 bodies, 22 suites. The IOCP cluster now has its worker and its shutdown.
+- Left in that cluster: 0x140074930 (the winsock extension resolution, 568 bytes) - it needs its WSAIoctl
+  argument list read out of the disassembly before it can be written, since the decompiler truncated the
+  call.
+- After it: 0x140002b30 can be rewired onto the real bodies (its eight callees are all ported now).

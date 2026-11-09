@@ -278,6 +278,14 @@ extern void* (*g_pfnNpcCreateEventA)(void* pSec, int bManual, int bInitial, cons
 extern int   (*g_pfnNpcSetEvent)(void* hEvent);                              // SetEvent
 extern int   (*g_pfnNpcResetEvent)(void* hEvent);                            // ResetEvent
 extern unsigned int (*g_pfnNpcWaitForSingleObject)(void* hHandle, unsigned int uMilliseconds);
+unsigned long long FUN_140074d90(void* pCtl, unsigned int dwTimeout);
+void FUN_140074780(void* pCtl);
+extern int   (*g_pfnNpcReleaseSemaphore)(void* hSemaphore, long nRelease, long* pPrevious);
+extern int   (*g_pfnNpcPostQueuedCompletionStatus)(void* hPort, unsigned int dwBytes,
+                                                   unsigned long long uKey, void* pOverlapped);
+extern int   (*g_pfnNpcGetQueuedCompletionStatus)(void* hPort, unsigned int* pBytes,
+                                                  unsigned long long* pKey, void** ppOverlapped,
+                                                  unsigned int dwMilliseconds);
 extern unsigned int (*g_pfnNpcGetTickCount)(void);                           // GetTickCount
 extern unsigned int (*g_pfnNpc_140016450)(int* pTimeval);                    // FUN_140016450
 #define NPCSERVER_HANDLER_ADDR_140005400 0x140005400ull

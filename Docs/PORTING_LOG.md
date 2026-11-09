@@ -1161,3 +1161,22 @@ last.
   table at all and releases just the (empty) field at `+0xf8` and then the block.
 - All 21 suites were rebuilt against the trimmed translation unit (2011 lines) and pass, which is the check
   that the deleted seams really had no other callers.
+
+## D188 — NpcServer.exe 0x140074d90 and 0x140074780
+
+- `0x140074d90` (port shutdown) raises the exit flag at `+0x32` under the lock, posts one wake-up per slot
+  with key `-1`, waits on the semaphore with the caller's timeout when it is non-negative and with
+  `0xffffffff` otherwise, then re-reads the started count at `+0x40`. Only zero lets it delete the lock and
+  close both handles before releasing the slot array and the block; anything else answers `-1` and leaves
+  everything standing.
+- `0x140074780` (worker) reads its wait timeout from `+0x34`, the value the launch stamped as
+  `0xffffffff`, and treats any value below one the same way. Each iteration: take the lock, read `+0x32`,
+  release, then act. An exit request decrements `+0x40` and releases the semaphore at zero. A completion
+  with a key other than `-1` and an overlapped structure carries its routine in the **second** overlapped
+  slot's first word (`+0x20`) and calls it as `(overlapped, key, bytes, success)`. A key of `-1` with a
+  structure present does nothing at all, while a wait that yields neither is logged with
+  "GetQueuedCompletionStatus exited with no event." and then takes the same decrement path.
+- `tests/npcserver_d188_test.cpp` covers the shutdown with three posted wake-ups (and checks the lock is
+  deleted only after the wait), a still-running worker reporting `-1`, both timeout pass-through cases, a
+  completion routed through its routine with the exit flag set from inside it, the empty wait, and the
+  `-1` key that must not call anything.

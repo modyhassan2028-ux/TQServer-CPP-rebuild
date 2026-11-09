@@ -145,6 +145,10 @@ unsigned long long (*g_pfnNpcBeginThread)(void (*)(void*), unsigned int, void*) 
 unsigned long (*g_pfnNpcInitializeCriticalSectionAndSpinCount)(void*, unsigned long) = nullptr;
 void  (*g_pfnNpcThreadProc_140074780)(void*) = nullptr;
 void  (*g_pfnNpc_140074930)(void*) = nullptr;
+int   (*g_pfnNpcReleaseSemaphore)(void*, long, long*) = nullptr;
+int   (*g_pfnNpcPostQueuedCompletionStatus)(void*, unsigned int, unsigned long long, void*) = nullptr;
+int   (*g_pfnNpcGetQueuedCompletionStatus)(void*, unsigned int*, unsigned long long*, void**,
+                                           unsigned int) = nullptr;
 void* g_pNpcBase_140103f80 = nullptr;
 void  (*g_pfnNpc_140074d90)(void*, unsigned int) = nullptr;
 void  (*g_pfnNpc_140014300)(void*) = nullptr;
@@ -2005,6 +2009,113 @@ void FUN_140014b30(long long* pBase, int nFlag) {
     }
     if (pBase == (long long*)g_pNpcBase_140103f80) g_pNpcBase_140103f80 = nullptr;
     NpcFreeBasePart(pBase);
+}
+
+// 0x140074d90 - the port shutdown: raise the exit flag, post one wake-up per worker, wait for the semaphore
+// with the caller's timeout (or forever when it is negative), and only when the started count has reached
+// zero tear down the lock, the port, the semaphore, the slot array and the block. Otherwise report -1.
+unsigned long long FUN_140074d90(void* pCtl, unsigned int dwTimeout) {
+    unsigned char* p = (unsigned char*)pCtl;
+    if (g_pfnNpcEnterCS != nullptr) g_pfnNpcEnterCS(p + 0x08);
+    *(unsigned short*)(p + 0x32) = 1;
+    if (g_pfnNpcLeaveCS != nullptr) g_pfnNpcLeaveCS(p + 0x08);
+    int nPosted = 0;
+    if (0 < *(short*)(p + 0x30)) {
+        do {
+            if (g_pfnNpcPostQueuedCompletionStatus != nullptr)
+                g_pfnNpcPostQueuedCompletionStatus(*(void**)p, 0, 0xffffffffffffffffull, nullptr);
+            ++nPosted;
+        } while (nPosted < *(short*)(p + 0x30));
+    }
+    unsigned int dwWait = 0xffffffff;
+    if (-1 < (int)dwTimeout) dwWait = dwTimeout;
+    if (g_pfnNpcWaitForSingleObject != nullptr) g_pfnNpcWaitForSingleObject(*(void**)(p + 0x48), dwWait);
+    if (g_pfnNpcEnterCS != nullptr) g_pfnNpcEnterCS(p + 0x08);
+    short nLeft = *(short*)(p + 0x40);
+    if (g_pfnNpcLeaveCS != nullptr) g_pfnNpcLeaveCS(p + 0x08);
+    if (nLeft == 0) {
+        if (g_pfnNpcDeleteCS != nullptr) g_pfnNpcDeleteCS(p + 0x08);
+        if (g_pfnNpcCloseHandle != nullptr) {
+            g_pfnNpcCloseHandle(*(void**)p);
+            g_pfnNpcCloseHandle(*(void**)(p + 0x48));
+        }
+        if (g_pfnNpcFree_1400119c0 != nullptr) {
+            g_pfnNpcFree_1400119c0(*(void**)(p + 0x38));
+            g_pfnNpcFree_1400119c0(p);
+        }
+        return 0;
+    }
+    return 0xffffffffull;
+}
+
+// 0x140074780 - one IOCP worker: wait for a completion, and around each wait take the lock and read the
+// exit flag. An exit request decrements the started count and releases the semaphore when it reaches zero.
+// A completion with a key other than -1 carries its routine at +0x20 of the overlapped structure; a wait
+// that returns nothing at all is logged.
+void FUN_140074780(void* pCtl) {
+    unsigned char* p = (unsigned char*)pCtl;
+    unsigned int dwTimeout = *(unsigned int*)(p + 0x34);
+    void* hPort = *(void**)p;
+    if ((int)dwTimeout < 1) dwTimeout = 0xffffffff;
+    unsigned int dwBytes = 0;
+    unsigned long long uKey = 0;
+    void* pOverlapped = nullptr;
+    int bOk = 0;
+    if (g_pfnNpcGetQueuedCompletionStatus != nullptr)
+        bOk = g_pfnNpcGetQueuedCompletionStatus(hPort, &dwBytes, &uKey, &pOverlapped, dwTimeout);
+    if (g_pfnNpcEnterCS != nullptr) g_pfnNpcEnterCS(p + 0x08);
+    short nExit = *(short*)(p + 0x32);
+    for (;;) {
+        if (nExit != 0) {
+            short* pnStarted = (short*)(p + 0x40);
+            *pnStarted = (short)(*pnStarted - 1);
+            if (*pnStarted == 0) {
+                if (g_pfnNpcReleaseSemaphore != nullptr)
+                    g_pfnNpcReleaseSemaphore(*(void**)(p + 0x48), 1, nullptr);
+            }
+            if (g_pfnNpcLeaveCS != nullptr) g_pfnNpcLeaveCS(p + 0x08);
+            return;
+        }
+        if (g_pfnNpcLeaveCS != nullptr) g_pfnNpcLeaveCS(p + 0x08);
+        if (uKey == 0xffffffffffffffffull) {
+            if (pOverlapped == nullptr) {
+                if (g_pfnNpcWarn_1400191c0 != nullptr)
+                    g_pfnNpcWarn_1400191c0("GetQueuedCompletionStatus exited with no event.");
+                if (g_pfnNpcEnterCS != nullptr) g_pfnNpcEnterCS(p + 0x08);
+                short* pnStarted = (short*)(p + 0x40);
+                *pnStarted = (short)(*pnStarted - 1);
+                if (*pnStarted == 0) {
+                    if (g_pfnNpcReleaseSemaphore != nullptr)
+                        g_pfnNpcReleaseSemaphore(*(void**)(p + 0x48), 1, nullptr);
+                }
+                if (g_pfnNpcLeaveCS != nullptr) g_pfnNpcLeaveCS(p + 0x08);
+                return;
+            }
+        } else if (pOverlapped == nullptr) {
+            if (g_pfnNpcWarn_1400191c0 != nullptr)
+                g_pfnNpcWarn_1400191c0("GetQueuedCompletionStatus exited with no event.");
+            if (g_pfnNpcEnterCS != nullptr) g_pfnNpcEnterCS(p + 0x08);
+            short* pnStarted = (short*)(p + 0x40);
+            *pnStarted = (short)(*pnStarted - 1);
+            if (*pnStarted == 0) {
+                if (g_pfnNpcReleaseSemaphore != nullptr)
+                    g_pfnNpcReleaseSemaphore(*(void**)(p + 0x48), 1, nullptr);
+            }
+            if (g_pfnNpcLeaveCS != nullptr) g_pfnNpcLeaveCS(p + 0x08);
+            return;
+        } else {
+            ((void (*)(void*, unsigned long long, unsigned int, int))*(void**)((char*)pOverlapped + 0x20))(
+                pOverlapped, uKey, dwBytes, bOk);
+        }
+        dwBytes = 0;
+        uKey = 0;
+        pOverlapped = nullptr;
+        bOk = 0;
+        if (g_pfnNpcGetQueuedCompletionStatus != nullptr)
+            bOk = g_pfnNpcGetQueuedCompletionStatus(hPort, &dwBytes, &uKey, &pOverlapped, dwTimeout);
+        if (g_pfnNpcEnterCS != nullptr) g_pfnNpcEnterCS(p + 0x08);
+        nExit = *(short*)(p + 0x32);
+    }
 }
 
 }  // namespace tq
