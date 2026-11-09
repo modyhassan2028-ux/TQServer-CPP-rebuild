@@ -839,3 +839,30 @@ The four bodies that were held back at D134 are in, each read straight off its o
   half-words at `+0x78` and `+0x7c` to zero, and the six words at `+0x48`, `+0x50`, `+0x58`, `+0x60`,
   `+0x68`, `+0x70` to zero. Those are eight-byte stores, so `+0x74` is inside the `+0x70` one.
 - `tests/npcserver_d173_test.cpp` drives all three; the whole NpcServer set (D165 to D173) passes.
+
+## D174 — NpcServer.exe 0x140002d70 (CLogThread constructor)
+
+- `CThreadBase::CThreadBase` first (through the seam), then the table at `0x1400bed00` into the object,
+  `+0x40` cleared, the value in `+0x48`, and, only when a name is passed, `tq::SafeCopy(+0x50, name,
+  0x80)`. A null name leaves `+0x50` untouched. The table address and the copy's `r8d` are the body's
+  own operands (`lea 0xbbf5c(%rip)` and `mov $0x80,%r8d`).
+- `tests/npcserver_d174_test.cpp` checks the store order (the base sees no table yet), the cleared word,
+  the handle, the destination pointer, the source and the 0x80 capacity.
+
+## Deferred: 0x1400027f0 CKernelThread::OnProcess()
+
+- Read in full (132 lines, `0x500`-byte frame) and deliberately not ported yet. It is the only body in
+  this stretch whose behaviour depends on a structure this project has not modelled:
+  - the receive call `slot +0x48(obj, -1, -1, 0x418)` fills a **packet header** the body then reads as
+    `local_4b8[4]` plus an `int` type compared against `0x1fbd1` and `0x1fbd2`, and `local_438[0]`
+    holding the fd (-1 short-circuits each branch);
+  - three `CTickAnalyst` scopes (`0x4c`, `0x4d`, `0x4f`, `0x50`) wrap the loop, the packet branches and
+    the tick call, so their constructor/destructor pair is part of the body's shape;
+  - it also walks the watchdog counters at `+0x78`/`+0x7c`, the static tick clock `DAT_140103c60` /
+    `DAT_140103c64`, the three atomic statistics `_DAT_140103f28`, `DAT_140103f2c`, `DAT_140103f30`, and
+    the adaptive loop delay `DAT_140102148`.
+- Writing it now would mean inventing the packet header layout, which this project does not allow, so it
+  waits for the receive seam and the packet header to be modelled (the `0x418` buffer bound is the first
+  thing to pin down).
+- `0x140002b30` (thread launcher, `_SYSTEM_INFO`) follows it and is deferred for the same reason: it
+  launches the worker and needs the same objects.

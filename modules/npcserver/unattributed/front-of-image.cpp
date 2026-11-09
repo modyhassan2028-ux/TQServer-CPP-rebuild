@@ -44,6 +44,8 @@ void* (*g_pfnNpcBevInput_140005b70)(void* pBev) = nullptr;
 unsigned long long (*g_pfnNpcEvbufLen_14000c370)(void* pEvbuf) = nullptr;
 long long (*g_pfnNpcEvbufRemove_140005c30)(void* pBev, void* pDst, long long nBytes) = nullptr;
 void (*g_pfnNpcThreadBaseCtor)(void* pThis) = nullptr;
+void (*g_pfnNpcSafeCopy)(char* pDst, const char* pSrc, unsigned long long uCapacity) = nullptr;
+void* g_symNpcVftbl_1400bed00 = nullptr;
 void (*g_pfnNpcThreadBaseDtor)(void* pThis) = nullptr;
 void (*g_pfnNpcEventBase_140016270)(void* pBase, long long a2, long long a3, long long a4) = nullptr;
 int  (*g_pfnNpcEventBaseLoopExit_140016280)(void* pBase, void* pArg) = nullptr;
@@ -798,6 +800,20 @@ void* FUN_140002790(void* pThis) {
     *(void**)((char*)pThis + 0x58) = nullptr;
     *(void**)((char*)pThis + 0x70) = nullptr;
     *(void**)((char*)pThis + 0x60) = nullptr;
+    return pThis;
+}
+
+// 0x140002d70 - CLogThread's constructor: the base first, then the table at 0x1400bed00 into the
+// object, +0x40 cleared, the handle at +0x48, and the name copied into +0x50 with a 0x80 cap when a
+// name is given. A null name leaves that buffer untouched.
+void* FUN_140002d70(void* pThis, long long hThread, const char* pszName) {
+    if (g_pfnNpcThreadBaseCtor != nullptr) g_pfnNpcThreadBaseCtor(pThis);
+    *(void**)pThis = &g_symNpcVftbl_1400bed00;
+    *(void**)((char*)pThis + 0x40) = nullptr;
+    *(void**)((char*)pThis + 0x48) = (void*)hThread;
+    if (pszName != nullptr) {
+        if (g_pfnNpcSafeCopy != nullptr) g_pfnNpcSafeCopy((char*)pThis + 0x50, pszName, 0x80);
+    }
     return pThis;
 }
 

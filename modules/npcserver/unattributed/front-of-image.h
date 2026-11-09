@@ -58,6 +58,8 @@ extern int   (*g_pfnNpcCloseHandle)(void* hObject);                         // C
 extern void  (*g_pfnNpcLogMessage)(const char* pszMessage);                 // log_InlineLogMessage
 extern unsigned long (*g_pfnNpcTimeGet)(unsigned long long uParam);         // tq::TimeGet
 extern void  (*g_pfnNpcThreadBaseCtor)(void* pThis);                       // CThreadBase::CThreadBase
+extern void  (*g_pfnNpcSafeCopy)(char* pDst, const char* pSrc, unsigned long long uCapacity);  // tq::SafeCopy
+extern void* g_symNpcVftbl_1400bed00;                                       // stored at 0x140002d70
 extern void* g_symNpcVftbl_1400be730;                                       // stored at 0x1400021f0/0x140002540
 extern void* g_symNpcVftbl_1400be6f8;                                       // the second store in both bodies                        // DAT_1400be0b0
 
@@ -122,6 +124,7 @@ void  FUN_140002630(long long pThis, long long a2, long long a3, long long a4);
 unsigned long long FUN_140002700(int* pThis);
 int   FUN_140002760(unsigned int* pThis, unsigned int uValue);
 void* FUN_140002790(void* pThis);
+void* FUN_140002d70(void* pThis, long long hThread, const char* pszName);
 int   FUN_140001520(char* pThis);
 
 }  // namespace tq

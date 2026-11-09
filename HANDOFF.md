@@ -580,3 +580,11 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - NpcServer: 64 bodies, 0x140001020 .. 0x140002790. Eight suites green.
 - `0x1400027f0` is next and it is large (0x500-byte frame, `CTickAnalyst` temporaries), so it gets its
   own unit with its full body read first.
+
+## D174 (latest)
+
+- NpcServer: 65 bodies. Suites D165 to D174 all green.
+- Log thread is now started: `CLogThread` ctor at 0x140002d70 with the table at 0x1400bed00.
+- Blocker on the sequence: 0x1400027f0 (`OnProcess`) and 0x140002b30 (thread launcher) need the packet
+  header that receive slot +0x48 fills (type 0x1fbd1/0x1fbd2, fd at word 0, 0x418 bound) and the
+  CTickAnalyst scope pair. Model those two seams first, then both bodies can be written verbatim.
