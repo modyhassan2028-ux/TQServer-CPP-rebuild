@@ -473,3 +473,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - `g_pfnSynCmp3_1418232b0` is new (three-argument comparison, null by default); 0x14178f470 was
   already modelled as `g_pfnLogic_14178f470` with a uint64 signature.
 - Next: 0x1417c8c10 in `Docs/ASM/1417c8a70.txt`, the same walk with a count and a 0x60 frame.
+
+## D159 (latest)
+
+- The scored walk is in: `SYNDICATE_D159_OK ... 3 checks`, 6 passes. Cluster 237 bodies.
+- `g_pfnSynScore_141798060` is new (element, mode -> int, null by default).
+- Next: `Docs/ASM/1417c8a70.txt` ends at 0x1417c8d80 with the scored walk's epilogue, so extend the
+  capture past 0x1417c8d80 before the next unit.

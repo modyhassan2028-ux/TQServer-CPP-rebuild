@@ -3286,4 +3286,67 @@ void* SynAccFindMatch_1417c8aa0(void* pThis, void* pArg2) {
     }
 }
 
+// 0x1417c8c10 - the same walk, keeping the element whose score from 0x141798060 is greatest.
+// The comparison is signed 32-bit against the running best, so only a strictly greater answer
+// replaces it; the mode arrives in edx and is passed straight through.
+int (*g_pfnSynScore_141798060)(void* pElem, unsigned int uMode) = nullptr;
+
+void* SynAccBestMatch_1417c8c10(void* pThis, unsigned int uMode) {
+    unsigned char* t = (unsigned char*)pThis;
+    unsigned char* cursor = *(unsigned char**)(*(unsigned char**)(t + 0x38));  // mov 0x38(%rcx),%rax / mov (%rax),%rbx
+    unsigned char* best = nullptr;                                             // xor %r12d,%r12d
+    int bestScore = 0;                                                         // xor %r13d,%r13d
+    for (;;) {
+        unsigned char* end = *(unsigned char**)(t + 0x38);                     // mov 0x38(%r14),%rdi
+        unsigned char* node = *(unsigned char**)(t + 8);                       // mov 0x8(%r14),%rax
+        if (node == nullptr || node != *(unsigned char**)(t + 8)) {            // test %rsi,%rsi / je, cmp
+            if (g_pfn_invalid_parameter_noinfo != nullptr) g_pfn_invalid_parameter_noinfo();
+        }
+        if (cursor == end) return best;                                        // cmp %rdi,%rbx / je
+        unsigned char* lead;
+        if (node == nullptr) {                                                 // test %rsi,%rsi / jne
+            if (g_pfn_invalid_parameter_noinfo != nullptr) g_pfn_invalid_parameter_noinfo();
+            lead = nullptr;
+        } else lead = *(unsigned char**)node;                                  // mov (%rsi),%r11
+        if (cursor == *(unsigned char**)(lead + 0x30)) {                       // cmp 0x30(%r11),%rbx
+            if (g_pfn_invalid_parameter_noinfo != nullptr) g_pfn_invalid_parameter_noinfo();
+        }
+        unsigned char* elem = *(unsigned char**)(cursor + 0x20);               // mov 0x20(%rbx),%rdi
+        if (elem != nullptr) {
+            int score = 0;                                                     // mov %r15d,%edx / call
+            if (g_pfnSynScore_141798060 != nullptr) score = g_pfnSynScore_141798060(elem, uMode);
+            if (bestScore < score) {                                           // cmp %eax,%r13d / jge
+                bestScore = score;                                             // mov %eax,%r13d
+                best = elem;                                                   // mov %rdi,%r12
+            }
+        }
+        if (node == nullptr) {                                                 // test %rsi,%rsi
+            if (g_pfn_invalid_parameter_noinfo != nullptr) g_pfn_invalid_parameter_noinfo();
+        }
+        if (*(unsigned char*)(cursor + 0x29) != 0) {                           // cmpb $0x0,0x29(%rbx) / je
+            if (g_pfn_invalid_parameter_noinfo != nullptr) g_pfn_invalid_parameter_noinfo();
+            continue;                                                          // jmp 0x1417c8c60
+        }
+        unsigned char* r = *(unsigned char**)(cursor + 0x10);                  // mov 0x10(%rbx),%rax
+        if (*(unsigned char*)(r + 0x29) == 0) {
+            cursor = r;                                                        // mov %rax,%rbx
+            for (;;) {                                                         // 0x1417c8d10
+                r = *(unsigned char**)cursor;                                  // mov (%rbx),%rax
+                if (*(unsigned char*)(r + 0x29) != 0) break;
+                cursor = r;
+            }
+            continue;
+        }
+        r = *(unsigned char**)(cursor + 8);                                    // mov 0x8(%rbx),%rax
+        if (*(unsigned char*)(r + 0x29) == 0) {
+            while (cursor == *(unsigned char**)(r + 0x10)) {                   // 0x1417c8d30
+                cursor = r;
+                r = *(unsigned char**)(r + 8);
+                if (*(unsigned char*)(r + 0x29) != 0) break;
+            }
+        }
+        cursor = r;                                                            // mov %rax,%rbx
+    }
+}
+
 }  // namespace tq

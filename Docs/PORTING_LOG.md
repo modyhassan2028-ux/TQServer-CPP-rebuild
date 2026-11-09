@@ -528,3 +528,17 @@ The four bodies that were held back at D134 are in, each read straight off its o
 - Test note: the first three attempts crashed because the element, the lead and the cursor live on
   different nodes — reading `0x20(node)` instead of `0x20(cursor)` walks straight into a null
   child. 12 checks, 6 passes, ASan+UBSan clean. Cluster 236 bodies.
+
+## D159 — the scored walk 0x1417c8c10
+
+- Same frame shape as 0x1417c8aa0 but with two more registers carried: the best answer and its
+  score, both zeroed before the walk. The score comes from 0x141798060 with the mode passed at
+  `edx`, the comparison is **signed 32-bit** (`cmp %eax,%r13d` / `jge`), so only a strictly greater
+  answer replaces the one held, and a walk that never scores answers zero.
+- The argument is a mode, not a pointer, and nothing on this path is asserted.
+- The step is the 0x29 descend (through `0x10`, then the left spine) and climb (`0x8` while the
+  parent's `0x10` names the node left), both looping back to the frame's re-read of `0x38(%r14)`
+  and `0x8(%r14)`.
+- Test note: the descend walks the left spine of the node it lands on, so a second node needs its
+  `0x0` link set as well; the first attempt crashed on exactly that read.
+- 3 checks, 6 passes, ASan+UBSan clean. Cluster 237 bodies.
