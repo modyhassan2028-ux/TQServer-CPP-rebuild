@@ -567,3 +567,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - NpcServer: 35 bodies, 0x140001020 .. 0x140001fd0. Six suites green 6x each.
 - New seams: `operator_new`, `operator_new__`, `FUN_140005b70`, `FUN_14000c370`, `FUN_140005c30`.
 - Next: 0x1400020c0 onward.
+
+## D172 (latest)
+
+- NpcServer: 61 bodies, 0x140001020 .. 0x140002630. Seven suites green 6x each.
+- The thread class work is now grounded: object at +8 / +0x50 / +0x68 each carry their table in the
+  first word, and the slots are reached through that word.
+- Next: 0x1400026xx onward.

@@ -43,6 +43,18 @@ void* (*g_pfnNpcOperatorNewUnderscore)(long long nBytes) = nullptr;
 void* (*g_pfnNpcBevInput_140005b70)(void* pBev) = nullptr;
 unsigned long long (*g_pfnNpcEvbufLen_14000c370)(void* pEvbuf) = nullptr;
 long long (*g_pfnNpcEvbufRemove_140005c30)(void* pBev, void* pDst, long long nBytes) = nullptr;
+void (*g_pfnNpcThreadBaseDtor)(void* pThis) = nullptr;
+void (*g_pfnNpcEventBase_140016270)(void* pBase, long long a2, long long a3, long long a4) = nullptr;
+int  (*g_pfnNpcEventBaseLoopExit_140016280)(void* pBase, void* pArg) = nullptr;
+void (*g_pfnNpcEventBaseFree_140014eb0)(void* pBase, void* a2, long long a3, long long a4) = nullptr;
+void (*g_pfnNpc_140012190)(void) = nullptr;
+int  (*g_pfnNpcBevEnable_1400071b0)(void* pBev, int nEvents) = nullptr;
+void (*g_pfnNpcSleep)(unsigned int nMilliseconds) = nullptr;
+int  (*g_pfnNpcCloseHandle)(void* hObject) = nullptr;
+void (*g_pfnNpcLogMessage)(const char* pszMessage) = nullptr;
+unsigned long (*g_pfnNpcTimeGet)(unsigned long long uParam) = nullptr;
+void* g_symNpcVftbl_1400be730 = nullptr;
+void* g_symNpcVftbl_1400be6f8 = nullptr;
 
 unsigned char g_symNpcStr_1400be0b0 = 0;
 
@@ -574,6 +586,182 @@ int* FUN_140001fd0(int* pThis, const void* pSrc, int nSize) {
         *pThis = nSize;
     }
     return pThis;
+}
+
+// ---- 0x1400020d0 .. 0x140002630 -------------------------------------------------------------
+
+void FUN_1400020d0(void) { return; }                     // 0x1400020d0
+void FUN_1400020f0(void) { if (g_pfnNpcInlineLogError) g_pfnNpcInlineLogError(&g_symNpcStr_1400be0b0); }
+void FUN_140002130(void) { if (g_pfnNpcInlineLogError) g_pfnNpcInlineLogError(&g_symNpcStr_1400be0b0); }
+void FUN_140002170(void) { if (g_pfnNpcInlineLogError) g_pfnNpcInlineLogError(&g_symNpcStr_1400be0b0); }
+void FUN_1400021b0(void) { if (g_pfnNpcInlineLogError) g_pfnNpcInlineLogError(&g_symNpcStr_1400be0b0); }
+void FUN_140002270(void) { return; }                     // 0x140002270
+
+// 0x1400021f0 - both table stores, then the base destructor
+void FUN_1400021f0(long long pThis) {
+    *(void**)pThis = &g_symNpcVftbl_1400be730;
+    *(void**)(pThis + 0x40) = &g_symNpcVftbl_1400be6f8;
+    if (g_pfnNpcThreadBaseDtor != nullptr) g_pfnNpcThreadBaseDtor((void*)pThis);
+}
+
+// 0x140002230 .. 0x140002260 - slots 0, 1, 2 and 3 of the table held by the object at *(this+8).
+// The machine code loads the object, then its first word (the table), then jumps through the slot, and
+// the load leaves the object in rcx, so the callee receives it as its first argument.
+static void CallSlot(long long pThis, int nSlot) {
+    void** pObj = *(void***)(pThis + 8);
+    void** pVtbl = *(void***)pObj;
+    (*(void (*)(void*))((void**)pVtbl)[nSlot])(pObj);
+}
+void FUN_140002230(long long pThis) { CallSlot(pThis, 0); }
+void FUN_140002240(long long pThis) { CallSlot(pThis, 1); }
+void FUN_140002250(long long pThis) { CallSlot(pThis, 2); }
+void FUN_140002260(long long pThis) { CallSlot(pThis, 3); }
+
+void FUN_140002280(long long pThis, void* pBuf, int nLen) {
+    FUN_140001390(*(void**)(pThis + 0x20), pBuf, nLen);
+}
+void FUN_140002290(long long pThis) {
+    FUN_140001440(*(void**)(pThis + 0x20));
+}
+
+// 0x1400022a0 - forward four values to the object at +0x58 when it exists
+void FUN_1400022a0(long long pThis, long long a2, long long a3, long long a4) {
+    if (*(void**)(pThis + 0x58) != (void*)0x0) {
+        if (g_pfnNpcEventBase_140016270 != nullptr)
+            g_pfnNpcEventBase_140016270(*(void**)(pThis + 0x58), a2, a3, a4);
+    }
+}
+
+void* FUN_1400022c0(long long pThis) { return *(void**)(pThis + 0x58); }   // 0x1400022c0
+void* FUN_1400022e0(long long pThis) { return *(void**)(pThis + 0x68); }   // 0x1400022e0
+
+// Every dispatch below loads the object, then the object's first word (its table), then the slot.
+static void** TableOf(void* pObj) { return *(void***)pObj; }
+
+// 0x1400022f0 - the read callback: one fd, then one four-value dispatch
+void FUN_1400022f0(long long pBev, long long pSocket) {
+    long long fd = g_pfnNpcBevGetFd_140006200 != nullptr ? g_pfnNpcBevGetFd_140006200((void*)pBev) : -1;
+    if (fd == -1) {
+        if (g_pfnNpcInlineLogError != nullptr) g_pfnNpcInlineLogError(&g_symNpcStr_1400be0b0);
+        return;
+    }
+    void** pObj = *(void***)(pSocket + 0x50);
+    void** pVtbl = TableOf(pObj);
+    ((void (*)(void*, long long, long long, long long, long long*))((void**)pVtbl)[10])(
+        pObj, 1, 0x1fbd1, 8, &fd);
+}
+
+// 0x140002380 - CKernelThread::BufferEventCb
+void FUN_140002380(long long* pBev, unsigned char bEvents, long long pSocket) {
+    long long fd = g_pfnNpcBevGetFd_140006200 != nullptr
+                       ? g_pfnNpcBevGetFd_140006200((void*)pBev) : -1;
+    if (-1 < fd) {
+        const char* pszError = nullptr;
+        if ((char)bEvents < '\0') {
+            int iVar1 = g_pfnNpcBevEnable_1400071b0 != nullptr
+                            ? g_pfnNpcBevEnable_1400071b0((void*)pBev, 6) : -1;
+            if (-1 < iVar1) {
+                return;
+            }
+            if (g_pfnNpcOrdinal111 != nullptr) g_pfnNpcOrdinal111();
+            pszError = "CKernelThread::BufferEventCb, bufferevent_enable error[%d].";
+        } else {
+            if ((bEvents & 0x30) != 0) {
+                void** pObj = *(void***)(pSocket + 0x50);
+                void** pVtbl = TableOf(pObj);
+                ((void (*)(void*, long long, long long, long long, long long*))((void**)pVtbl)[10])(
+                    pObj, 1, 0x1fbd2, 8, &fd);
+                return;
+            }
+            pszError = "CKernelThread::BufferEventCb, events[%0x] error.";
+        }
+        if (g_pfnNpcInlineLogError != nullptr) g_pfnNpcInlineLogError(pszError);
+    }
+}
+
+// 0x140002450 - the magic-multiply residue is kept verbatim from the body
+int FUN_140002450(long long pThis) {
+    unsigned long uVar1 = g_pfnNpcTimeGet != nullptr ? g_pfnNpcTimeGet(0) : 0;
+    *(unsigned int*)(pThis + 4) = (unsigned int)(uVar1 / 1000);
+    return (int)(uVar1 * 0x10624dd3u);
+}
+
+// 0x140002480 - true when the stored total has been reached, in the low byte of the result
+unsigned long long FUN_140002480(int* pThis) {
+    unsigned long uVar1 = g_pfnNpcTimeGet != nullptr ? g_pfnNpcTimeGet(0) : 0;
+    unsigned long long uResult = (unsigned long long)((unsigned int)(pThis[1] + *pThis) <= uVar1 / 1000);
+    return uResult;
+}
+
+// 0x1400024c0 - release and clear the object the word points at
+void FUN_1400024c0(void** pThis) {
+    if (*pThis != (void*)0x0) {
+        FUN_1400014d0(*pThis);
+        *pThis = 0;
+    }
+}
+
+// 0x1400024f0 - the worker routine's two messages around 0x1400022a0
+long long FUN_1400024f0(long long pThis, long long a2, long long a3, long long a4) {
+    if (g_pfnNpcLogMessage != nullptr) g_pfnNpcLogMessage("EvnetRoutine worker thread is up and running");
+    FUN_1400022a0(pThis, a2, a3, a4);
+    if (g_pfnNpcLogMessage != nullptr) g_pfnNpcLogMessage("EvnetRoutine worker thread exited");
+    return 0;
+}
+
+// 0x140002540 - the same two stores and destructor, then delete on the low flag bit
+void* FUN_140002540(long long pThis, unsigned int uFlags) {
+    *(void**)pThis = &g_symNpcVftbl_1400be730;
+    *(void**)(pThis + 0x40) = &g_symNpcVftbl_1400be6f8;
+    if (g_pfnNpcThreadBaseDtor != nullptr) g_pfnNpcThreadBaseDtor((void*)pThis);
+    if ((uFlags & 1) != 0) {
+        if (g_pfnNpcOperatorDelete != nullptr) g_pfnNpcOperatorDelete((void*)pThis);
+    }
+    return (void*)pThis;
+}
+
+void FUN_1400025b0(void) {
+    if (g_pfnNpcInlineLogError != nullptr) g_pfnNpcInlineLogError(&g_symNpcStr_1400be0b0);
+}
+void FUN_1400025f0(void) {
+    if (g_pfnNpcInlineLogError != nullptr) g_pfnNpcInlineLogError(&g_symNpcStr_1400be0b0);
+}
+
+// 0x140002630 - CKernelThread::OnDestroy
+void FUN_140002630(long long pThis, long long a2, long long a3, long long a4) {
+    if (*(void**)(pThis + 0x68) != (void*)0x0) {
+        void** pObj = *(void***)(pThis + 0x68);
+        void** pVtbl = TableOf(pObj);
+        ((void (*)(void*))((void**)pVtbl)[2])(pObj);
+        *(void**)(pThis + 0x68) = 0;
+    }
+    if (*(long long*)(pThis + 0x60) != 0) {
+        FUN_140001340(*(void**)(pThis + 0x60));
+        if (*(long long*)(pThis + 0x60) != 0) {
+            FUN_1400014d0(*(void**)(pThis + 0x60));
+            *(void**)(pThis + 0x60) = 0;
+        }
+    }
+    unsigned int local_res10 = 2;
+    unsigned int local_res14 = 0;
+    void* puVar2 = (void*)&local_res10;
+    int iVar1 = g_pfnNpcEventBaseLoopExit_140016280 != nullptr
+                    ? g_pfnNpcEventBaseLoopExit_140016280(*(void**)(pThis + 0x58), puVar2) : 0;
+    if (iVar1 < 0) {
+        if (g_pfnNpcInlineLogError != nullptr)
+            g_pfnNpcInlineLogError("CKernelThread::OnDestroy, event_base_loopexit error.");
+    }
+    if (g_pfnNpcSleep != nullptr) g_pfnNpcSleep(0x9c4);
+    if (g_pfnNpcCloseHandle != nullptr) g_pfnNpcCloseHandle(*(void**)(pThis + 0x70));
+    if (*(void**)(pThis + 0x58) != (void*)0x0) {
+        if (g_pfnNpcEventBaseFree_140014eb0 != nullptr)
+            g_pfnNpcEventBaseFree_140014eb0(*(void**)(pThis + 0x58), puVar2, a3, a4);
+        *(void**)(pThis + 0x58) = 0;
+    }
+    if (g_pfnNpc_140012190 != nullptr) g_pfnNpc_140012190();
+    void** pObj50 = *(void***)(pThis + 0x50);
+    void** pVtbl50 = TableOf(pObj50);
+    ((void (*)(void*))((void**)pVtbl50)[6])(pObj50);
 }
 
 }  // namespace tq

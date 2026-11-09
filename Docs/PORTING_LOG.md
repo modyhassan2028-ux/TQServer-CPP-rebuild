@@ -786,3 +786,42 @@ The four bodies that were held back at D134 are in, each read straight off its o
   the assignment, which is why the block reads `1` at `+0x10` after `0x140001ea0` returns.
 - `tests/npcserver_d171_test.cpp` drives all ten; D165, D166, D168, D169, D170 and D171 each pass 6
   times against the same objects.
+
+## D172 — NpcServer.exe 0x1400020d0 .. 0x140002630 (26 bodies)
+
+- Ten are trivial: `0x1400020d0` and `0x140002270` return; `0x1400020f0`, `0x140002130`, `0x140002170`,
+  `0x1400021b0`, `0x1400025b0`, `0x1400025f0` log `&DAT_1400be0b0` (the last two also return 0).
+- `0x1400021f0` and `0x140002540` store the table at `0x1400be730` into the object and the table at
+  `0x1400be6f8` into `+0x40`, then call `CThreadBase::~CThreadBase`; `0x140002540` also deletes on the
+  low flag bit. Both table addresses are the bodies' own `lea` operands.
+- `0x140002230` .. `0x140002260` are the same three instructions with a different slot offset
+  (`0x0`, `0x8`, `0x10`, `0x18`). The machine code is `mov 0x8(%rcx),%rcx; mov (%rcx),%rax;
+  jmp *0xN(%rax)`: the word at `+8` is the **object**, and that object's **first word** is the table.
+  Reading the slot off the object instead of its table is what a first pass of this unit got wrong, and
+  the suite caught it as a segfault. The load also leaves the object in `rcx`, so the callee receives
+  it as its first argument.
+- `0x140002280` and `0x140002290` forward to `0x140001390` and `0x140001440` through `+0x20`.
+  `0x1400022a0` forwards four values to the object at `+0x58` when it exists; `0x1400022c0` returns
+  that word and `0x1400022e0` returns `+0x68` (the two words the earlier clientsocket bodies read
+  through seams).
+- `0x1400022f0` is the read callback: one fd, then one dispatch with `1`, `0x1fbd1`, `8` and the fd's
+  address, through the object at `+0x50` and slot `+0x50`.
+- `0x140002380` is `CKernelThread::BufferEventCb` with its two strings: bit 7 enables with `6` and
+  logs `"CKernelThread::BufferEventCb, bufferevent_enable error[%d]."` on failure, the `0x30` bits
+  dispatch with `0x1fbd2`, anything else logs
+  `"CKernelThread::BufferEventCb, events[%0x] error."`.
+- `0x140002450` stores `TimeGet(0) / 1000` at `+4` and returns the magic-multiply residue the body
+  leaves in `eax` (`uVar1 * 0x10624dd3`); `0x140002480` compares the stored sum against `TimeGet(0)/1000`
+  and returns that as a boolean.
+- `0x1400024f0` logs `"EvnetRoutine worker thread is up and running"` and
+  `"EvnetRoutine worker thread exited"` around the four-value forward, misspelling included.
+- `0x140002630` is `CKernelThread::OnDestroy`: release `+0x68` through its slot `+0x10`, release
+  `+0x60` through `0x140001340` and then `0x1400014d0`, exit the loop with `2`/`0`, log
+  `"CKernelThread::OnDestroy, event_base_loopexit error."` when that fails, `Sleep(0x9c4)`,
+  `CloseHandle(*(+0x70))`, free the base and zero it, call `0x140012190`, then slot `+0x30` of `+0x50`.
+- Casting rule learned here and applied across the file: a **stored function value** must be cast to a
+  plain function pointer, while `(*(T **)addr)` is only right when `addr` is the **address of the
+  slot**. Four call sites in this unit used the latter form on the former and dereferenced the code
+  itself; the audit found no such site elsewhere in the tree.
+- `tests/npcserver_d172_test.cpp` drives all 26; seven suites (D165, D166, D168, D169, D170, D171,
+  D172) pass 6 times each against the same objects.

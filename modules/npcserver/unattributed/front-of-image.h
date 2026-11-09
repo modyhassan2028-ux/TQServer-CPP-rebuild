@@ -46,7 +46,19 @@ extern void* (*g_pfnNpcOperatorNew)(long long nBytes);                    // ope
 extern void* (*g_pfnNpcOperatorNewUnderscore)(long long nBytes);          // operator_new__
 extern void* (*g_pfnNpcBevInput_140005b70)(void* pBev);                   // FUN_140005b70
 extern unsigned long long (*g_pfnNpcEvbufLen_14000c370)(void* pEvbuf);    // FUN_14000c370
-extern long long (*g_pfnNpcEvbufRemove_140005c30)(void* pBev, void* pDst, long long nBytes);  // FUN_140005c30                        // DAT_1400be0b0
+extern long long (*g_pfnNpcEvbufRemove_140005c30)(void* pBev, void* pDst, long long nBytes);  // FUN_140005c30
+extern void  (*g_pfnNpcThreadBaseDtor)(void* pThis);                       // CThreadBase::~CThreadBase
+extern void  (*g_pfnNpcEventBase_140016270)(void* pBase, long long a2, long long a3, long long a4);  // FUN_140016270
+extern int   (*g_pfnNpcEventBaseLoopExit_140016280)(void* pBase, void* pArg);   // FUN_140016280
+extern void  (*g_pfnNpcEventBaseFree_140014eb0)(void* pBase, void* a2, long long a3, long long a4);  // FUN_140014eb0
+extern void  (*g_pfnNpc_140012190)(void);                                  // FUN_140012190
+extern int   (*g_pfnNpcBevEnable_1400071b0)(void* pBev, int nEvents);       // FUN_1400071b0
+extern void  (*g_pfnNpcSleep)(unsigned int nMilliseconds);                  // Sleep
+extern int   (*g_pfnNpcCloseHandle)(void* hObject);                         // CloseHandle
+extern void  (*g_pfnNpcLogMessage)(const char* pszMessage);                 // log_InlineLogMessage
+extern unsigned long (*g_pfnNpcTimeGet)(unsigned long long uParam);         // tq::TimeGet
+extern void* g_symNpcVftbl_1400be730;                                       // stored at 0x1400021f0/0x140002540
+extern void* g_symNpcVftbl_1400be6f8;                                       // the second store in both bodies                        // DAT_1400be0b0
 
 void  FUN_140001020(void** pThis);
 void  FUN_140001040(void** pThis);
@@ -80,6 +92,32 @@ void  FUN_140001f40(long long pThis);
 void* FUN_140001f90(void** pThis);
 void* FUN_140001fb0(void** pThis, void* pArg2, void* pArg3);
 int*  FUN_140001fd0(int* pThis, const void* pSrc, int nSize);
+void  FUN_1400020d0(void);
+void  FUN_1400020f0(void);
+void  FUN_140002130(void);
+void  FUN_140002170(void);
+void  FUN_1400021b0(void);
+void  FUN_1400021f0(long long pThis);
+void  FUN_140002230(long long pThis);
+void  FUN_140002240(long long pThis);
+void  FUN_140002250(long long pThis);
+void  FUN_140002260(long long pThis);
+void  FUN_140002270(void);
+void  FUN_140002280(long long pThis, void* pBuf, int nLen);
+void  FUN_140002290(long long pThis);
+void  FUN_1400022a0(long long pThis, long long a2, long long a3, long long a4);
+void* FUN_1400022c0(long long pThis);
+void* FUN_1400022e0(long long pThis);
+void  FUN_1400022f0(long long pBev, long long pSocket);
+void  FUN_140002380(long long* pBev, unsigned char bEvents, long long pSocket);
+int   FUN_140002450(long long pThis);
+unsigned long long FUN_140002480(int* pThis);
+void  FUN_1400024c0(void** pThis);
+long long FUN_1400024f0(long long pThis, long long a2, long long a3, long long a4);
+void* FUN_140002540(long long pThis, unsigned int uFlags);
+void  FUN_1400025b0(void);
+void  FUN_1400025f0(void);
+void  FUN_140002630(long long pThis, long long a2, long long a3, long long a4);
 int   FUN_140001520(char* pThis);
 
 }  // namespace tq
