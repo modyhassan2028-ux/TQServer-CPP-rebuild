@@ -466,3 +466,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - Next in `Docs/ASM/1417c8a70.txt`: 0x1417c8aa0 is a checked body (assert at line 0x172 with
   0x14183a778 and 0x141827b98) that then reads `0x38(%rcx)`, `0x8(%rcx)` and compares
   `0x8(%rbp)` — the shape of a range/verify step. Read the file before starting it.
+
+## D158 (latest)
+
+- The matching walk is in: `SYNDICATE_D158_OK ... 12 checks`, 6 passes. Cluster 236 bodies.
+- `g_pfnSynCmp3_1418232b0` is new (three-argument comparison, null by default); 0x14178f470 was
+  already modelled as `g_pfnLogic_14178f470` with a uint64 signature.
+- Next: 0x1417c8c10 in `Docs/ASM/1417c8a70.txt`, the same walk with a count and a 0x60 frame.

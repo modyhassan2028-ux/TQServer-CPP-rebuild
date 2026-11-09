@@ -3215,4 +3215,75 @@ void SynAccDistance_1417c89d0(void* pThis, void* pOther, int64_t* pCount) {
     }
 }
 
+// 0x1417c8aa0 - the walk that stops at the first element the comparison seam accepts.
+// rdx must be non-null (the assert at line 0x172), the walk ends when the node reaches the one the
+// holder at +0x38 names through its first qword, and the element tested is the node's +0x20 after
+// 0x14178f470 hands it over.
+// 0x1418232b0 - the three-argument comparison this walk calls with (element, argument, 0x10).
+int (*g_pfnSynCmp3_1418232b0)(void* pA, void* pB, unsigned int uFlags) = nullptr;
+
+void* SynAccFindMatch_1417c8aa0(void* pThis, void* pArg2) {
+    unsigned char* t = (unsigned char*)pThis;
+    if (pArg2 == nullptr) {                                 // test %rdx,%rdx / jne
+        if (g_pfnSynAssert_141823030 != nullptr)
+            g_pfnSynAssert_141823030((const void*)(uintptr_t)0x141824ca8, (const void*)(uintptr_t)0x141827b98,
+                                     (const void*)(uintptr_t)0x14183a778, (const void*)(uintptr_t)0x141839fe0,
+                                     0x172);
+        return nullptr;                                     // xor %eax,%eax
+    }
+    unsigned char* limit = *(unsigned char**)(*(unsigned char**)(t + 0x38));   // mov 0x38(%rcx),%rax / mov (%rax),%rbx
+    unsigned char* node = *(unsigned char**)(t + 8);        // mov 0x8(%rcx),%rsi
+    for (;;) {                                              // 0x1417c8b10
+        unsigned char* end = *(unsigned char**)(t + 0x38);  // mov 0x38(%rbp),%rdi
+        if (node == nullptr || node != *(unsigned char**)(t + 8)) {                // test %rsi,%rsi / je, cmp 0x8(%rbp)
+            if (g_pfn_invalid_parameter_noinfo != nullptr) g_pfn_invalid_parameter_noinfo();
+        }
+        if (limit == end) return nullptr;                   // cmp %rdi,%rbx / je -> xor %eax,%eax
+        unsigned char* lead;
+        if (node == nullptr) {                              // test %rsi,%rsi / jne
+            if (g_pfn_invalid_parameter_noinfo != nullptr) g_pfn_invalid_parameter_noinfo();
+            lead = nullptr;                                 // xor %r11d,%r11d
+        } else lead = *(unsigned char**)node;               // mov (%rsi),%r11
+        if (limit == *(unsigned char**)(lead + 0x30)) {     // cmp 0x30(%r11),%rbx / jne
+            if (g_pfn_invalid_parameter_noinfo != nullptr) g_pfn_invalid_parameter_noinfo();
+        }
+        unsigned char* elem = *(unsigned char**)(limit + 0x20);   // mov 0x20(%rbx),%rdi
+        if (elem != nullptr) {
+            unsigned char* h = nullptr;                     // mov %rdi,%rcx / call 0x14178f470
+            if (g_pfnLogic_14178f470 != nullptr) h = (unsigned char*)(uintptr_t)g_pfnLogic_14178f470((uint64_t)(uintptr_t)elem);
+            int verdict = 0;                                // mov $0x10,%r8d / mov %r12,%rdx / mov %rax,%rcx
+            if (g_pfnSynCmp3_1418232b0 != nullptr) verdict = g_pfnSynCmp3_1418232b0(h, pArg2, 0x10);
+            if (verdict == 0) return elem;                  // test %eax,%eax / je -> mov %rdi,%rax
+        }
+        if (node == nullptr) {                              // test %rsi,%rsi
+            if (g_pfn_invalid_parameter_noinfo != nullptr) g_pfn_invalid_parameter_noinfo();
+        }
+        if (*(unsigned char*)(limit + 0x29) != 0) {         // cmpb $0x0,0x29(%rbx) / je
+            if (g_pfn_invalid_parameter_noinfo != nullptr) g_pfn_invalid_parameter_noinfo();
+            continue;                                       // jmp back to the top of the walk
+        }
+        unsigned char* r = *(unsigned char**)(limit + 0x10);    // mov 0x10(%rbx),%rax
+        if (*(unsigned char*)(r + 0x29) == 0) {             // cmpb / jne
+            limit = r;                                      // mov %rax,%rbx
+            r = *(unsigned char**)r;                        // mov (%rax),%rax
+            if (*(unsigned char*)(r + 0x29) != 0) continue;  // cmpb / jne -> top
+            for (;;) {                                      // 0x1417c8bb0
+                limit = r;
+                r = *(unsigned char**)r;
+                if (*(unsigned char*)(r + 0x29) != 0) break;
+            }
+            continue;
+        }
+        r = *(unsigned char**)(limit + 8);                  // mov 0x8(%rbx),%rax
+        if (*(unsigned char*)(r + 0x29) == 0) {             // cmpb / jne
+            while (limit == *(unsigned char**)(r + 0x10)) { // cmp 0x10(%rax),%rbx / jne
+                limit = r;
+                r = *(unsigned char**)(r + 8);
+                if (*(unsigned char*)(r + 0x29) != 0) break;  // cmpb / je back
+            }
+        }
+        limit = r;                                          // mov %rax,%rbx
+    }
+}
+
 }  // namespace tq

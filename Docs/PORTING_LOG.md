@@ -514,3 +514,17 @@ The four bodies that were held back at D134 are in, each read straight off its o
   `0x1417c8a40` loop); climb walks `0x8` while the parent's `0x10` link names the node we came
   from. Both land in `mov %rax,0x8(%rbx)` and jump back to the top of the walk.
 - `tests/syndicate_d157_test.cpp`: 5 checks, 6 passes, ASan+UBSan clean. Cluster 235 bodies.
+
+## D158 — the matching walk 0x1417c8aa0
+
+- The argument at `rdx` is the only thing the assert guards (line 0x172, 0x141824ca8 / 0x141827b98 /
+  0x14183a778 / 0x141839fe0), and its branch answers zero without touching the tree.
+- Two different pointers drive the walk: the **cursor** comes out of the holder at `+0x38` through
+  its first qword, the **end** is the holder itself, and the element tested is `0x20(cursor)` after
+  0x14178f470 hands it over and 0x1418232b0 answers with the third argument `0x10`. A zero answer
+  returns that element.
+- The step is the 0x29 climb/descend: `0x10` then the left spine, or `0x8` while the parent's
+  `0x10` still names the node we came from; a flagged cursor fires the DEBUG check and loops.
+- Test note: the first three attempts crashed because the element, the lead and the cursor live on
+  different nodes — reading `0x20(node)` instead of `0x20(cursor)` walks straight into a null
+  child. 12 checks, 6 passes, ASan+UBSan clean. Cluster 236 bodies.
