@@ -41,7 +41,12 @@ extern unsigned char g_symNpcFn_140002380;                   // FUN_140002380 us
 extern void* g_symNpcVftbl_1400be090;                        // the table stored at 0x140001020, 0x140001a50, 0x140001b00, 0x140001b40
 extern void* g_symNpcVftbl_1400be3f0;                        // the second table 0x140001a50 stores
 extern unsigned char g_symNpcRtti_140102090;                 // RTTI descriptor compared at 0x140001ab0
-extern bool (*g_pfnNpcTypeInfoEquals)(const void* pA, const void* pB);  // type_info::operator==                        // DAT_1400be0b0
+extern bool (*g_pfnNpcTypeInfoEquals)(const void* pA, const void* pB);  // type_info::operator==
+extern void* (*g_pfnNpcOperatorNew)(long long nBytes);                    // operator_new
+extern void* (*g_pfnNpcOperatorNewUnderscore)(long long nBytes);          // operator_new__
+extern void* (*g_pfnNpcBevInput_140005b70)(void* pBev);                   // FUN_140005b70
+extern unsigned long long (*g_pfnNpcEvbufLen_14000c370)(void* pEvbuf);    // FUN_14000c370
+extern long long (*g_pfnNpcEvbufRemove_140005c30)(void* pBev, void* pDst, long long nBytes);  // FUN_140005c30                        // DAT_1400be0b0
 
 void  FUN_140001020(void** pThis);
 void  FUN_140001040(void** pThis);
@@ -65,6 +70,16 @@ long long FUN_140001ab0(long long pThis, const void* pTypeInfo);
 void  FUN_140001af0(long long pThis);
 void  FUN_140001b00(void** pThis);
 void* FUN_140001b40(void** pThis, unsigned char bDelete);
+void  FUN_140001cb0(long long pThis);
+void  FUN_140001db0(void* pThis);
+void* FUN_140001df0(void** pThis, void** pOther);
+void  FUN_140001e10(void** pThis);
+void  FUN_140001ea0(void** pThis, void* pArg2, void* pArg3);
+void  FUN_140001f20(long long* pThis);
+void  FUN_140001f40(long long pThis);
+void* FUN_140001f90(void** pThis);
+void* FUN_140001fb0(void** pThis, void* pArg2, void* pArg3);
+int*  FUN_140001fd0(int* pThis, const void* pSrc, int nSize);
 int   FUN_140001520(char* pThis);
 
 }  // namespace tq

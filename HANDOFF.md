@@ -561,3 +561,9 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - All five suites pass 6 times (D165, D166, D168, D169, D170).
 - Next: 0x140001c00 onward. Watch for bodies whose assert text names a new path; those move into
   that exact path.
+
+## D171 (latest)
+
+- NpcServer: 35 bodies, 0x140001020 .. 0x140001fd0. Six suites green 6x each.
+- New seams: `operator_new`, `operator_new__`, `FUN_140005b70`, `FUN_14000c370`, `FUN_140005c30`.
+- Next: 0x1400020c0 onward.

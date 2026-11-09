@@ -11,6 +11,8 @@
 
 namespace tq {
 
+void FUN_1400017b0(long long pThis);   // ported in npcserver/clientsocket.cpp
+
 void* (*g_pfnNpcOperatorDelete)(void* p) = nullptr;
 void* (*g_pfnNpcOperatorDelete2)(void* p) = nullptr;
 void (*g_pfnNpcInlineLogError)(const void* pMsg, ...) = nullptr;
@@ -36,6 +38,11 @@ void* g_symNpcVftbl_1400be090 = nullptr;
 void* g_symNpcVftbl_1400be3f0 = nullptr;
 unsigned char g_symNpcRtti_140102090 = 0;
 bool (*g_pfnNpcTypeInfoEquals)(const void* pA, const void* pB) = nullptr;
+void* (*g_pfnNpcOperatorNew)(long long nBytes) = nullptr;
+void* (*g_pfnNpcOperatorNewUnderscore)(long long nBytes) = nullptr;
+void* (*g_pfnNpcBevInput_140005b70)(void* pBev) = nullptr;
+unsigned long long (*g_pfnNpcEvbufLen_14000c370)(void* pEvbuf) = nullptr;
+long long (*g_pfnNpcEvbufRemove_140005c30)(void* pBev, void* pDst, long long nBytes) = nullptr;
 
 unsigned char g_symNpcStr_1400be0b0 = 0;
 
@@ -382,6 +389,189 @@ void* FUN_140001b40(void** pThis, unsigned char bDelete) {
     *pThis = &g_symNpcVftbl_1400be090;
     if ((bDelete & 1) != 0) {
         if (g_pfnNpcOperatorDelete != nullptr) g_pfnNpcOperatorDelete(pThis);
+    }
+    return pThis;
+}
+
+// FUN_140001cb0 @ 0x140001cb0 - CClientSocket::ProcessAllIncoming
+void FUN_140001cb0(long long pThis) {
+    if (*(long long*)(pThis + 0x820) == 0) {
+        if (g_pfnNpcInlineLogError != nullptr) g_pfnNpcInlineLogError(&g_symNpcStr_1400be0b0);
+        return;
+    }
+    if (*(int*)(pThis + 0x830) != 2) {
+        return;
+    }
+    if (0x7ff < *(int*)(pThis + 0x814)) {
+        FUN_1400017b0(pThis);
+    }
+    long long lVar1 = g_pfnNpcBevInput_140005b70 != nullptr
+                           ? (long long)g_pfnNpcBevInput_140005b70(*(void**)(pThis + 0x820)) : 0;
+    unsigned long long uVar2 = g_pfnNpcEvbufLen_14000c370 != nullptr
+                                    ? g_pfnNpcEvbufLen_14000c370((void*)lVar1) : 0;
+    if (0 < (int)uVar2) {
+        for (;;) {
+            int iVar3 = 0x800 - *(int*)(pThis + 0x814);
+            int iVar4 = (int)uVar2;
+            if (iVar4 <= iVar3) {
+                iVar3 = iVar4;
+            }
+            lVar1 = g_pfnNpcEvbufRemove_140005c30 != nullptr
+                        ? g_pfnNpcEvbufRemove_140005c30(*(void**)(pThis + 0x820),
+                                                        (void*)((long long)*(int*)(pThis + 0x814) + 0x14 + pThis),
+                                                        (long long)iVar3)
+                        : 0;
+            iVar3 = (int)lVar1;
+            if (iVar3 < 1) break;
+            *(int*)(pThis + 0x814) = *(int*)(pThis + 0x814) + iVar3;
+            uVar2 = (unsigned long long)(unsigned int)(iVar4 - iVar3);
+            FUN_1400017b0(pThis);
+            if (iVar4 - iVar3 < 1) {
+                return;
+            }
+        }
+        if (g_pfnNpcSocketErrno != nullptr) g_pfnNpcSocketErrno(*(long long*)(pThis + 0x818));
+        if (g_pfnNpcInlineLogError != nullptr)
+            g_pfnNpcInlineLogError("CClientSocket::ProcessAllIncoming, bufferevent_read err[%d].");
+        FUN_140001340((void*)pThis);
+    }
+}
+
+// FUN_140001db0 @ 0x140001db0 - the same release the body at 0x140001970 performs
+void FUN_140001db0(void* pThis) {
+    void** plVar3 = *(void***)((unsigned char*)pThis + 8);
+    if (plVar3 != (void**)0x0) {
+        int* plVar1 = (int*)((unsigned char*)plVar3 + 0x10);
+        *plVar1 = *plVar1 + -1;
+        if (*plVar1 == 0) {
+            ((void (*)(void*))plVar3[0])(plVar3);
+            int* piVar2 = (int*)((unsigned char*)plVar3 + 0x14);
+            *piVar2 = *piVar2 + -1;
+            if (*piVar2 == 0) {
+                ((void (*)(void*))plVar3[1])(plVar3);
+            }
+        }
+    }
+}
+
+// FUN_140001df0 @ 0x140001df0 - copy-assign through 0x1400019b0
+void* FUN_140001df0(void** pThis, void** pOther) {
+    FUN_1400019b0(pThis, pOther[0], (long long)pOther[1]);
+    return pThis;
+}
+
+// FUN_140001e10 @ 0x140001e10 - release and clear; both words are cleared in every branch
+void FUN_140001e10(void** pThis) {
+    void** plVar3 = (void**)pThis[1];
+    if (plVar3 == (void**)0x0) {
+        pThis[1] = 0;
+        pThis[0] = 0;
+        return;
+    }
+    int* plVar1 = (int*)((unsigned char*)plVar3 + 0x10);
+    *plVar1 = *plVar1 + -1;
+    if (*plVar1 == 0) {
+        ((void (*)(void*))plVar3[0])(plVar3);
+        int* piVar2 = (int*)((unsigned char*)plVar3 + 0x14);
+        *piVar2 = *piVar2 + -1;
+        if (*piVar2 == 0) {
+            ((void (*)(void*))plVar3[1])(plVar3);
+        }
+    }
+    pThis[1] = 0;
+    pThis[0] = 0;
+}
+
+// FUN_140001ea0 @ 0x140001ea0 - allocate the 0x28 control block, fill it, then assign
+void FUN_140001ea0(void** pThis, void* pArg2, void* pArg3) {
+    void** puVar1 = g_pfnNpcOperatorNew != nullptr ? (void**)g_pfnNpcOperatorNew(0x28) : nullptr;
+    if (puVar1 == (void**)0x0) {
+        puVar1 = (void**)0x0;
+    } else {
+        *puVar1 = &g_symNpcVftbl_1400be090;
+        puVar1[1] = pArg2;
+        *(uint32_t*)((unsigned char*)puVar1 + 0x10) = 0;
+        *(uint32_t*)((unsigned char*)puVar1 + 0x14) = 1;
+        *puVar1 = &g_symNpcVftbl_1400be3f0;
+        puVar1[4] = pArg3;
+    }
+    FUN_1400019b0(pThis, pArg2, (long long)puVar1);
+}
+
+// FUN_140001f20 @ 0x140001f20 - call slot 4 of the table with zero, then delete
+void FUN_140001f20(long long* pThis) {
+    (*(void (**)(long long*, long long))(*pThis + 0x10))(pThis, 0);
+    if (g_pfnNpcOperatorDelete != nullptr) g_pfnNpcOperatorDelete(pThis);
+}
+
+// FUN_140001f40 @ 0x140001f40 - release the counted object at +0x10
+void FUN_140001f40(long long pThis) {
+    void** plVar3 = *(void***)(pThis + 0x10);
+    if (plVar3 != (void**)0x0) {
+        int* plVar1 = (int*)((unsigned char*)plVar3 + 0x10);
+        *plVar1 = *plVar1 + -1;
+        if (*plVar1 == 0) {
+            ((void (*)(void*))plVar3[0])(plVar3);
+            int* piVar2 = (int*)((unsigned char*)plVar3 + 0x14);
+            *piVar2 = *piVar2 + -1;
+            if (*piVar2 == 0) {
+                ((void (*)(void*))plVar3[1])(plVar3);
+            }
+        }
+    }
+}
+
+// FUN_140001f90 @ 0x140001f90 - clear, then 0x140001e10
+void* FUN_140001f90(void** pThis) {
+    pThis[0] = 0;
+    pThis[1] = 0;
+    FUN_140001e10(pThis);
+    return pThis;
+}
+
+// FUN_140001fb0 @ 0x140001fb0 - clear, then 0x140001ea0
+void* FUN_140001fb0(void** pThis, void* pArg2, void* pArg3) {
+    pThis[0] = 0;
+    pThis[1] = 0;
+    FUN_140001ea0(pThis, pArg2, pArg3);
+    return pThis;
+}
+
+// FUN_140001fd0 @ 0x140001fd0 - buffer owner: allocate through operator_new__, wrap it in a counted
+// block, drop the temporary reference, then copy the caller's bytes in.
+int* FUN_140001fd0(int* pThis, const void* pSrc, int nSize) {
+    pThis[2] = 0;
+    pThis[3] = 0;
+    pThis[4] = 0;
+    pThis[5] = 0;
+    FUN_140001e10((void**)(pThis + 2));
+    pThis[1] = 0;
+    void* pvVar4 = g_pfnNpcOperatorNewUnderscore != nullptr
+                       ? g_pfnNpcOperatorNewUnderscore((long long)nSize) : nullptr;
+    // the original keeps local_40 and local_38 as two adjacent words that 0x140001ea0 writes as
+    // one two-word owner, so they are one array here instead of two scalars.
+    void* localOwner[2] = { 0, 0 };           // local_40, local_38
+    FUN_140001ea0((void**)&localOwner[0], pvVar4, (void*)&FUN_1400011f0);
+    void** plVar1 = (void**)localOwner[1];
+    FUN_1400019b0((void**)(pThis + 2), localOwner[0], (long long)localOwner[1]);
+    void** plVar3 = (void**)localOwner[1];
+    if (plVar1 != (void**)0x0) {
+        int* plVar1i = (int*)((unsigned char*)plVar1 + 0x10);
+        *plVar1i = *plVar1i + -1;
+        if (*plVar1i == 0) {
+            ((void (*)(void*))((void**)localOwner[1])[0])(localOwner[1]);
+            int* piVar2 = (int*)((unsigned char*)plVar3 + 0x14);
+            *piVar2 = *piVar2 + -1;
+            if (*piVar2 == 0) {
+                ((void (*)(void))((void**)localOwner[1])[1])();
+            }
+        }
+    }
+    if (*(void**)(pThis + 2) == (void*)0x0) {
+        *pThis = 0;
+    } else {
+        std::memcpy(*(void**)(pThis + 2), pSrc, (long long)nSize);
+        *pThis = nSize;
     }
     return pThis;
 }

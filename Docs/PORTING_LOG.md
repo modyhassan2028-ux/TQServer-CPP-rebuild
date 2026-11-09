@@ -757,3 +757,32 @@ The four bodies that were held back at D134 are in, each read straight off its o
   no class is claimed for it.
 - `tests/npcserver_d170_test.cpp` drives every branch above; D165, D166, D168, D169 and D170 each
   pass 6 times against the same objects.
+
+## D171 — NpcServer.exe 0x140001cb0 .. 0x140001fd0 (10 bodies)
+
+- `0x140001cb0` `CClientSocket::ProcessAllIncoming`: when `+0x820` is null it logs `&DAT_1400be0b0`
+  and returns; only state 2 proceeds; more than `0x7ff` buffered forces `0x1400017b0` first. The read
+  destination is `this + 0x14 + *(int *)(this+0x814)` and the length is `min(0x800 - count, available)`.
+  A read of zero or less reports `*(long long *)(this+0x818)` through `0x140007540`, logs
+  `"CClientSocket::ProcessAllIncoming, bufferevent_read err[%d]."`, then resets with `0x140001340`.
+  It stays in `unattributed/` because the body names the class but carries no path literal.
+- `0x140001db0` is byte-for-byte the release at `0x140001970` at a second address. Both are ported as
+  separate functions rather than folded together, because the binary really does hold two copies.
+- `0x140001df0` copy-assign, `0x140001e10` release-then-clear (both words cleared in every branch),
+  `0x140001ea0` allocates `0x28` through `operator new`, fills the two table words, the two counters
+  and `[4]`, then assigns through `0x1400019b0`.
+- `0x140001f20` calls slot `+0x10` of the object's table with `(this, 0)` and then deletes it.
+  `0x140001f40` releases the counted object at `+0x10`.
+- `0x140001f90` clears both words **first** and then calls `0x140001e10`, so its release never runs.
+  The test asserts exactly that (the reference count stays where it was) instead of assuming a release.
+- `0x140001fb0` clears, then allocates and assigns through `0x140001ea0`.
+- `0x140001fd0` is the buffer owner: it clears `[2..5]`, releases through `0x140001e10`, allocates the
+  payload with `operator_new__`, wraps it in a counted block whose deleter is `0x1400011f0`, drops the
+  temporary reference, then either stores 0 (no payload) or copies the caller's bytes into the payload
+  and records the size in `[0]`. The payload lands at `this+8` and the counted block at `this+16`.
+- Two structural details had to be reproduced rather than approximated: `0x140001ea0` writes
+  `local_40` and `local_38` as one two-word owner, so they are one array in the port (two scalars made
+  ASan report a stack write past the first); and the counted block's counters must be bumped before
+  the assignment, which is why the block reads `1` at `+0x10` after `0x140001ea0` returns.
+- `tests/npcserver_d171_test.cpp` drives all ten; D165, D166, D168, D169, D170 and D171 each pass 6
+  times against the same objects.
