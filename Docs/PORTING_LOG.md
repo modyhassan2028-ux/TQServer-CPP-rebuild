@@ -354,3 +354,20 @@ The four bodies that were held back at D134 are in, each read straight off its o
   register afterwards, so a seam that returns leaves the size at zero. The test asserts 96 / 144 /
   80 for two elements and zero after each throw.
 - `tests/syndicate_d146_test.cpp`: 33 checks, 6 passes, ASan+UBSan clean. Cluster 173 bodies.
+
+## D147 — twelve bodies, 0x1417c7600..0x1417c7830
+
+- 0x1417c7600 / 0x1417c76b0 / 0x1417c7830: the decrement wrappers, each calling its own body
+  (0x1417c6580, 0x1417c6610, 0x1417c63c0) and answering with the iterator.
+- 0x1417c7620: the 48-byte allocator body again at its own start, count in rdx, throw branch
+  zeroing the count register so a returning seam leaves the size at zero.
+- 0x1417c7690 (`ret $0x0`) and 0x1417c76a0 (the guarded store with destination rdx).
+- 0x1417c76d0 / 0x1417c7710 / 0x1417c7750 / 0x1417c7790: the four node builders. Eight bytes
+  come from 0x1417f3166, the object is written into them, the block (or zero when the seam
+  answers null) lands in the object's first qword, and the object comes back. The test covers
+  both the live and the null seam.
+- 0x1417c77d0: two dword stores, `this` back.
+- 0x1417c77e0: the deleting destructor. `this+0x18` goes to 0x141823290 first, then **only bit 0**
+  of the flag decides whether `this` is handed to 0x1417f2fdc: the test pins flag 0, flag 3 and
+  flag 0xFE (which frees nothing). This body needed `synacc.h` in the tail file for the slot seam.
+- `tests/syndicate_d147_test.cpp`: 30 checks, 6 passes, ASan+UBSan clean. Cluster 185 bodies.

@@ -1199,4 +1199,93 @@ void SynAccStoreFromR8_1417c75f0(void* pUnused, void* pDst, const void* pSrc) {
     if (pDst != nullptr) *(void**)pDst = *(void**)pSrc;
 }
 
+// 0x1417c7620 — the same allocator body as 0x1417c7370 at its own start: count in rdx,
+// 0x30 limit, 48-byte element, `call 0x1417f3166`.
+void* SynAccNew48Count2_1417c7620(void* pUnused, uint64_t nCount) {
+    int64_t nSentinel = -2;
+    (void)nSentinel; (void)pUnused;
+    uint64_t r8 = nCount;                            // mov %rdx,%r8
+    if (r8 != 0) {
+        uint64_t uQuot = 0xFFFFFFFFFFFFFFFFull / r8;
+        if (uQuot < 0x30) {
+            r8 = 0;                                  // xor %r8d,%r8d
+            unsigned char aErr[0x40] = {};
+            uint64_t uZero = r8;
+            if (g_pfnSynErrCtor_1418233e8 != nullptr)
+                g_pfnSynErrCtor_1418233e8(aErr, &uZero);
+            *(const void**)aErr = (const void*)(uintptr_t)0x141824c40;
+            if (g_pfnSynThrow_1417f3154 != nullptr)
+                g_pfnSynThrow_1417f3154(aErr, (const void*)(uintptr_t)0x141881df0);
+        }
+    }
+    uint64_t uBytes = r8 * 3 * 16;                   // lea (%r8,%r8,2) / shl $0x4
+    if (g_pfnSynNew_1417f3166 == nullptr) return nullptr;
+    return g_pfnSynNew_1417f3166(uBytes);
+}
+
+// 0x1417c7690 — ret $0x0
+void SynAccNoop_1417c7690() {}
+
+// 0x1417c76a0 — the guarded store once more, destination rdx and source r8.
+void SynAccStoreFromR8_1417c76a0(void* pUnused, void* pDst, const void* pSrc) {
+    (void)pUnused;
+    if (pDst != nullptr) *(void**)pDst = *(void**)pSrc;
+}
+
+// 0x1417c76d0 — takes eight bytes from 0x1417f3166, writes the object into them, then stores
+// the block (or zero) in the object's first qword and answers with the object.
+void* SynAccNewNode_1417c76d0(void* pThis) {
+    int64_t nSentinel = -2; (void)nSentinel;
+    void* pBlk = nullptr;
+    if (g_pfnSynNew_1417f3166 != nullptr) pBlk = g_pfnSynNew_1417f3166(8);   // mov $0x8,%ecx / call
+    void* pSpill = pBlk; (void)pSpill;              // mov %rax,0x50(%rsp) / mov %rax,0x58(%rsp)
+    if (pBlk != nullptr) *(void**)pBlk = pThis;     // mov %rbx,(%rax)
+    else pBlk = nullptr;                            // xor %eax,%eax
+    *(void**)pThis = pBlk;                          // mov %rax,(%rbx)
+    return pThis;
+}
+
+// 0x1417c7710 — the same body at its own start.
+void* SynAccNewNode_1417c7710(void* pThis) {
+    int64_t nSentinel = -2; (void)nSentinel;
+    void* pBlk = nullptr;
+    if (g_pfnSynNew_1417f3166 != nullptr) pBlk = g_pfnSynNew_1417f3166(8);
+    void* pSpill = pBlk; (void)pSpill;
+    if (pBlk != nullptr) *(void**)pBlk = pThis;
+    else pBlk = nullptr;
+    *(void**)pThis = pBlk;
+    return pThis;
+}
+
+// 0x1417c7750 — the same body at its own start.
+void* SynAccNewNode_1417c7750(void* pThis) {
+    int64_t nSentinel = -2; (void)nSentinel;
+    void* pBlk = nullptr;
+    if (g_pfnSynNew_1417f3166 != nullptr) pBlk = g_pfnSynNew_1417f3166(8);
+    void* pSpill = pBlk; (void)pSpill;
+    if (pBlk != nullptr) *(void**)pBlk = pThis;
+    else pBlk = nullptr;
+    *(void**)pThis = pBlk;
+    return pThis;
+}
+
+// 0x1417c7790 — the same body at its own start.
+void* SynAccNewNode_1417c7790(void* pThis) {
+    int64_t nSentinel = -2; (void)nSentinel;
+    void* pBlk = nullptr;
+    if (g_pfnSynNew_1417f3166 != nullptr) pBlk = g_pfnSynNew_1417f3166(8);
+    void* pSpill = pBlk; (void)pSpill;
+    if (pBlk != nullptr) *(void**)pBlk = pThis;
+    else pBlk = nullptr;
+    *(void**)pThis = pBlk;
+    return pThis;
+}
+
+// 0x1417c77d0 — mov %edx,(%rcx) / mov %r8d,0x4(%rcx) / mov %rcx,%rax / ret
+void* SynAcc2Words_1417c77d0(void* pThis, uint32_t uA, uint32_t uB) {
+    *(uint32_t*)pThis = uA;
+    *(uint32_t*)((unsigned char*)pThis + 4) = uB;
+    return pThis;
+}
+
 }  // namespace tq

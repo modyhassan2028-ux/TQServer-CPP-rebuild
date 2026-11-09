@@ -1,5 +1,6 @@
 // Instruction-by-instruction port of the twelve CSyndicateLogic slots described in the
 // header. Nothing is inferred beyond the registers the bytes read.
+#include "modules/syndicate/src/synacc.h"
 #include "CsyndicateLogicTailSlots.h"
 #include "modules/syndicate/src/synattr.h"
 
@@ -2812,6 +2813,37 @@ void* SynAccDecCall_1417c7560(void* pIter) {
 void* SynAccIncCall_1417c7590(void* pIter) {
     SynAccInc29_1417c64b0(pIter);
     return pIter;
+}
+
+// 0x1417c7600 — call 0x1417c6580, hand the iterator back.
+void* SynAccDecCall_1417c7600(void* pIter) {
+    SynAccDec21_1417c6580(pIter);
+    return pIter;
+}
+
+// 0x1417c76b0 — call 0x1417c6610, hand the iterator back.
+void* SynAccDecCall_1417c76b0(void* pIter) {
+    SynAccDec29_1417c6610(pIter);
+    return pIter;
+}
+
+// 0x1417c7830 — call 0x1417c63c0, hand the iterator back.
+void* SynAccDecCall_1417c7830(void* pIter) {
+    SynAccDec41_1417c63c0(pIter);
+    return pIter;
+}
+
+// 0x1417c77e0 — the deleting destructor: the 0x18 slot goes through 0x141823290 first, and only
+// the low bit of the flag decides whether the object itself is handed to 0x1417f2fdc.
+void* SynAccDtor_1417c77e0(void* pThis, uint32_t uFlags) {
+    int64_t nSentinel = -2; (void)nSentinel;
+    if (g_pfnSynTail_141823290 != nullptr)
+        g_pfnSynTail_141823290((unsigned char*)pThis + 0x18);     // add $0x18,%rcx / call *
+    if ((uFlags & 1u) != 0u) {                                    // test $0x1,%bl / je
+        if (g_pfnLogic_1417f2fdc != nullptr)
+            g_pfnLogic_1417f2fdc(pThis);                          // mov %rdi,%rcx / call 0x1417f2fdc
+    }
+    return pThis;
 }
 
 }  // namespace tq

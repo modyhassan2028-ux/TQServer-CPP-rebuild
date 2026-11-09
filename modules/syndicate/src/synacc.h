@@ -175,5 +175,17 @@ void SynAccStoreFromR8_1417c75c0(void* pUnused, void* pDst, const void* pSrc); /
 void SynAccStoreFromR8_1417c75d0(void* pUnused, void* pDst, const void* pSrc); // 0x1417c75d0
 void SynAccNoop_1417c75e0();                                                // 0x1417c75e0
 void SynAccStoreFromR8_1417c75f0(void* pUnused, void* pDst, const void* pSrc); // 0x1417c75f0
+void* SynAccNew48Count2_1417c7620(void* pUnused, uint64_t nCount);        // 0x1417c7620
+void SynAccNoop_1417c7690();                                                // 0x1417c7690
+void SynAccStoreFromR8_1417c76a0(void* pUnused, void* pDst, const void* pSrc); // 0x1417c76a0
+void* SynAccNewNode_1417c76d0(void* pThis);                                 // 0x1417c76d0
+void* SynAccNewNode_1417c7710(void* pThis);                                 // 0x1417c7710
+void* SynAccNewNode_1417c7750(void* pThis);                                 // 0x1417c7750
+void* SynAccNewNode_1417c7790(void* pThis);                                 // 0x1417c7790
+void* SynAcc2Words_1417c77d0(void* pThis, uint32_t uA, uint32_t uB);        // 0x1417c77d0
+void* SynAccDecCall_1417c7600(void* pIter);                                // 0x1417c7600
+void* SynAccDecCall_1417c76b0(void* pIter);                                 // 0x1417c76b0
+void* SynAccDtor_1417c77e0(void* pThis, uint32_t uFlags);                   // 0x1417c77e0
+void* SynAccDecCall_1417c7830(void* pIter);                                 // 0x1417c7830
 }  // namespace tq
 #endif
