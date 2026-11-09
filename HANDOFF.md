@@ -390,3 +390,11 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - Twelve bodies: `SYNDICATE_D148_OK ... 30 checks`, 6 passes. Cluster 197 bodies.
 - `Docs/ASM/1417c7830.txt` holds 0x1417c7830..0x1417c7c3f (274 lines) and is read to the cut at
   0x1417c7a5b. The body at 0x1417c7a50 continues past it, so re-capture from there before writing.
+
+## D149 (latest)
+
+- Eight bodies: `SYNDICATE_D149_OK ... 17 checks`, 6 passes. Cluster 205 bodies.
+- `Docs/ASM/1417c7a50.txt` holds 0x1417c7a50..0x1417c7e3f (275 lines); the erase body at
+  0x1417c7c30 runs past the cut. Re-capture 0x1417c7e30..0x1417c8200 before writing it, and note
+  that test binaries under /tmp can outlive a unit: delete them before each build or a stale
+  binary prints another unit's success line.

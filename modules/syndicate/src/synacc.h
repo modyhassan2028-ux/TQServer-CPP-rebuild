@@ -199,5 +199,13 @@ void SynAccFreeLead_1417c79b0(void* pThis);                               // 0x1
 void SynAccFreeLead_1417c79d0(void* pThis);                               // 0x1417c79d0
 void SynAccFreeLead_1417c79f0(void* pThis);                               // 0x1417c79f0
 void* SynAccFindPair_1417c7a10(void* pTree, void* pOut, const void* pKey); // 0x1417c7a10
+void SynAccEraseAll_1417c7a50(void* pTree, void* pNode);                  // 0x1417c7a50
+void* SynAccIterCtor_1417c7aa0(void* pIter, void* pNode, void* pHolder);   // 0x1417c7aa0
+void* SynAccIterCtor_1417c7b40(void* pIter, void* pNode, void* pHolder);   // 0x1417c7b40
+void* SynAccIterCtor_1417c7b80(void* pIter, void* pNode, void* pHolder);   // 0x1417c7b80
+void* SynAccCurrPlus18_1417c7ae0(void* pIter);                             // 0x1417c7ae0
+void* SynAccIncCall_1417c7b20(void* pIter);                                // 0x1417c7b20
+void* SynAccIncCall_1417c7bc0(void* pIter);                                // 0x1417c7bc0
+void* SynAccPair_1417c7be0(void* pThis, void* pOut, void* pArg3);          // 0x1417c7be0
 }  // namespace tq
 #endif

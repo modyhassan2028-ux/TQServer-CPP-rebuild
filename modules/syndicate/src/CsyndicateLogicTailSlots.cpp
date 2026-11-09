@@ -2949,4 +2949,104 @@ void* SynAccFindPair_1417c7a10(void* pTree, void* pOut, const void* pKey) {
     return o;                                                 // mov %rdx,%rax
 }
 
+// 0x1417c7a50 - the whole subtree goes: the 0x10 side first (recursively), then the node
+// itself to the deallocate, then the 0x0 side carries the walk on. A node flagged in 0x29
+// stops it before anything happens.
+void SynAccEraseAll_1417c7a50(void* pTree, void* pNode) {
+    unsigned char* t = (unsigned char*)pTree;
+    unsigned char* n = (unsigned char*)pNode;
+    if (*(unsigned char*)(n + 0x29) != 0) return;             // cmpb $0x0,0x29(%rdx) / jne end
+    for (;;) {
+        SynAccEraseAll_1417c7a50(t, *(void**)(n + 0x10));     // mov 0x10(%rbx),%rdx / call
+        unsigned char* left = *(unsigned char**)(n);          // mov (%rbx),%rbx
+        if (g_pfnLogic_1417f2fdc != nullptr)
+            g_pfnLogic_1417f2fdc(n);                          // mov %rdi,%rcx / call 0x1417f2fdc
+        if (*(unsigned char*)(left + 0x29) != 0) return;      // cmpb / je back
+        n = left;                                             // mov %rbx,%rdi
+    }
+}
+
+// 0x1417c7aa0 / 0x1417c7b40 / 0x1417c7b80 - the iterator builder at its own start, three times:
+// the lead cleared, the node into +0x8, then the holder's first qword into the lead.
+void* SynAccIterCtor_1417c7aa0(void* pIter, void* pNode, void* pHolder) {
+    unsigned char* it = (unsigned char*)pIter;
+    *(void**)it = nullptr;                                    // movq $0x0,(%rcx)
+    *(void**)(it + 8) = pNode;                                // mov %rdx,0x8(%rcx)
+    if (pHolder == nullptr) {                                 // test %r8,%r8 / jne
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();                 // call *0x1418233c0
+    }
+    *(void**)it = *(void**)pHolder;                           // mov (%rdi),%rax / mov %rax,(%rbx)
+    return it;                                                // mov %rbx,%rax
+}
+void* SynAccIterCtor_1417c7b40(void* pIter, void* pNode, void* pHolder) {
+    unsigned char* it = (unsigned char*)pIter;
+    *(void**)it = nullptr;
+    *(void**)(it + 8) = pNode;
+    if (pHolder == nullptr) {
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();
+    }
+    *(void**)it = *(void**)pHolder;
+    return it;
+}
+void* SynAccIterCtor_1417c7b80(void* pIter, void* pNode, void* pHolder) {
+    unsigned char* it = (unsigned char*)pIter;
+    *(void**)it = nullptr;
+    *(void**)(it + 8) = pNode;
+    if (pHolder == nullptr) {
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();
+    }
+    *(void**)it = *(void**)pHolder;
+    return it;
+}
+
+// 0x1417c7ae0 - the +0x18 accessor with both DEBUG checks (the seventh start).
+void* SynAccCurrPlus18_1417c7ae0(void* pIter) {
+    unsigned char* it = (unsigned char*)pIter;
+    void* lead = *(void**)it;                                 // mov (%rcx),%rax
+    if (lead == nullptr) {                                    // test / jne
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();
+        lead = *(void**)it;                                   // mov (%rbx),%rax
+        if (lead != nullptr) lead = *(void**)lead;            // test / je / mov (%rax),%rax
+    } else {
+        lead = *(void**)lead;
+    }
+    if (*(void**)((unsigned char*)lead + 0x30) == *(void**)(it + 8)) {   // cmp %rax,0x8(%rbx)
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();
+    }
+    return *(unsigned char**)(it + 8) + 0x18;                 // mov 0x8(%rbx),%rax / add $0x18
+}
+
+// 0x1417c7b20 - call 0x1417c5fa0, hand the iterator back.
+void* SynAccIncCall_1417c7b20(void* pIter) {
+    SynAccInc29_1417c5fa0(pIter);
+    return pIter;
+}
+
+// 0x1417c7bc0 - call 0x1417c6040, hand the iterator back.
+void* SynAccIncCall_1417c7bc0(void* pIter) {
+    SynAccInc41_1417c6040(pIter);
+    return pIter;
+}
+
+// 0x1417c7be0 - the pair comes from the object's own first qword and the third argument's +0x8,
+// with the DEBUG check run on the object pointer itself before either is read.
+void* SynAccPair_1417c7be0(void* pThis, void* pOut, void* pArg3) {
+    unsigned char* o = (unsigned char*)pOut;
+    unsigned char temp[0x10];
+    *(uint64_t*)(temp + 8) = *(uint64_t*)((unsigned char*)pArg3 + 8);   // mov 0x8(%r8),%rax / 0x28(%rsp)
+    if (pThis == nullptr) {                                   // test %rcx,%rcx / jne
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();
+    }
+    *(uint64_t*)temp = *(uint64_t*)pThis;                     // mov (%rdi),%rax / mov %rax,0x20(%rsp)
+    *(uint64_t*)o = *(uint64_t*)temp;                          // mov (%rcx),%rax / mov %rax,(%rbx)
+    *(uint64_t*)(o + 8) = *(uint64_t*)(temp + 8);              // mov 0x8(%rcx),%rax / mov %rax,0x8(%rbx)
+    return o;                                                 // mov %rbx,%rax
+}
+
 }  // namespace tq

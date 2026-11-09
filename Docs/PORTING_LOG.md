@@ -390,3 +390,18 @@ The four bodies that were held back at D134 are in, each read straight off its o
   left at — the header when it never turned. The test builds two real stop nodes so keys 7, 3 and
   99 land on the root, on n5 and on the header.
 - `tests/syndicate_d148_test.cpp`: 30 checks, 6 passes, ASan+UBSan clean. Cluster 197 bodies.
+
+## D149 — eight bodies, 0x1417c7a50..0x1417c7be0
+
+- 0x1417c7a50: the whole-subtree destroy, recursive. The 0x10 side goes first, then the node to
+  the deallocate, then the 0x0 side carries the walk on; a node flagged in its 0x29 byte stops it
+  before anything runs. The test records the free order (in, then its left, then that one's left)
+  and pins that a flagged node frees nothing.
+- 0x1417c7aa0 / 0x1417c7b40 / 0x1417c7b80: the iterator builder three more times, each at its own
+  start: lead cleared, node into +0x8, holder's first qword into the lead.
+- 0x1417c7ae0: the seventh start of the +0x18 accessor, both DEBUG checks kept.
+- 0x1417c7b20 / 0x1417c7bc0: the increments wrapped, iterator back — 0x1417c5fa0 and 0x1417c6040.
+- 0x1417c7be0: the pair is the object's own first qword and the third argument's +0x8, and the
+  DEBUG check runs on the object pointer **before** either is read, so the two come through a
+  stack temp in that order.
+- `tests/syndicate_d149_test.cpp`: 17 checks, 6 passes, ASan+UBSan clean. Cluster 205 bodies.
