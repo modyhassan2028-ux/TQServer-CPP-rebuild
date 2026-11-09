@@ -371,3 +371,9 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - Six bodies: `SYNDICATE_D145_OK ... 6 units`, 6 passes. Cluster 157 bodies.
 - Next: `Docs/ASM/1417c723a.txt` holds 0x1417c723a..0x1417c7600 (236 lines). The wrappers pattern
   (a call to one cluster body, then the argument handed back) continues there, so batch them.
+
+## D146 (latest)
+
+- Sixteen bodies: `SYNDICATE_D146_OK ... 33 checks`, 6 passes. Cluster 173 bodies.
+- `Docs/ASM/1417c723a.txt` is now read to its end (0x1417c75fb). Next unit starts by capturing
+  past 0x1417c7600.

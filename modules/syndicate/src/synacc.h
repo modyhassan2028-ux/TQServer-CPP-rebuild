@@ -163,5 +163,17 @@ void* SynAccSearch21_1417c71c0(void* pTree, const void* pKey);            // 0x1
 void* SynAccRotRight21_1417c71f0(void* pTree, void* pNode);               // 0x1417c71f0
 void* SynAccRotLeft21_1417c7250(void* pTree, void* pNode);                 // 0x1417c7250
 void SynAccNoop_1417c72b0();                                              // 0x1417c72b0
+void* SynAccPlus18_1417c7300(void* pThis);                                 // 0x1417c7300
+void SynAccNoop_1417c7310();                                               // 0x1417c7310
+void* SynAccZeroLead_1417c7360(void* pThis);                               // 0x1417c7360
+void* SynAccNew48FromCount_1417c7370(void* pUnused, uint64_t nCount);      // 0x1417c7370
+void* SynAccNew72FromCount_1417c73e0(void* pUnused, uint64_t nCount);      // 0x1417c73e0
+void* SynAccNew40FromCount_1417c7450(void* pUnused, uint64_t nCount);      // 0x1417c7450
+uint64_t SynAccConst_1417c7580();                                           // 0x1417c7580
+void* SynAccZeroLead_1417c75b0(void* pThis);                                // 0x1417c75b0
+void SynAccStoreFromR8_1417c75c0(void* pUnused, void* pDst, const void* pSrc); // 0x1417c75c0
+void SynAccStoreFromR8_1417c75d0(void* pUnused, void* pDst, const void* pSrc); // 0x1417c75d0
+void SynAccNoop_1417c75e0();                                                // 0x1417c75e0
+void SynAccStoreFromR8_1417c75f0(void* pUnused, void* pDst, const void* pSrc); // 0x1417c75f0
 }  // namespace tq
 #endif

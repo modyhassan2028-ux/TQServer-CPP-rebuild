@@ -2738,4 +2738,80 @@ void* SynAccIncIter_1417c72e0(void* pIter) {
     return pIter;
 }
 
+// 0x1417c7320 — the +0x18 accessor with both DEBUG checks, the fourth start of that body.
+void* SynAccCurrPlus18_1417c7320(void* pIter) {
+    unsigned char* it = (unsigned char*)pIter;
+    unsigned char* p = *(unsigned char**)it;                 // mov (%rcx),%rax
+    if (p == nullptr) {                                      // test %rax,%rax / jne
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();                // call *0x1418233c0
+        p = *(unsigned char**)it;                            // mov (%rbx),%rax
+        if (p != nullptr) p = *(unsigned char**)p;            // je over the deref
+    } else {
+        p = *(unsigned char**)p;                             // mov (%rax),%rax
+    }
+    (void)*(unsigned char**)((unsigned char*)p + 0x30);       // mov 0x30(%rax),%rax
+    if (*(void**)((unsigned char*)p + 0x30) == *(void**)(it + 8))
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();                // cmp %rax,0x8(%rbx) / jne / call
+    return (unsigned char*)*(void**)(it + 8) + 0x18;          // mov 0x8(%rbx),%rax / add $0x18
+}
+
+// 0x1417c74c0 — the 0x21 increment, every branch keeping the shape of its own bytes.
+void SynAccInc21_1417c74c0(void* pIter) {
+    unsigned char* it = (unsigned char*)pIter;
+    if (*(void**)it == nullptr) {
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();                // cmpq $0x0,(%rcx) / jne / call
+    }
+    unsigned char* n = *(unsigned char**)(it + 8);            // mov 0x8(%rbx),%rcx
+    if (*(unsigned char*)(n + 0x21) != 0) {                   // cmpb $0x0,0x21(%rcx) / je
+        unsigned char* r = *(unsigned char**)(n + 0x10);      // mov 0x10(%rcx),%rax
+        *(void**)(it + 8) = r;                                // mov %rax,0x8(%rbx)
+        if (*(unsigned char*)(r + 0x21) == 0) return;         // cmpb / je epilogue
+        if (g_pfn_invalid_parameter_noinfo != nullptr)
+            g_pfn_invalid_parameter_noinfo();                 // jmp *0x1418233c0
+        return;
+    }
+    unsigned char* l = *(unsigned char**)(n);                 // mov (%rcx),%rax
+    if (*(unsigned char*)(l + 0x21) != 0) {                   // jne 0x1417c7527
+        unsigned char* p = *(unsigned char**)(n + 8);         // mov 0x8(%rcx),%rcx
+        if (*(unsigned char*)(p + 0x21) == 0) {               // jne 0x1417c7548
+            for (;;) {                                        // 0x1417c7531
+                unsigned char* lp = *(unsigned char**)(p);    // mov (%rcx),%rax
+                if (*(void**)(it + 8) != (void*)lp) break;    // cmp %rax,0x8(%rbx) / jne
+                *(void**)(it + 8) = p;                        // mov %rcx,0x8(%rbx)
+                p = *(unsigned char**)(p + 8);                // mov 0x8(%rcx),%rcx
+                if (*(unsigned char*)(p + 0x21) != 0) break;  // cmpb / je
+            }
+        }
+        unsigned char* cur = *(unsigned char**)(it + 8);      // 0x1417c7548
+        if (*(unsigned char*)(cur + 0x21) != 0) {             // cmpb / jne 0x1417c74ed
+            if (g_pfn_invalid_parameter_noinfo != nullptr)
+                g_pfn_invalid_parameter_noinfo();
+            return;
+        }
+        *(void**)(it + 8) = p;                                // mov %rcx,0x8(%rbx)
+        return;
+    }
+    unsigned char* q = *(unsigned char**)(l + 0x10);          // mov 0x10(%rax),%rcx
+    while (*(unsigned char*)(q + 0x21) == 0) {
+        l = q;                                                // mov %rcx,%rax
+        q = *(unsigned char**)(q + 0x10);                     // mov 0x10(%rcx),%rcx
+    }
+    *(void**)(it + 8) = l;                                    // mov %rax,0x8(%rbx)
+}
+
+// 0x1417c7560 — call 0x1417c63c0, hand the iterator back.
+void* SynAccDecCall_1417c7560(void* pIter) {
+    SynAccDec41_1417c63c0(pIter);
+    return pIter;
+}
+
+// 0x1417c7590 — call 0x1417c64b0, hand the iterator back.
+void* SynAccIncCall_1417c7590(void* pIter) {
+    SynAccInc29_1417c64b0(pIter);
+    return pIter;
+}
+
 }  // namespace tq

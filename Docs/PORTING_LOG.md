@@ -333,3 +333,24 @@ The four bodies that were held back at D134 are in, each read straight off its o
   wrapper's return value is its own argument, not the increment's. The test drives both through
   the header case and checks the node slot lands on the root while the answer is the iterator.
 - `tests/syndicate_d145_test.cpp`: 6 groups, 6 passes, ASan+UBSan clean. Cluster 157 bodies.
+
+## D146 — sixteen bodies, 0x1417c7300..0x1417c75f0
+
+- 0x1417c7300 (`this+0x18`), the two `ret $0x0` stubs 0x1417c7310 / 0x1417c75e0, the two
+  zero-lead bodies 0x1417c7360 / 0x1417c75b0, the constant 0x1417c7580 and the three guarded
+  stores 0x1417c75c0 / 0x1417c75d0 / 0x1417c75f0 (destination rdx, source r8).
+- 0x1417c7320: the fourth start of the `+0x18` accessor. The first DEBUG check falls through on
+  a lead that stays null and then reads `0x30(%rax)` with rax zero, exactly as the bytes do; the
+  second runs when the lead's `0x30` slot equals the iterator's node, and the answer is still
+  node`+0x18` — the test pins both.
+- 0x1417c74c0: the 0x21 increment, three paths and both seams, its own start.
+- 0x1417c7560 / 0x1417c7590: call 0x1417c63c0 / 0x1417c64b0 and hand the iterator back, so the
+  wrapper answers with its argument. The decrement case in the test put the flag on the header
+  instead of the node at first and the original body then walked `0x10` on a null — the case is
+  now the tail-seam one where the slot cannot move.
+- 0x1417c7370 / 0x1417c73e0 / 0x1417c7450: the three allocators whose **count arrives in rdx**,
+  with `call 0x1417f3166` instead of the tail jump. Faithful detail worth keeping: the throw
+  branch zeroes the count register (`xor %r8d,%r8d`) and the size is computed from that same
+  register afterwards, so a seam that returns leaves the size at zero. The test asserts 96 / 144 /
+  80 for two elements and zero after each throw.
+- `tests/syndicate_d146_test.cpp`: 33 checks, 6 passes, ASan+UBSan clean. Cluster 173 bodies.

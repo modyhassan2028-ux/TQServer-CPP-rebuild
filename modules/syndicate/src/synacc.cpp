@@ -1087,4 +1087,116 @@ void* SynAccRotLeft21_1417c7250(void* pTree, void* pNode) {
 // 0x1417c72b0 — ret $0x0
 void SynAccNoop_1417c72b0() {}
 
+// 0x1417c7300 — lea 0x18(%rcx),%rax / ret
+void* SynAccPlus18_1417c7300(void* pThis) { return (unsigned char*)pThis + 0x18; }
+
+// 0x1417c7310 — ret $0x0
+void SynAccNoop_1417c7310() {}
+
+// 0x1417c7360 — movq $0x0,(%rcx) / mov %rcx,%rax / ret
+void* SynAccZeroLead_1417c7360(void* pThis) {
+    *(void**)pThis = nullptr;
+    return pThis;
+}
+
+// 0x1417c7370 — the count arrives in rdx, and the throw branch zeroes r8, so a seam that
+// returns leaves the size at zero: the bytes compute the size from the same register.
+void* SynAccNew48FromCount_1417c7370(void* pUnused, uint64_t nCount) {
+    int64_t nSentinel = -2;                          // movq $0xfffffffffffffffe,0x20(%rsp)
+    (void)nSentinel; (void)pUnused;
+    uint64_t r8 = nCount;                            // mov %rdx,%r8
+    if (r8 != 0) {                                   // test %rdx,%rdx / je
+        uint64_t uQuot = 0xFFFFFFFFFFFFFFFFull / r8; // or $-1,%rax / xor %edx,%edx / div %r8
+        if (uQuot < 0x30) {                          // cmp $0x30,%rax / jae
+            r8 = 0;                                  // xor %r8d,%r8d
+            unsigned char aErr[0x40] = {};
+            uint64_t uZero = r8;                     // mov %r8,0x58(%rsp)
+            if (g_pfnSynErrCtor_1418233e8 != nullptr)
+                g_pfnSynErrCtor_1418233e8(aErr, &uZero);          // call *0x1418233e8
+            *(const void**)aErr = (const void*)(uintptr_t)0x141824c40;  // lea 0x141824c40 / mov %rax
+            if (g_pfnSynThrow_1417f3154 != nullptr)
+                g_pfnSynThrow_1417f3154(aErr, (const void*)(uintptr_t)0x141881df0);
+        }
+    }
+    uint64_t uBytes = r8 * 3 * 16;                   // lea (%r8,%r8,2) / shl $0x4
+    if (g_pfnSynNew_1417f3166 == nullptr) return nullptr;
+    return g_pfnSynNew_1417f3166(uBytes);            // call 0x1417f3166
+}
+
+// 0x1417c73e0 — the same body with the 0x48 limit and a nine-wide element.
+void* SynAccNew72FromCount_1417c73e0(void* pUnused, uint64_t nCount) {
+    int64_t nSentinel = -2;
+    (void)nSentinel; (void)pUnused;
+    uint64_t r8 = nCount;
+    if (r8 != 0) {
+        uint64_t uQuot = 0xFFFFFFFFFFFFFFFFull / r8;
+        if (uQuot < 0x48) {
+            r8 = 0;
+            unsigned char aErr[0x40] = {};
+            uint64_t uZero = r8;
+            if (g_pfnSynErrCtor_1418233e8 != nullptr)
+                g_pfnSynErrCtor_1418233e8(aErr, &uZero);
+            *(const void**)aErr = (const void*)(uintptr_t)0x141824c40;
+            if (g_pfnSynThrow_1417f3154 != nullptr)
+                g_pfnSynThrow_1417f3154(aErr, (const void*)(uintptr_t)0x141881df0);
+        }
+    }
+    uint64_t uBytes = r8 * 9 * 8;                    // lea (%r8,%r8,8) / shl $0x3
+    if (g_pfnSynNew_1417f3166 == nullptr) return nullptr;
+    return g_pfnSynNew_1417f3166(uBytes);
+}
+
+// 0x1417c7450 — and again with the 0x28 limit and a five-wide element.
+void* SynAccNew40FromCount_1417c7450(void* pUnused, uint64_t nCount) {
+    int64_t nSentinel = -2;
+    (void)nSentinel; (void)pUnused;
+    uint64_t r8 = nCount;
+    if (r8 != 0) {
+        uint64_t uQuot = 0xFFFFFFFFFFFFFFFFull / r8;
+        if (uQuot < 0x28) {
+            r8 = 0;
+            unsigned char aErr[0x40] = {};
+            uint64_t uZero = r8;
+            if (g_pfnSynErrCtor_1418233e8 != nullptr)
+                g_pfnSynErrCtor_1418233e8(aErr, &uZero);
+            *(const void**)aErr = (const void*)(uintptr_t)0x141824c40;
+            if (g_pfnSynThrow_1417f3154 != nullptr)
+                g_pfnSynThrow_1417f3154(aErr, (const void*)(uintptr_t)0x141881df0);
+        }
+    }
+    uint64_t uBytes = r8 * 5 * 8;                    // lea (%r8,%r8,4) / shl $0x3
+    if (g_pfnSynNew_1417f3166 == nullptr) return nullptr;
+    return g_pfnSynNew_1417f3166(uBytes);
+}
+
+// 0x1417c7580 — movabs $0xfffffffffffffff,%rax / ret
+uint64_t SynAccConst_1417c7580() { return 0x0fffffffffffffffull; }
+
+// 0x1417c75b0 — movq $0x0,(%rcx) / mov %rcx,%rax / ret
+void* SynAccZeroLead_1417c75b0(void* pThis) {
+    *(void**)pThis = nullptr;
+    return pThis;
+}
+
+// 0x1417c75c0 — test %rdx,%rdx / je / mov (%r8),%rax / mov %rax,(%rdx) / repz ret
+void SynAccStoreFromR8_1417c75c0(void* pUnused, void* pDst, const void* pSrc) {
+    (void)pUnused;
+    if (pDst != nullptr) *(void**)pDst = *(void**)pSrc;
+}
+
+// 0x1417c75d0 — the same body at its own start.
+void SynAccStoreFromR8_1417c75d0(void* pUnused, void* pDst, const void* pSrc) {
+    (void)pUnused;
+    if (pDst != nullptr) *(void**)pDst = *(void**)pSrc;
+}
+
+// 0x1417c75e0 — ret $0x0
+void SynAccNoop_1417c75e0() {}
+
+// 0x1417c75f0 — the same body at its own start.
+void SynAccStoreFromR8_1417c75f0(void* pUnused, void* pDst, const void* pSrc) {
+    (void)pUnused;
+    if (pDst != nullptr) *(void**)pDst = *(void**)pSrc;
+}
+
 }  // namespace tq
