@@ -714,3 +714,9 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - Next cluster: continue after 0x140074b80 in address order (0x140074d90/0x140074930 are done; the next
   entries are the 0x140075000 region), and keep an eye out for other unaligned `long long` field moves of
   the kind fixed here.
+
+## D192 (latest)
+
+- NpcServer: 110 bodies, 24 suites. The notification queue pair is ported with its append/withdraw rules.
+- Next: 0x1400750d0 (the 0x38 queue object with five 0x108 buffers and 0x14001b590), whose failure path
+  needs the rest of its body read, then 0x140075210 onward.

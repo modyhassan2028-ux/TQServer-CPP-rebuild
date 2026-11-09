@@ -277,6 +277,13 @@ extern int   (*g_pfnNpcResetEvent)(void* hEvent);                            // 
 extern unsigned int (*g_pfnNpcWaitForSingleObject)(void* hHandle, unsigned int uMilliseconds);
 unsigned long long FUN_140074d90(void* pCtl, unsigned int dwTimeout);
 void FUN_140074780(void* pCtl);
+int  FUN_140074e80(void* pCtl, void* pOverlapped, unsigned long long uKey, unsigned int dwBytes);
+void* FUN_140074eb0(long long pBase);
+unsigned long long FUN_140074ec0(int* pQueue, int nSize);
+unsigned int FUN_140074f40(unsigned int* pQueue, int* pActive, unsigned long long uKey, int nWhich);
+unsigned long long FUN_140075040(long long pBase, long long pQueue, int* pActive, int nWhich);
+extern void* (*g_pfnNpcRealloc_1400119a0)(void* pBlock, unsigned long long nBytes);   // FUN_1400119a0
+extern void* (*g_pfnNpc_14001a880)(long long* pTree, long long uKey);                 // tree find
 extern int   (*g_pfnNpcReleaseSemaphore)(void* hSemaphore, long nRelease, long* pPrevious);
 extern int   (*g_pfnNpcPostQueuedCompletionStatus)(void* hPort, unsigned int dwBytes,
                                                    unsigned long long uKey, void* pOverlapped);

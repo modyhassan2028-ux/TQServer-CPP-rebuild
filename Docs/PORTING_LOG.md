@@ -1230,3 +1230,20 @@ closed, and the flag only being set on the path that got a socket.
 - Two typing facts worth recording, both found by the compiler: the linear log seam at `0x140019050` takes
   `const char*` while `InlineLogERROR` takes `const void*`, and the base constructor's second argument is
   `unsigned long long` while its third is `long long`.
+
+## D192 — NpcServer.exe 0x140074e80, 0x140074eb0, 0x140074ec0, 0x140074f40, 0x140075040
+
+- `0x140074e80` posts one completion and answers `0` or `-1`, which is `(ok != 0) - 1` exactly.
+- `0x140074eb0` returns the IOCP handle the base keeps at `+0x1f0`.
+- `0x140074ec0` sizes both notification queues to `(n - 1) * 8 + 0x10` bytes, reallocating the two pointers at
+  `+0x08` and `+0x10` in that order, and commits the size and the own-flag only when both succeeded.
+- `0x140074f40` appends a key to one of the two queues. Two facts the tests pinned down: an array carries its
+  count in the first four bytes and its entries start **eight** bytes in, each entry eight bytes wide; and the
+  guard refuses an append while **that same side's** cursor is non-zero (not the other side's), so a side is
+  filled, drained, and only then filled again. A full array doubles the capacity, reallocating both arrays to
+  `(2n - 1) * 8 + 0x10`, and the entry goes into the side that asked.
+- `0x140075040` withdraws the last handed-out entry: it clears that side's cursor, decrements the array count,
+  and only when the new count differs from the withdrawn index does it move the last entry into the hole and
+  look the moved key up at `0x14001a880` with the tree at `+0x128`, writing the old cursor value into the node
+  field for the side that withdrew.
+- Two new seams: the reallocator at `0x1400119a0` and the tree lookup at `0x14001a880`.

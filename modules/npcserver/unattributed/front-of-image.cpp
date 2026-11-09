@@ -144,6 +144,8 @@ int   (*g_pfnNpcReleaseSemaphore)(void*, long, long*) = nullptr;
 int   (*g_pfnNpcPostQueuedCompletionStatus)(void*, unsigned int, unsigned long long, void*) = nullptr;
 int   (*g_pfnNpcGetQueuedCompletionStatus)(void*, unsigned int*, unsigned long long*, void**,
                                            unsigned int) = nullptr;
+void* (*g_pfnNpcRealloc_1400119a0)(void*, unsigned long long) = nullptr;
+void* (*g_pfnNpc_14001a880)(long long*, long long) = nullptr;
 void* g_pNpcBase_140103f80 = nullptr;
 void  (*g_pfnNpc_140074d90)(void*, unsigned int) = nullptr;
 void  (*g_pfnNpc_140014300)(void*) = nullptr;
@@ -2135,6 +2137,115 @@ void FUN_140074930(void* pOut) {
     }
     if (g_pfnNpcOrdinal3 != nullptr) g_pfnNpcOrdinal3((long long)hSocket);
     g_nNpcFlag_140104cc8 = 1;
+}
+
+// 0x140074e80 - post one completion into the port and answer 0 on success, -1 otherwise.
+int FUN_140074e80(void* pCtl, void* pOverlapped, unsigned long long uKey, unsigned int dwBytes) {
+    int bOk = g_pfnNpcPostQueuedCompletionStatus != nullptr
+                  ? g_pfnNpcPostQueuedCompletionStatus(*(void**)pCtl, dwBytes, uKey, pOverlapped)
+                  : 0;
+    return (bOk != 0) - 1;
+}
+
+// 0x140074eb0 - the IOCP handle the base holds.
+void* FUN_140074eb0(long long pBase) { return *(void**)(pBase + 0x1f0); }
+
+// 0x140074ec0 - size the two queues of a notification buffer: one entry per slot plus the header, both
+// reallocated to the same size, and the size and the "own" flag only committed when both succeeded.
+unsigned long long FUN_140074ec0(int* pQueue, int nSize) {
+    size_t nBytes = (size_t)(nSize - 1) * 8 + 0x10;
+    long long pFirst = g_pfnNpcRealloc_1400119a0 != nullptr
+                           ? (long long)g_pfnNpcRealloc_1400119a0(*(void**)(pQueue + 2), nBytes) : 0;
+    *(long long*)(pQueue + 2) = pFirst;
+    if (pFirst != 0) {
+        long long pSecond = g_pfnNpcRealloc_1400119a0 != nullptr
+                                ? (long long)g_pfnNpcRealloc_1400119a0(*(void**)(pQueue + 4), nBytes) : 0;
+        *(long long*)(pQueue + 4) = pSecond;
+        if (pSecond != 0) {
+            pQueue[1] = 1;
+            *pQueue = nSize;
+            return 0;
+        }
+    }
+    return 0xffffffff;
+}
+
+// 0x140074f40 - append a key to one of the two queues. The append is refused while the other queue has
+// entries, so the pair stays interchangeable. When the queue is full it doubles and reallocates both.
+unsigned int FUN_140074f40(unsigned int* pQueue, int* pActive, unsigned long long uKey, int nWhich) {
+    unsigned int* pArr;
+    if (nWhich == 0) {
+        pArr = *(unsigned int**)(pQueue + 4);
+        if (0 < pActive[1]) return 0;
+    } else {
+        pArr = *(unsigned int**)(pQueue + 2);
+        if (0 < *pActive) return 0;
+    }
+    bool bStore;
+    if (*pArr == *pQueue) {
+        unsigned int uNew = *pQueue * 2;
+        size_t nBytes = (size_t)(uNew - 1) * 8 + 0x10;
+        long long pFirst = g_pfnNpcRealloc_1400119a0 != nullptr
+                               ? (long long)g_pfnNpcRealloc_1400119a0(*(void**)(pQueue + 2), nBytes) : 0;
+        *(long long*)(pQueue + 2) = pFirst;
+        bStore = false;
+        if (pFirst != 0) {
+            pArr = g_pfnNpcRealloc_1400119a0 != nullptr
+                       ? (unsigned int*)g_pfnNpcRealloc_1400119a0(*(void**)(pQueue + 4), nBytes) : nullptr;
+            *(unsigned int**)(pQueue + 4) = pArr;
+            if (pArr != nullptr) {
+                pQueue[1] = 1;
+                *pQueue = uNew;
+                if (nWhich != 0) pArr = *(unsigned int**)(pQueue + 2);
+                bStore = true;
+            }
+        }
+        if (!bStore) return 0xffffffffu;
+    } else {
+        bStore = true;
+    }
+    (void)bStore;
+    *(unsigned long long*)((unsigned char*)pArr + 8 + (size_t)(*pArr) * 8) = uKey;
+    if (nWhich == 0) pActive[1] = (int)(*pArr + 1);
+    else *pActive = (int)(*pArr + 1);
+    unsigned int uIndex = *pArr;
+    *pArr = uIndex + 1;
+    return uIndex;
+}
+
+// 0x140075040 - withdraw the last entry of one queue: the count comes down, the entry that was last is
+// moved into the hole, and the tree node for the moved key has its stored index corrected on the side that
+// was used. The active counter for that side is cleared first.
+unsigned long long FUN_140075040(long long pBase, long long pQueue, int* pActive, int nWhich) {
+    unsigned int* pArr;
+    int nCount;
+    if (nWhich == 0) {
+        pArr = *(unsigned int**)(pQueue + 0x10);
+        nCount = pActive[1];
+        pActive[1] = 0;
+    } else {
+        pArr = *(unsigned int**)(pQueue + 8);
+        nCount = *pActive;
+        *pActive = 0;
+    }
+    unsigned int uIndex = (unsigned int)(nCount - 1);
+    if (-1 < (int)uIndex) {
+        *pArr = *pArr - 1;
+        if (*pArr != uIndex) {
+            long long uMoved = *(long long*)((unsigned char*)pArr + 8 + (size_t)(*pArr) * 8);
+            *(long long*)((unsigned char*)pArr + 8 + (long long)(int)uIndex * 8) = uMoved;
+            int* pNode = g_pfnNpc_14001a880 != nullptr
+                             ? (int*)g_pfnNpc_14001a880((long long*)(pBase + 0x128), uMoved) : nullptr;
+            if (pNode != nullptr) {
+                if (nWhich != 0) {
+                    *pNode = nCount;
+                    return 0;
+                }
+                pNode[1] = nCount;
+            }
+        }
+    }
+    return 0;
 }
 
 }  // namespace tq
