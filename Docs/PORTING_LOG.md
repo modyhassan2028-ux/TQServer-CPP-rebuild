@@ -303,3 +303,17 @@ The four bodies that were held back at D134 are in, each read straight off its o
   link cases after the `0x30(%rcx)` head test, at its own start.
 - 0x1417c6ff0: the mirror, byte for byte the body at 0x1417c6170.
 - `tests/syndicate_d143_test.cpp`: 11 checks, 6 passes, ASan+UBSan clean. Cluster 142 bodies.
+
+## D144 — nine bodies, 0x1417c7050..0x1417c71c0
+
+- The three `ret $0x0` stubs 0x1417c7050 / 0x1417c7060 / 0x1417c71a0 and the two constants
+  0x1417c7070 (`0x666666666666666`) and 0x1417c71b0 (`0x1fffffffffffffff`).
+- 0x1417c70e0: the 0x10-side rotation with every link tested against the **0x41** byte, at its
+  own start. The node it lifts is `x->0x10`, so when that slot already holds the sentinel the
+  sentinel is what comes back as the answer and what the head ends up naming — the test pins
+  exactly that arrangement after the first attempt assumed a fresh node.
+- 0x1417c7140: the mirror on the 0x0 side, last link case on 0x10.
+- 0x1417c71c0: the 0x21 keyed search, 32-bit `cmp`/`jae`, the answer being the last node the
+  walk turned left at. Both the equal key (takes `jae`) and the never-turned-left case (the
+  header comes back) are asserted.
+- `tests/syndicate_d144_test.cpp`: 5 groups, 6 passes, ASan+UBSan clean. Cluster 151 bodies.

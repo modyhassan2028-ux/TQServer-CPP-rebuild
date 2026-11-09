@@ -358,3 +358,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   Cluster 142 bodies.
 - Next in `Docs/ASM/1417c6e00.txt`: 0x1417c7027 onward — the rest of the mirror rotation's third
   link case and whatever follows it, which the captured range already holds.
+
+## D144 (latest)
+
+- Nine bodies: `SYNDICATE_D144_OK ... 5 units`, 6 passes under ASan+UBSan. Cluster 151 bodies.
+- Still open from the captured range: 0x1417c7080 (the comparator-driven find-or-add; its
+  `0x141823260` comparator is not modelled yet) and 0x1417c71f0, whose third link case is cut
+  by the capture at 0x1417c723e — the range must be re-captured before that one is written.
