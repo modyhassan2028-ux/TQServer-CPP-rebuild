@@ -820,4 +820,92 @@ void* SynAccZeroLead_1417c6f40(void* pThis) {
 // 0x1417c6f50 — movabs $0xfffffffffffffff,%rax / ret
 uint64_t SynAccConst_1417c6f50() { return 0x0fffffffffffffffULL; }
 
+// 0x1417c6f60 — the keyed search:
+//   mov 0x30(%rcx),%r8 / mov 0x8(%r8),%rax / cmpb $0x0,0x29(%rax) / jne done /
+//   loop: mov (%rdx),%ecx / cmp %ecx,0x18(%rax) / jae left / mov 0x10(%rax),%rax / jmp test /
+//   left: mov %rax,%r8 / mov (%rax),%rax / test: cmpb $0x0,0x29(%rax) / je loop /
+//   done: mov %r8,%rax
+// `cmp %ecx,0x18(%rax)` is a 32-bit compare, so the key at +0x18 is read as one; `jae` keeps the
+// last node whose key was >= the argument and turns left there, otherwise the walk goes right.
+// The answer is that candidate, not the node the walk stopped on.
+void* SynAccSearch_1417c6f60(void* pTree, const void* pKey) {
+    unsigned char* s = (unsigned char*)pTree;                     // rcx
+    unsigned char* pCand = *(unsigned char**)(s + 0x30);          // mov 0x30(%rcx),%r8
+    unsigned char* pNode = *(unsigned char**)(pCand + 8);         // mov 0x8(%r8),%rax
+    while (*(unsigned char*)(pNode + 0x29) == 0) {                // cmpb / jne done
+        uint32_t uKey = *(const uint32_t*)pKey;                   // mov (%rdx),%ecx
+        if (*(uint32_t*)(pNode + 0x18) >= uKey) {                 // cmp %ecx,0x18(%rax) / jae
+            pCand = pNode;                                        // mov %rax,%r8
+            pNode = *(unsigned char**)(pNode);                    // mov (%rax),%rax
+        } else {
+            pNode = *(unsigned char**)(pNode + 0x10);             // mov 0x10(%rax),%rax
+        }
+    }
+    return pCand;                                                 // mov %r8,%rax
+}
+
+// 0x1417c6f90 — the 0x10-side rotation, byte for byte the body at 0x1417c6100:
+//   mov 0x10(%rdx),%r8 / mov (%r8),%rax / mov %rax,0x10(%rdx) / mov (%r8),%rax /
+//   cmpb $0x0,0x29(%rax) / jne / mov %rdx,0x8(%rax) / mov 0x8(%rdx),%rax / mov %rax,0x8(%r8) /
+//   mov 0x30(%rcx),%rax / cmp 0x8(%rax),%rdx / jne / then the three link cases
+void* SynAccRotRight_1417c6f90(void* pTree, void* pNode) {
+    unsigned char* s = (unsigned char*)pTree;                     // rcx
+    unsigned char* x = (unsigned char*)pNode;                     // rdx
+    unsigned char* y = *(unsigned char**)(x + 0x10);              // mov 0x10(%rdx),%r8
+    *(void**)(x + 0x10) = *(void**)(y);                           // mov (%r8),%rax / mov %rax,0x10(%rdx)
+    unsigned char* l = *(unsigned char**)(y);                     // mov (%r8),%rax
+    if (*(unsigned char*)(l + 0x29) == 0)                         // cmpb / jne
+        *(void**)(l + 8) = x;                                     // mov %rdx,0x8(%rax)
+    *(void**)(y + 8) = *(void**)(x + 8);                          // mov 0x8(%rdx),%rax / mov %rax,0x8(%r8)
+    unsigned char* head = *(unsigned char**)(s + 0x30);           // mov 0x30(%rcx),%rax
+    if (x == *(unsigned char**)(head + 8)) {                      // cmp 0x8(%rax),%rdx / jne
+        *(void**)(head + 8) = y;
+        *(void**)(y) = x;
+        *(void**)(x + 8) = y;
+        return pNode;
+    }
+    unsigned char* p = *(unsigned char**)(x + 8);                 // mov 0x8(%rdx),%rax
+    if (x == *(unsigned char**)p) {                               // cmp (%rax),%rdx / jne
+        *(void**)(p) = y;
+        *(void**)(y) = x;
+        *(void**)(x + 8) = y;
+        return pNode;
+    }
+    *(void**)(p + 0x10) = y;                                      // mov %r8,0x10(%rax)
+    *(void**)(y) = x;
+    *(void**)(x + 8) = y;
+    return pNode;
+}
+
+// 0x1417c6ff0 — the mirror rotation, byte for byte the body at 0x1417c6170:
+//   mov (%rdx),%r8 / mov 0x10(%r8),%rax / mov %rax,(%rdx) / ...
+void* SynAccRotLeft_1417c6ff0(void* pTree, void* pNode) {
+    unsigned char* s = (unsigned char*)pTree;                     // rcx
+    unsigned char* x = (unsigned char*)pNode;                     // rdx
+    unsigned char* y = *(unsigned char**)(x);                     // mov (%rdx),%r8
+    *(void**)(x) = *(void**)(y + 0x10);                           // mov 0x10(%r8),%rax / mov %rax,(%rdx)
+    unsigned char* r = *(unsigned char**)(y + 0x10);              // mov 0x10(%r8),%rax
+    if (*(unsigned char*)(r + 0x29) == 0)                         // cmpb / jne
+        *(void**)(r + 8) = x;                                     // mov %rdx,0x8(%rax)
+    *(void**)(y + 8) = *(void**)(x + 8);                          // mov 0x8(%rdx),%rax / mov %rax,0x8(%r8)
+    unsigned char* head = *(unsigned char**)(s + 0x30);           // mov 0x30(%rcx),%rax
+    if (x == *(unsigned char**)(head + 8)) {                      // cmp 0x8(%rax),%rdx / jne
+        *(void**)(head + 8) = y;
+        *(void**)(y + 0x10) = x;
+        *(void**)(x + 8) = y;
+        return pNode;
+    }
+    unsigned char* p = *(unsigned char**)(x + 8);                 // mov 0x8(%rdx),%rax
+    if (x == *(unsigned char**)(p + 0x10)) {                      // cmp 0x10(%rax),%rdx / jne
+        *(void**)(p + 0x10) = y;
+        *(void**)(y + 0x10) = x;
+        *(void**)(x + 8) = y;
+        return pNode;
+    }
+    *(void**)(p) = y;                                             // mov %r8,(%rax)
+    *(void**)(y + 0x10) = x;
+    *(void**)(x + 8) = y;
+    return pNode;
+}
+
 }  // namespace tq

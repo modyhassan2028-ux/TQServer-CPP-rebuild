@@ -351,3 +351,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - Next in `Docs/ASM/1417c6e00.txt`: 0x1417c6f60 (the keyed search — `mov 0x30(%rcx),%r8` then a
   `cmp %ecx,0x18(%rax)` loop with `jae`, answering `r8`), then the two rebalance steps
   0x1417c6f90 and 0x1417c6ff0.
+
+## D143 (latest)
+
+- The keyed search and the two rotations are in: `SYNDICATE_D143_OK ... 11 checks`, 6 passes.
+  Cluster 142 bodies.
+- Next in `Docs/ASM/1417c6e00.txt`: 0x1417c7027 onward — the rest of the mirror rotation's third
+  link case and whatever follows it, which the captured range already holds.

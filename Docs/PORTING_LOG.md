@@ -291,3 +291,15 @@ The four bodies that were held back at D134 are in, each read straight off its o
 - `synacc.cpp`: 0x1417c6f20 (two qword stores, this back), 0x1417c6f40 (`movq $0x0,(%rcx)`),
   0x1417c6f50 (`movabs $0xfffffffffffffff`).
 - `tests/syndicate_d142_test.cpp`: 17 checks, 6 passes, ASan+UBSan clean. Cluster 139 bodies.
+
+## D143 — the keyed search 0x1417c6f60 and the two rotations at 0x1417c6f90 / 0x1417c6ff0
+
+- 0x1417c6f60: `mov 0x30(%rcx),%r8` takes the header out of the tree's 0x30 slot, `mov 0x8(%r8),%rax`
+  its root, and the walk then compares `0x18(%rax)` against the argument with a **32-bit**
+  `cmp %ecx,0x18(%rax)` / `jae`. Equal keys take the `jae` too, so they turn left like greater
+  ones. The answer is the last node the walk turned left at (`r8`), not the node it stopped on,
+  which the test pins with the key-7 and key-3 cases and with key 99 keeping the header.
+- 0x1417c6f90: the 0x10-side rotation, byte for byte the body at 0x1417c6100 — the same three
+  link cases after the `0x30(%rcx)` head test, at its own start.
+- 0x1417c6ff0: the mirror, byte for byte the body at 0x1417c6170.
+- `tests/syndicate_d143_test.cpp`: 11 checks, 6 passes, ASan+UBSan clean. Cluster 142 bodies.
