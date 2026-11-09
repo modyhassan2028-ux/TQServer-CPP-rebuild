@@ -166,8 +166,36 @@ int   FUN_1400027f0(long long pThis);
 bool  FUN_140002b30(long long pThis, long long hSocketTable, long long pParam3, long long uFlag);
 unsigned long long FUN_140005750(unsigned long long a1, unsigned long long a2, unsigned long long a3,
                                 unsigned long long a4);
-// 0x140005750 stores the addresses of the eight handlers at 0x140005400 .. 0x1400055f0; none of those
-// bodies is ported yet, so the addresses are kept as the values the original stores.
+// the eight handlers 0x140005750 registers. A lock is a bare 0x28-byte CRITICAL_SECTION; a condition is
+// a handle, the critical section behind it, and three counters (0x40 bytes).
+struct NpcEvthreadCondition {
+    void* hEvent;            // +0x00
+    unsigned char cs[0x28];  // +0x08
+    int nWaiters;            // +0x30
+    int nSignals;            // +0x34
+    int nWaitCount;          // +0x38
+};
+void* FUN_140005400(void);
+void  FUN_140005450(void* pLock);
+bool  FUN_140005470(unsigned long long uFlags, void* pLock);
+unsigned long long FUN_1400054a0(unsigned long long a1, void* pLock);
+void* FUN_1400054d0(void);
+void  FUN_140005560(void* pCond);
+unsigned long long FUN_140005590(void* pCond, int nBroadcast);
+unsigned int FUN_1400055f0(void* pCond, void* pMutex, int* pTimeval);
+extern void* (*g_pfnNpcMalloc_140011830)(long long nBytes);                  // FUN_140011830
+extern void  (*g_pfnNpcFree_1400119c0)(void* p);                             // FUN_1400119c0
+extern int   (*g_pfnNpcInitCS)(void* pCS, unsigned long uSpin);              // InitializeCriticalSectionAndSpinCount
+extern void  (*g_pfnNpcDeleteCS)(void* pCS);                                 // DeleteCriticalSection
+extern void  (*g_pfnNpcEnterCS)(void* pCS);                                  // EnterCriticalSection
+extern void  (*g_pfnNpcLeaveCS)(void* pCS);                                  // LeaveCriticalSection
+extern int   (*g_pfnNpcTryEnterCS)(void* pCS);                               // TryEnterCriticalSection
+extern void* (*g_pfnNpcCreateEventA)(void* pSec, int bManual, int bInitial, const char* pszName);  // CreateEventA
+extern int   (*g_pfnNpcSetEvent)(void* hEvent);                              // SetEvent
+extern int   (*g_pfnNpcResetEvent)(void* hEvent);                            // ResetEvent
+extern unsigned int (*g_pfnNpcWaitForSingleObject)(void* hHandle, unsigned int uMilliseconds);
+extern unsigned int (*g_pfnNpcGetTickCount)(void);                           // GetTickCount
+extern unsigned int (*g_pfnNpc_140016450)(int* pTimeval);                    // FUN_140016450
 #define NPCSERVER_HANDLER_ADDR_140005400 0x140005400ull
 #define NPCSERVER_HANDLER_ADDR_140005450 0x140005450ull
 #define NPCSERVER_HANDLER_ADDR_140005470 0x140005470ull

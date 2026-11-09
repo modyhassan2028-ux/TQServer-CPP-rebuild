@@ -96,6 +96,19 @@ int  (*g_pfnNpc_1400121b0)(int, long long, unsigned long long, unsigned long lon
 const char g_symNpcStr_LockDisable[] = "Trying to disable lock functions after they have been set up will probaby not work.";
 const char g_symNpcStr_LockChange[] = "Can't change lock callbacks once they have been initialized.";
 const char g_symNpcStr_CondDisable[] = "Trying to disable condition functions after they have been set up will probaby not work.";
+void* (*g_pfnNpcMalloc_140011830)(long long) = nullptr;
+void  (*g_pfnNpcFree_1400119c0)(void*) = nullptr;
+int   (*g_pfnNpcInitCS)(void*, unsigned long) = nullptr;
+void  (*g_pfnNpcDeleteCS)(void*) = nullptr;
+void  (*g_pfnNpcEnterCS)(void*) = nullptr;
+void  (*g_pfnNpcLeaveCS)(void*) = nullptr;
+int   (*g_pfnNpcTryEnterCS)(void*) = nullptr;
+void* (*g_pfnNpcCreateEventA)(void*, int, int, const char*) = nullptr;
+int   (*g_pfnNpcSetEvent)(void*) = nullptr;
+int   (*g_pfnNpcResetEvent)(void*) = nullptr;
+unsigned int (*g_pfnNpcWaitForSingleObject)(void*, unsigned int) = nullptr;
+unsigned int (*g_pfnNpcGetTickCount)(void) = nullptr;
+unsigned int (*g_pfnNpc_140016450)(int*) = nullptr;
 const char g_symNpcStr_CondChange[] = "Can't change condition callbacks once they have been initialized.";
 
 void (*g_pfnNpc_140016880)(void*) = nullptr;
@@ -1071,17 +1084,17 @@ unsigned long long FUN_140005750(unsigned long long a1, unsigned long long a2, u
     NpcLibeventHandlers s1;
     s1.nFirst = 1;
     s1.nSecond = 1;
-    s1.pfnHandler[0] = (void (*)(void))NPCSERVER_HANDLER_ADDR_140005400;
-    s1.pfnHandler[1] = (void (*)(void))NPCSERVER_HANDLER_ADDR_140005450;
-    s1.pfnHandler[2] = (void (*)(void))NPCSERVER_HANDLER_ADDR_140005470;
-    s1.pfnHandler[3] = (void (*)(void))NPCSERVER_HANDLER_ADDR_1400054a0;
+    s1.pfnHandler[0] = (void (*)(void))&FUN_140005400;
+    s1.pfnHandler[1] = (void (*)(void))&FUN_140005450;
+    s1.pfnHandler[2] = (void (*)(void))&FUN_140005470;
+    s1.pfnHandler[3] = (void (*)(void))&FUN_1400054a0;
     NpcLibeventHandlers s2;
     s2.nFirst = 1;
     s2.nSecond = 1;
-    s2.pfnHandler[0] = (void (*)(void))NPCSERVER_HANDLER_ADDR_1400054d0;
-    s2.pfnHandler[1] = (void (*)(void))NPCSERVER_HANDLER_ADDR_140005560;
-    s2.pfnHandler[2] = (void (*)(void))NPCSERVER_HANDLER_ADDR_140005590;
-    s2.pfnHandler[3] = (void (*)(void))NPCSERVER_HANDLER_ADDR_1400055f0;
+    s2.pfnHandler[0] = (void (*)(void))&FUN_1400054d0;
+    s2.pfnHandler[1] = (void (*)(void))&FUN_140005560;
+    s2.pfnHandler[2] = (void (*)(void))&FUN_140005590;
+    s2.pfnHandler[3] = (void (*)(void))&FUN_1400055f0;
     if (g_pfnNpc_140016890 != nullptr) g_pfnNpc_140016890(&s1, (long long)a2, (long long)a3, (long long)a4);
     if (g_pfnNpc_140016880 != nullptr) g_pfnNpc_140016880(g_symNpcData_1400054c0);
     if (g_pfnNpc_140016990 != nullptr) g_pfnNpc_140016990(&s2, (long long)a2, (long long)a3, (long long)a4);
@@ -1157,6 +1170,149 @@ unsigned long long FUN_140016990(NpcEvthreadCbs* pCbs, unsigned long long a2, un
         return 0xffffffffull;
     }
     return 0;
+}
+
+// The eight handlers behind the registration. They are libevent's Windows threading shims: a lock is a
+// bare CRITICAL_SECTION with a spin count of 2000, and a condition is an auto-reset handle plus a critical
+// section and three counters.
+
+// 0x140005400 - a lock is 0x28 bytes, initialised with a spin count of 2000.
+void* FUN_140005400(void) {
+    void* p = g_pfnNpcMalloc_140011830 != nullptr ? g_pfnNpcMalloc_140011830(0x28) : nullptr;
+    if (p != nullptr) {
+        int bOk = g_pfnNpcInitCS != nullptr ? g_pfnNpcInitCS(p, 2000) : 0;
+        if (bOk != 0) return p;
+        if (g_pfnNpcFree_1400119c0 != nullptr) g_pfnNpcFree_1400119c0(p);
+    }
+    return nullptr;
+}
+
+// 0x140005450 - release the critical section, then the block.
+void FUN_140005450(void* pLock) {
+    if (g_pfnNpcDeleteCS != nullptr) g_pfnNpcDeleteCS(pLock);
+    if (g_pfnNpcFree_1400119c0 != nullptr) g_pfnNpcFree_1400119c0(pLock);
+}
+
+// 0x140005470 - flag 0x10 asks for the try form, and a failed try answers true.
+bool FUN_140005470(unsigned long long uFlags, void* pLock) {
+    if ((uFlags & 0x10) != 0) {
+        int bLocked = g_pfnNpcTryEnterCS != nullptr ? g_pfnNpcTryEnterCS(pLock) : 0;
+        return bLocked == 0;
+    }
+    if (g_pfnNpcEnterCS != nullptr) g_pfnNpcEnterCS(pLock);
+    return false;
+}
+
+// 0x1400054a0 - unlock.
+unsigned long long FUN_1400054a0(unsigned long long a1, void* pLock) {
+    (void)a1;
+    if (g_pfnNpcLeaveCS != nullptr) g_pfnNpcLeaveCS(pLock);
+    return 0;
+}
+
+// 0x1400054d0 - a condition is 0x40 bytes: the handle first, the critical section behind it, and the
+// three counters cleared only once the handle exists.
+void* FUN_1400054d0(void) {
+    NpcEvthreadCondition* p = (NpcEvthreadCondition*)(g_pfnNpcMalloc_140011830 != nullptr
+                                                         ? g_pfnNpcMalloc_140011830(0x40) : nullptr);
+    if (p == nullptr) return nullptr;
+    int bOk = g_pfnNpcInitCS != nullptr ? g_pfnNpcInitCS(p->cs, 2000) : 0;
+    if (bOk != 0) {
+        void* hEvent = g_pfnNpcCreateEventA != nullptr ? g_pfnNpcCreateEventA(nullptr, 1, 0, nullptr) : nullptr;
+        p->hEvent = hEvent;
+        if (hEvent != nullptr) {
+            p->nWaitCount = 0;
+            p->nSignals = 0;
+            p->nWaiters = 0;
+            return p;
+        }
+        if (g_pfnNpcDeleteCS != nullptr) g_pfnNpcDeleteCS(p->cs);
+    }
+    if (g_pfnNpcFree_1400119c0 != nullptr) g_pfnNpcFree_1400119c0(p);
+    return nullptr;
+}
+
+// 0x140005560 - release the critical section, the handle, then the block.
+void FUN_140005560(void* pCond) {
+    NpcEvthreadCondition* p = (NpcEvthreadCondition*)pCond;
+    if (g_pfnNpcDeleteCS != nullptr) g_pfnNpcDeleteCS(p->cs);
+    if (g_pfnNpcCloseHandle != nullptr) g_pfnNpcCloseHandle(p->hEvent);
+    if (g_pfnNpcFree_1400119c0 != nullptr) g_pfnNpcFree_1400119c0(p);
+}
+
+// 0x140005590 - signal: a single wake bumps the pending count, a broadcast makes every waiter pending,
+// then the generation counter moves and the event is set.
+unsigned long long FUN_140005590(void* pCond, int nBroadcast) {
+    NpcEvthreadCondition* p = (NpcEvthreadCondition*)pCond;
+    if (g_pfnNpcEnterCS != nullptr) g_pfnNpcEnterCS(p->cs);
+    if (nBroadcast == 0) p->nSignals = p->nSignals + 1;
+    else p->nSignals = p->nWaiters;
+    p->nWaitCount = p->nWaitCount + 1;
+    if (g_pfnNpcSetEvent != nullptr) g_pfnNpcSetEvent(p->hEvent);
+    if (g_pfnNpcLeaveCS != nullptr) g_pfnNpcLeaveCS(p->cs);
+    return 0;
+}
+
+// 0x1400055f0 - wait: count this waiter, release the caller's lock, then wait on the handle until the
+// generation moves or the deadline passes, retiming the remaining interval each round.
+unsigned int FUN_1400055f0(void* pCond, void* pMutex, int* pTimeval) {
+    NpcEvthreadCondition* p = (NpcEvthreadCondition*)pCond;
+    unsigned int uResult = 0xffffffffu;
+    unsigned int uTimeout = 0xffffffffu;
+    bool bLoop = true;
+    if (pTimeval != nullptr) {
+        uTimeout = g_pfnNpc_140016450 != nullptr ? g_pfnNpc_140016450(pTimeval) : 0xffffffffu;
+    }
+    if (g_pfnNpcEnterCS != nullptr) g_pfnNpcEnterCS(p->cs);
+    int nGeneration = p->nWaitCount;
+    p->nWaiters = p->nWaiters + 1;
+    if (g_pfnNpcLeaveCS != nullptr) g_pfnNpcLeaveCS(p->cs);
+    if (g_pfnNpcLeaveCS != nullptr) g_pfnNpcLeaveCS(pMutex);
+    unsigned int uStart = g_pfnNpcGetTickCount != nullptr ? g_pfnNpcGetTickCount() : 0;
+    unsigned int uMillis = uTimeout;
+    for (;;) {
+        unsigned int uWait = g_pfnNpcWaitForSingleObject != nullptr
+                                 ? g_pfnNpcWaitForSingleObject(p->hEvent, uMillis) : 0;
+        if (g_pfnNpcEnterCS != nullptr) g_pfnNpcEnterCS(p->cs);
+        if (p->nSignals == 0 || p->nWaitCount == nGeneration) {
+            if (uWait == 0) {
+                if (uMillis != 0xffffffffu) {
+                    unsigned int uNow = g_pfnNpcGetTickCount != nullptr ? g_pfnNpcGetTickCount() : 0;
+                    if (uStart + uTimeout <= uNow) {
+                        p->nWaiters = p->nWaiters - 1;
+                        uResult = 1;
+                        bLoop = false;
+                        goto waited;
+                    }
+                    uMillis = (uStart - uNow) + uTimeout;
+                }
+                if (p->nSignals == 0) {
+                    if (g_pfnNpcResetEvent != nullptr) g_pfnNpcResetEvent(p->hEvent);
+                }
+            } else {
+                uResult = 0xffffffffu;
+                if (uWait == 0x102) uResult = 1;
+                p->nWaiters = p->nWaiters - 1;
+                bLoop = false;
+            }
+        } else {
+            p->nWaiters = p->nWaiters - 1;
+            uResult = 0;
+            p->nSignals = p->nSignals - 1;
+            bLoop = false;
+        }
+    waited:
+        if (g_pfnNpcLeaveCS != nullptr) g_pfnNpcLeaveCS(p->cs);
+        if (!bLoop) {
+            if (g_pfnNpcEnterCS != nullptr) g_pfnNpcEnterCS(pMutex);
+            if (g_pfnNpcEnterCS != nullptr) g_pfnNpcEnterCS(p->cs);
+            if (p->nWaiters == 0) {
+                if (g_pfnNpcResetEvent != nullptr) g_pfnNpcResetEvent(p->hEvent);
+            }
+            if (g_pfnNpcLeaveCS != nullptr) g_pfnNpcLeaveCS(p->cs);
+            return uResult;
+        }
+    }
 }
 
 }  // namespace tq

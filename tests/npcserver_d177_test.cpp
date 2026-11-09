@@ -44,11 +44,11 @@ int main() {
 
     // every table starts with two ones, and the four handlers are the body's own addresses
     assert(g_seen1.a == 1 && g_seen1.b == 1);
-    assert(g_seen1.fn[0] == (void (*)(void))NPCSERVER_HANDLER_ADDR_140005400 && g_seen1.fn[1] == (void (*)(void))NPCSERVER_HANDLER_ADDR_140005450);
-    assert(g_seen1.fn[2] == (void (*)(void))NPCSERVER_HANDLER_ADDR_140005470 && g_seen1.fn[3] == (void (*)(void))NPCSERVER_HANDLER_ADDR_1400054a0);
+    assert(g_seen1.fn[0] == (void (*)(void))&FUN_140005400 && g_seen1.fn[1] == (void (*)(void))&FUN_140005450);
+    assert(g_seen1.fn[2] == (void (*)(void))&FUN_140005470 && g_seen1.fn[3] == (void (*)(void))&FUN_1400054a0);
     assert(g_seen2.a == 1 && g_seen2.b == 1);
-    assert(g_seen2.fn[0] == (void (*)(void))NPCSERVER_HANDLER_ADDR_1400054d0 && g_seen2.fn[1] == (void (*)(void))NPCSERVER_HANDLER_ADDR_140005560);
-    assert(g_seen2.fn[2] == (void (*)(void))NPCSERVER_HANDLER_ADDR_140005590 && g_seen2.fn[3] == (void (*)(void))NPCSERVER_HANDLER_ADDR_1400055f0);
+    assert(g_seen2.fn[0] == (void (*)(void))&FUN_1400054d0 && g_seen2.fn[1] == (void (*)(void))&FUN_140005560);
+    assert(g_seen2.fn[2] == (void (*)(void))&FUN_140005590 && g_seen2.fn[3] == (void (*)(void))&FUN_1400055f0);
 
     // the middle call gets the fixed data address, the outer two get the same three arguments
     assert(g_dataArg == (void*)g_symNpcData_1400054c0);

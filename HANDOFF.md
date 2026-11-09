@@ -619,3 +619,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - The thread-callback half of the libevent layer is done: 0x140016880, 0x140016890, 0x140016990.
 - Next: the eight handlers 0x140005400..0x1400055f0 that 0x140005750 registers, then 0x140012580 /
   0x140010a00 / 0x140010a20 / 0x140015ed0 (the event-config and event-base wrappers).
+
+## D179 (latest)
+
+- NpcServer: 79 bodies. Suites D165 to D179 all green.
+- The registered handlers are ported and wired: the lock and condition shims with spin count 2000.
+- Next in the layer: 0x140012580 (event_config_new), 0x140010a00, 0x140010a20, 0x140015ed0 (event_base_new),
+  0x140012660, 0x140010d80, 0x14001d350, then 0x1400121b0 and 0x140016450 which the callbacks already call.

@@ -954,3 +954,29 @@ The four bodies that were held back at D134 are in, each read straight off its o
 - `tests/npcserver_d178_test.cpp` covers the empty table, the first request plus follow-up, the identical
   repeat, a changed pointer, a request with a hole, disabling a set table, both debug-flag targets, the
   condition registrar's ignored second word and the three echoed pointers.
+
+## D179 — NpcServer.exe 0x140005400 .. 0x1400055f0 (the eight registered handlers)
+
+These are libevent's Windows threading shims. A lock is a bare `0x28`-byte `CRITICAL_SECTION`; a condition is
+`0x40` bytes: the handle at `+0`, the section at `+8`, then `nWaiters` at `+0x30`, `nSignals` at `+0x34`
+and `nWaitCount` at `+0x38` (the offsets the code itself uses: `param_1 + 6`, `param_1 + 7`, `+0x34`).
+
+- `0x140005400` allocates `0x28`, initialises with a spin count of **2000**, and frees on failure.
+- `0x140005450` releases the section then the block.
+- `0x140005470` tests flag `0x10`: the try form answers `TryEnterCriticalSection(...) == 0` (a failed try is
+  reported as held), otherwise it enters and answers false.
+- `0x1400054a0` leaves the section and answers 0.
+- `0x1400054d0` allocates `0x40`, initialises the section at `+8` with spin **2000**, creates a manual-reset
+  event (`CreateEventA(0, 1, 0, 0)`) into `+0`, and only then clears the three counters; a missing handle
+  releases the section, and every failure frees the block.
+- `0x140005560` releases the section, closes the handle, then frees.
+- `0x140005590` signals: a single wake increments `nSignals`, a broadcast sets it to `nWaiters`, then
+  `nWaitCount` advances and the event is set.
+- `0x1400055f0` waits: the timeval is converted by `0x140016450`, the waiter is counted, the caller's lock is
+  released, and each round re-computes the remaining interval from `GetTickCount`; running past
+  `start + timeout` answers 1, a `WAIT_TIMEOUT` (`0x102`) answers 1, any other wait failure answers
+  `0xffffffff`, and a consumed signal answers 0. The last waiter resets the handle.
+- `0x140005750` now stores the real addresses of these eight bodies instead of the placeholder constants, so
+  the registration is wired end to end; the D177 suite compares against the same symbols.
+- Tests: `tests/npcserver_d179_test.cpp` (allocation and failure paths, the try flag, the counters, signal and
+  broadcast, and three wait outcomes: deadline, signalled, timeout plus a generic failure).
