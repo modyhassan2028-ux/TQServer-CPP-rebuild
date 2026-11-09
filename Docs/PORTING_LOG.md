@@ -703,3 +703,26 @@ The four bodies that were held back at D134 are in, each read straight off its o
   `FUN_14000b3e0`, `FUN_140005a50`, `FUN_14000b9f0`, `FUN_140006200`, and the value symbols
   `DAT_140002370`, `FUN_1400022f0`, `FUN_140002380`, `DAT_1400be2d8`.
 - `tests/npcserver_d168_test.cpp`: 32 checks; D165, D166 and D168 each pass 6 times under ASan+UBSan.
+
+## D169 — the first body placed by its own evidence: clientsocket.cpp
+
+- `FUN_1400017b0` @ `0x1400017b0` lands in
+  `modules/npcserver/src/version/cqserver-78.0.11-1204/npcserver/clientsocket.cpp`, and the evidence
+  is inside the body: it calls
+  `log_InlineLogERROR(&DAT_1400be0b0, "CHECK", "m_pKernelThread",
+  "f:\version\cqserver-78.0.11-1204\npcserver\clientsocket.cpp", 0x184)`. The path with its drive
+  letter, the two expressions, and the lines `0x184`, `0x187`, `0x1a7` are all reproduced verbatim.
+  This is the standard the other bodies wait for: a path from the binary, not from us.
+- Checks in the original's order: buffered count must be `>= 1`, then `>= 9`, then
+  `>= *(u16*)(this+0x14)`, then the packet length must be `>= 4` and `<= 0x400`. The payload starts
+  at `this+0x1c`, the length handed to the virtual call is `size - 8`, the id is `*(u16*)(this+0x16)`
+  and the fourth value is `*(u32*)(this+0x18)`.
+- The analyst is bracketed exactly as in the source: `CTickAnalyst::CTickAnalyst(local, 0x4e)`,
+  the virtual call through slot `+0x18` (index 3), then `CTickAnalyst::~CTickAnalyst(local)`.
+- `IF_NOT "this->ClearPacket(nNetPacketSize)"` at `0x1a7` is reachable: when the virtual call leaves
+  the socket out of state 2, `FUN_1400012a0` returns 0 and the loop logs it. The test drives that
+  exact path (the slot clears `+0x830`), rather than assuming it is dead code.
+- The inline-log seam is now variadic (`const void* pMsg, ...`) so the assert form travels through
+  the same seam as the plain messages; the three earlier suites were rebuilt and re-run against it.
+- `tests/npcserver_d169_test.cpp` covers the two CHECK paths, four early returns, one full packet
+  (analyst id `0x4e`, four-byte payload, twelve bytes consumed) and the IF_NOT path.

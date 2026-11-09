@@ -16,7 +16,7 @@ static void* g_writeBuf = nullptr;
 static int g_writeLen = 0;
 static void* g_freed = nullptr;
 
-static void LogHook(const void* m) { ++g_logs; g_lastLog = m; }
+static void LogHook(const void* m, ...) { ++g_logs; g_lastLog = m; }
 static void* DelHook(void* p) { ++g_deletes; return p; }
 static void* FreeHook(void* p) { ++g_frees; g_freed = p; return p; }
 static int WriteHook(void* p, void* b, int n) { ++g_writes; (void)p; g_writeBuf = b; g_writeLen = n; return g_writeRet; }

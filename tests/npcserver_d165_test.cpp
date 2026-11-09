@@ -11,7 +11,7 @@ static int g_deletes = 0, g_deletes2 = 0, g_logs = 0, g_cleanups = 0;
 static void* g_deleted = nullptr;
 static void* DelHook(void* p) { ++g_deletes; g_deleted = p; return p; }
 static void* Del2Hook(void* p) { ++g_deletes2; return p; }
-static void LogHook(const void* m) { if (m != nullptr) ++g_logs; }
+static void LogHook(const void* m, ...) { if (m != nullptr) ++g_logs; }
 static int CleanupHook(void) { ++g_cleanups; return 0; }
 
 static int g_virtual = 0;

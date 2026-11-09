@@ -15,7 +15,7 @@ namespace tq {
 // seams
 extern void* (*g_pfnNpcOperatorDelete)(void* p);              // operator_delete
 extern void* (*g_pfnNpcOperatorDelete2)(void* p);             // operator_delete__
-extern void (*g_pfnNpcInlineLogError)(const void* pMsg);      // log_InlineLogERROR
+extern void (*g_pfnNpcInlineLogError)(const void* pMsg, ...);  // log_InlineLogERROR (variadic)
 extern int (*g_pfnNpcWSAStartup)(int iVersion, void* pData);  // Ordinal_115
 extern int (*g_pfnNpcWSACleanup)(void);                       // Ordinal_116
 extern void* (*g_pfnNpcFreeBufferevent)(void* p);             // FUN_140006a60

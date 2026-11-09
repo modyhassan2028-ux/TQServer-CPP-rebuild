@@ -22,7 +22,7 @@ static int   g_addrInt = 0x0A0B0C0D;
 static void* g_addrTarget = &g_addrInt;
 static void* g_addrOuter[4] = { nullptr, nullptr, nullptr, &g_addrTarget };
 
-static void LogHook(const void* m) { ++g_logs; g_lastLog = m; }
+static void LogHook(const void* m, ...) { ++g_logs; g_lastLog = m; }
 static int Ord11Hook(void* p) { (void)p; return g_o11; }
 static long long Ord52Hook(void* p) { (void)p; return g_o52; }
 static unsigned short Ord9Hook(unsigned short v) { return (unsigned short)(v + 1); }
