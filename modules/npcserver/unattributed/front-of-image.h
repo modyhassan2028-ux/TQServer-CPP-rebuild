@@ -87,6 +87,9 @@ extern bool (*g_pfnNpcThreadBaseCreateThread)(void* pThis, const char* pszName, 
 // event_config (0x30 bytes): the entry queue head at +0 with its tail pointer at +8, the processor hint at
 // +0x10, the dispatch interval at +0x14, the callback limit at +0x1c, and the flags at +0x28.
 void* FUN_140012580(void);
+void  FUN_140012660(void* pConfig);
+extern void* (*g_pfnNpcCrtFree)(void* p);                                    // free (0x1400bd548)
+extern void* (*g_pfnNpcEventFree_140103fa8)(void* p);                        // DAT_140103fa8
 unsigned int FUN_140010a00(long long pConfig, unsigned int uFlag);
 unsigned int FUN_140010a20(long long pConfig, unsigned int uCount);
 void* FUN_140010d80(void* pBase);

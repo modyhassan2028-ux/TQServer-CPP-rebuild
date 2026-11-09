@@ -635,3 +635,12 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - Next: 0x140012660 (event_config_free, needs the disassembly for its entry list) and 0x140015ed0
   (event_base_new_with_config, 925 bytes). Then rewire 0x140002b30 and the other seam users to these real
   bodies.
+
+## D181 (latest)
+
+- NpcServer: 85 bodies. Suites D165 to D181 all green.
+- The event_config family is complete: new (0x140012580), free (0x140012660), set_flag (0x140010a00),
+  set_num_cpus_hint (0x140010a20). The hooks are DAT_140103f98 (allocate) and DAT_140103fa8 (release).
+- Next: 0x140015ed0 event_base_new_with_config, 925 bytes, the largest body left in this layer. Its field map
+  is already partly known from D180 (config flags land at base +0x1f8, the interval at +0x1fc, the callback
+  limit at +0x204).

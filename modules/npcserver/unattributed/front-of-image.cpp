@@ -112,6 +112,8 @@ unsigned int (*g_pfnNpc_140016450)(int*) = nullptr;
 void* (*g_pfnNpcCalloc)(long long, long long) = nullptr;
 void* (*g_pfnNpcEventMalloc_140103f98)(long long) = nullptr;
 void* (*g_pfnNpc_14001ced0)(void*) = nullptr;
+void* (*g_pfnNpcCrtFree)(void*) = nullptr;
+void* (*g_pfnNpcEventFree_140103fa8)(void*) = nullptr;
 const char g_symNpcStr_CondChange[] = "Can't change condition callbacks once they have been initialized.";
 
 void (*g_pfnNpc_140016880)(void*) = nullptr;
@@ -1375,6 +1377,43 @@ void* FUN_14001d350(void) {
     void* p = g_pfnNpcOperatorNew != nullptr ? g_pfnNpcOperatorNew(0x68) : nullptr;
     if (p == nullptr) return nullptr;
     return g_pfnNpc_14001ced0 != nullptr ? g_pfnNpc_14001ced0(p) : p;
+}
+
+// 0x140012660 - event_config_free: walk the entry queue, unlink each node from both sides, release its
+// name and then the node, and finally the config itself. Every release goes through the hook when one is
+// installed, otherwise straight to the runtime free; the hook is re-read after each call.
+void FUN_140012660(void* pConfig) {
+    void* pNode = *(void**)pConfig;
+    void* (*pfnFree)(void*) = g_pfnNpcEventFree_140103fa8;
+    while (pNode != nullptr) {
+        char* p = (char*)pNode;
+        void* pNext = *(void**)p;
+        void* pPrev = *(void**)(p + 0x08);
+        if (pNext != nullptr) *(void**)((char*)pNext + 0x08) = pPrev;
+        else *(void**)((char*)pConfig + 0x08) = pPrev;
+        *(void**)pPrev = pNext;
+        void* pName = *(void**)(p + 0x10);
+        if (pName != nullptr) {
+            if (pfnFree == nullptr) {
+                if (g_pfnNpcCrtFree != nullptr) g_pfnNpcCrtFree(pName);
+            } else {
+                pfnFree(pName);
+                pfnFree = g_pfnNpcEventFree_140103fa8;
+            }
+        }
+        if (pfnFree == nullptr) {
+            if (g_pfnNpcCrtFree != nullptr) g_pfnNpcCrtFree(pNode);
+        } else {
+            pfnFree(pNode);
+            pfnFree = g_pfnNpcEventFree_140103fa8;
+        }
+        pNode = *(void**)pConfig;
+    }
+    if (pfnFree == nullptr) {
+        if (g_pfnNpcCrtFree != nullptr) g_pfnNpcCrtFree(pConfig);
+    } else {
+        pfnFree(pConfig);
+    }
 }
 
 }  // namespace tq

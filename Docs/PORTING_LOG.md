@@ -999,3 +999,18 @@ and `nWaitCount` at `+0x38` (the offsets the code itself uses: `param_1 + 6`, `p
   one-for-one; the decompiler dropped that register.
 - `tests/npcserver_d180_test.cpp` covers both allocation paths of the config (including errno `0xc`), the two
   setters with their null answers, the selector indirection, and the factory with a failing allocation.
+
+## D181 — NpcServer.exe 0x140012660 (event_config_free)
+
+- Straight from the instructions, not the pseudo-code: each round reads `node->next` (`+0`) and `node->prev`
+  (`+8`), and unlinks with `next ? next->prev = prev : cfg->tail = prev` followed by `*prev = next`. The tail
+  word at `+8` is the address of the last node's `next` field, exactly as the TAILQ head in D180 implied.
+- The name at `+0x10` is released first (when present), then the node, then finally the config itself.
+- Every release goes through `DAT_140103fa8` when that hook is installed, otherwise to the runtime `free` at
+  `0x1400bd548`. The hook is re-read after each call (the machine does `mov`, call, `mov` again), so a hook
+  that rewires itself mid-walk is honoured; the port reproduces that.
+- The config release is a tail jump: hook if installed, else runtime `free`.
+- The nameless node is the interesting path: with a hook it still goes through the hook, and with no hook the
+  `je` skips the name release and lands straight on the node release.
+- `tests/npcserver_d181_test.cpp` checks the runtime path with one and two nodes (unlink arithmetic, the tail
+  rewrite, the emptied queue), the hook path, and an empty config that releases only itself.
