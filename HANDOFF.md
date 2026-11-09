@@ -661,3 +661,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   0x140074b80 (346) and 0x140014b30 (867), plus 0x140016720 / 0x1400163c0 / 0x1400165d0 which the new
   timer code calls.
 - Next: those three larger ones, then rewire 0x140002b30 and 0x140015ed0 to call the real bodies directly.
+
+## D184 (latest)
+
+- NpcServer: 100 bodies. Suites D165 to D184 all green.
+- Remaining seams: 0x140074b80 (346, IOCP launch) and 0x140014b30 (867, event_base_free).
+- Then the payoff step: rewire 0x140002b30 (CKernelThread::Create) and 0x140015ed0 to call these real bodies
+  instead of their seams.

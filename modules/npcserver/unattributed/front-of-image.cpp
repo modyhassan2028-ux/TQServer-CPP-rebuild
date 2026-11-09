@@ -147,6 +147,10 @@ void* (*g_pfnNpc_140014900)(void*, long long, unsigned long long, unsigned long 
 int   (*g_pfnNpc_140009250)(char*, unsigned long long, const char*, const char*) = nullptr;
 unsigned char (*g_pfnNpc_140008820)(unsigned char) = nullptr;
 static const double g_dNpc_1400c11b8 = 1000000.0;   // the .rdata double the timer scaling divides by
+static const double g_dNpc_1400c11f0 = 9223372036854775808.0;   // 2^63, the counter rebase threshold
+void  (*g_pfnNpcGetSystemTimeAsFileTime)(void*) = nullptr;
+void  (*g_pfnNpc_1400164f0)(long long, int*) = nullptr;
+void* (*g_pfnNpc_140011850)(long long, long long) = nullptr;
 void* (*g_pfnNpcEventFree_140103fa8)(void*) = nullptr;
 const char g_symNpcStr_CondChange[] = "Can't change condition callbacks once they have been initialized.";
 
@@ -1726,6 +1730,123 @@ unsigned long long FUN_140015e70(void* pBase, unsigned long long a2, unsigned lo
         if (g_pfnNpc_140016e50 != nullptr) g_pfnNpc_140016e50();
     }
     return (unsigned long long)(unsigned int)(unsigned long long)pRes;
+}
+
+// 0x1400165d0 - the tick reading: the first entry point if one was resolved, else the second with its high
+// word folded in, else GetTickCount with the wrap counter bumped whenever the reading goes backwards.
+unsigned long long FUN_1400165d0(void* p) {
+    void** pp = (void**)p;
+    if (pp[0] != nullptr) return ((unsigned long long (*)(void))pp[0])();
+    if (pp[1] != nullptr) {
+        unsigned long long u = ((unsigned long long (*)(void))pp[1])();
+        return (u & 0xffffffffull) | ((u >> 0x12) & 0x3fff00000000ull);
+    }
+    unsigned int dwTick = g_pfnNpcGetTickCount != nullptr ? g_pfnNpcGetTickCount() : 0;
+    unsigned long long u = (unsigned long long)dwTick;
+    if (u < *(unsigned long long*)((char*)p + 0x10)) {
+        *(unsigned long long*)((char*)p + 0x18) = *(unsigned long long*)((char*)p + 0x18) + 0x100000000ull;
+    }
+    *(unsigned long long*)((char*)p + 0x10) = u;
+    return *(unsigned long long*)((char*)p + 0x18) + u;
+}
+
+// 0x1400163c0 - the wall clock: FILETIME shifted from 1601 to 1970, seconds and microseconds. A FILETIME
+// at or below the epoch answers -1 and writes nothing.
+unsigned long long FUN_1400163c0(void* pOut) {
+    if (pOut != nullptr) {
+        unsigned long long aFileTime[2] = { 0, 0 };
+        if (g_pfnNpcGetSystemTimeAsFileTime != nullptr) g_pfnNpcGetSystemTimeAsFileTime(aFileTime);
+        if (0x19db1ded53e7fffull < aFileTime[0]) {
+            unsigned long long u = aFileTime[0] + 0xfe624e212ac18000ull;
+            ((unsigned int*)pOut)[0] = (unsigned int)(u / 10000000ull);
+            unsigned long long uTenths = u / 10ull;
+            ((unsigned int*)pOut)[1] = (unsigned int)uTenths +
+                                       (unsigned int)(uTenths / 1000000ull) * 0xFFF0BDC0u;
+            return 0;
+        }
+    }
+    return 0xffffffffull;
+}
+
+// 0x140016720 - the monitor's read: the plain path divides the tick by 1000 with the image's magic
+// constant, the counter path scales by the stored factor and rebases when it drifts more than a second.
+unsigned long long FUN_140016720(void* pMonitor, int* pOut) {
+    unsigned char* p = (unsigned char*)pMonitor;
+    unsigned long long uNow = FUN_1400165d0(pMonitor);
+    long long lMicro;
+    if (*(int*)(p + 0x38) == 0) {
+        unsigned long long uHi = (unsigned long long)(((unsigned __int128)0x0624dd2f1a9fbe77ull * uNow) >> 64);
+        int iSec = (int)((((uNow - uHi) >> 1) + uHi) >> 9);
+        pOut[0] = iSec;
+        pOut[1] = (int)((unsigned int)uNow + (unsigned int)iSec * 0xFFFFFC18u);
+        pOut[1] = (int)((unsigned int)pOut[1] * 1000u);
+        lMicro = 0;
+    } else {
+        long long aCount[2] = { 0, 0 };
+        if (g_pfnNpcQueryPerformanceCounter != nullptr) g_pfnNpcQueryPerformanceCounter(aCount);
+        long long lTicks = (long long)((uNow - *(unsigned long long*)(p + 0x20)) * 1000ull);
+        lMicro = (long long)((double)(aCount[0] - *(long long*)(p + 0x28)) * *(double*)(p + 0x30));
+        long long lDrift = lTicks - lMicro;
+        if (lDrift < 0) lDrift = -lDrift;
+        if (1000000 < lDrift) {
+            long long lBias = 0;
+            double dCount = (double)aCount[0] - (double)lTicks / *(double*)(p + 0x30);
+            if (g_dNpc_1400c11f0 < dCount) {
+                dCount = dCount - g_dNpc_1400c11f0;
+                if (dCount < g_dNpc_1400c11f0) lBias = (long long)0x8000000000000000ull;
+            }
+            *(long long*)(p + 0x28) = (long long)dCount + lBias;
+            lMicro = lTicks;
+        }
+        int iSec = (int)(lMicro / 1000000);
+        pOut[0] = iSec;
+        pOut[1] = (int)((unsigned int)lMicro + (unsigned int)iSec * 0xFFF0BDC0u);
+    }
+    if (g_pfnNpc_1400164f0 != nullptr) g_pfnNpc_1400164f0((long long)pMonitor, pOut);
+    return 0;
+}
+
+// 0x1400127e0 - event_base_priority_init: only a base whose dispatch loop has not started can be re-sized,
+// and only between 1 and 0xff. Re-sizing releases the old table through the hook when one is installed and
+// relinks every entry as a two-word node pointing at itself.
+unsigned long long FUN_1400127e0(long long pBase, int nPriorities, unsigned long long a3,
+                                 unsigned long long a4) {
+    if (*(long long*)(pBase + 0x1d0) != 0) {
+        if (g_pfnNpc_140016e30 != nullptr) g_pfnNpc_140016e30();
+    }
+    unsigned long long uResult = 0xffffffffull;
+    if (*(int*)(pBase + 0xd8) == 0 && (unsigned int)(nPriorities - 1) < 0xffu) {
+        uResult = 0;
+        if (nPriorities != *(int*)(pBase + 0x100)) {
+            if (*(int*)(pBase + 0x100) != 0) {
+                void* pOld = *(void**)(pBase + 0xf8);
+                if (g_pfnNpcEventFree_140103fa8 == nullptr) {
+                    if (g_pfnNpcCrtFree != nullptr) g_pfnNpcCrtFree(pOld);
+                } else {
+                    g_pfnNpcEventFree_140103fa8(pOld);
+                }
+                *(unsigned int*)(pBase + 0x100) = 0;
+            }
+            void* pTable = g_pfnNpc_140011850 != nullptr ? g_pfnNpc_140011850(nPriorities, 0x10) : nullptr;
+            *(void**)(pBase + 0xf8) = pTable;
+            if (pTable == nullptr) {
+                if (g_pfnNpc_140019050 != nullptr)
+                    g_pfnNpc_140019050("%s: calloc", "event_base_priority_init");
+                uResult = 0xffffffffull;
+            } else {
+                *(int*)(pBase + 0x100) = nPriorities;
+                for (int i = 0; i < nPriorities; ++i) {
+                    char* pEntry = (char*)pTable + (long long)i * 0x10;
+                    *(void**)(pEntry + 0x00) = nullptr;
+                    *(void**)(pEntry + 0x08) = pEntry;
+                }
+            }
+        }
+    }
+    if (*(long long*)(pBase + 0x1d0) != 0) {
+        if (g_pfnNpc_140016e50 != nullptr) g_pfnNpc_140016e50();
+    }
+    return uResult;
 }
 
 }  // namespace tq

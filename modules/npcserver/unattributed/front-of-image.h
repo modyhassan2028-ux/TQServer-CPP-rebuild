@@ -133,6 +133,14 @@ extern void* (*g_pfnNpcGetProcAddress)(void* hModule, const char* pszName);   //
 extern int   (*g_pfnNpcQueryPerformanceFrequency)(void* pFreq);              // QueryPerformanceFrequency
 extern int   (*g_pfnNpcQueryPerformanceCounter)(void* pCount);               // QueryPerformanceCounter
 extern unsigned long long (*g_pfnNpc_1400165d0)(void* p);                    // FUN_1400165d0
+unsigned long long FUN_1400165d0(void* p);
+unsigned long long FUN_1400163c0(void* pOut);
+unsigned long long FUN_140016720(void* pMonitor, int* pOut);
+unsigned long long FUN_1400127e0(long long pBase, int nPriorities, unsigned long long a3,
+                                 unsigned long long a4);
+extern void  (*g_pfnNpcGetSystemTimeAsFileTime)(void* pFileTime);             // GetSystemTimeAsFileTime
+extern void  (*g_pfnNpc_1400164f0)(long long pMonitor, int* pOut);            // FUN_1400164f0
+extern void* (*g_pfnNpc_140011850)(long long nCount, long long nSize);        // FUN_140011850
 extern unsigned long long (*g_pfnNpc_140016720)(void* pMonitor, void* pOut);  // FUN_140016720
 extern void  (*g_pfnNpc_1400163c0)(void* pOut);                              // FUN_1400163c0
 extern void  (*g_pfnNpc_140016ef0)(void);                                    // FUN_140016ef0

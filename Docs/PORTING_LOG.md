@@ -1072,3 +1072,29 @@ and `nWaitCount` at `+0x38` (the offsets the code itself uses: `param_1 + 6`, `p
 - `0x140015e70` answers `0xffffffff` for a null base, cycles the notifier around `0x140014900`, and returns
   the install result truncated to 32 bits, so `-1` survives the round trip.
 - `tests/npcserver_d183_test.cpp` covers all ten, including the borrow path and the timer scaling.
+
+## D184 — NpcServer.exe 0x1400165d0, 0x1400163c0, 0x140016720, 0x1400127e0
+
+- `0x1400165d0` (the tick reading) tries the resolved entry point at `+0`, then the fallback at `+8` whose
+  result is folded as `(u & 0xffffffff) | ((u >> 0x12) & 0x3fff00000000)`, and only then `GetTickCount`
+  with the wrap counter at `+0x18` bumped by `0x100000000` whenever a reading comes back lower than the one
+  stored at `+0x10`.
+- `0x1400163c0` (the wall clock) refuses a FILETIME at or below `0x19db1ded53e7fff`, otherwise shifts it to
+  the 1970 epoch by adding `0xfe624e212ac18000`, divides by `10000000` for the seconds and by `10` for the
+  sub-second field, which is then reduced modulo `1000000` in **32-bit** arithmetic. The modular constant is
+  `0xFFF0BDC0`, not `0xFFFFF0C0`: subtracting a million is `2^32 - 1000000 = 0xFFF0BDC0`, and getting that
+  byte wrong is what the first run of the suite caught.
+- `0x140016720` (the monitor read) has two paths. Without the counter flag at `+0x38` the tick is divided by
+  a thousand with the image's magic `0x0624dd2f1a9fbe77` and the sequence
+  `(((x - hi) >> 1) + hi) >> 9`, which was checked against `x / 1000` over 100k inputs before being
+  written. With the flag it scales the counter difference by the stored factor at `+0x30`, and when the two
+  readings disagree by more than a second it rebases the stored counter using the `2^63` threshold read from
+  `.rdata` at `0x1400c11f0` (`9223372036854775808.0`). `0x1400164f0` always runs afterwards, which is why
+  the suite sees the field it adjusts.
+- `0x1400127e0` (`event_base_priority_init`): refused unless `+0xd8` is zero and the count is 1..0xff. The
+  table at `+0xf8` with its size at `+0x100` is released through the hook `DAT_140103fa8` when installed,
+  otherwise through the runtime `free`, then rebuilt with `0x140011850(n, 0x10)`, each `0x10`-byte entry
+  being `{ 0, self }`. A failed allocation reports "%s: calloc" with "event_base_priority_init" and answers
+  `-1`. The notifier is cycled around the work.
+- `tests/npcserver_d184_test.cpp` covers all four, including the tick wrap, the epoch guard, the exact
+  seconds/microseconds of a 2026 FILETIME, the drift rebase, the table relinking and the failing allocation.
