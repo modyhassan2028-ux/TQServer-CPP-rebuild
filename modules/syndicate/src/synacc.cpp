@@ -1740,4 +1740,52 @@ void* SynAccNew48Zero_1417c8530() {
     return b;
 }
 
+// 0x1417c8590 - the zeroed 0x28 node: three slots cleared, colour 1 at +0x20, +0x21 cleared.
+void* SynAccNew28Zero_1417c8590() {
+    int64_t marker = -2; (void)marker;                    // movq $0xfffffffffffffffe,0x28(%rsp)
+    unsigned char* b = (unsigned char*)(g_pfnSynNew_1417f3166 ? g_pfnSynNew_1417f3166(0x28) : nullptr);
+    int64_t zero = 0; (void)zero;                          // xor %ecx,%ecx
+    if (b != nullptr) *(void**)b = nullptr;                // mov %rcx,(%rax) / jmp
+    int32_t spill1 = 1; (void)spill1;                      // movl $0x1,0x20(%rsp)
+    if (b + 8 != nullptr) *(void**)(b + 8) = nullptr;      // lea 0x8(%rax),%rdx / test / mov
+    int32_t spill2 = 2; (void)spill2;                      // movl $0x2,0x20(%rsp)
+    if (b + 0x10 != nullptr) *(void**)(b + 0x10) = nullptr;
+    b[0x20] = 1;                                           // movb $0x1,0x20(%rax)
+    b[0x21] = 0;                                           // movb $0x0,0x21(%rax)
+    return b;
+}
+
+// 0x1417c8620 - the zeroed 0x30 node: the same three slots, its pair at +0x28.
+void* SynAccNew30Zero2_1417c8620() {
+    int64_t marker = -2; (void)marker;
+    unsigned char* b = (unsigned char*)(g_pfnSynNew_1417f3166 ? g_pfnSynNew_1417f3166(0x30) : nullptr);
+    int64_t zero = 0; (void)zero;
+    if (b != nullptr) *(void**)b = nullptr;
+    int32_t spill1 = 1; (void)spill1;
+    if (b + 8 != nullptr) *(void**)(b + 8) = nullptr;
+    int32_t spill2 = 2; (void)spill2;
+    if (b + 0x10 != nullptr) *(void**)(b + 0x10) = nullptr;
+    b[0x28] = 1;
+    b[0x29] = 0;
+    return b;
+}
+
+// 0x1417c8680 - the 0x30 node with both pair qwords from the fifth argument.
+void* SynAccNew30Pair_1417c8680(void* pUnused, void* p2, void* p3, void* p4, const void* pPair, unsigned char uFlag) {
+    (void)pUnused;
+    int64_t marker = -2; (void)marker;
+    unsigned char* b = (unsigned char*)(g_pfnSynNew_1417f3166 ? g_pfnSynNew_1417f3166(0x30) : nullptr);
+    if (b != nullptr) {
+        *(void**)b = p2;                                   // mov %rsi,(%rax)
+        *(void**)(b + 8) = p3;                             // mov %rdi,0x8(%rax)
+        *(void**)(b + 0x10) = p4;                          // mov %rbx,0x10(%rax)
+        const unsigned char* src = (const unsigned char*)pPair;
+        *(void**)(b + 0x18) = *(void**)src;                 // mov (%rcx),%rax / mov %rax,0x18(%r11)
+        *(void**)(b + 0x20) = *(void**)(src + 8);           // mov 0x8(%rcx),%rax / mov %rax,0x20(%r11)
+        b[0x28] = uFlag;                                    // movzbl 0x78(%rsp),%eax / mov %al,0x28(%r11)
+        b[0x29] = 0;                                        // movb $0x0,0x29(%r11)
+    }
+    return b;
+}
+
 }  // namespace tq

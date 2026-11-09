@@ -222,5 +222,8 @@ void* SynAccNew48Node_1417c82e0(void* pUnused, void* p2, void* p3, void* p4, con
 void* SynAccNew28Node_1417c8370(void* pUnused, void* p2, void* p3, void* p4, const void* pArg5, unsigned char uFlag); // 0x1417c8370
 void* SynAccNew30Zero_1417c84d0();                                         // 0x1417c84d0
 void* SynAccNew48Zero_1417c8530();                                         // 0x1417c8530
+void* SynAccNew28Zero_1417c8590();                                         // 0x1417c8590
+void* SynAccNew30Zero2_1417c8620();                                        // 0x1417c8620
+void* SynAccNew30Pair_1417c8680(void* pUnused, void* p2, void* p3, void* p4, const void* pPair, unsigned char uFlag); // 0x1417c8680
 }  // namespace tq
 #endif

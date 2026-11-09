@@ -466,3 +466,16 @@ The four bodies that were held back at D134 are in, each read straight off its o
 - Test note worth keeping: each family reads its **own** byte, and the 0x29 increment reads
   0x0 before 0x10 — the first two attempts crashed because the chain was built for one family
   only. 25 checks, 6 passes, ASan+UBSan clean. Cluster 220 bodies.
+
+## D154 — five bodies, 0x1417c8590 / 0x1417c8620 / 0x1417c8680 / 0x1417c85f0 / 0x1417c8700
+
+- 0x1417c8590 (0x28) and 0x1417c8620 (0x30): the zeroed nodes at their own starts. Three slots
+  cleared through a register the bytes zero once, colour 1 at the node's own pair, the byte beside
+  it cleared, nothing past it touched. The `$0x1` / `$0x2` spills at 0x20(%rsp) are dead and kept
+  as locals.
+- 0x1417c8680: the 0x30 node that takes **both** pair qwords from the fifth argument (the 0x28
+  builder takes only the first) plus the flag byte at +0x28.
+- 0x1417c85f0: the pair is read out before 0x1417c6580 runs, and the step lands on the **source**
+  iterator, so the answer and the moved iterator are both observable; the test pins the order.
+- 0x1417c8700: the iterator builder once more.
+- `tests/syndicate_d154_test.cpp`: 30 checks, 6 passes, ASan+UBSan clean. Cluster 225 bodies.

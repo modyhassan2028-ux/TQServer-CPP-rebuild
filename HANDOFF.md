@@ -438,3 +438,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - Next in `Docs/ASM/1417c83f0.txt`: 0x1417c8590 (the 0x28 zeroed node) is cut at 0x1417c85e6, so
   extend the capture past 0x1417c8800 before writing it; the rest of that file (271 lines) is
   untouched.
+
+## D154 (latest)
+
+- Five bodies: `SYNDICATE_D154_OK ... 30 checks`, 6 passes. Cluster 225 bodies.
+- `Docs/ASM/1417c8590.txt` (322 lines) still holds 0x1417c8740 onward: the copy-then-step family
+  with 0x1417c6610, plus the iterator builders and the pair fills that follow, most of them cut
+  by the capture's end at 0x1417c8a80. Read that file before starting the next unit.

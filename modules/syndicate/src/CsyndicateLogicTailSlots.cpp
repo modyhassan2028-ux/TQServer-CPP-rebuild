@@ -3089,4 +3089,23 @@ void* SynAccInc29Call_1417c84b0(void* pIter) {
     return pIter;
 }
 
+// 0x1417c85f0 - the pair copied out, then the source iterator steps down through 0x1417c6580.
+void* SynAccCopyThenDec21_1417c85f0(void* pSrc, void* pOut) {
+    *(void**)pOut = *(void**)pSrc;                         // mov (%rcx),%rax / mov %rax,(%rdx)
+    *(void**)((unsigned char*)pOut + 8) = *(void**)((unsigned char*)pSrc + 8);
+    SynAccDec21_1417c6580(pSrc);                           // call 0x1417c6580 with rcx still the source
+    return pOut;                                           // mov %rbx,%rax
+}
+
+// 0x1417c8700 - the iterator builder once more.
+void* SynAccIterCtor3_1417c8700(void* pThis, void* pNode, void* pLeadHolder) {
+    *(void**)pThis = nullptr;                              // movq $0x0,(%rcx)
+    *(void**)((unsigned char*)pThis + 8) = pNode;           // mov %rdx,0x8(%rcx)
+    if (pLeadHolder == nullptr) {                          // test %r8,%r8 / jne
+        if (g_pfn_invalid_parameter_noinfo != nullptr) g_pfn_invalid_parameter_noinfo();
+    }
+    *(void**)pThis = *(void**)pLeadHolder;                  // mov (%rdi),%rax / mov %rax,(%rbx)
+    return pThis;                                          // mov %rbx,%rax
+}
+
 }  // namespace tq
