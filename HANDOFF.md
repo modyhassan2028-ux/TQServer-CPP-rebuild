@@ -707,3 +707,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 105 bodies, 23 suites green. 0x140074b80 -> real 0x140074930.
 - Next: 0x140002b30 onto its eight ported callees (needs suite D176 rewritten to drive real internals:
   0x140012580/0x140010a00/0x140010a20/0x140010d80/0x140012660/0x14001d350/0x140005750/0x140015ed0).
+
+## D191 (latest)
+
+- 105 bodies, 23 suites green. NpcServer's thread create path is entirely on real bodies.
+- Next cluster: continue after 0x140074b80 in address order (0x140074d90/0x140074930 are done; the next
+  entries are the 0x140075000 region), and keep an eye out for other unaligned `long long` field moves of
+  the kind fixed here.

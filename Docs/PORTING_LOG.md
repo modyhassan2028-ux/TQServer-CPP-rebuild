@@ -1212,3 +1212,21 @@ closed, and the flag only being set on the path that got a socket.
 - Suite D185 no longer stubs the once-init; with the winsock seams left null the real body stops at the
   failed socket, which is exactly the behaviour that path should have.
 - All 23 suites rebuilt and green against the trimmed unit.
+
+## D191 — Rewiring 0x140002b30 onto the real bodies
+
+- `CKernelThread::Create` now calls `0x140012580` (config new), `0x140010a00` (flag), `0x140010a20`
+  (processor count), `0x140015ed0` (base), `0x140012660` (config free), `0x140010d80` (method name),
+  `0x14001d350` (engine) and `0x140005750` (handler registration) directly. The eight seam globals are gone.
+- One real defect surfaced: the base constructor copies eight bytes from `+0x14` of the config to `+0x1fc`
+  of the base. Both are odd offsets, and the C++ access as a `long long` is unaligned, which UBSan flags and
+  which no optimizer may assume. The bytes are now moved through a local eight-byte buffer, so the result is
+  identical to the machine's move without the undefined behaviour.
+- `tests/npcserver_d176_test.cpp` was rewritten to drive the real chain: it pins that the config gets the
+  processor count at `+0x10` and the flag at `+0x28`, that six processors produce twelve IOCP slots, that
+  the engine's first slot receives the thread base address, that a failed socket allocation reports
+  `0x1400bebe0` and clears `+0x60`, and that a refusing engine releases itself through its `+0x10` slot.
+  The null-config, null-base and missing-argument paths are covered as before.
+- Two typing facts worth recording, both found by the compiler: the linear log seam at `0x140019050` takes
+  `const char*` while `InlineLogERROR` takes `const void*`, and the base constructor's second argument is
+  `unsigned long long` while its third is `long long`.

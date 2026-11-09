@@ -58,16 +58,8 @@ unsigned int g_nNpcTickClockInit_140103c64 = 0;
 unsigned int g_nNpcStatCount_140103f28 = 0;
 unsigned int g_nNpcStatSum_140103f2c = 0;
 unsigned int g_nNpcStatMax_140103f30 = 0;
-void* (*g_pfnNpc_140005750)(void*, long long, void*, void*) = nullptr;
-void* (*g_pfnNpcEventConfigNew_140012580)(void) = nullptr;
-void  (*g_pfnNpcEventConfigFlag_140010a00)(void*, long long) = nullptr;
 void  (*g_pfnNpcGetSystemInfo)(void*) = nullptr;
-void  (*g_pfnNpcEventConfigCpu_140010a20)(void*, unsigned int) = nullptr;
-void* (*g_pfnNpcEventBaseNew_140015ed0)(void*, unsigned long long, void*, void*) = nullptr;
-void  (*g_pfnNpcEventConfigFree_140012660)(void*) = nullptr;
-const char* (*g_pfnNpcEventBaseMethod_140010d80)(void*) = nullptr;
 void  (*g_pfnNpcLogMessageFmt)(const char*, ...) = nullptr;
-void* (*g_pfnNpc_14001d350)(void) = nullptr;
 void* (*g_pfnNpcBeginThreadEx)(void*, unsigned int, void*, void*, unsigned int, unsigned int*) = nullptr;
 unsigned long (*g_pfnNpcGetThreadId)(void*) = nullptr;
 unsigned long (*g_pfnNpcGetCurrentThreadId)(void) = nullptr;
@@ -1048,33 +1040,29 @@ bool FUN_140002b30(long long pThis, long long hSocketTable, long long pParam3, l
         long long hObj = *(long long*)(pThis + 0x50);
         void** v2 = (void**)*(void**)hObj;
         ((void (*)(long long, long long))((void**)v2)[8])(hObj, 0x1e);    // slot +0x40
-        if (g_pfnNpc_140005750 != nullptr)
-            g_pfnNpc_140005750((void*)hObj, 0x1e, (void*)pParam3, (void*)uFlag);
+        FUN_140005750((unsigned long long)hObj, 0x1e, (unsigned long long)pParam3, (unsigned long long)uFlag);
     }
-    void* pConfig = g_pfnNpcEventConfigNew_140012580 != nullptr ? g_pfnNpcEventConfigNew_140012580() : nullptr;
+    void* pConfig = FUN_140012580();
     if (pConfig == nullptr) {
         if (g_pfnNpcInlineLogError != nullptr) g_pfnNpcInlineLogError(&g_symNpcStr_1400beb80);
         return false;
     }
-    if (g_pfnNpcEventConfigFlag_140010a00 != nullptr) g_pfnNpcEventConfigFlag_140010a00(pConfig, 4);
+    FUN_140010a00((long long)pConfig, 4);
     unsigned char si[0x40];
     for (int i = 0; i < 0x40; ++i) si[i] = 0;
     if (g_pfnNpcGetSystemInfo != nullptr) g_pfnNpcGetSystemInfo(si);
     unsigned long long uCpu = *(unsigned int*)(si + 0x20);                // dwNumberOfProcessors
-    if (g_pfnNpcEventConfigCpu_140010a20 != nullptr)
-        g_pfnNpcEventConfigCpu_140010a20(pConfig, *(unsigned int*)(si + 0x20));
-    void* pBase = g_pfnNpcEventBaseNew_140015ed0 != nullptr
-                      ? g_pfnNpcEventBaseNew_140015ed0(pConfig, uCpu, (void*)pParam3, (void*)uFlag) : nullptr;
+    FUN_140010a20((long long)pConfig, *(unsigned int*)(si + 0x20));
+    void* pBase = FUN_140015ed0(pConfig, uCpu, (long long)pParam3, (void*)uFlag);
     *(void**)(pThis + 0x58) = pBase;
-    if (g_pfnNpcEventConfigFree_140012660 != nullptr) g_pfnNpcEventConfigFree_140012660(pConfig);
+    FUN_140012660(pConfig);
     if (*(void**)(pThis + 0x58) == nullptr) {
         if (g_pfnNpcInlineLogError != nullptr) g_pfnNpcInlineLogError(&g_symNpcStr_1400bebb0);
         return false;
     }
-    const char* pszMethod = g_pfnNpcEventBaseMethod_140010d80 != nullptr
-                                ? g_pfnNpcEventBaseMethod_140010d80(*(void**)(pThis + 0x58)) : nullptr;
+    const char* pszMethod = (const char*)FUN_140010d80(*(void**)(pThis + 0x58));
     if (g_pfnNpcLogMessageFmt != nullptr) g_pfnNpcLogMessageFmt(g_symNpcStr_1400beca8, pszMethod);
-    void* pEngine = g_pfnNpc_14001d350 != nullptr ? g_pfnNpc_14001d350() : nullptr;
+    void* pEngine = FUN_14001d350();
     *(void**)(pThis + 0x68) = pEngine;
     if (pEngine == nullptr) return false;
     {
@@ -1516,7 +1504,13 @@ void* FUN_140015ed0(void* pConfig, unsigned long long a2, long long a3, void* a4
         *(unsigned int*)(pBase + 0x208) = 1;
         *(unsigned int*)(pBase + 0x204) = 0x7fffffff;
     } else {
-        *(long long*)(pBase + 0x1fc) = *(long long*)((char*)pConfig + 0x14);
+        // the machine moves eight bytes from +0x14 of the config to +0x1fc of the base, both odd offsets;
+        // copying through a byte buffer keeps the same bytes without an unaligned access
+        {
+            unsigned char aTmp[8];
+            for (int i = 0; i < 8; ++i) aTmp[i] = *((unsigned char*)pConfig + 0x14 + i);
+            for (int i = 0; i < 8; ++i) *((unsigned char*)pBase + 0x1fc + i) = aTmp[i];
+        }
         *(unsigned int*)(pBase + 0x208) = *(unsigned int*)((char*)pConfig + 0x20);
         if (*(int*)((char*)pConfig + 0x1c) < 0) *(unsigned int*)(pBase + 0x204) = 0x7fffffff;
         else *(int*)(pBase + 0x204) = *(int*)((char*)pConfig + 0x1c);

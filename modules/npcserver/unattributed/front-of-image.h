@@ -68,16 +68,8 @@ extern void (*g_pfnNpcTickAnalystCtor)(void* pScope, int nId);              // C
 extern void (*g_pfnNpcTickAnalystDtor)(void* pScope);                       // CTickAnalyst::~CTickAnalyst
 extern void (*g_pfnNpcInlineLogWARNING)(const void* pFmt, unsigned long long uValue);
 // the libevent-facing layer 0x140002b30 reaches into; none of these bodies is ported yet
-extern void* (*g_pfnNpc_140005750)(void* a, long long b, void* c, void* d);
-extern void* (*g_pfnNpcEventConfigNew_140012580)(void);
-extern void  (*g_pfnNpcEventConfigFlag_140010a00)(void* pConfig, long long nValue);
 extern void  (*g_pfnNpcGetSystemInfo)(void* pInfo);
-extern void  (*g_pfnNpcEventConfigCpu_140010a20)(void* pConfig, unsigned int uCount);
-extern void* (*g_pfnNpcEventBaseNew_140015ed0)(void* pConfig, unsigned long long uCpu, void* a3, void* a4);
-extern void  (*g_pfnNpcEventConfigFree_140012660)(void* pConfig);
-extern const char* (*g_pfnNpcEventBaseMethod_140010d80)(void* pBase);
 extern void  (*g_pfnNpcLogMessageFmt)(const char* pszFormat, ...);
-extern void* (*g_pfnNpc_14001d350)(void);
 extern void* (*g_pfnNpcBeginThreadEx)(void* pSec, unsigned int uStack, void* pStart, void* pArg,
                                       unsigned int uFlags, unsigned int* pTid);
 extern unsigned long (*g_pfnNpcGetThreadId)(void* hThread);
