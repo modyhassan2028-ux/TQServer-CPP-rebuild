@@ -636,3 +636,23 @@ The four bodies that were held back at D134 are in, each read straight off its o
   by address and the PORTING_LOG says so. Seams: `operator_delete`, `operator_delete__`,
   `log_InlineLogERROR`, `Ordinal_115` (WSAStartup), `Ordinal_116` (WSACleanup).
 - `tests/npcserver_d165_test.cpp`: 20 checks, 6 passes, ASan+UBSan clean.
+
+## D166 — NpcServer.exe 0x140001130 .. 0x140001440 (6 bodies)
+
+- `0x140001130` `WSAStartup(2, &data)`: returns 0 on a non-zero result or when `data[0] != 2`, and 1
+  otherwise; the two log strings are `"ERROR: Init WSAStartup() failed."` and
+  `"ERROR: WSAStartup Version not match 2.0"`.
+- `0x140001280` deletes its argument only when the low byte is set, and returns the argument either way.
+- `0x1400012a0` consumes `nBytes` from the receive buffer at `+0x14`: it logs `&DAT_1400be0b0` when
+  `nBytes` exceeds `+0x814`, and only acts when `+0x830 == 2`.
+  **Deviation, stated:** the original calls `memcpy` with the destination inside the source range.
+  The port copies forward byte by byte, which is what the CRT call does here and is defined
+  behaviour; without it the sanitisers abort on the overlapping range.
+- `0x140001340` frees `+0x820` when it is non-null, clears `+0x830`, and writes `-1` to `+0x818`.
+- `0x140001390` is `CClientSocket::SendPacket`. Its strings are
+  `"CClientSocket::SendPacket, bufferevent_write packet failed[%d]."` (only when the socket errno is
+  not `0x2746`) and `"CClientSocket::SendPacket, invalid socket failed."`. Ghidra's `CONCAT31`
+  returns on that path are the low byte of a boolean: 1 on a written packet, 0 otherwise.
+- `0x140001440` returns `*(int *)(param_1 + 0x830) == 2`.
+- `tests/npcserver_d166_test.cpp`: 26 checks over the success, failure, tolerated-errno and
+  not-connected paths; 6 passes, ASan and UBSan clean.

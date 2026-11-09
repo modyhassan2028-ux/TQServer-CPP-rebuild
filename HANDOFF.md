@@ -521,3 +521,11 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - Corpus: 832 generated Syndicate bodies + 241 hand bodies + 8 NpcServer bodies.
 - Next: continue NpcServer by address (0x140001280 onwards) and pick up the WSAStartup body
   0x140001130, whose tail was cut in the listing — read the full body before porting it.
+
+## D166 (latest)
+
+- NpcServer now has 14 bodies ported (0x140001020 .. 0x140001440), `NPCSERVER_D166_OK`, 6 passes.
+- Note for the next unit: 0x1400012a0's in-place shift is a forward byte loop in the port, because the
+  original memcpy range overlaps.
+- Next: continue by address from 0x1400014b0, and attribute bodies to their `__FILE__` paths as soon
+  as a path shows up in the image.

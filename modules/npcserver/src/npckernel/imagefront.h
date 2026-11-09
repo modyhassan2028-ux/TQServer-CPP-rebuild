@@ -13,6 +13,9 @@ extern void* (*g_pfnNpcOperatorDelete2)(void* p);             // operator_delete
 extern void (*g_pfnNpcInlineLogError)(const void* pMsg);      // log_InlineLogERROR
 extern int (*g_pfnNpcWSAStartup)(int iVersion, void* pData);  // Ordinal_115
 extern int (*g_pfnNpcWSACleanup)(void);                       // Ordinal_116
+extern void* (*g_pfnNpcFreeBufferevent)(void* p);             // FUN_140006a60
+extern int   (*g_pfnNpcBuffereventWrite)(void* p, void* pBuf, int nLen);  // FUN_140005bf0
+extern int   (*g_pfnNpcSocketErrno)(long long hSocket);       // FUN_140007540
 
 // the vftable symbol the original stores first in these objects
 extern void* g_symNpcRefCountBaseVftbl;
@@ -26,6 +29,12 @@ void  NpcLogEmptyError_1400010b0(void);
 int   NpcWsaCleanup_1400011d0(void);
 void  NpcDeleteIfNotNull_1400011f0(void* p);
 void* NpcBufferInit_140001210(void* pThis);
+int   NpcWsaStartup_140001130(void);
+void* NpcDeleteOnFlag_140001280(void* p, unsigned char bDelete);
+int   NpcConsumeBytes_1400012a0(void* pThis, int nBytes);
+void  NpcResetBuffer_140001340(void* pThis);
+int   NpcSendPacket_140001390(void* pThis, void* pBuf, int nLen);
+bool  NpcIsConnected_140001440(void* pThis);
 
 }  // namespace tq
 
