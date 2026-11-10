@@ -339,6 +339,17 @@ void FUN_140076670(long long* pThis, std::string* pValue);
 void FUN_1400766c0(long long* pThis, std::string* pValue);
 void FUN_140076710(long long* pThis, const char* pszData, int nLen);
 void FUN_140076750(long long* pThis, const char* pszData, int nLen);
+extern void (*g_pfnNpc_14007d760)(void* pCoded, long long pOut, int nSize, int nLimit);
+extern void (*g_pfnNpc_14007bbf0)(void* pOut, void* pCoded);
+extern unsigned char (*g_pfnNpc_140077840)(long long pOut);
+extern void (*g_pfnNpc_14007bc70)(void* pOut);
+extern void (*g_pfnNpc_14007d810)(void* pCoded);
+extern long long (*g_pfnNpc_140077850)(long long pTarget, unsigned int uSize);
+extern int  (*g_pfnNpc_1400778a0)(long long pTarget);
+long long FUN_140076790(long long* pMsg, long long pOutBuf);
+void FUN_140076910(long long* pMsg, long long pTarget);
+unsigned long long FUN_140076aa0(long long* pMsg, long long pTarget);
+
 
 
 

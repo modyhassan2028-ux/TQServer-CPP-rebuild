@@ -1389,3 +1389,26 @@ closed, and the flag only being set on the path that got a socket.
   first of each pair takes a `std::string` and passes `size()` truncated to an `int` and then widened, so a
   string of more than 2^31 bytes would wrap exactly as the machine does; the second of each pair passes the
   caller's length through untouched, negative values included.
+
+## D203 — NpcServer.exe 0x140076790, 0x140076910, 0x140076aa0
+
+- `0x140076790` serializes into a caller's buffer. The byte size comes from the message's slot 11 at `+0x58`, the
+  coded output is wrapped around the buffer with a limit of `-1`, the message writes itself through slot 9 at
+  `+0x48`, and a coded output that reports an error aborts through the check at line `0xe0` of `message_lite.cc`
+  with the single text `CHECK failed: !coded_out.HadError(): ` - no second message on this one. The buffer comes
+  down (`0x14007bc70`) before the coded output (`0x14007d810`), and the answer is the buffer advanced by the byte
+  size.
+- `0x140076910` is a straight forward to `0x140076aa0` and is now wired to the real body.
+- `0x140076aa0` serializes into a target. The byte size comes from slot 8 at `+0x40` and the target is asked for
+  that much room through `0x140077850`. With no room, the message writes through slot 9 and the bytes are measured
+  by `0x1400778a0` before and after. With room, slot 10 at `+0x50` writes into it and answers the end pointer, and
+  the end minus the start must equal the byte size. Either mismatch runs `0x140075f60`, so a short write fires
+  **two** checks (the produced-count one and the unconditional third); the answer is 1 in the low byte with the
+  measured value's upper bytes, and 0 when the target reports an error.
+- One real bug found and fixed here, worth remembering for every later vtable call: `(*pMsg + 0x58)` is the
+  address of a **slot**, not a function. Writing `(*(T)(*pMsg + 0x58))(...)` calls the slot address itself,
+  which is the vtable's own memory - in this port it jumped into the object on the stack and ASan reported a
+  stack overflow with the program counter equal to the faulting address. The correct form keeps two stars:
+  `(*(T (**)(...))(*pMsg + 0x58))(...)`.
+- Seven new seams: the coded output, the output wrapper, the error query, both teardowns, the room request and
+  the written-bytes query.

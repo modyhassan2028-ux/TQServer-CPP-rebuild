@@ -9,6 +9,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include <cstdio>
 #include <string>
 #include <new>
 
@@ -180,6 +181,13 @@ int (*g_pfnNpc_14007a9c0)(long long) = nullptr;
 void (*g_pfnNpc_14007a700)(void*) = nullptr;
 void (*g_pfnNpc_140077620)(const char*, long long, long long*) = nullptr;
 void (*g_pfnNpc_1400777a0)(const char*, long long, long long*) = nullptr;
+void (*g_pfnNpc_14007d760)(void*, long long, int, int) = nullptr;
+void (*g_pfnNpc_14007bbf0)(void*, void*) = nullptr;
+unsigned char (*g_pfnNpc_140077840)(long long) = nullptr;
+void (*g_pfnNpc_14007bc70)(void*) = nullptr;
+void (*g_pfnNpc_14007d810)(void*) = nullptr;
+long long (*g_pfnNpc_140077850)(long long, unsigned int) = nullptr;
+int (*g_pfnNpc_1400778a0)(long long) = nullptr;
 void (*g_pfnNpc_14000c160)(long long) = nullptr;
 void (*g_pfnNpc_14000c220)(void*) = nullptr;
 int (*g_pfnNpcWsaPoll_Ordinal18)(unsigned int, void*, void*, void*, int*) = nullptr;
@@ -2993,6 +3001,86 @@ void FUN_140076710(long long* pThis, const char* pszData, int nLen) {
 // 0x140076750 - the same hand-over to 0x1400777a0.
 void FUN_140076750(long long* pThis, const char* pszData, int nLen) {
     if (g_pfnNpc_1400777a0 != nullptr) g_pfnNpc_1400777a0(pszData, (long long)nLen, pThis);
+}
+
+// 0x140076790 - serialize into a caller's buffer through a coded output. The byte size comes from the message's
+// own slot 11 at +0x58, the output is wrapped around the buffer with a limit of -1, the message writes itself
+// through slot 9 at +0x48, and a coded output reporting an error aborts through the check at line 0xe0 of
+// message_lite.cc. The buffer and the coded output are torn down in that order afterwards and the answer is the
+// buffer advanced by the byte size.
+long long FUN_140076790(long long* pMsg, long long pOutBuf) {
+    unsigned char aFinisher[8];
+    unsigned char aSink[64];
+    unsigned int uState = 0;
+    long long aCoded[4];
+    long long aOut[4];
+    int nSize = (*(int (**)(long long*))(*pMsg + 0x58))(pMsg);
+    if (g_pfnNpc_14007d760 != nullptr) g_pfnNpc_14007d760(aCoded, pOutBuf, nSize, -1);
+    if (g_pfnNpc_14007bbf0 != nullptr) g_pfnNpc_14007bbf0(aOut, aCoded);
+    (*(void (**)(long long*, long long*))(*pMsg + 0x48))(pMsg, aOut);
+    unsigned char bError = g_pfnNpc_140077840 != nullptr
+                               ? g_pfnNpc_140077840((long long)aOut) : 0;
+    if (bError != 0) {
+        aFinisher[0] = 0;
+        void* pSink = g_pfnNpc_1400783d0 != nullptr
+                          ? g_pfnNpc_1400783d0(aSink, 3,
+                                               "F:\\cq\\64\\develop\\protobuf\\src\\google\\protobuf\\message_lite.cc",
+                                               0xe0) : nullptr;
+        uState = uState | 1u;
+        int* pText = (int*)(g_pfnNpc_140078030 != nullptr
+                                ? g_pfnNpc_140078030((long long)pSink,
+                                                     "CHECK failed: !coded_out.HadError(): ")
+                                : 0);
+        if (g_pfnNpc_140078580 != nullptr) g_pfnNpc_140078580(aFinisher, pText);
+    }
+    if ((uState & 1) != 0) {
+        uState = uState & 0xfffffffeu;
+        if (g_pfnNpc_140078440 != nullptr) g_pfnNpc_140078440((long long)(void*)aSink);
+    }
+    long long lTotal = pOutBuf + nSize;
+    if (g_pfnNpc_14007bc70 != nullptr) g_pfnNpc_14007bc70(aOut);
+    if (g_pfnNpc_14007d810 != nullptr) g_pfnNpc_14007d810(aCoded);
+    return lTotal;
+}
+
+// 0x140076910 - straight forward to 0x140076aa0.
+void FUN_140076910(long long* pMsg, long long pTarget) { FUN_140076aa0(pMsg, pTarget); }
+
+// 0x140076aa0 - serialize into a target. The byte size comes from slot 8 at +0x40 and the target is asked for
+// that much room through 0x140077850. With no room handed back the message writes itself through slot 9 at
+// +0x48 and the bytes produced are measured by 0x1400778a0 before and after; with room, slot 10 at +0x50 writes
+// into it and answers the end of what it wrote. Either way a mismatch with the byte size runs the consistency
+// check 0x140075f60, which never returns, and the answer is one with the upper bytes of the measured value.
+unsigned long long FUN_140076aa0(long long* pMsg, long long pTarget) {
+    unsigned int uSize = (*(unsigned int (**)(long long*))(*pMsg + 0x40))(pMsg);
+    long long pRoom = g_pfnNpc_140077850 != nullptr ? g_pfnNpc_140077850(pTarget, uSize) : 0;
+    unsigned long long uRet;
+    if (pRoom == 0) {
+        int nBefore = g_pfnNpc_1400778a0 != nullptr ? g_pfnNpc_1400778a0(pTarget) : 0;
+        (*(void (**)(long long*, long long))(*pMsg + 0x48))(pMsg, pTarget);
+        if (g_pfnNpc_140077840 != nullptr && g_pfnNpc_140077840(pTarget) == 0) {
+            int nAfter = g_pfnNpc_1400778a0 != nullptr ? g_pfnNpc_1400778a0(pTarget) : 0;
+            unsigned long long uProduced = (unsigned long long)(unsigned int)(nAfter - nBefore);
+            if (nAfter - nBefore != (int)uSize) {
+                int nSizeNow = (*(int (**)(long long*))(*pMsg + 0x40))(pMsg);
+                FUN_140075f60((int)uSize, nSizeNow, nAfter - nBefore);
+                uProduced = 0;   // unreachable: the consistency check never returns
+            }
+            uRet = 1ull | (uProduced & ~0xffull);
+        } else {
+            uRet = 0;
+        }
+    } else {
+        long long pEnd = (*(long long (**)(long long*, long long))(*pMsg + 0x50))(pMsg, pRoom);
+        long long lExpect = (long long)(int)uSize;
+        if (pEnd - pRoom != lExpect) {
+            int nSizeNow = (*(int (**)(long long*))(*pMsg + 0x40))(pMsg);
+            FUN_140075f60((int)uSize, nSizeNow, (int)pEnd - (int)pRoom);
+            lExpect = 0;         // unreachable: the consistency check never returns
+        }
+        uRet = 1ull | ((unsigned long long)lExpect & ~0xffull);
+    }
+    return uRet;
 }
 
 }  // namespace tq

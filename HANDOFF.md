@@ -768,3 +768,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 
 - NpcServer: 138 bodies, 34 suites green.
 - Next: 0x140076790 (370), 0x140076910 (385), 0x140076aa0 (295).
+
+## D203 (latest)
+
+- NpcServer: 141 bodies, 35 suites green.
+- Lesson worth re-checking in every vtable port: a call through a slot needs `*(T (**)(...))(pBase + off)`, two
+  stars. One star calls the slot's address (vtable memory) and shows up as a jump to a stack or data address.
+- Next: 0x140076be0 and 0x140076c40 (77 each), then 0x140076ca0 (385).
