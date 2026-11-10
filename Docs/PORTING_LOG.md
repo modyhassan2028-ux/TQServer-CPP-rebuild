@@ -1355,3 +1355,15 @@ closed, and the flag only being set on the path that got a socket.
   checks clear their state bit and release their own sink through `0x140078440`, the third releasing
   unconditionally. The single state word packs bit 0 for the first check and bit 1 for the second.
 - Four new seams for the protobuf log objects, plus the `MessageLite` vtable data symbol.
+
+## D200 — NpcServer.exe 0x140076190, 0x140076320, 0x140076350, 0x140076380
+
+- `0x140076190` builds the required-fields sentence: `Can't ` + action + ` message of type "` + the type name +
+  `" because it is missing required fields: ` + the missing list. The two variable parts come from the message's
+  own vtable, slot 1 at `+0x08` for the type name and slot 5 at `+0x28` for the list, each built into its own
+  temporary that is destroyed the moment it has been appended. The three temporaries are destroyed exactly once
+  each, which matters in a port: as scoped C++ objects they would be destroyed twice.
+- `0x140076320`, `0x140076350` and `0x140076380` are three-word thunks that forward their `(this, argument)`
+  pair to `0x140077370`, `0x1400774a0` and `0x1400774e0` with the two **the other way round**, so the callee
+  receives the argument first and the object second. The tests pin the swap.
+- Three new seams for the three forward targets.

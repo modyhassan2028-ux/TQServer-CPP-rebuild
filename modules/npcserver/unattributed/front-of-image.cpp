@@ -170,6 +170,9 @@ void* (*g_pfnNpc_1400783d0)(void*, int, const char*, int) = nullptr;
 long long (*g_pfnNpc_140078030)(long long, const char*) = nullptr;
 void (*g_pfnNpc_140078580)(void*, int*) = nullptr;
 void (*g_pfnNpc_140078440)(long long) = nullptr;
+void* (*g_pfnNpc_140077370)(void*, long long*) = nullptr;
+void* (*g_pfnNpc_1400774a0)(void*, long long*) = nullptr;
+void* (*g_pfnNpc_1400774e0)(void*, long long*) = nullptr;
 void (*g_pfnNpc_14000c160)(long long) = nullptr;
 void (*g_pfnNpc_14000c220)(void*) = nullptr;
 int (*g_pfnNpcWsaPoll_Ordinal18)(unsigned int, void*, void*, void*, int*) = nullptr;
@@ -2846,6 +2849,53 @@ void FUN_140075f60(int nBefore, int nAfter, int nProduced) {
                              : 0);
     if (g_pfnNpc_140078580 != nullptr) g_pfnNpc_140078580(aFinisher3, pText3);
     if (g_pfnNpc_140078440 != nullptr) g_pfnNpc_140078440((long long)(void*)aSink3);
+}
+
+// 0x140076190 - the required-fields description of a message: "Can't <action> message of type \"<name>\" because
+// it is missing required fields: <list>". The type name and the list come from the message's own vtable, slot 1
+// at +0x08 and slot 5 at +0x28, each built into a temporary that is destroyed as soon as it has been appended.
+std::string* FUN_140076190(std::string* pOut, const char* pszAction, long long* pMessage) {
+    // The three temporaries are raw storage destroyed exactly once, as the machine does, rather than scoped
+    // objects that would also be destroyed at the end of their block.
+    unsigned char aBuilt[sizeof(std::string)];
+    std::string* pBuilt = new (aBuilt) std::string();
+    *pBuilt += "Can't ";
+    *pBuilt += pszAction;
+    *pBuilt += " message of type \"";
+    typedef const std::string* (*NpcMessageStringFn)(void* pSelf, std::string* pOut);
+    {
+        unsigned char aTemp[sizeof(std::string)];
+        NpcMessageStringFn pfnName = *(NpcMessageStringFn*)(*(char**)pMessage + 8);
+        const std::string* pName = pfnName(pMessage, (std::string*)aTemp);
+        *pBuilt += *pName;
+        ((std::string*)aTemp)->~basic_string();
+    }
+    *pBuilt += "\" because it is missing required fields: ";
+    {
+        unsigned char aTemp[sizeof(std::string)];
+        NpcMessageStringFn pfnList = *(NpcMessageStringFn*)(*(char**)pMessage + 0x28);
+        const std::string* pList = pfnList(pMessage, (std::string*)aTemp);
+        *pBuilt += *pList;
+        ((std::string*)aTemp)->~basic_string();
+    }
+    new (pOut) std::string(*pBuilt);
+    pBuilt->~basic_string();
+    return pOut;
+}
+
+// 0x140076320 - forward the (this, argument) pair to 0x140077370, with the two the other way round.
+void FUN_140076320(long long* pThis, void* a2) {
+    if (g_pfnNpc_140077370 != nullptr) g_pfnNpc_140077370(a2, pThis);
+}
+
+// 0x140076350 - forward the (this, argument) pair to 0x1400774a0, with the two the other way round.
+void FUN_140076350(long long* pThis, void* a2) {
+    if (g_pfnNpc_1400774a0 != nullptr) g_pfnNpc_1400774a0(a2, pThis);
+}
+
+// 0x140076380 - forward the (this, argument) pair to 0x1400774e0, with the two the other way round.
+void FUN_140076380(long long* pThis, void* a2) {
+    if (g_pfnNpc_1400774e0 != nullptr) g_pfnNpc_1400774e0(a2, pThis);
 }
 
 }  // namespace tq
