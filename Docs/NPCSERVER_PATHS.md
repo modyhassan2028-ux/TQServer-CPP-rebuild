@@ -55,6 +55,20 @@ Extracted from the binary itself: **50** paths, **50** of them scaffolded under 
 | `version/cqserver-78.0.11-1204/npcserver/npckernel/usermanager.h` |
 | `version/cqserver-78.0.11-1204/npcserver/npcserverdlg.cpp` |
 
+## Layout rule
+
+The paths above are **nestings**, not names: `version/cqserver-78.0.11-1204/npcserver/npckernel/npc.cpp` is the
+folder `npc.cpp` inside `npckernel`, inside `npcserver`, inside `cqserver-78.0.11-1204`, inside `version`. No folder
+in the tree is named with a slash in it.
+
+GitHub's file browser compresses a chain of single-child folders into one row, so `src/` shows `google/protobuf/io`
+and `version/cqserver-78.0.11-...` as if those were names. On disk `modules/npcserver/src` holds exactly three
+entries: `google`, `version` and nothing else.
+
+`tools/check_npcserver_paths.py` enforces this: it fails when a listed path has no file, when a folder is not a
+prefix of a listed path (invented), or when a single name contains a separator. D221 removed one leftover empty
+folder, `src/npckernel`, that the check caught.
+
 ## Attribution note (corrected in D167)
 
 The 50 paths above are the ones the image carries, and they are dead data: nothing in `.text`
