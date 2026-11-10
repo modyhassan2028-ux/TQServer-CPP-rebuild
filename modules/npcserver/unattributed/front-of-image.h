@@ -322,8 +322,6 @@ std::string* FUN_140076190(std::string* pOut, const char* pszAction, long long* 
 unsigned char FUN_140076320(long long* pThis, void* a2);
 unsigned char FUN_140076350(long long* pThis, void* a2);
 unsigned char FUN_140076380(long long* pThis, void* a2);
-extern void (*g_pfnNpc_14007a8e0)(long long pWrapper, int nValue);        // wrapper set type
-extern int  (*g_pfnNpc_14007a9c0)(long long pWrapper);                    // wrapper error state
 extern void (*g_pfnNpc_14007a700)(void* pWrapper);                        // wrapper destroy
 unsigned char FUN_1400763b0(long long* pThis, void* a2);
 unsigned char FUN_140076450(long long* pThis, void* a2);

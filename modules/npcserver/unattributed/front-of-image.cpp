@@ -171,8 +171,6 @@ void (*g_pfnNpc_14000bf50)(void*) = nullptr;
 void (*g_pfnNpc_14000c300)(void*) = nullptr;
 const void* g_pNpcVtblMessageLite = nullptr;
 unsigned char (*g_pfnNpc_140077370)(void*, long long*) = nullptr;
-void (*g_pfnNpc_14007a8e0)(long long, int) = nullptr;
-int (*g_pfnNpc_14007a9c0)(long long) = nullptr;
 void (*g_pfnNpc_14007a700)(void*) = nullptr;
 void (*g_pfnNpc_14007d760)(void*, long long, int, int) = nullptr;
 void (*g_pfnNpc_14007bbf0)(void*, void*) = nullptr;
@@ -2925,12 +2923,12 @@ unsigned char FUN_140076450(long long* pThis, void* a2) {
 unsigned char FUN_1400764f0(long long* pThis, void* a2, int nType) {
     long long aWrapper[10];
     FUN_140077530((void**)aWrapper, a2);
-    if (g_pfnNpc_14007a8e0 != nullptr) g_pfnNpc_14007a8e0((long long)aWrapper, nType);
+    FUN_14007a8e0((long long)aWrapper, nType);
     unsigned char bAccepted = FUN_140076350(pThis, aWrapper);
     unsigned char bOk = 0;
     if (bAccepted != 0) {
         if (FUN_140077520((long long)aWrapper) != 0) {
-            int nError = g_pfnNpc_14007a9c0 != nullptr ? g_pfnNpc_14007a9c0((long long)aWrapper) : 0;
+            int nError = (int)FUN_14007a9c0((long long)aWrapper);
             if (nError == 0) bOk = 1;
         }
     }
@@ -2942,12 +2940,12 @@ unsigned char FUN_1400764f0(long long* pThis, void* a2, int nType) {
 unsigned char FUN_1400765b0(long long* pThis, void* a2, int nType) {
     long long aWrapper[10];
     FUN_140077530((void**)aWrapper, a2);
-    if (g_pfnNpc_14007a8e0 != nullptr) g_pfnNpc_14007a8e0((long long)aWrapper, nType);
+    FUN_14007a8e0((long long)aWrapper, nType);
     unsigned char bAccepted = FUN_140076380(pThis, aWrapper);
     unsigned char bOk = 0;
     if (bAccepted != 0) {
         if (FUN_140077520((long long)aWrapper) != 0) {
-            int nError = g_pfnNpc_14007a9c0 != nullptr ? g_pfnNpc_14007a9c0((long long)aWrapper) : 0;
+            int nError = (int)FUN_14007a9c0((long long)aWrapper);
             if (nError == 0) bOk = 1;
         }
     }

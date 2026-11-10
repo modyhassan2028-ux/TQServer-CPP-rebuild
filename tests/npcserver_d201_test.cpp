@@ -13,10 +13,10 @@ static void* g_wrapper = nullptr; static void* g_buildArg = nullptr;
 static void Build(void* w, void* a2) { g_wrapper = w; g_buildArg = a2; Note(1); }
 static int g_valid = 1;
 static unsigned char Valid(long long w) { (void)w; Note(2); return (unsigned char)g_valid; }
-static int g_stampVal = -1;
-static void Stamp(long long w, int v) { (void)w; g_stampVal = v; Note(3); }
-static int g_error = 0;
-static int ErrState(long long w) { (void)w; Note(4); return g_error; }
+// the limit and the remaining-bytes count are real bodies now: the only thing left to supply is how many bytes the
+// wire has already handed over (0x14007c670 is still unported)
+static int g_consumed = 0;
+static int Consumed(long long w) { (void)w; return g_consumed; }
 static void Destroy(void* w) { (void)w; Note(5); }
 static int g_accept = 1;
 // the handler marks the wrapper it was handed: +0x24 is the validity byte the real check reads back
@@ -39,9 +39,8 @@ static unsigned char Slot7(long long* p, void* a) {
 
 int main() {
     g_pfnNpc_140077370 = &T370;
-    g_pfnNpc_14007a8e0 = &Stamp;
-    g_pfnNpc_14007a9c0 = &ErrState;
     g_pfnNpc_14007a700 = &Destroy;
+    g_pfnNpc_14007c670 = &Consumed;      // the wire's byte count, still a seam
     long long aThisVt[8];
     std::memset(aThisVt, 0, sizeof aThisVt);
     aThisVt[3] = (long long)&Closer;          // +0x18, closed before the work
@@ -75,29 +74,49 @@ int main() {
         g_accept = 1; g_valid = 1;
     }
 
-    // with a type stamped on the wrapper: the stamp comes right after the build, and the error state must be
-    // zero on top of acceptance and validity
+    // with a limit stamped on the wrapper: the limit is raised from what the wire already consumed, and the call
+    // only succeeds when the wrapper is left with nothing unread
     {
-        g_seqN = 0; g_accept = 1; g_valid = 1; g_error = 0; g_stampVal = -1;
-        assert(FUN_1400764f0(aThis, pArg, 0x400) == 1);
-        assert(g_stampVal == 0x400);
-        assert(g_seqN == 4);
-        assert(g_seq[0] == 3 && g_seq[1] == 6 && g_seq[2] == 4 && g_seq[3] == 5);
-        // a non-zero error state refuses, and the destroy still runs last
-        g_seqN = 0; g_error = -1;
+        g_seqN = 0; g_accept = 1; g_valid = 1; g_consumed = 0x400;
+        assert(FUN_1400764f0(aThis, pArg, 0) == 1);       // an allowance of zero leaves nothing unread
+        assert(g_seqN == 2 && g_seq[0] == 6 && g_seq[1] == 5);
+        // any allowance beyond what was consumed leaves bytes unread, and that reads as a refusal
+        g_seqN = 0; g_consumed = 0;
+        assert(FUN_1400764f0(aThis, pArg, 0x400) == 0);
+        assert(g_seqN == 2 && g_seq[1] == 5);
+        // a negative amount pins the limit at 0x7fffffff, which answers -1 before anything is compared
+        g_seqN = 0;
+        assert(FUN_1400764f0(aThis, pArg, -1) == 0);
+        assert(g_seqN == 2 && g_seq[1] == 5);
+        // invalid refuses before the remaining count is asked
+        g_seqN = 0; g_valid = 0; g_consumed = 0x400;
         assert(FUN_1400764f0(aThis, pArg, 1) == 0);
-        assert(g_seqN == 4 && g_seq[3] == 5);
-        // invalid refuses before the error state is even asked
-        g_seqN = 0; g_valid = 0; g_error = 0;
-        assert(FUN_1400764f0(aThis, pArg, 1) == 0);
-        assert(g_seqN == 3 && g_seq[2] == 5);
+        assert(g_seqN == 2 && g_seq[1] == 5);
         // the same cycle through the other forward
-        g_seqN = 0; g_valid = 1; g_error = 0;
-        assert(FUN_1400765b0(aThis, pArg, 2) == 1);
-        assert(g_seqN == 4 && g_seq[1] == 7 && g_seq[3] == 5);
-        g_seqN = 0; g_error = 3;
+        g_seqN = 0; g_valid = 1; g_consumed = 0x400;
+        assert(FUN_1400765b0(aThis, pArg, 0) == 1);
+        assert(g_seqN == 2 && g_seq[0] == 7 && g_seq[1] == 5);
+        g_seqN = 0; g_consumed = 0;
         assert(FUN_1400765b0(aThis, pArg, 2) == 0);
-        assert(g_seqN == 4 && g_seq[3] == 5);
+        assert(g_seqN == 2 && g_seq[1] == 5);
+    }
+
+    // the two remaining-bytes rules read straight off a coded input
+    {
+        long long aCoded[8];
+        std::memset(aCoded, 0, sizeof aCoded);
+        *(int*)((unsigned char*)aCoded + 0x28) = 0x7fffffff;
+        assert(FUN_14007a9c0((long long)aCoded) == -1);          // unlimited answers -1
+        *(int*)((unsigned char*)aCoded + 0x28) = 10;
+        g_consumed = 4;
+        assert(FUN_14007a9c0((long long)aCoded) == 6);            // the limit less what was consumed
+        g_consumed = 4;
+        assert(FUN_14007a8e0((long long)aCoded, 5) == 10);        // the old limit comes back
+        assert(*(int*)((unsigned char*)aCoded + 0x28) == 9);      // consumed plus the allowance
+        g_consumed = 0x400;
+        assert(FUN_14007a8e0((long long)aCoded, 0x7ffffff0) == 9);
+        assert(*(unsigned int*)((unsigned char*)aCoded + 0x28) == 0x7fffffff);   // pinned, not wrapped
+        assert(FUN_14007a9c0((long long)aCoded) == -1);           // and the pin reads as unlimited
     }
 
     // a null seam at the last hop answers zero rather than pretending success

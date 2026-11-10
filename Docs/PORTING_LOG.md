@@ -1619,3 +1619,13 @@ closed, and the flag only being set on the path that got a socket.
   while the debug flag is set) and the store keeps `g_pNpcData_140103fe0`. The suite now reads those tables back
   instead of a fake's copy, and the argument pass-through it used to watch is the registrar's own business.
 - Only `0x140016990` (the condition twin) is still a seam here.
+
+## D220 — rewiring pass 2, slice 7: the byte limit and the remaining count
+
+- `0x14007a8e0` and `0x14007a9c0` are no longer seams; `0x1400764f0` and `0x1400765b0` call them directly.
+- The two rules read off the decompiled bodies: `0x14007a8e0` settles the limit at **consumed + allowance** (pinned
+  to `0x7fffffff` when that would pass it) and answers the limit that was in place before; `0x14007a9c0` answers
+  `-1` for an unlimited wrapper, otherwise limit minus consumed.
+- Consequence for the callers: a wrapper is only accepted when its allowance is **zero** over what the wire already
+  consumed, because the remaining count has to come back zero. Any positive allowance reads as unread bytes.
+  The suite now pins that, plus the pin-to-`0x7fffffff` path and the unlimited `-1`.

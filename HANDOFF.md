@@ -881,3 +881,8 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 
 - 140016880 / 140016890 rewired; D177 reads the real registry tables. 44 suites green, both six times.
 - Next: a830/a8e0/a9c0, then the log layer (77f50/77fc0/78d20/78d60), then 16990.
+
+## D220 (latest)
+
+- 14007a8e0 / 14007a9c0 rewired; D201 drives the real limit rules. 44 suites green, three of them six times.
+- Next: a830 (needs a coded input with a vtable slot at +0x10), then the log layer (77f50/77fc0/78d20/78d60).
