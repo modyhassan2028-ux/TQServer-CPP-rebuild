@@ -170,9 +170,14 @@ void* (*g_pfnNpc_1400783d0)(void*, int, const char*, int) = nullptr;
 long long (*g_pfnNpc_140078030)(long long, const char*) = nullptr;
 void (*g_pfnNpc_140078580)(void*, int*) = nullptr;
 void (*g_pfnNpc_140078440)(long long) = nullptr;
-void* (*g_pfnNpc_140077370)(void*, long long*) = nullptr;
-void* (*g_pfnNpc_1400774a0)(void*, long long*) = nullptr;
-void* (*g_pfnNpc_1400774e0)(void*, long long*) = nullptr;
+unsigned char (*g_pfnNpc_140077370)(void*, long long*) = nullptr;
+unsigned char (*g_pfnNpc_1400774a0)(void*, long long*) = nullptr;
+unsigned char (*g_pfnNpc_1400774e0)(void*, long long*) = nullptr;
+void (*g_pfnNpc_140077530)(void*, void*) = nullptr;
+unsigned char (*g_pfnNpc_140077520)(long long) = nullptr;
+void (*g_pfnNpc_14007a8e0)(long long, int) = nullptr;
+int (*g_pfnNpc_14007a9c0)(long long) = nullptr;
+void (*g_pfnNpc_14007a700)(void*) = nullptr;
 void (*g_pfnNpc_14000c160)(long long) = nullptr;
 void (*g_pfnNpc_14000c220)(void*) = nullptr;
 int (*g_pfnNpcWsaPoll_Ordinal18)(unsigned int, void*, void*, void*, int*) = nullptr;
@@ -2883,19 +2888,85 @@ std::string* FUN_140076190(std::string* pOut, const char* pszAction, long long* 
     return pOut;
 }
 
-// 0x140076320 - forward the (this, argument) pair to 0x140077370, with the two the other way round.
-void FUN_140076320(long long* pThis, void* a2) {
-    if (g_pfnNpc_140077370 != nullptr) g_pfnNpc_140077370(a2, pThis);
+// 0x140076320 - forward the (this, argument) pair to 0x140077370, with the two the other way round. These three
+// are tail calls, so the callee's answer comes straight back to the caller of the thunk.
+unsigned char FUN_140076320(long long* pThis, void* a2) {
+    if (g_pfnNpc_140077370 == nullptr) return 0;
+    return g_pfnNpc_140077370(a2, pThis);
 }
 
 // 0x140076350 - forward the (this, argument) pair to 0x1400774a0, with the two the other way round.
-void FUN_140076350(long long* pThis, void* a2) {
-    if (g_pfnNpc_1400774a0 != nullptr) g_pfnNpc_1400774a0(a2, pThis);
+unsigned char FUN_140076350(long long* pThis, void* a2) {
+    if (g_pfnNpc_1400774a0 == nullptr) return 0;
+    return g_pfnNpc_1400774a0(a2, pThis);
 }
 
 // 0x140076380 - forward the (this, argument) pair to 0x1400774e0, with the two the other way round.
-void FUN_140076380(long long* pThis, void* a2) {
-    if (g_pfnNpc_1400774e0 != nullptr) g_pfnNpc_1400774e0(a2, pThis);
+unsigned char FUN_140076380(long long* pThis, void* a2) {
+    if (g_pfnNpc_1400774e0 == nullptr) return 0;
+    return g_pfnNpc_1400774e0(a2, pThis);
+}
+
+// 0x1400763b0 - build a wrapper around the argument, hand it to 0x140076350, and answer 1 only when that
+// accepted it and the wrapper then reports itself valid. The wrapper is destroyed on every path.
+unsigned char FUN_1400763b0(long long* pThis, void* a2) {
+    long long aWrapper[10];
+    if (g_pfnNpc_140077530 != nullptr) g_pfnNpc_140077530(aWrapper, a2);
+    unsigned char bAccepted = FUN_140076350(pThis, aWrapper);
+    unsigned char bOk = 0;
+    if (bAccepted != 0) {
+        if (g_pfnNpc_140077520 != nullptr && g_pfnNpc_140077520((long long)aWrapper) != 0) bOk = 1;
+    }
+    if (g_pfnNpc_14007a700 != nullptr) g_pfnNpc_14007a700(aWrapper);
+    return bOk;
+}
+
+// 0x140076450 - the same shape through 0x140076380 instead.
+unsigned char FUN_140076450(long long* pThis, void* a2) {
+    long long aWrapper[10];
+    if (g_pfnNpc_140077530 != nullptr) g_pfnNpc_140077530(aWrapper, a2);
+    unsigned char bAccepted = FUN_140076380(pThis, aWrapper);
+    unsigned char bOk = 0;
+    if (bAccepted != 0) {
+        if (g_pfnNpc_140077520 != nullptr && g_pfnNpc_140077520((long long)aWrapper) != 0) bOk = 1;
+    }
+    if (g_pfnNpc_14007a700 != nullptr) g_pfnNpc_14007a700(aWrapper);
+    return bOk;
+}
+
+// 0x1400764f0 - build the wrapper, stamp the type on it, then 0x140076350, and answer 1 only when it was
+// accepted, the wrapper is valid and its error state is zero.
+unsigned char FUN_1400764f0(long long* pThis, void* a2, int nType) {
+    long long aWrapper[10];
+    if (g_pfnNpc_140077530 != nullptr) g_pfnNpc_140077530(aWrapper, a2);
+    if (g_pfnNpc_14007a8e0 != nullptr) g_pfnNpc_14007a8e0((long long)aWrapper, nType);
+    unsigned char bAccepted = FUN_140076350(pThis, aWrapper);
+    unsigned char bOk = 0;
+    if (bAccepted != 0) {
+        if (g_pfnNpc_140077520 != nullptr && g_pfnNpc_140077520((long long)aWrapper) != 0) {
+            int nError = g_pfnNpc_14007a9c0 != nullptr ? g_pfnNpc_14007a9c0((long long)aWrapper) : 0;
+            if (nError == 0) bOk = 1;
+        }
+    }
+    if (g_pfnNpc_14007a700 != nullptr) g_pfnNpc_14007a700(aWrapper);
+    return bOk;
+}
+
+// 0x1400765b0 - the same shape through 0x140076380 instead.
+unsigned char FUN_1400765b0(long long* pThis, void* a2, int nType) {
+    long long aWrapper[10];
+    if (g_pfnNpc_140077530 != nullptr) g_pfnNpc_140077530(aWrapper, a2);
+    if (g_pfnNpc_14007a8e0 != nullptr) g_pfnNpc_14007a8e0((long long)aWrapper, nType);
+    unsigned char bAccepted = FUN_140076380(pThis, aWrapper);
+    unsigned char bOk = 0;
+    if (bAccepted != 0) {
+        if (g_pfnNpc_140077520 != nullptr && g_pfnNpc_140077520((long long)aWrapper) != 0) {
+            int nError = g_pfnNpc_14007a9c0 != nullptr ? g_pfnNpc_14007a9c0((long long)aWrapper) : 0;
+            if (nError == 0) bOk = 1;
+        }
+    }
+    if (g_pfnNpc_14007a700 != nullptr) g_pfnNpc_14007a700(aWrapper);
+    return bOk;
 }
 
 }  // namespace tq

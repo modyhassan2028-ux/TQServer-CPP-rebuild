@@ -756,3 +756,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 
 - NpcServer: 130 bodies, 32 suites green.
 - Next: 0x1400763b0 and 0x140076450 (145 each), 0x1400764f0 and 0x1400765b0 (181 each).
+
+## D201 (latest)
+
+- NpcServer: 134 bodies, 33 suites green.
+- The thunk return type is a general lesson: any `FUN_` the decompiler shows as `void` that is called as a tail
+  call in another function carries a value back. 0x140076320/350/380 are now typed that way.
+- Next: 0x140076670 and 0x1400766c0 (61 each), 0x140076710 and 0x140076750 (43 each), then 0x140076790.

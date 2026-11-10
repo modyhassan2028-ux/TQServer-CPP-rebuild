@@ -1367,3 +1367,17 @@ closed, and the flag only being set on the path that got a socket.
   pair to `0x140077370`, `0x1400774a0` and `0x1400774e0` with the two **the other way round**, so the callee
   receives the argument first and the object second. The tests pin the swap.
 - Three new seams for the three forward targets.
+
+## D201 — NpcServer.exe 0x1400763b0, 0x140076450, 0x1400764f0, 0x1400765b0
+
+- The three thunks of D200 are **tail calls** that carry the callee's answer back, so their return type is the
+  callee's: each returns one byte. The earlier `void` reading of `0x140076350` in the decompiler was the reason
+  this only became visible here, where `0x1400763b0` tests the value the thunk returned.
+- `0x1400763b0` builds a `0x50`-byte wrapper around the argument through `0x140077530`, offers it to
+  `0x140076350`, and answers 1 only when the offer was accepted **and** `0x140077520` then reports the wrapper
+  valid. The wrapper is destroyed through `0x14007a700` on every path, including both refusals.
+- `0x140076450` is the same shape through `0x140076380`.
+- `0x1400764f0` and `0x1400765b0` stamp a type on the wrapper with `0x14007a8e0` right after the build, and add a
+  third condition: `0x14007a9c0` must answer zero. Lazy evaluation matters and the tests pin it: a refused offer
+  stops before the validity check, and an invalid wrapper stops before the error state is asked at all.
+- Five new seams: the wrapper build, validity, type stamp, error state and destroy.

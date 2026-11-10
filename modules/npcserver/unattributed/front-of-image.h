@@ -317,13 +317,22 @@ extern void (*g_pfnNpc_140078440)(long long pMessage);
 void  FUN_140075ef0(void** pThis);
 std::string* FUN_140075f10(void* unused, std::string* pOut);
 void  FUN_140075f60(int nBefore, int nAfter, int nProduced);
-extern void* (*g_pfnNpc_140077370)(void* a2, long long* pThis);
-extern void* (*g_pfnNpc_1400774a0)(void* a2, long long* pThis);
-extern void* (*g_pfnNpc_1400774e0)(void* a2, long long* pThis);
+extern unsigned char (*g_pfnNpc_140077370)(void* a2, long long* pThis);
+extern unsigned char (*g_pfnNpc_1400774a0)(void* a2, long long* pThis);
+extern unsigned char (*g_pfnNpc_1400774e0)(void* a2, long long* pThis);
 std::string* FUN_140076190(std::string* pOut, const char* pszAction, long long* pMessage);
-void FUN_140076320(long long* pThis, void* a2);
-void FUN_140076350(long long* pThis, void* a2);
-void FUN_140076380(long long* pThis, void* a2);
+unsigned char FUN_140076320(long long* pThis, void* a2);
+unsigned char FUN_140076350(long long* pThis, void* a2);
+unsigned char FUN_140076380(long long* pThis, void* a2);
+extern void (*g_pfnNpc_140077530)(void* pWrapper, void* a2);              // wrapper build
+extern unsigned char (*g_pfnNpc_140077520)(long long pWrapper);           // wrapper valid
+extern void (*g_pfnNpc_14007a8e0)(long long pWrapper, int nValue);        // wrapper set type
+extern int  (*g_pfnNpc_14007a9c0)(long long pWrapper);                    // wrapper error state
+extern void (*g_pfnNpc_14007a700)(void* pWrapper);                        // wrapper destroy
+unsigned char FUN_1400763b0(long long* pThis, void* a2);
+unsigned char FUN_140076450(long long* pThis, void* a2);
+unsigned char FUN_1400764f0(long long* pThis, void* a2, int nType);
+unsigned char FUN_1400765b0(long long* pThis, void* a2, int nType);
 
 
 
