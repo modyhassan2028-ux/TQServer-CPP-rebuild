@@ -863,3 +863,9 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - Rewiring pass 2, slice 3 done: 140077530/140077520 rewired, D201 rebuilt. 44 suites green, six cycles on the
   six suites around the wrappers.
 - Next slice: 140077370 / 1400774a0 / 1400774e0, then 140077620/1400776c0/1400777a0.
+
+## D217 (latest)
+
+- 140077620 / 1400777a0 / 1400776c0 rewired; D202 and D207 now watch real wrappers. 44 suites green, both six times.
+- `rewire_seams.py` is in the conversation's tools_local. Next: a830/a8e0/a9c0 (blocked on suites that need a real
+  coded input: vtable slot +0x10, state at +0x18/+0x1c/+0x28/+0x2c), then 774a0/774e0, then the log pair.

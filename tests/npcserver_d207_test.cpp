@@ -31,17 +31,25 @@ static int g_b7e0 = 0;
 static void B7e0(void* p) { (void)p; ++g_b7e0; Note(9); }
 static const char* g_bytes = nullptr; static int g_bytesLen = -1;
 static int g_wrap24 = 1;
-static void BuildWrap(void* w, const char* d, int n) {
-    (void)w; g_bytes = d; g_bytesLen = n;
-    *(unsigned char*)((unsigned char*)w + 0x24) = (unsigned char)g_wrap24;
-    Note(10);
-}
+// the builder is the real body now: it keeps the bytes at +8 and +0x10 and the length at +0x18, so the bytes are
+// read back where that wrapper is torn down
+static void BuildWrap(void* w, const char* d, int n) { (void)w; (void)d; (void)n; Note(10); }
 static int g_slot18 = 0;
 static void Slot18(long long* p) { (void)p; ++g_slot18; Note(11); }
 static int g_t370 = 0, g_t370Ret = 1;
-static unsigned char T370(void* a1, long long* p) { (void)a1; (void)p; ++g_t370; Note(12); return (unsigned char)g_t370Ret; }
+// the parser marks the wrapper it was handed: +0x24 is the validity byte the parse reads back
+static unsigned char T370(void* a1, long long* p) {
+    (void)p;
+    *(unsigned char*)((unsigned char*)a1 + 0x24) = (unsigned char)g_wrap24;
+    ++g_t370; Note(12); return (unsigned char)g_t370Ret;
+}
 static int g_destroy = 0;
-static void Destroy(void* p) { (void)p; ++g_destroy; Note(13); }
+static void Destroy(void* p) {
+    void** q = (void**)p;
+    g_bytes = (const char*)q[1];
+    g_bytesLen = *(int*)((unsigned char*)p + 0x18);
+    ++g_destroy; Note(13);
+}
 
 static void LogSink(int nSeverity, const char* pszFile, int nLine, std::string* pText) {
     g_logSev = nSeverity; g_logFile = pszFile; g_logLine = nLine;
@@ -60,7 +68,6 @@ int main() {
     long long aMsg[1] = { (long long)vt };
     g_pfnNpcLogSink_1401035c8 = &LogSink;   // the real log bodies now reach this seam
     g_pfnNpc_14007b7e0 = &B7e0;
-    g_pfnNpc_1400776c0 = &BuildWrap;
     g_pfnNpc_140077370 = &T370;
     g_pfnNpc_14007a700 = &Destroy;
 
@@ -124,7 +131,7 @@ int main() {
         unsigned char b = FUN_140077620(sz, 7, aThis);
         assert(b == 1);
         assert(g_bytes == sz && g_bytesLen == 7);
-        assert(g_seq[0] == 10 && g_seq[1] == 11 && g_seq[2] == 12);
+        assert(g_seq[0] == 11 && g_seq[1] == 12);   // the builder no longer announces itself
         assert(g_destroy == 1 && g_seq[g_seqN - 1] == 13);
         // the offer refused: zero, and the wrapper still comes down
         g_seqN = 0; g_destroy = 0; g_t370Ret = 0;

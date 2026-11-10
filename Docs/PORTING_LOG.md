@@ -1588,3 +1588,15 @@ closed, and the flag only being set on the path that got a socket.
   handler fakes write that byte, which is what acceptance through `0x140076350` really does, and the sequence notes
   drop from four entries to two: the build no longer announces itself.
 - The build keeps its own seam for the finisher `0x14007b7e0`, which is still unported.
+
+## D217 — rewiring pass 2, slice 4: the byte parse, and a rewriter
+
+- `0x140077620`, `0x1400777a0` and `0x1400776c0` are no longer seams: the four hand-over wrappers call the parse
+  directly, and the parse builds the 0x50-byte bytes wrapper itself.
+- `0x1400776c0` keeps the run at `+8` (start) and `+0x10` (end) with the length at `+0x18`, and it **clears** `+0x24`.
+  The suites therefore read the bytes back at teardown, and the parser fake now marks the wrapper valid, which is
+  what a real parse does.
+- New tool: `tools_local/rewire_seams.py`. It rewrites the three call shapes the port uses
+  (`if (seam != nullptr) seam(...)`, `if (seam != nullptr && seam(...) != 0)`, `seam != nullptr ? seam(...) : 0`),
+  deletes the seam from the module and the header, and strips the assignments the suites made. Mechanically rewiring
+  a seam is now a command, not a hand pass; the work left per seam is teaching its suites to watch real objects.

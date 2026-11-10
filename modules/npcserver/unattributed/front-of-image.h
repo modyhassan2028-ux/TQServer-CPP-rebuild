@@ -331,8 +331,6 @@ unsigned char FUN_1400763b0(long long* pThis, void* a2);
 unsigned char FUN_140076450(long long* pThis, void* a2);
 unsigned char FUN_1400764f0(long long* pThis, void* a2, int nType);
 unsigned char FUN_1400765b0(long long* pThis, void* a2, int nType);
-extern void (*g_pfnNpc_140077620)(const char* pszData, long long nLen, long long* pThis);
-extern void (*g_pfnNpc_1400777a0)(const char* pszData, long long nLen, long long* pThis);
 void FUN_140076670(long long* pThis, std::string* pValue);
 void FUN_1400766c0(long long* pThis, std::string* pValue);
 void FUN_140076710(long long* pThis, const char* pszData, int nLen);
@@ -367,7 +365,6 @@ std::string* FUN_140077280(long long* pMsg, std::string* pOut);
 void* FUN_140077330(void** pThis, unsigned int uFlags);
 extern long long (*g_pfnNpc_140077ff0)(long long pMessage, std::string* pText);
 extern void (*g_pfnNpc_14007b7e0)(void* pWrapper);
-extern void (*g_pfnNpc_1400776c0)(void* pWrapper, const char* pszData, int nLen);
 extern unsigned int g_uNpcConst_1401036a0;                                             // DAT_1401036a0
 unsigned long long FUN_140077370(void* a1, long long* pMsg);
 void** FUN_140077530(void** pWrapper, void* a2);

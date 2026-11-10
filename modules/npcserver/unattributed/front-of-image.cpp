@@ -177,14 +177,11 @@ unsigned char (*g_pfnNpc_1400774e0)(void*, long long*) = nullptr;
 void (*g_pfnNpc_14007a8e0)(long long, int) = nullptr;
 int (*g_pfnNpc_14007a9c0)(long long) = nullptr;
 void (*g_pfnNpc_14007a700)(void*) = nullptr;
-void (*g_pfnNpc_140077620)(const char*, long long, long long*) = nullptr;
-void (*g_pfnNpc_1400777a0)(const char*, long long, long long*) = nullptr;
 void (*g_pfnNpc_14007d760)(void*, long long, int, int) = nullptr;
 void (*g_pfnNpc_14007bbf0)(void*, void*) = nullptr;
 void (*g_pfnNpc_14007bc70)(void*) = nullptr;
 void (*g_pfnNpc_14007d810)(void*) = nullptr;
 void (*g_pfnNpc_14007b7e0)(void*) = nullptr;
-void (*g_pfnNpc_1400776c0)(void*, const char*, int) = nullptr;
 unsigned int g_uNpcConst_1401036a0 = 0;
 void (*g_pfnNpc_14000c160)(long long) = nullptr;
 void (*g_pfnNpc_14000c220)(void*) = nullptr;
@@ -2968,24 +2965,24 @@ unsigned char FUN_1400765b0(long long* pThis, void* a2, int nType) {
 void FUN_140076670(long long* pThis, std::string* pValue) {
     unsigned long long uLen = pValue->size();
     const char* pszData = pValue->data();
-    if (g_pfnNpc_140077620 != nullptr) g_pfnNpc_140077620(pszData, (long long)(int)uLen, pThis);
+    FUN_140077620(pszData, (long long)(int)uLen, pThis);
 }
 
 // 0x1400766c0 - the same hand-over to 0x1400777a0.
 void FUN_1400766c0(long long* pThis, std::string* pValue) {
     unsigned long long uLen = pValue->size();
     const char* pszData = pValue->data();
-    if (g_pfnNpc_1400777a0 != nullptr) g_pfnNpc_1400777a0(pszData, (long long)(int)uLen, pThis);
+    FUN_1400777a0(pszData, (long long)(int)uLen, pThis);
 }
 
 // 0x140076710 - hand a raw pointer and length to 0x140077620 with the object last.
 void FUN_140076710(long long* pThis, const char* pszData, int nLen) {
-    if (g_pfnNpc_140077620 != nullptr) g_pfnNpc_140077620(pszData, (long long)nLen, pThis);
+    FUN_140077620(pszData, (long long)nLen, pThis);
 }
 
 // 0x140076750 - the same hand-over to 0x1400777a0.
 void FUN_140076750(long long* pThis, const char* pszData, int nLen) {
-    if (g_pfnNpc_1400777a0 != nullptr) g_pfnNpc_1400777a0(pszData, (long long)nLen, pThis);
+    FUN_1400777a0(pszData, (long long)nLen, pThis);
 }
 
 // 0x140076790 - serialize into a caller's buffer through a coded output. The byte size comes from the message's
@@ -3277,7 +3274,7 @@ void** FUN_140077530(void** pWrapper, void* a2) {
 // The wrapper is destroyed through 0x14007a700 on every path.
 unsigned char FUN_140077620(const char* pszData, int nLen, long long* pThis) {
     long long aWrapper[10];
-    if (g_pfnNpc_1400776c0 != nullptr) g_pfnNpc_1400776c0(aWrapper, pszData, nLen);
+    FUN_1400776c0((void**)aWrapper, (long long)pszData, nLen);
     unsigned char bAccepted = FUN_1400774a0(aWrapper, pThis);
     unsigned char bOk = 0;
     if (bAccepted != 0 && FUN_140077520((long long)aWrapper) != 0) bOk = 1;
