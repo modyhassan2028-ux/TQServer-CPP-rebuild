@@ -103,8 +103,6 @@ int main() {
     g_pfnNpcLogMessageFmt = &LogFmt;
     g_pfnNpcOperatorNew = &OperatorNew;
     g_pfnNpc_14001ced0 = &EngineSetup;
-    g_pfnNpc_140016880 = &H880;
-    g_pfnNpc_140016890 = &H890;
     g_pfnNpc_140016990 = &H890;
     (void)g_hReg;
 

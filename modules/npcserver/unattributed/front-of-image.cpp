@@ -80,7 +80,6 @@ const char g_symNpcStr_1400bebe0[] = "CNpcWorld::Create, cannot create NpcServer
 const char g_symNpcStr_1400bebb0[] = "CKernelThread::Create m_pEventBase is NULL";
 const char g_symNpcStr_1400beb80[] = "CKernelThread::Create event_config_new failed";
 unsigned char g_symNpcData_1400054c0[16] = {0};
-void (*g_pfnNpc_140016890)(void*, long long, long long, long long) = nullptr;
 int  g_nNpcEvthreadDebug_140103fb0 = 0;
 NpcEvthreadCbs g_npcLockCbs_140103fb8;
 NpcEvthreadCbs g_npcLockCbsOrig_140104010;
@@ -200,7 +199,6 @@ void  (*g_pfnNpc_140016e90)(void) = nullptr;
 void* (*g_pfnNpcEventFree_140103fa8)(void*) = nullptr;
 const char g_symNpcStr_CondChange[] = "Can't change condition callbacks once they have been initialized.";
 
-void (*g_pfnNpc_140016880)(void*) = nullptr;
 void (*g_pfnNpc_140016990)(void*, long long, long long, long long) = nullptr;
 
 void (*g_pfnNpcThreadBaseDtor)(void* pThis) = nullptr;
@@ -1180,8 +1178,8 @@ unsigned long long FUN_140005750(unsigned long long a1, unsigned long long a2, u
     s2.pfnHandler[1] = (void (*)(void))&FUN_140005560;
     s2.pfnHandler[2] = (void (*)(void))&FUN_140005590;
     s2.pfnHandler[3] = (void (*)(void))&FUN_1400055f0;
-    if (g_pfnNpc_140016890 != nullptr) g_pfnNpc_140016890(&s1, (long long)a2, (long long)a3, (long long)a4);
-    if (g_pfnNpc_140016880 != nullptr) g_pfnNpc_140016880(g_symNpcData_1400054c0);
+    FUN_140016890((NpcEvthreadCbs*)&s1, (long long)a2, (long long)a3, (long long)a4);
+    FUN_140016880(g_symNpcData_1400054c0);
     if (g_pfnNpc_140016990 != nullptr) g_pfnNpc_140016990(&s2, (long long)a2, (long long)a3, (long long)a4);
     return 0;
 }

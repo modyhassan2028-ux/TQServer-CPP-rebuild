@@ -17,12 +17,13 @@ static H g_seen1, g_seen2;
 static long long g_args1[3] = {0,0,0}, g_args2[3] = {0,0,0};
 static void* g_dataArg = nullptr;
 
-static void Cb16890(void* p, long long a2, long long a3, long long a4) {
-    std::memcpy(&g_seen1, p, sizeof(H));
-    g_args1[0] = a2; g_args1[1] = a3; g_args1[2] = a4;
-    g_order[g_calls++] = "16890";
+// the registrar and the pointer store are real now: they leave their marks in the module's own tables instead of
+// in a fake, and only the last hop (0x140016990) is still a seam
+static void SnapshotLockTable() {
+    g_seen1.a = g_npcLockCbs_140103fb8.nApiVersion;
+    g_seen1.b = g_npcLockCbs_140103fb8.nReserved;
+    for (int i = 0; i < 4; ++i) g_seen1.fn[i] = (void (*)(void))g_npcLockCbs_140103fb8.pfn[i];
 }
-static void Cb16880(void* p) { g_dataArg = p; g_order[g_calls++] = "16880"; }
 static void Cb16990(void* p, long long a2, long long a3, long long a4) {
     std::memcpy(&g_seen2, p, sizeof(H));
     g_args2[0] = a2; g_args2[1] = a3; g_args2[2] = a4;
@@ -30,17 +31,17 @@ static void Cb16990(void* p, long long a2, long long a3, long long a4) {
 }
 
 int main() {
-    g_pfnNpc_140016890 = &Cb16890;
-    g_pfnNpc_140016880 = &Cb16880;
     g_pfnNpc_140016990 = &Cb16990;
 
     assert(FUN_140005750(0xAA, 0x22, 0x33, 0x44) == 0);
 
-    // the three calls happen in the body's order
-    assert(g_calls == 3);
-    assert(std::strcmp(g_order[0], "16890") == 0);
-    assert(std::strcmp(g_order[1], "16880") == 0);
-    assert(std::strcmp(g_order[2], "16990") == 0);
+    // the real registrar registered the first table and the real store kept the fixed address; only the last hop
+    // left a note, and it came last
+    assert(g_calls == 1);
+    assert(std::strcmp(g_order[0], "16990") == 0);
+    SnapshotLockTable();
+    assert(g_dataArg == nullptr);                                  // the seam is not the store any more
+    assert(g_pNpcData_140103fe0 == (void*)g_symNpcData_1400054c0);  // the store kept it instead
 
     // every table starts with two ones, and the four handlers are the body's own addresses
     assert(g_seen1.a == 1 && g_seen1.b == 1);
@@ -50,13 +51,13 @@ int main() {
     assert(g_seen2.fn[0] == (void (*)(void))&FUN_1400054d0 && g_seen2.fn[1] == (void (*)(void))&FUN_140005560);
     assert(g_seen2.fn[2] == (void (*)(void))&FUN_140005590 && g_seen2.fn[3] == (void (*)(void))&FUN_1400055f0);
 
-    // the middle call gets the fixed data address, the outer two get the same three arguments
-    assert(g_dataArg == (void*)g_symNpcData_1400054c0);
-    assert(g_args1[0] == 0x22 && g_args1[1] == 0x33 && g_args1[2] == 0x44);
+    // the middle call gets the fixed data address (the real store kept it), the outer two get the same three
+    // arguments
+    assert(g_pNpcData_140103fe0 == (void*)g_symNpcData_1400054c0);
+    // the real registrar answers the arguments onward itself, so only the seam's own record remains
     assert(g_args2[0] == 0x22 && g_args2[1] == 0x33 && g_args2[2] == 0x44);
 
     // with no seams wired the body still answers zero
-    g_pfnNpc_140016890 = nullptr; g_pfnNpc_140016880 = nullptr; g_pfnNpc_140016990 = nullptr;
     assert(FUN_140005750(0, 0, 0, 0) == 0);
 
     std::printf("NPCSERVER_D177_OK: 0x140005750 handler registration\n");

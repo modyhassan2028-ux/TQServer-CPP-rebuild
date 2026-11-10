@@ -1610,3 +1610,12 @@ closed, and the flag only being set on the path that got a socket.
 - The suites had to grow a real object: `+0x18` is closed before any work and `+0x38` answers on the second path.
   What that exposed: the object itself reports acceptance on the second path, and it is the last hop (`0x140077370`,
   still unported) that marks the wrapper valid on the first.
+
+## D219 — rewiring pass 2, slice 6: the evthread registrar
+
+- `0x140016880` (the one-pointer store) and `0x140016890` (the lock-callback registrar) are called directly by
+  `0x140005750`. Both had stayed seams only because their suites used them as observation points.
+- What that exposed: the registrar writes the module's own tables (`g_npcLockCbs_140103fb8`, or the original one
+  while the debug flag is set) and the store keeps `g_pNpcData_140103fe0`. The suite now reads those tables back
+  instead of a fake's copy, and the argument pass-through it used to watch is the registrar's own business.
+- Only `0x140016990` (the condition twin) is still a seam here.

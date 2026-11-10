@@ -876,3 +876,8 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   green, four of them six times.
 - Next: the coded-input helpers a830/a8e0/a9c0 (each suite needs a real coded input: vtable +0x10, state at
   +0x18/+0x1c/+0x28/+0x2c), then the log layer pair, then 160880/160890.
+
+## D219 (latest)
+
+- 140016880 / 140016890 rewired; D177 reads the real registry tables. 44 suites green, both six times.
+- Next: a830/a8e0/a9c0, then the log layer (77f50/77fc0/78d20/78d60), then 16990.
