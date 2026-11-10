@@ -810,3 +810,11 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - NpcServer: 165 bodies, 40 suites green.
 - Next: 0x140077930 (35), 0x140077370's neighbours done; then 0x1400778c0's callers and 0x14007a700 (the wrapper
   destroy) so the pending rewiring pass can close.
+
+## D209 (latest)
+
+- NpcServer: 170 bodies, 41 suites green.
+- The wrapper destroy `0x14007a700` and the data unwrap chain are now real. The pending rewiring pass can start:
+  seams whose bodies now exist — 0x140077370, 0x1400774a0, 0x1400774e0, 0x140077520, 0x140077530, 0x140077620,
+  0x1400776c0, 0x1400777a0, 0x140077840, 0x140077850, 0x1400778a0, 0x1400778c0, 0x140077900, 0x140077930,
+  0x14007a700.

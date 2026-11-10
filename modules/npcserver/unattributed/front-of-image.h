@@ -380,6 +380,17 @@ unsigned char FUN_140077620(const char* pszData, int nLen, long long* pThis);
 void** FUN_1400776c0(void** pWrapper, long long pData, int nLen);
 unsigned char FUN_1400777a0(const char* pszData, int nLen, long long* pThis);
 void FUN_1400778c0(long long pTarget, int nBytes);
+extern void (*g_pfnNpc_14007a830)(long long* pCoded);
+extern int* (*g_pfnNpc_140078100)(long long pMessage, unsigned int uValue);
+extern bool (*g_pfnNpcIteratorHasContainer)(void* pIter);
+extern char* (*g_pfnNpcStringMyPtr)(void* pString);
+extern void (*g_pfnNpcInvalidParameter)(void);
+void* FUN_140077930(std::string* pValue);
+void* FUN_140077950(std::string* pValue);
+void* FUN_1400779a0(void* pIter);
+void* FUN_1400779c0(void* pIter);
+void FUN_14007a700(long long* pCoded);
+
 
 
 

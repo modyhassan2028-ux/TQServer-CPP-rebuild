@@ -14,6 +14,11 @@
 #include <new>
 
 namespace tq {
+void (*g_pfnNpcInvalidParameter)(void) = nullptr;
+char* (*g_pfnNpcStringMyPtr)(void* pString) = nullptr;
+bool (*g_pfnNpcIteratorHasContainer)(void* pIter) = nullptr;
+int* (*g_pfnNpc_140078100)(long long pMessage, unsigned int uValue) = nullptr;
+void (*g_pfnNpc_14007a830)(long long* pCoded) = nullptr;
 
 void FUN_1400017b0(long long pThis);   // ported in npcserver/clientsocket.cpp
 
@@ -3356,6 +3361,72 @@ unsigned char FUN_1400777a0(const char* pszData, int nLen, long long* pThis) {
 void FUN_1400778c0(long long pTarget, int nBytes) {
     *(long long*)(pTarget + 8) = (long long)nBytes + *(long long*)(pTarget + 8);
     *(int*)(pTarget + 0x10) = *(int*)(pTarget + 0x10) - nBytes;
+}
+
+// 0x140077930 - the string's data pointer through 0x140077950.
+void* FUN_140077930(std::string* pValue) {
+    return FUN_140077950(pValue);
+}
+
+// 0x140077950 - an empty string answers zero rather than a pointer into itself; a non-empty one unwraps its
+// begin iterator through 0x1400779a0.
+void* FUN_140077950(std::string* pValue) {
+    if (pValue->empty()) return nullptr;
+    // MSVC's begin() hands over the two words of a checked _Iterator_base: the container it belongs to and the
+    // pointer it holds. The unwrap below returns the second word, so the pair is built directly here.
+    struct NpcStringIter { long long pContainer; char* pPtr; } aIter;
+    aIter.pContainer = (long long)pValue;
+    aIter.pPtr = (char*)pValue->data();
+    return FUN_1400779a0(&aIter);
+}
+
+// 0x1400779a0 - forward to 0x1400779c0, carrying its answer back (the decompiler shows void; its caller reads it).
+void* FUN_1400779a0(void* pIter) {
+    return FUN_1400779c0(pIter);
+}
+
+// 0x1400779c0 - the checked unwrap of an MSVC string iterator. The container word at +0x00 is compared against
+// the unlinked sentinel -4; when it is linked the debug checks run (the container must be known and the iterator
+// must sit inside the string's buffer) and each failure calls _invalid_parameter_noinfo. The answer is always the
+// pointer word at +0x08.
+void* FUN_1400779c0(void* pIter) {
+    long long* p = (long long*)pIter;
+    if (p[0] != -4) {
+        if (g_pfnNpcIteratorHasContainer != nullptr && !g_pfnNpcIteratorHasContainer(pIter)) {
+            if (g_pfnNpcInvalidParameter != nullptr) g_pfnNpcInvalidParameter();
+        }
+        char* pBase = g_pfnNpcStringMyPtr != nullptr ? g_pfnNpcStringMyPtr((void*)p[0]) : nullptr;
+        if (pBase + *(long long*)(p[0] + 0x18) <= (char*)p[1]) {
+            if (g_pfnNpcInvalidParameter != nullptr) g_pfnNpcInvalidParameter();
+        }
+    }
+    return (void*)p[1];
+}
+
+// 0x14007a700 - the coded input's teardown. The byte chain at +0x00 is released through 0x14007a830, and the
+// count at +0x34 is compared against the -2 sentinel: that state is a CHECK failure logged at
+// coded_stream.cc:0x4e as "The total number of bytes read was " followed by the count at +0x18, severity 1.
+void FUN_14007a700(long long* pCoded) {
+    if (pCoded[0] != 0) {
+        if (g_pfnNpc_14007a830 != nullptr) g_pfnNpc_14007a830(pCoded);
+    }
+    if (*(int*)((char*)pCoded + 0x34) == -2) {
+        unsigned char aFinisher[8];
+        unsigned char aSink[64];
+        aFinisher[0] = 0;
+        void* pSink = g_pfnNpc_1400783d0 != nullptr
+                          ? g_pfnNpc_1400783d0(aSink, 1,
+                                "F:\\cq\\64\\develop\\protobuf\\src\\google\\protobuf\\io\\coded_stream.cc", 0x4e)
+                          : nullptr;
+        long long pMessage = g_pfnNpc_140078030 != nullptr
+                                 ? g_pfnNpc_140078030((long long)pSink, "The total number of bytes read was ")
+                                 : 0;
+        int* pOut = g_pfnNpc_140078100 != nullptr
+                        ? g_pfnNpc_140078100(pMessage, *(unsigned int*)((char*)pCoded + 0x18))
+                        : nullptr;
+        if (g_pfnNpc_140078580 != nullptr) g_pfnNpc_140078580(aFinisher, pOut);
+        if (g_pfnNpc_140078440 != nullptr) g_pfnNpc_140078440((long long)aSink);
+    }
 }
 
 }  // namespace tq

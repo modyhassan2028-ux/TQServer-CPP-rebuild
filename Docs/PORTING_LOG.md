@@ -1492,3 +1492,17 @@ closed, and the flag only being set on the path that got a socket.
   shrinks, leaving a negative count when more than is left is asked for.
 - Fixture note: my first sequence helper wrote `g_seq[n] = n` instead of `g_seq[g_seqN] = n`, so the ordering
   assertions read zeros while the counter advanced. Worth watching for across the remaining suites.
+
+## D209 — NpcServer.exe 0x140077930, 0x140077950, 0x1400779a0, 0x1400779c0, 0x14007a700
+
+- `0x140077930` → `0x140077950` → `0x1400779a0` → `0x1400779c0`. `0x140077950` answers **zero** for an empty string
+  instead of a pointer into itself; `0x1400779a0` is another tail call the decompiler shows as void.
+- `0x1400779c0` is MSVC's checked iterator unwrap: the container word at `+0x00` is compared against the unlinked
+  sentinel **-4**, then the container must be known and the answer must satisfy `base + *(container+0x18) > iterator`
+  (note the bound: a pointer **at** base+size already trips it). Every failure calls `_invalid_parameter_noinfo` and
+  the answer is always the pointer word at `+0x08`.
+  Divergence to record: the word at `+0x18` is MSVC's string field; under libstdc++ that offset is not the size, so
+  the bound check can report an invalid parameter for an ordinary `std::string`. The value returned is unaffected.
+- `0x14007a700` releases the byte chain at `+0x00` through `0x14007a830` and compares the word at `+0x34` with the
+  **-2** sentinel: that state logs a CHECK failure at `coded_stream.cc` line **0x4e**, severity 1, text
+  "The total number of bytes read was " followed by the count at `+0x18`.
