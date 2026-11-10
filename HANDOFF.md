@@ -896,3 +896,8 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 
 - 140077fc0 / 140078d20 / 140078d60 rewired; D211 observes the layer below. 44 suites green, two of them six times.
 - Next: 140016990 (the condition twin), then 140078b30 / 1400787c0 / 1400787f0 to close the log layer.
+
+## D224 (latest)
+
+- 140016990 rewired; D177 reads the lock and condition tables directly. 44 suites green, two of them six times.
+- Next: 140078b30 (the one-time initialiser that takes a callback) to close the log layer.

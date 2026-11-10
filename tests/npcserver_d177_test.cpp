@@ -24,24 +24,24 @@ static void SnapshotLockTable() {
     g_seen1.b = g_npcLockCbs_140103fb8.nReserved;
     for (int i = 0; i < 4; ++i) g_seen1.fn[i] = (void (*)(void))g_npcLockCbs_140103fb8.pfn[i];
 }
-static void Cb16990(void* p, long long a2, long long a3, long long a4) {
-    std::memcpy(&g_seen2, p, sizeof(H));
-    g_args2[0] = a2; g_args2[1] = a3; g_args2[2] = a4;
-    g_order[g_calls++] = "16990";
+// the condition registrar is a real body too, so the second table is read back from the module's own condition
+// table instead of a fake
+static void SnapshotCondTable() {
+    g_seen2.a = g_npcCondCbs_140103fe8.nApiVersion;
+    g_seen2.b = g_npcCondCbs_140103fe8.nReserved;
+    for (int i = 0; i < 4; ++i) g_seen2.fn[i] = (void (*)(void))g_npcCondCbs_140103fe8.pfn[i];
 }
 
 int main() {
-    g_pfnNpc_140016990 = &Cb16990;
 
     assert(FUN_140005750(0xAA, 0x22, 0x33, 0x44) == 0);
 
-    // the real registrar registered the first table and the real store kept the fixed address; only the last hop
-    // left a note, and it came last
-    assert(g_calls == 1);
-    assert(std::strcmp(g_order[0], "16990") == 0);
+    // no seam is left in this body: the first table went to the lock table, the second to the condition table, and
+    // the fixed data address was stored in between
+    assert(g_calls == 0);
     SnapshotLockTable();
-    assert(g_dataArg == nullptr);                                  // the seam is not the store any more
-    assert(g_pNpcData_140103fe0 == (void*)g_symNpcData_1400054c0);  // the store kept it instead
+    SnapshotCondTable();
+    assert(g_pNpcData_140103fe0 == (void*)g_symNpcData_1400054c0);
 
     // every table starts with two ones, and the four handlers are the body's own addresses
     assert(g_seen1.a == 1 && g_seen1.b == 1);
@@ -54,8 +54,9 @@ int main() {
     // the middle call gets the fixed data address (the real store kept it), the outer two get the same three
     // arguments
     assert(g_pNpcData_140103fe0 == (void*)g_symNpcData_1400054c0);
-    // the real registrar answers the arguments onward itself, so only the seam's own record remains
-    assert(g_args2[0] == 0x22 && g_args2[1] == 0x33 && g_args2[2] == 0x44);
+    // the condition table is never consulted again for the same table, and a second identical registration is a
+    // no-op: 0x140005750 answers zero both times
+    assert(g_seen2.a == 1 && g_seen2.b == 1);
 
     // with no seams wired the body still answers zero
     assert(FUN_140005750(0, 0, 0, 0) == 0);

@@ -196,7 +196,6 @@ void  (*g_pfnNpc_140016e90)(void) = nullptr;
 void* (*g_pfnNpcEventFree_140103fa8)(void*) = nullptr;
 const char g_symNpcStr_CondChange[] = "Can't change condition callbacks once they have been initialized.";
 
-void (*g_pfnNpc_140016990)(void*, long long, long long, long long) = nullptr;
 
 void (*g_pfnNpcThreadBaseDtor)(void* pThis) = nullptr;
 void (*g_pfnNpcEventBase_140016270)(void* pBase, long long a2, long long a3, long long a4) = nullptr;
@@ -1177,7 +1176,8 @@ unsigned long long FUN_140005750(unsigned long long a1, unsigned long long a2, u
     s2.pfnHandler[3] = (void (*)(void))&FUN_1400055f0;
     FUN_140016890((NpcEvthreadCbs*)&s1, (long long)a2, (long long)a3, (long long)a4);
     FUN_140016880(g_symNpcData_1400054c0);
-    if (g_pfnNpc_140016990 != nullptr) g_pfnNpc_140016990(&s2, (long long)a2, (long long)a3, (long long)a4);
+    // the second table is the same 0x28-byte shape, so it goes in as the registrar's own type
+    FUN_140016990((NpcEvthreadCbs*)&s2, a2, a3, a4);
     return 0;
 }
 

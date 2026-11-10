@@ -103,7 +103,6 @@ int main() {
     g_pfnNpcLogMessageFmt = &LogFmt;
     g_pfnNpcOperatorNew = &OperatorNew;
     g_pfnNpc_14001ced0 = &EngineSetup;
-    g_pfnNpc_140016990 = &H890;
     (void)g_hReg;
 
     // either argument missing ends it before anything is touched

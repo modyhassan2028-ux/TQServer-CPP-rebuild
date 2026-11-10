@@ -1659,3 +1659,12 @@ closed, and the flag only being set on the path that got a socket.
   the initialiser runs once per non-fatal message.
 - Note for the next slices: `rewire_seams.py` deletes the fake bindings it finds in tests, so any observer that has
   to move down a level must be re-added after the run.
+
+## D224 — the condition registrar is called, not stubbed
+
+- `0x140016990` is called directly from `0x140005750`. The second table is the same 0x28-byte shape as the first
+  (two ints, then four handlers), so it goes in as `NpcEvthreadCbs*`; the image hands the same buffer.
+- The body writes `g_npcCondCbs_140103fe8`, which is a different table from the lock one, so the two registrations do
+  not collide. An identical table is a no-op, a different one warns and answers `0xffffffff`, and with the debug word
+  set the first three pointers are also copied to `0x140103ff0/ff8/0x140104000`.
+- D177 now reads both tables back from the module itself and asserts that no seam is left in `0x140005750`.
