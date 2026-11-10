@@ -3107,8 +3107,11 @@ unsigned char FUN_140076c40(long long* pMsg, long long pTarget) {
     return bOk;
 }
 
-// 0x140076ca0 - straight forward to 0x140076e30.
-void FUN_140076ca0(long long* pMsg, std::string* pValue) { FUN_140076e30(pMsg, pValue); }
+// 0x140076ca0 - straight forward to 0x140076e30. A tail call again: the decompiler shows it as void, and
+// 0x1400771d0 reads the byte it returns.
+unsigned char FUN_140076ca0(long long* pMsg, std::string* pValue) {
+    return (unsigned char)(FUN_140076e30(pMsg, pValue) & 0xffull);
+}
 
 // 0x140076e30 - append the message's bytes to a string. The string is grown to its own size plus the message's
 // byte size from slot 8, the message writes itself through slot 10 at the string's data plus that size, and a
@@ -3179,6 +3182,64 @@ unsigned char FUN_1400774a0(void* a1, long long* pThis) {
 unsigned char FUN_1400774e0(void* a1, long long* pThis) {
     (*(void (**)(long long*))(*pThis + 0x18))(pThis);
     return (*(unsigned char (**)(long long*, void*))(*pThis + 0x38))(pThis, a1);
+}
+
+// 0x140076f80 - straight forward to 0x140077120, carrying its answer back.
+long long FUN_140076f80(long long* pMsg, long long pBuf, int nRoom) {
+    return FUN_140077120(pMsg, pBuf, nRoom);
+}
+
+// 0x140077120 - write into a caller's room. When the room is smaller than the message's byte size from slot 8,
+// nothing is written and the answer is that size with its low byte cleared, so the caller sees a zero low byte
+// and whatever size class the upper bytes carry. Otherwise slot 10 at +0x50 writes and must end exactly at the
+// byte size; a mismatch runs 0x140075f60, which never returns, and the answer is one with the expected end's
+// upper bytes.
+long long FUN_140077120(long long* pMsg, long long pBuf, int nRoom) {
+    int nSize = (*(int (**)(long long*))(*pMsg + 0x40))(pMsg);
+    long long lRet;
+    if (nRoom < nSize) {
+        lRet = (long long)(((unsigned int)nSize >> 8) << 8);
+    } else {
+        lRet = (*(long long (**)(long long*, long long))(*pMsg + 0x50))(pMsg, pBuf);
+        long long lExpect = (long long)nSize;
+        if (lRet - pBuf != lExpect) {
+            int nSizeNow = (*(int (**)(long long*))(*pMsg + 0x40))(pMsg);
+            FUN_140075f60(nSize, nSizeNow, (int)lRet - (int)pBuf);
+            lExpect = 0;             // unreachable: the consistency check never returns
+        }
+        lRet = (long long)(1ull | ((unsigned long long)lExpect & ~0xffull));
+    }
+    return lRet;
+}
+
+// 0x1400771d0 - serialize into a string: a temporary is built, filled through 0x140076ca0, emptied again when
+// that answers zero, and copied into the caller's storage. The temporary is destroyed exactly once.
+std::string* FUN_1400771d0(long long* pMsg, std::string* pOut) {
+    unsigned char aTemp[sizeof(std::string)];
+    std::string* pTemp = new (aTemp) std::string();
+    if (FUN_140076ca0(pMsg, pTemp) == 0) pTemp->clear();
+    new (pOut) std::string(*pTemp);
+    pTemp->~basic_string();
+    return pOut;
+}
+
+// 0x140077280 - the same through 0x140076e30, testing the low byte of its eight-byte answer.
+std::string* FUN_140077280(long long* pMsg, std::string* pOut) {
+    unsigned char aTemp[sizeof(std::string)];
+    std::string* pTemp = new (aTemp) std::string();
+    unsigned long long uOk = FUN_140076e30(pMsg, pTemp);
+    if ((uOk & 0xffull) == 0) pTemp->clear();
+    new (pOut) std::string(*pTemp);
+    pTemp->~basic_string();
+    return pOut;
+}
+
+// 0x140077330 - the lite message's deleting form: the vtable is installed and the object is released only when
+// bit 0 of the flags is set. The pointer is answered either way.
+void* FUN_140077330(void** pThis, unsigned int uFlags) {
+    FUN_140075ef0(pThis);
+    if ((uFlags & 1) != 0 && g_pfnNpcOperatorDelete != nullptr) g_pfnNpcOperatorDelete(pThis);
+    return pThis;
 }
 
 }  // namespace tq

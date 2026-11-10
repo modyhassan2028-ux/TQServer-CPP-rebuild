@@ -353,7 +353,7 @@ extern void (*g_pfnNpc_140077900)(std::string* pValue, long long nNewSize);
 extern long long (*g_pfnNpc_140077930)(std::string* pValue);
 unsigned char FUN_140076be0(long long* pMsg, long long pTarget);
 unsigned char FUN_140076c40(long long* pMsg, long long pTarget);
-void FUN_140076ca0(long long* pMsg, std::string* pValue);
+unsigned char FUN_140076ca0(long long* pMsg, std::string* pValue);
 unsigned long long FUN_140076e30(long long* pMsg, std::string* pValue);
 extern void (*g_pfnNpc_1400778c0)(long long pTarget, int nSize);
 void FUN_140076f00(long long* pMsg, std::string* pValue);
@@ -365,6 +365,12 @@ void FUN_140077900(std::string* pValue, unsigned long long nNewSize);
 void* FUN_140077850(long long pTarget, int nSize);
 unsigned char FUN_1400774a0(void* a1, long long* pThis);
 unsigned char FUN_1400774e0(void* a1, long long* pThis);
+long long FUN_140076f80(long long* pMsg, long long pBuf, int nRoom);
+long long FUN_140077120(long long* pMsg, long long pBuf, int nRoom);
+std::string* FUN_1400771d0(long long* pMsg, std::string* pOut);
+std::string* FUN_140077280(long long* pMsg, std::string* pOut);
+void* FUN_140077330(void** pThis, unsigned int uFlags);
+
 
 
 

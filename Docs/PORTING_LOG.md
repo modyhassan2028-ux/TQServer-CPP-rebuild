@@ -1444,3 +1444,19 @@ closed, and the flag only being set on the path that got a socket.
   which is why the thunks of D200 return a byte.
 - These bodies now exist, but the earlier ports still reach them through their seams. A rewiring pass for this
   cluster is due - the same job D191 did for the thread create path.
+
+## D206 — NpcServer.exe 0x140076f80, 0x140077120, 0x1400771d0, 0x140077280, 0x140077330
+
+- `0x140076f80` forwards to `0x140077120` and carries its answer back.
+- `0x140077120` writes into a caller's room. When the room is smaller than the byte size from slot 8, nothing is
+  written and the answer is the size with its **low byte cleared** - `nSize >> 8 << 8` - so the caller reads a
+  zero low byte for failure while the upper bytes still carry the size class (a size of 8 answers 0, a size of
+  `0x108` answers `0x100`). With room, slot 10 writes and must end exactly at the byte size; a mismatch runs
+  `0x140075f60`, and the answer is one with the expected end's upper bytes.
+- `0x1400771d0` and `0x140077280` serialize into a string through a temporary, empty it again when the producer
+  answers zero, and copy it into the caller's storage. The branch is unreachable in practice: both producers
+  answer with a one in the low byte or never return at all, so the temporary is never emptied. Ported as written.
+- `0x140077330` is the lite message's deleting form: the vtable is installed unconditionally, the object is
+  released only when bit 0 of the flags is set, and the pointer is answered either way.
+- `0x140076ca0` had to be retyped to return a byte: fourth tail call of the cluster that the decompiler shows as
+  void. `0x1400771d0` reads the value it returns.

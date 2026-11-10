@@ -790,3 +790,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   0x1400778a0, 0x140077900. Call sites to rewire: 0x140075a50, 0x140075c30, 0x140076790, 0x140076aa0,
   0x140076e30, 0x1400763b0/450/4f0/5b0 and the three thunks.
 - Next: 0x140076f80 (398), 0x140077120 (164), 0x1400771d0 and 0x140077280 (161 each).
+
+## D206 (latest)
+
+- NpcServer: 159 bodies, 38 suites green.
+- Dead branch worth knowing: the `clear()` in 0x1400771d0/0x140077280 can never run, because 0x140076ca0 and
+  0x140076e30 answer 1 in the low byte or abort.
+- Next: 0x140077370 (294 - which would let the three thunks be rewired), 0x140077530 (227), 0x140077620 (157).
