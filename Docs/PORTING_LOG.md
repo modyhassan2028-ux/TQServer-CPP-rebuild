@@ -1774,3 +1774,28 @@ never approximated. The null-source path is not exercised for the pair shape for
 guards: the image dereferences the source word after the hook, so with a no-op hook it faults by design.
 
 D229 green, and the whole NpcServer set (48 suites) green over six cycles through `tools/run_npcserver_suites.sh`.
+
+## D230 — allocation, forward moves, range checks and position pairs (30 bodies)
+
+`tools/gen_stl_shapes.py`, same range, four more shapes into `modules/npcserver/unattributed/stl-shapes.{h,cpp}`
+(manifest `g_aNpcShape_140080000`):
+
+| family | bodies | what the body says |
+|---|---|---|
+| alloc-raw | 12 | guard `~0 / nCount < ELEM` then ask `operator_new(nCount * ELEM)`; element sizes 4, 8, 12, 0x10, 0x20, 0x30, 0x58 across the twelve, expressed either as a shift or a multiply in the image |
+| memmove-forward | 4 | `(nLast - pFirst) >> SHIFT` elements of `ELEM` bytes moved forward with `memmove_s`, returning `bytes + pDest`; the four are the 4-byte (shift 2) and 8-byte (shift 3) forms |
+| iterator-bounds | 6 | `pOut[0] = 0`, reject when the source is null or `nPosition` is below `pSource[lo]` or above `pSource[hi]`, then copy the word and the position |
+| position-build | 8 | read `pSource[word]` first, guard the pair against `pSource[other]` in the body's own direction, then build the pair |
+
+Details that come from the text, not from assumption:
+- Two allocator signatures exist: `(nCount)` for six and `(pAllocator, nCount)` for six, so the manifest records which
+  parameter carries the count and the suite calls each body the way the image does.
+- The overflow guard is a division, `0xFFFFFFFFFFFFFFFF / nCount < ELEM`, and it is checked against the same element
+  size the following `operator_new` multiplies by. The generator refuses the shape if the two disagree.
+- `std::bad_alloc` is thrown where the image builds the exception and calls `_CxxThrowException`; the decompiler's
+  construct expression is not compilable, and the throw is the same observable behaviour.
+- `memmove_s` goes through `g_pfnNpcMemmoveS`, defaulting to `std::memmove` with both sizes equal to the byte count,
+  exactly the contract the image passes it.
+- `operator_new` is the seam the module already had, `g_pfnNpcOperatorNew`.
+
+D230 green on its own and the whole set (49 suites) green over six cycles.

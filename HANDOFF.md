@@ -932,3 +932,11 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   `tools/gen_stl_iterators.py` into `stl-iterators.{h,cpp}` with manifest `g_aNpcIter_140080000`.
 - Runner is now one command: `tools/run_npcserver_suites.sh` (48 suites, six cycles, sanitizers on).
 - Next shapes in the range: `vector::insert` bounds (6 + 5), aligned allocate (4), `memmove_s` move (4).
+
+## D230 (latest)
+
+- 30 bodies of 0x140080000..0x140090000: 12 alloc-raw, 4 memmove-forward, 6 iterator-bounds, 8 position-build, in
+  `stl-shapes.{h,cpp}` with manifest `g_aNpcShape_140080000`.
+- 49 suites green, six cycles, `tools/run_npcserver_suites.sh`.
+- Next in the range: the `vector<T> too long` throwers, the reference-count assign/release pair, and the
+  `operator_delete` cleanup wrappers.
