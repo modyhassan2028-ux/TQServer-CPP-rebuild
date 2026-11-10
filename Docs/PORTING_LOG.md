@@ -1544,3 +1544,14 @@ closed, and the flag only being set on the path that got a socket.
 - Note that these checks carry severity 3, and `0x140078470` throws only through its own throw seam, so with that
   seam unset the port logs and keeps going. The machine's abort comes from the throw info the image passes at
   `0x1400fee98`.
+
+## D213 — NpcServer.exe 0x140077fc0, 0x140077f50, 0x140078d20, 0x140078d60, 0x140078d80
+
+- `0x140078d80` builds `google::protobuf::FatalException`. The object is **0x48** bytes: the `std::exception` base at
+  `+0`, the vtable the image stores is **0x1400cdd70** (confirmed by objdump of the constructor, `lea 0x54fb7(%rip)`
+  into `(%rcx)`), the file at `+0x18`, the line at `+0x20` and a **copy** of the message at `+0x28`. The copy matters:
+  the message object the caller built can go away, and the exception keeps its text.
+- `0x140078d20` stores the mutex into the wrapper **before** taking it, so the wrapper is already usable if the take
+  reports a problem; `0x140078d60` only releases.
+- `0x140077fc0` runs the one-time log initialisation: it hands `0x140078b30` the state word at `0x140104ce8` and the
+  **address** of `0x140077f50`, not a call.

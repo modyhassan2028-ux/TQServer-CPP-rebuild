@@ -3523,5 +3523,48 @@ void FUN_140078470(int* pMsg) {
         if (g_pfnNpcThrowFatal != nullptr) g_pfnNpcThrowFatal(aException, (void*)g_pNpcThrowInfo_1400fee98);
     }
 }
+void (*g_pfnNpc_140078b30)(long long*, void (*)(void)) = nullptr;
+void (*g_pfnNpc_1400787c0)(void*) = nullptr;
+void (*g_pfnNpc_1400787f0)(void*) = nullptr;
+void (*g_pfnNpc_140077f50)(void) = nullptr;
+long long g_pNpcLogState_140104ce8 = 0;
+const void* g_pNpcVtblFatalException = nullptr;
+// 0x140077fc0 - run the one-time initialisation of the log file through 0x140078b30. The storage is the eight
+// bytes the image keeps at 0x140104ce8.
+void FUN_140077fc0(void) {
+    if (g_pfnNpc_140078b30 != nullptr) {
+        g_pfnNpc_140078b30((long long*)&g_pNpcLogState_140104ce8, (void (*)(void))&FUN_140077f50);
+    }
+}
+
+// 0x140077f50 - the body the one-time initialisation runs. It is kept as its own seam until 0x140078b30 itself is
+// ported, so the call above keeps the machine's shape (a function address, not a call).
+void FUN_140077f50(void) {
+    if (g_pfnNpc_140077f50 != nullptr) g_pfnNpc_140077f50();
+}
+
+// 0x140078d20 - hold the log mutex for the life of the wrapper: store the mutex, then take it.
+void* FUN_140078d20(void* pLock, void* pMutex) {
+    *(void**)pLock = pMutex;
+    if (g_pfnNpc_1400787c0 != nullptr) g_pfnNpc_1400787c0(*(void**)pLock);
+    return pLock;
+}
+
+// 0x140078d60 - let it go again through 0x1400787f0.
+void FUN_140078d60(void* pLock) {
+    if (g_pfnNpc_1400787f0 != nullptr) g_pfnNpc_1400787f0(*(void**)pLock);
+}
+
+// 0x140078d80 - build the fatal exception: the base at 0x1400bd680, the vtable the image writes at 0x1400cdd70, the
+// file at +0x18, the line at +0x20 and a copy of the message at +0x28. The string is copied, not shared, so the
+// message object the caller built can go away.
+void* FUN_140078d80(void* pException, const char* pszFile, unsigned int uLine, const std::string* pMessage) {
+    new (pException) std::exception();
+    *(const void**)pException = g_pNpcVtblFatalException;
+    *(const char**)((unsigned char*)pException + 0x18) = pszFile;
+    *(unsigned int*)((unsigned char*)pException + 0x20) = uLine;
+    new ((unsigned char*)pException + 0x28) std::string(*pMessage);
+    return pException;
+}
 
 }  // namespace tq

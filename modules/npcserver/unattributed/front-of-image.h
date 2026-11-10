@@ -412,6 +412,18 @@ long long FUN_140077ff0(long long pMsg, std::string* pText);
 long long FUN_140078100(long long pMsg, unsigned int uValue);
 void FUN_140078580(void* pFinisher, int* pMsg);
 void FUN_140078470(int* pMsg);
+extern void (*g_pfnNpc_140078b30)(long long* pState, void (*pfnInit)(void));
+extern void (*g_pfnNpc_1400787c0)(void* pMutex);
+extern void (*g_pfnNpc_1400787f0)(void* pMutex);
+extern void (*g_pfnNpc_140077f50)(void);
+extern long long g_pNpcLogState_140104ce8;
+extern const void* g_pNpcVtblFatalException;
+void FUN_140077fc0(void);
+void FUN_140077f50(void);
+void* FUN_140078d20(void* pLock, void* pMutex);
+void FUN_140078d60(void* pLock);
+void* FUN_140078d80(void* pException, const char* pszFile, unsigned int uLine, const std::string* pMessage);
+
 
 
 

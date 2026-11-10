@@ -837,3 +837,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - Still on the pending rewiring list: 140077370, 1400774a0, 1400774e0, 140077520, 140077530, 140077620, 1400776c0,
   1400777a0, 140077840, 140077850, 1400778a0, 1400778c0, 140077900, 140077930, 14007a700, 14007a830, 14007a8e0,
   14007a9c0, and the libevent group 1400163c0/1400165d0/140016720/140016880/140016890/140016990/140074d90.
+
+## D213 (latest)
+
+- NpcServer: 185 bodies, 44 suites green. The logging layer is complete except 0x140078b30/0x1400787c0/0x1400787f0,
+  which are still seams.
+- Rewiring pass 2 (the tree/queue cluster) was started and rolled back: 13 suites substitute those seams for
+  infrastructure, not just observation, so the pass needs its suites rebuilt one at a time. Nothing is left red.
