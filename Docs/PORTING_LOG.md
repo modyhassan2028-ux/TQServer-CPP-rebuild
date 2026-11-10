@@ -1478,3 +1478,17 @@ closed, and the flag only being set on the path that got a socket.
 - Three new seams and one data constant: `0x140077ff0`, `0x14007b7e0`, `0x1400776c0`, `DAT_1401036a0`.
 - Test note worth keeping: the required-fields text is freed by the body right after the failure, so a fixture
   must copy it at the append call, not hold the pointer.
+
+## D208 — NpcServer.exe 0x1400776c0, 0x1400777a0, 0x1400778c0
+
+- `0x1400776c0` builds the same 0x50-byte wrapper as `0x140077530` but around a byte range: cleared at `+0x00`,
+  the start at `+0x08`, the end at `+0x10`, the length at `+0x18` **and again at `+0x28`** where the stream form
+  puts `0x7fffffff`, then the same `0x4000000` / `0x2000000` / data constant at `+0x30` / `+0x34` / `+0x3c`. No
+  `0x14007b7e0` call: this form is already complete when it returns.
+- `0x1400777a0` is the twin of `0x140077620`, offering the wrapper through `0x1400774e0` (slot `+0x18`, then slot
+  `+0x38`) instead of `0x1400774a0` (slot `+0x18`, then `0x140077370`). Same validity byte at `+0x24` through
+  `0x140077520`, same destroy through `0x14007a700` on every path.
+- `0x1400778c0` consumes n bytes: the data pointer at `+0x08` moves forward and the remaining count at `+0x10`
+  shrinks, leaving a negative count when more than is left is asked for.
+- Fixture note: my first sequence helper wrote `g_seq[n] = n` instead of `g_seq[g_seqN] = n`, so the ordering
+  assertions read zeros while the counter advanced. Worth watching for across the remaining suites.

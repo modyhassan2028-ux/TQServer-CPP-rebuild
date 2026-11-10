@@ -3314,4 +3314,48 @@ unsigned char FUN_140077620(const char* pszData, int nLen, long long* pThis) {
     return bOk;
 }
 
+
+// 0x1400776c0 - build the parse wrapper around a run of bytes. Same sixteen fields as 0x140077530, but the
+// source is the byte range itself: cleared at +0x00, the start at +0x08, the end at +0x10, the length at +0x18,
+// and - unlike the stream form - the length sits at +0x28 too instead of 0x7fffffff. No 0x14007b7e0 here.
+void** FUN_1400776c0(void** pWrapper, long long pData, int nLen) {
+    pWrapper[0] = nullptr;
+    pWrapper[1] = (void*)pData;
+    pWrapper[2] = (void*)(pData + nLen);
+    *(int*)((unsigned char*)pWrapper + 0x18) = nLen;
+    *(unsigned int*)((unsigned char*)pWrapper + 0x1c) = 0;
+    *(unsigned int*)((unsigned char*)pWrapper + 0x20) = 0;
+    *(unsigned char*)((unsigned char*)pWrapper + 0x24) = 0;
+    *(unsigned char*)((unsigned char*)pWrapper + 0x25) = 0;
+    *(int*)((unsigned char*)pWrapper + 0x28) = nLen;
+    *(unsigned int*)((unsigned char*)pWrapper + 0x2c) = 0;
+    *(unsigned int*)((unsigned char*)pWrapper + 0x30) = 0x4000000;
+    *(unsigned int*)((unsigned char*)pWrapper + 0x34) = 0x2000000;
+    *(unsigned int*)((unsigned char*)pWrapper + 0x38) = 0;
+    *(unsigned int*)((unsigned char*)pWrapper + 0x3c) = g_uNpcConst_1401036a0;
+    pWrapper[8] = nullptr;
+    pWrapper[9] = nullptr;
+    return pWrapper;
+}
+
+// 0x1400777a0 - the twin of 0x140077620, offering the wrapper through 0x1400774e0 instead of 0x1400774a0. The
+// answer is one only when that accepted it and 0x140077520 finds the wrapper valid; the wrapper is destroyed on
+// every path.
+unsigned char FUN_1400777a0(const char* pszData, int nLen, long long* pThis) {
+    long long aWrapper[10];
+    FUN_1400776c0((void**)aWrapper, (long long)pszData, nLen);
+    unsigned char bAccepted = FUN_1400774e0(aWrapper, pThis);
+    unsigned char bOk = 0;
+    if (bAccepted != 0 && FUN_140077520((long long)aWrapper) != 0) bOk = 1;
+    if (g_pfnNpc_14007a700 != nullptr) g_pfnNpc_14007a700(aWrapper);
+    return bOk;
+}
+
+// 0x1400778c0 - consume n bytes from the front of a target: the data pointer moves forward and the remaining
+// count shrinks by the same amount, so a request larger than what is left leaves a negative count.
+void FUN_1400778c0(long long pTarget, int nBytes) {
+    *(long long*)(pTarget + 8) = (long long)nBytes + *(long long*)(pTarget + 8);
+    *(int*)(pTarget + 0x10) = *(int*)(pTarget + 0x10) - nBytes;
+}
+
 }  // namespace tq

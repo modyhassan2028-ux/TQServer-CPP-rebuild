@@ -377,6 +377,10 @@ extern unsigned int g_uNpcConst_1401036a0;                                      
 unsigned long long FUN_140077370(void* a1, long long* pMsg);
 void** FUN_140077530(void** pWrapper, void* a2);
 unsigned char FUN_140077620(const char* pszData, int nLen, long long* pThis);
+void** FUN_1400776c0(void** pWrapper, long long pData, int nLen);
+unsigned char FUN_1400777a0(const char* pszData, int nLen, long long* pThis);
+void FUN_1400778c0(long long pTarget, int nBytes);
+
 
 
 

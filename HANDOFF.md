@@ -804,3 +804,9 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - The three thunks 0x140076320/350/380 can now be rewired: 0x140077370, 0x1400774a0 and 0x1400774e0 all have real
   bodies. That is part of the pending rewiring pass noted under D205.
 - Next: 0x1400776c0 (223), 0x1400777a0 (157), 0x1400778c0 (55).
+
+## D208 (latest)
+
+- NpcServer: 165 bodies, 40 suites green.
+- Next: 0x140077930 (35), 0x140077370's neighbours done; then 0x1400778c0's callers and 0x14007a700 (the wrapper
+  destroy) so the pending rewiring pass can close.
