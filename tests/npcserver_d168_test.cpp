@@ -26,7 +26,7 @@ static void LogHook(const void* m, ...) { ++g_logs; g_lastLog = m; }
 static int Ord11Hook(void* p) { (void)p; return g_o11; }
 static long long Ord52Hook(void* p) { (void)p; return g_o52; }
 static unsigned short Ord9Hook(unsigned short v) { return (unsigned short)(v + 1); }
-static void Ord111Hook(void) { ++g_ord111; }
+static int Ord111Hook(void) { ++g_ord111; return 0; }
 static long long EventBaseHook(long long b) { return b + 1; }
 static void* BevNewHook(long long b, void* h, int o) {
     (void)b; (void)h; (void)o; ++g_new; return g_bev;

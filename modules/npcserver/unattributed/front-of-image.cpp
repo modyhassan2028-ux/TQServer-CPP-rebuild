@@ -25,7 +25,7 @@ int   (*g_pfnNpcSocketErrno)(long long hSocket) = nullptr;
 int   (*g_pfnNpcOrdinal11)(void* pThis) = nullptr;
 long long (*g_pfnNpcOrdinal52)(void* pThis) = nullptr;
 unsigned short (*g_pfnNpcOrdinal9)(unsigned short uValue) = nullptr;
-void  (*g_pfnNpcOrdinal111)(void) = nullptr;
+int   (*g_pfnNpcOrdinal111)(void) = nullptr;
 long long (*g_pfnNpcEventBase_1400022c0)(long long hBase) = nullptr;
 void* (*g_pfnNpcBevSockNew_14000b3e0)(long long hBase, void* hSocket, int nOptions) = nullptr;
 void  (*g_pfnNpcBevSetCallbacks_140005a50)(void* pBev, void* pRead, void* pWrite, void* pEvent, void* pArg) = nullptr;
@@ -152,6 +152,13 @@ void (*g_pfnNpc_140008930)(int*, int) = nullptr;
 void (*g_pfnNpc_14001b930)(long long, void*, void*, void*) = nullptr;
 void (*g_pfnNpc_14000dcb0)(void*, unsigned int) = nullptr;
 void (*g_pfnNpc_14000d9a0)(long long, int) = nullptr;
+int  (*g_pfnNpcWsaSend)(unsigned long long, void*, unsigned int, void*, unsigned int, void*, void*) =
+    nullptr;
+void (*g_pfnNpc_14000e2a0)(void*, unsigned long long) = nullptr;
+void (*g_pfnNpc_14000d950)(long long, int) = nullptr;
+void (*g_pfnNpc_14000be60)(void*, unsigned int) = nullptr;
+void (*g_pfnNpc_14000bf50)(void*) = nullptr;
+void (*g_pfnNpc_14000c300)(void*) = nullptr;
 void (*g_pfnNpc_14000c160)(long long) = nullptr;
 void (*g_pfnNpc_14000c220)(void*) = nullptr;
 int (*g_pfnNpcWsaPoll_Ordinal18)(unsigned int, void*, void*, void*, int*) = nullptr;
@@ -2537,6 +2544,119 @@ void FUN_140075840(void** pBuf, unsigned long long uLen) {
     pBuf[4] = (void*)((long long)pBuf[4] + (long long)uLen);
     if (g_pfnNpc_14000c160 != nullptr) g_pfnNpc_14000c160((long long)pBuf);
     if (g_pfnNpc_14000c220 != nullptr) g_pfnNpc_14000c220(pBuf);
+}
+
+// Walk the notification list at +0x98 for +0xa0 entries, resetting each with the given value. Shared by the
+// three buffer entry points that end a write cycle.
+static void NpcResetNotifyList(void* pTarget, unsigned int uValue) {
+    void** pIt = (void**)*(void**)((unsigned char*)pTarget + 0x98);
+    int nLimit = *(int*)((unsigned char*)pTarget + 0xa0);
+    if (0 < nLimit) {
+        int nDone = 0;
+        int nInc = 0;
+        do {
+            void** pNext = (void**)*pIt;
+            if (g_pfnNpc_14000dcb0 != nullptr) g_pfnNpc_14000dcb0(pIt, uValue);
+            nInc = nDone + 1;
+            nDone = nInc;
+            pIt = pNext;
+        } while (nInc < nLimit);
+    }
+}
+
+// 0x140075950 - add input to the buffer: the unlock hook first when +0x30 is set, then the buffer adjustment
+// with 1, the add at 0x14000e2a0, the notification list reset with 0x20, bit 1 of +0x90 cleared, and the
+// closing hook 0x14000c220.
+void FUN_140075950(long long* pBuf, unsigned long long uLen) {
+    long long* pTarget = nullptr;
+    if (pBuf != nullptr && ((*(unsigned char*)(pBuf + 7) & 0x10) != 0)) pTarget = pBuf;
+    if (pBuf[6] != 0 && g_pfnNpc_140016e30 != nullptr) g_pfnNpc_140016e30();
+    if (g_pfnNpc_14000d9a0 != nullptr) g_pfnNpc_14000d9a0((long long)pBuf, 1);
+    if (g_pfnNpc_14000e2a0 != nullptr) g_pfnNpc_14000e2a0(pBuf, uLen);
+    NpcResetNotifyList(pTarget, 0x20);
+    *(unsigned int*)((unsigned char*)pTarget + 0x90) =
+        *(unsigned int*)((unsigned char*)pTarget + 0x90) & 0xfffffffdu;
+    if (g_pfnNpc_14000c220 != nullptr) g_pfnNpc_14000c220(pBuf);
+}
+
+// 0x140075a00 - build the 0x1a8 write context: flag 0x10 at +0x38, a cleared word at +0x78, 1 at +0x48, the
+// object as its own +0x10, and the caller's value at +0x88. A failed allocation returns silently.
+void FUN_140075a00(unsigned long long a1) {
+    void* p = g_pfnNpc_140011850 != nullptr ? g_pfnNpc_140011850(1, 0x1a8) : nullptr;
+    if (p == nullptr) return;
+    *(unsigned int*)((unsigned char*)p + 0x38) = *(unsigned int*)((unsigned char*)p + 0x38) | 0x10u;
+    *(void**)((unsigned char*)p + 0x78) = nullptr;
+    *(unsigned int*)((unsigned char*)p + 0x48) = 1;
+    *(void**)((unsigned char*)p + 0x10) = p;
+    *(void**)((unsigned char*)p + 0x88) = (void*)a1;
+}
+
+// 0x140075a50 - send what the buffer holds. Refused with -1 when the buffer's own flag byte at +0x38 carries
+// 2 or when its +0x90 carry 2, and with -1 as well when the buffer holds nothing to send. Otherwise the chain
+// at the head of the buffer is walked into up to sixteen WSABUF entries at +0xa8, each entry a length and the
+// sum of the node's words at +0x10 and +0x28, stopping at the node that covers the requested length. A send
+// that succeeds or reports 0x3e5 marks +0x90 with 2 and answers null; anything else resets the notification
+// list with 0x20, adjusts the buffer, runs 0x14000c300 and answers -1.
+void* FUN_140075a50(void** pBuf, unsigned long long uLen, void* pOverlapped) {
+    void** pTarget = nullptr;
+    if (pBuf != nullptr && ((*(unsigned char*)(pBuf + 7) & 0x10) != 0)) pTarget = pBuf;
+    void* pRet = (void*)0xffffffff;
+    if (pBuf != nullptr) {
+        if (pBuf[6] != 0 && g_pfnNpc_140016e30 != nullptr) g_pfnNpc_140016e30();
+        if ((*(unsigned char*)(pBuf + 7) & 2) == 0 &&
+            (*(unsigned char*)((unsigned char*)pTarget + 0x90) & 2) == 0) {
+            unsigned long long uAvail = (unsigned long long)pBuf[3];
+            pRet = nullptr;
+            if (uAvail != 0) {
+                if ((long long)uLen < 0 || uAvail < uLen) uLen = uAvail;
+                if (g_pfnNpc_14000d950 != nullptr) g_pfnNpc_14000d950((long long)pBuf, 1);
+                *(void**)((unsigned char*)pTarget + 0x98) = nullptr;
+                *(unsigned int*)((unsigned char*)pTarget + 0xa0) = 0;
+                memset((unsigned char*)pTarget + 0xa8, 0, 0x100);
+                void** pNode = (void**)*pBuf;
+                *(void**)((unsigned char*)pTarget + 0x98) = pNode;
+                void** pSeg = (void**)((unsigned char*)pTarget + 0xa8);
+                long long nIndex = 0;
+                unsigned int uSegs = 0;
+                do {
+                    uSegs = (unsigned int)nIndex;
+                    if (pNode == nullptr) break;
+                    pSeg[1] = (void*)((long long)pNode[5] + (long long)pNode[2]);
+                    if (g_pfnNpc_14000be60 != nullptr) g_pfnNpc_14000be60(pNode, 0x20);
+                    if (uLen <= (unsigned long long)pNode[3]) {
+                        *(int*)pSeg = (int)uLen;
+                        uSegs = uSegs + 1;
+                        break;
+                    }
+                    nIndex = nIndex + 1;
+                    *(int*)pSeg = *(int*)((unsigned char*)pNode + 0x18);
+                    uLen = uLen - (unsigned long long)pNode[3];
+                    pNode = (void**)*pNode;
+                    uSegs = uSegs + 1;
+                    pSeg = pSeg + 2;
+                } while (nIndex < 0x10);
+                *(unsigned int*)((unsigned char*)pTarget + 0xa0) = uSegs;
+                if (g_pfnNpc_14000bf50 != nullptr) g_pfnNpc_14000bf50(pBuf);
+                unsigned char aSent[8] = { 0 };
+                int nSend = g_pfnNpcWsaSend != nullptr
+                                ? g_pfnNpcWsaSend((unsigned long long)*(void**)((unsigned char*)pTarget + 0x88),
+                                                  (void*)((unsigned char*)pTarget + 0xa8), uSegs, aSent, 0,
+                                                  pOverlapped, nullptr) : 0;
+                if (nSend == 0 || (g_pfnNpcOrdinal111 != nullptr && g_pfnNpcOrdinal111() == 0x3e5)) {
+                    *(unsigned int*)((unsigned char*)pTarget + 0x90) =
+                        *(unsigned int*)((unsigned char*)pTarget + 0x90) | 2u;
+                    pRet = nullptr;
+                } else {
+                    FUN_1400757e0((long long)pTarget, 0x20);
+                    if (g_pfnNpc_14000d9a0 != nullptr) g_pfnNpc_14000d9a0((long long)pBuf, 1);
+                    if (g_pfnNpc_14000c300 != nullptr) g_pfnNpc_14000c300(pBuf);
+                    pRet = (void*)0xffffffff;
+                }
+            }
+        }
+        if (pBuf[6] != 0 && g_pfnNpc_140016e50 != nullptr) g_pfnNpc_140016e50();
+    }
+    return pRet;
 }
 
 }  // namespace tq

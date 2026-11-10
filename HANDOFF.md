@@ -736,3 +736,8 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 
 - NpcServer: 117 bodies, 28 suites green.
 - Next: 0x140075950 (173), 0x140075a00 (71), 0x140075a50 (471) in address order.
+
+## D197 (latest)
+
+- NpcServer: 120 bodies, 29 suites green.
+- Next: 0x140075c30 (547), 0x140075e60 (24), 0x140075e80 (99) in address order.

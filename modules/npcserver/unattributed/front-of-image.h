@@ -24,7 +24,7 @@ extern int   (*g_pfnNpcSocketErrno)(long long hSocket);       // FUN_140007540
 extern int   (*g_pfnNpcOrdinal11)(void* pThis);               // Ordinal_11
 extern long long (*g_pfnNpcOrdinal52)(void* pThis);           // Ordinal_52
 extern unsigned short (*g_pfnNpcOrdinal9)(unsigned short uValue);  // Ordinal_9
-extern void  (*g_pfnNpcOrdinal111)(void);                     // Ordinal_111
+extern int   (*g_pfnNpcOrdinal111)(void);                     // Ordinal_111 (error value)
 extern long long (*g_pfnNpcEventBase_1400022c0)(long long hBase);       // FUN_1400022c0
 extern void* (*g_pfnNpcBevSockNew_14000b3e0)(long long hBase, void* hSocket, int nOptions);  // FUN_14000b3e0
 extern void  (*g_pfnNpcBevSetCallbacks_140005a50)(void* pBev, void* pRead, void* pWrite, void* pEvent, void* pArg);  // FUN_140005a50
@@ -289,6 +289,17 @@ extern void (*g_pfnNpc_14000c220)(void* pBuf);                                  
 void FUN_140075740(long long pMechanism, void* a2, void* a3, void* a4);
 void FUN_1400757e0(long long pBase, unsigned int uValue);
 void FUN_140075840(void** pBuf, unsigned long long uLen);
+extern int  (*g_pfnNpcWsaSend)(unsigned long long uSocket, void* pBuffers, unsigned int nBuffers,
+                                void* pSent, unsigned int uFlags, void* pOverlapped, void* pRoutine);
+extern void (*g_pfnNpc_14000e2a0)(void* pBuf, unsigned long long uLen);                  // add input
+extern void (*g_pfnNpc_14000d950)(long long pBuf, int nValue);                           // buffer adjust
+extern void (*g_pfnNpc_14000be60)(void* pNode, unsigned int uFlags);                     // node touch
+extern void (*g_pfnNpc_14000bf50)(void* pBuf);                                           // before send
+extern void (*g_pfnNpc_14000c300)(void* pBuf);                                           // after send
+void FUN_140075950(long long* pBuf, unsigned long long uLen);
+void FUN_140075a00(unsigned long long a1);
+void* FUN_140075a50(void** pBuf, unsigned long long uLen, void* pOverlapped);
+
 
 int  FUN_140074e80(void* pCtl, void* pOverlapped, unsigned long long uKey, unsigned int dwBytes);
 void* FUN_140074eb0(long long pBase);

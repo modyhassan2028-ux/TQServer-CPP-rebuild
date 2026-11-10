@@ -1301,3 +1301,21 @@ closed, and the flag only being set on the path that got a socket.
   with `0x10`, bit 0 of `+0x90` is cleared, `+0x18` and `+0x20` both grow by the length, and `0x14000c160` and
   `0x14000c220` run last. A zero length still runs the unlock hook, the reset, both hooks and the totals stay.
 - Five new seams: `0x14001b930`, `0x14000dcb0`, `0x14000d9a0`, `0x14000c160`, `0x14000c220`.
+
+## D197 — NpcServer.exe 0x140075950, 0x140075a00, 0x140075a50
+
+- `0x140075950` adds input: unlock hook when `+0x30` is set, the buffer adjustment with 1, the add through
+  `0x14000e2a0`, the notification list at `+0x98` reset with `0x20` for `+0xa0` entries, bit 1 of `+0x90`
+  cleared, and `0x14000c220` last. Note it has no closing unlock hook, unlike `0x140075840`.
+- `0x140075a00` builds the `0x1a8` write context: flag `0x10` or-ed into `+0x38`, `+0x78` cleared, `1` at
+  `+0x48`, the object itself at `+0x10`, and the caller's value at `+0x88`. A failed allocation returns quiet.
+- `0x140075a50` sends. It is refused with `-1` when the buffer's byte at `+0x38` carries 2 or its `+0x90`
+  carries 2, and answers null with nothing to send. Otherwise the chain at the buffer's head becomes the
+  notification list at `+0x98` and is walked into at most sixteen WSABUF entries at `+0xa8`: each entry is a
+  length and the sum of the node's words at `+0x10` and `+0x28`, capped by what is left, stopping on the node
+  that covers the request. Every node looked at is touched through `0x14000be60` with `0x20`, the last one too,
+  so a two-node send touches twice. A send answering 0 or `0x3e5` marks `+0x90` with 2 and answers null;
+  anything else resets `+0xa0` entries of the list with `0x20`, adjusts the buffer, runs `0x14000c300` and
+  answers `-1`. All three entry points read the buffer's flag through `pBuf + 7` (byte `0x38`).
+- The `Ordinal_111` seam was retyped to return the error value, since this function compares it with `0x3e5`
+  (WSA_IO_PENDING); the earlier call sites ignore the value, so they are unchanged. Five more seams added.

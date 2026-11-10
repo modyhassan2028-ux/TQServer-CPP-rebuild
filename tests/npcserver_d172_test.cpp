@@ -26,7 +26,7 @@ static void MsgHook(const char* s) {
     else std::snprintf(g_msgDown, sizeof g_msgDown, "%s", s);
     ++g_msgs;
 }
-static void Ord111Hook(void) { ++g_errno111; }
+static int Ord111Hook(void) { ++g_errno111; return 0; }
 static void* DelHook(void* p) { ++g_deletes; return p; }
 static void DtorHook(void* p) { (void)p; ++g_dtors; }
 static void SlotN(void) { ++g_slot[g_setFrom]; g_lastSlot = g_setFrom; }
