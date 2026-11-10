@@ -1,8 +1,8 @@
 // The container node builders and destructors of the 0x140024xxx cluster.
 //
 // Transcribed verbatim from NpcServer.exe. The sentinel allocators (0x140022a40, 0x140022af0) and the two erase
-// helpers (0x140023df0, 0x1400243b0) are outside this cluster, so they are entered through seams until their own
-// batches land.
+// helpers (0x140023df0, 0x1400243b0) are called directly now that their own batch has landed, so this file has no
+// seams left of its own.
 #ifndef TQ_NPCSERVER_CONTAINER_NODES_H
 #define TQ_NPCSERVER_CONTAINER_NODES_H
 
@@ -10,8 +10,6 @@ namespace tq {
 
 extern void* (*g_pfnNpcOperatorNew)(long long nBytes);
 extern void* (*g_pfnNpcOperatorDelete)(void* p);
-extern void* (*g_pfnNpc_140023df0)(long long* pSet, long long* pOut, long long* pFirst, long long* pLast);
-extern void* (*g_pfnNpc_1400243b0)(long long* pSet, long long* pOut, long long* pFirst, long long* pLast);
 
 void* FUN_1400257a0(void* pThis);      // sentinel head from 0x140022a40 (map-tree.cpp)
 void* FUN_1400258d0(void* pThis);      // sentinel head from 0x140022a40

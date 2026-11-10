@@ -1029,3 +1029,14 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 60 suites green, six cycles. Total ported: 580 of 4099 bodies.
 - Next: `0x140023df0` / `0x1400243b0`, the two erase loops that call these bodies, which retires the last seams in
   `container-nodes.cpp`, then the rest of the 0x140024xxx cluster.
+
+## D242 (latest)
+
+- 2 bodies in `tree-erase-range.{h,cpp}`: `0x140023df0` and `0x1400243b0`, the range erases with the whole-tree
+  shortcut into the clear.
+- Corrected `0x140024340` / `0x140024d70` in `container-nodes.cpp`: the first iterator is `{owner, leftmost}` and the
+  last is `{owner, head}`, so those destructors take the clear shortcut. The old port read `pSet[0]` for both nodes.
+- Seams gone from `container-nodes.cpp` (`g_pfnNpc_140023df0`, `g_pfnNpc_1400243b0`); D237's destructor cases were
+  rebuilt on a real empty tree.
+- 61 suites green, six cycles. Total ported: 582 of 4099 bodies.
+- Next: the rest of the 0x140024xxx cluster (`0x140025210` and the containers above it), then the 0x140026xxx tails.

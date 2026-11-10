@@ -20,18 +20,10 @@ static void* FakeNew(long long nBytes) {
     return g_aArena;
 }
 static void* FakeDelete(void* p) { g_pDeleted[g_deletes++ & 3] = p; return p; }
-static void* FakeEraseMap(long long* pSet, long long* pOut, long long* pFirst, long long* pLast) {
-    ++g_erases; g_pEraseSet = pSet; pOut[0] = pFirst[0]; pOut[1] = pLast[0]; return pOut;
-}
-static void* FakeEraseGen(long long* pSet, long long* pOut, long long* pFirst, long long* pLast) {
-    ++g_erases; g_pEraseSet = pSet; pOut[0] = pFirst[0]; pOut[1] = pLast[0]; return pOut;
-}
 
 int main() {
     g_pfnNpcOperatorNew = &FakeNew;
     g_pfnNpcOperatorDelete = &FakeDelete;
-    g_pfnNpc_140023df0 = &FakeEraseMap;
-    g_pfnNpc_1400243b0 = &FakeEraseGen;
 
     assert(g_nNpcContainerNode == 10);
     int nBuild = 0, nDtor = 0, nDel = 0;
@@ -64,13 +56,17 @@ int main() {
         } else if (std::strncmp(e.pszKind, "destructor-", 11) == 0) {
             long long aSet[8];
             std::memset(aSet, 0, sizeof aSet);
-            aSet[0] = 0xB000;
+            // an empty tree: the head's three links meet itself and its nil flag is set
+            long long* pHead = (long long*)g_aHead;
+            pHead[0] = (long long)g_aHead;
+            pHead[1] = (long long)g_aHead;
+            pHead[2] = (long long)g_aHead;
+            *(unsigned char*)(g_aHead + 0x29) = 1;
+            aSet[0] = (long long)g_aHead;                           // the iterator's owner slot
             aSet[6] = (long long)g_aHead;
             aSet[7] = 0x77;
-            g_erases = 0; g_deletes = 0; g_pEraseSet = nullptr;
+            g_deletes = 0;
             ((void (*)(long long*))e.pfn)(aSet);
-            assert(g_erases == 1);
-            assert(g_pEraseSet == aSet);                            // the set itself is erased
             assert(g_deletes == 1 && g_pDeleted[0] == (void*)g_aHead);  // the head is freed
             assert(aSet[6] == 0 && aSet[7] == 0);                   // and the set forgets it
             ++nDtor;
@@ -80,9 +76,9 @@ int main() {
             std::memset(aSet, 0, sizeof aSet);
             aSet[0] = 0xC000;
             aSet[6] = (long long)g_aHead;
-            g_erases = 0; g_deletes = 0; g_pDeleted[0] = g_pDeleted[1] = nullptr;
+            g_deletes = 0; g_pDeleted[0] = g_pDeleted[1] = nullptr;
             ((void (*)(long long*))e.pfn)(aSet);
-            assert(g_erases == 1);                                  // the base destructor ran first
+            // the base destructor runs first, so the head is released before the object itself
             assert(g_deletes == 2);                                 // the head, then the object
             assert(g_pDeleted[0] == (void*)g_aHead);
             assert(g_pDeleted[1] == (void*)0xC000);                 // *pSet, not pSet

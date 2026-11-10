@@ -1,12 +1,9 @@
-// Transcribed from NpcServer.exe; see container-nodes.h for the seams.
+// Transcribed from NpcServer.exe; see container-nodes.h.
 #include "modules/npcserver/unattributed/container-nodes.h"
 #include "modules/npcserver/unattributed/map-tree.h"
+#include "modules/npcserver/unattributed/tree-erase-range.h"
 
 namespace tq {
-
-// The seams this file owns until the callees' own batches land.
-void* (*g_pfnNpc_140023df0)(long long* pSet, long long* pOut, long long* pFirst, long long* pLast) = nullptr;
-void* (*g_pfnNpc_1400243b0)(long long* pSet, long long* pOut, long long* pFirst, long long* pLast) = nullptr;
 
 // 0x1400257a0 - node builder, sentinel head from 0x140022a40
 void* FUN_1400257a0(void* pThis) {
@@ -86,13 +83,17 @@ void* FUN_140025950(void* pThis) {
 
 // 0x140024340 - erase everything through 0x140023df0, then release the head
 void FUN_140024340(long long* pSet) {
-    long long nFirst = pSet[0];
-    void* pHead = (void*)pSet[6];
-    long long nHead = *(long long*)pHead;          // read by the original, its value is not used
-    long long nBegin = nFirst;
+    long long nOwner = *pSet;                                  // local_38
+    void* pHead = (void*)pSet[6];                              // puStack_30
+    long long nLeftmost = *(long long*)pHead;                  // uStack_20
+    long long aFirst[2];
+    aFirst[0] = nOwner;
+    aFirst[1] = nLeftmost;                                     // the range starts at the leftmost node
+    long long aLast[2];
+    aLast[0] = nOwner;
+    aLast[1] = (long long)pHead;                               // and ends at the head, so it covers the tree
     long long aOut[2];
-    (void)nHead;
-    g_pfnNpc_140023df0(pSet, aOut, &nBegin, &nFirst);
+    FUN_140023df0(pSet, aOut, aFirst, aLast);
     g_pfnNpcOperatorDelete((void*)pSet[6]);
     pSet[6] = 0;
     pSet[7] = 0;
@@ -101,13 +102,17 @@ void FUN_140024340(long long* pSet) {
 
 // 0x140024d70 - the same shape through 0x1400243b0
 void FUN_140024d70(long long* pSet) {
-    long long nFirst = pSet[0];
+    long long nOwner = *pSet;
     void* pHead = (void*)pSet[6];
-    long long nHead = *(long long*)pHead;          // read by the original, its value is not used
-    long long nBegin = nFirst;
+    long long nLeftmost = *(long long*)pHead;
+    long long aFirst[2];
+    aFirst[0] = nOwner;
+    aFirst[1] = nLeftmost;
+    long long aLast[2];
+    aLast[0] = nOwner;
+    aLast[1] = (long long)pHead;
     long long aOut[2];
-    (void)nHead;
-    g_pfnNpc_1400243b0(pSet, aOut, &nBegin, &nFirst);
+    FUN_1400243b0(pSet, aOut, aFirst, aLast);
     g_pfnNpcOperatorDelete((void*)pSet[6]);
     pSet[6] = 0;
     pSet[7] = 0;

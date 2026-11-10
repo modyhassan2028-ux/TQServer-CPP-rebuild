@@ -2047,3 +2047,28 @@ hands its place, its left child and its colour to the successor; a left-child le
 parent's left link onto its left child; and the returned iterator carries `*pTree` plus the successor node.
 
 D241 green; the whole set (60 suites) green over six cycles.
+
+## D242 — the range erase pair, and a correction in the destructors (2 new bodies)
+
+`modules/npcserver/unattributed/tree-erase-range.{h,cpp}`, manifest `g_aNpcTreeEraseRange`.
+
+| address | body |
+|---|---|
+| 0x140023df0 | erase `[first, last)`: the whole-range shortcut clears the tree, otherwise each node is stepped to its successor and then erased |
+| 0x1400243b0 | the same body with `0x1400237c0` and `0x140023400` behind it |
+
+The whole-range shortcut is the part worth writing down: when the first node is the head's leftmost and the last node
+is the head itself, the body does not walk at all, it calls the clear (`0x140023210` / `0x1400237c0`) and answers the end
+iterator.
+
+**Correction in `0x140024340` / `0x140024d70`.** The earlier port read the first iterator's node from `pSet[0]` twice.
+The listing is unambiguous: `local_38 = *param_1` (the owner), `uStack_20 = *puStack_30` where `puStack_30 = param_1[6]`
+(the leftmost node), `local_28 = local_38`; the call passes `&local_28` as first — `{owner, leftmost}` — and `&local_38`
+as last — `{owner, head}`. So the destructors erase the whole tree through the shortcut, which is exactly what the
+stack layout says. Both destructors now build those two iterators and call the real bodies, and the two seams
+`g_pfnNpc_140023df0` / `g_pfnNpc_1400243b0` are gone: `container-nodes.cpp` has no seams of its own left.
+
+The D237 suite had been feeding those destructors a fake tree through the seams, so it could not have caught this. It
+now builds an empty tree (head closed on itself, nil flag set) and the real clear runs.
+
+D242 green; the whole set (61 suites) green over six cycles.
