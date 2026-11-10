@@ -1051,3 +1051,13 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   rebuilt on a real empty tree.
 - 61 suites green, six cycles. Total ported: 582 of 4099 bodies.
 - Next: the rest of the 0x140024xxx cluster (`0x140025210` and the containers above it), then the 0x140026xxx tails.
+
+## D243 (latest)
+
+- 4 bodies in `cinstance.{h,cpp}`: `0x140049050`, `0x140049070`, `0x140048f90`, `0x1400491b0`.
+- `CInstance::vftable` resolved to `0x1400c7340` from the `lea` inside `0x1400491b0` (the RTTI record is unreferenced, so
+  the index could not supply it).
+- New seams: `g_pfnNpc_14001c790`, `g_pfnNpc_14003cc10`, `g_pfnNpc_140048fb0`.
+- 62 suites green, six cycles. Total ported: 586 of 4099 bodies.
+- Next: `0x140048fb0` (the map bring-up, needs `0x14003cd80`), then `0x140024fe0` / `0x140024970` / `0x140024b20`, and
+  after them `0x1400250e0` / `0x140025690` / `0x140025750` become stitchable.

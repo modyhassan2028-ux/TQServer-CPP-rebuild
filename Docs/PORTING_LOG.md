@@ -2072,3 +2072,23 @@ The D237 suite had been feeding those destructors a fake tree through the seams,
 now builds an empty tree (head closed on itself, nil flag set) and the real clear runs.
 
 D242 green; the whole set (61 suites) green over six cycles.
+
+## D243 — CInstance: getter, deleting destructor, map release, constructor (4 bodies)
+
+`modules/npcserver/unattributed/cinstance.{h,cpp}`, manifest `g_aNpcCInstance`.
+
+| address | body |
+|---|---|
+| 0x140049070 | the instance type at +8 |
+| 0x140048f90 | deleting destructor: slot 0 called with the delete flag 1, a null holder left alone |
+| 0x140049050 | the map id at +0xc handed to the module singleton from `0x14001c790` through `0x14003cc10` |
+| 0x1400491b0 | build the 0x18-byte object, then let `0x140048fb0` bring its map up |
+
+**The vtable address is read, not guessed.** `CInstance::vftable` has no entry in the index and its RTTI record is not
+referenced by any vtable pointer, so I took it from the instruction that stores it: `objdump` on `0x1400491b0` shows
+`lea 0x7e118(%rip),%rax # 0x1400c7340` followed by `mov %rax,(%rbx)`. That address is now in the port and pinned by the
+suite. The same listing gave the log arguments for both error paths (`0x1400be0b0` message, lines 0x18 and 0x1a).
+
+Seams added, all for later batches: `g_pfnNpc_14001c790`, `g_pfnNpc_14003cc10`, `g_pfnNpc_140048fb0`.
+
+D243 green; the whole set (62 suites) green over six cycles.
