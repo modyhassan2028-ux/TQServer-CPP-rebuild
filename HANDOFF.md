@@ -1,5 +1,16 @@
 # HANDOFF
 
+## Two `npcserver` folders — which one is the live work
+
+- `modules/npcserver/{src,unattributed}/` — **the live port.** Verbatim function-by-function bodies keyed by their
+  binary address (D88 → D242), manifest-driven suites under `tests/npcserver_d*.cpp`, runner
+  `tools/run_npcserver_suites.sh`. 582 of 4099 bodies, 61 suites.
+- `npcserver/` (top level, untouched since the 27 Oct reorganisation) — the early wave-1 reconstruction with
+  hand-named files (`NpcAssembly.cpp`, `NpcAiTick.cpp`, …) and `main.cpp`, still referenced by `build.sh`. It is a
+  different, older effort against the same binary; nothing lands there any more.
+
+
+
 Written 2026-11-08 by the agent working the CQBase/Syndicate port. Read this first, then AGENTS.md,
 then the tail of PORTING_LOG.md. The point of this file is that the next agent can start a batch
 within minutes without re-deriving anything.
