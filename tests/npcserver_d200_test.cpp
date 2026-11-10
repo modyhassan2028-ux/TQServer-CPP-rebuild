@@ -23,9 +23,9 @@ static const std::string* ListSlot(void* pSelf, std::string* pOut) {
     return pOut;
 }
 static long long* g_targetThis = nullptr; static void* g_targetArg = nullptr; static int g_calls = 0;
-static void* T370(void* a2, long long* pThis) { g_targetArg = a2; g_targetThis = pThis; ++g_calls; return nullptr; }
-static void* T4a0(void* a2, long long* pThis) { g_targetArg = a2; g_targetThis = pThis; ++g_calls; return nullptr; }
-static void* T4e0(void* a2, long long* pThis) { g_targetArg = a2; g_targetThis = pThis; ++g_calls; return nullptr; }
+static unsigned char T370(void* a2, long long* pThis) { g_targetArg = a2; g_targetThis = pThis; ++g_calls; return 1; }
+static unsigned char T4a0(void* a2, long long* pThis) { g_targetArg = a2; g_targetThis = pThis; ++g_calls; return 1; }
+static unsigned char T4e0(void* a2, long long* pThis) { g_targetArg = a2; g_targetThis = pThis; ++g_calls; return 1; }
 
 int main() {
     g_msgVt[0] = 0;
