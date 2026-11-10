@@ -948,3 +948,11 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 50 suites green, six cycles, `tools/run_npcserver_suites.sh`.
 - Remaining in the range: 375 bodies, led by the `operator_delete` cleanup wrappers and the remaining
   iterator/position builders.
+
+## D232 (latest)
+
+- 12 bodies: move-backward, clear-or-drop, ref-fill, position-member (three each) in `stl-tail.{h,cpp}`.
+- 51 suites green, six cycles.
+- The STL-internals cluster is now down to 224 unmatched bodies in a very long tail (largest remaining group is 2),
+  so the generator route is exhausted here. Recommendation for the next batch: leave the remainder alone for now and
+  return to the module surface past 0x140090000, or port the tail by hand, two or three per batch.

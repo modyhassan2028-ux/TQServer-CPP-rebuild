@@ -1824,3 +1824,24 @@ The generator uses a normalised skeleton to recognise a family, then pulls the c
 refuses the body if any of them is missing, so a partial match cannot be emitted.
 
 D231 green alone, and the whole set (50 suites) green over six cycles.
+
+## D232 — the four tail shapes (12 bodies)
+
+`tools/gen_stl_tail.py` into `modules/npcserver/unattributed/stl-tail.{h,cpp}` (manifest `g_aNpcTail_140080000`),
+three bodies each:
+
+- **move-backward** — `(nLast - pFirst) >> SHIFT` elements of `ELEM` bytes, but the destination is `nDst` *minus* the
+  range: `pDst = nDst + nCount * -ELEM`, moved only when `0 < nCount`, and `pDst` returned.
+- **clear-or-drop** — read the pair's control block first: with none, both words are cleared and it returns; otherwise
+  the strong count drops, `vtable[0]` destroys at zero, the weak count drops at `0x14` and `pControl[1]` frees at zero,
+  and the pair is cleared either way.
+- **ref-fill** — a null destination is left alone, otherwise the pair is cleared and filled from the source's two words
+  through the ref-assign body the image names.
+- **position-member** — the position word comes from a *third* object's member at `+8`, then the same three-way range
+  check against the source's `[lo]`/`[hi]` words before the pair is built.
+
+Two shapes I looked for turned out to be already covered: every `operator_delete(*p)` holder and every 8-byte
+node-push body in this range was emitted by the earlier leaf generation, so a generator written for them produced
+nothing and was removed rather than left as a misleading tool.
+
+D232 green alone; 51 suites green over six cycles.
