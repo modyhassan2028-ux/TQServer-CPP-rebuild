@@ -20,24 +20,33 @@ static int ErrState(long long w) { (void)w; Note(4); return g_error; }
 static void Destroy(void* w) { (void)w; Note(5); }
 static int g_accept = 1;
 // the handler marks the wrapper it was handed: +0x24 is the validity byte the real check reads back
-static unsigned char T350(void* a2, long long* pThis) {
+// the offer thunks are real now: what answers is the seam at the last hop, 0x140077370, which also marks the
+// wrapper it was handed
+static unsigned char T370(void* a2, long long* pThis) {
     (void)pThis;
     *(unsigned char*)((unsigned char*)a2 + 0x24) = (unsigned char)(g_accept != 0 ? g_valid : 0);
     Note(6); return (unsigned char)g_accept;
 }
-static unsigned char T380(void* a2, long long* pThis) {
-    (void)pThis;
-    *(unsigned char*)((unsigned char*)a2 + 0x24) = (unsigned char)(g_accept != 0 ? g_valid : 0);
-    Note(7); return (unsigned char)g_accept;
+static int g_closed = 0;
+static void Closer(long long* p) { (void)p; ++g_closed; }
+static int g_slot7 = 0;
+static unsigned char Slot7(long long* p, void* a) {
+    (void)p;
+    *(unsigned char*)((unsigned char*)a + 0x24) = (unsigned char)(g_accept != 0 ? g_valid : 0);
+    ++g_slot7; Note(7); return (unsigned char)g_accept;
 }
 
+
 int main() {
+    g_pfnNpc_140077370 = &T370;
     g_pfnNpc_14007a8e0 = &Stamp;
     g_pfnNpc_14007a9c0 = &ErrState;
     g_pfnNpc_14007a700 = &Destroy;
-    g_pfnNpc_1400774a0 = &T350;
-    g_pfnNpc_1400774e0 = &T380;
-    long long aThis[2] = { 0x111, 0x222 };
+    long long aThisVt[8];
+    std::memset(aThisVt, 0, sizeof aThisVt);
+    aThisVt[3] = (long long)&Closer;          // +0x18, closed before the work
+    aThisVt[7] = (long long)&Slot7;           // +0x38, the second path's own answer
+    long long aThis[2] = { (long long)aThisVt, 0x222 };
     void* pArg = (void*)0x4321;
 
     // accepted and valid: the real wrapper is built (its validity byte cleared), the handler marks it, the
@@ -55,13 +64,15 @@ int main() {
 
     // the second forward: same decisions, through 0x140076380
     {
-        g_seqN = 0; g_accept = 1; g_valid = 1;
+        g_seqN = 0; g_accept = 1; g_valid = 1; g_closed = 0; g_slot7 = 0;
         assert(FUN_140076450(aThis, pArg) == 1);
         assert(g_seqN == 2 && g_seq[0] == 7 && g_seq[1] == 5);
-        g_seqN = 0; g_valid = 0;
+        assert(g_closed == 1 && g_slot7 == 1);
+        // the object refusing through its own slot reads as refused, and the wrapper still comes down
+        g_seqN = 0; g_accept = 0;
         assert(FUN_140076450(aThis, pArg) == 0);
         assert(g_seqN == 2 && g_seq[1] == 5);
-        g_valid = 1;
+        g_accept = 1; g_valid = 1;
     }
 
     // with a type stamped on the wrapper: the stamp comes right after the build, and the error state must be
@@ -89,11 +100,13 @@ int main() {
         assert(g_seqN == 4 && g_seq[3] == 5);
     }
 
-    // a null thunk seam answers zero rather than pretending success
+    // a null seam at the last hop answers zero rather than pretending success
     {
-        g_pfnNpc_1400774a0 = nullptr;
-        assert(FUN_140076350(aThis, pArg) == 0);
-        g_pfnNpc_1400774a0 = &T350;
+        long long aWrap[10];
+        std::memset(aWrap, 0, sizeof aWrap);
+        g_pfnNpc_140077370 = nullptr;
+        assert(FUN_140076350(aThis, aWrap) == 0);
+        g_pfnNpc_140077370 = &T370;
     }
 
     std::printf("NPCSERVER_D201_OK: 0x1400763b0/450/4f0/5b0\n");

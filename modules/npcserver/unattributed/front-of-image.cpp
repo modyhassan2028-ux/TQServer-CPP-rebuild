@@ -172,8 +172,6 @@ void (*g_pfnNpc_14000bf50)(void*) = nullptr;
 void (*g_pfnNpc_14000c300)(void*) = nullptr;
 const void* g_pNpcVtblMessageLite = nullptr;
 unsigned char (*g_pfnNpc_140077370)(void*, long long*) = nullptr;
-unsigned char (*g_pfnNpc_1400774a0)(void*, long long*) = nullptr;
-unsigned char (*g_pfnNpc_1400774e0)(void*, long long*) = nullptr;
 void (*g_pfnNpc_14007a8e0)(long long, int) = nullptr;
 int (*g_pfnNpc_14007a9c0)(long long) = nullptr;
 void (*g_pfnNpc_14007a700)(void*) = nullptr;
@@ -2889,14 +2887,12 @@ unsigned char FUN_140076320(long long* pThis, void* a2) {
 
 // 0x140076350 - forward the (this, argument) pair to 0x1400774a0, with the two the other way round.
 unsigned char FUN_140076350(long long* pThis, void* a2) {
-    if (g_pfnNpc_1400774a0 == nullptr) return 0;
-    return g_pfnNpc_1400774a0(a2, pThis);
+    return FUN_1400774a0(a2, pThis);
 }
 
 // 0x140076380 - forward the (this, argument) pair to 0x1400774e0, with the two the other way round.
 unsigned char FUN_140076380(long long* pThis, void* a2) {
-    if (g_pfnNpc_1400774e0 == nullptr) return 0;
-    return g_pfnNpc_1400774e0(a2, pThis);
+    return FUN_1400774e0(a2, pThis);
 }
 
 // 0x1400763b0 - build a wrapper around the argument, hand it to 0x140076350, and answer 1 only when that

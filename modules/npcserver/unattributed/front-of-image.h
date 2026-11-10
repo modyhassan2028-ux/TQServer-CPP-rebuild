@@ -318,8 +318,6 @@ void  FUN_140075ef0(void** pThis);
 std::string* FUN_140075f10(void* unused, std::string* pOut);
 void  FUN_140075f60(int nBefore, int nAfter, int nProduced);
 extern unsigned char (*g_pfnNpc_140077370)(void* a2, long long* pThis);
-extern unsigned char (*g_pfnNpc_1400774a0)(void* a2, long long* pThis);
-extern unsigned char (*g_pfnNpc_1400774e0)(void* a2, long long* pThis);
 std::string* FUN_140076190(std::string* pOut, const char* pszAction, long long* pMessage);
 unsigned char FUN_140076320(long long* pThis, void* a2);
 unsigned char FUN_140076350(long long* pThis, void* a2);

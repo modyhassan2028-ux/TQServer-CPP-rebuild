@@ -869,3 +869,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 140077620 / 1400777a0 / 1400776c0 rewired; D202 and D207 now watch real wrappers. 44 suites green, both six times.
 - `rewire_seams.py` is in the conversation's tools_local. Next: a830/a8e0/a9c0 (blocked on suites that need a real
   coded input: vtable slot +0x10, state at +0x18/+0x1c/+0x28/+0x2c), then 774a0/774e0, then the log pair.
+
+## D218 (latest)
+
+- 1400774a0 / 1400774e0 rewired; D200 and D201 now drive a real object with slots at +0x18 and +0x38. 44 suites
+  green, four of them six times.
+- Next: the coded-input helpers a830/a8e0/a9c0 (each suite needs a real coded input: vtable +0x10, state at
+  +0x18/+0x1c/+0x28/+0x2c), then the log layer pair, then 160880/160890.

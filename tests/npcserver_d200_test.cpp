@@ -23,9 +23,12 @@ static const std::string* ListSlot(void* pSelf, std::string* pOut) {
     return pOut;
 }
 static long long* g_targetThis = nullptr; static void* g_targetArg = nullptr; static int g_calls = 0;
+// the thunks are real now, so the pair only reaches a seam at the last hop: 0x140077370, which is still unported
 static unsigned char T370(void* a2, long long* pThis) { g_targetArg = a2; g_targetThis = pThis; ++g_calls; return 1; }
-static unsigned char T4a0(void* a2, long long* pThis) { g_targetArg = a2; g_targetThis = pThis; ++g_calls; return 1; }
-static unsigned char T4e0(void* a2, long long* pThis) { g_targetArg = a2; g_targetThis = pThis; ++g_calls; return 1; }
+// the object is closed through its own slot 3 before that, and answered through slot 7 on the other path
+static int g_closed = 0, g_slot7 = 0;
+static void Closer(long long* p) { (void)p; ++g_closed; }
+static unsigned char Slot7(long long* p, void* a) { (void)p; (void)a; ++g_slot7; return 1; }
 
 int main() {
     g_msgVt[0] = 0;
@@ -54,19 +57,23 @@ int main() {
     // the three thunks hand the pair on with the two the other way round
     {
         g_pfnNpc_140077370 = &T370;
-        g_pfnNpc_1400774a0 = &T4a0;
-        g_pfnNpc_1400774e0 = &T4e0;
-        long long aThis[2] = { 0x1111, 0x2222 };
+        long long aThisVt[8];
+        std::memset(aThisVt, 0, sizeof aThisVt);
+        aThisVt[3] = (long long)&Closer;            // +0x18, closed before the work
+        aThisVt[7] = (long long)&Slot7;             // +0x38, the second path's own answer
+        long long aThis[2] = { (long long)aThisVt, 0x2222 };
         void* pArg = (void*)0x9999;
-        g_calls = 0; g_targetThis = nullptr; g_targetArg = nullptr;
+        g_calls = 0; g_targetThis = nullptr; g_targetArg = nullptr; g_closed = 0; g_slot7 = 0;
         FUN_140076320(aThis, pArg);
         assert(g_calls == 1 && g_targetArg == pArg && g_targetThis == aThis);
         g_calls = 0;
-        FUN_140076350(aThis, pArg);
-        assert(g_calls == 1 && g_targetArg == pArg && g_targetThis == aThis);
+        unsigned char b = FUN_140076350(aThis, pArg);
+        assert(b == 1 && g_calls == 1 && g_targetArg == pArg && g_targetThis == aThis);
+        assert(g_closed == 1);                      // closed first, then worked on
         g_calls = 0;
-        FUN_140076380(aThis, pArg);
-        assert(g_calls == 1 && g_targetArg == pArg && g_targetThis == aThis);
+        b = FUN_140076380(aThis, pArg);
+        assert(b == 1 && g_closed == 2 && g_slot7 == 1);
+        assert(g_calls == 0);                       // the second path never reaches the seam
     }
 
     std::printf("NPCSERVER_D200_OK: 0x140076190/320/350/380\n");

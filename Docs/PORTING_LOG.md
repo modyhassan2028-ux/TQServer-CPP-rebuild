@@ -1600,3 +1600,13 @@ closed, and the flag only being set on the path that got a socket.
   (`if (seam != nullptr) seam(...)`, `if (seam != nullptr && seam(...) != 0)`, `seam != nullptr ? seam(...) : 0`),
   deletes the seam from the module and the header, and strips the assignments the suites made. Mechanically rewiring
   a seam is now a command, not a hand pass; the work left per seam is teaching its suites to watch real objects.
+
+## D218 — rewiring pass 2, slice 5: the two offer thunks
+
+- `0x1400774a0` and `0x1400774e0` are no longer seams: `0x140076350` and `0x140076380` return their answers
+  straight through, which restores the tail call the decompiler hides.
+- New seam shape found by the rewriter: the guard form `if (seam == nullptr) return 0; return seam(...);`. The tool
+  now drops the guard and calls the body, so a seam whose only call site is a tail call is handled mechanically.
+- The suites had to grow a real object: `+0x18` is closed before any work and `+0x38` answers on the second path.
+  What that exposed: the object itself reports acceptance on the second path, and it is the last hop (`0x140077370`,
+  still unported) that marks the wrapper valid on the first.
