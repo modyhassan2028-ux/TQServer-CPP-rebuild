@@ -1069,3 +1069,11 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 62 suites green, six cycles. Total ported: 587 of 4099 bodies.
 - Next: `0x14003cd80`, then `0x140024fe0` / `0x140024970` / `0x140024b20`; after those the `0x140025xxx` containers
   (`0x1400250e0`, `0x140025690`, `0x140025750`) have no missing callees left.
+
+## D245 (latest)
+
+- `0x14003cd80` in `cmapmanager-instance.{h,cpp}`: the map-instance factory, with four seams for its callees
+  (`0x14003ca10`, `0x1400550f0`, `0x14001c7a0`, `0x140032e20`).
+- `Docs/WORKING_METHOD.md` added: the full working method in Arabic, written for a fresh agent on another account.
+- 63 suites green, six cycles. Total ported: 588 of 4099 bodies.
+- Next: `0x140024fe0` / `0x140024970` / `0x140024b20`, then `0x1400250e0` / `0x140025690` / `0x140025750`.

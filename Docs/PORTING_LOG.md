@@ -2105,3 +2105,20 @@ the suite: `CInstance::Create NPCServer Map Create Error, map:%u`.
 Seam added: `g_pfnNpc_14003cd80`. `0x1400491b0` now calls this body directly instead of a seam.
 
 62 suites green, six cycles. Total ported: 587 of 4099 bodies.
+
+## D245 — CMapManager::CreateNewInstanceMap (1 body)
+
+`modules/npcserver/unattributed/cmapmanager-instance.{h,cpp}`, manifest `g_aNpcMapInstance`.
+
+`0x14003cd80` finds the map (`0x14003ca10`), builds a 0x90-byte instance, constructs it (`0x1400550f0`), then calls the
+instance's own slot `0x28` with `(instance, map, low)`. A refusal logs
+`CMapManager::CreateNewInstanceMap error %u`, calls slot `0x38` on the instance and answers null; success registers the
+instance on the manager's slot `0x20` and records both ids on the second singleton (`0x14001c7a0` → `0x140032e20`).
+
+Seams added: `g_pfnNpc_14003ca10`, `g_pfnNpc_1400550f0`, `g_pfnNpc_14001c7a0`, `g_pfnNpc_140032e20`.
+
+**Trap worth recording:** `(**(code **)(*pObj + 0x28))(...)` is a *double* dereference. Porting it as
+`(char (*)(...))(*(long long*)pObj + 0x28)` executes the vtable slot's *address*. It bit this batch once (pc = 0x28),
+and the fix is to read the slot value: `pVt[0x28 / 8]`.
+
+63 suites green, six cycles. Total ported: 588 of 4099 bodies.
