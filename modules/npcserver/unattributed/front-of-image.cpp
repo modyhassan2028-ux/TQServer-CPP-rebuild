@@ -157,6 +157,10 @@ int  (*g_pfnNpcWsaSend)(unsigned long long, void*, unsigned int, void*, unsigned
 void (*g_pfnNpc_14000e2a0)(void*, unsigned long long) = nullptr;
 void (*g_pfnNpc_14000d950)(long long, int) = nullptr;
 void (*g_pfnNpc_14000be60)(void*, unsigned int) = nullptr;
+void* (*g_pfnNpc_14000ebd0)(long long*, unsigned long long, unsigned int) = nullptr;
+int  (*g_pfnNpc_14000cdc0)(long long, unsigned long long, void*, int, void**, int) = nullptr;
+int  (*g_pfnNpcWsaRecv)(unsigned long long, void*, unsigned int, void*, unsigned int*, void*, void*) =
+    nullptr;
 void (*g_pfnNpc_14000bf50)(void*) = nullptr;
 void (*g_pfnNpc_14000c300)(void*) = nullptr;
 void (*g_pfnNpc_14000c160)(long long) = nullptr;
@@ -2657,6 +2661,105 @@ void* FUN_140075a50(void** pBuf, unsigned long long uLen, void* pOverlapped) {
         if (pBuf[6] != 0 && g_pfnNpc_140016e50 != nullptr) g_pfnNpc_140016e50();
     }
     return pRet;
+}
+
+// 0x140075c30 - reserve and receive. Refused with -1 when the buffer's byte at +0x38 carries 4 or its +0x90
+// carries bit 0. The list at +0x98 and the segment array at +0xa8 are cleared first, then 0x14000ebd0 is asked
+// whether the length may be taken; only a -1 answer stops the cycle, still answering -1. The reservation goes
+// through 0x14000cdc0 into a sixteen-entry vector of {pointer, length} pairs which is copied into the WSABUF
+// array at +0xa8 as {length, pointer} pairs. The chain handed back becomes the list at +0x98 and every node on
+// it is touched with 0x10. A receive answering 0 or 0x3e5 marks +0x90 with 1 and answers null; anything else
+// resets the list with 0x10, adjusts the buffer, runs 0x14000c300 and answers -1.
+long long* FUN_140075c30(long long* pBuf, unsigned long long uLen, void* pOverlapped) {
+    long long* pTarget = nullptr;
+    if (pBuf != nullptr && ((*(unsigned char*)(pBuf + 7) & 0x10) != 0)) pTarget = pBuf;
+    long long* pRet = (long long*)0xffffffff;
+    unsigned int uRecvFlags = 0;
+    if (pTarget != nullptr) {
+        if (pBuf[6] != 0 && g_pfnNpc_140016e30 != nullptr) g_pfnNpc_140016e30();
+        if ((*(unsigned char*)(pBuf + 7) & 4) == 0 &&
+            (*(unsigned char*)((unsigned char*)pTarget + 0x90) & 1) == 0) {
+            *(void**)((unsigned char*)pTarget + 0x98) = nullptr;
+            *(unsigned int*)((unsigned char*)pTarget + 0xa0) = 0;
+            memset((unsigned char*)pTarget + 0xa8, 0, 0x100);
+            unsigned long long uCheck = g_pfnNpc_14000ebd0 != nullptr
+                                            ? (unsigned long long)g_pfnNpc_14000ebd0(pBuf, uLen, 0x10) : 0;
+            pRet = (long long*)0xffffffff;
+            if ((int)uCheck != -1) {
+                if (g_pfnNpc_14000d950 != nullptr) g_pfnNpc_14000d950((long long)pBuf, 0);
+                unsigned char aVec[16 * 16];
+                memset(aVec, 0, sizeof aVec);
+                void* aChainField[2] = { nullptr, nullptr };
+                int nCount = g_pfnNpc_14000cdc0 != nullptr
+                                 ? g_pfnNpc_14000cdc0((long long)pBuf, uLen, aVec, 0x10,
+                                                       (void**)&aChainField[0], 1) : 0;
+                if (0 < nCount) {
+                    const unsigned char* pSrc = aVec;
+                    long long* pSeg = pTarget + 0x15;
+                    long long nLeft = (long long)nCount;
+                    do {
+                        nLeft = nLeft - 1;
+                        pSeg[1] = *(long long*)pSrc;                        // the pointer, source +0
+                        *(unsigned int*)pSeg = *(unsigned int*)(pSrc + 8);   // the length, source +8
+                        pSrc = pSrc + 16;
+                        pSeg = pSeg + 2;
+                    } while (nLeft != 0);
+                }
+                *(int*)((unsigned char*)pTarget + 0xa0) = nCount;
+                void* pNode = *(void**)aChainField[0];
+                *(void**)((unsigned char*)pTarget + 0x98) = pNode;
+                for (; pNode != nullptr; pNode = *(void**)pNode) {
+                    if (g_pfnNpc_14000be60 != nullptr) g_pfnNpc_14000be60(pNode, 0x10);
+                }
+                if (g_pfnNpc_14000bf50 != nullptr) g_pfnNpc_14000bf50(pBuf);
+                unsigned char aReceived[8] = { 0 };
+                int nRecv = g_pfnNpcWsaRecv != nullptr
+                                ? g_pfnNpcWsaRecv((unsigned long long)*(void**)((unsigned char*)pTarget + 0x88),
+                                                  (void*)((unsigned char*)pTarget + 0xa8),
+                                                  (unsigned int)nCount, aReceived, &uRecvFlags,
+                                                  pOverlapped, nullptr) : 0;
+                if (nRecv == 0 || (g_pfnNpcOrdinal111 != nullptr && g_pfnNpcOrdinal111() == 0x3e5)) {
+                    *(unsigned int*)((unsigned char*)pTarget + 0x90) =
+                        *(unsigned int*)((unsigned char*)pTarget + 0x90) | 1u;
+                    pRet = nullptr;
+                } else {
+                    void** pIt = (void**)*(void**)((unsigned char*)pTarget + 0x98);
+                    int nLimit = *(int*)((unsigned char*)pTarget + 0xa0);
+                    if (0 < nLimit) {
+                        int nDone = 0;
+                        int nInc = 0;
+                        do {
+                            void** pNext = (void**)*pIt;
+                            if (g_pfnNpc_14000dcb0 != nullptr) g_pfnNpc_14000dcb0(pIt, 0x10);
+                            nInc = nDone + 1;
+                            nDone = nInc;
+                            pIt = pNext;
+                        } while (nInc < nLimit);
+                    }
+                    if (g_pfnNpc_14000d9a0 != nullptr) g_pfnNpc_14000d9a0((long long)pBuf, 0);
+                    if (g_pfnNpc_14000c300 != nullptr) g_pfnNpc_14000c300(pBuf);
+                    pRet = (long long*)0xffffffff;
+                }
+            }
+        }
+        if (pBuf[6] != 0 && g_pfnNpc_140016e50 != nullptr) g_pfnNpc_140016e50();
+    }
+    return pRet;
+}
+
+// 0x140075e60 - the value at +0x88, but only for a buffer that carries the own flag at +0x38; otherwise -1.
+void* FUN_140075e60(long long pBuf) {
+    if (pBuf != 0 && ((*(unsigned char*)(pBuf + 0x38) & 0x10) != 0)) return *(void**)(pBuf + 0x88);
+    return (void*)0xffffffffffffffffull;
+}
+
+// 0x140075e80 - set the value at +0x88, bracketed by the two unlock hooks when +0x30 is set.
+void FUN_140075e80(long long pBuf, void* pValue) {
+    long long pTarget = 0;
+    if (pBuf != 0 && ((*(unsigned char*)(pBuf + 0x38) & 0x10) != 0)) pTarget = pBuf;
+    if (*(long long*)(pBuf + 0x30) != 0 && g_pfnNpc_140016e30 != nullptr) g_pfnNpc_140016e30();
+    if (pTarget != 0) *(void**)(pTarget + 0x88) = pValue;
+    if (*(long long*)(pBuf + 0x30) != 0 && g_pfnNpc_140016e50 != nullptr) g_pfnNpc_140016e50();
 }
 
 }  // namespace tq

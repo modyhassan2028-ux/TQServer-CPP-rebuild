@@ -1319,3 +1319,20 @@ closed, and the flag only being set on the path that got a socket.
   answers `-1`. All three entry points read the buffer's flag through `pBuf + 7` (byte `0x38`).
 - The `Ordinal_111` seam was retyped to return the error value, since this function compares it with `0x3e5`
   (WSA_IO_PENDING); the earlier call sites ignore the value, so they are unchanged. Five more seams added.
+
+## D198 — NpcServer.exe 0x140075c30, 0x140075e60, 0x140075e80
+
+- `0x140075c30` receives. Refused with `-1` when the buffer's byte at `+0x38` carries 4 or its `+0x90` carries
+  bit 0. The list at `+0x98` and the segment array at `+0xa8` (256 bytes) are cleared, then `0x14000ebd0` is
+  asked whether the length may be taken; only a `-1` answer stops the cycle, and it still answers `-1`.
+  `0x14000cdc0` reserves into a sixteen-entry vector whose entries are `{pointer at +0, length at +8}`, and that
+  vector is copied into the WSABUF array as `{length at +0, pointer at +8}` - the two layouts are the other way
+  round, so the copy swaps the halves. The chain pointer taken from the reservation's out field becomes the
+  list at `+0x98` and every node on it is touched with `0x10`. A receive answering 0 or `0x3e5` marks `+0x90`
+  with 1 and answers null; anything else resets `+0xa0` entries with `0x10`, adjusts the buffer with 0, runs
+  `0x14000c300` and answers `-1`.
+- `0x140075e60` reads `+0x88` for a buffer carrying the own flag at `+0x38`, answering all ones otherwise and for
+  a null buffer.
+- `0x140075e80` writes `+0x88` only with that flag, bracketed by `0x140016e30` and `0x140016e50` when `+0x30`
+  is set. The send side's counterpart is the same pair of entry points on the same field.
+- Three new seams: `0x14000ebd0`, `0x14000cdc0` and `WSARecv`.

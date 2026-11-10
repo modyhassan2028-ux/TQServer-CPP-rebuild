@@ -299,6 +299,15 @@ extern void (*g_pfnNpc_14000c300)(void* pBuf);                                  
 void FUN_140075950(long long* pBuf, unsigned long long uLen);
 void FUN_140075a00(unsigned long long a1);
 void* FUN_140075a50(void** pBuf, unsigned long long uLen, void* pOverlapped);
+extern void* (*g_pfnNpc_14000ebd0)(long long* pBuf, unsigned long long uLen, unsigned int uFlags);
+extern int  (*g_pfnNpc_14000cdc0)(long long pBuf, unsigned long long uLen, void* pVec, int nMax,
+                                  void** pChainField, int nFlag);
+extern int  (*g_pfnNpcWsaRecv)(unsigned long long uSocket, void* pBuffers, unsigned int nBuffers,
+                               void* pReceived, unsigned int* pFlags, void* pOverlapped, void* pRoutine);
+long long* FUN_140075c30(long long* pBuf, unsigned long long uLen, void* pOverlapped);
+void* FUN_140075e60(long long pBuf);
+void  FUN_140075e80(long long pBuf, void* pValue);
+
 
 
 int  FUN_140074e80(void* pCtl, void* pOverlapped, unsigned long long uKey, unsigned int dwBytes);
