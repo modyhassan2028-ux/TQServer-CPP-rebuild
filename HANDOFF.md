@@ -781,3 +781,12 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - NpcServer: 145 bodies, 36 suites green.
 - Next: 0x140076f60 onward in address order. Re-check every forwarder's return type at the call site: three of
   them in this cluster were tail calls the decompiler labelled void.
+
+## D205 (latest)
+
+- NpcServer: 154 bodies, 37 suites green.
+- Pending rewiring pass for the protobuf-target cluster. These seams now have real bodies behind them:
+  0x140077370 (still a seam, not yet ported), 0x1400774a0, 0x1400774e0, 0x140077520, 0x140077840, 0x140077850,
+  0x1400778a0, 0x140077900. Call sites to rewire: 0x140075a50, 0x140075c30, 0x140076790, 0x140076aa0,
+  0x140076e30, 0x1400763b0/450/4f0/5b0 and the three thunks.
+- Next: 0x140076f80 (398), 0x140077120 (164), 0x1400771d0 and 0x140077280 (161 each).

@@ -1426,3 +1426,21 @@ closed, and the flag only being set on the path that got a socket.
   slot 10 at `+0x50` writes starting at data plus the string's old size. A write that does not end exactly at the
   byte size runs `0x140075f60`, which never returns, and the answer is one with the expected end's upper bytes.
 - Two new seams: the string resize and its data pointer.
+
+## D205 — NpcServer.exe 0x140076f00, 0x140076f40, 0x140077520, 0x140077840, 0x1400778a0, 0x140077900,
+0x140077850, 0x1400774a0, 0x1400774e0
+
+- `0x140076f00` and `0x140076f40` empty the string first and then append through `0x140076ca0` and
+  `0x140076e30`; the tests pin the consequence: the resize they cause is the byte size alone, not the old size
+  plus it.
+- Three field readers: `0x140077520` the wrapper's validity byte at `+0x24`, `0x140077840` the target's error
+  byte at `+0x18`, and `0x1400778a0` the bytes written, the cursor at `+0x14` minus the start at `+0x10`, which
+  is negative while the cursor still sits behind the start.
+- `0x140077900` resizes the string, straight through.
+- `0x140077850` hands out the target's buffer at `+0x08` only when the room at `+0x10` is at least the requested
+  size, advancing the target through `0x1400778c0`; otherwise it answers null and touches nothing.
+- `0x1400774a0` closes the wrapper through its slot 3 at `+0x18` and then runs `0x140077370`, and `0x1400774e0`
+  closes it the same way and then hands it to slot 7 at `+0x38`. Both carry the second call's answer back out,
+  which is why the thunks of D200 return a byte.
+- These bodies now exist, but the earlier ports still reach them through their seams. A rewiring pass for this
+  cluster is due - the same job D191 did for the thread create path.

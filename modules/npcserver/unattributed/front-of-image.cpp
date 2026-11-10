@@ -190,6 +190,7 @@ long long (*g_pfnNpc_140077850)(long long, unsigned int) = nullptr;
 int (*g_pfnNpc_1400778a0)(long long) = nullptr;
 void (*g_pfnNpc_140077900)(std::string*, long long) = nullptr;
 long long (*g_pfnNpc_140077930)(std::string*) = nullptr;
+void (*g_pfnNpc_1400778c0)(long long, int) = nullptr;
 void (*g_pfnNpc_14000c160)(long long) = nullptr;
 void (*g_pfnNpc_14000c220)(void*) = nullptr;
 int (*g_pfnNpcWsaPoll_Ordinal18)(unsigned int, void*, void*, void*, int*) = nullptr;
@@ -3128,6 +3129,56 @@ unsigned long long FUN_140076e30(long long* pMsg, std::string* pValue) {
         lExpect = 0;             // unreachable: the consistency check never returns
     }
     return 1ull | ((unsigned long long)lExpect & ~0xffull);
+}
+
+// 0x140076f00 - empty the string, then append through 0x140076ca0.
+void FUN_140076f00(long long* pMsg, std::string* pValue) {
+    pValue->clear();
+    FUN_140076ca0(pMsg, pValue);
+}
+
+// 0x140076f40 - empty the string, then append through 0x140076e30.
+void FUN_140076f40(long long* pMsg, std::string* pValue) {
+    pValue->clear();
+    FUN_140076e30(pMsg, pValue);
+}
+
+// 0x140077520 - the wrapper's validity byte at +0x24.
+unsigned char FUN_140077520(long long pWrapper) { return *(unsigned char*)(pWrapper + 0x24); }
+
+// 0x140077840 - the target's error byte at +0x18.
+unsigned char FUN_140077840(long long pTarget) { return *(unsigned char*)(pTarget + 0x18); }
+
+// 0x1400778a0 - the bytes written so far: the write cursor at +0x14 minus the start at +0x10.
+int FUN_1400778a0(long long pTarget) {
+    return *(int*)(pTarget + 0x14) - *(int*)(pTarget + 0x10);
+}
+
+// 0x140077900 - resize the string.
+void FUN_140077900(std::string* pValue, unsigned long long nNewSize) { pValue->resize(nNewSize); }
+
+// 0x140077850 - hand out the target's buffer when it already holds at least nSize, and advance it with
+// 0x1400778c0; when it does not, answer null and leave the target alone.
+void* FUN_140077850(long long pTarget, int nSize) {
+    if (*(int*)(pTarget + 0x10) < nSize) return nullptr;
+    void* pBuffer = *(void**)(pTarget + 8);
+    if (g_pfnNpc_1400778c0 != nullptr) g_pfnNpc_1400778c0(pTarget, nSize);
+    return pBuffer;
+}
+
+// 0x1400774a0 - close the wrapper through slot 3 at +0x18, then do the work through 0x140077370, whose answer
+// comes back out. The decompiler shows this as void, but 0x140076350 returns what it leaves behind.
+unsigned char FUN_1400774a0(void* a1, long long* pThis) {
+    (*(void (**)(long long*))(*pThis + 0x18))(pThis);
+    if (g_pfnNpc_140077370 == nullptr) return 0;
+    return g_pfnNpc_140077370(a1, pThis);
+}
+
+// 0x1400774e0 - close the wrapper through slot 3 at +0x18, then hand it to slot 7 at +0x38, whose answer comes
+// back out.
+unsigned char FUN_1400774e0(void* a1, long long* pThis) {
+    (*(void (**)(long long*))(*pThis + 0x18))(pThis);
+    return (*(unsigned char (**)(long long*, void*))(*pThis + 0x38))(pThis, a1);
 }
 
 }  // namespace tq
