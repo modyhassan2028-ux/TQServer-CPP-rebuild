@@ -1689,3 +1689,20 @@ also closes the log layer.
   modelled as symbols exactly like the fatal exception's vtable, and set by the suites.
 - D225 drives all of it, including the losing-race path. D207, D209, D211 and D213 supply the closure vtable, and
   D211/D213 now assert the real semantics: the log initialisation runs once and the state word ends at 2.
+
+## D226 — the coded-input bounds (4 bodies)
+
+`0x14007c650`, `0x14007c670`, `0x14007d140`, `0x14007c6a0`. These are what `0x14007a830`, `0x14007a8e0` and
+`0x14007a9c0` were still reaching through seams, so the coded-input slice has no seam left.
+
+- `0x14007c650` is `+0x10 - +0x08`, a full 64-bit difference. Those two words are the buffer start and its end, so the
+  answer is the bytes still waiting, and it can be negative.
+- `0x14007c670` is `+0x18 - (bytecount + +0x2c)`.
+- `0x14007d140` answers the address of the smaller int, and a tie keeps the **first** argument. That tie rule matters:
+  in `0x14007a8e0` the first argument is the new limit, so a tie leaves the pinned `0x7fffffff` in place.
+- `0x14007c6a0` adds `+0x2c` onto the end pointer first, then compares the smaller of `+0x28`/`+0x30` with `+0x18`:
+  below it, the difference becomes the new overrun and comes back off the end pointer; otherwise the overrun clears.
+- A raise never grows the limit past the old one, because `0x14007a8e0` settles with `min(new, old)`. The pinned
+  `0x7fffffff` therefore only survives when the old limit was already there. D201, D209 and D210 were rewritten to
+  drive the object's own fields and now assert exactly that.
+- D226 covers the four bodies directly.

@@ -490,6 +490,11 @@ long long FUN_14007f5b0(long long* pOnce, long long nExpected, long long nDesire
 long long FUN_14007f410(long long* pOnce, long long nExpected, long long nDesired);
 void  FUN_14007f360(long long* pOnce, void* pObject);
 void  FUN_140078b30(long long* pOnce, void (*pfnBody)(void));
+// the coded input's bounds (0x14007a830 / 0x14007a8e0 / 0x14007a9c0 reach these)
+long long FUN_14007c650(long long pCoded);
+int  FUN_14007c670(long long pCoded);
+int* FUN_14007d140(int* pFirst, int* pSecond);
+void FUN_14007c6a0(long long pCoded);
 int   FUN_140001520(char* pThis);
 
 }  // namespace tq

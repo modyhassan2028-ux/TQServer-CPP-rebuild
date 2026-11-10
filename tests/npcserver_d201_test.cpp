@@ -108,13 +108,18 @@ int main() {
         *(int*)((unsigned char*)aCoded + 0x28) = 0x7fffffff;
         assert(FUN_14007a9c0((long long)aCoded) == -1);          // unlimited answers -1
         *(int*)((unsigned char*)aCoded + 0x28) = 10;
-        g_consumed = 4;
+        *(int*)((unsigned char*)aCoded + 0x18) = 4;               // four bytes consumed, nothing overrun
         assert(FUN_14007a9c0((long long)aCoded) == 6);            // the limit less what was consumed
-        g_consumed = 4;
         assert(FUN_14007a8e0((long long)aCoded, 5) == 10);        // the old limit comes back
         assert(*(int*)((unsigned char*)aCoded + 0x28) == 9);      // consumed plus the allowance
-        g_consumed = 0x400;
-        assert(FUN_14007a8e0((long long)aCoded, 0x7ffffff0) == 9);
+
+        // the pin: a negative amount sends the limit to 0x7fffffff, and settling against the old 0x7fffffff is a tie,
+        // so the limit keeps the top value and reads as unlimited again
+        *(int*)((unsigned char*)aCoded + 0x28) = 0x7fffffff;
+        *(int*)((unsigned char*)aCoded + 0x18) = 0;
+        *(int*)((unsigned char*)aCoded + 0x2c) = 0;
+        *(int*)((unsigned char*)aCoded + 0x30) = 0;
+        assert(FUN_14007a8e0((long long)aCoded, -1) == 0x7fffffff);
         assert(*(unsigned int*)((unsigned char*)aCoded + 0x28) == 0x7fffffff);   // pinned, not wrapped
         assert(FUN_14007a9c0((long long)aCoded) == -1);           // and the pin reads as unlimited
     }

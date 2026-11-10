@@ -3376,6 +3376,38 @@ void FUN_14007a700(long long* pCoded) {
         FUN_140078440((long long)aSink);
     }
 }
+// 0x14007c650 - the coded input's byte count: how far the limit at +0x10 sits past the current pointer at +0x08.
+long long FUN_14007c650(long long pCoded) {
+    return *(long long*)(pCoded + 0x10) - *(long long*)(pCoded + 0x08);
+}
+
+// 0x14007c670 - the position: the consumed count at +0x18 less the byte count and the overrun at +0x2c.
+int FUN_14007c670(long long pCoded) {
+    long long lByteCount = FUN_14007c650(pCoded);
+    return *(int*)(pCoded + 0x18) - ((int)lByteCount + *(int*)(pCoded + 0x2c));
+}
+
+// 0x14007d140 - the address of the smaller of two ints.
+int* FUN_14007d140(int* pFirst, int* pSecond) {
+    int* pSmaller = pFirst;
+    if (*pSecond < *pFirst) pSmaller = pSecond;
+    return pSmaller;
+}
+
+// 0x14007c6a0 - settle the overrun after the limit moved: the current pointer absorbs the overrun at +0x2c, then the
+// smaller of the limit and the consumed count at +0x30 decides. Still short of +0x18 means the difference is the new
+// overrun and is taken back off the pointer; otherwise the overrun clears.
+void FUN_14007c6a0(long long pCoded) {
+    *(long long*)(pCoded + 0x10) = (long long)*(int*)(pCoded + 0x2c) + *(long long*)(pCoded + 0x10);
+    int* pSmaller = FUN_14007d140((int*)(pCoded + 0x28), (int*)(pCoded + 0x30));
+    if (*pSmaller < *(int*)(pCoded + 0x18)) {
+        *(int*)(pCoded + 0x2c) = *(int*)(pCoded + 0x18) - *pSmaller;
+        *(long long*)(pCoded + 0x10) = *(long long*)(pCoded + 0x10) - (long long)*(int*)(pCoded + 0x2c);
+    } else {
+        *(unsigned int*)(pCoded + 0x2c) = 0;
+    }
+}
+
 long long (*g_pfnNpc_14007c650)(long long) = nullptr;
 int (*g_pfnNpc_14007c670)(long long) = nullptr;
 void (*g_pfnNpc_14007c6a0)(long long) = nullptr;
@@ -3386,14 +3418,14 @@ int* (*g_pfnNpc_14007d140)(int*, int*) = nullptr;
 // +0x10. Afterwards the read count at +0x18 drops by the pending bytes plus the counter at +0x2c, the current
 // pointer at +0x10 is copied back to +0x08, and both counters are cleared.
 void FUN_14007a830(long long* pCoded) {
-    long long lPending = g_pfnNpc_14007c650 != nullptr ? g_pfnNpc_14007c650((long long)pCoded) : 0;
+    long long lPending = FUN_14007c650((long long)pCoded);
     int nAmount = (int)lPending + *(int*)((char*)pCoded + 0x2c) + *(int*)((char*)pCoded + 0x1c);
     if (0 < nAmount) {
         // the original reads the sink through two indirections: *(longlong*)*param_1 + 0x10, and hands *param_1
         // itself as the first argument
         long long pInner = *pCoded;
         (*(void (**)(long long, int))(*(long long*)pInner + 0x10))(pInner, nAmount);
-        long long lAfter = g_pfnNpc_14007c650 != nullptr ? g_pfnNpc_14007c650((long long)pCoded) : 0;
+        long long lAfter = FUN_14007c650((long long)pCoded);
         *(int*)((char*)pCoded + 0x18) = *(int*)((char*)pCoded + 0x18)
                                         - ((int)lAfter + *(int*)((char*)pCoded + 0x2c));
         pCoded[2] = pCoded[1];
@@ -3407,17 +3439,15 @@ void FUN_14007a830(long long* pCoded) {
 // address of the limit it settled on, that value is stored back, the wire is told through 0x14007c6a0, and the
 // answer is the limit that was in place before the call.
 int FUN_14007a8e0(long long pCoded, int nExtra) {
-    int nConsumed = g_pfnNpc_14007c670 != nullptr ? g_pfnNpc_14007c670(pCoded) : 0;
+    int nConsumed = FUN_14007c670(pCoded);
     int nOld = *(int*)(pCoded + 0x28);
     if (nExtra < 0 || 0x7fffffff - nConsumed < nExtra) {
         *(unsigned int*)(pCoded + 0x28) = 0x7fffffff;
     } else {
         *(int*)(pCoded + 0x28) = nConsumed + nExtra;
     }
-    int* pSettled = g_pfnNpc_14007d140 != nullptr
-                        ? g_pfnNpc_14007d140((int*)(pCoded + 0x28), &nOld) : nullptr;
-    if (pSettled != nullptr) *(int*)(pCoded + 0x28) = *pSettled;
-    if (g_pfnNpc_14007c6a0 != nullptr) g_pfnNpc_14007c6a0(pCoded);
+    *(int*)(pCoded + 0x28) = *FUN_14007d140((int*)(pCoded + 0x28), &nOld);
+    FUN_14007c6a0(pCoded);
     return nOld;
 }
 
@@ -3425,7 +3455,7 @@ int FUN_14007a8e0(long long pCoded, int nExtra) {
 // count, so a caller can tell "no limit" from "this much left".
 int FUN_14007a9c0(long long pCoded) {
     if (*(int*)(pCoded + 0x28) == 0x7fffffff) return -1;
-    int nConsumed = g_pfnNpc_14007c670 != nullptr ? g_pfnNpc_14007c670(pCoded) : 0;
+    int nConsumed = FUN_14007c670(pCoded);
     return *(int*)(pCoded + 0x28) - nConsumed;
 }
 void (*g_pfnNpcLogSink_1401035c8)(int, const char*, int, std::string*) = nullptr;

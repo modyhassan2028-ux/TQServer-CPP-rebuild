@@ -907,3 +907,8 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - Once-init cluster ported and 0x140077fc0 calls it directly: the log layer is closed end to end.
 - 45 suites green, the whole set run six times. Next: the remaining coded-stream seams (0x14007c650 pending count,
   0x14007c9xx) and then back to the 0x14008xxxx range.
+
+## D226 (latest)
+
+- Coded-input bounds ported; the 0x14007a8xx/0x14007c6xx slice has no seams left. 46 suites, six clean cycles.
+- Next: back into the 0x14008xxxx range for the next unported cluster.

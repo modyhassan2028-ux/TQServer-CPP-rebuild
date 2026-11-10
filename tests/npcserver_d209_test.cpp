@@ -20,7 +20,6 @@ void InvalidParam(void) { ++g_invalid; }
 // the flush is a real body now: what it needs from outside is how many bytes are still pending (0x14007c650 is
 // still unported) and a sink to hand them to, reached through the object's own slot 2
 int g_pending = 0, g_pendingAfter = 0, g_sinkAmount = 0; long long* g_sinkObj = nullptr;
-long long Pending(long long p) { (void)p; return g_pending; }
 void FlushSink(long long p, int nAmount) { g_sinkObj = (long long*)p; g_sinkAmount = nAmount; g_pending = g_pendingAfter; }
 void* Sink(void* pOut, int sev, const char* file, int line) {
     g_sinkSeverity = sev; g_sinkFile = file; g_sinkLine = line; return pOut; }
@@ -58,7 +57,6 @@ int main() {
     g_pfnNpcIteratorHasContainer = &HasContainer;
     g_pfnNpcStringMyPtr = &MyPtr;
     g_pfnNpcInvalidParameter = &InvalidParam;
-    g_pfnNpc_14007c650 = &Pending;      // how many bytes are still waiting, still a seam
     g_pfnNpcLogSink_1401035c8 = &LogSink;   // the real log bodies now reach this seam
 
     // the data pointer of a string
@@ -134,7 +132,7 @@ int main() {
         aCoded[0] = 0x7000;                           // a chain is attached
         *(unsigned int*)((unsigned char*)aCoded + 0x18) = 1234;
         *(unsigned int*)((unsigned char*)aCoded + 0x34) = -2;
-        g_pending = 0; g_sinkAmount = 0; g_fail = 0; g_release = 0; g_value = 0; g_text.clear();
+        g_sinkAmount = 0; g_fail = 0; g_release = 0; g_value = 0; g_text.clear();
         FUN_14007a700(aCoded);
         assert(g_sinkAmount == 0);                    // nothing is waiting, so the sink is never reached
         assert(g_fail == 1);
@@ -154,24 +152,25 @@ int main() {
         long long aObj[8];
         std::memset(aObj, 0, sizeof aObj);
         aObj[0] = (long long)aInner;
-        aObj[1] = 0x1111; aObj[2] = 0x2222;
+        aObj[1] = 1000; aObj[2] = 1003;      // current pointer and limit: three bytes are still waiting
         *(unsigned int*)((unsigned char*)aObj + 0x18) = 100;
         *(unsigned int*)((unsigned char*)aObj + 0x1c) = 7;
         *(unsigned int*)((unsigned char*)aObj + 0x2c) = 5;
-        g_pending = 3; g_pendingAfter = 1; g_sinkAmount = 0; g_sinkObj = nullptr;
+        g_sinkAmount = 0; g_sinkObj = nullptr;
         FUN_14007a830(aObj);
         assert(g_sinkObj == aInner && g_sinkAmount == 15);   // 3 pending + 5 + 7
-        assert(*(unsigned int*)((unsigned char*)aObj + 0x18) == 100 - (1 + 5));
-        assert(aObj[2] == 0x1111);                         // the current pointer comes back to +0x08
+        assert(*(unsigned int*)((unsigned char*)aObj + 0x18) == 100 - (3 + 5));
+        assert(aObj[2] == 1000);                           // the current pointer comes back to +0x08
         assert(*(unsigned int*)((unsigned char*)aObj + 0x2c) == 0);
         assert(*(unsigned int*)((unsigned char*)aObj + 0x1c) == 0);
         // an amount of zero, or less, never reaches the sink and leaves the object untouched
-        g_pending = 0; g_pendingAfter = 0; g_sinkAmount = 0;
+        aObj[2] = aObj[1];                               // nothing waiting now
+        g_sinkAmount = 0;
         *(unsigned int*)((unsigned char*)aObj + 0x1c) = 0;
         *(unsigned int*)((unsigned char*)aObj + 0x2c) = 0;
         FUN_14007a830(aObj);
         assert(g_sinkAmount == 0);
-        assert(*(unsigned int*)((unsigned char*)aObj + 0x18) == 94);
+        assert(*(unsigned int*)((unsigned char*)aObj + 0x18) == 92);
     }
 
     // no chain and another state: nothing happens
