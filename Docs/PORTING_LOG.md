@@ -2092,3 +2092,16 @@ suite. The same listing gave the log arguments for both error paths (`0x1400be0b
 Seams added, all for later batches: `g_pfnNpc_14001c790`, `g_pfnNpc_14003cc10`, `g_pfnNpc_140048fb0`.
 
 D243 green; the whole set (62 suites) green over six cycles.
+
+## D244 — CInstance::Create's map bring-up (1 body)
+
+`0x140048fb0` added to `cinstance.{h,cpp}` and to the same manifest, which now carries five bodies.
+
+The body reads the map object at `+0x10`, asks it for an id through its own slot `+0x10` with the argument `2`, then hands
+that id and the instance's low dword (`+0xc`) to the singleton from `0x14001c790` through `0x14003cd80`. A null map or a
+null answer both log, and both answer 0; only a live map answers 1. The second log string is a literal and is pinned by
+the suite: `CInstance::Create NPCServer Map Create Error, map:%u`.
+
+Seam added: `g_pfnNpc_14003cd80`. `0x1400491b0` now calls this body directly instead of a seam.
+
+62 suites green, six cycles. Total ported: 587 of 4099 bodies.

@@ -9,12 +9,13 @@ namespace tq {
 
 extern long long (*g_pfnNpc_14001c790)(void);                                  // the module singleton
 extern unsigned long long (*g_pfnNpc_14003cc10)(long long pSingleton, unsigned nId);
-extern unsigned long long (*g_pfnNpc_140048fb0)(long long pInstance);
+extern unsigned long long (*g_pfnNpc_14003cd80)(long long pSingleton, unsigned nMapId, unsigned nLow);
 
 void FUN_140049050(long long pInstance);        // release the instance's map through the singleton
 unsigned FUN_140049070(long long pInstance);    // the instance type at +8
 void FUN_140048f90(long long* pObject);         // deleting destructor through slot 0
 long long* FUN_1400491b0(unsigned nType, long long pMap, unsigned nLow);
+unsigned long long FUN_140048fb0(long long pInstance);   // bring the instance's map up
 
 struct NpcCInstanceEntry {
     const char* pszAddress;

@@ -1061,3 +1061,11 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 62 suites green, six cycles. Total ported: 586 of 4099 bodies.
 - Next: `0x140048fb0` (the map bring-up, needs `0x14003cd80`), then `0x140024fe0` / `0x140024970` / `0x140024b20`, and
   after them `0x1400250e0` / `0x140025690` / `0x140025750` become stitchable.
+
+## D244 (latest)
+
+- `0x140048fb0` ported into the same `cinstance` manifest (now five bodies); `0x1400491b0` calls it directly and the
+  seam `g_pfnNpc_140048fb0` is gone. New seam: `g_pfnNpc_14003cd80`.
+- 62 suites green, six cycles. Total ported: 587 of 4099 bodies.
+- Next: `0x14003cd80`, then `0x140024fe0` / `0x140024970` / `0x140024b20`; after those the `0x140025xxx` containers
+  (`0x1400250e0`, `0x140025690`, `0x140025750`) have no missing callees left.
