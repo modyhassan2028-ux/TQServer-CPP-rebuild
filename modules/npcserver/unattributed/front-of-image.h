@@ -476,6 +476,20 @@ extern const char g_symNpcStr_LockDisable[];                                // T
 extern const char g_symNpcStr_LockChange[];                                 // Can't change lock callbacks...
 extern const char g_symNpcStr_CondDisable[];                                // Trying to disable condition functions...
 extern const char g_symNpcStr_CondChange[];                                 // Can't change condition callbacks...
+// the protobuf once-init cluster (0x140078b30 and what it runs)
+extern const void* g_pNpcVtblClosure;                                       // google::protobuf::Closure::vftable
+extern const void* g_pNpcVtblFunctionClosure0;                              // FunctionClosure0::vftable
+void* FUN_140078bf0(void* pThis);
+void  FUN_1400786c0(void* pThis);
+void* FUN_140078b90(void* pThis, void (*pfnBody)(void), unsigned char bSelfDelete);
+void  FUN_1400786e0(void* pThis);
+long long FUN_140078d00(long long* pOnce);
+void  FUN_14007f340(void);
+void  FUN_14007f3f0(long long* pOnce, long long nValue);
+long long FUN_14007f5b0(long long* pOnce, long long nExpected, long long nDesired);
+long long FUN_14007f410(long long* pOnce, long long nExpected, long long nDesired);
+void  FUN_14007f360(long long* pOnce, void* pObject);
+void  FUN_140078b30(long long* pOnce, void (*pfnBody)(void));
 int   FUN_140001520(char* pThis);
 
 }  // namespace tq

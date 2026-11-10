@@ -1668,3 +1668,24 @@ closed, and the flag only being set on the path that got a socket.
   not collide. An identical table is a no-op, a different one warns and answers `0xffffffff`, and with the debug word
   set the first three pointers are also copied to `0x140103ff0/ff8/0x140104000`.
 - D177 now reads both tables back from the module itself and asserts that no seam is left in `0x140005750`.
+
+## D225 — the once-init cluster (11 bodies)
+
+Source: `0x140078bf0`, `0x1400786c0`, `0x140078d00`, `0x140078b90`, `0x1400786e0`, `0x14007f340`, `0x14007f3f0`,
+`0x14007f5b0`, `0x14007f410`, `0x14007f360`, `0x140078b30`. This is what `0x140077fc0` actually runs, so closing it
+also closes the log layer.
+
+- A closure is 0x18 bytes: vtable at `+0x00`, function at `+0x08`, self-delete byte at `+0x10`. The derived
+  constructor writes the base vtable first and then its own; the derived destructor does the reverse, so the base
+  word wins last.
+- `0x14007f5b0` is the exchange the image brackets with `LOCK/UNLOCK`: answer is what the word held, and the store
+  happens only on a match. Implemented as one atomic step (`__atomic_compare_exchange_n`), which is the same
+  observable body. `0x14007f410` is the same body (the decompiler prints a tail call).
+- `0x14007f360` state machine: `2` means done; otherwise the `0 -> 1` exchange picks a winner that calls slot 1 of
+  the object and then stores `2`; a loser spins with `Sleep(0)` only while the word still reads `1`.
+- `0x140078b30` builds the closure on the frame, runs the once, then destroys the closure. The frame also writes the
+  dead word `0xfffffffffffffffe` that the decompiled body shows.
+- The two vtables (`google::protobuf::Closure::vftable`, `FunctionClosure0::vftable`) are the image's rdata objects,
+  modelled as symbols exactly like the fatal exception's vtable, and set by the suites.
+- D225 drives all of it, including the losing-race path. D207, D209, D211 and D213 supply the closure vtable, and
+  D211/D213 now assert the real semantics: the log initialisation runs once and the state word ends at 2.

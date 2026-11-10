@@ -29,20 +29,30 @@ static void ThrowFatal(void* pException, void* pThrowInfo) {
 // initialiser, the mutex's take and its give
 static void* g_storedMutex = nullptr;
 static int g_initCalls = 0;
-static void InitOnce(long long* pState, void (*pfnBody)(void)) {
-    (void)pState; ++g_initCalls; Note(3);
-    if (pfnBody != nullptr) pfnBody();          // the body the image hands over
-}
+static void LogInitBody(void) { ++g_initCalls; Note(3); }   // 0x140077f50, the body the once runs
 static void MutexTake(void* pMutex) { g_storedMutex = pMutex; Note(4); }
 static void MutexGive(void* pMutex) { (void)pMutex; Note(5); }
 
 static unsigned char g_msg[0x40];
 static const char* const kFile = "C:\\path\\file.cc";
 
+// the log layer's one-time initialiser is a real body now, so these suites have to answer for what it needs: the
+// FunctionClosure0 vtable (slot 1 runs the stored function) and the body 0x140077f50 reaches.
+static long long g_onceVt[3] = { 0, 0, 0 };
+static void OnceRun(void* pThis) {
+    void (*pfn)(void) = *(void (**)(void))((unsigned char*)pThis + 0x08);
+    if (pfn != nullptr) pfn();
+}
+static void OnceVtable(void) {
+    g_onceVt[1] = (long long)&OnceRun;
+    g_pNpcVtblFunctionClosure0 = (const void*)g_onceVt;
+}
+
 int main() {
+    OnceVtable();
     g_pfnNpcLogSink_1401035c8 = &LogSink;
     g_pfnNpcThrowFatal = &ThrowFatal;
-    g_pfnNpc_140078b30 = &InitOnce;        // the one-time initialiser behind 0x140077fc0
+    g_pfnNpc_140077f50 = &LogInitBody;     // the body the one-time initialisation runs
     g_pfnNpc_1400787c0 = &MutexTake;       // the mutex take behind 0x140078d20
     g_pfnNpc_1400787f0 = &MutexGive;       // and the give behind 0x140078d60
 
@@ -87,7 +97,7 @@ int main() {
         FUN_140078440((long long)g_msg);
     }
 
-    // a quiet rotation keeps the sink closed, but the rotation still runs
+    // a quiet rotation keeps the sink closed, and the initialisation does not run a second time
     {
         std::memset(g_msg, 0, sizeof g_msg);
         FUN_1400783d0(g_msg, 1, kFile, 7);
@@ -95,7 +105,8 @@ int main() {
         g_nNpcConst_140104cd8 = 1;                     // the rotation said "quiet"
         FUN_140078470((int*)g_msg);
         assert(g_logCalls == 0);
-        assert(g_orderN == 3 && g_order[0] == 3 && g_order[1] == 4 && g_order[2] == 5);
+        assert(g_initCalls == 1);                    // the once word is spent, so nothing initialises again
+        assert(g_orderN == 2 && g_order[0] == 4 && g_order[1] == 5);
         g_nNpcConst_140104cd8 = 0;
         FUN_140078440((long long)g_msg);
     }

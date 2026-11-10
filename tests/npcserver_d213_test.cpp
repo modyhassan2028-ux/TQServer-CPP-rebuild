@@ -12,12 +12,6 @@
 
 using namespace tq;
 
-static int g_onceCalls = 0;
-static long long* g_onceState = nullptr;
-static void (*g_onceFn)(void) = nullptr;
-static void Once(long long* pState, void (*pfnInit)(void)) {
-    g_onceState = pState; g_onceFn = pfnInit; ++g_onceCalls;
-}
 static int g_initCalls = 0;
 static void InitOnce(void) { ++g_initCalls; }
 
@@ -28,24 +22,33 @@ static void UnlockMutex(void* pMutex) { ++g_unlockCalls; g_unlockedMutex = pMute
 
 static int g_vt[4];
 
+// the log layer's one-time initialiser is a real body now, so these suites have to answer for what it needs: the
+// FunctionClosure0 vtable (slot 1 runs the stored function) and the body 0x140077f50 reaches.
+static long long g_onceVt[3] = { 0, 0, 0 };
+static void OnceRun(void* pThis) {
+    void (*pfn)(void) = *(void (**)(void))((unsigned char*)pThis + 0x08);
+    if (pfn != nullptr) pfn();
+}
+static void OnceVtable(void) {
+    g_onceVt[1] = (long long)&OnceRun;
+    g_pNpcVtblFunctionClosure0 = (const void*)g_onceVt;
+}
+
 int main() {
-    g_pfnNpc_140078b30 = &Once;
+    OnceVtable();
     g_pfnNpc_140077f50 = &InitOnce;
     g_pfnNpc_1400787c0 = &LockMutex;
     g_pfnNpc_1400787f0 = &UnlockMutex;
 
     // the one-time initialisation is handed the image's own state word and the address of 0x140077f50
     {
-        g_onceCalls = 0; g_onceState = nullptr; g_onceFn = nullptr;
-        FUN_140077fc0();
-        assert(g_onceCalls == 1);
-        assert(g_onceState == &g_pNpcLogState_140104ce8);
-        assert(g_onceFn == &FUN_140077f50);
-        // the body the initialisation calls is 0x140077f50 itself, which reaches its own seam
+        g_pNpcLogState_140104ce8 = 0;      // a fresh module: the state word has not been spent
         g_initCalls = 0;
-        g_onceFn();
-        assert(g_initCalls == 1);
-        assert(g_pNpcLogState_140104ce8 == 0);
+        FUN_140077fc0();
+        assert(g_initCalls == 1);                              // the initialisation ran exactly once
+        assert(g_pNpcLogState_140104ce8 == 2);                 // and the image's own state word says so
+        FUN_140077fc0();
+        assert(g_initCalls == 1);                              // a second call is a no-op
     }
 
     // the mutex wrapper stores the mutex first and then takes it

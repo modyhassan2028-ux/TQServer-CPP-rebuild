@@ -3510,15 +3510,97 @@ const void* g_pNpcVtblFatalException = nullptr;
 // 0x140077fc0 - run the one-time initialisation of the log file through 0x140078b30. The storage is the eight
 // bytes the image keeps at 0x140104ce8.
 void FUN_140077fc0(void) {
-    if (g_pfnNpc_140078b30 != nullptr) {
-        g_pfnNpc_140078b30((long long*)&g_pNpcLogState_140104ce8, (void (*)(void))&FUN_140077f50);
-    }
+    FUN_140078b30((long long*)&g_pNpcLogState_140104ce8, (void (*)(void))&FUN_140077f50);
 }
 
 // 0x140077f50 - the body the one-time initialisation runs. It is kept as its own seam until 0x140078b30 itself is
 // ported, so the call above keeps the machine's shape (a function address, not a call).
 void FUN_140077f50(void) {
     if (g_pfnNpc_140077f50 != nullptr) g_pfnNpc_140077f50();
+}
+
+// The protobuf once-init cluster. A closure is 0x18 bytes: the vtable at +0x00, the function at +0x08 and the
+// self-delete byte at +0x10. The two vtables are the image's rdata objects, kept as symbols the way the fatal
+// exception's vtable is.
+const void* g_pNpcVtblClosure = nullptr;
+const void* g_pNpcVtblFunctionClosure0 = nullptr;
+
+// 0x140078bf0 - Closure's constructor stores the base vtable.
+void* FUN_140078bf0(void* pThis) { *(const void**)pThis = g_pNpcVtblClosure; return pThis; }
+
+// 0x1400786c0 - and its destructor restores it.
+void FUN_1400786c0(void* pThis) { *(const void**)pThis = g_pNpcVtblClosure; }
+
+// 0x140078d00 - the state word of an once object.
+long long FUN_140078d00(long long* pOnce) { return *pOnce; }
+
+// 0x140078b90 - FunctionClosure0's constructor: the base first, then its own vtable, the function at +0x08 and the
+// self-delete byte at +0x10.
+void* FUN_140078b90(void* pThis, void (*pfnBody)(void), unsigned char bSelfDelete) {
+    FUN_140078bf0(pThis);
+    *(const void**)pThis = g_pNpcVtblFunctionClosure0;
+    *(void (**)(void))((unsigned char*)pThis + 0x08) = pfnBody;
+    *(unsigned char*)((unsigned char*)pThis + 0x10) = bSelfDelete;
+    return pThis;
+}
+
+// 0x1400786e0 - the derived destructor: its own vtable first, then the base one.
+void FUN_1400786e0(void* pThis) {
+    *(const void**)pThis = g_pNpcVtblFunctionClosure0;
+    FUN_1400786c0(pThis);
+}
+
+// 0x14007f340 - the spin yield.
+void FUN_14007f340(void) {
+    if (g_pfnNpcSleep != nullptr) g_pfnNpcSleep(0);
+}
+
+// 0x14007f3f0 - a plain store of the second word.
+void FUN_14007f3f0(long long* pOnce, long long nValue) { *pOnce = nValue; }
+
+// 0x14007f5b0 - compare-exchange: the word is replaced only when it holds the expected value, and the answer is
+// what the word held. The image brackets it with LOCK/UNLOCK, so it is one atomic step.
+long long FUN_14007f5b0(long long* pOnce, long long nExpected, long long nDesired) {
+    long long nOld = nExpected;
+    if (__atomic_compare_exchange_n(pOnce, &nOld, nDesired, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST))
+        return nExpected;
+    return nOld;
+}
+
+// 0x14007f410 - the compare-exchange the state machine uses; it is the same body.
+long long FUN_14007f410(long long* pOnce, long long nExpected, long long nDesired) {
+    return FUN_14007f5b0(pOnce, nExpected, nDesired);
+}
+
+// 0x14007f360 - the once run. State 2 is done; otherwise the 0->1 exchange decides who runs the closure. The winner
+// calls slot 1 of the object and then stores 2; a loser spins on a zero-length sleep while the winner is still at 1.
+void FUN_14007f360(long long* pOnce, void* pObject) {
+    long long nState = FUN_140078d00(pOnce);
+    if (nState != 2) {
+        long long nOld = FUN_14007f410(pOnce, 0, 1);
+        if (nOld == 0) {
+            (*(void (**)(void*))(*(long long*)pObject + 0x08))(pObject);
+            FUN_14007f3f0(pOnce, 2);
+        } else {
+            while (nOld == 1) {
+                FUN_14007f340();
+                nOld = FUN_140078d00(pOnce);
+            }
+        }
+    }
+}
+
+// 0x140078b30 - run a function once behind a state word. The closure lives on the frame, and the frame also carries
+// the dead word the image writes at 0xfffffffffffffffe.
+void FUN_140078b30(long long* pOnce, void (*pfnBody)(void)) {
+    long long aClosure[3];
+    long long nDeadWord = -2;
+    if (FUN_140078d00(pOnce) != 2) {
+        FUN_140078b90(aClosure, pfnBody, 0);
+        FUN_14007f360(pOnce, aClosure);
+        FUN_1400786e0(aClosure);
+    }
+    (void)nDeadWord;
 }
 
 // 0x140078d20 - hold the log mutex for the life of the wrapper: store the mutex, then take it.

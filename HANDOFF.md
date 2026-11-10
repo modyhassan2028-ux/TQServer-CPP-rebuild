@@ -901,3 +901,9 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 
 - 140016990 rewired; D177 reads the lock and condition tables directly. 44 suites green, two of them six times.
 - Next: 140078b30 (the one-time initialiser that takes a callback) to close the log layer.
+
+## D225 (latest)
+
+- Once-init cluster ported and 0x140077fc0 calls it directly: the log layer is closed end to end.
+- 45 suites green, the whole set run six times. Next: the remaining coded-stream seams (0x14007c650 pending count,
+  0x14007c9xx) and then back to the 0x14008xxxx range.

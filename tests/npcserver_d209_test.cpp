@@ -41,7 +41,20 @@ static void LogSink(int nSeverity, const char* pszFile, int nLine, std::string* 
     ++g_fail;
 }
 
+// the log layer's one-time initialiser is a real body now, so these suites have to answer for what it needs: the
+// FunctionClosure0 vtable (slot 1 runs the stored function) and the body 0x140077f50 reaches.
+static long long g_onceVt[3] = { 0, 0, 0 };
+static void OnceRun(void* pThis) {
+    void (*pfn)(void) = *(void (**)(void))((unsigned char*)pThis + 0x08);
+    if (pfn != nullptr) pfn();
+}
+static void OnceVtable(void) {
+    g_onceVt[1] = (long long)&OnceRun;
+    g_pNpcVtblFunctionClosure0 = (const void*)g_onceVt;
+}
+
 int main() {
+    OnceVtable();
     g_pfnNpcIteratorHasContainer = &HasContainer;
     g_pfnNpcStringMyPtr = &MyPtr;
     g_pfnNpcInvalidParameter = &InvalidParam;
