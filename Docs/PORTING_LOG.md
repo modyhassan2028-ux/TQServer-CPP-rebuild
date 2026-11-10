@@ -1460,3 +1460,21 @@ closed, and the flag only being set on the path that got a socket.
   released only when bit 0 of the flags is set, and the pointer is answered either way.
 - `0x140076ca0` had to be retyped to return a byte: fourth tail call of the cluster that the decompiler shows as
   void. `0x1400771d0` reads the value it returns.
+
+## D207 — NpcServer.exe 0x140077370, 0x140077530, 0x140077620
+
+- `0x140077370` accepts a message from a source. Slot 7 at `+0x38` parses and a refusal answers zero at once. A
+  parse that succeeds but leaves the message uninitialised is reported as a **warning**, severity 2, at line
+  `0x7b` of `message_lite.cc`, with the text built by `0x140076190` for the action word `parse` and appended by
+  `0x140077ff0`; the sink and the text are then released and the answer is zero with its low byte cleared. A
+  message that parses and is initialised answers one.
+- `0x140077530` builds the `0x50`-byte parse wrapper, field by field: source at `+0x00`, cleared at `+0x08`,
+  `+0x10`, `+0x18`, `+0x1c`, `+0x20`, the two bytes at `+0x24` and `+0x25`, `0x7fffffff` at `+0x28`, `0` at
+  `+0x2c`, `0x4000000` at `+0x30`, `0x2000000` at `+0x34`, `0` at `+0x38`, the data constant `DAT_1401036a0` at
+  `+0x3c`, cleared words at `+0x40` and `+0x48`, and `0x14007b7e0` last.
+- `0x140077620` parses a run of bytes: the wrapper is built by `0x1400776c0` around the bytes, offered through
+  `0x1400774a0`, and the answer is one only when that accepted it **and** `0x140077520` reports the wrapper valid.
+  The wrapper is destroyed through `0x14007a700` on every path, refusals included.
+- Three new seams and one data constant: `0x140077ff0`, `0x14007b7e0`, `0x1400776c0`, `DAT_1401036a0`.
+- Test note worth keeping: the required-fields text is freed by the body right after the failure, so a fixture
+  must copy it at the append call, not hold the pointer.

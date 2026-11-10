@@ -370,6 +370,14 @@ long long FUN_140077120(long long* pMsg, long long pBuf, int nRoom);
 std::string* FUN_1400771d0(long long* pMsg, std::string* pOut);
 std::string* FUN_140077280(long long* pMsg, std::string* pOut);
 void* FUN_140077330(void** pThis, unsigned int uFlags);
+extern long long (*g_pfnNpc_140077ff0)(long long pMessage, std::string* pText);
+extern void (*g_pfnNpc_14007b7e0)(void* pWrapper);
+extern void (*g_pfnNpc_1400776c0)(void* pWrapper, const char* pszData, int nLen);
+extern unsigned int g_uNpcConst_1401036a0;                                             // DAT_1401036a0
+unsigned long long FUN_140077370(void* a1, long long* pMsg);
+void** FUN_140077530(void** pWrapper, void* a2);
+unsigned char FUN_140077620(const char* pszData, int nLen, long long* pThis);
+
 
 
 

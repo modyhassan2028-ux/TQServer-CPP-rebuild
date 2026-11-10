@@ -191,6 +191,10 @@ int (*g_pfnNpc_1400778a0)(long long) = nullptr;
 void (*g_pfnNpc_140077900)(std::string*, long long) = nullptr;
 long long (*g_pfnNpc_140077930)(std::string*) = nullptr;
 void (*g_pfnNpc_1400778c0)(long long, int) = nullptr;
+long long (*g_pfnNpc_140077ff0)(long long, std::string*) = nullptr;
+void (*g_pfnNpc_14007b7e0)(void*) = nullptr;
+void (*g_pfnNpc_1400776c0)(void*, const char*, int) = nullptr;
+unsigned int g_uNpcConst_1401036a0 = 0;
 void (*g_pfnNpc_14000c160)(long long) = nullptr;
 void (*g_pfnNpc_14000c220)(void*) = nullptr;
 int (*g_pfnNpcWsaPoll_Ordinal18)(unsigned int, void*, void*, void*, int*) = nullptr;
@@ -3240,6 +3244,74 @@ void* FUN_140077330(void** pThis, unsigned int uFlags) {
     FUN_140075ef0(pThis);
     if ((uFlags & 1) != 0 && g_pfnNpcOperatorDelete != nullptr) g_pfnNpcOperatorDelete(pThis);
     return pThis;
+}
+
+// 0x140077370 - accept a message from a source: slot 7 at +0x38 parses, and a parse that fails answers zero at
+// once. A parse that succeeds but leaves the message uninitialised is reported as a warning at line 0x7b with the
+// required-fields text built by 0x140076190 through "parse", appended by 0x140077ff0; the sink and the text are
+// then released and the answer is zero. The low byte of the answer carries the refusal, which is why the caller
+// tests a byte.
+unsigned long long FUN_140077370(void* a1, long long* pMsg) {
+    unsigned char bParsed = (*(unsigned char (**)(long long*, void*))(*pMsg + 0x38))(pMsg, a1);
+    if (bParsed == 0) return 0;
+    unsigned char bInitialised = (*(unsigned char (**)(long long*))(*pMsg + 0x20))(pMsg);
+    if (bInitialised == 0) {
+        unsigned char aFinisher[8];
+        unsigned char aSink[64];
+        aFinisher[0] = 0;
+        unsigned char aText[sizeof(std::string)];
+        std::string* pText = FUN_140076190((std::string*)aText, "parse", pMsg);
+        void* pSink = g_pfnNpc_1400783d0 != nullptr
+                          ? g_pfnNpc_1400783d0(aSink, 2,
+                                               "F:\\cq\\64\\develop\\protobuf\\src\\google\\protobuf\\message_lite.cc",
+                                               0x7b) : nullptr;
+        int* pOut = (int*)(g_pfnNpc_140077ff0 != nullptr
+                               ? g_pfnNpc_140077ff0((long long)pSink, pText) : 0);
+        if (g_pfnNpc_140078580 != nullptr) g_pfnNpc_140078580(aFinisher, pOut);
+        if (g_pfnNpc_140078440 != nullptr) g_pfnNpc_140078440((long long)(void*)aSink);
+        ((std::string*)aText)->~basic_string();
+        return 0;                    // the machine answers the residue's upper bytes with the low byte cleared
+    }
+    return 1;
+}
+
+// 0x140077530 - build the 0x50-byte parse wrapper: the source at +0x00, three cleared words, the counters at
+// +0x18/+0x1c/+0x20 cleared, the two bytes at +0x24/+0x25 cleared, 0x7fffffff at +0x28, 0 at +0x2c, 0x4000000 at
+// +0x30, 0x2000000 at +0x34, 0 at +0x38, the data constant at +0x3c, two cleared words at +0x40/+0x48, then
+// 0x14007b7e0 finishes the object.
+void** FUN_140077530(void** pWrapper, void* a2) {
+    unsigned char* p = (unsigned char*)pWrapper;
+    pWrapper[0] = a2;
+    pWrapper[1] = nullptr;
+    pWrapper[2] = nullptr;
+    *(unsigned int*)(p + 0x18) = 0;
+    *(unsigned int*)(p + 0x1c) = 0;
+    *(unsigned int*)(p + 0x20) = 0;
+    *(unsigned char*)(p + 0x24) = 0;
+    *(unsigned char*)(p + 0x25) = 0;
+    *(unsigned int*)(p + 0x28) = 0x7fffffff;
+    *(unsigned int*)(p + 0x2c) = 0;
+    *(unsigned int*)(p + 0x30) = 0x4000000;
+    *(unsigned int*)(p + 0x34) = 0x2000000;
+    *(unsigned int*)(p + 0x38) = 0;
+    *(unsigned int*)(p + 0x3c) = g_uNpcConst_1401036a0;
+    pWrapper[8] = nullptr;
+    pWrapper[9] = nullptr;
+    if (g_pfnNpc_14007b7e0 != nullptr) g_pfnNpc_14007b7e0(pWrapper);
+    return pWrapper;
+}
+
+// 0x140077620 - parse a run of bytes: the wrapper is built around the bytes by 0x1400776c0, handed to
+// 0x1400774a0, and the answer is one only when that accepted it and 0x140077520 then reports the wrapper valid.
+// The wrapper is destroyed through 0x14007a700 on every path.
+unsigned char FUN_140077620(const char* pszData, int nLen, long long* pThis) {
+    long long aWrapper[10];
+    if (g_pfnNpc_1400776c0 != nullptr) g_pfnNpc_1400776c0(aWrapper, pszData, nLen);
+    unsigned char bAccepted = FUN_1400774a0(aWrapper, pThis);
+    unsigned char bOk = 0;
+    if (bAccepted != 0 && FUN_140077520((long long)aWrapper) != 0) bOk = 1;
+    if (g_pfnNpc_14007a700 != nullptr) g_pfnNpc_14007a700(aWrapper);
+    return bOk;
 }
 
 }  // namespace tq

@@ -797,3 +797,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - Dead branch worth knowing: the `clear()` in 0x1400771d0/0x140077280 can never run, because 0x140076ca0 and
   0x140076e30 answer 1 in the low byte or abort.
 - Next: 0x140077370 (294 - which would let the three thunks be rewired), 0x140077530 (227), 0x140077620 (157).
+
+## D207 (latest)
+
+- NpcServer: 162 bodies, 39 suites green.
+- The three thunks 0x140076320/350/380 can now be rewired: 0x140077370, 0x1400774a0 and 0x1400774e0 all have real
+  bodies. That is part of the pending rewiring pass noted under D205.
+- Next: 0x1400776c0 (223), 0x1400777a0 (157), 0x1400778c0 (55).
