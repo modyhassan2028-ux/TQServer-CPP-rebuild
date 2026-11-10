@@ -153,3 +153,10 @@
 كلاسّات CMsg المتبقية من قائمة الـ20: **صفر**. آخر 8 (D126/D127) مغلقة،
 والاختبار الموحّد 145/145 × 6. المرحلة القادمة: الفحص الشامل للتغطية
 (الدوال غير المصنّفة في DLL) وموجة NpcServer.
+
+## 0x140080000..0x140090000 (container internals)
+
+391 bodies, 212 shapes. 86 ported in D227 (delete-thunk, new-and-store, decref, iterator-check, iterator-compare).
+Outstanding shapes by frequency: forwarding wrapper (10), iterator construct pair (8), vector::insert bounds (6+5),
+aligned allocate (4), memmove_s move (4), then the rest one template at a time. Extend
+`tools/gen_stl_family.py` with a new template per shape; it refuses to emit anything it cannot match exactly.

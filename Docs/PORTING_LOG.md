@@ -1706,3 +1706,34 @@ also closes the log layer.
   `0x7fffffff` therefore only survives when the old limit was already there. D201, D209 and D210 were rewritten to
   drive the object's own fields and now assert exactly that.
 - D226 covers the four bodies directly.
+
+## D227 — the container internals of 0x140080000..0x140090000 (86 bodies)
+
+The range holds 391 functions and only 212 distinct shapes, so it is one repeated container/STL implementation. These
+bodies were not hand-typed: `tools/gen_stl_family.py` transcribes each address's own decompiled text, reads the
+offsets, sizes and returned deltas back out of that text, and reports any body that does not match a known shape
+instead of guessing at it. Generated output lives in `modules/npcserver/unattributed/stl-internals.{h,cpp}` (the
+range carries no `__FILE__` string, so it stays unattributed) and carries a manifest, `g_aNpcStl_140080000`, so a
+suite can walk every ported body rather than one representative per shape.
+
+Five families, 86 bodies:
+
+| family | bodies | body |
+|---|---|---|
+| delete-thunk | 23 | `::operator delete(*pThis)` and nothing else. |
+| new-and-store | 21 | `::operator new(8)`; the new object's first word points back at the slot, the slot takes the object, the slot comes back. |
+| decref | 17 | shared-owner release: reads the ref object at +8/+0x18/+0x20/+0x48 (four variants), decrements the uses count atomically, on zero runs vtable slot 0, decrements the weak count and on zero runs vtable slot 1. |
+| iterator-check | 15 | debug iterator guard: dereferences the holder, compares against the container's size word, returns the iterator plus 0x10/0x18. |
+| iterator-compare | 10 | guard then `pFirst[1] != pSecond[1]` (6 of them) or `==` (4). |
+
+Notes worth keeping:
+- The guard's size word sits at +0x20, +0x28 or +0x30 depending on the member, and the answer adds 0, 0x10 or 0x18.
+  Both come from the body itself; nothing was assumed.
+- The four decref variants differ only in where the owner keeps the ref object (+8, +0x18, +0x20, +0x48); the counts
+  are at +0x10 and +0x14 in every one.
+- `_invalid_parameter_noinfo` stays behind `g_pfnNpcInvalidParameter`, through a new `NpcInvalidParameter()` helper.
+- The null-holder path is not exercised by the suite: the image dereferences the container word unconditionally after
+  the hook, so with a no-op hook it faults by design.
+- 305 bodies in the range still need their shapes handled. Next, in order of frequency: the forwarding wrapper
+  (`F(P); return P`, 10), the iterator-construct pair (8), the `vector::insert` bounds template (6 + 5), the aligned
+  allocate (4) and the `memmove_s` move (4).

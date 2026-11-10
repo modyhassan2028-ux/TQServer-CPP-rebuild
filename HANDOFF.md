@@ -912,3 +912,9 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 
 - Coded-input bounds ported; the 0x14007a8xx/0x14007c6xx slice has no seams left. 46 suites, six clean cycles.
 - Next: back into the 0x14008xxxx range for the next unported cluster.
+
+## D227 (latest)
+
+- 86 container-internal bodies of 0x140080000..0x140090000 ported by `tools/gen_stl_family.py`, with a manifest
+  (`g_aNpcStl_140080000`) and a walk suite, D227. 47 suites, six cycles, one command: `tools/run_npcserver_suites.sh`.
+- 305 bodies left in the range; the shapes to take next are listed at the end of PORTING_LOG.md.
