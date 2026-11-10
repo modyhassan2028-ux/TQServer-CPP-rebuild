@@ -1381,3 +1381,11 @@ closed, and the flag only being set on the path that got a socket.
   third condition: `0x14007a9c0` must answer zero. Lazy evaluation matters and the tests pin it: a refused offer
   stops before the validity check, and an invalid wrapper stops before the error state is asked at all.
 - Five new seams: the wrapper build, validity, type stamp, error state and destroy.
+
+## D202 — NpcServer.exe 0x140076670, 0x1400766c0, 0x140076710, 0x140076750
+
+- Four hand-overs, all with the same argument order: the bytes first, the length second, the object **last**.
+  `0x140076670` and `0x140076710` go to `0x140077620`; `0x1400766c0` and `0x140076750` go to `0x1400777a0`. The
+  first of each pair takes a `std::string` and passes `size()` truncated to an `int` and then widened, so a
+  string of more than 2^31 bytes would wrap exactly as the machine does; the second of each pair passes the
+  caller's length through untouched, negative values included.

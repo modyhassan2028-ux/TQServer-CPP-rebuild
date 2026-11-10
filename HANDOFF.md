@@ -763,3 +763,8 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - The thunk return type is a general lesson: any `FUN_` the decompiler shows as `void` that is called as a tail
   call in another function carries a value back. 0x140076320/350/380 are now typed that way.
 - Next: 0x140076670 and 0x1400766c0 (61 each), 0x140076710 and 0x140076750 (43 each), then 0x140076790.
+
+## D202 (latest)
+
+- NpcServer: 138 bodies, 34 suites green.
+- Next: 0x140076790 (370), 0x140076910 (385), 0x140076aa0 (295).

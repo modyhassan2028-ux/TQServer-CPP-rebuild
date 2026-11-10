@@ -333,6 +333,13 @@ unsigned char FUN_1400763b0(long long* pThis, void* a2);
 unsigned char FUN_140076450(long long* pThis, void* a2);
 unsigned char FUN_1400764f0(long long* pThis, void* a2, int nType);
 unsigned char FUN_1400765b0(long long* pThis, void* a2, int nType);
+extern void (*g_pfnNpc_140077620)(const char* pszData, long long nLen, long long* pThis);
+extern void (*g_pfnNpc_1400777a0)(const char* pszData, long long nLen, long long* pThis);
+void FUN_140076670(long long* pThis, std::string* pValue);
+void FUN_1400766c0(long long* pThis, std::string* pValue);
+void FUN_140076710(long long* pThis, const char* pszData, int nLen);
+void FUN_140076750(long long* pThis, const char* pszData, int nLen);
+
 
 
 

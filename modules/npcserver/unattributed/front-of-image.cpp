@@ -178,6 +178,8 @@ unsigned char (*g_pfnNpc_140077520)(long long) = nullptr;
 void (*g_pfnNpc_14007a8e0)(long long, int) = nullptr;
 int (*g_pfnNpc_14007a9c0)(long long) = nullptr;
 void (*g_pfnNpc_14007a700)(void*) = nullptr;
+void (*g_pfnNpc_140077620)(const char*, long long, long long*) = nullptr;
+void (*g_pfnNpc_1400777a0)(const char*, long long, long long*) = nullptr;
 void (*g_pfnNpc_14000c160)(long long) = nullptr;
 void (*g_pfnNpc_14000c220)(void*) = nullptr;
 int (*g_pfnNpcWsaPoll_Ordinal18)(unsigned int, void*, void*, void*, int*) = nullptr;
@@ -2967,6 +2969,30 @@ unsigned char FUN_1400765b0(long long* pThis, void* a2, int nType) {
     }
     if (g_pfnNpc_14007a700 != nullptr) g_pfnNpc_14007a700(aWrapper);
     return bOk;
+}
+
+// 0x140076670 - hand the string's bytes and length to 0x140077620 with the object last.
+void FUN_140076670(long long* pThis, std::string* pValue) {
+    unsigned long long uLen = pValue->size();
+    const char* pszData = pValue->data();
+    if (g_pfnNpc_140077620 != nullptr) g_pfnNpc_140077620(pszData, (long long)(int)uLen, pThis);
+}
+
+// 0x1400766c0 - the same hand-over to 0x1400777a0.
+void FUN_1400766c0(long long* pThis, std::string* pValue) {
+    unsigned long long uLen = pValue->size();
+    const char* pszData = pValue->data();
+    if (g_pfnNpc_1400777a0 != nullptr) g_pfnNpc_1400777a0(pszData, (long long)(int)uLen, pThis);
+}
+
+// 0x140076710 - hand a raw pointer and length to 0x140077620 with the object last.
+void FUN_140076710(long long* pThis, const char* pszData, int nLen) {
+    if (g_pfnNpc_140077620 != nullptr) g_pfnNpc_140077620(pszData, (long long)nLen, pThis);
+}
+
+// 0x140076750 - the same hand-over to 0x1400777a0.
+void FUN_140076750(long long* pThis, const char* pszData, int nLen) {
+    if (g_pfnNpc_1400777a0 != nullptr) g_pfnNpc_1400777a0(pszData, (long long)nLen, pThis);
 }
 
 }  // namespace tq
