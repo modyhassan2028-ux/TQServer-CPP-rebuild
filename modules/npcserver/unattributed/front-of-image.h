@@ -281,6 +281,15 @@ extern int (*g_pfnNpcWsaPoll_Ordinal18)(unsigned int uCount, void* pRead, void* 
 extern int (*g_pfnNpc_1400089a0)(unsigned int* pField, int nCount);   // rotating start
 extern void (*g_pfnNpc_14001a5d0)(long long pBase, long long uKey, int nFlag);   // activate one fd
 int FUN_140075480(long long pBase, int* pTimeout);
+extern void (*g_pfnNpc_14001b930)(long long pMechanism, void* a2, void* a3, void* a4);  // mechanism free
+extern void (*g_pfnNpc_14000dcb0)(void* pNode, unsigned int uValue);                     // node reset
+extern void (*g_pfnNpc_14000d9a0)(long long pBuf, int nValue);                           // buffer adjust
+extern void (*g_pfnNpc_14000c160)(long long pBuf);                                       // after write
+extern void (*g_pfnNpc_14000c220)(void* pBuf);                                           // after write
+void FUN_140075740(long long pMechanism, void* a2, void* a3, void* a4);
+void FUN_1400757e0(long long pBase, unsigned int uValue);
+void FUN_140075840(void** pBuf, unsigned long long uLen);
+
 int  FUN_140074e80(void* pCtl, void* pOverlapped, unsigned long long uKey, unsigned int dwBytes);
 void* FUN_140074eb0(long long pBase);
 unsigned long long FUN_140074ec0(int* pQueue, int nSize);

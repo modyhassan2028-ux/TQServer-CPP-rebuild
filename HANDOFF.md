@@ -731,3 +731,8 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 
 - NpcServer: 114 bodies, 27 suites green. The poll cycle is ported; the notification cluster's backbone is done.
 - Next: 0x140075740, 0x1400757e0, 0x140075840, 0x140075950, 0x140075a00 continuing in address order.
+
+## D196 (latest)
+
+- NpcServer: 117 bodies, 28 suites green.
+- Next: 0x140075950 (173), 0x140075a00 (71), 0x140075a50 (471) in address order.

@@ -149,6 +149,11 @@ void* (*g_pfnNpc_14001a880)(long long*, long long) = nullptr;
 long long (*g_pfnNpc_14001b590)(long long, unsigned long long, unsigned long long, unsigned long long) =
     nullptr;
 void (*g_pfnNpc_140008930)(int*, int) = nullptr;
+void (*g_pfnNpc_14001b930)(long long, void*, void*, void*) = nullptr;
+void (*g_pfnNpc_14000dcb0)(void*, unsigned int) = nullptr;
+void (*g_pfnNpc_14000d9a0)(long long, int) = nullptr;
+void (*g_pfnNpc_14000c160)(long long) = nullptr;
+void (*g_pfnNpc_14000c220)(void*) = nullptr;
 int (*g_pfnNpcWsaPoll_Ordinal18)(unsigned int, void*, void*, void*, int*) = nullptr;
 int (*g_pfnNpc_1400089a0)(unsigned int*, int) = nullptr;
 void (*g_pfnNpc_14001a5d0)(long long, long long, int) = nullptr;
@@ -2455,6 +2460,83 @@ int FUN_140075480(long long pBase, int* pTimeout) {
         NpcDispatchList(pBase, *(unsigned int**)(q + 8), 4);
     }
     return 0;
+}
+
+// 0x140075740 - tear the queue object down: the mechanism's own teardown first, then the five index buffers
+// in offset order, then the seven words of the object are cleared and the object itself is released.
+void FUN_140075740(long long pMechanism, void* a2, void* a3, void* a4) {
+    void** pQueue = *(void***)(pMechanism + 8);
+    if (g_pfnNpc_14001b930 != nullptr) g_pfnNpc_14001b930(pMechanism, a2, a3, a4);
+    for (int i = 1; i <= 5; ++i) {
+        if (pQueue[i] != nullptr && g_pfnNpcFree_1400119c0 != nullptr) g_pfnNpcFree_1400119c0(pQueue[i]);
+    }
+    for (int i = 0; i <= 6; ++i) pQueue[i] = nullptr;
+    if (g_pfnNpcFree_1400119c0 != nullptr) g_pfnNpcFree_1400119c0(pQueue);
+}
+
+// 0x1400757e0 - walk the list at +0x98 for as many entries as +0xa0 says, resetting each with the value.
+void FUN_1400757e0(long long pBase, unsigned int uValue) {
+    void** pNode = *(void***)(pBase + 0x98);
+    int nDone = 0;
+    if (0 < *(int*)(pBase + 0xa0)) {
+        do {
+            void** pNext = (void**)*pNode;
+            if (g_pfnNpc_14000dcb0 != nullptr) g_pfnNpc_14000dcb0(pNode, uValue);
+            nDone = nDone + 1;
+            pNode = pNext;
+        } while (nDone < *(int*)(pBase + 0xa0));
+    }
+}
+
+// 0x140075840 - account a write of uLen bytes over the buffer's segments. The target is the buffer itself
+// only when its flag byte at +0x38 carries 0x10, otherwise the target stays null. The node used starts at the
+// second entry of the chain at +0x10 unless that entry's byte at +0x20 lacks 0x10, in which case the first
+// entry is skipped. Each segment is capped by what is left, its length is added to the current node's +0x18,
+// and the chain is followed. Afterwards the list at +0x98 is reset with 0x10, bit 0 of +0x90 is cleared, the
+// two running totals at +0x18 and +0x20 grow by uLen, and the two write hooks run.
+void FUN_140075840(void** pBuf, unsigned long long uLen) {
+    void** pTarget = nullptr;
+    if (pBuf != nullptr && ((*(unsigned char*)(pBuf + 7) & 0x10) != 0)) pTarget = pBuf;
+    if (pBuf[6] != 0 && g_pfnNpc_140016e30 != nullptr) g_pfnNpc_140016e30();
+    if (g_pfnNpc_14000d9a0 != nullptr) g_pfnNpc_14000d9a0((long long)pBuf, 0);
+    long long* pFirst = *(long long**)pBuf[2];
+    long long* pNode = (long long*)pBuf[2];
+    if ((*(unsigned char*)(pFirst + 4) & 0x10) == 0) pNode = pFirst;
+    if (uLen != 0) {
+        unsigned int* pSeg = (unsigned int*)((unsigned char*)pTarget + 0xa8);
+        unsigned int uIndex = 0;
+        unsigned long long uLeft = uLen;
+        do {
+            if (*(unsigned int*)((unsigned char*)pTarget + 0xa0) <= uIndex) break;
+            unsigned long long uTake = *pSeg;
+            if (uLeft < *pSeg) uTake = uLeft;
+            uIndex = uIndex + 1;
+            pSeg = (unsigned int*)((unsigned char*)pSeg + 0x10);
+            *(long long*)((unsigned char*)*pNode + 0x18) = *(long long*)((unsigned char*)*pNode + 0x18) + (long long)uTake;
+            uLeft = uLeft - uTake;
+            pBuf[2] = pNode;
+            pNode = (long long*)*pNode;
+        } while (uLeft != 0);
+    }
+    void** pIt = (void**)((unsigned char*)pTarget + 0x98);
+    pIt = (void**)*pIt;
+    if (0 < *(int*)((unsigned char*)pTarget + 0xa0)) {
+        int nDone = 0;
+        int nInc = 0;
+        do {
+            void** pNext = (void**)*pIt;
+            if (g_pfnNpc_14000dcb0 != nullptr) g_pfnNpc_14000dcb0(pIt, 0x10);
+            nInc = nDone + 1;
+            nDone = nInc;
+            pIt = pNext;
+        } while (nInc < *(int*)((unsigned char*)pTarget + 0xa0));
+    }
+    *(unsigned int*)((unsigned char*)pTarget + 0x90) =
+        *(unsigned int*)((unsigned char*)pTarget + 0x90) & 0xfffffffeu;
+    pBuf[3] = (void*)((long long)pBuf[3] + (long long)uLen);
+    pBuf[4] = (void*)((long long)pBuf[4] + (long long)uLen);
+    if (g_pfnNpc_14000c160 != nullptr) g_pfnNpc_14000c160((long long)pBuf);
+    if (g_pfnNpc_14000c220 != nullptr) g_pfnNpc_14000c220(pBuf);
 }
 
 }  // namespace tq

@@ -1284,3 +1284,20 @@ closed, and the flag only being set on the path that got a socket.
   entry 0 and then entry 1, while a list of three with a start of one activates 2, 0, 1. The tests pin both.
 - Five new seams: `Sleep`, `Ordinal_18` (the poll), the timeout-to-milliseconds conversion at `0x140016450`,
   the two notification hooks, the rotating index at `0x1400089a0` and the per-fd activation at `0x14001a5d0`.
+
+## D196 — NpcServer.exe 0x140075740, 0x1400757e0, 0x140075840
+
+- `0x140075740` tears the queue object down: `0x14001b930` for the mechanism first, then the five index buffers
+  at `+0x08` through `+0x28` in offset order, then all seven words of the object are cleared and the object is
+  released last. Missing buffers are skipped without disturbing the order.
+- `0x1400757e0` walks the list held at `+0x98` for exactly `+0xa0` entries, resetting each through
+  `0x14000dcb0` with the caller's value, taking the next pointer before the reset so the reset may free the node.
+- `0x140075840` accounts a write. The buffer is its own target only when the byte at `+0x38` carries `0x10`.
+  The chain starts at `*(long long*)pBuf[2]` and steps to `pBuf[2]` itself only when that first node's byte at
+  `+0x20` carries `0x10`, so by default the **first** node is skipped. Each segment at `+0xa8`, spaced `0x10`
+  apart and limited to `+0xa0` of them, is capped by the bytes left and added to the successor node's `+0x18`.
+  The `pBuf[2]` field is written back **before** the chain steps on, so after the loop it holds the node whose
+  successor received the last bytes, one step behind the last node touched. Then the list at `+0x98` is reset
+  with `0x10`, bit 0 of `+0x90` is cleared, `+0x18` and `+0x20` both grow by the length, and `0x14000c160` and
+  `0x14000c220` run last. A zero length still runs the unlock hook, the reset, both hooks and the totals stay.
+- Five new seams: `0x14001b930`, `0x14000dcb0`, `0x14000d9a0`, `0x14000c160`, `0x14000c220`.
