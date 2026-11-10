@@ -390,6 +390,14 @@ void* FUN_140077950(std::string* pValue);
 void* FUN_1400779a0(void* pIter);
 void* FUN_1400779c0(void* pIter);
 void FUN_14007a700(long long* pCoded);
+extern long long (*g_pfnNpc_14007c650)(long long pCoded);
+extern int (*g_pfnNpc_14007c670)(long long pCoded);
+extern void (*g_pfnNpc_14007c6a0)(long long pCoded);
+extern int* (*g_pfnNpc_14007d140)(int* pLimit, int* pOld);
+void FUN_14007a830(long long* pCoded);
+int FUN_14007a8e0(long long pCoded, int nExtra);
+int FUN_14007a9c0(long long pCoded);
+
 
 
 

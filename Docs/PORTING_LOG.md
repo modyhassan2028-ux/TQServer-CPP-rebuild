@@ -1506,3 +1506,15 @@ closed, and the flag only being set on the path that got a socket.
 - `0x14007a700` releases the byte chain at `+0x00` through `0x14007a830` and compares the word at `+0x34` with the
   **-2** sentinel: that state logs a CHECK failure at `coded_stream.cc` line **0x4e**, severity 1, text
   "The total number of bytes read was " followed by the count at `+0x18`.
+
+## D210 — NpcServer.exe 0x14007a830, 0x14007a8e0, 0x14007a9c0
+
+- `0x14007a9c0` answers **-1** when the limit at `+0x28` is still `0x7fffffff`, so "no limit" is distinguishable from
+  "nothing left" (which answers 0). `0x14007a8e0` answers the limit from **before** the raise, and `0x14007d140` has
+  the final word over the value it stores back; a negative amount, or a sum that would pass `0x7fffffff` from the
+  bytes already consumed, pins the limit at `0x7fffffff`.
+- `0x14007a830` flushes only a **positive** amount (pending from `0x14007c650` + `+0x2c` + `+0x1c`) through sink slot
+  2 at `+0x10`, then drops the read count at `+0x18` by the re-read pending value plus `+0x2c`, copies `+0x08` into
+  `+0x10` (current into end), and clears both counters.
+- Everything answered through a measured `int` re-read after the sink call: the pending count is asked twice on
+  purpose, and the second answer is the one used for the bookkeeping.

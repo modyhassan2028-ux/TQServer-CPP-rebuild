@@ -818,3 +818,9 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   seams whose bodies now exist — 0x140077370, 0x1400774a0, 0x1400774e0, 0x140077520, 0x140077530, 0x140077620,
   0x1400776c0, 0x1400777a0, 0x140077840, 0x140077850, 0x1400778a0, 0x1400778c0, 0x140077900, 0x140077930,
   0x14007a700.
+
+## D210 (latest)
+
+- NpcServer: 173 bodies, 42 suites green. The coded-input cluster is complete.
+- Next: the rewiring pass listed under D209, or 0x140077ff0 / 0x140078030 / 0x1400783d0 (log helpers) to close the
+  logging seams.

@@ -3428,5 +3428,54 @@ void FUN_14007a700(long long* pCoded) {
         if (g_pfnNpc_140078440 != nullptr) g_pfnNpc_140078440((long long)aSink);
     }
 }
+long long (*g_pfnNpc_14007c650)(long long) = nullptr;
+int (*g_pfnNpc_14007c670)(long long) = nullptr;
+void (*g_pfnNpc_14007c6a0)(long long) = nullptr;
+int* (*g_pfnNpc_14007d140)(int*, int*) = nullptr;
+
+// 0x14007a830 - flush what the coded input still holds. The amount waiting is the pending bytes from 0x14007c650
+// plus the two counters at +0x2c and +0x1c; only a positive amount is handed to the sink through slot 2 at
+// +0x10. Afterwards the read count at +0x18 drops by the pending bytes plus the counter at +0x2c, the current
+// pointer at +0x10 is copied back to +0x08, and both counters are cleared.
+void FUN_14007a830(long long* pCoded) {
+    long long lPending = g_pfnNpc_14007c650 != nullptr ? g_pfnNpc_14007c650((long long)pCoded) : 0;
+    int nAmount = (int)lPending + *(int*)((char*)pCoded + 0x2c) + *(int*)((char*)pCoded + 0x1c);
+    if (0 < nAmount) {
+        (*(void (**)(long long, int))(*pCoded + 0x10))(*pCoded, nAmount);
+        long long lAfter = g_pfnNpc_14007c650 != nullptr ? g_pfnNpc_14007c650((long long)pCoded) : 0;
+        *(int*)((char*)pCoded + 0x18) = *(int*)((char*)pCoded + 0x18)
+                                        - ((int)lAfter + *(int*)((char*)pCoded + 0x2c));
+        pCoded[2] = pCoded[1];
+        *(unsigned int*)((char*)pCoded + 0x2c) = 0;
+        *(unsigned int*)((char*)pCoded + 0x1c) = 0;
+    }
+}
+
+// 0x14007a8e0 - raise the byte limit at +0x28 by the caller's amount. A negative amount, or one that would pass
+// 0x7fffffff from the bytes already consumed, pins the limit at 0x7fffffff instead. 0x14007d140 then returns the
+// address of the limit it settled on, that value is stored back, the wire is told through 0x14007c6a0, and the
+// answer is the limit that was in place before the call.
+int FUN_14007a8e0(long long pCoded, int nExtra) {
+    int nConsumed = g_pfnNpc_14007c670 != nullptr ? g_pfnNpc_14007c670(pCoded) : 0;
+    int nOld = *(int*)(pCoded + 0x28);
+    if (nExtra < 0 || 0x7fffffff - nConsumed < nExtra) {
+        *(unsigned int*)(pCoded + 0x28) = 0x7fffffff;
+    } else {
+        *(int*)(pCoded + 0x28) = nConsumed + nExtra;
+    }
+    int* pSettled = g_pfnNpc_14007d140 != nullptr
+                        ? g_pfnNpc_14007d140((int*)(pCoded + 0x28), &nOld) : nullptr;
+    if (pSettled != nullptr) *(int*)(pCoded + 0x28) = *pSettled;
+    if (g_pfnNpc_14007c6a0 != nullptr) g_pfnNpc_14007c6a0(pCoded);
+    return nOld;
+}
+
+// 0x14007a9c0 - how many bytes are still allowed. An untouched limit of 0x7fffffff answers -1 rather than a
+// count, so a caller can tell "no limit" from "this much left".
+int FUN_14007a9c0(long long pCoded) {
+    if (*(int*)(pCoded + 0x28) == 0x7fffffff) return -1;
+    int nConsumed = g_pfnNpc_14007c670 != nullptr ? g_pfnNpc_14007c670(pCoded) : 0;
+    return *(int*)(pCoded + 0x28) - nConsumed;
+}
 
 }  // namespace tq
