@@ -997,3 +997,11 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 56 suites green, six cycles. Total ported: 560 of 4099 bodies.
 - Next in this cluster: `0x140023df0` / `0x1400243b0` (the RB-tree erase loops) and `0x140022a40` / `0x140022af0`
   (the sentinel allocators), which retire four seams at once.
+
+## D238 (latest)
+
+- 6 bodies in `map-tree.{h,cpp}`: 2 sentinel-head allocators (now returning their block, as the bytes do), 2 recursive
+  subtree frees, 2 tree clears.
+- Two seams retired: `g_pfnNpc_140022a40` / `_140022af0` are gone and `container-nodes.cpp` calls the real bodies.
+- 57 suites green, six cycles. Total ported: 566 of 4099 bodies.
+- Still seams: `0x140023df0`, `0x1400243b0` (need `0x140022e50` / `0x140023400`, the erase-with-throw pair).

@@ -1,11 +1,10 @@
 // Transcribed from NpcServer.exe; see container-nodes.h for the seams.
 #include "modules/npcserver/unattributed/container-nodes.h"
+#include "modules/npcserver/unattributed/map-tree.h"
 
 namespace tq {
 
 // The seams this file owns until the callees' own batches land.
-long long (*g_pfnNpc_140022a40)(void) = nullptr;
-long long (*g_pfnNpc_140022af0)(void) = nullptr;
 void* (*g_pfnNpc_140023df0)(long long* pSet, long long* pOut, long long* pFirst, long long* pLast) = nullptr;
 void* (*g_pfnNpc_1400243b0)(long long* pSet, long long* pOut, long long* pFirst, long long* pLast) = nullptr;
 
@@ -18,7 +17,7 @@ void* FUN_1400257a0(void* pThis) {
         *pNode = pThis;
     }
     *(void**)pThis = pNode;
-    long long nHead = g_pfnNpc_140022a40();
+    long long nHead = (long long)FUN_140022a40();
     ((long long*)pThis)[6] = nHead;
     *(unsigned char*)(nHead + 0x29) = 1;
     *(long long*)(((long long*)pThis)[6] + 8) = ((long long*)pThis)[6];
@@ -37,7 +36,7 @@ void* FUN_1400258d0(void* pThis) {
         *pNode = pThis;
     }
     *(void**)pThis = pNode;
-    long long nHead = g_pfnNpc_140022a40();
+    long long nHead = (long long)FUN_140022a40();
     ((long long*)pThis)[6] = nHead;
     *(unsigned char*)(nHead + 0x29) = 1;
     *(long long*)(((long long*)pThis)[6] + 8) = ((long long*)pThis)[6];
@@ -56,7 +55,7 @@ void* FUN_140025820(void* pThis) {
         *pNode = pThis;
     }
     *(void**)pThis = pNode;
-    long long nHead = g_pfnNpc_140022af0();
+    long long nHead = (long long)FUN_140022af0();
     ((long long*)pThis)[6] = nHead;
     *(unsigned char*)(nHead + 0x29) = 1;
     *(long long*)(((long long*)pThis)[6] + 8) = ((long long*)pThis)[6];
@@ -75,7 +74,7 @@ void* FUN_140025950(void* pThis) {
         *pNode = pThis;
     }
     *(void**)pThis = pNode;
-    long long nHead = g_pfnNpc_140022af0();
+    long long nHead = (long long)FUN_140022af0();
     ((long long*)pThis)[6] = nHead;
     *(unsigned char*)(nHead + 0x29) = 1;
     *(long long*)(((long long*)pThis)[6] + 8) = ((long long*)pThis)[6];

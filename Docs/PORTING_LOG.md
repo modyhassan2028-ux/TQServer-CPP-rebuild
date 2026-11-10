@@ -1964,3 +1964,24 @@ itself.
 The suite checks the head flag, the three head links, that a builder takes its head from the right allocator (a40 vs
 af0), that a destructor erases then frees the head and clears both fields, and that a deleter frees the head first and
 the object second. D237 green; the whole set (56 suites) green over six cycles.
+
+## D238 — the red-black tree helpers (6 bodies)
+
+`modules/npcserver/unattributed/map-tree.{h,cpp}`, manifest `g_aNpcMapTree`.
+
+| address | body |
+|---|---|
+| 0x140022a40 / 0x140022af0 | `operator_new(0x30)`, three cleared links, `+0x28 = 1`, `+0x29 = 0`, block returned |
+| 0x140022aa0 / 0x140022b80 | recursive subtree free: recurse on `[2]`, free the node, step to `[0]`, stop when `+0x29` is set |
+| 0x140023210 / 0x1400237c0 | the same walk starting from `head[1]`, then the head is closed on itself and the count at `+0x38` cleared |
+
+Two facts worth recording. The allocators are typed `void` by the decompiler, but the tail of both bodies is
+`mov byte ptr [rax+0x29],0; add rsp,0x38; ret` with `rax` untouched, and every caller reads the result, so the port
+returns the block. And the node walk frees the entry node before the node its left link names, which is the order the
+suite pins down.
+
+This retires two seams: the node builders in `container-nodes.cpp` now call `FUN_140022a40` / `FUN_140022af0` directly,
+and the D237 suite follows them through the real allocator. The two erase loops (`0x140023df0`, `0x1400243b0`) still sit
+behind seams because they need `0x140022e50` / `0x140023400`, the erase-and-throw pair.
+
+D238 green; the whole set (57 suites) green over six cycles.

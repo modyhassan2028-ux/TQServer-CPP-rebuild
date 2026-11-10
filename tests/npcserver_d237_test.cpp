@@ -8,14 +8,18 @@ using namespace tq;
 
 static char g_aNode[64];
 static char g_aHead[0x40];
-static int g_news = 0, g_deletes = 0, g_erases = 0, g_allocA = 0, g_allocB = 0;
+static int g_news = 0, g_deletes = 0, g_erases = 0;
 static void* g_pDeleted[4];
 static long long* g_pEraseSet;
 
-static void* FakeNew(long long) { ++g_news; return g_aNode; }
+static char g_aArena[0x80];
+static void* FakeNew(long long nBytes) {
+    ++g_news;
+    if (nBytes == 8) return g_aNode;              // the node
+    if (nBytes == 0x30) return g_aHead;           // the sentinel head
+    return g_aArena;
+}
 static void* FakeDelete(void* p) { g_pDeleted[g_deletes++ & 3] = p; return p; }
-static long long FakeHeadA(void) { ++g_allocA; return (long long)g_aHead; }
-static long long FakeHeadB(void) { ++g_allocB; return (long long)g_aHead; }
 static void* FakeEraseMap(long long* pSet, long long* pOut, long long* pFirst, long long* pLast) {
     ++g_erases; g_pEraseSet = pSet; pOut[0] = pFirst[0]; pOut[1] = pLast[0]; return pOut;
 }
@@ -26,8 +30,6 @@ static void* FakeEraseGen(long long* pSet, long long* pOut, long long* pFirst, l
 int main() {
     g_pfnNpcOperatorNew = &FakeNew;
     g_pfnNpcOperatorDelete = &FakeDelete;
-    g_pfnNpc_140022a40 = &FakeHeadA;
-    g_pfnNpc_140022af0 = &FakeHeadB;
     g_pfnNpc_140023df0 = &FakeEraseMap;
     g_pfnNpc_1400243b0 = &FakeEraseGen;
 
@@ -43,10 +45,10 @@ int main() {
             std::memset(aObject, 0xCC, sizeof aObject);
             std::memset(g_aNode, 0, sizeof g_aNode);
             std::memset(g_aHead, 0, sizeof g_aHead);
-            g_news = 0; g_allocA = 0; g_allocB = 0;
+            g_news = 0;
             void* pRet = ((void* (*)(void*))e.pfn)(aObject);
             assert(pRet == aObject);
-            assert(g_news == 1);                                  // one 8-byte node
+            assert(g_news == 2);                                  // the 8-byte node, then the head
             assert((void*)aObject[0] == (void*)g_aNode);           // the object points at it
             assert(*(void**)g_aNode == (void*)aObject);            // and it points back
             assert((void*)aObject[6] == (void*)g_aHead);           // the sentinel head
@@ -55,11 +57,8 @@ int main() {
             assert(*(void**)(g_aHead + 0x10) == g_aHead);
             assert(*(void**)g_aHead == g_aHead);
             assert(aObject[7] == 0);
-            if (std::strcmp(e.pszKind, "node-builder-140022a40") == 0) {
-                assert(g_allocA == 1 && g_allocB == 0);
-            } else {
-                assert(g_allocB == 1 && g_allocA == 0);
-            }
+            assert(*(unsigned char*)(g_aHead + 0x28) == 1);        // set by the real allocator
+            assert(*(unsigned char*)(g_aHead + 0x29) == 1);        // and then flagged by the builder
             ++nBuild;
 
         } else if (std::strncmp(e.pszKind, "destructor-", 11) == 0) {
