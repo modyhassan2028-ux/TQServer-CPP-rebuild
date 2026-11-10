@@ -2005,3 +2005,22 @@ Detail worth keeping: the two steppers move the position even when the guard com
 still answer after complaining. The suite pins both habits down instead of tidying them.
 
 D239 green; the whole set (58 suites) green over six cycles.
+
+## D240 — the successor step and the two rotations (3 bodies)
+
+`modules/npcserver/unattributed/tree-links.{h,cpp}`, manifest `g_aNpcTreeLink`.
+
+| address | body |
+|---|---|
+| 0x140021f50 | `++iterator`: right subtree present → leftmost node of it; otherwise climb while the node is its parent's right child; a nil node is reported and left alone |
+| 0x140021e60 | rotate left over the node, with the three link cases (root, node is a left child, node is a right child) |
+| 0x140021ec0 | rotate right over the node, same three cases |
+
+The climb has a habit worth writing down: it assigns the walking node to the iterator inside the loop and again after
+it, so successor-of-the-maximum lands on the head, not on the root. The suite now pins that (the first draft expected
+the root and was wrong, not the port).
+
+These three are what the erase-with-throw pair needs, so `0x140022e50` / `0x140023400` can be transcribed next without
+adding seams.
+
+D240 green; the whole set (59 suites) green over six cycles.

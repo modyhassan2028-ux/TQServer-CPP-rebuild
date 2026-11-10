@@ -1012,3 +1012,11 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 58 suites green, six cycles. Total ported: 572 of 4099 bodies.
 - Next in the cluster: the erase-with-throw pair `0x140022e50` / `0x140023400` (~120 lines each, they need the
   successor `0x140021f50` and the two rotations `0x140021e60` / `0x140021ec0`), then the two erase loops that wait on them.
+
+## D240 (latest)
+
+- 3 bodies in `tree-links.{h,cpp}`: the successor step and the two rotations. Node shape used: left +0, parent +8,
+  right +0x10, colour +0x28, nil flag +0x29; the head is at tree + 0x30 and the root at head + 8.
+- 59 suites green, six cycles. Total ported: 575 of 4099 bodies.
+- Everything the erase-with-throw pair needs is now in place: next is `0x140022e50` (then `0x140023400`, its twin),
+  which retires the last two seams in `container-nodes.cpp`, and after them `0x140023df0` / `0x1400243b0`.
