@@ -31,6 +31,12 @@ static long long Append(long long m, const char* t) { (void)m; (void)t; return m
 static void Fail(void* f, int* t) { (void)f; (void)t; ++g_fail; }
 static void Release(long long p) { (void)p; }
 
+static void LogSink(int nSeverity, const char* pszFile, int nLine, std::string* pText) {
+    (void)nSeverity; (void)pszFile; (void)pText;
+    g_logLine = nLine;
+    ++g_fail;
+}
+
 int main() {
     long long vt[12];
     std::memset(vt, 0, sizeof vt);
@@ -45,10 +51,7 @@ int main() {
     g_pfnNpc_1400778a0 = &Written;
     g_pfnNpc_140077900 = &Resize;
     g_pfnNpc_140077930 = &DataOf;
-    g_pfnNpc_1400783d0 = &Sink;
-    g_pfnNpc_140078030 = &Append;
-    g_pfnNpc_140078580 = &Fail;
-    g_pfnNpc_140078440 = &Release;
+    g_pfnNpcLogSink_1401035c8 = &LogSink;   // the real log bodies now reach this seam
 
     // the two coded-output wrappers: wrap, serialize, destroy, and hand back the low byte only
     {

@@ -17,7 +17,6 @@ namespace tq {
 void (*g_pfnNpcInvalidParameter)(void) = nullptr;
 char* (*g_pfnNpcStringMyPtr)(void* pString) = nullptr;
 bool (*g_pfnNpcIteratorHasContainer)(void* pIter) = nullptr;
-int* (*g_pfnNpc_140078100)(long long pMessage, unsigned int uValue) = nullptr;
 void (*g_pfnNpc_14007a830)(long long* pCoded) = nullptr;
 
 void FUN_1400017b0(long long pThis);   // ported in npcserver/clientsocket.cpp
@@ -172,10 +171,6 @@ int  (*g_pfnNpcWsaRecv)(unsigned long long, void*, unsigned int, void*, unsigned
 void (*g_pfnNpc_14000bf50)(void*) = nullptr;
 void (*g_pfnNpc_14000c300)(void*) = nullptr;
 const void* g_pNpcVtblMessageLite = nullptr;
-void* (*g_pfnNpc_1400783d0)(void*, int, const char*, int) = nullptr;
-long long (*g_pfnNpc_140078030)(long long, const char*) = nullptr;
-void (*g_pfnNpc_140078580)(void*, int*) = nullptr;
-void (*g_pfnNpc_140078440)(long long) = nullptr;
 unsigned char (*g_pfnNpc_140077370)(void*, long long*) = nullptr;
 unsigned char (*g_pfnNpc_1400774a0)(void*, long long*) = nullptr;
 unsigned char (*g_pfnNpc_1400774e0)(void*, long long*) = nullptr;
@@ -196,7 +191,6 @@ int (*g_pfnNpc_1400778a0)(long long) = nullptr;
 void (*g_pfnNpc_140077900)(std::string*, long long) = nullptr;
 long long (*g_pfnNpc_140077930)(std::string*) = nullptr;
 void (*g_pfnNpc_1400778c0)(long long, int) = nullptr;
-long long (*g_pfnNpc_140077ff0)(long long, std::string*) = nullptr;
 void (*g_pfnNpc_14007b7e0)(void*) = nullptr;
 void (*g_pfnNpc_1400776c0)(void*, const char*, int) = nullptr;
 unsigned int g_uNpcConst_1401036a0 = 0;
@@ -2825,57 +2819,44 @@ void FUN_140075f60(int nBefore, int nAfter, int nProduced) {
     (void)uGuard;
     if (nBefore != nAfter) {
         aFinisher1[0] = 0;
-        void* pSink = g_pfnNpc_1400783d0 != nullptr
-                          ? g_pfnNpc_1400783d0(aSink1, 3,
+        void* pSink = FUN_1400783d0(aSink1, 3,
                                                "F:\\cq\\64\\develop\\protobuf\\src\\google\\protobuf\\message_lite.cc",
-                                               0x3f) : nullptr;
+                                               0x3f);
         uState = uState | 1u;
-        long long pChained = g_pfnNpc_140078030 != nullptr
-                                 ? g_pfnNpc_140078030((long long)pSink,
-                                                      "CHECK failed: (byte_size_before_serialization) == (byte_size_after_serialization): ")
-                                 : 0;
-        int* pText = (int*)(g_pfnNpc_140078030 != nullptr
-                                ? g_pfnNpc_140078030(pChained,
-                                                     "Protocol message was modified concurrently during serialization.")
-                                : 0);
-        if (g_pfnNpc_140078580 != nullptr) g_pfnNpc_140078580(aFinisher1, pText);
+        long long pChained = FUN_140078030((long long)pSink,
+                                                      "CHECK failed: (byte_size_before_serialization) == (byte_size_after_serialization): ");
+        int* pText = (int*)FUN_140078030(pChained,
+                                                     "Protocol message was modified concurrently during serialization.");
+        FUN_140078580(aFinisher1, pText);
     }
     if ((uState & 1) != 0) {
         uState = uState & 0xfffffffeu;
-        if (g_pfnNpc_140078440 != nullptr) g_pfnNpc_140078440((long long)(void*)aSink1);
+        FUN_140078440((long long)(void*)aSink1);
     }
     if (nProduced != nBefore) {
         aFinisher2[0] = 0;
-        void* pSink = g_pfnNpc_1400783d0 != nullptr
-                          ? g_pfnNpc_1400783d0(aSink2, 3,
+        void* pSink = FUN_1400783d0(aSink2, 3,
                                                "F:\\cq\\64\\develop\\protobuf\\src\\google\\protobuf\\message_lite.cc",
-                                               0x41) : nullptr;
+                                               0x41);
         uState = uState | 2u;
-        long long pChained = g_pfnNpc_140078030 != nullptr
-                                 ? g_pfnNpc_140078030((long long)pSink,
-                                                      "CHECK failed: (bytes_produced_by_serialization) == (byte_size_before_serialization): ")
-                                 : 0;
-        int* pText = (int*)(g_pfnNpc_140078030 != nullptr
-                                ? g_pfnNpc_140078030(pChained,
-                                                     "Byte size calculation and serialization were inconsistent.  This may indicate a bug in protocol buffers or it may be caused by concurrent modification of the message.")
-                                : 0);
-        if (g_pfnNpc_140078580 != nullptr) g_pfnNpc_140078580(aFinisher2, pText);
+        long long pChained = FUN_140078030((long long)pSink,
+                                                      "CHECK failed: (bytes_produced_by_serialization) == (byte_size_before_serialization): ");
+        int* pText = (int*)FUN_140078030(pChained,
+                                                     "Byte size calculation and serialization were inconsistent.  This may indicate a bug in protocol buffers or it may be caused by concurrent modification of the message.");
+        FUN_140078580(aFinisher2, pText);
     }
     if ((uState & 2) != 0) {
         uState = uState & 0xfffffffdu;
-        if (g_pfnNpc_140078440 != nullptr) g_pfnNpc_140078440((long long)(void*)aSink2);
+        FUN_140078440((long long)(void*)aSink2);
     }
     aFinisher3[0] = 0;
-    void* pSink3 = g_pfnNpc_1400783d0 != nullptr
-                       ? g_pfnNpc_1400783d0(aSink3, 3,
+    void* pSink3 = FUN_1400783d0(aSink3, 3,
                                             "F:\\cq\\64\\develop\\protobuf\\src\\google\\protobuf\\message_lite.cc",
-                                            0x45) : nullptr;
-    int* pText3 = (int*)(g_pfnNpc_140078030 != nullptr
-                             ? g_pfnNpc_140078030((long long)pSink3,
-                                                  "This shouldn't be called if all the sizes are equal.")
-                             : 0);
-    if (g_pfnNpc_140078580 != nullptr) g_pfnNpc_140078580(aFinisher3, pText3);
-    if (g_pfnNpc_140078440 != nullptr) g_pfnNpc_140078440((long long)(void*)aSink3);
+                                            0x45);
+    int* pText3 = (int*)FUN_140078030((long long)pSink3,
+                                                  "This shouldn't be called if all the sizes are equal.");
+    FUN_140078580(aFinisher3, pText3);
+    FUN_140078440((long long)(void*)aSink3);
 }
 
 // 0x140076190 - the required-fields description of a message: "Can't <action> message of type \"<name>\" because
@@ -3034,20 +3015,17 @@ long long FUN_140076790(long long* pMsg, long long pOutBuf) {
                                ? g_pfnNpc_140077840((long long)aOut) : 0;
     if (bError != 0) {
         aFinisher[0] = 0;
-        void* pSink = g_pfnNpc_1400783d0 != nullptr
-                          ? g_pfnNpc_1400783d0(aSink, 3,
+        void* pSink = FUN_1400783d0(aSink, 3,
                                                "F:\\cq\\64\\develop\\protobuf\\src\\google\\protobuf\\message_lite.cc",
-                                               0xe0) : nullptr;
+                                               0xe0);
         uState = uState | 1u;
-        int* pText = (int*)(g_pfnNpc_140078030 != nullptr
-                                ? g_pfnNpc_140078030((long long)pSink,
-                                                     "CHECK failed: !coded_out.HadError(): ")
-                                : 0);
-        if (g_pfnNpc_140078580 != nullptr) g_pfnNpc_140078580(aFinisher, pText);
+        int* pText = (int*)FUN_140078030((long long)pSink,
+                                                     "CHECK failed: !coded_out.HadError(): ");
+        FUN_140078580(aFinisher, pText);
     }
     if ((uState & 1) != 0) {
         uState = uState & 0xfffffffeu;
-        if (g_pfnNpc_140078440 != nullptr) g_pfnNpc_140078440((long long)(void*)aSink);
+        FUN_140078440((long long)(void*)aSink);
     }
     long long lTotal = pOutBuf + nSize;
     if (g_pfnNpc_14007bc70 != nullptr) g_pfnNpc_14007bc70(aOut);
@@ -3266,14 +3244,12 @@ unsigned long long FUN_140077370(void* a1, long long* pMsg) {
         aFinisher[0] = 0;
         unsigned char aText[sizeof(std::string)];
         std::string* pText = FUN_140076190((std::string*)aText, "parse", pMsg);
-        void* pSink = g_pfnNpc_1400783d0 != nullptr
-                          ? g_pfnNpc_1400783d0(aSink, 2,
+        void* pSink = FUN_1400783d0(aSink, 2,
                                                "F:\\cq\\64\\develop\\protobuf\\src\\google\\protobuf\\message_lite.cc",
-                                               0x7b) : nullptr;
-        int* pOut = (int*)(g_pfnNpc_140077ff0 != nullptr
-                               ? g_pfnNpc_140077ff0((long long)pSink, pText) : 0);
-        if (g_pfnNpc_140078580 != nullptr) g_pfnNpc_140078580(aFinisher, pOut);
-        if (g_pfnNpc_140078440 != nullptr) g_pfnNpc_140078440((long long)(void*)aSink);
+                                               0x7b);
+        int* pOut = (int*)FUN_140077ff0((long long)pSink, pText);
+        FUN_140078580(aFinisher, pOut);
+        FUN_140078440((long long)(void*)aSink);
         ((std::string*)aText)->~basic_string();
         return 0;                    // the machine answers the residue's upper bytes with the low byte cleared
     }
@@ -3414,18 +3390,12 @@ void FUN_14007a700(long long* pCoded) {
         unsigned char aFinisher[8];
         unsigned char aSink[64];
         aFinisher[0] = 0;
-        void* pSink = g_pfnNpc_1400783d0 != nullptr
-                          ? g_pfnNpc_1400783d0(aSink, 1,
-                                "F:\\cq\\64\\develop\\protobuf\\src\\google\\protobuf\\io\\coded_stream.cc", 0x4e)
-                          : nullptr;
-        long long pMessage = g_pfnNpc_140078030 != nullptr
-                                 ? g_pfnNpc_140078030((long long)pSink, "The total number of bytes read was ")
-                                 : 0;
-        int* pOut = g_pfnNpc_140078100 != nullptr
-                        ? g_pfnNpc_140078100(pMessage, *(unsigned int*)((char*)pCoded + 0x18))
-                        : nullptr;
-        if (g_pfnNpc_140078580 != nullptr) g_pfnNpc_140078580(aFinisher, pOut);
-        if (g_pfnNpc_140078440 != nullptr) g_pfnNpc_140078440((long long)aSink);
+        void* pSink = FUN_1400783d0(aSink, 1,
+                                "F:\\cq\\64\\develop\\protobuf\\src\\google\\protobuf\\io\\coded_stream.cc", 0x4e);
+        long long pMessage = FUN_140078030((long long)pSink, "The total number of bytes read was ");
+        int* pOut = (int*)FUN_140078100(pMessage, *(unsigned int*)((char*)pCoded + 0x18));
+        FUN_140078580(aFinisher, pOut);
+        FUN_140078440((long long)aSink);
     }
 }
 long long (*g_pfnNpc_14007c650)(long long) = nullptr;

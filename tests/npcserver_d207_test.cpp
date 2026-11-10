@@ -43,6 +43,13 @@ static unsigned char T370(void* a1, long long* p) { (void)a1; (void)p; ++g_t370;
 static int g_destroy = 0;
 static void Destroy(void* p) { (void)p; ++g_destroy; Note(13); }
 
+static void LogSink(int nSeverity, const char* pszFile, int nLine, std::string* pText) {
+    g_logSev = nSeverity; g_logFile = pszFile; g_logLine = nLine;
+    g_appendedText = pText != nullptr ? *pText : std::string();
+    ++g_fail;
+    Note(5);
+}
+
 int main() {
     long long vt[12];
     std::memset(vt, 0, sizeof vt);
@@ -51,10 +58,7 @@ int main() {
     vt[5] = (long long)&ListSlot;      // +0x28
     vt[7] = (long long)&ParseSlot;     // +0x38
     long long aMsg[1] = { (long long)vt };
-    g_pfnNpc_1400783d0 = &Sink;
-    g_pfnNpc_140078580 = &Fail;
-    g_pfnNpc_140078440 = &Release;
-    g_pfnNpc_140077ff0 = &AppendText;
+    g_pfnNpcLogSink_1401035c8 = &LogSink;   // the real log bodies now reach this seam
     g_pfnNpc_14007b7e0 = &B7e0;
     g_pfnNpc_1400776c0 = &BuildWrap;
     g_pfnNpc_140077370 = &T370;
@@ -74,9 +78,8 @@ int main() {
                "F:\\cq\\64\\develop\\protobuf\\src\\google\\protobuf\\message_lite.cc") == 0);
         assert(g_seq[0] == 1 && g_seq[1] == 2);
         assert(g_seq[2] == 3 && g_seq[3] == 4);         // the text was built from the message's own slots
-        assert(g_seqN == 8);
-        assert(g_seq[4] == 5 && g_seq[5] == 6 && g_seq[6] == 7);
-        assert(g_seq[7] == 8);                          // the sink is released after the failure
+        assert(g_seqN == 5);
+        assert(g_seq[4] == 5);                          // the finished message reaches the log sink
         // the text appended is exactly the sentence
         assert(g_appendedText == "Can't parse message of type \"Npc.Msg\" because it is missing required fields: field_x");
         // parsed and initialised: accepted

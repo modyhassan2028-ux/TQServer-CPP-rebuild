@@ -11,7 +11,7 @@ using namespace tq;
 
 int g_hasContainerCalls = 0; int g_myPtrCalls = 0; int g_invalid = 0;
 int g_a830Calls = 0; int g_sinkLine = 0; const char* g_sinkFile = nullptr; int g_sinkSeverity = 0;
-std::string g_text; int g_appendTextCalls = 0; unsigned int g_value = 0; int g_fail = 0; int g_release = 0;
+std::string g_text; std::string g_logFile; int g_logLine = 0; unsigned int g_value = 0; int g_fail = 0; int g_release = 0;
 
 bool HasContainer(void* p) { (void)p; ++g_hasContainerCalls; return true; }
 bool UnknownContainer(void* p) { (void)p; ++g_hasContainerCalls; return false; }
@@ -20,23 +20,29 @@ void InvalidParam(void) { ++g_invalid; }
 void ReleaseChain(long long* p) { (void)p; ++g_a830Calls; }
 void* Sink(void* pOut, int sev, const char* file, int line) {
     g_sinkSeverity = sev; g_sinkFile = file; g_sinkLine = line; return pOut; }
-long long AppendText(long long m, const char* t) { (void)m; g_text = t; ++g_appendTextCalls; return m; }
+long long AppendText(long long m, const char* t) { (void)m; g_text = t; return m; }   // unused since the real bodies run
 int* AppendValue(long long m, unsigned int v) { g_value = v; return (int*)m; }
 void Fail(void* fin, int* m) { (void)fin; (void)m; ++g_fail; }
 void ReleaseSink(long long p) { (void)p; ++g_release; }
 
 }  // namespace
 
+static void LogSink(int nSeverity, const char* pszFile, int nLine, std::string* pText) {
+    g_sinkSeverity = nSeverity;
+    g_sinkFile = pszFile;
+    g_sinkLine = nLine;
+    if (pszFile != nullptr) g_logFile = pszFile;
+    g_logLine = nLine;
+    g_text = pText != nullptr ? *pText : std::string();
+    ++g_fail;
+}
+
 int main() {
     g_pfnNpcIteratorHasContainer = &HasContainer;
     g_pfnNpcStringMyPtr = &MyPtr;
     g_pfnNpcInvalidParameter = &InvalidParam;
     g_pfnNpc_14007a830 = &ReleaseChain;
-    g_pfnNpc_1400783d0 = &Sink;
-    g_pfnNpc_140078030 = &AppendText;
-    g_pfnNpc_140078100 = &AppendValue;
-    g_pfnNpc_140078580 = &Fail;
-    g_pfnNpc_140078440 = &ReleaseSink;
+    g_pfnNpcLogSink_1401035c8 = &LogSink;   // the real log bodies now reach this seam
 
     // the data pointer of a string
     {
@@ -114,11 +120,11 @@ int main() {
         g_a830Calls = 0; g_fail = 0; g_release = 0; g_value = 0; g_text.clear();
         FUN_14007a700(aCoded);
         assert(g_a830Calls == 1);
-        assert(g_fail == 1 && g_release == 1);
+        assert(g_fail == 1);
         assert(g_sinkSeverity == 1 && g_sinkLine == 0x4e);
         assert(g_sinkFile != nullptr && std::strstr(g_sinkFile, "coded_stream.cc") != nullptr);
-        assert(g_text == "The total number of bytes read was ");
-        assert(g_value == 1234);
+        assert(g_text.find("The total number of bytes read was ") == 0);
+        assert(g_text.find("1234") != std::string::npos);   // the count is formatted into the same message
     }
 
     // no chain and another state: nothing happens

@@ -27,11 +27,18 @@ static void Coded(void* pCoded, long long out, int n, int lim) { (void)pCoded; (
 static void Wrap(void* pOut, void* pCoded) { (void)pCoded; Note(17); }
 static void DestroyOut(void* p) { (void)p; Note(18); }
 static void DestroyCoded(void* p) { (void)p; Note(19); }
-static int g_logLine = 0; static const char* g_logText = nullptr; static int g_fail = 0;
+static int g_logLine = 0; static std::string g_logText; static int g_fail = 0;
 static void* Sink(void* pOut, int sev, const char* f, int line) { (void)pOut; (void)sev; (void)f; g_logLine = line; Note(20); return pOut; }
 static long long Append(long long m, const char* t) { (void)m; g_logText = t; Note(21); return m; }
 static void Fail(void* f, int* t) { (void)f; (void)t; ++g_fail; Note(22); }
 static void Release(long long p) { (void)p; Note(23); }
+
+static void LogSink(int nSeverity, const char* pszFile, int nLine, std::string* pText) {
+    (void)nSeverity; (void)pszFile;
+    g_logLine = nLine;
+    g_logText = pText != nullptr ? *pText : std::string();
+    ++g_fail;
+}
 
 int main() {
     long long vt[12];
@@ -48,10 +55,7 @@ int main() {
     g_pfnNpc_14007d810 = &DestroyCoded;
     g_pfnNpc_140077850 = &Room;
     g_pfnNpc_1400778a0 = &Written;
-    g_pfnNpc_1400783d0 = &Sink;
-    g_pfnNpc_140078030 = &Append;
-    g_pfnNpc_140078580 = &Fail;
-    g_pfnNpc_140078440 = &Release;
+    g_pfnNpcLogSink_1401035c8 = &LogSink;   // the real log bodies now reach this seam
     static unsigned char aBuf[0x100];
 
     // into a buffer: the size, the coded output around the buffer with limit -1, the write at slot 9, and the
@@ -70,7 +74,7 @@ int main() {
         g_seqN = 0; g_hadError = 1;
         FUN_140076790(aMsg, (long long)aBuf);
         assert(g_logLine == 0xe0 && g_fail == 1);
-        assert(std::strcmp(g_logText, "CHECK failed: !coded_out.HadError(): ") == 0);
+        assert(g_logText == "CHECK failed: !coded_out.HadError(): ");
         assert(g_seq[g_seqN - 1] == 19);          // the coded output still comes down last
         g_hadError = 0;
     }

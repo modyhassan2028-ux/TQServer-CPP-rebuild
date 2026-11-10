@@ -1530,3 +1530,17 @@ closed, and the flag only being set on the path that got a socket.
   first rotates the log file (`0x140077fc0`), takes the lock (`0x140078d20`) and lets it go (`0x140078d60`), and only
   logs when the quiet flag `140104cd8` the rotation leaves behind is clear.
 - `0x140078580` is the finisher form of the same sink: its first word is ignored.
+
+## D212 — rewiring pass 1: the log message bodies
+
+- `0x1400783d0`, `0x140078030`, `0x140078100`, `0x140078440`, `0x140078580` and `0x140077ff0` now have real bodies, so
+  their seams are gone. Every call site (27 of them, in `0x140075f60`, `0x140076790`, `0x140077370` and
+  `0x14007a700`) calls the body directly, exactly as the image does.
+- The suites for those four bodies now observe at the one seam that is genuinely foreign to this image: the log
+  function at `0x1401035c8`, reached from the real sink `0x140078470` with severity, file, line and the finished
+  text. That is a stronger check than the old one: the tests read the **composed** message,
+  e.g. `CHECK failed: (byte_size_before_serialization) == (byte_size_after_serialization): Protocol message was
+  modified concurrently during serialization.`, instead of the individual appends.
+- Note that these checks carry severity 3, and `0x140078470` throws only through its own throw seam, so with that
+  seam unset the port logs and keeps going. The machine's abort comes from the throw info the image passes at
+  `0x1400fee98`.
