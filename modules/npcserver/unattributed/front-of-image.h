@@ -347,8 +347,15 @@ extern void (*g_pfnNpc_14007d810)(void* pCoded);
 extern long long (*g_pfnNpc_140077850)(long long pTarget, unsigned int uSize);
 extern int  (*g_pfnNpc_1400778a0)(long long pTarget);
 long long FUN_140076790(long long* pMsg, long long pOutBuf);
-void FUN_140076910(long long* pMsg, long long pTarget);
+unsigned long long FUN_140076910(long long* pMsg, long long pTarget);
 unsigned long long FUN_140076aa0(long long* pMsg, long long pTarget);
+extern void (*g_pfnNpc_140077900)(std::string* pValue, long long nNewSize);
+extern long long (*g_pfnNpc_140077930)(std::string* pValue);
+unsigned char FUN_140076be0(long long* pMsg, long long pTarget);
+unsigned char FUN_140076c40(long long* pMsg, long long pTarget);
+void FUN_140076ca0(long long* pMsg, std::string* pValue);
+unsigned long long FUN_140076e30(long long* pMsg, std::string* pValue);
+
 
 
 

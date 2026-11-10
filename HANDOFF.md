@@ -775,3 +775,9 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - Lesson worth re-checking in every vtable port: a call through a slot needs `*(T (**)(...))(pBase + off)`, two
   stars. One star calls the slot's address (vtable memory) and shows up as a jump to a stack or data address.
 - Next: 0x140076be0 and 0x140076c40 (77 each), then 0x140076ca0 (385).
+
+## D204 (latest)
+
+- NpcServer: 145 bodies, 36 suites green.
+- Next: 0x140076f60 onward in address order. Re-check every forwarder's return type at the call site: three of
+  them in this cluster were tail calls the decompiler labelled void.

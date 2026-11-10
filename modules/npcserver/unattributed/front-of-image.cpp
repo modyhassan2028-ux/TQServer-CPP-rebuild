@@ -188,6 +188,8 @@ void (*g_pfnNpc_14007bc70)(void*) = nullptr;
 void (*g_pfnNpc_14007d810)(void*) = nullptr;
 long long (*g_pfnNpc_140077850)(long long, unsigned int) = nullptr;
 int (*g_pfnNpc_1400778a0)(long long) = nullptr;
+void (*g_pfnNpc_140077900)(std::string*, long long) = nullptr;
+long long (*g_pfnNpc_140077930)(std::string*) = nullptr;
 void (*g_pfnNpc_14000c160)(long long) = nullptr;
 void (*g_pfnNpc_14000c220)(void*) = nullptr;
 int (*g_pfnNpcWsaPoll_Ordinal18)(unsigned int, void*, void*, void*, int*) = nullptr;
@@ -3043,8 +3045,9 @@ long long FUN_140076790(long long* pMsg, long long pOutBuf) {
     return lTotal;
 }
 
-// 0x140076910 - straight forward to 0x140076aa0.
-void FUN_140076910(long long* pMsg, long long pTarget) { FUN_140076aa0(pMsg, pTarget); }
+// 0x140076910 - straight forward to 0x140076aa0, whose eight-byte answer it carries back (a tail call again: the
+// decompiler shows it as void, and 0x140076be0 reads the value it returns).
+unsigned long long FUN_140076910(long long* pMsg, long long pTarget) { return FUN_140076aa0(pMsg, pTarget); }
 
 // 0x140076aa0 - serialize into a target. The byte size comes from slot 8 at +0x40 and the target is asked for
 // that much room through 0x140077850. With no room handed back the message writes itself through slot 9 at
@@ -3081,6 +3084,50 @@ unsigned long long FUN_140076aa0(long long* pMsg, long long pTarget) {
         uRet = 1ull | ((unsigned long long)lExpect & ~0xffull);
     }
     return uRet;
+}
+
+// 0x140076be0 - wrap the target in a coded output, serialize through the forwarder at 0x140076910, hand back its
+// low byte and destroy the wrapper.
+unsigned char FUN_140076be0(long long* pMsg, long long pTarget) {
+    long long aOut[4];
+    if (g_pfnNpc_14007bbf0 != nullptr) g_pfnNpc_14007bbf0(aOut, (void*)pTarget);
+    unsigned char bOk = (unsigned char)(FUN_140076910(pMsg, (long long)aOut) & 0xffull);
+    if (g_pfnNpc_14007bc70 != nullptr) g_pfnNpc_14007bc70(aOut);
+    return bOk;
+}
+
+// 0x140076c40 - the same with 0x140076aa0, whose answer arrives as eight bytes and its low one is the result.
+unsigned char FUN_140076c40(long long* pMsg, long long pTarget) {
+    long long aOut[4];
+    if (g_pfnNpc_14007bbf0 != nullptr) g_pfnNpc_14007bbf0(aOut, (void*)pTarget);
+    unsigned long long uOk = FUN_140076aa0(pMsg, (long long)aOut);
+    unsigned char bOk = (unsigned char)(uOk & 0xffull);
+    if (g_pfnNpc_14007bc70 != nullptr) g_pfnNpc_14007bc70(aOut);
+    return bOk;
+}
+
+// 0x140076ca0 - straight forward to 0x140076e30.
+void FUN_140076ca0(long long* pMsg, std::string* pValue) { FUN_140076e30(pMsg, pValue); }
+
+// 0x140076e30 - append the message's bytes to a string. The string is grown to its own size plus the message's
+// byte size from slot 8, the message writes itself through slot 10 at the string's data plus that size, and a
+// write that does not end exactly where the byte size says runs the consistency check 0x140075f60, which never
+// returns. The answer is one with the upper bytes of the expected end.
+unsigned long long FUN_140076e30(long long* pMsg, std::string* pValue) {
+    unsigned long long uLen = pValue->size();
+    int nSize = (*(int (**)(long long*))(*pMsg + 0x40))(pMsg);
+    if (g_pfnNpc_140077900 != nullptr)
+        g_pfnNpc_140077900(pValue, (long long)((int)uLen + nSize));
+    long long pData = g_pfnNpc_140077930 != nullptr ? g_pfnNpc_140077930(pValue) : 0;
+    pData = pData + (int)uLen;
+    long long pEnd = (*(long long (**)(long long*, long long))(*pMsg + 0x50))(pMsg, pData);
+    long long lExpect = (long long)nSize;
+    if (pEnd - pData != lExpect) {
+        int nSizeNow = (*(int (**)(long long*))(*pMsg + 0x40))(pMsg);
+        FUN_140075f60(nSize, nSizeNow, (int)pEnd - (int)pData);
+        lExpect = 0;             // unreachable: the consistency check never returns
+    }
+    return 1ull | ((unsigned long long)lExpect & ~0xffull);
 }
 
 }  // namespace tq

@@ -1412,3 +1412,17 @@ closed, and the flag only being set on the path that got a socket.
   `(*(T (**)(...))(*pMsg + 0x58))(...)`.
 - Seven new seams: the coded output, the output wrapper, the error query, both teardowns, the room request and
   the written-bytes query.
+
+## D204 — NpcServer.exe 0x140076be0, 0x140076c40, 0x140076ca0, 0x140076e30
+
+- `0x140076be0` and `0x140076c40` wrap the target in a coded output through `0x14007bbf0`, serialize through
+  `0x140076910` and `0x140076aa0` respectively, destroy the wrapper through `0x14007bc70`, and hand back only the
+  **low byte** of the answer.
+- `0x140076910` is a tail call too and had to be retyped to return eight bytes; the decompiler shows it as `void`
+  and `0x140076be0` reads what it returns. Third instance of this pattern in this cluster.
+- `0x140076ca0` forwards to `0x140076e30`.
+- `0x140076e30` appends the message's bytes to a string: the byte size comes from slot 8 at `+0x40`, the string is
+  grown through `0x140077900` to its own size plus that byte size, its data pointer comes from `0x140077930`, and
+  slot 10 at `+0x50` writes starting at data plus the string's old size. A write that does not end exactly at the
+  byte size runs `0x140075f60`, which never returns, and the answer is one with the expected end's upper bytes.
+- Two new seams: the string resize and its data pointer.
