@@ -2024,3 +2024,26 @@ These three are what the erase-with-throw pair needs, so `0x140022e50` / `0x1400
 adding seams.
 
 D240 green; the whole set (59 suites) green over six cycles.
+
+## D241 — the erase-with-iterator pair and its three helpers (5 bodies)
+
+`modules/npcserver/unattributed/tree-erase.{h,cpp}`, manifest `g_aNpcTreeErase`.
+
+| address | body |
+|---|---|
+| 0x140022e50 | erase the node the iterator names: refuse the end node, advance the iterator to the successor, splice the replacement, then rebalance and free |
+| 0x140023400 | the same body with `0x140021fe0`, `0x140021d50`, `0x140021db0` behind it instead of `0x140021f50`, `0x140021e60`, `0x140021ec0` |
+| 0x140021fe0 | the second successor copy (identical to `0x140021f50` apart from the unrecovered-jumptable comment) |
+| 0x140021d50 | the second rotate-left copy (identical to `0x140021e60`) |
+| 0x140021db0 | the second rotate-right copy (identical to `0x140021ec0`) |
+
+Both erase bodies are kept as two full copies rather than folded into one: the listing shows the same instructions with
+the second tree flavour's own helpers, and folding them would hide which instantiation a caller used. The refusal is a
+seam (`g_pfnNpcThrowOutOfRange`) that throws `std::out_of_range("invalid map/set<T> iterator")` by default, mirroring
+the `_CxxThrowException` the image performs with the out_of_range vtable.
+
+Facts the suite pins down: the erased node's colour decides whether the rebalance runs at all; a node with both children
+hands its place, its left child and its colour to the successor; a left-child leaf without a right subtree raises its
+parent's left link onto its left child; and the returned iterator carries `*pTree` plus the successor node.
+
+D241 green; the whole set (60 suites) green over six cycles.

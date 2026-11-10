@@ -1020,3 +1020,12 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 59 suites green, six cycles. Total ported: 575 of 4099 bodies.
 - Everything the erase-with-throw pair needs is now in place: next is `0x140022e50` (then `0x140023400`, its twin),
   which retires the last two seams in `container-nodes.cpp`, and after them `0x140023df0` / `0x1400243b0`.
+
+## D241 (latest)
+
+- 5 bodies in `tree-erase.{h,cpp}`: both erase-with-iterator bodies (`0x140022e50`, `0x140023400`) and the three
+  helpers the second one calls (`0x140021fe0`, `0x140021d50`, `0x140021db0`).
+- `g_pfnNpcThrowOutOfRange` is the only new seam; it throws `std::out_of_range("invalid map/set<T> iterator")`.
+- 60 suites green, six cycles. Total ported: 580 of 4099 bodies.
+- Next: `0x140023df0` / `0x1400243b0`, the two erase loops that call these bodies, which retires the last seams in
+  `container-nodes.cpp`, then the rest of the 0x140024xxx cluster.
