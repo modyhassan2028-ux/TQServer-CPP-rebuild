@@ -1942,3 +1942,25 @@ and `0x1400C3298` (`ISingleMap<INpc>`), which the suite checks are three distinc
 all three interface families: `==`, `!=`, and the pointer difference `(pA[1] - pB[1]) >> 3` that the same guard protects.
 
 D236 green; the whole set (55 suites) green over six cycles.
+
+## D237 — the container node builders and destructors (10 bodies)
+
+`modules/npcserver/unattributed/container-nodes.{h,cpp}`, manifest `g_aNpcContainerNode`. Written by hand from the
+decompiled bodies; the four calls that leave the cluster are seams owned by this file.
+
+| address | body |
+|---|---|
+| 0x1400257a0 / 0x1400258d0 | `operator_new(8)` node pointing back at the object, sentinel head from `0x140022a40`, `+0x29` flag set, three links closed on the head, `[7] = 0` |
+| 0x140025820 / 0x140025950 | the same body with the head from `0x140022af0` |
+| 0x140024340 | reads `[0]` and `[6]`, erases through `0x140023df0`, frees the head, clears `[6]` and `[7]` |
+| 0x140024d70 | the same through `0x1400243b0` |
+| 0x140025210 / 0x140025310 | `0x140024340` then `operator_delete(*pSet)` |
+| 0x1400251e0 / 0x1400252e0 | `0x140024d70` then `operator_delete(*pSet)` |
+
+Two details worth keeping: both destructors read `*(long long*)pSet[6]` into a local that is never used (the compiler
+kept the load, so the port keeps it and marks it), and the deleters free `*pSet`, the object the set holds, not the set
+itself.
+
+The suite checks the head flag, the three head links, that a builder takes its head from the right allocator (a40 vs
+af0), that a destructor erases then frees the head and clears both fields, and that a deleter frees the head first and
+the object second. D237 green; the whole set (56 suites) green over six cycles.

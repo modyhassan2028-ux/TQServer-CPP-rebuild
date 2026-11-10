@@ -989,3 +989,11 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 55 suites green, six cycles. Total ported: 550 of 4099 bodies.
 - The parse gap: the true addresses of `ISingleMap<INpc>`, `IGameObjSet<IGenerator>` and `IGameObjSet<CNpcType>`
   vtables are now on record, which is what the interface classes' own batches will need.
+
+## D237 (latest)
+
+- 10 bodies in `container-nodes.{h,cpp}`: 4 node builders, 2 erase-then-free destructors, 4 deleters.
+  The seams `g_pfnNpc_140022a40`, `_140022af0`, `_140023df0`, `_1400243b0` are owned by that file until their bodies land.
+- 56 suites green, six cycles. Total ported: 560 of 4099 bodies.
+- Next in this cluster: `0x140023df0` / `0x1400243b0` (the RB-tree erase loops) and `0x140022a40` / `0x140022af0`
+  (the sentinel allocators), which retire four seams at once.
