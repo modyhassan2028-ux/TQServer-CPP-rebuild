@@ -956,3 +956,11 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - The STL-internals cluster is now down to 224 unmatched bodies in a very long tail (largest remaining group is 2),
   so the generator route is exhausted here. Recommendation for the next batch: leave the remainder alone for now and
   return to the module surface past 0x140090000, or port the tail by hand, two or three per batch.
+
+## D233 (latest)
+
+- 226 bodies across the whole image: 88 node-push, 86 delete-holder, 52 move-forward, in `stl-global.{h,cpp}`
+  with manifest `g_aNpcGlobal`. Total ported: 393 of 4099 bodies.
+- 52 suites green, six cycles.
+- Next by mass: the logging stubs `log_InlineLogERROR(&DAT_x); return 0/void;` (141 bodies). They need the static
+  descriptor layout (file/line/severity) read out of the image first, so that is its own batch.

@@ -1845,3 +1845,26 @@ node-push body in this range was emitted by the earlier leaf generation, so a ge
 nothing and was removed rather than left as a misleading tool.
 
 D232 green alone; 51 suites green over six cycles.
+
+## D233 — the binary-wide template shapes (226 bodies)
+
+The same three instantiation shapes keep appearing wherever the compiler emitted them, so this batch stops limiting
+itself to one 64 KiB window and takes every exact match in the image: `modules/npcserver/unattributed/stl-global.{h,cpp}`,
+manifest `g_aNpcGlobal`.
+
+| family | bodies | span | body |
+|---|---|---|---|
+| node-push | 88 | 0x14001ed70 .. 0x140095030 | `operator_new(8)`, put the object in the node, point the object at it, return the object; a failed allocation stores null without touching the node |
+| delete-holder | 86 | 0x14001e5e0 .. 0x140094c70 | `operator_delete(*(void**)pObject)` — the object's first word, never the object itself |
+| move-forward | 52 | 0x1400277f0 .. 0x14006fc50 | `(nLast - pFirst) >> SHIFT` elements of `ELEM` bytes, `memmove_s` only when the count is non-zero, returning `end + pDst` |
+
+All 88 node-push bodies use an 8-byte node and store the object itself; all 86 delete-holders take `*pObject`; the 52
+moves split into 42 eight-byte (shift 3) and 10 four-byte (shift 2) forms. The generator emits a body only when its
+text matches exactly and the element size equals `1 << shift`, so no near-miss is transcribed.
+
+The most prolific remaining shape in the image is now the logging stub
+`log_InlineLogERROR(&DAT_...); return 0;` (141 bodies across three return types). It is deliberately left for its own
+batch: every body names a different static descriptor, so it needs the descriptor's file/line/severity data from the
+image rather than a text-only transcription.
+
+D233 green on its own and the whole set (52 suites) green over six cycles.
