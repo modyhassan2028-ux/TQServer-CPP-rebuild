@@ -891,3 +891,8 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 
 - 14007a830 rewired, and one missing indirection fixed in its sink call. 44 suites green, three of them six times.
 - Next: the log layer (77f50/77fc0/78d20/78d60), then 16990, then the coded-input cluster around a8e0/a9c0 is done.
+
+## D223 (latest)
+
+- 140077fc0 / 140078d20 / 140078d60 rewired; D211 observes the layer below. 44 suites green, two of them six times.
+- Next: 140016990 (the condition twin), then 140078b30 / 1400787c0 / 1400787f0 to close the log layer.

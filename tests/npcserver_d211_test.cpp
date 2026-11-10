@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <cstring>
 #include <cstdint>
+#include <cstdio>
 #include <string>
 #include "modules/npcserver/unattributed/front-of-image.h"
 
@@ -24,9 +25,16 @@ static void ThrowFatal(void* pException, void* pThrowInfo) {
     (void)pException; (void)pThrowInfo; ++g_throwCalls; Note(2);
     throw false;                                  // stands in for the exception the sink raises
 }
-static void Rotate(void) { Note(3); }
-static void Lock(void* pLock, void* pConst) { (void)pLock; (void)pConst; Note(4); }
-static void Unlock(void* pLock) { (void)pLock; Note(5); }
+// the three log-layer bodies are real now, so what stays outside is what they themselves reach: the one-time
+// initialiser, the mutex's take and its give
+static void* g_storedMutex = nullptr;
+static int g_initCalls = 0;
+static void InitOnce(long long* pState, void (*pfnBody)(void)) {
+    (void)pState; ++g_initCalls; Note(3);
+    if (pfnBody != nullptr) pfnBody();          // the body the image hands over
+}
+static void MutexTake(void* pMutex) { g_storedMutex = pMutex; Note(4); }
+static void MutexGive(void* pMutex) { (void)pMutex; Note(5); }
 
 static unsigned char g_msg[0x40];
 static const char* const kFile = "C:\\path\\file.cc";
@@ -34,9 +42,9 @@ static const char* const kFile = "C:\\path\\file.cc";
 int main() {
     g_pfnNpcLogSink_1401035c8 = &LogSink;
     g_pfnNpcThrowFatal = &ThrowFatal;
-    g_pfnNpc_140077fc0 = &Rotate;
-    g_pfnNpc_140078d20 = &Lock;
-    g_pfnNpc_140078d60 = &Unlock;
+    g_pfnNpc_140078b30 = &InitOnce;        // the one-time initialiser behind 0x140077fc0
+    g_pfnNpc_1400787c0 = &MutexTake;       // the mutex take behind 0x140078d20
+    g_pfnNpc_1400787f0 = &MutexGive;       // and the give behind 0x140078d60
 
     // the message holds the severity, the file, the line and an empty text
     {
@@ -71,7 +79,8 @@ int main() {
         g_nNpcConst_140104cd8 = 0;
         FUN_140078470((int*)g_msg);
         assert(g_orderN == 4);
-        assert(g_order[0] == 3 && g_order[1] == 4 && g_order[2] == 5 && g_order[3] == 1);
+        assert(g_initCalls == 1);                            // the initialiser runs once per message
+        assert(g_storedMutex == (void*)g_pNpcConst_140104ce0);   // the hold is on the image's own mutex
         assert(g_logCalls == 1 && g_logSeverity == 2 && g_logLine == 0x2a);
         assert(g_logFile == kFile && g_logText == "hello");
         assert(g_throwCalls == 0);

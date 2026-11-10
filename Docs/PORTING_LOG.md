@@ -1648,3 +1648,14 @@ closed, and the flag only being set on the path that got a socket.
 - The recorded layout rule: all 50 paths are nestings. GitHub shows `google/protobuf/io` and
   `version/cqserver-78.0.11-...` as single rows only because its browser compresses single-child chains; on disk
   `src/` holds `google` and `version` as separate entries.
+
+## D223 — the log layer is called, not stubbed
+
+- `0x140077fc0`, `0x140078d20` and `0x140078d60` are called directly from `0x140078470`. Their bodies stay thin on
+  purpose: `0x140077fc0` hands `&0x140077f50` and the image's eight bytes at `0x140104ce8` to `0x140078b30`, and the
+  mutex wrapper stores the mutex before taking it, so what remains outside is `0x140078b30`, `0x1400787c0` and
+  `0x1400787f0`.
+- D211 moved its observation one level down and now also pins that the hold is on `g_pNpcConst_140104ce0` and that
+  the initialiser runs once per non-fatal message.
+- Note for the next slices: `rewire_seams.py` deletes the fake bindings it finds in tests, so any observer that has
+  to move down a level must be re-added after the run.

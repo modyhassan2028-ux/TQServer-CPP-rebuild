@@ -3430,9 +3430,6 @@ int FUN_14007a9c0(long long pCoded) {
 }
 void (*g_pfnNpcLogSink_1401035c8)(int, const char*, int, std::string*) = nullptr;
 void (*g_pfnNpcThrowFatal)(void*, void*) = nullptr;
-void (*g_pfnNpc_140077fc0)(void) = nullptr;
-void (*g_pfnNpc_140078d20)(void*, void*) = nullptr;
-void (*g_pfnNpc_140078d60)(void*) = nullptr;
 const void* g_pNpcConst_140104ce0 = nullptr;
 int g_nNpcConst_140104cd8 = 0;
 const void* g_pNpcThrowInfo_1400fee98 = nullptr;
@@ -3486,11 +3483,11 @@ void FUN_140078580(void* pFinisher, int* pMsg) {
 void FUN_140078470(int* pMsg) {
     unsigned char bQuiet = 0;
     if (*pMsg != 3) {
-        if (g_pfnNpc_140077fc0 != nullptr) g_pfnNpc_140077fc0();
+        FUN_140077fc0();
         long long aLock[1] = { 0 };
-        if (g_pfnNpc_140078d20 != nullptr) g_pfnNpc_140078d20(aLock, (void*)g_pNpcConst_140104ce0);
+        FUN_140078d20(aLock, (void*)g_pNpcConst_140104ce0);
         bQuiet = (unsigned char)(0 < g_nNpcConst_140104cd8);
-        if (g_pfnNpc_140078d60 != nullptr) g_pfnNpc_140078d60(aLock);
+        FUN_140078d60(aLock);
     }
     if (bQuiet == 0) {
         if (g_pfnNpcLogSink_1401035c8 != nullptr) {
