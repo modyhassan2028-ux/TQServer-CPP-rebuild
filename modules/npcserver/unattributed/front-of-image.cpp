@@ -174,8 +174,6 @@ const void* g_pNpcVtblMessageLite = nullptr;
 unsigned char (*g_pfnNpc_140077370)(void*, long long*) = nullptr;
 unsigned char (*g_pfnNpc_1400774a0)(void*, long long*) = nullptr;
 unsigned char (*g_pfnNpc_1400774e0)(void*, long long*) = nullptr;
-void (*g_pfnNpc_140077530)(void*, void*) = nullptr;
-unsigned char (*g_pfnNpc_140077520)(long long) = nullptr;
 void (*g_pfnNpc_14007a8e0)(long long, int) = nullptr;
 int (*g_pfnNpc_14007a9c0)(long long) = nullptr;
 void (*g_pfnNpc_14007a700)(void*) = nullptr;
@@ -2908,11 +2906,11 @@ unsigned char FUN_140076380(long long* pThis, void* a2) {
 // accepted it and the wrapper then reports itself valid. The wrapper is destroyed on every path.
 unsigned char FUN_1400763b0(long long* pThis, void* a2) {
     long long aWrapper[10];
-    if (g_pfnNpc_140077530 != nullptr) g_pfnNpc_140077530(aWrapper, a2);
+    FUN_140077530((void**)aWrapper, a2);
     unsigned char bAccepted = FUN_140076350(pThis, aWrapper);
     unsigned char bOk = 0;
     if (bAccepted != 0) {
-        if (g_pfnNpc_140077520 != nullptr && g_pfnNpc_140077520((long long)aWrapper) != 0) bOk = 1;
+        if (FUN_140077520((long long)aWrapper) != 0) bOk = 1;
     }
     if (g_pfnNpc_14007a700 != nullptr) g_pfnNpc_14007a700(aWrapper);
     return bOk;
@@ -2921,11 +2919,11 @@ unsigned char FUN_1400763b0(long long* pThis, void* a2) {
 // 0x140076450 - the same shape through 0x140076380 instead.
 unsigned char FUN_140076450(long long* pThis, void* a2) {
     long long aWrapper[10];
-    if (g_pfnNpc_140077530 != nullptr) g_pfnNpc_140077530(aWrapper, a2);
+    FUN_140077530((void**)aWrapper, a2);
     unsigned char bAccepted = FUN_140076380(pThis, aWrapper);
     unsigned char bOk = 0;
     if (bAccepted != 0) {
-        if (g_pfnNpc_140077520 != nullptr && g_pfnNpc_140077520((long long)aWrapper) != 0) bOk = 1;
+        if (FUN_140077520((long long)aWrapper) != 0) bOk = 1;
     }
     if (g_pfnNpc_14007a700 != nullptr) g_pfnNpc_14007a700(aWrapper);
     return bOk;
@@ -2935,12 +2933,12 @@ unsigned char FUN_140076450(long long* pThis, void* a2) {
 // accepted, the wrapper is valid and its error state is zero.
 unsigned char FUN_1400764f0(long long* pThis, void* a2, int nType) {
     long long aWrapper[10];
-    if (g_pfnNpc_140077530 != nullptr) g_pfnNpc_140077530(aWrapper, a2);
+    FUN_140077530((void**)aWrapper, a2);
     if (g_pfnNpc_14007a8e0 != nullptr) g_pfnNpc_14007a8e0((long long)aWrapper, nType);
     unsigned char bAccepted = FUN_140076350(pThis, aWrapper);
     unsigned char bOk = 0;
     if (bAccepted != 0) {
-        if (g_pfnNpc_140077520 != nullptr && g_pfnNpc_140077520((long long)aWrapper) != 0) {
+        if (FUN_140077520((long long)aWrapper) != 0) {
             int nError = g_pfnNpc_14007a9c0 != nullptr ? g_pfnNpc_14007a9c0((long long)aWrapper) : 0;
             if (nError == 0) bOk = 1;
         }
@@ -2952,12 +2950,12 @@ unsigned char FUN_1400764f0(long long* pThis, void* a2, int nType) {
 // 0x1400765b0 - the same shape through 0x140076380 instead.
 unsigned char FUN_1400765b0(long long* pThis, void* a2, int nType) {
     long long aWrapper[10];
-    if (g_pfnNpc_140077530 != nullptr) g_pfnNpc_140077530(aWrapper, a2);
+    FUN_140077530((void**)aWrapper, a2);
     if (g_pfnNpc_14007a8e0 != nullptr) g_pfnNpc_14007a8e0((long long)aWrapper, nType);
     unsigned char bAccepted = FUN_140076380(pThis, aWrapper);
     unsigned char bOk = 0;
     if (bAccepted != 0) {
-        if (g_pfnNpc_140077520 != nullptr && g_pfnNpc_140077520((long long)aWrapper) != 0) {
+        if (FUN_140077520((long long)aWrapper) != 0) {
             int nError = g_pfnNpc_14007a9c0 != nullptr ? g_pfnNpc_14007a9c0((long long)aWrapper) : 0;
             if (nError == 0) bOk = 1;
         }

@@ -1579,3 +1579,12 @@ closed, and the flag only being set on the path that got a socket.
     argument, not the message. Reading the message's `+0x14` instead walks off a one-element array.
   - The room path consumes through `0x1400778c0`, so `+8` moves on by the byte size and `+0x10` shrinks by it, while
     the refused call leaves both untouched.
+
+## D216 — rewiring pass 2, slice 3: the parse wrapper
+
+- `0x140077530` (build the 0x50-byte wrapper) and `0x140077520` (its validity byte at `+0x24`) are now called
+  directly by the four accept wrappers `0x1400763b0`, `0x140076450`, `0x1400764f0`, `0x1400765b0`.
+- `0x140077530` **clears** `+0x24`, so a wrapper is invalid until the handler marks it. The suite now has its
+  handler fakes write that byte, which is what acceptance through `0x140076350` really does, and the sequence notes
+  drop from four entries to two: the build no longer announces itself.
+- The build keeps its own seam for the finisher `0x14007b7e0`, which is still unported.

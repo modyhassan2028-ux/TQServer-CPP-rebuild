@@ -857,3 +857,9 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - Rewiring pass 2, slice 2 done: 140077840, 140077850, 1400778a0 rewired. D203 and D204 rebuilt around real coded
   outputs (buffer/room/cursor inside the wrapper, read at teardown). 44 suites green, the rebuilt ones six times.
 - Next slice: 140077520/140077530 (wrapper validity and construction), then 140077370/1400774a0/1400774e0.
+
+## D216 (latest)
+
+- Rewiring pass 2, slice 3 done: 140077530/140077520 rewired, D201 rebuilt. 44 suites green, six cycles on the
+  six suites around the wrappers.
+- Next slice: 140077370 / 1400774a0 / 1400774e0, then 140077620/1400776c0/1400777a0.
