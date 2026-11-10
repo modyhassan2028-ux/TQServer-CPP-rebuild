@@ -824,3 +824,8 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - NpcServer: 173 bodies, 42 suites green. The coded-input cluster is complete.
 - Next: the rewiring pass listed under D209, or 0x140077ff0 / 0x140078030 / 0x1400783d0 (log helpers) to close the
   logging seams.
+
+## D211 (latest)
+
+- NpcServer: 180 bodies, 43 suites green. The logging layer now has real bodies; its seams stay until the rewiring
+  pass, which is the next unit.

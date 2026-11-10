@@ -1518,3 +1518,15 @@ closed, and the flag only being set on the path that got a socket.
   `+0x10` (current into end), and clears both counters.
 - Everything answered through a measured `int` re-read after the sink call: the pending count is asked twice on
   purpose, and the second answer is the one used for the bookkeeping.
+
+## D211 — NpcServer.exe 0x1400783d0, 0x140078440, 0x140078030, 0x140077ff0, 0x140078100, 0x140078580, 0x140078470
+
+- The log message is 0x38 bytes: severity at `+0`, the file pointer at `+8`, the line at `+0x10`, and a `std::string`
+  at `+0x18` that the constructor builds in place and `0x140078440` destroys.
+- `0x140078100` formats with `"%d"` into a **0x80** buffer from an **unsigned** word, so a value such as `0xFFFFFFF0`
+  lands in the text as `-16`. Pinned in the suite.
+- `0x140078470` is the sink. Severity 3 (fatal) skips the rotation entirely, still goes through the log function at
+  `0x1401035c8`, and then throws `0x1400fee98`, which is what makes a failed check end the run. Every other severity
+  first rotates the log file (`0x140077fc0`), takes the lock (`0x140078d20`) and lets it go (`0x140078d60`), and only
+  logs when the quiet flag `140104cd8` the rotation leaves behind is clear.
+- `0x140078580` is the finisher form of the same sink: its first word is ignored.

@@ -3477,5 +3477,81 @@ int FUN_14007a9c0(long long pCoded) {
     int nConsumed = g_pfnNpc_14007c670 != nullptr ? g_pfnNpc_14007c670(pCoded) : 0;
     return *(int*)(pCoded + 0x28) - nConsumed;
 }
+void (*g_pfnNpcLogSink_1401035c8)(int, const char*, int, std::string*) = nullptr;
+void (*g_pfnNpcThrowFatal)(void*, void*) = nullptr;
+void (*g_pfnNpc_140077fc0)(void) = nullptr;
+void (*g_pfnNpc_140078d20)(void*, void*) = nullptr;
+void (*g_pfnNpc_140078d60)(void*) = nullptr;
+const void* g_pNpcConst_140104ce0 = nullptr;
+int g_nNpcConst_140104cd8 = 0;
+const void* g_pNpcThrowInfo_1400fee98 = nullptr;
+#include <cstdio>
+// 0x1400783d0 - build one log message: severity at +0, the file at +8, the line at +0x10, and an empty text at
+// +0x18. The object is 0x38 bytes.
+void* FUN_1400783d0(void* pMsg, unsigned int uSeverity, const char* pszFile, unsigned int uLine) {
+    unsigned int* p = (unsigned int*)pMsg;
+    p[0] = uSeverity;
+    *(const char**)((unsigned char*)pMsg + 8) = pszFile;
+    *(unsigned int*)((unsigned char*)pMsg + 0x10) = uLine;
+    new ((unsigned char*)pMsg + 0x18) std::string();
+    return pMsg;
+}
+
+// 0x140078440 - the text at +0x18 comes down.
+void FUN_140078440(long long pMsg) {
+    ((std::string*)((unsigned char*)pMsg + 0x18))->~basic_string();
+}
+
+// 0x140078030 - append a C string to the text and hand the message back for chaining.
+long long FUN_140078030(long long pMsg, const char* pszText) {
+    *(std::string*)((unsigned char*)pMsg + 0x18) += pszText;
+    return pMsg;
+}
+
+// 0x140077ff0 - append another string to the text and hand the message back.
+long long FUN_140077ff0(long long pMsg, std::string* pText) {
+    *(std::string*)((unsigned char*)pMsg + 0x18) += *pText;
+    return pMsg;
+}
+
+// 0x140078100 - append a number as "%d" through a 0x80 buffer, then hand the message back.
+long long FUN_140078100(long long pMsg, unsigned int uValue) {
+    char szNumber[128];
+    snprintf(szNumber, 0x80, "%d", uValue);   // the original calls the CRT's _snprintf
+    szNumber[127] = 0;
+    *(std::string*)((unsigned char*)pMsg + 0x18) += szNumber;
+    return pMsg;
+}
+
+// 0x140078580 - finish the message through 0x140078470.
+void FUN_140078580(void* pFinisher, int* pMsg) {
+    (void)pFinisher;
+    FUN_140078470(pMsg);
+}
+
+// 0x140078470 - the sink. Anything but severity 3 goes to the log function behind 0x1401035c8, and only when the
+// quiet flag that the file rotation leaves behind is clear; severity 3 throws instead, which is what makes a
+// failed check end the run.
+void FUN_140078470(int* pMsg) {
+    unsigned char bQuiet = 0;
+    if (*pMsg != 3) {
+        if (g_pfnNpc_140077fc0 != nullptr) g_pfnNpc_140077fc0();
+        long long aLock[1] = { 0 };
+        if (g_pfnNpc_140078d20 != nullptr) g_pfnNpc_140078d20(aLock, (void*)g_pNpcConst_140104ce0);
+        bQuiet = (unsigned char)(0 < g_nNpcConst_140104cd8);
+        if (g_pfnNpc_140078d60 != nullptr) g_pfnNpc_140078d60(aLock);
+    }
+    if (bQuiet == 0) {
+        if (g_pfnNpcLogSink_1401035c8 != nullptr) {
+            g_pfnNpcLogSink_1401035c8(*pMsg, *(const char**)((unsigned char*)pMsg + 8),
+                                      *(int*)((unsigned char*)pMsg + 0x10),
+                                      (std::string*)((unsigned char*)pMsg + 0x18));
+        }
+    }
+    if (*pMsg == 3) {
+        unsigned char aException[80];
+        if (g_pfnNpcThrowFatal != nullptr) g_pfnNpcThrowFatal(aException, (void*)g_pNpcThrowInfo_1400fee98);
+    }
+}
 
 }  // namespace tq

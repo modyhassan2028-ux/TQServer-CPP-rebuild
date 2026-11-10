@@ -397,6 +397,22 @@ extern int* (*g_pfnNpc_14007d140)(int* pLimit, int* pOld);
 void FUN_14007a830(long long* pCoded);
 int FUN_14007a8e0(long long pCoded, int nExtra);
 int FUN_14007a9c0(long long pCoded);
+extern void (*g_pfnNpcLogSink_1401035c8)(int nSeverity, const char* pszFile, int nLine, std::string* pText);
+extern void (*g_pfnNpcThrowFatal)(void* pException, void* pThrowInfo);
+extern void (*g_pfnNpc_140077fc0)(void);
+extern void (*g_pfnNpc_140078d20)(void* pLock, void* pConst);
+extern void (*g_pfnNpc_140078d60)(void* pLock);
+extern const void* g_pNpcConst_140104ce0;
+extern int g_nNpcConst_140104cd8;
+extern const void* g_pNpcThrowInfo_1400fee98;
+void* FUN_1400783d0(void* pMsg, unsigned int uSeverity, const char* pszFile, unsigned int uLine);
+void FUN_140078440(long long pMsg);
+long long FUN_140078030(long long pMsg, const char* pszText);
+long long FUN_140077ff0(long long pMsg, std::string* pText);
+long long FUN_140078100(long long pMsg, unsigned int uValue);
+void FUN_140078580(void* pFinisher, int* pMsg);
+void FUN_140078470(int* pMsg);
+
 
 
 
