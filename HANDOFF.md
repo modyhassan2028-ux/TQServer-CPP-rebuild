@@ -974,3 +974,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   say the first register is the source file. Reconcile them when that file is next touched.
 - Next by mass: the remaining 54 log bodies (variants with a saved register or a forwarding shape) and the `x21`
   shapes in the 0x14008 window.
+
+## D235 (latest)
+
+- 6 member getters with a CHECKF log in `log-getters.{h,cpp}`; log arguments taken from the bytes, not the decompiler.
+- 54 suites green, six cycles. Total ported: 533 of 4099 bodies.
+- The remaining 116 log-bearing bodies are not stubs: they are real functions with a log on a failure path (vtable
+  guards, arity checks, jump tables). They belong to their module batches, not to an extraction pass.

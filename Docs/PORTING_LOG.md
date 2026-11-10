@@ -1895,3 +1895,31 @@ instead of duplicated. Their argument order should be checked against the regist
 written they pass a format pointer first, while the bytes put the source file in `rcx`.
 
 D234 green and the whole set (53 suites) green over six cycles.
+
+## D235 — the six member getters that log (6 bodies)
+
+Each body is exactly one read and one check:
+
+```
+nValue = *(long long*)(pThis + OFF);      // OFF in { 8, 0x10, 0x18, 0x20 }
+if (nValue == 0) { log(...); nValue = 0; }
+return nValue;
+```
+
+`tools/gen_npc_loggetters.py` accepts only that decompiled shape, then finds the five-argument log call inside the
+body's instructions (`lea r9 / lea r8 / lea rdx / lea rcx / mov [rsp+0x20],line / call`) and reads its four strings out
+of `.rdata`, so the decompiler's one-argument rendering is never trusted.
+
+| address | member | source | line |
+|---|---|---|---|
+| 0x140025b10 | `m_pMapSet` (+8) | `npcserver\npckernel\mapmanager.h` | 31 |
+| 0x140025b50 | `m_pNpcGenSet` (+0x10) | `npcserver\npckernel\npcmanager.cpp` | 417 |
+| 0x140025ba0 | (+0x18) | `npcserver\npckernel\npcmanager.cpp` | 432 |
+| 0x140025be0 | (+0x20) | `npcserver\npckernel\npcmanager.cpp` | 446 |
+| 0x140025c40 | `m_pMapSet` (+8) | `npcserver\npckernel\mapmanager.h` | 468 |
+| 0x140037f40 | (+8) | `npcserver\npckernel\npcmanager.cpp` | 29 |
+
+The kind is `CHECKF` in all six, and the format is the same `【%s(%s)】 in %s, %d` the assert stubs use. The expression
+string names the member, which is what makes these readable as `MapManager::m_pMapSet` style accessors.
+
+D235 green; the whole set (54 suites) green over six cycles.
