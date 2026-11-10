@@ -1005,3 +1005,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - Two seams retired: `g_pfnNpc_140022a40` / `_140022af0` are gone and `container-nodes.cpp` calls the real bodies.
 - 57 suites green, six cycles. Total ported: 566 of 4099 bodies.
 - Still seams: `0x140023df0`, `0x1400243b0` (need `0x140022e50` / `0x140023400`, the erase-with-throw pair).
+
+## D239 (latest)
+
+- 6 bodies in `vector-accessors.{h,cpp}`: 2 position readers, 2 steppers (8 and 4 bytes), 2 tail readers (+0x18).
+- 58 suites green, six cycles. Total ported: 572 of 4099 bodies.
+- Next in the cluster: the erase-with-throw pair `0x140022e50` / `0x140023400` (~120 lines each, they need the
+  successor `0x140021f50` and the two rotations `0x140021e60` / `0x140021ec0`), then the two erase loops that wait on them.

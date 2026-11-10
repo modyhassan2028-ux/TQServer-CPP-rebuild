@@ -1985,3 +1985,23 @@ and the D237 suite follows them through the real allocator. The two erase loops 
 behind seams because they need `0x140022e50` / `0x140023400`, the erase-and-throw pair.
 
 D238 green; the whole set (57 suites) green over six cycles.
+
+## D239 — the checked vector accessors (6 bodies)
+
+`modules/npcserver/unattributed/vector-accessors.{h,cpp}`, manifest `g_aNpcVectorAccessor`.
+
+All six open the same way: `pOwner = *(long long**)pIter`, and when that slot is null they report and read it again
+before falling back to a size of 0. The owner's first qword is itself a pointer; the size lives at its `+0x20` and the
+end marker at its `+0x30`.
+
+| address | body |
+|---|---|
+| 0x140026600 / 0x140026700 | `if (*(unsigned long long*)(owner + 0x20) <= pIter[1]) report; return pIter[1];` |
+| 0x140026640 | the same guard, then `pIter[1] += 8`, answering `pIter` |
+| 0x140026740 | the same guard, then `pIter[1] += 4`, answering `pIter` |
+| 0x1400268f0 / 0x140026a30 | `if (pIter[1] == *(long long*)(owner + 0x30)) report; return pIter[1] + 0x18;` |
+
+Detail worth keeping: the two steppers move the position even when the guard complains, and the two position readers
+still answer after complaining. The suite pins both habits down instead of tidying them.
+
+D239 green; the whole set (58 suites) green over six cycles.
