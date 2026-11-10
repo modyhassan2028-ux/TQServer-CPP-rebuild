@@ -9,6 +9,8 @@
 
 #include <cstdint>
 #include <cstring>
+#include <string>
+#include <new>
 
 namespace tq {
 
@@ -163,6 +165,11 @@ int  (*g_pfnNpcWsaRecv)(unsigned long long, void*, unsigned int, void*, unsigned
     nullptr;
 void (*g_pfnNpc_14000bf50)(void*) = nullptr;
 void (*g_pfnNpc_14000c300)(void*) = nullptr;
+const void* g_pNpcVtblMessageLite = nullptr;
+void* (*g_pfnNpc_1400783d0)(void*, int, const char*, int) = nullptr;
+long long (*g_pfnNpc_140078030)(long long, const char*) = nullptr;
+void (*g_pfnNpc_140078580)(void*, int*) = nullptr;
+void (*g_pfnNpc_140078440)(long long) = nullptr;
 void (*g_pfnNpc_14000c160)(long long) = nullptr;
 void (*g_pfnNpc_14000c220)(void*) = nullptr;
 int (*g_pfnNpcWsaPoll_Ordinal18)(unsigned int, void*, void*, void*, int*) = nullptr;
@@ -2760,6 +2767,85 @@ void FUN_140075e80(long long pBuf, void* pValue) {
     if (*(long long*)(pBuf + 0x30) != 0 && g_pfnNpc_140016e30 != nullptr) g_pfnNpc_140016e30();
     if (pTarget != 0) *(void**)(pTarget + 0x88) = pValue;
     if (*(long long*)(pBuf + 0x30) != 0 && g_pfnNpc_140016e50 != nullptr) g_pfnNpc_140016e50();
+}
+
+// 0x140075ef0 - the lite message constructor: only the vtable is installed.
+void FUN_140075ef0(void** pThis) { *pThis = (void*)g_pNpcVtblMessageLite; }
+
+// 0x140075f10 - the lite message's missing-fields description.
+std::string* FUN_140075f10(void* unused, std::string* pOut) {
+    (void)unused;
+    new (pOut) std::string("(cannot determine missing fields for lite message)");
+    return pOut;
+}
+
+// 0x140075f60 - the byte-size consistency check of message_lite.cc. Three separate checks are built and only
+// the failing one aborts, through 0x140078580, after its text has been appended through 0x140078030. The two
+// sized checks hold their state in one word and release their sink through 0x140078440 when the bit is set;
+// the last check is built unconditionally, because reaching this function at all is the error.
+void FUN_140075f60(int nBefore, int nAfter, int nProduced) {
+    unsigned char aFinisher1[8];
+    unsigned char aSink1[64];
+    unsigned char aFinisher2[8];
+    unsigned char aSink2[64];
+    unsigned char aFinisher3[8];
+    unsigned char aSink3[64];
+    unsigned long long uGuard = 0xfffffffffffffffeull;
+    unsigned int uState = 0;
+    (void)uGuard;
+    if (nBefore != nAfter) {
+        aFinisher1[0] = 0;
+        void* pSink = g_pfnNpc_1400783d0 != nullptr
+                          ? g_pfnNpc_1400783d0(aSink1, 3,
+                                               "F:\\cq\\64\\develop\\protobuf\\src\\google\\protobuf\\message_lite.cc",
+                                               0x3f) : nullptr;
+        uState = uState | 1u;
+        long long pChained = g_pfnNpc_140078030 != nullptr
+                                 ? g_pfnNpc_140078030((long long)pSink,
+                                                      "CHECK failed: (byte_size_before_serialization) == (byte_size_after_serialization): ")
+                                 : 0;
+        int* pText = (int*)(g_pfnNpc_140078030 != nullptr
+                                ? g_pfnNpc_140078030(pChained,
+                                                     "Protocol message was modified concurrently during serialization.")
+                                : 0);
+        if (g_pfnNpc_140078580 != nullptr) g_pfnNpc_140078580(aFinisher1, pText);
+    }
+    if ((uState & 1) != 0) {
+        uState = uState & 0xfffffffeu;
+        if (g_pfnNpc_140078440 != nullptr) g_pfnNpc_140078440((long long)(void*)aSink1);
+    }
+    if (nProduced != nBefore) {
+        aFinisher2[0] = 0;
+        void* pSink = g_pfnNpc_1400783d0 != nullptr
+                          ? g_pfnNpc_1400783d0(aSink2, 3,
+                                               "F:\\cq\\64\\develop\\protobuf\\src\\google\\protobuf\\message_lite.cc",
+                                               0x41) : nullptr;
+        uState = uState | 2u;
+        long long pChained = g_pfnNpc_140078030 != nullptr
+                                 ? g_pfnNpc_140078030((long long)pSink,
+                                                      "CHECK failed: (bytes_produced_by_serialization) == (byte_size_before_serialization): ")
+                                 : 0;
+        int* pText = (int*)(g_pfnNpc_140078030 != nullptr
+                                ? g_pfnNpc_140078030(pChained,
+                                                     "Byte size calculation and serialization were inconsistent.  This may indicate a bug in protocol buffers or it may be caused by concurrent modification of the message.")
+                                : 0);
+        if (g_pfnNpc_140078580 != nullptr) g_pfnNpc_140078580(aFinisher2, pText);
+    }
+    if ((uState & 2) != 0) {
+        uState = uState & 0xfffffffdu;
+        if (g_pfnNpc_140078440 != nullptr) g_pfnNpc_140078440((long long)(void*)aSink2);
+    }
+    aFinisher3[0] = 0;
+    void* pSink3 = g_pfnNpc_1400783d0 != nullptr
+                       ? g_pfnNpc_1400783d0(aSink3, 3,
+                                            "F:\\cq\\64\\develop\\protobuf\\src\\google\\protobuf\\message_lite.cc",
+                                            0x45) : nullptr;
+    int* pText3 = (int*)(g_pfnNpc_140078030 != nullptr
+                             ? g_pfnNpc_140078030((long long)pSink3,
+                                                  "This shouldn't be called if all the sizes are equal.")
+                             : 0);
+    if (g_pfnNpc_140078580 != nullptr) g_pfnNpc_140078580(aFinisher3, pText3);
+    if (g_pfnNpc_140078440 != nullptr) g_pfnNpc_140078440((long long)(void*)aSink3);
 }
 
 }  // namespace tq

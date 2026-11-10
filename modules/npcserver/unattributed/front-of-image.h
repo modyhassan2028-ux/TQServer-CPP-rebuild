@@ -10,6 +10,8 @@
 #ifndef NPCSERVER_IMAGEFRONT_H
 #define NPCSERVER_IMAGEFRONT_H
 
+#include <string>
+
 namespace tq {
 
 // seams
@@ -307,6 +309,15 @@ extern int  (*g_pfnNpcWsaRecv)(unsigned long long uSocket, void* pBuffers, unsig
 long long* FUN_140075c30(long long* pBuf, unsigned long long uLen, void* pOverlapped);
 void* FUN_140075e60(long long pBuf);
 void  FUN_140075e80(long long pBuf, void* pValue);
+extern const void* g_pNpcVtblMessageLite;                                              // MessageLite vtable
+extern void* (*g_pfnNpc_1400783d0)(void* pOut, int nSeverity, const char* pszFile, int nLine);
+extern long long (*g_pfnNpc_140078030)(long long pMessage, const char* pszText);
+extern void (*g_pfnNpc_140078580)(void* pFinisher, int* pMessage);
+extern void (*g_pfnNpc_140078440)(long long pMessage);
+void  FUN_140075ef0(void** pThis);
+std::string* FUN_140075f10(void* unused, std::string* pOut);
+void  FUN_140075f60(int nBefore, int nAfter, int nProduced);
+
 
 
 

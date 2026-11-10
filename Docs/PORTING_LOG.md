@@ -1336,3 +1336,22 @@ closed, and the flag only being set on the path that got a socket.
 - `0x140075e80` writes `+0x88` only with that flag, bracketed by `0x140016e30` and `0x140016e50` when `+0x30`
   is set. The send side's counterpart is the same pair of entry points on the same field.
 - Three new seams: `0x14000ebd0`, `0x14000cdc0` and `WSARecv`.
+
+## D199 — NpcServer.exe 0x140075ef0, 0x140075f10, 0x140075f60
+
+- `0x140075ef0` is the lite message constructor: it installs only the `MessageLite` vtable at `+0` and touches
+  nothing else. The vtable address is a data symbol, carried here as `g_pNpcVtblMessageLite`.
+- `0x140075f10` is the lite message's missing-fields description, a `std::string` built in the caller's storage
+  with the literal `"(cannot determine missing fields for lite message)"`.
+- `0x140075f60` is the byte-size consistency check from `message_lite.cc`. It builds up to three separate
+  checks, each through `0x1400783d0` with severity 3 and this exact file, at lines `0x3f`, `0x41` and `0x45`:
+  the first two only when their sizes differ, the third always, because reaching the function is the error. The
+  texts, in order: `CHECK failed: (byte_size_before_serialization) == (byte_size_after_serialization): ` followed
+  by `Protocol message was modified concurrently during serialization.`; then
+  `CHECK failed: (bytes_produced_by_serialization) == (byte_size_before_serialization): ` followed by
+  `Byte size calculation and serialization were inconsistent.  This may indicate a bug in protocol buffers or it
+  may be caused by concurrent modification of the message.`; and finally
+  `This shouldn't be called if all the sizes are equal.` Each check ends in `0x140078580`, and the two sized
+  checks clear their state bit and release their own sink through `0x140078440`, the third releasing
+  unconditionally. The single state word packs bit 0 for the first check and bit 1 for the second.
+- Four new seams for the protobuf log objects, plus the `MessageLite` vtable data symbol.

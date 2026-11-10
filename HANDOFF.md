@@ -746,3 +746,8 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 
 - NpcServer: 123 bodies, 30 suites green. Both directions of the buffer object are now ported.
 - Next: 0x140075ef0 (21), 0x140075f10 (71), 0x140075f60 (545), 0x140076190 (391).
+
+## D199 (latest)
+
+- NpcServer: 126 bodies, 31 suites green.
+- Next: 0x140076190 (391), 0x140076320/0x140076350/0x140076380 (34 each), then 0x1400763b0 onward.
