@@ -981,3 +981,11 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 54 suites green, six cycles. Total ported: 533 of 4099 bodies.
 - The remaining 116 log-bearing bodies are not stubs: they are real functions with a log on a failure path (vtable
   guards, arity checks, jump tables). They belong to their module batches, not to an extraction pass.
+
+## D236 (latest)
+
+- 17 bodies in `container-bodies.{h,cpp}`: 3 vtable stores, 3 deleting destructors, 1 vtable release,
+  9 protected iterator comparisons, 1 member address (`+0x28`).
+- 55 suites green, six cycles. Total ported: 550 of 4099 bodies.
+- The parse gap: the true addresses of `ISingleMap<INpc>`, `IGameObjSet<IGenerator>` and `IGameObjSet<CNpcType>`
+  vtables are now on record, which is what the interface classes' own batches will need.

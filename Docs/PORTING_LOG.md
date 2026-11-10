@@ -1923,3 +1923,22 @@ The kind is `CHECKF` in all six, and the format is the same `【%s(%s)】 in %s,
 string names the member, which is what makes these readable as `MapManager::m_pMapSet` style accessors.
 
 D235 green; the whole set (54 suites) green over six cycles.
+
+## D236 — the container/interface bodies around NpcManager (17 bodies)
+
+`tools/gen_npc_containers.py` into `modules/npcserver/unattributed/container-bodies.{h,cpp}`, manifest `g_aNpcContainer`.
+Each vtable address is read back out of the store instruction rather than trusted from the decompiler's symbol name:
+
+| kind | bodies | body |
+|---|---|---|
+| vtable-set | 3 | `*(void**)pThis = X::vftable; return;` |
+| vtable-dtor | 3 | the same store, then `operator_delete(pThis)` when `bFree & 1`, returning `pThis` |
+| vtable-release | 1 | `if (pThis) (**(*pThis))(pThis, 1); return 0;` |
+| iter-compare | 9 | `if (*pA == 0 || *pA != *pB) _invalid_parameter_noinfo();` then the two-element comparison |
+| member-address | 1 | `return pThis + 0x28;` |
+
+The three interface tables live at `0x1400C33C8` (`IGameObjSet<CNpcType>`), `0x1400C3338` (`IGameObjSet<IGenerator>`)
+and `0x1400C3298` (`ISingleMap<INpc>`), which the suite checks are three distinct objects. The nine comparisons cover
+all three interface families: `==`, `!=`, and the pointer difference `(pA[1] - pB[1]) >> 3` that the same guard protects.
+
+D236 green; the whole set (55 suites) green over six cycles.
