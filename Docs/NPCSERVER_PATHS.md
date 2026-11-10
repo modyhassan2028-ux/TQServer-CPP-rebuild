@@ -1,10 +1,15 @@
 # NpcServer.exe — the embedded source paths
 
-Extracted from the binary itself: **50** paths, **50** of them scaffolded under `modules/npcserver/src`.
+Extracted from the image with `strings`: **56** `__FILE__` paths (the `57`th string is the PDB name, not a source file, and is left out). The tree under `modules/npcserver/src` mirrors these exactly.
 
 | path |
 |---|
-| `google/protobuf/io/coded_stream.h` |
+| `cq/64/develop/protobuf/src/google/protobuf/io/coded_stream.cc` |
+| `cq/64/develop/protobuf/src/google/protobuf/io/zero_copy_stream.cc` |
+| `cq/64/develop/protobuf/src/google/protobuf/io/zero_copy_stream_impl_lite.cc` |
+| `cq/64/develop/protobuf/src/google/protobuf/message_lite.cc` |
+| `cq/64/develop/protobuf/src/google/protobuf/stubs/common.cc` |
+| `cq/64/develop/protobuf/src/google/protobuf/wire_format_lite.cc` |
 | `version/cqserver-78.0.11-1204/comm/i_messageport.h` |
 | `version/cqserver-78.0.11-1204/comm/source/messageport.cpp` |
 | `version/cqserver-78.0.11-1204/include/basecode/autolink.h` |
@@ -54,24 +59,32 @@ Extracted from the binary itself: **50** paths, **50** of them scaffolded under 
 | `version/cqserver-78.0.11-1204/npcserver/npckernel/usermanager.cpp` |
 | `version/cqserver-78.0.11-1204/npcserver/npckernel/usermanager.h` |
 | `version/cqserver-78.0.11-1204/npcserver/npcserverdlg.cpp` |
+| `version/cqserver-78.0.11-1204/protobuf/msgwalk.pb.cc` |
+
+## What was wrong before D228
+
+The earlier table held 50 paths and mis-split the protobuf ones: it recorded `google/protobuf/io/coded_stream.h`,
+but the image says `cq/64/develop/protobuf/src/google/protobuf/io/coded_stream.cc` — a different folder chain and a
+`.cc`, not a `.h`. Five more protobuf translation units (`zero_copy_stream.cc`, `zero_copy_stream_impl_lite.cc`,
+`message_lite.cc`, `stubs/common.cc`, `wire_format_lite.cc`) and `version/cqserver-78.0.11-1204/protobuf/msgwalk.pb.cc`
+were missing altogether. D228 rebuilt the tree from the strings, so `src/` now holds `cq/` and `version/` with every
+prefix of the table below.
 
 ## Layout rule
 
-The paths above are **nestings**, not names: `version/cqserver-78.0.11-1204/npcserver/npckernel/npc.cpp` is the
-folder `npc.cpp` inside `npckernel`, inside `npcserver`, inside `cqserver-78.0.11-1204`, inside `version`. No folder
-in the tree is named with a slash in it.
+The paths are **nestings**, not names: `version/cqserver-78.0.11-1204/npcserver/npckernel/npc.cpp` is the folder
+`npc.cpp` inside `npckernel`, inside `npcserver`, inside `cqserver-78.0.11-1204`, inside `version`. No folder in the
+tree is named with a slash in it.
 
-GitHub's file browser compresses a chain of single-child folders into one row, so `src/` shows `google/protobuf/io`
-and `version/cqserver-78.0.11-...` as if those were names. On disk `modules/npcserver/src` holds exactly three
-entries: `google`, `version` and nothing else.
+GitHub compresses a chain of single-child folders into one row, so `src/` shows `cq/64/develop/...` and
+`version/cqserver-78.0.11-1204/...` as if those were single names. On disk `src` holds exactly two entries: `cq` and
+`version`.
 
 `tools/check_npcserver_paths.py` enforces this: it fails when a listed path has no file, when a folder is not a
-prefix of a listed path (invented), or when a single name contains a separator. D221 removed one leftover empty
-folder, `src/npckernel`, that the check caught.
+prefix of a listed path (invented), or when a single name contains a separator.
 
-## Attribution note (corrected in D167)
+## Attribution note
 
-The 50 paths above are the ones the image carries, and they are dead data: nothing in `.text`
-references any of their addresses. A body therefore cannot be attributed to a file from the binary,
-and no placement is claimed. Bodies without evidence stay in `modules/npcserver/unattributed/`,
-outside `src/`. A body moves into one of the paths above only when the evidence exists.
+The paths are dead data: nothing in `.text` references their addresses, so a body cannot be attributed to a file from
+the binary and no placement is claimed. Bodies without evidence stay in `modules/npcserver/unattributed/`, outside
+`src/`. A body moves into one of the paths above only when the evidence exists.

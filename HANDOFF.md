@@ -504,7 +504,7 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 
 ## D163 (latest)
 
-- NpcServer.exe scaffolded: 50 paths from the binary, `Docs/NPCSERVER_PATHS.md`, no bodies yet.
+- NpcServer.exe scaffolded: 56 paths from the binary (corrected in D228; was 50), `Docs/NPCSERVER_PATHS.md`, no bodies yet.
 - The work order is now written down in `Docs/REMAINING_ROADMAP.md`; `npckernel` is 34 of the 50.
 
 ## D164 (latest)
@@ -918,3 +918,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 86 container-internal bodies of 0x140080000..0x140090000 ported by `tools/gen_stl_family.py`, with a manifest
   (`g_aNpcStl_140080000`) and a walk suite, D227. 47 suites, six cycles, one command: `tools/run_npcserver_suites.sh`.
 - 305 bodies left in the range; the shapes to take next are listed at the end of PORTING_LOG.md.
+
+## D228 (latest)
+
+- `modules/npcserver/src` rebuilt from the image's own `strings`: 56 `__FILE__` paths, not 50. `src/` now holds
+  `cq/` (the six protobuf translation units, which the old table had mis-pathed under `google/`) and `version/`.
+  `version/.../protobuf/msgwalk.pb.cc` added. `tools/check_npcserver_paths.py`: 56 listed, 56 present, no invented
+  folder.

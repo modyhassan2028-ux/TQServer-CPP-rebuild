@@ -33,7 +33,7 @@ Flower.dll: 5/6 ملفات. المتبقي فقط بقية دوال todayflower.
 
 1. Syndicate.dll families: forwarders done (126), next the destructors, the sized allocators
    (`n*0x28`, `n*0x30`, `n*0x48`) and the `operator delete` thunks, which need those two seams.
-2. NpcServer.exe: scaffold is in place (50 paths, `Docs/NPCSERVER_PATHS.md`); port in the author's
-   sequence, `npckernel` first because 34 of the 50 paths live there.
+2. NpcServer.exe: scaffold is in place (56 paths, `Docs/NPCSERVER_PATHS.md`); port in the author's
+   sequence, `npckernel` first because 34 of the 56 paths live there.
 3. CQCrossServer.exe (19 paths), then the smaller DLLs as complete units.
 4. MsgServer.exe last: 59,977 functions, 6x Syndicate and the largest single binary in the tree.

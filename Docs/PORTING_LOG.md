@@ -1737,3 +1737,22 @@ Notes worth keeping:
 - 305 bodies in the range still need their shapes handled. Next, in order of frequency: the forwarding wrapper
   (`F(P); return P`, 10), the iterator-construct pair (8), the `vector::insert` bounds template (6 + 5), the aligned
   allocate (4) and the `memmove_s` move (4).
+
+## D228 — the tree, rebuilt from the binary's own strings
+
+`Docs/NPCSERVER_PATHS.md` claimed 50 paths and had the protobuf ones wrong: it recorded
+`google/protobuf/io/coded_stream.h` where the image carries
+`cq/64/develop/protobuf/src/google/protobuf/io/coded_stream.cc` (different chain, and `.cc`). Five more protobuf
+translation units and `version/cqserver-78.0.11-1204/protobuf/msgwalk.pb.cc` were missing.
+
+Everything now comes straight out of `strings NpcServer.exe`, lowercased and slash-normalised:
+
+- 57 path-shaped strings; one is `F:\version\CQServer-78.0.11-1204\Env\pdb\NpcServer.pdb`, a PDB name rather than a
+  source file, so **56** source paths are scaffolded.
+- `src/` holds exactly two entries, `cq` and `version`. The old `src/google/` chain was invented and is gone.
+- `tools/check_npcserver_paths.py` reads the new table: 56 listed, 56 present, no invented folder, and no single
+  name carrying a separator.
+- The existing ported files under `version/...` were untouched; only scaffolding changed.
+
+A note for the next agent: the counts in old handoffs (41, 50) are superseded by the table in
+`Docs/NPCSERVER_PATHS.md`, which is generated from the image and is the only authority.
