@@ -7,11 +7,12 @@ INC="-I. -Iinclude -Imodules -Imodules/npcserver/src"
 mkdir -p /tmp/npcsrv
 g++ -std=c++17 $SAN $INC -c modules/npcserver/unattributed/front-of-image.cpp -o /tmp/npcsrv/front.o
 g++ -std=c++17 $SAN $INC -c modules/npcserver/unattributed/stl-internals.cpp -o /tmp/npcsrv/stl.o
+g++ -std=c++17 $SAN $INC -c modules/npcserver/unattributed/stl-iterators.cpp -o /tmp/npcsrv/iter.o
 g++ -std=c++17 $SAN $INC -c modules/npcserver/src/version/cqserver-78.0.11-1204/npcserver/clientsocket.cpp -o /tmp/npcsrv/data.o
 for t in tests/npcserver_d*_test.cpp; do
     name=$(basename "$t" _test.cpp)
     g++ -std=c++17 $SAN $INC -c "$t" -o /tmp/npcsrv/$name.o
-    g++ -std=c++17 $SAN /tmp/npcsrv/$name.o /tmp/npcsrv/front.o /tmp/npcsrv/stl.o /tmp/npcsrv/data.o -o /tmp/npcsrv/$name
+    g++ -std=c++17 $SAN /tmp/npcsrv/$name.o /tmp/npcsrv/front.o /tmp/npcsrv/stl.o /tmp/npcsrv/iter.o /tmp/npcsrv/data.o -o /tmp/npcsrv/$name
 done
 cycle=1
 while [ $cycle -le 6 ]; do

@@ -1756,3 +1756,21 @@ Everything now comes straight out of `strings NpcServer.exe`, lowercased and sla
 
 A note for the next agent: the counts in old handoffs (41, 50) are superseded by the table in
 `Docs/NPCSERVER_PATHS.md`, which is generated from the image and is the only authority.
+
+## D229 — the forwarding wrappers and pair constructs (23 bodies, 0x140080000..0x140090000)
+
+`tools/gen_stl_iterators.py` takes the next two repeated shapes out of the same range and emits them to
+`modules/npcserver/unattributed/stl-iterators.{h,cpp}`, with its own manifest `g_aNpcIter_140080000`:
+
+- **forwarder, 15 bodies** — `FUN_x(param_1[, param_2]); return param_1;`. Two arities: ten one-argument, five
+  two-argument. The callee address is read out of each body; where that callee is not ported yet the call goes
+  through `g_pfnNpc_<callee>` with the callee's own arity (11 distinct seams, four forwarders land on already
+  written code). The wrapper touches nothing itself: the suite checks the forwarded pointer is returned unchanged,
+  the two sentinel words around the object survive, and exactly one seam fires.
+- **pair-construct, 8 bodies** — `*p1 = 0; p1[1] = param_2; if (p3 == 0) invalid; *p1 = *p3; return p1;`.
+
+Same rule as D227: a body that does not match the shape exactly is skipped and counted (368 left in the range),
+never approximated. The null-source path is not exercised for the pair shape for the same reason as the iterator
+guards: the image dereferences the source word after the hook, so with a no-op hook it faults by design.
+
+D229 green, and the whole NpcServer set (48 suites) green over six cycles through `tools/run_npcserver_suites.sh`.
