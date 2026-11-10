@@ -1868,3 +1868,30 @@ batch: every body names a different static descriptor, so it needs the descripto
 image rather than a text-only transcription.
 
 D233 green on its own and the whole set (52 suites) green over six cycles.
+
+## D234 — the fixed-argument log stubs (134 bodies)
+
+The decompiler renders these as `log_InlineLogERROR(&DAT_x);` with one argument. The machine code sets up five:
+
+```
+sub rsp,0x38
+lea r9,  <format>      lea r8,  <kind>      lea rdx, <expression>      lea rcx, <source file>
+mov dword ptr [rsp+0x20], <line>
+call qword ptr [rip + <log_InlineLogERROR>]
+```
+
+so the logger takes the source file first, then the expression, the kind, the format, and the line on the stack.
+`tools/gen_npc_logstubs.py` disassembles each candidate with capstone, accepts only that exact instruction sequence,
+resolves the four `lea` targets to their GBK byte strings inside `.rdata` (`tools/read_dat_string.py` reads them), and
+emits the call byte-for-byte, with non-ASCII bytes as `\xNN`.
+
+The 134 bodies are all the same statement: `MYASSERT("PURE_VIRTUAL_FUNCTION")` (or `_0`) at its own file and line, which
+is what the image does when a pure virtual is reached. Three return types occur: `void`, `undefined8` and `undefined1`;
+the manifest records which, so a void body is never read for a value.
+
+Six of the image's log bodies in this shape (`FUN_1400020f0`, `0x140002130`, `0x140002170`, `0x1400021b0`,
+`0x1400025b0`, `0x1400025f0`) are already written in `front-of-image.cpp` from the earlier pass, so they are excluded
+instead of duplicated. Their argument order should be checked against the register reading above in a later batch: as
+written they pass a format pointer first, while the bytes put the source file in `rcx`.
+
+D234 green and the whole set (53 suites) green over six cycles.

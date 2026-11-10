@@ -964,3 +964,13 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 52 suites green, six cycles.
 - Next by mass: the logging stubs `log_InlineLogERROR(&DAT_x); return 0/void;` (141 bodies). They need the static
   descriptor layout (file/line/severity) read out of the image first, so that is its own batch.
+
+## D234 (latest)
+
+- 134 fixed-argument log stubs in `log-stubs.{h,cpp}`: `MYASSERT("PURE_VIRTUAL_FUNCTION")` with each body's own file
+  and line, extracted from the machine code (rcx=file, rdx=expression, r8=kind, r9=format, stack=line).
+- 53 suites green, six cycles. Total ported: 527 of 4099 bodies.
+- Follow-up: the six log bodies already in `front-of-image.cpp` pass a format pointer as the first argument; the bytes
+  say the first register is the source file. Reconcile them when that file is next touched.
+- Next by mass: the remaining 54 log bodies (variants with a saved register or a forwarding shape) and the `x21`
+  shapes in the 0x14008 window.

@@ -12,11 +12,12 @@ g++ -std=c++17 $SAN $INC -c modules/npcserver/unattributed/stl-shapes.cpp -o /tm
 g++ -std=c++17 $SAN $INC -c modules/npcserver/unattributed/stl-refs.cpp -o /tmp/npcsrv/refs.o
 g++ -std=c++17 $SAN $INC -c modules/npcserver/unattributed/stl-tail.cpp -o /tmp/npcsrv/tail.o
 g++ -std=c++17 $SAN $INC -c modules/npcserver/unattributed/stl-global.cpp -o /tmp/npcsrv/global.o
+g++ -std=c++17 $SAN $INC -c modules/npcserver/unattributed/log-stubs.cpp -o /tmp/npcsrv/logstub.o
 g++ -std=c++17 $SAN $INC -c modules/npcserver/src/version/cqserver-78.0.11-1204/npcserver/clientsocket.cpp -o /tmp/npcsrv/data.o
 for t in tests/npcserver_d*_test.cpp; do
     name=$(basename "$t" _test.cpp)
     g++ -std=c++17 $SAN $INC -c "$t" -o /tmp/npcsrv/$name.o
-    g++ -std=c++17 $SAN /tmp/npcsrv/$name.o /tmp/npcsrv/front.o /tmp/npcsrv/stl.o /tmp/npcsrv/iter.o /tmp/npcsrv/shapes.o /tmp/npcsrv/refs.o /tmp/npcsrv/tail.o /tmp/npcsrv/global.o /tmp/npcsrv/data.o -o /tmp/npcsrv/$name
+    g++ -std=c++17 $SAN /tmp/npcsrv/$name.o /tmp/npcsrv/front.o /tmp/npcsrv/stl.o /tmp/npcsrv/iter.o /tmp/npcsrv/shapes.o /tmp/npcsrv/refs.o /tmp/npcsrv/tail.o /tmp/npcsrv/global.o /tmp/npcsrv/logstub.o /tmp/npcsrv/data.o -o /tmp/npcsrv/$name
 done
 cycle=1
 while [ $cycle -le 6 ]; do
