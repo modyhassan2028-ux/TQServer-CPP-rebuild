@@ -886,3 +886,8 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 
 - 14007a8e0 / 14007a9c0 rewired; D201 drives the real limit rules. 44 suites green, three of them six times.
 - Next: a830 (needs a coded input with a vtable slot at +0x10), then the log layer (77f50/77fc0/78d20/78d60).
+
+## D222 (latest)
+
+- 14007a830 rewired, and one missing indirection fixed in its sink call. 44 suites green, three of them six times.
+- Next: the log layer (77f50/77fc0/78d20/78d60), then 16990, then the coded-input cluster around a8e0/a9c0 is done.

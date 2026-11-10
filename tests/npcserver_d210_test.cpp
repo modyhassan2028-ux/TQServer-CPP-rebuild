@@ -47,7 +47,11 @@ int main() {
     {
         unsigned char b[0x40];
         std::memset(b, 0, sizeof b);
-        *(long long*)b = (long long)g_vt;
+        // the sink is reached through two indirections: the object's first word points at the word holding the
+        // vtable, and the call hands that inner word as its first argument
+        static long long s_inner[2];
+        s_inner[0] = (long long)g_vt;
+        *(long long*)b = (long long)s_inner;
         *(int*)(b + 0x28) = 40;
         g_c670Ret = 10; g_c6a0Calls = 0; g_d140Calls = 0; g_d140Override = false;
         assert(FUN_14007a8e0((long long)b, 20) == 40);       // answers the limit from before
@@ -71,7 +75,11 @@ int main() {
     {
         unsigned char b[0x40];
         std::memset(b, 0, sizeof b);
-        *(long long*)b = (long long)g_vt;
+        // the sink is reached through two indirections: the object's first word points at the word holding the
+        // vtable, and the call hands that inner word as its first argument
+        static long long s_inner[2];
+        s_inner[0] = (long long)g_vt;
+        *(long long*)b = (long long)s_inner;
         g_sinkCalls = 0; g_sinkAmount = 0;
         g_c650Ret = 0;
         *(int*)(b + 0x2c) = 0; *(int*)(b + 0x1c) = 0;

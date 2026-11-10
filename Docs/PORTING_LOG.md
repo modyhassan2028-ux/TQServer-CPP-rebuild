@@ -1629,3 +1629,22 @@ closed, and the flag only being set on the path that got a socket.
 - Consequence for the callers: a wrapper is only accepted when its allowance is **zero** over what the wire already
   consumed, because the remaining count has to come back zero. Any positive allowance reads as unread bytes.
   The suite now pins that, plus the pin-to-`0x7fffffff` path and the unlimited `-1`.
+
+## D222 — the flush, and a real parity bug it exposed
+
+- `0x14007a830` is no longer a seam: `0x14007a700` calls it directly.
+- The port had collapsed one indirection. The original reads the sink as `(**(code **)(*(longlong *)*param_1 + 0x10))(*param_1, iVar1)`: the
+  object's first word points at a word that holds the vtable, and the call hands that **inner** word as its first
+  argument. The port had used `*pCoded` as the vtable. Corrected to the verbatim two-step form.
+- Flush arithmetic confirmed against the decompiled body: amount = pending + `+0x2c` + `+0x1c`, and only a positive
+  amount flushes; then `+0x18` loses the bytes still pending plus `+0x2c`, `+0x10` copies back to `+0x08`, and both
+  counters clear.
+- D209 and D210 now drive the real body with an inner word, and the "nothing waiting" path leaves the object alone.
+
+## D221 — the tree guard
+
+- `tools/check_npcserver_paths.py` enforces the 50 embedded paths: no missing path, no folder that is not a prefix of
+  a listed path, no separator inside a single name. It caught and removed one leftover empty folder, `src/npckernel`.
+- The recorded layout rule: all 50 paths are nestings. GitHub shows `google/protobuf/io` and
+  `version/cqserver-78.0.11-...` as single rows only because its browser compresses single-child chains; on disk
+  `src/` holds `google` and `version` as separate entries.

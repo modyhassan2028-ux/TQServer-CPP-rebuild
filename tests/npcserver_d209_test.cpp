@@ -17,7 +17,11 @@ bool HasContainer(void* p) { (void)p; ++g_hasContainerCalls; return true; }
 bool UnknownContainer(void* p) { (void)p; ++g_hasContainerCalls; return false; }
 char* MyPtr(void* p) { ++g_myPtrCalls; return *(char**)p; }   // the container's buffer word at +0x00
 void InvalidParam(void) { ++g_invalid; }
-void ReleaseChain(long long* p) { (void)p; ++g_a830Calls; }
+// the flush is a real body now: what it needs from outside is how many bytes are still pending (0x14007c650 is
+// still unported) and a sink to hand them to, reached through the object's own slot 2
+int g_pending = 0, g_pendingAfter = 0, g_sinkAmount = 0; long long* g_sinkObj = nullptr;
+long long Pending(long long p) { (void)p; return g_pending; }
+void FlushSink(long long p, int nAmount) { g_sinkObj = (long long*)p; g_sinkAmount = nAmount; g_pending = g_pendingAfter; }
 void* Sink(void* pOut, int sev, const char* file, int line) {
     g_sinkSeverity = sev; g_sinkFile = file; g_sinkLine = line; return pOut; }
 long long AppendText(long long m, const char* t) { (void)m; g_text = t; return m; }   // unused since the real bodies run
@@ -41,7 +45,7 @@ int main() {
     g_pfnNpcIteratorHasContainer = &HasContainer;
     g_pfnNpcStringMyPtr = &MyPtr;
     g_pfnNpcInvalidParameter = &InvalidParam;
-    g_pfnNpc_14007a830 = &ReleaseChain;
+    g_pfnNpc_14007c650 = &Pending;      // how many bytes are still waiting, still a seam
     g_pfnNpcLogSink_1401035c8 = &LogSink;   // the real log bodies now reach this seam
 
     // the data pointer of a string
@@ -117,9 +121,9 @@ int main() {
         aCoded[0] = 0x7000;                           // a chain is attached
         *(unsigned int*)((unsigned char*)aCoded + 0x18) = 1234;
         *(unsigned int*)((unsigned char*)aCoded + 0x34) = -2;
-        g_a830Calls = 0; g_fail = 0; g_release = 0; g_value = 0; g_text.clear();
+        g_pending = 0; g_sinkAmount = 0; g_fail = 0; g_release = 0; g_value = 0; g_text.clear();
         FUN_14007a700(aCoded);
-        assert(g_a830Calls == 1);
+        assert(g_sinkAmount == 0);                    // nothing is waiting, so the sink is never reached
         assert(g_fail == 1);
         assert(g_sinkSeverity == 1 && g_sinkLine == 0x4e);
         assert(g_sinkFile != nullptr && std::strstr(g_sinkFile, "coded_stream.cc") != nullptr);
@@ -127,14 +131,44 @@ int main() {
         assert(g_text.find("1234") != std::string::npos);   // the count is formatted into the same message
     }
 
+    // the flush itself: pending plus the two counters is what the sink is handed, then the read count loses the
+    // bytes that are still pending plus the counter at +0x2c, the current pointer copies back to +0x08 and both
+    // counters clear
+    {
+        long long aVt[4] = { 0, 0, 0, 0 };
+        aVt[2] = (long long)&FlushSink;               // vtable +0x10
+        long long aInner[2] = { (long long)aVt, 0 }; // what the first word points at, and the word itself
+        long long aObj[8];
+        std::memset(aObj, 0, sizeof aObj);
+        aObj[0] = (long long)aInner;
+        aObj[1] = 0x1111; aObj[2] = 0x2222;
+        *(unsigned int*)((unsigned char*)aObj + 0x18) = 100;
+        *(unsigned int*)((unsigned char*)aObj + 0x1c) = 7;
+        *(unsigned int*)((unsigned char*)aObj + 0x2c) = 5;
+        g_pending = 3; g_pendingAfter = 1; g_sinkAmount = 0; g_sinkObj = nullptr;
+        FUN_14007a830(aObj);
+        assert(g_sinkObj == aInner && g_sinkAmount == 15);   // 3 pending + 5 + 7
+        assert(*(unsigned int*)((unsigned char*)aObj + 0x18) == 100 - (1 + 5));
+        assert(aObj[2] == 0x1111);                         // the current pointer comes back to +0x08
+        assert(*(unsigned int*)((unsigned char*)aObj + 0x2c) == 0);
+        assert(*(unsigned int*)((unsigned char*)aObj + 0x1c) == 0);
+        // an amount of zero, or less, never reaches the sink and leaves the object untouched
+        g_pending = 0; g_pendingAfter = 0; g_sinkAmount = 0;
+        *(unsigned int*)((unsigned char*)aObj + 0x1c) = 0;
+        *(unsigned int*)((unsigned char*)aObj + 0x2c) = 0;
+        FUN_14007a830(aObj);
+        assert(g_sinkAmount == 0);
+        assert(*(unsigned int*)((unsigned char*)aObj + 0x18) == 94);
+    }
+
     // no chain and another state: nothing happens
     {
         long long aCoded[8];
         std::memset(aCoded, 0, sizeof aCoded);
         *(unsigned int*)((unsigned char*)aCoded + 0x34) = 7;
-        g_a830Calls = 0; g_fail = 0;
+        g_sinkAmount = 0; g_fail = 0;
         FUN_14007a700(aCoded);
-        assert(g_a830Calls == 0 && g_fail == 0);
+        assert(g_sinkAmount == 0 && g_fail == 0);
     }
 
     std::printf("NPCSERVER_D209_OK: 0x140077930/950/9a0/9c0 and 0x14007a700\n");

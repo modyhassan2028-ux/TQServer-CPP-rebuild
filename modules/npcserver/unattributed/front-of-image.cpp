@@ -17,7 +17,6 @@ namespace tq {
 void (*g_pfnNpcInvalidParameter)(void) = nullptr;
 char* (*g_pfnNpcStringMyPtr)(void* pString) = nullptr;
 bool (*g_pfnNpcIteratorHasContainer)(void* pIter) = nullptr;
-void (*g_pfnNpc_14007a830)(long long* pCoded) = nullptr;
 
 void FUN_1400017b0(long long pThis);   // ported in npcserver/clientsocket.cpp
 
@@ -3363,7 +3362,7 @@ void* FUN_1400779c0(void* pIter) {
 // coded_stream.cc:0x4e as "The total number of bytes read was " followed by the count at +0x18, severity 1.
 void FUN_14007a700(long long* pCoded) {
     if (pCoded[0] != 0) {
-        if (g_pfnNpc_14007a830 != nullptr) g_pfnNpc_14007a830(pCoded);
+        FUN_14007a830(pCoded);
     }
     if (*(int*)((char*)pCoded + 0x34) == -2) {
         unsigned char aFinisher[8];
@@ -3390,7 +3389,10 @@ void FUN_14007a830(long long* pCoded) {
     long long lPending = g_pfnNpc_14007c650 != nullptr ? g_pfnNpc_14007c650((long long)pCoded) : 0;
     int nAmount = (int)lPending + *(int*)((char*)pCoded + 0x2c) + *(int*)((char*)pCoded + 0x1c);
     if (0 < nAmount) {
-        (*(void (**)(long long, int))(*pCoded + 0x10))(*pCoded, nAmount);
+        // the original reads the sink through two indirections: *(longlong*)*param_1 + 0x10, and hands *param_1
+        // itself as the first argument
+        long long pInner = *pCoded;
+        (*(void (**)(long long, int))(*(long long*)pInner + 0x10))(pInner, nAmount);
         long long lAfter = g_pfnNpc_14007c650 != nullptr ? g_pfnNpc_14007c650((long long)pCoded) : 0;
         *(int*)((char*)pCoded + 0x18) = *(int*)((char*)pCoded + 0x18)
                                         - ((int)lAfter + *(int*)((char*)pCoded + 0x2c));
