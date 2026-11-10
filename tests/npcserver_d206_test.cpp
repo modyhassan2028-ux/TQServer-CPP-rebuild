@@ -29,8 +29,6 @@ int main() {
     vt[8] = (long long)&SizeSlot;     // +0x40
     vt[10] = (long long)&ArraySlot;   // +0x50
     long long aMsg[1] = { (long long)vt };
-    g_pfnNpc_140077900 = &ResizeSeam;
-    g_pfnNpc_140077930 = &DataSeam;
     g_pfnNpcOperatorDelete = &FreeSeam;
     static unsigned char aBuf[0x40];
 

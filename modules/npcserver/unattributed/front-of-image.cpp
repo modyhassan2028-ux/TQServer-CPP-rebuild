@@ -183,14 +183,8 @@ void (*g_pfnNpc_140077620)(const char*, long long, long long*) = nullptr;
 void (*g_pfnNpc_1400777a0)(const char*, long long, long long*) = nullptr;
 void (*g_pfnNpc_14007d760)(void*, long long, int, int) = nullptr;
 void (*g_pfnNpc_14007bbf0)(void*, void*) = nullptr;
-unsigned char (*g_pfnNpc_140077840)(long long) = nullptr;
 void (*g_pfnNpc_14007bc70)(void*) = nullptr;
 void (*g_pfnNpc_14007d810)(void*) = nullptr;
-long long (*g_pfnNpc_140077850)(long long, unsigned int) = nullptr;
-int (*g_pfnNpc_1400778a0)(long long) = nullptr;
-void (*g_pfnNpc_140077900)(std::string*, long long) = nullptr;
-long long (*g_pfnNpc_140077930)(std::string*) = nullptr;
-void (*g_pfnNpc_1400778c0)(long long, int) = nullptr;
 void (*g_pfnNpc_14007b7e0)(void*) = nullptr;
 void (*g_pfnNpc_1400776c0)(void*, const char*, int) = nullptr;
 unsigned int g_uNpcConst_1401036a0 = 0;
@@ -3107,9 +3101,8 @@ unsigned char FUN_140076ca0(long long* pMsg, std::string* pValue) {
 unsigned long long FUN_140076e30(long long* pMsg, std::string* pValue) {
     unsigned long long uLen = pValue->size();
     int nSize = (*(int (**)(long long*))(*pMsg + 0x40))(pMsg);
-    if (g_pfnNpc_140077900 != nullptr)
-        g_pfnNpc_140077900(pValue, (long long)((int)uLen + nSize));
-    long long pData = g_pfnNpc_140077930 != nullptr ? g_pfnNpc_140077930(pValue) : 0;
+    FUN_140077900(pValue, (long long)((int)uLen + nSize));
+    long long pData = (long long)FUN_140077930(pValue);
     pData = pData + (int)uLen;
     long long pEnd = (*(long long (**)(long long*, long long))(*pMsg + 0x50))(pMsg, pData);
     long long lExpect = (long long)nSize;
@@ -3152,7 +3145,7 @@ void FUN_140077900(std::string* pValue, unsigned long long nNewSize) { pValue->r
 void* FUN_140077850(long long pTarget, int nSize) {
     if (*(int*)(pTarget + 0x10) < nSize) return nullptr;
     void* pBuffer = *(void**)(pTarget + 8);
-    if (g_pfnNpc_1400778c0 != nullptr) g_pfnNpc_1400778c0(pTarget, nSize);
+    FUN_1400778c0(pTarget, nSize);
     return pBuffer;
 }
 
@@ -3523,6 +3516,9 @@ void FUN_140078470(int* pMsg) {
         if (g_pfnNpcThrowFatal != nullptr) g_pfnNpcThrowFatal(aException, (void*)g_pNpcThrowInfo_1400fee98);
     }
 }
+unsigned char (*g_pfnNpc_140077840)(long long) = nullptr;
+long long (*g_pfnNpc_140077850)(long long, unsigned int) = nullptr;
+int (*g_pfnNpc_1400778a0)(long long) = nullptr;
 void (*g_pfnNpc_140078b30)(long long*, void (*)(void)) = nullptr;
 void (*g_pfnNpc_1400787c0)(void*) = nullptr;
 void (*g_pfnNpc_1400787f0)(void*) = nullptr;

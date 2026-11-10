@@ -1555,3 +1555,14 @@ closed, and the flag only being set on the path that got a socket.
   reports a problem; `0x140078d60` only releases.
 - `0x140077fc0` runs the one-time log initialisation: it hands `0x140078b30` the state word at `0x140104ce8` and the
   **address** of `0x140077f50`, not a call.
+
+## D214 — rewiring pass 2, slice 1: the string and buffer helpers
+
+- `0x140077900` (resize), `0x140077930` (data pointer) and `0x1400778c0` (consume from a target) now have their real
+  bodies called directly from `0x140076e30` and `0x140077850`. The suites no longer stand a fake in their place.
+- The three suites that used the fakes had to be rebuilt around **real state** instead of counters, and that is
+  where the value is: `0x140076e30` is now checked by the string's own size (3 becomes 11, then 19 through the
+  forwarder, and 8 for an empty string), and `0x140077850` by the target's own cursor: the data pointer at `+8` moves
+  from `0x1234` to `0x1238` and the count at `+0x10` falls from 4 to 0, while the refused call leaves both alone.
+- Side effect worth recording: with the real resize in place the note sequence inside `0x140076e30` is two entries,
+  not four. The resize and the data pointer no longer announce themselves.

@@ -33,9 +33,6 @@ int main() {
     vt[8] = (long long)&SizeSlot;
     vt[10] = (long long)&ArraySlot;
     long long aMsg[1] = { (long long)vt };
-    g_pfnNpc_140077900 = &Resize;
-    g_pfnNpc_140077930 = &DataOf;
-    g_pfnNpc_1400778c0 = &C800;
     g_pfnNpc_140077370 = &T370;
 
     // the field readers
@@ -71,11 +68,12 @@ int main() {
         std::memset(t, 0, sizeof t);
         *(int*)(t + 0x10) = 4;
         *(void**)(t + 8) = (void*)0x1234;
-        g_c800 = 0;
         assert(FUN_140077850((long long)t, 8) == nullptr);
-        assert(g_c800 == 0);
+        assert(*(int*)(t + 0x10) == 4);                  // refused: the count is untouched
         void* p = FUN_140077850((long long)t, 4);
-        assert(p == (void*)0x1234 && g_c800 == 1 && g_c800Arg == 4);
+        assert(p == (void*)0x1234);                      // the buffer as it stood before the take
+        assert(*(void**)(t + 8) == (void*)0x1238);       // the data pointer moved on by four
+        assert(*(int*)(t + 0x10) == 0);                  // and the count shrank by the same four
     }
 
     // emptying then appending: the string is cleared first, so the append sees a zero length
@@ -83,14 +81,14 @@ int main() {
         std::string s("hello");
         g_seqN = 0; g_resizeTo = -1; g_arrayDelta = 0; g_byteSize = 3;
         FUN_140076f00(aMsg, &s);
-        assert(g_resizeTo == 3);                          // zero plus the byte size, not five plus it
+        assert(s.size() == 3);                            // zero plus the byte size, not five plus it
         g_seqN = 0; g_resizeTo = -1;
         FUN_140076f40(aMsg, &s);
-        assert(g_resizeTo == 3);
+        assert(s.size() == 3);
         s = "hello";
         g_resizeTo = -1;
         FUN_140076f40(aMsg, &s);
-        assert(g_resizeTo == 3);
+        assert(s.size() == 3);
     }
 
     // the two wrapper closers: slot 3 first, then the work, with the answer carried back

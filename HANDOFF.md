@@ -844,3 +844,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   which are still seams.
 - Rewiring pass 2 (the tree/queue cluster) was started and rolled back: 13 suites substitute those seams for
   infrastructure, not just observation, so the pass needs its suites rebuilt one at a time. Nothing is left red.
+
+## D214 (latest)
+
+- Rewiring pass 2, slice 1 done: 140077900, 140077930, 1400778c0 rewired; D204/D205/D206 rebuilt against real state.
+  44 suites green, the three rebuilt ones six times.
+- Next slice: 140077840, 140077850, 1400778a0 (readers used by 0x140076790 and 0x140076aa0). A first attempt showed the
+  target's fields must exist for the real 140077850, so D203/D204 need their targets filled before that group moves.

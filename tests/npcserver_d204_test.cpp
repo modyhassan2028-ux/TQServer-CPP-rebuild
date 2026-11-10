@@ -49,8 +49,6 @@ int main() {
     g_pfnNpc_140077840 = &HadError;
     g_pfnNpc_140077850 = &Room;
     g_pfnNpc_1400778a0 = &Written;
-    g_pfnNpc_140077900 = &Resize;
-    g_pfnNpc_140077930 = &DataOf;
     g_pfnNpcLogSink_1401035c8 = &LogSink;   // the real log bodies now reach this seam
 
     // the two coded-output wrappers: wrap, serialize, destroy, and hand back the low byte only
@@ -78,14 +76,15 @@ int main() {
         g_seqN = 0; g_resizeTo = -1; g_byteSize = 8; g_fail = 0; g_arrayEndDelta = 0;
         unsigned long long u = FUN_140076e30(aMsg, &s);
         assert(u == 1);
-        assert(g_resizeTo == 3 + 8);                        // old size plus the byte size
-        // byte size, then the resize, then the data pointer, then the write into it
-        assert(g_seqN == 4);
-        assert(g_seq[0] == 3 && g_seq[1] == 9 && g_seq[2] == 10 && g_seq[3] == 5);
+        assert(s.size() == 3 + 8);                          // old size plus the byte size
+        // byte size, then the write into the string's own data: the resize and the data pointer are now the
+        // real bodies, so they no longer leave a note behind
+        assert(g_seqN == 2);
+        assert(g_seq[0] == 3 && g_seq[1] == 5);
         // the same through the forwarder
         g_seqN = 0; g_resizeTo = -1;
         FUN_140076ca0(aMsg, &s);
-        assert(g_resizeTo == 3 + 8 && g_seq[0] == 3);
+        assert(s.size() == 11 + 8 && g_seq[0] == 3);        // the string now stands at eleven
         // a write that ends short runs the consistency check and still answers one
         g_arrayEndDelta = 1; g_fail = 0;
         u = FUN_140076e30(aMsg, &s);
@@ -95,7 +94,7 @@ int main() {
         std::string e;
         g_resizeTo = -1;
         FUN_140076e30(aMsg, &e);
-        assert(g_resizeTo == 8);
+        assert(e.size() == 8);
     }
 
     std::printf("NPCSERVER_D204_OK: 0x140076be0/c40/ca0/e30\n");
