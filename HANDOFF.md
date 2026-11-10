@@ -940,3 +940,11 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 49 suites green, six cycles, `tools/run_npcserver_suites.sh`.
 - Next in the range: the `vector<T> too long` throwers, the reference-count assign/release pair, and the
   `operator_delete` cleanup wrappers.
+
+## D231 (latest)
+
+- 16 bodies of 0x140080000..0x140090000: 4 ref-assign, 4 ref-copy, 1 ref-release, 7 length-error throwers, in
+  `stl-refs.{h,cpp}` with manifest `g_aNpcRef_140080000`.
+- 50 suites green, six cycles, `tools/run_npcserver_suites.sh`.
+- Remaining in the range: 375 bodies, led by the `operator_delete` cleanup wrappers and the remaining
+  iterator/position builders.

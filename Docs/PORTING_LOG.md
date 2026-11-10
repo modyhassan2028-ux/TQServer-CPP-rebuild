@@ -1799,3 +1799,28 @@ Details that come from the text, not from assumption:
 - `operator_new` is the seam the module already had, `g_pfnNpcOperatorNew`.
 
 D230 green on its own and the whole set (49 suites) green over six cycles.
+
+## D231 — the shared-owner pair, the release wrapper, the length-error throwers (16 bodies)
+
+`tools/gen_stl_refs.py` into `modules/npcserver/unattributed/stl-refs.{h,cpp}` (manifest `g_aNpcRef_140080000`):
+
+| family | bodies | body |
+|---|---|---|
+| ref-assign | 4 | `if (pControl) ++strong;` then, holding an old control block, drop its strong count, destroy through `vtable[0]` at zero, drop the weak count and free through `vtable[<slot>]` at zero; then store the new pair |
+| ref-copy | 4 | zero the pair and forward into `ref-assign` with the source's two words |
+| ref-release | 1 | release the control block held at `pThis + <offset>`, then `operator_delete(pThis)` when the low flag bit is set, returning `pThis` either way |
+| too-long | 7 | build the message, `logic_error`, then `length_error` and throw |
+
+Every constant comes from that body's text: the strong counter (`0x10`), the weak counter (`0x14`), the freeing slot
+(`8`, i.e. `pOld[1]`), and the release wrapper's control offset (`8`). The seven messages are the image's own strings
+and differ per family: five `vector<T> too long`, one `vector<bool> too long`, one `list<T> too long`. The suite
+compares each thrown `what()` against the string the manifest carries, so a wrong message cannot pass.
+
+The image brackets each counter change in `LOCK()/UNLOCK()`; those become `__atomic_add_fetch`/`__atomic_sub_fetch`
+with `__ATOMIC_SEQ_CST`, which is what those macros expand to. The decompiled `_CxxThrowException` of a built
+`length_error` becomes `throw std::length_error(<the body's own message>)`.
+
+The generator uses a normalised skeleton to recognise a family, then pulls the constants with separate searches and
+refuses the body if any of them is missing, so a partial match cannot be emitted.
+
+D231 green alone, and the whole set (50 suites) green over six cycles.
