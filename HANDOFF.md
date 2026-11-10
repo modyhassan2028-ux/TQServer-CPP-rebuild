@@ -851,3 +851,9 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
   44 suites green, the three rebuilt ones six times.
 - Next slice: 140077840, 140077850, 1400778a0 (readers used by 0x140076790 and 0x140076aa0). A first attempt showed the
   target's fields must exist for the real 140077850, so D203/D204 need their targets filled before that group moves.
+
+## D215 (latest)
+
+- Rewiring pass 2, slice 2 done: 140077840, 140077850, 1400778a0 rewired. D203 and D204 rebuilt around real coded
+  outputs (buffer/room/cursor inside the wrapper, read at teardown). 44 suites green, the rebuilt ones six times.
+- Next slice: 140077520/140077530 (wrapper validity and construction), then 140077370/1400774a0/1400774e0.

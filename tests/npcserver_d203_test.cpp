@@ -11,11 +11,19 @@ static int g_seq[16]; static int g_seqN = 0;
 static void Note(int c) { if (g_seqN < 16) g_seq[g_seqN] = c; ++g_seqN; }
 static int g_byteSize = 8;
 static int SizeSlot(long long* p) { (void)p; Note(10); return g_byteSize; }
+static int g_hadError = 0;
 static int g_serCalls = 0;
-static void SerSlot(long long* p, long long out) { (void)p; (void)out; Note(11); ++g_serCalls; }
+static int g_serDelta = 0;
+// the target takes the bytes itself: the cursor at +0x14 moves on and the error byte at +0x18 is set
+static void SerSlot(long long* p, long long out) {
+    (void)p;
+    // the second argument is the coded output the bytes go into, not the message
+    *(int*)(out + 0x14) = *(int*)(out + 0x14) + (g_serDelta ? g_serDelta : g_byteSize);
+    *(unsigned char*)(out + 0x18) = (unsigned char)g_hadError;
+    Note(11); ++g_serCalls;
+}
 static long long g_arrayEnd = 0;
 static long long SerArraySlot(long long* p, long long buf) { (void)p; Note(12); return g_arrayEnd ? g_arrayEnd : buf + g_byteSize; }
-static int g_hadError = 0;
 static unsigned char HadError(long long out) { (void)out; Note(13); return (unsigned char)g_hadError; }
 static long long g_room = 0;
 static unsigned int g_roomSize = 0;
@@ -24,7 +32,13 @@ static int g_written = 0;
 static int Written(long long t) { (void)t; Note(15); return g_written; }
 static int g_coded, g_out;
 static void Coded(void* pCoded, long long out, int n, int lim) { (void)pCoded; (void)out; Note(16); assert(n == g_byteSize); assert(lim == -1); }
-static void Wrap(void* pOut, void* pCoded) { (void)pCoded; Note(17); }
+// the coded output is a real object now: zero it and carry the error flag at +0x18
+static void Wrap(void* pOut, void* pCoded) {
+    (void)pCoded;
+    std::memset(pOut, 0, 32);
+    *(unsigned char*)((unsigned char*)pOut + 0x18) = (unsigned char)g_hadError;
+    Note(17);
+}
 static void DestroyOut(void* p) { (void)p; Note(18); }
 static void DestroyCoded(void* p) { (void)p; Note(19); }
 static int g_logLine = 0; static std::string g_logText; static int g_fail = 0;
@@ -50,25 +64,21 @@ int main() {
     long long aMsg[1] = { (long long)vt };
     g_pfnNpc_14007d760 = &Coded;
     g_pfnNpc_14007bbf0 = &Wrap;
-    g_pfnNpc_140077840 = &HadError;
     g_pfnNpc_14007bc70 = &DestroyOut;
     g_pfnNpc_14007d810 = &DestroyCoded;
-    g_pfnNpc_140077850 = &Room;
-    g_pfnNpc_1400778a0 = &Written;
     g_pfnNpcLogSink_1401035c8 = &LogSink;   // the real log bodies now reach this seam
     static unsigned char aBuf[0x100];
 
     // into a buffer: the size, the coded output around the buffer with limit -1, the write at slot 9, and the
-    // two teardowns in order
+    // two teardowns in order. The target is the real coded output now, so the error byte is its own +0x18.
     {
         g_seqN = 0; g_hadError = 0;
         long long lRet = FUN_140076790(aMsg, (long long)aBuf);
         assert(lRet == (long long)aBuf + 8);
-        assert(g_seqN == 7);
+        assert(g_seqN == 6);
         assert(g_seq[0] == 10 && g_seq[1] == 16 && g_seq[2] == 17 && g_seq[3] == 11);
-        assert(g_seq[4] == 13);
         // the buffer comes down before the coded output it was wrapped in
-        assert(g_seq[5] == 18 && g_seq[6] == 19);
+        assert(g_seq[4] == 18 && g_seq[5] == 19);
         assert(g_fail == 0);
         // an error in the coded output aborts through the check at line 0xe0, and the sink is released
         g_seqN = 0; g_hadError = 1;
@@ -79,37 +89,59 @@ int main() {
         g_hadError = 0;
     }
 
-    // into a target with no room handed back: the write counts bytes through the target
+    // into a target that has no room: the write counts bytes through the target's own cursor and start
     {
-        g_seqN = 0; g_room = 0; g_hadError = 0; g_written = 0; g_byteSize = 8; g_serCalls = 0;
-        unsigned long long u = FUN_140076aa0(aMsg, 0x5000);
+        static unsigned char aTarget[0x40];
+        std::memset(aTarget, 0, sizeof aTarget);
+        g_seqN = 0; g_byteSize = 8; g_serCalls = 0; g_serDelta = 0; g_hadError = 0;
+        unsigned long long u = FUN_140076aa0(aMsg, (long long)aTarget);
         assert(u == 1);
-        assert(g_roomSize == 8);                  // the target was asked for the byte size
-        assert(g_serCalls == 1);
+        assert(g_serCalls == 1);                  // the target was asked to take the bytes itself
+        assert(*(int*)(aTarget + 0x10) == 0);     // no room was handed out, so nothing was consumed
+        assert(*(int*)(aTarget + 0x14) == 8);     // and the cursor stands at the byte size
+
         // into a target with room: the array writer is used and must end exactly at the byte size
-        g_seqN = 0; g_room = 0x6000; g_arrayEnd = 0;
-        u = FUN_140076aa0(aMsg, 0x5000);
+        g_seqN = 0; g_arrayEnd = 0;
+        *(void**)(aTarget + 8) = (void*)aBuf;
+        *(int*)(aTarget + 0x10) = 0x20;
+        u = FUN_140076aa0(aMsg, (long long)aTarget);
         assert(u == 1);
-        assert(g_seq[2] == 12);                   // the array writer at slot 10
+        assert(g_seq[1] == 12);                   // the array writer at slot 10
+        assert(*(void**)(aTarget + 8) == (void*)(aBuf + 8));   // the buffer moved on by the byte size
+        assert(*(int*)(aTarget + 0x10) == 0x20 - 8);           // and so did the room
+
         // a short write runs the consistency check, which reports and still answers one
-        g_seqN = 0; g_arrayEnd = 0x6000 + 3; g_fail = 0;
-        u = FUN_140076aa0(aMsg, 0x5000);
+        g_seqN = 0; g_arrayEnd = (long long)aBuf + 8 + 3; g_fail = 0;
+        *(void**)(aTarget + 8) = (void*)aBuf;
+        *(int*)(aTarget + 0x10) = 0x20;
+        u = FUN_140076aa0(aMsg, (long long)aTarget);
         assert(u == 1);
         // the produced count differs, so the second check and the unconditional third both fire
         assert(g_fail == 2 && g_logLine == 0x45);
         g_arrayEnd = 0;
+
+        // a short write that the target itself reports: the counted bytes fall short of the byte size, so the
+        // first check fires
+        std::memset(aTarget, 0, sizeof aTarget);
+        g_seqN = 0; g_serDelta = -2; g_fail = 0;
+        u = FUN_140076aa0(aMsg, (long long)aTarget);
+        assert(u == 1);
+        assert(g_fail == 2);                      // six bytes against eight, so the check fires
+
         // an error from the target refuses with zero
-        g_room = 0; g_hadError = 1;
-        u = FUN_140076aa0(aMsg, 0x5000);
+        std::memset(aTarget, 0, sizeof aTarget);
+        g_serDelta = 0; g_hadError = 1;
+        u = FUN_140076aa0(aMsg, (long long)aTarget);
         assert(u == 0);
         g_hadError = 0;
     }
 
     // the forwarder reaches the same body
     {
-        g_room = 0; g_written = 0; g_hadError = 0;
-        g_serCalls = 0;
-        FUN_140076910(aMsg, 0x7000);
+        static unsigned char aTarget[0x40];
+        std::memset(aTarget, 0, sizeof aTarget);
+        g_serCalls = 0; g_serDelta = 0; g_hadError = 0;
+        FUN_140076910(aMsg, (long long)aTarget);
         assert(g_serCalls == 1);
     }
 

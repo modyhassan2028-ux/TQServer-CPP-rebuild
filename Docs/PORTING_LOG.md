@@ -1566,3 +1566,16 @@ closed, and the flag only being set on the path that got a socket.
   from `0x1234` to `0x1238` and the count at `+0x10` falls from 4 to 0, while the refused call leaves both alone.
 - Side effect worth recording: with the real resize in place the note sequence inside `0x140076e30` is two entries,
   not four. The resize and the data pointer no longer announce themselves.
+
+## D215 — rewiring pass 2, slice 2: the target readers
+
+- `0x140077840` (error byte at `+0x18`), `0x140077850` (hand out the buffer and consume it) and `0x1400778a0`
+  (cursor `+0x14` minus start `+0x10`) are now called directly by `0x140076790` and `0x140076aa0`.
+- The two suites had to build **real coded outputs**. What that exposed:
+  - `0x140076be0`/`0x140076c40` do not serialize into the caller's buffer: they build a wrapper on the stack and
+    hand **that** to `0x140076910`. So the buffer, the room and the cursor live in the wrapper, and the only place
+    they can be inspected is the teardown, before the call returns. The suite now records them there.
+  - In the no-room path the target counts its own bytes: slot 9 receives the coded output as its **second**
+    argument, not the message. Reading the message's `+0x14` instead walks off a one-element array.
+  - The room path consumes through `0x1400778c0`, so `+8` moves on by the byte size and `+0x10` shrinks by it, while
+    the refused call leaves both untouched.

@@ -3005,8 +3005,7 @@ long long FUN_140076790(long long* pMsg, long long pOutBuf) {
     if (g_pfnNpc_14007d760 != nullptr) g_pfnNpc_14007d760(aCoded, pOutBuf, nSize, -1);
     if (g_pfnNpc_14007bbf0 != nullptr) g_pfnNpc_14007bbf0(aOut, aCoded);
     (*(void (**)(long long*, long long*))(*pMsg + 0x48))(pMsg, aOut);
-    unsigned char bError = g_pfnNpc_140077840 != nullptr
-                               ? g_pfnNpc_140077840((long long)aOut) : 0;
+    unsigned char bError = FUN_140077840((long long)aOut);
     if (bError != 0) {
         aFinisher[0] = 0;
         void* pSink = FUN_1400783d0(aSink, 3,
@@ -3038,13 +3037,13 @@ unsigned long long FUN_140076910(long long* pMsg, long long pTarget) { return FU
 // check 0x140075f60, which never returns, and the answer is one with the upper bytes of the measured value.
 unsigned long long FUN_140076aa0(long long* pMsg, long long pTarget) {
     unsigned int uSize = (*(unsigned int (**)(long long*))(*pMsg + 0x40))(pMsg);
-    long long pRoom = g_pfnNpc_140077850 != nullptr ? g_pfnNpc_140077850(pTarget, uSize) : 0;
+    long long pRoom = (long long)FUN_140077850(pTarget, (int)uSize);
     unsigned long long uRet;
     if (pRoom == 0) {
-        int nBefore = g_pfnNpc_1400778a0 != nullptr ? g_pfnNpc_1400778a0(pTarget) : 0;
+        int nBefore = FUN_1400778a0(pTarget);
         (*(void (**)(long long*, long long))(*pMsg + 0x48))(pMsg, pTarget);
-        if (g_pfnNpc_140077840 != nullptr && g_pfnNpc_140077840(pTarget) == 0) {
-            int nAfter = g_pfnNpc_1400778a0 != nullptr ? g_pfnNpc_1400778a0(pTarget) : 0;
+        if (FUN_140077840(pTarget) == 0) {
+            int nAfter = FUN_1400778a0(pTarget);
             unsigned long long uProduced = (unsigned long long)(unsigned int)(nAfter - nBefore);
             if (nAfter - nBefore != (int)uSize) {
                 int nSizeNow = (*(int (**)(long long*))(*pMsg + 0x40))(pMsg);
@@ -3516,9 +3515,6 @@ void FUN_140078470(int* pMsg) {
         if (g_pfnNpcThrowFatal != nullptr) g_pfnNpcThrowFatal(aException, (void*)g_pNpcThrowInfo_1400fee98);
     }
 }
-unsigned char (*g_pfnNpc_140077840)(long long) = nullptr;
-long long (*g_pfnNpc_140077850)(long long, unsigned int) = nullptr;
-int (*g_pfnNpc_1400778a0)(long long) = nullptr;
 void (*g_pfnNpc_140078b30)(long long*, void (*)(void)) = nullptr;
 void (*g_pfnNpc_1400787c0)(void*) = nullptr;
 void (*g_pfnNpc_1400787f0)(void*) = nullptr;

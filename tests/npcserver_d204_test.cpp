@@ -10,12 +10,33 @@ using namespace tq;
 
 static int g_seqN = 0; static int g_seq[16];
 static void Note(int c) { if (g_seqN < 16) g_seq[g_seqN] = c; ++g_seqN; }
+static int g_room = 0x20;
 static unsigned long long g_wrapTarget = 0;
-static void Wrap(void* pOut, void* pCoded) { (void)pOut; g_wrapTarget = (unsigned long long)(long long)pCoded; Note(1); }
-static void Destroy(void* p) { (void)p; Note(2); }
+static void Wrap(void* pOut, void* pCoded) {
+    g_wrapTarget = (unsigned long long)(long long)pCoded;
+    // the coded output the wrapper builds: the buffer the caller handed over, the room it has, a cursor at
+    // +0x14 that starts at nothing and an error byte at +0x18 that starts clear
+    std::memset(pOut, 0, 32);
+    *(void**)((unsigned char*)pOut + 8) = pCoded;
+    *(int*)((unsigned char*)pOut + 0x10) = g_room;
+    Note(1);
+}
+static long long g_goneBuf = 0; static int g_goneRoom = -1, g_goneCursor = -1;
+// the wrapper is torn down before the call returns, so that is the last chance to look inside it
+static void Destroy(void* p) {
+    g_goneBuf = *(long long*)((unsigned char*)p + 8);
+    g_goneRoom = *(int*)((unsigned char*)p + 0x10);
+    g_goneCursor = *(int*)((unsigned char*)p + 0x14);
+    Note(2);
+}
 static int g_byteSize = 8;
 static int SizeSlot(long long* p) { (void)p; Note(3); return g_byteSize; }
-static void SerSlot(long long* p, long long out) { (void)p; (void)out; Note(4); }
+static void SerSlot(long long* p, long long out) {
+    (void)p;
+    *(int*)(out + 0x14) = *(int*)(out + 0x14) + g_byteSize;
+    *(unsigned char*)(out + 0x18) = 0;
+    Note(4);
+}
 static long long g_arrayEndDelta = 0;
 static long long SerArraySlot(long long* p, long long buf) { (void)p; Note(5); return buf + (g_arrayEndDelta ? g_arrayEndDelta : g_byteSize); }
 static unsigned char HadError(long long o) { (void)o; Note(6); return 0; }
@@ -46,20 +67,23 @@ int main() {
     long long aMsg[1] = { (long long)vt };
     g_pfnNpc_14007bbf0 = &Wrap;
     g_pfnNpc_14007bc70 = &Destroy;
-    g_pfnNpc_140077840 = &HadError;
-    g_pfnNpc_140077850 = &Room;
-    g_pfnNpc_1400778a0 = &Written;
     g_pfnNpcLogSink_1401035c8 = &LogSink;   // the real log bodies now reach this seam
 
     // the two coded-output wrappers: wrap, serialize, destroy, and hand back the low byte only
     {
         static unsigned char target[0x40];
+        static unsigned char aRoom[0x100];
         g_seqN = 0; g_wrapTarget = 0; g_byteSize = 8;
+        (void)aRoom;
+        std::memset(target, 0, sizeof target);
+        g_goneBuf = 0; g_goneRoom = -1;
         unsigned char b = FUN_140076be0(aMsg, (long long)target);
         assert(b == 1);
         assert(g_wrapTarget == (unsigned long long)(long long)target);
         assert(g_seq[0] == 1 && g_seq[g_seqN - 1] == 2);    // wrapped first, destroyed last
-        g_seqN = 0; g_arrayEndDelta = 0;
+        assert(g_goneBuf == (long long)target + 8);            // the buffer moved on by the byte size
+        assert(g_goneRoom == 0x20 - 8);                        // and so did the room
+        g_seqN = 0; g_goneBuf = 0; g_goneRoom = -1;
         b = FUN_140076c40(aMsg, (long long)target);
         assert(b == 1);
         assert(g_seq[0] == 1 && g_seq[g_seqN - 1] == 2);
