@@ -1128,7 +1128,13 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 67 suites green, six cycles. Total ported: 603 of 4099 bodies.
 - Next: `0x140025340` (the CInstanceMgr constructor/clear, 153 lines) and the rest of `0x140025xxx`, then `0x140026xxx`.
 
-## D273 (latest)
+## D273 (latest, corrected)
+
+- Vtable table is complete: 169 rows vs the image's 125 RTTI names, and `::vftable` resolves in real runs.
+- `tools/rtti_vtables_missing.py` tried and deleted - its only rows were mangled names nothing spells.
+- Real remaining blockers: extraout_ 106, callee decl 77, SUB168 67, class-by-value 63.
+
+## D273
 
 - `Docs/MODULE_RTTI.md`: image has 125 RTTI classes, table covers them; package DLLs add 1,030 unrelated classes.
 - `::vftable` rejections are module-boundary (`std::` exceptions from msvcp90), not missing rows. Not fixable here.

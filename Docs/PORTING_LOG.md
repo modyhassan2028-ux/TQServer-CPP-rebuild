@@ -2740,3 +2740,19 @@ row. So "vftable not in table" is not missing data - the rows that fail are `std
 anyone quotes from memory, and the package contains no `ws2_32.dll`, no `mfc90.dll`, no `oleaut32.dll`. Mapping those 25
 from recollection would be inventing signatures, which is the one thing this port does not do. They stay shut until the
 real DLLs are in hand.
+
+## D273 correction — the vftable table was never the problem
+
+I measured the vtable coverage with `rewrite_body` called directly on an imported module, and got 144 failures. That
+number was mine, not the tool's: `VTABLE` is filled inside `main()`, so an imported call resolves nothing. Run the way
+it actually runs, `IGameData::vftable`, `IFile::vftable`, `CKernelThread::vftable` all resolve, and the table carries
+169 rows against the image's 125 RTTI names.
+
+The RTTI completion attempt (`tools/rtti_vtables_missing.py`) is **deleted**: it walked TypeDescriptor -> Complete Object
+Locator -> COL slot correctly and found 114 classes, but the only rows it could add were mangled names
+(`?$CGameData@$1?szNpcType`) that nothing in the listing spells, so it added 36 rows that could never match. Removing
+them restored the table; the tool is not kept because it produced no usable row, and a tool that cannot be trusted to
+add nothing is worse than no tool.
+
+What that leaves is the honest list, unchanged: `extraout_` 106, `callee has no usable declaration` 77, `SUB168` 67,
+`class used by value` 63, and the module-boundary classes.

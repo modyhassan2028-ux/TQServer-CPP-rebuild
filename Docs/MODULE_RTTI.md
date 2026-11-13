@@ -2,8 +2,9 @@
 
 Read from `NpcServer.exe`'s own RTTI and from the class tables of the DLLs in the v6159 package.
 
-- `NpcServer.exe` carries **125 RTTI class names**; `Docs/VTABLE_SLOTS.tsv` covers **60** of them, so the port's own
-  vtable table is not the gap it was assumed to be.
+- `NpcServer.exe` carries **125 RTTI class names**; `Docs/VTABLE_SLOTS.tsv` holds **169 vtable rows** and every class the
+  listing spells through `::vftable` has a row. Resolution works: `rewrite_body` turns `IGameData::vftable` into the
+  table's address. So the vtable table is not a gap at all.
 - 46 of the package's DLLs carry RTTI of their own: **1,030 classes**, none of which appear in `NpcServer.exe`'s
   list. `Syndicate.dll` alone has 81, `DB.dll` 45, `Common.dll` and the rest the remainder.
 - Therefore a body rejected for `::vftable not in table` is almost always reaching for a **class of another module**
