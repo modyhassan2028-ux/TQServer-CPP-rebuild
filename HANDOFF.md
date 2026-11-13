@@ -1128,7 +1128,13 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 67 suites green, six cycles. Total ported: 603 of 4099 bodies.
 - Next: `0x140025340` (the CInstanceMgr constructor/clear, 153 lines) and the rest of `0x140025xxx`, then `0x140026xxx`.
 
-## D252 (latest)
+## D253 (latest)
+
+- Generator grew `iter-assign` (18) and `vtable-set` (30, addresses resolved through the normalised RTTI names in
+  `Docs/VTABLE_SLOTS.tsv`). `small-bodies.{h,cpp}` now carries **171** generated bodies, all driven by the suite.
+- Still hand-work for the 79 `memmove_s` forward-move bodies: several decompiler spellings must be matched by hand first.
+
+## D252
 
 - `tools/gen_small_bodies.py` + `Docs/` batch: **123 generated bodies** in `small-bodies.{h,cpp}` (53 iterator compares,
   41 field getters, 22 empty bodies, 2 range predicates, 2 module-base getters, 2 stores, 1 compare), all driven from

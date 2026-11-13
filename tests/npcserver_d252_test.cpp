@@ -37,7 +37,7 @@ int main() {
     g_pNpcModuleBase_1401045b8 = g_aBase;
 
     assert(g_nNpcSmallBody > 100);
-    int nSeen[9] = { 0 };
+    int nSeen[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     int nKinds = 0;
 
     for (int i = 0; i < g_nNpcSmallBody; ++i) {
@@ -90,6 +90,23 @@ int main() {
             ((void (*)(void))e.pfn)();
             ++nSeen[6];
 
+        } else if (std::strcmp(e.pszKind, "iter-assign") == 0) {
+            typedef unsigned long long* (*AssignFn)(unsigned long long*, unsigned long long, unsigned long long*);
+            AssignFn pfnA = (AssignFn)e.pfn;
+            unsigned long long aOut[2] = { 0xDEAD, 0xBEEF };
+            unsigned long long aSrc[2] = { 0xABCD, 0x1234 };
+            g_invalids = 0;
+            assert(pfnA(aOut, 0x77, aSrc) == aOut);
+            assert(aOut[0] == 0xABCD && aOut[1] == 0x77);
+            assert(g_invalids == 0);
+            ++nSeen[8];
+        } else if (std::strcmp(e.pszKind, "vtable-set") == 0) {
+            typedef void (*VtableFn)(long long);
+            VtableFn pfnV = (VtableFn)e.pfn;
+            long long aObject[2] = { 0, 0 };
+            pfnV((long long)aObject);
+            assert((const void*)aObject[0] == (const void*)e.nOffset);
+            ++nSeen[9];
         } else if (std::strcmp(e.pszKind, "iter-cmp") == 0) {
             long long aA[2] = { 0x1000, 0x2000 };
             long long aB[2] = { 0x1000, 0x2000 };
@@ -115,7 +132,7 @@ int main() {
     assert(nKinds == g_nNpcSmallBody);
     // every shape present in this batch was exercised; a shape with no body in the batch stays at zero
     int nShapes = 0;
-    for (int i = 0; i < 8; ++i) if (nSeen[i] > 0) ++nShapes;
+    for (int i = 0; i < 10; ++i) if (nSeen[i] > 0) ++nShapes;
     assert(nShapes >= 6);
     std::printf("NPCSERVER_D252_OK: %d small bodies driven from the manifest\n", g_nNpcSmallBody);
     return 0;

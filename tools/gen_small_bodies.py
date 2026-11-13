@@ -23,6 +23,39 @@ SIZE = {"undefined8": 8, "undefined4": 4, "undefined2": 2, "undefined1": 1, "lon
         "uint": 4, "int": 4, "ushort": 2, "short": 2, "byte": 1, "char": 1}
 
 
+def load_vtables():
+    """class name -> vftable address, from the RTTI dump under Docs/reference."""
+    out = {}
+    path = "Docs/VTABLE_SLOTS.tsv"
+    try:
+        lines = open(path, errors="ignore").read().splitlines()[1:]
+    except FileNotFoundError:
+        return out
+    def norm(name):
+        name = name.replace("class_", "").replace("struct_", "").replace("enum_", "").replace("union_", "")
+        name = name.replace(" ", "")
+        while "_>" in name:
+            name = name.replace("_>", ">")
+        return name
+
+    for line in lines:
+        f = line.split("\t")
+        if len(f) >= 3 and f[0] and f[1]:
+            out.setdefault(norm(f[1]), int(f[0], 16))
+    return out
+
+
+VTABLE = {}
+
+
+def normalise(name):
+    name = name.replace("class_", "").replace("struct_", "").replace("enum_", "").replace("union_", "")
+    name = name.replace(" ", "")
+    while "_>" in name:
+        name = name.replace("_>", ">")
+    return name
+
+
 def load_bodies():
     src = open(SRC, errors="ignore").read()
     out = {}
@@ -51,6 +84,20 @@ def classify(body):
     p = re.fullmatch(r"return \*\((%s) \*\)\(DAT_1401045b8 \+ (0x[0-9a-f]+)\);" % "|".join(CTYPE), b)
     if p:
         return ("get-base", SIZE[p.group(1)], int(p.group(2), 16), None)
+
+    # an iterator assign: clear the owner, take the node from the source, then copy the source's owner back
+    p = re.fullmatch(r"\*param_1 = 0; param_1\[1\] = param_2; if \(param_3 == \(undefined8 \*\)0x0\) \{ "
+                     r"_invalid_parameter_noinfo\(\); \} \*param_1 = \*param_3; return param_1;", b)
+    if p:
+        return ("iter-assign", 8, 0, None)
+
+    # the vtable store of a class the RTTI table names
+    p = re.fullmatch(r"\*param_1 = (\S+?)::vftable; return;", b)
+    if p:
+        addr = VTABLE.get(normalise(p.group(1)), 0)
+        if addr == 0:
+            return None
+        return ("vtable-set", 8, addr, None)
 
     p = re.fullmatch(r"return \*param_1 (==|!=) \*param_2;", b)
     if p:
@@ -89,6 +136,13 @@ def emit_cpp(rows):
            '#include "modules/npcserver/unattributed/front-of-image.h"',
            '#include "modules/npcserver/unattributed/module-singletons.h"',
            '', 'namespace tq {', '']
+    seen = set()
+    for addr, kind, size, off, extra, text in rows:
+        if kind == "vtable-set" and off not in seen:
+            seen.add(off)
+            out.append("// %s" % text.replace("std::", "std::"))
+            out.append("const void* const g_pNpcVtblGen_%x = (const void*)0x%x;" % (off, off))
+            out.append("")
     for addr, kind, size, off, extra, text in rows:
         ctype = {8: "unsigned long long", 4: "unsigned", 2: "unsigned short", 1: "unsigned char"}.get(size, "unsigned long long")
         out.append("// %s - %s   [%s]" % (addr, kind, text))
@@ -112,6 +166,19 @@ def emit_cpp(rows):
                        % (addr, ctype, off, ctype))
         elif kind == "noop":
             out.append("void FUN_%s(void) { return; }" % addr)
+        elif kind == "iter-assign":
+            out.append("unsigned long long* FUN_%s(unsigned long long* pOut, unsigned long long nOwner, "
+                       "unsigned long long* pSrc) {\n"
+                       "    pOut[0] = 0;\n"
+                       "    pOut[1] = nOwner;\n"
+                       "    if (pSrc == 0) {\n"
+                       "        g_pfnNpcInvalidParameter();\n"
+                       "    }\n"
+                       "    pOut[0] = pSrc[0];\n"
+                       "    return pOut;\n"
+                       "}" % addr)
+        elif kind == "vtable-set":
+            out.append("void FUN_%s(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_%x; }" % (addr, off))
         elif kind == "iter-cmp":
             op = "==" if extra == 0 else "!="
             out.append("bool FUN_%s(long long* pA, long long* pB) {\n"
@@ -134,6 +201,8 @@ def emit_cpp(rows):
 
 
 def main():
+    global VTABLE
+    VTABLE = load_vtables()
     bodies = load_bodies()
     ported = set(open(PORTED).read().split())
     rows = []

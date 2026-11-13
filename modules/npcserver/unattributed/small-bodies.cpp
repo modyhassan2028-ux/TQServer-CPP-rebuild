@@ -7,6 +7,66 @@
 
 namespace tq {
 
+// *param_1 = std::tr1::_Ref_count_base::vftable; return;
+const void* const g_pNpcVtblGen_1400be090 = (const void*)0x1400be090;
+
+// *param_1 = ISingleMap2<CConstGameData<&char*_szItemTypeTable,&char*_szItemTypeTableID>_>::vftable; return;
+const void* const g_pNpcVtblGen_1400c1f78 = (const void*)0x1400c1f78;
+
+// *param_1 = IGameData::vftable; return;
+const void* const g_pNpcVtblGen_1400c2778 = (const void*)0x1400c2778;
+
+// *param_1 = CNetMsg::vftable; return;
+const void* const g_pNpcVtblGen_1400c4d78 = (const void*)0x1400c4d78;
+
+// *param_1 = ISingleMap<CNpcPath>::vftable; return;
+const void* const g_pNpcVtblGen_1400c4e98 = (const void*)0x1400c4e98;
+
+// *param_1 = IGameObjSet<CUser>::vftable; return;
+const void* const g_pNpcVtblGen_1400c54c8 = (const void*)0x1400c54c8;
+
+// *param_1 = IGameObjSet<CGameMap>::vftable; return;
+const void* const g_pNpcVtblGen_1400c5d08 = (const void*)0x1400c5d08;
+
+// *param_1 = IAIStrategy::vftable; return;
+const void* const g_pNpcVtblGen_1400c61b0 = (const void*)0x1400c61b0;
+
+// *param_1 = tq::Singleton<CAIStrategyMgr>::vftable; return;
+const void* const g_pNpcVtblGen_1400c62b0 = (const void*)0x1400c62b0;
+
+// *param_1 = IRole::vftable; return;
+const void* const g_pNpcVtblGen_1400c8a18 = (const void*)0x1400c8a18;
+
+// *param_1 = IGameObjSet<INpc>::vftable; return;
+const void* const g_pNpcVtblGen_1400cb9f8 = (const void*)0x1400cb9f8;
+
+// *param_1 = CGameObj::vftable; return;
+const void* const g_pNpcVtblGen_1400cbc90 = (const void*)0x1400cbc90;
+
+// *param_1 = IMessagePort::vftable; return;
+const void* const g_pNpcVtblGen_1400cc288 = (const void*)0x1400cc288;
+
+// *param_1 = google::protobuf::io::CopyingInputStream::vftable; return;
+const void* const g_pNpcVtblGen_1400cf3d8 = (const void*)0x1400cf3d8;
+
+// *param_1 = google::protobuf::io::CopyingOutputStream::vftable; return;
+const void* const g_pNpcVtblGen_1400cf428 = (const void*)0x1400cf428;
+
+// *param_1 = google::protobuf::io::ZeroCopyInputStream::vftable; return;
+const void* const g_pNpcVtblGen_1400cf300 = (const void*)0x1400cf300;
+
+// *param_1 = google::protobuf::io::ZeroCopyOutputStream::vftable; return;
+const void* const g_pNpcVtblGen_1400cf368 = (const void*)0x1400cf368;
+
+// *param_1 = IMapData::vftable; return;
+const void* const g_pNpcVtblGen_1400cf5a8 = (const void*)0x1400cf5a8;
+
+// *param_1 = CMapObj::vftable; return;
+const void* const g_pNpcVtblGen_1400d1780 = (const void*)0x1400d1780;
+
+// *param_1 = IFile::vftable; return;
+const void* const g_pNpcVtblGen_1400d1dc8 = (const void*)0x1400d1dc8;
+
 // 140002f30 - noop   [return;]
 void FUN_140002f30(void) { return; }
 
@@ -58,6 +118,12 @@ unsigned long long FUN_14001c210(void) { return *(unsigned long long*)((char*)g_
 // 14001c250 - get-base   [return *(undefined8 *)(DAT_1401045b8 + 0x50);]
 unsigned long long FUN_14001c250(void) { return *(unsigned long long*)((char*)g_pNpcModuleBase_1401045b8 + 0x50); }
 
+// 14001c550 - vtable-set   [*param_1 = std::tr1::_Ref_count_base::vftable; return;]
+void FUN_14001c550(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400be090; }
+
+// 14001c9c0 - vtable-set   [*param_1 = std::tr1::_Ref_count_base::vftable; return;]
+void FUN_14001c9c0(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400be090; }
+
 // 14001cab0 - get-offset   [return *(undefined8 *)(param_1 + 0x58);]
 unsigned long long FUN_14001cab0(long long pObject) { return *(unsigned long long*)((char*)pObject + 0x58); }
 
@@ -69,6 +135,9 @@ void FUN_14001da00(void) { return; }
 
 // 14001da30 - compare   [return *param_1 == *param_2;]
 bool FUN_14001da30(long long* pA, long long* pB) { return *pA == *pB; }
+
+// 14001dda0 - vtable-set   [*param_1 = ISingleMap2<CConstGameData<&char*_szItemTypeTable,&char*_szItemTypeTableID>_>::vftable; return;]
+void FUN_14001dda0(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400c1f78; }
 
 // 14001e020 - iter-cmp   [if ((*param_1 == 0) || (*param_1 != *param_2)) { _invalid_parameter_noinfo(); } return param_1[1] == param_2[1];]
 bool FUN_14001e020(long long* pA, long long* pB) {
@@ -85,6 +154,31 @@ bool FUN_14001e060(long long* pA, long long* pB) {
     }
     return pA[1] != pB[1];
 }
+
+// 14001e5f0 - iter-assign   [*param_1 = 0; param_1[1] = param_2; if (param_3 == (undefined8 *)0x0) { _invalid_parameter_noinfo(); } *param_1 = *param_3; return param_1;]
+unsigned long long* FUN_14001e5f0(unsigned long long* pOut, unsigned long long nOwner, unsigned long long* pSrc) {
+    pOut[0] = 0;
+    pOut[1] = nOwner;
+    if (pSrc == 0) {
+        g_pfnNpcInvalidParameter();
+    }
+    pOut[0] = pSrc[0];
+    return pOut;
+}
+
+// 14001e760 - iter-assign   [*param_1 = 0; param_1[1] = param_2; if (param_3 == (undefined8 *)0x0) { _invalid_parameter_noinfo(); } *param_1 = *param_3; return param_1;]
+unsigned long long* FUN_14001e760(unsigned long long* pOut, unsigned long long nOwner, unsigned long long* pSrc) {
+    pOut[0] = 0;
+    pOut[1] = nOwner;
+    if (pSrc == 0) {
+        g_pfnNpcInvalidParameter();
+    }
+    pOut[0] = pSrc[0];
+    return pOut;
+}
+
+// 140021100 - vtable-set   [*param_1 = IGameData::vftable; return;]
+void FUN_140021100(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400c2778; }
 
 // 1400214e0 - iter-cmp   [if ((*param_1 == 0) || (*param_1 != *param_2)) { _invalid_parameter_noinfo(); } return param_1[1] == param_2[1];]
 bool FUN_1400214e0(long long* pA, long long* pB) {
@@ -118,6 +212,50 @@ bool FUN_1400215b0(long long* pA, long long* pB) {
     return pA[1] != pB[1];
 }
 
+// 140022970 - iter-assign   [*param_1 = 0; param_1[1] = param_2; if (param_3 == (undefined8 *)0x0) { _invalid_parameter_noinfo(); } *param_1 = *param_3; return param_1;]
+unsigned long long* FUN_140022970(unsigned long long* pOut, unsigned long long nOwner, unsigned long long* pSrc) {
+    pOut[0] = 0;
+    pOut[1] = nOwner;
+    if (pSrc == 0) {
+        g_pfnNpcInvalidParameter();
+    }
+    pOut[0] = pSrc[0];
+    return pOut;
+}
+
+// 1400229e0 - iter-assign   [*param_1 = 0; param_1[1] = param_2; if (param_3 == (undefined8 *)0x0) { _invalid_parameter_noinfo(); } *param_1 = *param_3; return param_1;]
+unsigned long long* FUN_1400229e0(unsigned long long* pOut, unsigned long long nOwner, unsigned long long* pSrc) {
+    pOut[0] = 0;
+    pOut[1] = nOwner;
+    if (pSrc == 0) {
+        g_pfnNpcInvalidParameter();
+    }
+    pOut[0] = pSrc[0];
+    return pOut;
+}
+
+// 140022d20 - iter-assign   [*param_1 = 0; param_1[1] = param_2; if (param_3 == (undefined8 *)0x0) { _invalid_parameter_noinfo(); } *param_1 = *param_3; return param_1;]
+unsigned long long* FUN_140022d20(unsigned long long* pOut, unsigned long long nOwner, unsigned long long* pSrc) {
+    pOut[0] = 0;
+    pOut[1] = nOwner;
+    if (pSrc == 0) {
+        g_pfnNpcInvalidParameter();
+    }
+    pOut[0] = pSrc[0];
+    return pOut;
+}
+
+// 140022d60 - iter-assign   [*param_1 = 0; param_1[1] = param_2; if (param_3 == (undefined8 *)0x0) { _invalid_parameter_noinfo(); } *param_1 = *param_3; return param_1;]
+unsigned long long* FUN_140022d60(unsigned long long* pOut, unsigned long long nOwner, unsigned long long* pSrc) {
+    pOut[0] = 0;
+    pOut[1] = nOwner;
+    if (pSrc == 0) {
+        g_pfnNpcInvalidParameter();
+    }
+    pOut[0] = pSrc[0];
+    return pOut;
+}
+
 // 140027b30 - iter-cmp   [if ((*param_1 == 0) || (*param_1 != *param_2)) { _invalid_parameter_noinfo(); } return param_1[1] != param_2[1];]
 bool FUN_140027b30(long long* pA, long long* pB) {
     if ((pA[0] == 0) || (pA[0] != pB[0])) {
@@ -140,6 +278,72 @@ bool FUN_140027c30(long long* pA, long long* pB) {
         g_pfnNpcInvalidParameter();
     }
     return pA[1] != pB[1];
+}
+
+// 1400283f0 - iter-assign   [*param_1 = 0; param_1[1] = param_2; if (param_3 == (undefined8 *)0x0) { _invalid_parameter_noinfo(); } *param_1 = *param_3; return param_1;]
+unsigned long long* FUN_1400283f0(unsigned long long* pOut, unsigned long long nOwner, unsigned long long* pSrc) {
+    pOut[0] = 0;
+    pOut[1] = nOwner;
+    if (pSrc == 0) {
+        g_pfnNpcInvalidParameter();
+    }
+    pOut[0] = pSrc[0];
+    return pOut;
+}
+
+// 140028e20 - iter-assign   [*param_1 = 0; param_1[1] = param_2; if (param_3 == (undefined8 *)0x0) { _invalid_parameter_noinfo(); } *param_1 = *param_3; return param_1;]
+unsigned long long* FUN_140028e20(unsigned long long* pOut, unsigned long long nOwner, unsigned long long* pSrc) {
+    pOut[0] = 0;
+    pOut[1] = nOwner;
+    if (pSrc == 0) {
+        g_pfnNpcInvalidParameter();
+    }
+    pOut[0] = pSrc[0];
+    return pOut;
+}
+
+// 140028e70 - iter-assign   [*param_1 = 0; param_1[1] = param_2; if (param_3 == (undefined8 *)0x0) { _invalid_parameter_noinfo(); } *param_1 = *param_3; return param_1;]
+unsigned long long* FUN_140028e70(unsigned long long* pOut, unsigned long long nOwner, unsigned long long* pSrc) {
+    pOut[0] = 0;
+    pOut[1] = nOwner;
+    if (pSrc == 0) {
+        g_pfnNpcInvalidParameter();
+    }
+    pOut[0] = pSrc[0];
+    return pOut;
+}
+
+// 140029120 - iter-assign   [*param_1 = 0; param_1[1] = param_2; if (param_3 == (undefined8 *)0x0) { _invalid_parameter_noinfo(); } *param_1 = *param_3; return param_1;]
+unsigned long long* FUN_140029120(unsigned long long* pOut, unsigned long long nOwner, unsigned long long* pSrc) {
+    pOut[0] = 0;
+    pOut[1] = nOwner;
+    if (pSrc == 0) {
+        g_pfnNpcInvalidParameter();
+    }
+    pOut[0] = pSrc[0];
+    return pOut;
+}
+
+// 140029da0 - iter-assign   [*param_1 = 0; param_1[1] = param_2; if (param_3 == (undefined8 *)0x0) { _invalid_parameter_noinfo(); } *param_1 = *param_3; return param_1;]
+unsigned long long* FUN_140029da0(unsigned long long* pOut, unsigned long long nOwner, unsigned long long* pSrc) {
+    pOut[0] = 0;
+    pOut[1] = nOwner;
+    if (pSrc == 0) {
+        g_pfnNpcInvalidParameter();
+    }
+    pOut[0] = pSrc[0];
+    return pOut;
+}
+
+// 140029e60 - iter-assign   [*param_1 = 0; param_1[1] = param_2; if (param_3 == (undefined8 *)0x0) { _invalid_parameter_noinfo(); } *param_1 = *param_3; return param_1;]
+unsigned long long* FUN_140029e60(unsigned long long* pOut, unsigned long long nOwner, unsigned long long* pSrc) {
+    pOut[0] = 0;
+    pOut[1] = nOwner;
+    if (pSrc == 0) {
+        g_pfnNpcInvalidParameter();
+    }
+    pOut[0] = pSrc[0];
+    return pOut;
 }
 
 // 14002bcc0 - iter-cmp   [if ((*param_1 == 0) || (*param_1 != *param_2)) { _invalid_parameter_noinfo(); } return param_1[1] == param_2[1];]
@@ -177,6 +381,12 @@ bool FUN_14002caa0(long long* pA, long long* pB) {
 // 1400302a0 - get-offset   [return *(undefined8 *)(param_1 + 0x48);]
 unsigned long long FUN_1400302a0(long long pObject) { return *(unsigned long long*)((char*)pObject + 0x48); }
 
+// 140034810 - vtable-set   [*param_1 = CNetMsg::vftable; return;]
+void FUN_140034810(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400c4d78; }
+
+// 140034ed0 - vtable-set   [*param_1 = ISingleMap<CNpcPath>::vftable; return;]
+void FUN_140034ed0(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400c4e98; }
+
 // 1400350d0 - iter-cmp   [if ((*param_1 == 0) || (*param_1 != *param_2)) { _invalid_parameter_noinfo(); } return param_1[1] == param_2[1];]
 bool FUN_1400350d0(long long* pA, long long* pB) {
     if ((pA[0] == 0) || (pA[0] != pB[0])) {
@@ -193,8 +403,33 @@ bool FUN_1400353c0(long long* pA, long long* pB) {
     return pA[1] != pB[1];
 }
 
+// 1400354c0 - iter-assign   [*param_1 = 0; param_1[1] = param_2; if (param_3 == (undefined8 *)0x0) { _invalid_parameter_noinfo(); } *param_1 = *param_3; return param_1;]
+unsigned long long* FUN_1400354c0(unsigned long long* pOut, unsigned long long nOwner, unsigned long long* pSrc) {
+    pOut[0] = 0;
+    pOut[1] = nOwner;
+    if (pSrc == 0) {
+        g_pfnNpcInvalidParameter();
+    }
+    pOut[0] = pSrc[0];
+    return pOut;
+}
+
+// 1400355d0 - iter-assign   [*param_1 = 0; param_1[1] = param_2; if (param_3 == (undefined8 *)0x0) { _invalid_parameter_noinfo(); } *param_1 = *param_3; return param_1;]
+unsigned long long* FUN_1400355d0(unsigned long long* pOut, unsigned long long nOwner, unsigned long long* pSrc) {
+    pOut[0] = 0;
+    pOut[1] = nOwner;
+    if (pSrc == 0) {
+        g_pfnNpcInvalidParameter();
+    }
+    pOut[0] = pSrc[0];
+    return pOut;
+}
+
 // 140036720 - get-offset   [return *(undefined8 *)(param_1 + 0x48);]
 unsigned long long FUN_140036720(long long pObject) { return *(unsigned long long*)((char*)pObject + 0x48); }
+
+// 140038190 - vtable-set   [*param_1 = IGameObjSet<CUser>::vftable; return;]
+void FUN_140038190(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400c54c8; }
 
 // 1400383e0 - iter-cmp   [if ((*param_1 == 0) || (*param_1 != *param_2)) { _invalid_parameter_noinfo(); } return param_1[1] == param_2[1];]
 bool FUN_1400383e0(long long* pA, long long* pB) {
@@ -210,6 +445,28 @@ bool FUN_140038a90(long long* pA, long long* pB) {
         g_pfnNpcInvalidParameter();
     }
     return pA[1] != pB[1];
+}
+
+// 140038fc0 - iter-assign   [*param_1 = 0; param_1[1] = param_2; if (param_3 == (undefined8 *)0x0) { _invalid_parameter_noinfo(); } *param_1 = *param_3; return param_1;]
+unsigned long long* FUN_140038fc0(unsigned long long* pOut, unsigned long long nOwner, unsigned long long* pSrc) {
+    pOut[0] = 0;
+    pOut[1] = nOwner;
+    if (pSrc == 0) {
+        g_pfnNpcInvalidParameter();
+    }
+    pOut[0] = pSrc[0];
+    return pOut;
+}
+
+// 140039340 - iter-assign   [*param_1 = 0; param_1[1] = param_2; if (param_3 == (undefined8 *)0x0) { _invalid_parameter_noinfo(); } *param_1 = *param_3; return param_1;]
+unsigned long long* FUN_140039340(unsigned long long* pOut, unsigned long long nOwner, unsigned long long* pSrc) {
+    pOut[0] = 0;
+    pOut[1] = nOwner;
+    if (pSrc == 0) {
+        g_pfnNpcInvalidParameter();
+    }
+    pOut[0] = pSrc[0];
+    return pOut;
 }
 
 // 14003a970 - iter-cmp   [if ((*param_1 == 0) || (*param_1 != *param_2)) { _invalid_parameter_noinfo(); } return param_1[1] == param_2[1];]
@@ -231,6 +488,9 @@ bool FUN_14003ac70(long long* pA, long long* pB) {
 // 14003c520 - noop   [return;]
 void FUN_14003c520(void) { return; }
 
+// 14003c5a0 - vtable-set   [*param_1 = IGameObjSet<CGameMap>::vftable; return;]
+void FUN_14003c5a0(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400c5d08; }
+
 // 14003d300 - iter-cmp   [if ((*param_1 == 0) || (*param_1 != *param_2)) { _invalid_parameter_noinfo(); } return param_1[1] == param_2[1];]
 bool FUN_14003d300(long long* pA, long long* pB) {
     if ((pA[0] == 0) || (pA[0] != pB[0])) {
@@ -246,6 +506,9 @@ bool FUN_14003d590(long long* pA, long long* pB) {
     }
     return pA[1] != pB[1];
 }
+
+// 14003e760 - vtable-set   [*param_1 = IAIStrategy::vftable; return;]
+void FUN_14003e760(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400c61b0; }
 
 // 14003eb90 - iter-cmp   [if ((*param_1 == 0) || (*param_1 != *param_2)) { _invalid_parameter_noinfo(); } return param_1[1] == param_2[1];]
 bool FUN_14003eb90(long long* pA, long long* pB) {
@@ -278,6 +541,15 @@ bool FUN_14003f100(long long* pA, long long* pB) {
     }
     return pA[1] == pB[1];
 }
+
+// 14003f170 - vtable-set   [*param_1 = tq::Singleton<CAIStrategyMgr>::vftable; return;]
+void FUN_14003f170(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400c62b0; }
+
+// 14003f760 - vtable-set   [*param_1 = std::tr1::_Ref_count_base::vftable; return;]
+void FUN_14003f760(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400be090; }
+
+// 14003f780 - vtable-set   [*param_1 = std::tr1::_Ref_count_base::vftable; return;]
+void FUN_14003f780(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400be090; }
 
 // 14003fa80 - iter-cmp   [if ((*param_1 == 0) || (*param_1 != *param_2)) { _invalid_parameter_noinfo(); } return param_1[1] == param_2[1];]
 bool FUN_14003fa80(long long* pA, long long* pB) {
@@ -407,6 +679,37 @@ bool FUN_14004b930(long long* pA, long long* pB) {
     return pA[1] != pB[1];
 }
 
+// 14004bd40 - vtable-set   [*param_1 = std::tr1::_Ref_count_base::vftable; return;]
+void FUN_14004bd40(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400be090; }
+
+// 14004cfe0 - iter-assign   [*param_1 = 0; param_1[1] = param_2; if (param_3 == (undefined8 *)0x0) { _invalid_parameter_noinfo(); } *param_1 = *param_3; return param_1;]
+unsigned long long* FUN_14004cfe0(unsigned long long* pOut, unsigned long long nOwner, unsigned long long* pSrc) {
+    pOut[0] = 0;
+    pOut[1] = nOwner;
+    if (pSrc == 0) {
+        g_pfnNpcInvalidParameter();
+    }
+    pOut[0] = pSrc[0];
+    return pOut;
+}
+
+// 14004e480 - iter-assign   [*param_1 = 0; param_1[1] = param_2; if (param_3 == (undefined8 *)0x0) { _invalid_parameter_noinfo(); } *param_1 = *param_3; return param_1;]
+unsigned long long* FUN_14004e480(unsigned long long* pOut, unsigned long long nOwner, unsigned long long* pSrc) {
+    pOut[0] = 0;
+    pOut[1] = nOwner;
+    if (pSrc == 0) {
+        g_pfnNpcInvalidParameter();
+    }
+    pOut[0] = pSrc[0];
+    return pOut;
+}
+
+// 140057490 - vtable-set   [*param_1 = IRole::vftable; return;]
+void FUN_140057490(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400c8a18; }
+
+// 140057a10 - vtable-set   [*param_1 = IRole::vftable; return;]
+void FUN_140057a10(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400c8a18; }
+
 // 140057ae0 - get-offset   [return *(undefined4 *)(param_1 + 0x14);]
 unsigned long long FUN_140057ae0(long long pObject) { return *(unsigned*)((char*)pObject + 0x14); }
 
@@ -488,6 +791,9 @@ unsigned long long FUN_1400678b0(long long pObject) { return *(unsigned long lon
 // 1400678c0 - set-deref   [*param_1 = param_2; return;]
 void FUN_1400678c0(long long* pObject, long long nValue) { *pObject = nValue; }
 
+// 1400678d0 - vtable-set   [*param_1 = IGameObjSet<INpc>::vftable; return;]
+void FUN_1400678d0(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400cb9f8; }
+
 // 140068130 - iter-cmp   [if ((*param_1 == 0) || (*param_1 != *param_2)) { _invalid_parameter_noinfo(); } return param_1[1] == param_2[1];]
 bool FUN_140068130(long long* pA, long long* pB) {
     if ((pA[0] == 0) || (pA[0] != pB[0])) {
@@ -503,6 +809,9 @@ bool FUN_1400683c0(long long* pA, long long* pB) {
     }
     return pA[1] != pB[1];
 }
+
+// 1400695e0 - vtable-set   [*param_1 = CGameObj::vftable; return;]
+void FUN_1400695e0(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400cbc90; }
 
 // 140069610 - noop   [return;]
 void FUN_140069610(void) { return; }
@@ -530,6 +839,9 @@ unsigned long long FUN_14006a0d0(long long pObject) { return *(unsigned*)((char*
 
 // 14006a0e0 - get-offset   [return *(undefined4 *)(param_1 + 0x20);]
 unsigned long long FUN_14006a0e0(long long pObject) { return *(unsigned*)((char*)pObject + 0x20); }
+
+// 14006dab0 - vtable-set   [*param_1 = IMessagePort::vftable; return;]
+void FUN_14006dab0(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400cc288; }
 
 // 14006de30 - get-offset   [return *(undefined4 *)(param_1 + 0xc);]
 unsigned long long FUN_14006de30(long long pObject) { return *(unsigned*)((char*)pObject + 0xc); }
@@ -575,6 +887,21 @@ void FUN_140078820(void) { return; }
 // 14007a230 - noop   [return;]
 void FUN_14007a230(void) { return; }
 
+// 14007dfd0 - vtable-set   [*param_1 = google::protobuf::io::CopyingInputStream::vftable; return;]
+void FUN_14007dfd0(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400cf3d8; }
+
+// 14007e970 - vtable-set   [*param_1 = google::protobuf::io::CopyingOutputStream::vftable; return;]
+void FUN_14007e970(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400cf428; }
+
+// 14007f440 - vtable-set   [*param_1 = google::protobuf::io::ZeroCopyInputStream::vftable; return;]
+void FUN_14007f440(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400cf300; }
+
+// 14007f460 - vtable-set   [*param_1 = google::protobuf::io::ZeroCopyOutputStream::vftable; return;]
+void FUN_14007f460(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400cf368; }
+
+// 14007f6c0 - vtable-set   [*param_1 = IMapData::vftable; return;]
+void FUN_14007f6c0(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400cf5a8; }
+
 // 14007fbb0 - iter-cmp   [if ((*param_1 == 0) || (*param_1 != *param_2)) { _invalid_parameter_noinfo(); } return param_1[1] == param_2[1];]
 bool FUN_14007fbb0(long long* pA, long long* pB) {
     if ((pA[0] == 0) || (pA[0] != pB[0])) {
@@ -607,14 +934,29 @@ bool FUN_14007ffd0(long long* pA, long long* pB) {
     return pA[1] == pB[1];
 }
 
+// 140080b60 - vtable-set   [*param_1 = std::tr1::_Ref_count_base::vftable; return;]
+void FUN_140080b60(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400be090; }
+
+// 14008dfa0 - vtable-set   [*param_1 = std::tr1::_Ref_count_base::vftable; return;]
+void FUN_14008dfa0(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400be090; }
+
 // 140093940 - set-deref   [*param_1 = param_2; return;]
 void FUN_140093940(long long* pObject, long long nValue) { *pObject = nValue; }
+
+// 1400939e0 - vtable-set   [*param_1 = std::tr1::_Ref_count_base::vftable; return;]
+void FUN_1400939e0(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400be090; }
+
+// 140093b80 - vtable-set   [*param_1 = CMapObj::vftable; return;]
+void FUN_140093b80(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400d1780; }
 
 // 140093bd0 - get-offset   [return *(undefined4 *)(param_1 + 0x20);]
 unsigned long long FUN_140093bd0(long long pObject) { return *(unsigned*)((char*)pObject + 0x20); }
 
 // 140093be0 - get-offset   [return *(undefined4 *)(param_1 + 0x24);]
 unsigned long long FUN_140093be0(long long pObject) { return *(unsigned*)((char*)pObject + 0x24); }
+
+// 140093c80 - vtable-set   [*param_1 = std::tr1::_Ref_count_base::vftable; return;]
+void FUN_140093c80(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400be090; }
 
 // 140094620 - get-offset   [return *(undefined4 *)(param_1 + 0x18);]
 unsigned long long FUN_140094620(long long pObject) { return *(unsigned*)((char*)pObject + 0x18); }
@@ -627,6 +969,9 @@ bool FUN_140094730(long long* pA, long long* pB) {
     return pA[1] == pB[1];
 }
 
+// 140094a00 - vtable-set   [*param_1 = std::tr1::_Ref_count_base::vftable; return;]
+void FUN_140094a00(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400be090; }
+
 // 140094ae0 - iter-cmp   [if ((*param_1 == 0) || (*param_1 != *param_2)) { _invalid_parameter_noinfo(); } return param_1[1] != param_2[1];]
 bool FUN_140094ae0(long long* pA, long long* pB) {
     if ((pA[0] == 0) || (pA[0] != pB[0])) {
@@ -634,6 +979,9 @@ bool FUN_140094ae0(long long* pA, long long* pB) {
     }
     return pA[1] != pB[1];
 }
+
+// 140096920 - vtable-set   [*param_1 = IFile::vftable; return;]
+void FUN_140096920(long long pThis) { *(const void**)pThis = g_pNpcVtblGen_1400d1dc8; }
 
 // 140097830 - get-offset   [return *(undefined4 *)(param_1 + 0x34);]
 unsigned long long FUN_140097830(long long pObject) { return *(unsigned*)((char*)pObject + 0x34); }
@@ -659,38 +1007,66 @@ const NpcSmallBodyEntry g_aNpcSmallBody[] = {
     { "14001c1d0", "range", 4, 0x61a81, 299999, (void*)&FUN_14001c1d0 },
     { "14001c210", "get-base", 8, 0x38, 0, (void*)&FUN_14001c210 },
     { "14001c250", "get-base", 8, 0x50, 0, (void*)&FUN_14001c250 },
+    { "14001c550", "vtable-set", 8, 0x1400be090, 0, (void*)&FUN_14001c550 },
+    { "14001c9c0", "vtable-set", 8, 0x1400be090, 0, (void*)&FUN_14001c9c0 },
     { "14001cab0", "get-offset", 8, 0x58, 0, (void*)&FUN_14001cab0 },
     { "14001d9d0", "noop", 0, 0x0, 0, (void*)&FUN_14001d9d0 },
     { "14001da00", "noop", 0, 0x0, 0, (void*)&FUN_14001da00 },
     { "14001da30", "compare", 8, 0x0, 0, (void*)&FUN_14001da30 },
+    { "14001dda0", "vtable-set", 8, 0x1400c1f78, 0, (void*)&FUN_14001dda0 },
     { "14001e020", "iter-cmp", 8, 0x0, 0, (void*)&FUN_14001e020 },
     { "14001e060", "iter-cmp", 8, 0x0, 1, (void*)&FUN_14001e060 },
+    { "14001e5f0", "iter-assign", 8, 0x0, 0, (void*)&FUN_14001e5f0 },
+    { "14001e760", "iter-assign", 8, 0x0, 0, (void*)&FUN_14001e760 },
+    { "140021100", "vtable-set", 8, 0x1400c2778, 0, (void*)&FUN_140021100 },
     { "1400214e0", "iter-cmp", 8, 0x0, 0, (void*)&FUN_1400214e0 },
     { "140021520", "iter-cmp", 8, 0x0, 1, (void*)&FUN_140021520 },
     { "140021570", "iter-cmp", 8, 0x0, 0, (void*)&FUN_140021570 },
     { "1400215b0", "iter-cmp", 8, 0x0, 1, (void*)&FUN_1400215b0 },
+    { "140022970", "iter-assign", 8, 0x0, 0, (void*)&FUN_140022970 },
+    { "1400229e0", "iter-assign", 8, 0x0, 0, (void*)&FUN_1400229e0 },
+    { "140022d20", "iter-assign", 8, 0x0, 0, (void*)&FUN_140022d20 },
+    { "140022d60", "iter-assign", 8, 0x0, 0, (void*)&FUN_140022d60 },
     { "140027b30", "iter-cmp", 8, 0x0, 1, (void*)&FUN_140027b30 },
     { "140027bf0", "iter-cmp", 8, 0x0, 1, (void*)&FUN_140027bf0 },
     { "140027c30", "iter-cmp", 8, 0x0, 1, (void*)&FUN_140027c30 },
+    { "1400283f0", "iter-assign", 8, 0x0, 0, (void*)&FUN_1400283f0 },
+    { "140028e20", "iter-assign", 8, 0x0, 0, (void*)&FUN_140028e20 },
+    { "140028e70", "iter-assign", 8, 0x0, 0, (void*)&FUN_140028e70 },
+    { "140029120", "iter-assign", 8, 0x0, 0, (void*)&FUN_140029120 },
+    { "140029da0", "iter-assign", 8, 0x0, 0, (void*)&FUN_140029da0 },
+    { "140029e60", "iter-assign", 8, 0x0, 0, (void*)&FUN_140029e60 },
     { "14002bcc0", "iter-cmp", 8, 0x0, 0, (void*)&FUN_14002bcc0 },
     { "14002bf50", "iter-cmp", 8, 0x0, 1, (void*)&FUN_14002bf50 },
     { "14002c810", "iter-cmp", 8, 0x0, 0, (void*)&FUN_14002c810 },
     { "14002caa0", "iter-cmp", 8, 0x0, 1, (void*)&FUN_14002caa0 },
     { "1400302a0", "get-offset", 8, 0x48, 0, (void*)&FUN_1400302a0 },
+    { "140034810", "vtable-set", 8, 0x1400c4d78, 0, (void*)&FUN_140034810 },
+    { "140034ed0", "vtable-set", 8, 0x1400c4e98, 0, (void*)&FUN_140034ed0 },
     { "1400350d0", "iter-cmp", 8, 0x0, 0, (void*)&FUN_1400350d0 },
     { "1400353c0", "iter-cmp", 8, 0x0, 1, (void*)&FUN_1400353c0 },
+    { "1400354c0", "iter-assign", 8, 0x0, 0, (void*)&FUN_1400354c0 },
+    { "1400355d0", "iter-assign", 8, 0x0, 0, (void*)&FUN_1400355d0 },
     { "140036720", "get-offset", 8, 0x48, 0, (void*)&FUN_140036720 },
+    { "140038190", "vtable-set", 8, 0x1400c54c8, 0, (void*)&FUN_140038190 },
     { "1400383e0", "iter-cmp", 8, 0x0, 0, (void*)&FUN_1400383e0 },
     { "140038a90", "iter-cmp", 8, 0x0, 1, (void*)&FUN_140038a90 },
+    { "140038fc0", "iter-assign", 8, 0x0, 0, (void*)&FUN_140038fc0 },
+    { "140039340", "iter-assign", 8, 0x0, 0, (void*)&FUN_140039340 },
     { "14003a970", "iter-cmp", 8, 0x0, 0, (void*)&FUN_14003a970 },
     { "14003ac70", "iter-cmp", 8, 0x0, 1, (void*)&FUN_14003ac70 },
     { "14003c520", "noop", 0, 0x0, 0, (void*)&FUN_14003c520 },
+    { "14003c5a0", "vtable-set", 8, 0x1400c5d08, 0, (void*)&FUN_14003c5a0 },
     { "14003d300", "iter-cmp", 8, 0x0, 0, (void*)&FUN_14003d300 },
     { "14003d590", "iter-cmp", 8, 0x0, 1, (void*)&FUN_14003d590 },
+    { "14003e760", "vtable-set", 8, 0x1400c61b0, 0, (void*)&FUN_14003e760 },
     { "14003eb90", "iter-cmp", 8, 0x0, 0, (void*)&FUN_14003eb90 },
     { "14003ec10", "iter-cmp", 8, 0x0, 0, (void*)&FUN_14003ec10 },
     { "14003f0c0", "iter-cmp", 8, 0x0, 0, (void*)&FUN_14003f0c0 },
     { "14003f100", "iter-cmp", 8, 0x0, 0, (void*)&FUN_14003f100 },
+    { "14003f170", "vtable-set", 8, 0x1400c62b0, 0, (void*)&FUN_14003f170 },
+    { "14003f760", "vtable-set", 8, 0x1400be090, 0, (void*)&FUN_14003f760 },
+    { "14003f780", "vtable-set", 8, 0x1400be090, 0, (void*)&FUN_14003f780 },
     { "14003fa80", "iter-cmp", 8, 0x0, 0, (void*)&FUN_14003fa80 },
     { "14003fe70", "iter-cmp", 8, 0x0, 1, (void*)&FUN_14003fe70 },
     { "14003ff90", "iter-cmp", 8, 0x0, 1, (void*)&FUN_14003ff90 },
@@ -707,6 +1083,11 @@ const NpcSmallBodyEntry g_aNpcSmallBody[] = {
     { "14004b4f0", "iter-cmp", 8, 0x0, 1, (void*)&FUN_14004b4f0 },
     { "14004b8d0", "iter-cmp", 8, 0x0, 1, (void*)&FUN_14004b8d0 },
     { "14004b930", "iter-cmp", 8, 0x0, 1, (void*)&FUN_14004b930 },
+    { "14004bd40", "vtable-set", 8, 0x1400be090, 0, (void*)&FUN_14004bd40 },
+    { "14004cfe0", "iter-assign", 8, 0x0, 0, (void*)&FUN_14004cfe0 },
+    { "14004e480", "iter-assign", 8, 0x0, 0, (void*)&FUN_14004e480 },
+    { "140057490", "vtable-set", 8, 0x1400c8a18, 0, (void*)&FUN_140057490 },
+    { "140057a10", "vtable-set", 8, 0x1400c8a18, 0, (void*)&FUN_140057a10 },
     { "140057ae0", "get-offset", 4, 0x14, 0, (void*)&FUN_140057ae0 },
     { "140057b40", "get-offset", 4, 0x80, 0, (void*)&FUN_140057b40 },
     { "140057b80", "get-offset", 8, 0x88, 0, (void*)&FUN_140057b80 },
@@ -734,8 +1115,10 @@ const NpcSmallBodyEntry g_aNpcSmallBody[] = {
     { "1400670e0", "get-offset", 4, 0x58, 0, (void*)&FUN_1400670e0 },
     { "1400678b0", "get-offset", 8, 0x10, 0, (void*)&FUN_1400678b0 },
     { "1400678c0", "set-deref", 8, 0x0, 0, (void*)&FUN_1400678c0 },
+    { "1400678d0", "vtable-set", 8, 0x1400cb9f8, 0, (void*)&FUN_1400678d0 },
     { "140068130", "iter-cmp", 8, 0x0, 0, (void*)&FUN_140068130 },
     { "1400683c0", "iter-cmp", 8, 0x0, 1, (void*)&FUN_1400683c0 },
+    { "1400695e0", "vtable-set", 8, 0x1400cbc90, 0, (void*)&FUN_1400695e0 },
     { "140069610", "noop", 0, 0x0, 0, (void*)&FUN_140069610 },
     { "140069920", "get-offset", 4, 0xc, 0, (void*)&FUN_140069920 },
     { "140069f00", "get-offset", 4, 0x10, 0, (void*)&FUN_140069f00 },
@@ -745,6 +1128,7 @@ const NpcSmallBodyEntry g_aNpcSmallBody[] = {
     { "14006a0c0", "get-offset", 4, 0x1c, 0, (void*)&FUN_14006a0c0 },
     { "14006a0d0", "get-offset", 4, 0x14, 0, (void*)&FUN_14006a0d0 },
     { "14006a0e0", "get-offset", 4, 0x20, 0, (void*)&FUN_14006a0e0 },
+    { "14006dab0", "vtable-set", 8, 0x1400cc288, 0, (void*)&FUN_14006dab0 },
     { "14006de30", "get-offset", 4, 0xc, 0, (void*)&FUN_14006de30 },
     { "14006de50", "get-offset", 4, 0x10, 0, (void*)&FUN_14006de50 },
     { "14006e050", "iter-cmp", 8, 0x0, 0, (void*)&FUN_14006e050 },
@@ -753,20 +1137,32 @@ const NpcSmallBodyEntry g_aNpcSmallBody[] = {
     { "14006ed00", "iter-cmp", 8, 0x0, 1, (void*)&FUN_14006ed00 },
     { "140078820", "noop", 0, 0x0, 0, (void*)&FUN_140078820 },
     { "14007a230", "noop", 0, 0x0, 0, (void*)&FUN_14007a230 },
+    { "14007dfd0", "vtable-set", 8, 0x1400cf3d8, 0, (void*)&FUN_14007dfd0 },
+    { "14007e970", "vtable-set", 8, 0x1400cf428, 0, (void*)&FUN_14007e970 },
+    { "14007f440", "vtable-set", 8, 0x1400cf300, 0, (void*)&FUN_14007f440 },
+    { "14007f460", "vtable-set", 8, 0x1400cf368, 0, (void*)&FUN_14007f460 },
+    { "14007f6c0", "vtable-set", 8, 0x1400cf5a8, 0, (void*)&FUN_14007f6c0 },
     { "14007fbb0", "iter-cmp", 8, 0x0, 0, (void*)&FUN_14007fbb0 },
     { "14007fbf0", "iter-cmp", 8, 0x0, 1, (void*)&FUN_14007fbf0 },
     { "14007ff80", "iter-cmp", 8, 0x0, 0, (void*)&FUN_14007ff80 },
     { "14007ffd0", "iter-cmp", 8, 0x0, 0, (void*)&FUN_14007ffd0 },
+    { "140080b60", "vtable-set", 8, 0x1400be090, 0, (void*)&FUN_140080b60 },
+    { "14008dfa0", "vtable-set", 8, 0x1400be090, 0, (void*)&FUN_14008dfa0 },
     { "140093940", "set-deref", 8, 0x0, 0, (void*)&FUN_140093940 },
+    { "1400939e0", "vtable-set", 8, 0x1400be090, 0, (void*)&FUN_1400939e0 },
+    { "140093b80", "vtable-set", 8, 0x1400d1780, 0, (void*)&FUN_140093b80 },
     { "140093bd0", "get-offset", 4, 0x20, 0, (void*)&FUN_140093bd0 },
     { "140093be0", "get-offset", 4, 0x24, 0, (void*)&FUN_140093be0 },
+    { "140093c80", "vtable-set", 8, 0x1400be090, 0, (void*)&FUN_140093c80 },
     { "140094620", "get-offset", 4, 0x18, 0, (void*)&FUN_140094620 },
     { "140094730", "iter-cmp", 8, 0x0, 0, (void*)&FUN_140094730 },
+    { "140094a00", "vtable-set", 8, 0x1400be090, 0, (void*)&FUN_140094a00 },
     { "140094ae0", "iter-cmp", 8, 0x0, 1, (void*)&FUN_140094ae0 },
+    { "140096920", "vtable-set", 8, 0x1400d1dc8, 0, (void*)&FUN_140096920 },
     { "140097830", "get-offset", 4, 0x34, 0, (void*)&FUN_140097830 },
     { "14009804c", "noop", 0, 0x0, 0, (void*)&FUN_14009804c },
 };
 
-const int g_nNpcSmallBody = 123;
+const int g_nNpcSmallBody = 171;
 
 }  // namespace tq

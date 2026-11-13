@@ -2307,3 +2307,22 @@ per-batch "total ported" lines earlier in this file are on the old denominator, 
 margin. Every line from here uses 7239.
 
 68 suites green, six cycles.
+
+## D253 — two more generated shapes: 171 bodies in one file
+
+`tools/gen_small_bodies.py` grew two shapes and one normalisation:
+
+- **`iter-assign` (18)** — `*pOut = 0; pOut[1] = owner; if (src == 0) invalid; *pOut = src[0]; return pOut;`
+- **`vtable-set` (30)** — `*pThis = <Class>::vftable; return;`  The address is resolved from
+  `Docs/VTABLE_SLOTS.tsv`, never guessed: Ghidra writes the RTTI name as `ISingleMap2<class_CConstGameData<...>_>` while the
+  body text says `ISingleMap2<CConstGameData<...>>`, so `normalise()` strips the `class_`/`struct_` prefixes and the `_>`
+  before matching. A class with no row in the table is skipped.
+
+Batch totals in `small-bodies.{h,cpp}`: 171 bodies (53 iterator compares, 41 field getters, 30 vtable stores, 22 empty, 18
+iterator assigns, 2 range predicates, 2 module-base getters, 2 stores, 1 compare), all driven from `g_aNpcSmallBody`.
+
+Deliberately left out: the 79 `memmove_s` forward-move bodies. They come in several decompiler spellings
+(`_Dst`/`_DstSize`, `param_1`/`param_2` swapped) and each needs its variant matched by hand before it can be trusted to a
+generator; that is the next template job.
+
+68 suites green, six cycles.
