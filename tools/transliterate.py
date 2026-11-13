@@ -64,7 +64,7 @@ REJECT = [
     "unaff_", "in_stack_", "extraout_", "__thiscall",
     "__fastcall", "_guard_", "in_EAX", "in_RAX", "SUB84", "SUB168", "ZEXT", "SEXT",
     "assert", "Ordinal_", "freeaddrinfo", "_open(", "_close(", "_read(", "_write(", "_lseek(", "_fstat64",
-    "log_InlineLogWARNING", "log_InlineLogINFO", "basic_string",
+    "log_InlineLogWARNING", "log_InlineLogINFO", "__none__",
     "type_info", "_1_1_",
     "time_t", "FILE ", "(_locale_t)",
 ]
@@ -280,7 +280,7 @@ def rewrite_std_string(text):
             rep = "((std::string *)(%s))->data()" % first
         elif name == "end":
             rep = "((std::string *)(%s))->data() + ((std::string *)(%s))->size()" % (first, first)
-        elif name == "basic_string":
+        elif name == "__none__":
             rep = "::new ((void *)(%s)) std::string(%s)" % (first, ", ".join(rest))
         elif name == "operator=":
             rep = "%s = *((std::string *)(%s))" % (dst, rest[0]) if rest else "%s.clear()" % first
@@ -299,6 +299,10 @@ def rewrite_std_string(text):
 def rewrite_body(body):
     body = rewrite_log_calls(body)
     body = rewrite_std_string(body)
+    # `basic_string<char, char_traits<char>, allocator<char>>` IS std::string - the same type spelled out. Naming it
+    # plainly is not a simplification, it is the typedef the original headers used.
+    body = re.sub(r"basic_string<char\s*,\s*(?:struct_|class_)?std::char_traits<char>\s*,\s*"
+                  r"(?:class_|struct_)?std::allocator<char>\s*_?>", "std::string", body)
     body = rename_params(map_types(body))
     # The RTTI table names some classes with a scope and some with template arguments
     # (`CGameData<&char*_szGenerator,&char*_szID>`, `std::tr1::_Ref_count_base`), so the class name is read backwards
@@ -492,6 +496,7 @@ def main():
     lines.append("#include \"npc-underscore-data.h\"")
     lines.append("#include \"npc-win-types.h\"")
     lines.append("#include \"npc-tq-imports.h\"")
+    lines.append("#include \"npc-crt-seams.h\"")
     lines.append("#include \"log-stubs.h\"")
     lines.append("#include \"npc-concat.h\"")
     lines.append("#include <string>")

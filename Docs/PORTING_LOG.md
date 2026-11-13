@@ -2756,3 +2756,16 @@ add nothing is worse than no tool.
 
 What that leaves is the honest list, unchanged: `extraout_` 106, `callee has no usable declaration` 77, `SUB168` 67,
 `class used by value` 63, and the module-boundary classes.
+
+## D274 — CRT seams, and std::string named plainly
+
+`npc-crt-seams.h` carries the four CRT/lock entry points the listing calls by name - `_invalid_parameter_noinfo`
+(378 references), `__security_check_cookie`, `LOCK`, `UNLOCK` - as null-defaulted seams with the signatures the call
+sites state. `basic_string<char, char_traits<char>, allocator<char>>` is now spelled `std::string`, which is that type
+under another name, so the bodies that declare it are no longer rejected on a spelling.
+
+    1,102 -> **1,106 linked** (1,797 bodies, 691 pending). 69 suites green, six cycles.
+
+Neither moved the total much, and the reason is now visible in the census: the `basic_string` bodies that came through
+walked straight into `callee has no usable declaration`. `Docs/REMAINING_BODIES.md` is rewritten from that census - 800
+bodies left, grouped by what holds each one, with the three decisions that gate the rest.
