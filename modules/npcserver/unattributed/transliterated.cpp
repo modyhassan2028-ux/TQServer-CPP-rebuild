@@ -4,6 +4,7 @@
 // not landed yet and is built only for a syntax check until then.
 #include <cstddef>
 #include <cstdio>
+#include "npc-data.h"
 
 namespace tq {
 // An indirect call the listing types `code *`. The template fixes the arity from the call site, so every

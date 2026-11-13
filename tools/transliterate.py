@@ -301,6 +301,7 @@ def main():
     lines.append("// not landed yet and is built only for a syntax check until then.")
     lines.append("#include <cstddef>")
     lines.append("#include <cstdio>")
+    lines.append("#include \"npc-data.h\"")
     lines.append("")
     lines.append("namespace tq {")
     lines.append("// An indirect call the listing types `code *`. The template fixes the arity from the call site, so every")

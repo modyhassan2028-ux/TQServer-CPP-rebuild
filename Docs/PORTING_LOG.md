@@ -2403,3 +2403,20 @@ a body it rejects is declined, not patched.
 Result: **1,645 bodies** (996 linked, 649 pending), and **2,751 of the 4,099 decompiled bodies** now have source here.
 Declined and reported: 287 `DAT_` (blocked on the data wave), 176 `std::`, 105 `extraout_`/uninitialised-register
 recovery, 72 `CONCAT` intrinsics, 63 whose vftable the RTTI table does not carry.
+
+## D257 — the data wave, opened and measured
+
+`tools/harvest_data.py` asks the listing what width each `DAT_` global has (the cast applied straight to the name, not
+merely present on the line), and `tools/extract_data.py` cuts the bytes out of the original image by parsing the PE
+sections and reading at `VA - ImageBase`. Nothing is invented: a global is a string because its bytes are printable up
+to a NUL, and a fixed-width blob because a body writes it at that width, and the bytes come from the image itself.
+
+The measurement matters more than the yield: of the **214** `DAT_` names the listing mentions, only **7** can be sized
+without a guess - 1 string and 6 blobs. **190 have no width evidence at all** (they are passed as `&DAT_x` to
+`_CxxThrowException` or to a log call, which says the address, never the size) and **17 do not resolve** through the
+section table. So the data wave is not a translation problem, it is a typing problem: it needs a pass that decides what
+`DAT_x` *is* before any body that touches it can be written honestly.
+
+`modules/npcserver/unattributed/npc-data.{h,cpp}` carries the 7 that are settled, and `Docs/NPC_DATA_WIDTHS.tsv` records
+each one's evidence (the function address the evidence came from). `DAT_` bodies stay declined until that typing pass
+lands - reported, not approximated.

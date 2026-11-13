@@ -1128,7 +1128,16 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 67 suites green, six cycles. Total ported: 603 of 4099 bodies.
 - Next: `0x140025340` (the CInstanceMgr constructor/clear, 153 lines) and the rest of `0x140025xxx`, then `0x140026xxx`.
 
-## D256 (latest)
+## D257 (latest)
+
+- `tools/harvest_data.py` + `tools/extract_data.py` open the data wave: widths from the listing's own casts, bytes from
+  the image via the PE section table. `Docs/NPC_DATA_WIDTHS.tsv` records the evidence per global.
+- Measured scope: 214 `DAT_` names, only 7 sizeable today (1 string, 6 blobs), 190 with no width evidence, 17
+  unresolvable. `npc-data.{h,cpp}` carries the 7; `DAT_` bodies stay declined until a typing pass decides what each
+  global is.
+- 1,738 bodies transliterated (996 linked, 742 pending); 69 suites green, six cycles.
+
+## D256
 
 - The transliterated unit now carries **1,645 bodies** (996 linked, 649 pending): 2,751 of 4,099 decompiled bodies have
   source in the port.

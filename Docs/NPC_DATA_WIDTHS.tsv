@@ -1,0 +1,7 @@
+name	size	evidence
+DAT_1401023f0	8	0x14000aa90
+DAT_1401045b8	8	0x14001d390
+DAT_140104610	8	0x1400bbcb0 (also seen at 1)
+DAT_140104660	8	0x1400bbd40 (also seen at 1)
+DAT_140104690	8	0x140071970
+DAT_140104d40	8	0x1400bbe50 (also seen at 1)
