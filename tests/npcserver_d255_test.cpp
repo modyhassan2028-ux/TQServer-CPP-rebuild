@@ -13,7 +13,7 @@ int main()
 
     CHECK(tq::g_nNpcTranslitCount == tq::g_nNpcTranslitLinked + tq::g_nNpcTranslitPending);
     CHECK(tq::g_nNpcTranslitCount > 1400u);
-    CHECK(tq::g_nNpcTranslitLinked > 700u);
+    CHECK(tq::g_nNpcTranslitLinked > 900u);
 
     std::set<unsigned long long> seen;
     unsigned long long nPrev = 0;

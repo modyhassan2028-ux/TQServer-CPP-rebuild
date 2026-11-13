@@ -40,6 +40,7 @@ TYPES = [
     ("byte", "unsigned char"),
     ("rsize_t", "size_t"),
     ("__uint64", "unsigned long long"),
+    ("code *", "unsigned long long"),
     ("ULONG_PTR", "unsigned long long"),
 ]
 
@@ -59,7 +60,7 @@ CRT = {
 }
 
 REJECT = [
-    "switch", "goto ", "LAB_", "code *", "unaff_", "in_stack_", "extraout_", "std::", "__thiscall",
+    "switch", "unaff_", "in_stack_", "extraout_", "std::", "__thiscall",
     "__fastcall", "DAT_", "_guard_", "in_EAX", "in_RAX", "CONCAT", "SUB84", "SUB168", "ZEXT", "SEXT",
     "assert", "Ordinal_", "DWORD", "freeaddrinfo", "_open(", "_close(", "_read(", "_write(", "_lseek(", "_fstat64",
     "log_InlineLogWARNING", "log_InlineLogINFO", "TimeGet", "LPCRITICAL_SECTION",
@@ -300,6 +301,16 @@ def main():
     lines.append("// not landed yet and is built only for a syntax check until then.")
     lines.append("#include <cstddef>")
     lines.append("#include <cstdio>")
+    lines.append("")
+    lines.append("namespace tq {")
+    lines.append("// An indirect call the listing types `code *`. The template fixes the arity from the call site, so every")
+    lines.append("// argument reaches the register the original convention put it in; only the return value is widened.")
+    lines.append("template <class... A>")
+    lines.append("inline unsigned long long CallCode(unsigned long long nPfn, A... a)")
+    lines.append("{")
+    lines.append("    return ((unsigned long long (*)(A...))nPfn)(a...);")
+    lines.append("}")
+    lines.append("}  // namespace tq")
     lines.append("#include <cstring>")
     lines.append('#include "modules/npcserver/unattributed/front-of-image.h"')
     lines.append('#include "modules/npcserver/unattributed/stl-global.h"')

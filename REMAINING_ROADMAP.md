@@ -161,6 +161,13 @@ Outstanding shapes by frequency: forwarding wrapper (10), iterator construct pai
 aligned allocate (4), memmove_s move (4), then the rest one template at a time. Extend
 `tools/gen_stl_family.py` with a new template per shape; it refuses to emit anything it cannot match exactly.
 
+## After D256
+
+**The data wave is now the single biggest blocker**: 287 bodies touch `DAT_` globals, and the vtable-bound 63 need the
+same treatment (an address, a width and a type each). Harvest them from the listing's own writes - a `DAT_x = 0x...`
+or `*(int *)(DAT_x) = ...` in another body gives the width and the address without a guess - then those bodies become
+transliterable exactly like the ones that landed today.
+
 ## After D255
 
 The remaining 1,588 decompiled bodies are now grouped by what blocks them, in the order they should be taken:

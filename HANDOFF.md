@@ -1128,7 +1128,17 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 67 suites green, six cycles. Total ported: 603 of 4099 bodies.
 - Next: `0x140025340` (the CInstanceMgr constructor/clear, 153 lines) and the rest of `0x140025xxx`, then `0x140026xxx`.
 
-## D255 (latest)
+## D256 (latest)
+
+- The transliterated unit now carries **1,645 bodies** (996 linked, 649 pending): 2,751 of 4,099 decompiled bodies have
+  source in the port.
+- `code *` and `code **` call sites rewrite to `tq::CallCode(...)`, a variadic template that keeps the call site's own
+  argument types (a plain variadic cast would lose float arguments). `goto LAB_...` bodies keep their labels as
+  `lab_<address>` and are declined only when the jump crosses an initialization.
+- Still declined: 287 `DAT_` (data wave), 176 `std::`, 105 `extraout_`, 72 `CONCAT`, 63 vftable-not-in-table, and the
+  file-IO bodies waiting on the CRT shims.
+
+## D255
 
 - `modules/npcserver/unattributed/transliterated.{h,cpp}`: **1,418 bodies** copied from the listing by
   `tools/transliterate.py` (782 linked, 636 pending behind `TQ_TRANSLIT_PENDING`). 2,511 of 4,099 decompiled bodies

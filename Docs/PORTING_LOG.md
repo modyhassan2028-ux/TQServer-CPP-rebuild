@@ -2379,3 +2379,27 @@ file-IO bodies waiting on the CRT shims.
 
 The unit is held to its own account: `tests/npcserver_d255_test.cpp` asserts the counts, that every address is inside
 the image, that the table is sorted and that no address appears twice. 69 suites green, six cycles.
+
+## D256 — indirect calls and the flattened loops: 1,418 -> 1,645 bodies
+
+Two families were sitting outside the unit because the transliterator could not express them. Both are now expressed
+without a single line of invented logic.
+
+**Indirect calls.** The listing writes them two ways, and they mean different things:
+
+    (*(code *)(P))(a)        P already holds the function pointer
+    (**(code **)(P))(a)      P is the address of the slot that holds it
+
+Both rewrite to `CallCode(...)`, a variadic template that fixes the arity from the call site:
+`return ((unsigned long long (*)(A...))nPfn)(a...);`. That matters: a plain `(unsigned long long(*)(...))` cast would
+compile but push float arguments nowhere, because a variadic call sets up its registers differently. With the template
+the argument types are the caller's own, so every argument lands where the original convention put it. Only the return
+value is widened, which is what the listing shows anyway (`cVar2 = (**...)(...)` keeps its low byte).
+
+**Flattened loops.** 298 bodies carry `goto LAB_...`. The label is real: the decompiler turned a loop into jumps. The
+body keeps them, spelled `lab_<address>`; the compiler is the judge of whether the jump crosses an initialization, and
+a body it rejects is declined, not patched.
+
+Result: **1,645 bodies** (996 linked, 649 pending), and **2,751 of the 4,099 decompiled bodies** now have source here.
+Declined and reported: 287 `DAT_` (blocked on the data wave), 176 `std::`, 105 `extraout_`/uninitialised-register
+recovery, 72 `CONCAT` intrinsics, 63 whose vftable the RTTI table does not carry.
