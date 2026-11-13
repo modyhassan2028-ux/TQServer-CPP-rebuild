@@ -1086,3 +1086,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 64 suites green, six cycles. Total ported: 591 of 4099 bodies.
 - Next: `0x140024000` (the insert core, needs `0x140024970`'s caller shape) and `0x140023290` (the range lookup), then
   `0x1400250e0` / `0x140025690` / `0x140025750` close out with no missing callees.
+
+## D247 (latest)
+
+- `0x140023290` ported into the same manifest: the equal range, no seams.
+- 64 suites green, six cycles. Total ported: 592 of 4099 bodies.
+- Next: `0x140024000` — the insert core with the rebalance (the big one, ~600 lines including the length_error throw).
+  After it the `0x140024970` seam goes away, and `0x1400250e0` / `0x140025690` / `0x140025750` close out clean.

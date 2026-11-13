@@ -181,6 +181,55 @@ long long FUN_140024b20(long long* pMap, unsigned* pKey) {
     return lVar8;
 }
 
+// 0x140023290 - the equal range: the lower bound first, then the upper bound
+long long* FUN_140023290(long long* pMap, long long* pOut, unsigned* pKey) {
+    unsigned long long uVar1;
+    unsigned long long* puVar2;
+    unsigned long long* puVar3;
+    unsigned long long* puVar4;
+    unsigned long long* puVar5;
+
+    puVar4 = (unsigned long long*)pMap[6];
+    puVar5 = puVar4;
+    if (*(char*)((long long)puVar4[1] + 0x29) == '\0') {
+        puVar2 = (unsigned long long*)puVar4[1];
+        do {
+            if (*(unsigned*)(puVar2 + 3) < *pKey) {
+                puVar3 = (unsigned long long*)puVar2[2];
+            } else {
+                if ((*(char*)((long long)puVar4 + 0x29) != '\0') && (*pKey < *(unsigned*)(puVar2 + 3))) {
+                    puVar4 = puVar2;
+                }
+                puVar3 = (unsigned long long*)*puVar2;
+                puVar5 = puVar2;
+            }
+            puVar2 = puVar3;
+        } while (*(char*)((long long)puVar3 + 0x29) == '\0');
+    }
+    if (*(char*)((long long)puVar4 + 0x29) == '\0') {
+        puVar2 = (unsigned long long*)*puVar4;
+    } else {
+        puVar2 = *(unsigned long long**)(pMap[6] + 8);
+    }
+    if (*(char*)((long long)puVar2 + 0x29) == '\0') {
+        do {
+            if (*pKey < *(unsigned*)(puVar2 + 3)) {
+                puVar3 = (unsigned long long*)*puVar2;
+                puVar4 = puVar2;
+            } else {
+                puVar3 = (unsigned long long*)puVar2[2];
+            }
+            puVar2 = puVar3;
+        } while (*(char*)((long long)puVar3 + 0x29) == '\0');
+    }
+    uVar1 = (unsigned long long)*pMap;
+    pOut[0] = (long long)uVar1;
+    pOut[1] = (long long)puVar5;
+    pOut[2] = (long long)uVar1;
+    pOut[3] = (long long)puVar4;
+    return pOut;
+}
+
 // 0x140024fe0 - the value stored at node+0x20 for a key, or zero when the key is absent
 //
 // The image builds the answer position on the stack as two adjacent slots and then takes the address of whichever pair
@@ -253,8 +302,9 @@ const NpcMapInsertEntry g_aNpcMapInsert[] = {
     { "140024970", "insert-hinted", (void*)&FUN_140024970 },
     { "140024b20", "erase-counted", (void*)&FUN_140024b20 },
     { "140024fe0", "find-value",    (void*)&FUN_140024fe0 },
+    { "140023290", "equal-range",   (void*)&FUN_140023290 },
 };
 
-const int g_nNpcMapInsert = 3;
+const int g_nNpcMapInsert = 4;
 
 }  // namespace tq

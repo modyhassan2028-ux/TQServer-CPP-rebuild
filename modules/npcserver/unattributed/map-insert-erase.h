@@ -19,6 +19,9 @@ long long* FUN_140024970(long long* pMap, long long* pOut, unsigned* pKey);
 // 0x140024b20 - count the nodes of the range, then erase exactly that range.
 long long FUN_140024b20(long long* pMap, unsigned* pKey);
 
+// 0x140023290 - the equal range of a key: {owner, lower, owner, upper}.
+long long* FUN_140023290(long long* pMap, long long* pOut, unsigned* pKey);
+
 // 0x140024fe0 - the value at node+0x20 for that key, or 0 when the key is not in the tree.
 unsigned long long FUN_140024fe0(long long pLookup, unsigned nKey);
 

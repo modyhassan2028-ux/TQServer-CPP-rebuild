@@ -2144,3 +2144,15 @@ guaranteed.
 The suite runs over a real five-node red/black tree: the four hint positions, the empty range, the whole-tree range
 (count 5, cleared through the head), a single red leaf range (count 1, child transplanted) and the six lookup answers.
 64 suites green, six cycles. Total ported: 591 of 4099 bodies.
+
+## D247 — the equal range (1 body)
+
+`0x140023290` in `map-insert-erase.{h,cpp}` (manifest now four bodies). No seams: the body only walks the tree. It
+answers four slots `{owner, lower, owner, upper}`; the first pass is the lower bound and remembers the last node it turned
+left at, the second pass walks from that node for the upper bound, and when the first pass ended on the head the walk
+starts from the head's parent (the root at `head[1]`).
+
+The suite pins six positions: an exact key (`[30,40)`), a gap (`[30,30)`), the leftmost (`[10,20)`), below everything
+(`[10,10)`), the rightmost (upper bound is `end()`), and above everything (`[head, head)`).
+
+64 suites green, six cycles. Total ported: 592 of 4099 bodies.

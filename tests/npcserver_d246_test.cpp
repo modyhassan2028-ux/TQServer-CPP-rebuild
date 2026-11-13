@@ -110,8 +110,8 @@ int main() {
     g_pfnNpcOperatorDelete = &FakeDelete;
     g_pfnNpcInvalidParameter = &Invalid;
 
-    assert(g_nNpcMapInsert == 3);
-    int nInsert = 0, nErase = 0, nFind = 0;
+    assert(g_nNpcMapInsert == 4);
+    int nInsert = 0, nErase = 0, nFind = 0, nRange = 0;
 
     for (int i = 0; i < g_nNpcMapInsert; ++i) {
         const NpcMapInsertEntry& e = g_aNpcMapInsert[i];
@@ -212,13 +212,61 @@ int main() {
             assert(g_invalids == 0);
             ++nFind;
 
+        } else if (std::strcmp(e.pszKind, "equal-range") == 0) {
+            typedef long long* (*RangeFn)(long long*, long long*, unsigned*);
+            RangeFn pfn = (RangeFn)e.pfn;
+            long long aOut[4];
+
+            BuildTree(); ResetCase();
+            unsigned nKey30 = 30;
+            assert(pfn(aMap, aOut, &nKey30) == aOut);
+            assert((long long*)aOut[1] == g_pNode30);     // lower bound is the node itself
+            assert((long long*)aOut[3] == g_pNode40);     // upper bound is its successor
+            assert(aOut[0] == aMap[0] && aOut[2] == aMap[0]);
+
+            // a key between two nodes: both bounds collapse on the upper neighbour
+            BuildTree(); ResetCase();
+            unsigned nKey25 = 25;
+            pfn(aMap, aOut, &nKey25);
+            assert((long long*)aOut[1] == g_pNode30);
+            assert((long long*)aOut[3] == g_pNode30);
+
+            // the leftmost node: the range covers just it
+            BuildTree(); ResetCase();
+            unsigned nKey10 = 10;
+            pfn(aMap, aOut, &nKey10);
+            assert((long long*)aOut[1] == g_pNode10);
+            assert((long long*)aOut[3] == g_pNode20);
+
+            // below everything: an empty range standing on the leftmost node
+            BuildTree(); ResetCase();
+            unsigned nKey5 = 5;
+            pfn(aMap, aOut, &nKey5);
+            assert((long long*)aOut[1] == g_pNode10);
+            assert((long long*)aOut[3] == g_pNode10);
+
+            // the rightmost node: the upper bound is the head, i.e. end()
+            BuildTree(); ResetCase();
+            unsigned nKey50 = 50;
+            pfn(aMap, aOut, &nKey50);
+            assert((long long*)aOut[1] == g_pNode50);
+            assert((long long*)aOut[3] == (long long*)aHeader);
+
+            // above everything: empty, but still anchored on the head
+            BuildTree(); ResetCase();
+            unsigned nKey99 = 99;
+            pfn(aMap, aOut, &nKey99);
+            assert((long long*)aOut[3] == (long long*)aHeader);
+            assert(g_invalids == 0);
+            ++nRange;
+
         } else {
             assert(!"unknown kind in the manifest");
         }
     }
 
     FreePool();
-    assert(nInsert == 1 && nErase == 1 && nFind == 1);
+    assert(nInsert == 1 && nErase == 1 && nFind == 1 && nRange == 1);
     std::printf("NPCSERVER_D246_OK: insert-with-hint and the counted range erase\n");
     return 0;
 }
