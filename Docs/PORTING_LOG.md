@@ -2676,3 +2676,17 @@ in `front-of-image.cpp` and failed to link where that object is not part of the 
 
 Also worth recording: `194 of the 467 imports are by ordinal` (`dll!#54`), and an ordinal carries no signature at all.
 Those bodies stay shut until the exporting DLL is in hand - that is the one thing still missing that I cannot derive.
+
+## D271 — every listing file is read now, and the number does not move
+
+The loader read one consolidated file, `_ALLLISTING`-style, which is why 3,574 bodies were counted while the loader saw
+4,098 - a hundred-odd bodies exist only in the split `_unnamed_*.cpp` files. Those are now read too and merged by
+address, first body wins. The count does not move (1,102 linked, 696 pending): those bodies walk straight into the same
+declines as everything else. A first attempt globbed every file in the reference tree and produced 40,944 "linked"
+bodies - the tree also holds other images' listings, and the merge happily took them. Reverted; only `_unnamed_*` is
+merged.
+
+Controls tried this round, both rejected by the suite and reverted: allowing `goto`/`switch`/`LAB_` bodies (they never
+compile past the next wall) and the broad glob above. What remains is 691 + 102 bodies, each blocked by something that
+needs a decision: an ordinal import with no signature (194 in the table), a register value C cannot name (`in_RAX`,
+`extraout_`), or a callee that is itself unportable.
