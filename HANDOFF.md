@@ -1128,7 +1128,15 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 67 suites green, six cycles. Total ported: 603 of 4099 bodies.
 - Next: `0x140025340` (the CInstanceMgr constructor/clear, 153 lines) and the rest of `0x140025xxx`, then `0x140026xxx`.
 
-## D261 (latest)
+## D262 (latest)
+
+- The vftable lookup could not see scoped names (`std::bad_alloc::vftable`, `std::tr1::_Ref_count_base::vftable`);
+  the table always had them. Capture widened to the full scope, matched whole then by last component.
+- Standing count: **1,720 bodies** (1,046 linked, 674 pending). 69 suites green, six cycles.
+- "vftable not in table" 88 -> 65 (the rest are classes the RTTI harvest does not carry).
+- `SUB84`/`SUB168` (67) left alone on purpose: the listing does not establish which half the operand points at.
+
+## D261
 
 - `modules/npcserver/unattributed/npc-concat.h`: the eleven `CONCATxy` macros plus the Ghidra slice typedefs
   (`int7`/`uint7`/...), defined from the name and nothing else. `CONCAT` left the reject list.

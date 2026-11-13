@@ -959,15 +959,28 @@ unsigned char * FUN_14007cc10(unsigned long long arg1, unsigned char * arg2);
 unsigned char * FUN_14007ccb0(unsigned arg1, unsigned char * arg2);
 unsigned char * FUN_14007cde0(unsigned long long arg1, unsigned char * arg2);
 int * FUN_14007d190(int * arg1, int * arg2);
+unsigned long long * FUN_14007d1e0(unsigned long long * arg1, unsigned long long arg2, int arg3, int arg4);
+void FUN_14007d290(unsigned long long * arg1);
 bool FUN_14007d2d0(long long arg1, long long * arg2, unsigned * arg3);
 long long FUN_14007d740(long long arg1);
+unsigned long long * FUN_14007d760(unsigned long long * arg1, unsigned long long arg2, int arg3, int arg4);
+void FUN_14007d810(unsigned long long * arg1);
 bool FUN_14007d850(long long arg1, long long * arg2, unsigned * arg3);
 long long FUN_14007db90(long long arg1);
+unsigned long long * FUN_14007dbb0(unsigned long long * arg1, unsigned long long arg2);
+void FUN_14007dc00(unsigned long long * arg1);
+unsigned long long * FUN_14007e0f0(unsigned long long * arg1, unsigned long long arg2, int arg3);
 long long FUN_14007e800(long long arg1);
+unsigned long long * FUN_14007e990(unsigned long long * arg1, unsigned long long arg2, int arg3);
 long long FUN_14007ee40(long long arg1);
 void FUN_14007ef80(long long arg1);
+unsigned long long * FUN_14007efb0(unsigned long long * arg1);
 unsigned long long * FUN_14007efd0(unsigned long long * arg1, unsigned arg2);
+unsigned long long * FUN_14007f010(unsigned long long * arg1, unsigned arg2);
+unsigned long long * FUN_14007f050(unsigned long long * arg1);
 unsigned long long * FUN_14007f080(unsigned long long * arg1, unsigned arg2);
+unsigned long long * FUN_14007f0c0(unsigned long long * arg1, unsigned arg2);
+unsigned long long * FUN_14007f100(unsigned long long * arg1, unsigned arg2);
 unsigned long long * FUN_14007f140(unsigned long long * arg1, unsigned arg2);
 unsigned long long * FUN_14007f1c0(unsigned long long * arg1, unsigned arg2);
 unsigned long long * FUN_14007f240(unsigned long long * arg1, unsigned long long arg2);
@@ -1140,6 +1153,8 @@ int FUN_140096800(long long arg1, void * arg2, int arg3, int arg4);
 bool FUN_140096850(long long arg1);
 int FUN_140096860(long long arg1, void * arg2, int arg3, int arg4);
 bool FUN_1400968b0(long long arg1);
+void FUN_140096c40(unsigned long long * arg1);
+unsigned long long * FUN_140096d90(unsigned long long * arg1, unsigned arg2);
 unsigned FUN_140097280(unsigned arg1);
 unsigned FUN_140097290(unsigned arg1);
 int FUN_140097420(long long arg1);
@@ -1727,9 +1742,6 @@ void FUN_14007bd80(unsigned long long * arg1, void * arg2, int arg3);
 void FUN_14007bf80(unsigned long long * arg1, unsigned arg2);
 void FUN_14007eaf0(long long arg1);
 unsigned long long FUN_14007eb10(long long arg1, long long * arg2, int * arg3);
-unsigned long long * FUN_14007f010(unsigned long long * arg1, unsigned arg2);
-unsigned long long * FUN_14007f0c0(unsigned long long * arg1, unsigned arg2);
-unsigned long long * FUN_14007f100(unsigned long long * arg1, unsigned arg2);
 unsigned long long * FUN_14007f180(unsigned long long * arg1, unsigned arg2);
 unsigned long long * FUN_14007f200(unsigned long long * arg1, unsigned arg2);
 void FUN_140081d90(long long arg1, int arg2, int arg3);
@@ -1815,12 +1827,13 @@ long long * FUN_140095ff0(long long * arg1, long long * arg2, long long * arg3, 
 void FUN_1400961b0(unsigned long long * arg1);
 void FUN_140096230(long long * arg1, long long * arg2);
 unsigned long long * FUN_140096300(unsigned long long * arg1, unsigned arg2);
+void FUN_140096aa0(unsigned long long * arg1);
+unsigned long long * FUN_140096d20(unsigned long long * arg1, unsigned arg2);
 void FUN_140097360(long long arg1, unsigned long long * arg2);
 unsigned long long FUN_140097710(unsigned long long * arg1, unsigned * arg2);
 unsigned * FUN_140097a60(unsigned long long * arg1, unsigned * arg2, unsigned arg3);
 unsigned long long FUN_140097b90(unsigned long long arg1);
 long long FUN_140097c10(void);
-unsigned long long FUN_140097c40(long long arg1, unsigned long long * arg2);
 void FUN_140098e78(long long * arg1, unsigned arg2, long long * arg3, unsigned long long * arg4);
 unsigned long long FUN_140099e54(unsigned long long * arg1, long long * arg2, unsigned long long * arg3, unsigned arg4, long long arg5, unsigned * arg6, unsigned long long * arg7);
 unsigned long long FUN_14009aeec(unsigned * arg1, long long * arg2, unsigned long long * arg3, unsigned long long * arg4, unsigned long long * arg5);
@@ -2117,7 +2130,6 @@ extern unsigned long long FUN_14007ad30(unsigned long long * arg1, void * arg2, 
 extern unsigned long long FUN_14007b000(unsigned long long * arg1, unsigned long long * arg2);   // defined elsewhere in the port
 extern unsigned long long FUN_14007b340(unsigned long long * arg1, unsigned long long * arg2);   // defined elsewhere in the port
 extern unsigned long long FUN_14007b7e0(unsigned long long * arg1);   // defined elsewhere in the port
-extern void FUN_14007bc70(unsigned long long * arg1);   // defined elsewhere in the port
 extern void FUN_14007be70(unsigned long long * arg1, void * arg2, int arg3);   // defined elsewhere in the port
 extern void FUN_14007c030(unsigned long long * arg1, unsigned long long arg2);   // defined elsewhere in the port
 extern unsigned long long FUN_14007c100(unsigned long long * arg1, unsigned arg2);   // defined elsewhere in the port
@@ -2128,10 +2140,6 @@ extern int  FUN_14007c670(long long pCoded);   // defined elsewhere in the port
 extern void FUN_14007c6a0(long long pCoded);   // defined elsewhere in the port
 extern unsigned long long FUN_14007caf0(unsigned long long * arg1, unsigned long long * arg2);   // defined elsewhere in the port
 extern int* FUN_14007d140(int* pFirst, int* pSecond);   // defined elsewhere in the port
-extern void FUN_14007d290(unsigned long long * arg1);   // defined elsewhere in the port
-extern void FUN_14007d810(unsigned long long * arg1);   // defined elsewhere in the port
-extern unsigned long long * FUN_14007dbb0(unsigned long long * arg1, unsigned long long arg2);   // defined elsewhere in the port
-extern unsigned long long FUN_14007dc00(unsigned long long * arg1);   // defined elsewhere in the port
 extern unsigned long long FUN_14007dfd0(long long);   // defined elsewhere in the port
 extern void FUN_14007e1c0(unsigned long long * arg1);   // defined elsewhere in the port
 extern unsigned long long FUN_14007e970(long long);   // defined elsewhere in the port
@@ -2187,6 +2195,7 @@ extern void FUN_140095b70(long long arg1, long long arg2, unsigned long long arg
 extern unsigned long long * FUN_1400977d0(unsigned long long * arg1);   // defined elsewhere in the port
 extern void FUN_1400978b0(unsigned long long * arg1);   // defined elsewhere in the port
 extern void FUN_140097b20(void);   // defined elsewhere in the port
+extern void FUN_140098300(unsigned long long arg1);   // defined elsewhere in the port
 extern void FUN_140098790(unsigned long long * arg1, long long arg2);   // defined elsewhere in the port
 extern void FUN_140098948(unsigned * arg1, long long arg2);   // defined elsewhere in the port
 extern unsigned long long FUN_140098ca8(long long * arg1, unsigned arg2, unsigned long long * arg3, unsigned long long * arg4);   // defined elsewhere in the port
@@ -2739,9 +2748,6 @@ extern void FUN_1400a3c90(unsigned long long * arg1, int arg2);   // defined els
 // pending: FUN_14007bf80 needs FUN_14007bd80
 // pending: FUN_14007eaf0 needs FUN_14007ee60
 // pending: FUN_14007eb10 needs FUN_14007ee60, FUN_14007ef20
-// pending: FUN_14007f010 needs FUN_14007d290
-// pending: FUN_14007f0c0 needs FUN_14007d810
-// pending: FUN_14007f100 needs FUN_14007dc00
 // pending: FUN_14007f180 needs FUN_14007e1c0
 // pending: FUN_14007f200 needs FUN_14007ea50
 // pending: FUN_140081d90 needs FUN_1400906e0
@@ -2827,12 +2833,13 @@ extern void FUN_1400a3c90(unsigned long long * arg1, int arg2);   // defined els
 // pending: FUN_1400961b0 needs FUN_140095a00
 // pending: FUN_140096230 needs FUN_140095610, FUN_140095ff0
 // pending: FUN_140096300 needs FUN_1400961b0
+// pending: FUN_140096aa0 needs FUN_140098300
+// pending: FUN_140096d20 needs FUN_140098300
 // pending: FUN_140097360 needs FUN_14007bd80, FUN_1400a2960
 // pending: FUN_140097710 needs FUN_14007b0f0
 // pending: FUN_140097a60 needs FUN_14007b260
 // pending: FUN_140097b90 needs FUN_140097b20
 // pending: FUN_140097c10 needs FUN_140097b20
-// pending: FUN_140097c40 needs FUN_14007b0f0, FUN_14007b260, FUN_14007bbf0, FUN_14007bc70, FUN_14007dbb0, FUN_14007dc00, FUN_1400a2330
 // pending: FUN_140098e78 needs FUN_140098790, FUN_140098ca8, FUN_140098da0
 // pending: FUN_140099e54 needs FUN_140099ce0, FUN_14009b63c, FUN_14009b7fc, FUN_14009ca6c, FUN_14009cbdc
 // pending: FUN_14009aeec needs FUN_14009a294, FUN_14009cc24
@@ -17514,6 +17521,33 @@ int * FUN_14007d190(int * arg1, int * arg2) {
 }
 //@END
 
+//@START 14007d1e0
+unsigned long long * FUN_14007d1e0(unsigned long long * arg1, unsigned long long arg2, int arg3, int arg4) {
+  int local_10;
+  
+  FUN_14007efb0(arg1);
+  *arg1 = g_pNpcVtblTrans_1400cf2d0;
+  arg1[1] = arg2;
+  *(int *)(arg1 + 2) = arg3;
+  local_10 = arg3;
+  if (0 < arg4) {
+    local_10 = arg4;
+  }
+  *(int *)((long long)arg1 + 0x14) = local_10;
+  *(unsigned *)(arg1 + 3) = 0;
+  *(unsigned *)((long long)arg1 + 0x1c) = 0;
+  return arg1;
+}
+//@END
+
+//@START 14007d290
+void FUN_14007d290(unsigned long long * arg1) {
+  *arg1 = g_pNpcVtblTrans_1400cf2d0;
+  FUN_14007f440(arg1);
+  return;
+}
+//@END
+
 //@START 14007d2d0
 bool FUN_14007d2d0(long long arg1, long long * arg2, unsigned * arg3) {
   bool bVar1;
@@ -17539,6 +17573,33 @@ bool FUN_14007d2d0(long long arg1, long long * arg2, unsigned * arg3) {
 //@START 14007d740
 long long FUN_14007d740(long long arg1) {
   return (long long)*(int *)(arg1 + 0x18);
+}
+//@END
+
+//@START 14007d760
+unsigned long long * FUN_14007d760(unsigned long long * arg1, unsigned long long arg2, int arg3, int arg4) {
+  int local_10;
+  
+  FUN_14007f050(arg1);
+  *arg1 = g_pNpcVtblTrans_1400cf330;
+  arg1[1] = arg2;
+  *(int *)(arg1 + 2) = arg3;
+  local_10 = arg3;
+  if (0 < arg4) {
+    local_10 = arg4;
+  }
+  *(int *)((long long)arg1 + 0x14) = local_10;
+  *(unsigned *)(arg1 + 3) = 0;
+  *(unsigned *)((long long)arg1 + 0x1c) = 0;
+  return arg1;
+}
+//@END
+
+//@START 14007d810
+void FUN_14007d810(unsigned long long * arg1) {
+  *arg1 = g_pNpcVtblTrans_1400cf330;
+  FUN_14007f460(arg1);
+  return;
 }
 //@END
 
@@ -17570,9 +17631,69 @@ long long FUN_14007db90(long long arg1) {
 }
 //@END
 
+//@START 14007dbb0
+unsigned long long * FUN_14007dbb0(unsigned long long * arg1, unsigned long long arg2) {
+  FUN_14007f050(arg1);
+  *arg1 = g_pNpcVtblTrans_1400cf3a0;
+  arg1[1] = arg2;
+  return arg1;
+}
+//@END
+
+//@START 14007dc00
+void FUN_14007dc00(unsigned long long * arg1) {
+  *arg1 = g_pNpcVtblTrans_1400cf3a0;
+  FUN_14007f460(arg1);
+  return;
+}
+//@END
+
+//@START 14007e0f0
+unsigned long long * FUN_14007e0f0(unsigned long long * arg1, unsigned long long arg2, int arg3) {
+  int local_10;
+  
+  FUN_14007efb0(arg1);
+  *arg1 = g_pNpcVtblTrans_1400cf3f8;
+  arg1[1] = arg2;
+  *(unsigned char *)(arg1 + 2) = 0;
+  *(unsigned char *)((long long)arg1 + 0x11) = 0;
+  arg1[3] = 0;
+  FUN_14007f240(arg1 + 4,0);
+  local_10 = arg3;
+  if (arg3 < 1) {
+    local_10 = 0x2000;
+  }
+  *(int *)(arg1 + 5) = local_10;
+  *(unsigned *)((long long)arg1 + 0x2c) = 0;
+  *(unsigned *)(arg1 + 6) = 0;
+  return arg1;
+}
+//@END
+
 //@START 14007e800
 long long FUN_14007e800(long long arg1) {
   return *(long long *)(arg1 + 0x18) - (long long)*(int *)(arg1 + 0x30);
+}
+//@END
+
+//@START 14007e990
+unsigned long long * FUN_14007e990(unsigned long long * arg1, unsigned long long arg2, int arg3) {
+  int local_10;
+  
+  FUN_14007f050(arg1);
+  *arg1 = g_pNpcVtblTrans_1400cf440;
+  arg1[1] = arg2;
+  *(unsigned char *)(arg1 + 2) = 0;
+  *(unsigned char *)((long long)arg1 + 0x11) = 0;
+  arg1[3] = 0;
+  FUN_14007f240(arg1 + 4,0);
+  local_10 = arg3;
+  if (arg3 < 1) {
+    local_10 = 0x2000;
+  }
+  *(int *)(arg1 + 5) = local_10;
+  *(unsigned *)((long long)arg1 + 0x2c) = 0;
+  return arg1;
 }
 //@END
 
@@ -17590,6 +17711,13 @@ void FUN_14007ef80(long long arg1) {
 }
 //@END
 
+//@START 14007efb0
+unsigned long long * FUN_14007efb0(unsigned long long * arg1) {
+  *arg1 = g_pNpcVtblTrans_1400cf300;
+  return arg1;
+}
+//@END
+
 //@START 14007efd0
 unsigned long long * FUN_14007efd0(unsigned long long * arg1, unsigned arg2) {
   FUN_14007f440(arg1);
@@ -17600,9 +17728,46 @@ unsigned long long * FUN_14007efd0(unsigned long long * arg1, unsigned arg2) {
 }
 //@END
 
+//@START 14007f010
+unsigned long long * FUN_14007f010(unsigned long long * arg1, unsigned arg2) {
+  FUN_14007d290(arg1);
+  if ((arg2 & 1) != 0) {
+    operator_delete(arg1);
+  }
+  return arg1;
+}
+//@END
+
+//@START 14007f050
+unsigned long long * FUN_14007f050(unsigned long long * arg1) {
+  *arg1 = g_pNpcVtblTrans_1400cf368;
+  return arg1;
+}
+//@END
+
 //@START 14007f080
 unsigned long long * FUN_14007f080(unsigned long long * arg1, unsigned arg2) {
   FUN_14007f460(arg1);
+  if ((arg2 & 1) != 0) {
+    operator_delete(arg1);
+  }
+  return arg1;
+}
+//@END
+
+//@START 14007f0c0
+unsigned long long * FUN_14007f0c0(unsigned long long * arg1, unsigned arg2) {
+  FUN_14007d810(arg1);
+  if ((arg2 & 1) != 0) {
+    operator_delete(arg1);
+  }
+  return arg1;
+}
+//@END
+
+//@START 14007f100
+unsigned long long * FUN_14007f100(unsigned long long * arg1, unsigned arg2) {
+  FUN_14007dc00(arg1);
   if ((arg2 & 1) != 0) {
     operator_delete(arg1);
   }
@@ -21432,6 +21597,31 @@ int FUN_140096860(long long arg1, void * arg2, int arg3, int arg4) {
 //@START 1400968b0
 bool FUN_1400968b0(long long arg1) {
   return *(long long *)(arg1 + 8) != 0;
+}
+//@END
+
+//@START 140096c40
+void FUN_140096c40(unsigned long long * arg1) {
+  *arg1 = g_pNpcVtblTrans_1400d1e80;
+  if ((void *)arg1[2] != (void *)0x0) {
+    operator_delete__((void *)arg1[2]);
+  }
+  *arg1 = g_pNpcVtblTrans_1400d1dc8;
+  return;
+}
+//@END
+
+//@START 140096d90
+unsigned long long * FUN_140096d90(unsigned long long * arg1, unsigned arg2) {
+  *arg1 = g_pNpcVtblTrans_1400d1e80;
+  if ((void *)arg1[2] != (void *)0x0) {
+    operator_delete__((void *)arg1[2]);
+  }
+  *arg1 = g_pNpcVtblTrans_1400d1dc8;
+  if ((arg2 & 1) != 0) {
+    operator_delete(arg1);
+  }
+  return arg1;
 }
 //@END
 
@@ -38571,33 +38761,6 @@ unsigned long long FUN_14007eb10(long long arg1, long long * arg2, int * arg3) {
   return CONCAT71((uint7)(uint3)((unsigned)*(unsigned *)(arg1 + 0x28) >> 8),1);
 }
 
-//@PENDING 14007f010
-unsigned long long * FUN_14007f010(unsigned long long * arg1, unsigned arg2) {
-  FUN_14007d290(arg1);
-  if ((arg2 & 1) != 0) {
-    operator_delete(arg1);
-  }
-  return arg1;
-}
-
-//@PENDING 14007f0c0
-unsigned long long * FUN_14007f0c0(unsigned long long * arg1, unsigned arg2) {
-  FUN_14007d810(arg1);
-  if ((arg2 & 1) != 0) {
-    operator_delete(arg1);
-  }
-  return arg1;
-}
-
-//@PENDING 14007f100
-unsigned long long * FUN_14007f100(unsigned long long * arg1, unsigned arg2) {
-  FUN_14007dc00(arg1);
-  if ((arg2 & 1) != 0) {
-    operator_delete(arg1);
-  }
-  return arg1;
-}
-
 //@PENDING 14007f180
 unsigned long long * FUN_14007f180(unsigned long long * arg1, unsigned arg2) {
   FUN_14007e1c0(arg1);
@@ -40436,6 +40599,29 @@ unsigned long long * FUN_140096300(unsigned long long * arg1, unsigned arg2) {
   return arg1;
 }
 
+//@PENDING 140096aa0
+void FUN_140096aa0(unsigned long long * arg1) {
+  *arg1 = g_pNpcVtblTrans_1400d1e10;
+  if (arg1[2] != 0) {
+    FUN_140098300(arg1[2]);
+  }
+  *arg1 = g_pNpcVtblTrans_1400d1dc8;
+  return;
+}
+
+//@PENDING 140096d20
+unsigned long long * FUN_140096d20(unsigned long long * arg1, unsigned arg2) {
+  *arg1 = g_pNpcVtblTrans_1400d1e10;
+  if (arg1[2] != 0) {
+    FUN_140098300(arg1[2]);
+  }
+  *arg1 = g_pNpcVtblTrans_1400d1dc8;
+  if ((arg2 & 1) != 0) {
+    operator_delete(arg1);
+  }
+  return arg1;
+}
+
 //@PENDING 140097360
 void FUN_140097360(long long arg1, unsigned long long * arg2) {
   void *pvVar1;
@@ -40536,136 +40722,6 @@ long long FUN_140097c10(void) {
     FUN_140097b20();
   }
   return DAT_140104d50;
-}
-
-//@PENDING 140097c40
-unsigned long long FUN_140097c40(long long arg1, unsigned long long * arg2) {
-  unsigned char bVar1;
-  unsigned char *pbVar2;
-  char *pcVar3;
-  int iVar4;
-  char cVar5;
-  unsigned uVar6;
-  unsigned long long uVar7;
-  unsigned long long uVar8;
-  unsigned long long local_40 [2];
-  unsigned long long local_30 [5];
-  
-  FUN_14007dbb0(local_40,arg1 + 8);
-  FUN_14007bbf0(local_30,local_40);
-LAB_140097c80:
-  while ((pbVar2 = (unsigned char *)arg2[1], (unsigned char *)arg2[2] <= pbVar2 ||
-         (bVar1 = *pbVar2, (char)bVar1 < '\x01'))) {
-    uVar7 = FUN_14007b260(arg2);
-    uVar6 = (unsigned)uVar7;
-    uVar7 = uVar7 & 0xffffffff;
-    *(unsigned *)(arg2 + 4) = uVar6;
-    if (uVar6 - 1 < 0x7f) goto LAB_140097cbd;
-LAB_140097eba:
-    if ((uVar6 == 0) || (((unsigned char)uVar6 & 7) == 4)) goto LAB_140097f02;
-    cVar5 = FUN_1400a2330(arg2,uVar6,local_30);
-    if (cVar5 == '\0') {
-LAB_140097ee9:
-      FUN_14007bc70(local_30);
-      uVar7 = FUN_14007dc00(local_40);
-      return uVar7 & 0xffffffffffffff00;
-    }
-  }
-  uVar7 = (unsigned long long)bVar1;
-  *(unsigned *)(arg2 + 4) = (unsigned)bVar1;
-  arg2[1] = pbVar2 + 1;
-LAB_140097cbd:
-  uVar6 = (unsigned)uVar7;
-  iVar4 = (int)(uVar7 >> 3);
-  if (iVar4 == 1) {
-    if (uVar6 != 8) goto LAB_140097eba;
-    if (((unsigned char *)arg2[1] < (unsigned char *)arg2[2]) && (bVar1 = *(unsigned char *)arg2[1], bVar1 < 0x80)) {
-      *(unsigned *)(arg1 + 0x38) = (unsigned)bVar1;
-      arg2[1] = arg2[1] + 1;
-    }
-    else {
-      uVar8 = FUN_14007b0f0(arg2,(unsigned *)(arg1 + 0x38));
-      if ((char)uVar8 == '\0') goto LAB_140097ee9;
-    }
-    *(unsigned *)(arg1 + 0x30) = *(unsigned *)(arg1 + 0x30) | 1;
-    pcVar3 = (char *)arg2[1];
-    if (((char *)arg2[2] <= pcVar3) || (*pcVar3 != '\x10')) goto LAB_140097c80;
-    arg2[1] = pcVar3 + 1;
-LAB_140097d6f:
-    if (((unsigned char *)arg2[1] < (unsigned char *)arg2[2]) && (bVar1 = *(unsigned char *)arg2[1], bVar1 < 0x80)) {
-      *(unsigned *)(arg1 + 0x3c) = (unsigned)bVar1;
-      arg2[1] = arg2[1] + 1;
-    }
-    else {
-      uVar8 = FUN_14007b0f0(arg2,(unsigned *)(arg1 + 0x3c));
-      if ((char)uVar8 == '\0') goto LAB_140097ee9;
-    }
-    *(unsigned *)(arg1 + 0x30) = *(unsigned *)(arg1 + 0x30) | 2;
-    pcVar3 = (char *)arg2[1];
-    if (((char *)arg2[2] <= pcVar3) || (*pcVar3 != '\x18')) goto LAB_140097c80;
-    arg2[1] = pcVar3 + 1;
-LAB_140097dc2:
-    if (((unsigned char *)arg2[1] < (unsigned char *)arg2[2]) && (bVar1 = *(unsigned char *)arg2[1], bVar1 < 0x80)) {
-      *(unsigned *)(arg1 + 0x40) = (unsigned)bVar1;
-      arg2[1] = arg2[1] + 1;
-    }
-    else {
-      uVar8 = FUN_14007b0f0(arg2,(unsigned *)(arg1 + 0x40));
-      if ((char)uVar8 == '\0') goto LAB_140097ee9;
-    }
-    *(unsigned *)(arg1 + 0x30) = *(unsigned *)(arg1 + 0x30) | 4;
-    pcVar3 = (char *)arg2[1];
-    if (((char *)arg2[2] <= pcVar3) || (*pcVar3 != ' ')) goto LAB_140097c80;
-    arg2[1] = pcVar3 + 1;
-LAB_140097e15:
-    if (((unsigned char *)arg2[1] < (unsigned char *)arg2[2]) && (bVar1 = *(unsigned char *)arg2[1], bVar1 < 0x80)) {
-      *(unsigned *)(arg1 + 0x44) = (unsigned)bVar1;
-      arg2[1] = arg2[1] + 1;
-    }
-    else {
-      uVar8 = FUN_14007b0f0(arg2,(unsigned *)(arg1 + 0x44));
-      if ((char)uVar8 == '\0') goto LAB_140097ee9;
-    }
-    *(unsigned *)(arg1 + 0x30) = *(unsigned *)(arg1 + 0x30) | 8;
-    pcVar3 = (char *)arg2[1];
-    if (((char *)arg2[2] <= pcVar3) || (*pcVar3 != '(')) goto LAB_140097c80;
-    arg2[1] = pcVar3 + 1;
-  }
-  else {
-    if (iVar4 == 2) {
-      if (uVar6 != 0x10) goto LAB_140097eba;
-      goto LAB_140097d6f;
-    }
-    if (iVar4 == 3) {
-      if (uVar6 != 0x18) goto LAB_140097eba;
-      goto LAB_140097dc2;
-    }
-    if (iVar4 == 4) {
-      if (uVar6 != 0x20) goto LAB_140097eba;
-      goto LAB_140097e15;
-    }
-    if ((iVar4 != 5) || (uVar6 != 0x28)) goto LAB_140097eba;
-  }
-  if (((unsigned char *)arg2[1] < (unsigned char *)arg2[2]) && (bVar1 = *(unsigned char *)arg2[1], bVar1 < 0x80)) {
-    *(unsigned *)(arg1 + 0x48) = (unsigned)bVar1;
-    arg2[1] = arg2[1] + 1;
-  }
-  else {
-    uVar8 = FUN_14007b0f0(arg2,(unsigned *)(arg1 + 0x48));
-    if ((char)uVar8 == '\0') goto LAB_140097ee9;
-  }
-  *(unsigned *)(arg1 + 0x30) = *(unsigned *)(arg1 + 0x30) | 0x10;
-  if ((arg2[1] == arg2[2]) &&
-     ((*(int *)((long long)arg2 + 0x2c) != 0 || (*(int *)(arg2 + 3) == *(int *)(arg2 + 5))))
-     ) {
-    *(unsigned *)(arg2 + 4) = 0;
-    *(unsigned char *)((long long)arg2 + 0x24) = 1;
-LAB_140097f02:
-    FUN_14007bc70(local_30);
-    uVar8 = FUN_14007dc00(local_40);
-    return CONCAT71((int7)((unsigned long long)uVar8 >> 8),1);
-  }
-  goto LAB_140097c80;
 }
 
 //@PENDING 140098e78
@@ -42613,17 +42669,27 @@ extern const unsigned long long g_aNpcTranslitAddr[] = {
     (unsigned long long)0x14007ccb0ULL,
     (unsigned long long)0x14007cde0ULL,
     (unsigned long long)0x14007d190ULL,
+    (unsigned long long)0x14007d1e0ULL,
+    (unsigned long long)0x14007d290ULL,
     (unsigned long long)0x14007d2d0ULL,
     (unsigned long long)0x14007d740ULL,
+    (unsigned long long)0x14007d760ULL,
+    (unsigned long long)0x14007d810ULL,
     (unsigned long long)0x14007d850ULL,
     (unsigned long long)0x14007db90ULL,
+    (unsigned long long)0x14007dbb0ULL,
+    (unsigned long long)0x14007dc00ULL,
+    (unsigned long long)0x14007e0f0ULL,
     (unsigned long long)0x14007e800ULL,
+    (unsigned long long)0x14007e990ULL,
     (unsigned long long)0x14007eaf0ULL,
     (unsigned long long)0x14007eb10ULL,
     (unsigned long long)0x14007ee40ULL,
     (unsigned long long)0x14007ef80ULL,
+    (unsigned long long)0x14007efb0ULL,
     (unsigned long long)0x14007efd0ULL,
     (unsigned long long)0x14007f010ULL,
+    (unsigned long long)0x14007f050ULL,
     (unsigned long long)0x14007f080ULL,
     (unsigned long long)0x14007f0c0ULL,
     (unsigned long long)0x14007f100ULL,
@@ -42884,6 +42950,10 @@ extern const unsigned long long g_aNpcTranslitAddr[] = {
     (unsigned long long)0x140096850ULL,
     (unsigned long long)0x140096860ULL,
     (unsigned long long)0x1400968b0ULL,
+    (unsigned long long)0x140096aa0ULL,
+    (unsigned long long)0x140096c40ULL,
+    (unsigned long long)0x140096d20ULL,
+    (unsigned long long)0x140096d90ULL,
     (unsigned long long)0x140097280ULL,
     (unsigned long long)0x140097290ULL,
     (unsigned long long)0x140097360ULL,
@@ -42893,7 +42963,6 @@ extern const unsigned long long g_aNpcTranslitAddr[] = {
     (unsigned long long)0x140097a60ULL,
     (unsigned long long)0x140097b90ULL,
     (unsigned long long)0x140097c10ULL,
-    (unsigned long long)0x140097c40ULL,
     (unsigned long long)0x140098314ULL,
     (unsigned long long)0x140098330ULL,
     (unsigned long long)0x14009833cULL,
@@ -43008,8 +43077,8 @@ extern const unsigned long long g_aNpcTranslitAddr[] = {
     (unsigned long long)0x1400b5500ULL,
     (unsigned long long)0x1400bc070ULL,
 };
-extern const unsigned g_nNpcTranslitCount = 1707;
-extern const unsigned g_nNpcTranslitLinked = 1031;
-extern const unsigned g_nNpcTranslitPending = 676;
+extern const unsigned g_nNpcTranslitCount = 1720;
+extern const unsigned g_nNpcTranslitLinked = 1046;
+extern const unsigned g_nNpcTranslitPending = 674;
 
 }  // namespace tq

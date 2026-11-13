@@ -295,9 +295,14 @@ def rewrite_body(body):
     body = rewrite_log_calls(body)
     body = rewrite_std_string(body)
     body = rename_params(map_types(body))
-    body = re.sub(r"\b([A-Z]\w*)::vftable\b",
-                  lambda m: ("g_pNpcVtblTrans_%x" % VTABLE[normalise(m.group(1))])
-                  if normalise(m.group(1)) in VTABLE else m.group(0), body)
+    # The RTTI table names some classes with a scope (std::tr1::_Ref_count_base) and some without, so the class is
+    # captured with its scope and matched whole first, then by its last component.
+    def _vtl(mo):
+        for cand in (mo.group(1), mo.group(1).split("::")[-1]):
+            if normalise(cand) in VTABLE:
+                return "g_pNpcVtblTrans_%x" % VTABLE[normalise(cand)]
+        return mo.group(0)
+    body = re.sub(r"((?:[A-Za-z_]\w*::)*[A-Za-z_]\w*)::vftable\b", _vtl, body)
     for name in re.findall(r"\b([A-Z]\w* *)\*", body):
         pass
     for name in re.findall(r"\(([A-Z]\w*) \*\)", body):

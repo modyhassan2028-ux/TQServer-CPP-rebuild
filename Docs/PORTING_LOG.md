@@ -2520,3 +2520,24 @@ name form does not match a table entry, and widening the definition cannot fix a
 
 Remaining wall, measured again: `extraout_` 105, vftable-name mismatch 88, callee with no usable declaration 69,
 `SUB84`/`SUB168` 67.
+
+## D262 — the vftable lookup was matching half the name
+
+The 88 bodies declined as "vftable not in table" were not missing from the table at all. The rewrite matched the class
+with `\b([A-Z]\w*)::vftable\b`, which cannot see a scoped name: `std::bad_alloc::vftable` and
+`std::tr1::_Ref_count_base::vftable` never matched, so the body kept a `::vftable` token and was declined. The table
+(`Docs/VTABLE_SLOTS.tsv`, 1,199 rows) always had them - `std::bad_alloc` at `1400c1dd8`,
+`std::tr1::_Ref_count_base` at `1400be090`, ten slots each.
+
+The capture now takes the whole scope and matches it first, then its last component, which is how the table names
+things. Effect:
+
+    1,707 -> **1,720 bodies** (1,046 linked, 674 pending)     69 suites green, six cycles
+    "vftable not in table": 88 -> 65
+
+The 65 that remain are classes the RTTI harvest genuinely does not carry, and the honest move there is to leave them
+declined until the harvest is widened - not to point them at the nearest slot.
+
+`SUB84`/`SUB168` (67 bodies) are deliberately untouched. Ghidra's `SUBabc` describes a slice of a value whose source
+width Ghidra chose, and the listing does not say which half the first operand already points at. Writing a macro for it
+would be deciding the convention by eye for 67 call sites, which is exactly the kind of guess this unit refuses.
