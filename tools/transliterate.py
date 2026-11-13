@@ -62,7 +62,7 @@ CRT = {
 
 REJECT = [
     "switch", "unaff_", "in_stack_", "extraout_", "__thiscall",
-    "__fastcall", "_guard_", "in_EAX", "in_RAX", "CONCAT", "SUB84", "SUB168", "ZEXT", "SEXT",
+    "__fastcall", "_guard_", "in_EAX", "in_RAX", "SUB84", "SUB168", "ZEXT", "SEXT",
     "assert", "Ordinal_", "DWORD", "freeaddrinfo", "_open(", "_close(", "_read(", "_write(", "_lseek(", "_fstat64",
     "log_InlineLogWARNING", "log_InlineLogINFO", "TimeGet", "LPCRITICAL_SECTION",
     "type_info", "_1_1_", "undefined)", "LPCSTR", "LPVOID", "HWND", "LPCVOID", "exception", "undefined ", "LPCSTR",
@@ -447,6 +447,7 @@ def main():
     lines.append("#include <new>")
     lines.append("#include \"npc-data.h\"")
     lines.append("#include \"log-stubs.h\"")
+    lines.append("#include \"npc-concat.h\"")
     lines.append("#include <string>")
     lines.append("#include <new>")
     lines.append("#include \"npc-data.h\"")
@@ -478,6 +479,10 @@ def main():
     vtables = set()
     for _, _, text, _ in [(c[0], c[1], c[2], c[3]) for c in candidates]:
         vtables.update(re.findall(r"g_pNpcVtblTrans_[0-9a-f]+", text))
+    # every slot the RTTI table knows, not only the ones this run happens to reference: a body kept in the pending
+    # tier refers to the same symbols, and a missing definition turns a faithful body into a compile error.
+    for addr in VTABLE.values():
+        vtables.add("g_pNpcVtblTrans_%x" % addr)
     for sym in sorted(vtables):
         lines.append("const void* const %s = (const void*)0x%x;" % (sym, int(sym.rsplit("_", 1)[1], 16)))
     if vtables:

@@ -1128,7 +1128,16 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 67 suites green, six cycles. Total ported: 603 of 4099 bodies.
 - Next: `0x140025340` (the CInstanceMgr constructor/clear, 153 lines) and the rest of `0x140025xxx`, then `0x140026xxx`.
 
-## D260 (latest)
+## D261 (latest)
+
+- `modules/npcserver/unattributed/npc-concat.h`: the eleven `CONCATxy` macros plus the Ghidra slice typedefs
+  (`int7`/`uint7`/...), defined from the name and nothing else. `CONCAT` left the reject list.
+- Standing count: **1,707 bodies** (1,031 linked, 676 pending). 69 suites green, six cycles.
+- Vtable symbols are now emitted for every RTTI slot (no body should fail on an undefined slot). The 88 bodies still
+  declined as "vftable not in table" are a name-form mismatch in the lookup, not a missing definition.
+- Next wall: `extraout_` 105, vftable-name mismatch 88, callee with no usable declaration 69, `SUB` slices 67.
+
+## D260
 
 - Correction: `rewrite_std_string()` and `rewrite_log_calls()` were documented in D258/D259 but were **not** in
   `tools/transliterate.py` (patches anchored on names the file no longer had). They are in now, applied before

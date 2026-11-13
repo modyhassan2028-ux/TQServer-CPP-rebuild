@@ -8,6 +8,7 @@
 #include <new>
 #include "npc-data.h"
 #include "log-stubs.h"
+#include "npc-concat.h"
 #include <string>
 #include <new>
 #include "npc-data.h"
@@ -52,37 +53,121 @@ struct HANDLE;
 struct ILogKernel;
 struct ITerrainObjInfoMgr;
 
+const void* const g_pNpcVtblTrans_1400be090 = (const void*)0x1400be090;
+const void* const g_pNpcVtblTrans_1400be3f0 = (const void*)0x1400be3f0;
+const void* const g_pNpcVtblTrans_1400be650 = (const void*)0x1400be650;
+const void* const g_pNpcVtblTrans_1400be6f8 = (const void*)0x1400be6f8;
+const void* const g_pNpcVtblTrans_1400be908 = (const void*)0x1400be908;
+const void* const g_pNpcVtblTrans_1400bed00 = (const void*)0x1400bed00;
+const void* const g_pNpcVtblTrans_1400bef08 = (const void*)0x1400bef08;
+const void* const g_pNpcVtblTrans_1400bf118 = (const void*)0x1400bf118;
+const void* const g_pNpcVtblTrans_1400bf338 = (const void*)0x1400bf338;
+const void* const g_pNpcVtblTrans_1400bf7f8 = (const void*)0x1400bf7f8;
+const void* const g_pNpcVtblTrans_1400bfb08 = (const void*)0x1400bfb08;
+const void* const g_pNpcVtblTrans_1400c01f0 = (const void*)0x1400c01f0;
+const void* const g_pNpcVtblTrans_1400c05b8 = (const void*)0x1400c05b8;
+const void* const g_pNpcVtblTrans_1400c1630 = (const void*)0x1400c1630;
+const void* const g_pNpcVtblTrans_1400c16b8 = (const void*)0x1400c16b8;
+const void* const g_pNpcVtblTrans_1400c1880 = (const void*)0x1400c1880;
 const void* const g_pNpcVtblTrans_1400c1a68 = (const void*)0x1400c1a68;
+const void* const g_pNpcVtblTrans_1400c1dd8 = (const void*)0x1400c1dd8;
+const void* const g_pNpcVtblTrans_1400c1e68 = (const void*)0x1400c1e68;
+const void* const g_pNpcVtblTrans_1400c1ef8 = (const void*)0x1400c1ef8;
 const void* const g_pNpcVtblTrans_1400c1f60 = (const void*)0x1400c1f60;
+const void* const g_pNpcVtblTrans_1400c1f78 = (const void*)0x1400c1f78;
+const void* const g_pNpcVtblTrans_1400c2498 = (const void*)0x1400c2498;
+const void* const g_pNpcVtblTrans_1400c2510 = (const void*)0x1400c2510;
+const void* const g_pNpcVtblTrans_1400c2778 = (const void*)0x1400c2778;
+const void* const g_pNpcVtblTrans_1400c28f8 = (const void*)0x1400c28f8;
 const void* const g_pNpcVtblTrans_1400c3020 = (const void*)0x1400c3020;
+const void* const g_pNpcVtblTrans_1400c3298 = (const void*)0x1400c3298;
+const void* const g_pNpcVtblTrans_1400c3338 = (const void*)0x1400c3338;
+const void* const g_pNpcVtblTrans_1400c33c8 = (const void*)0x1400c33c8;
+const void* const g_pNpcVtblTrans_1400c4178 = (const void*)0x1400c4178;
+const void* const g_pNpcVtblTrans_1400c4288 = (const void*)0x1400c4288;
+const void* const g_pNpcVtblTrans_1400c48b8 = (const void*)0x1400c48b8;
 const void* const g_pNpcVtblTrans_1400c4d78 = (const void*)0x1400c4d78;
+const void* const g_pNpcVtblTrans_1400c4e98 = (const void*)0x1400c4e98;
+const void* const g_pNpcVtblTrans_1400c5218 = (const void*)0x1400c5218;
 const void* const g_pNpcVtblTrans_1400c5398 = (const void*)0x1400c5398;
+const void* const g_pNpcVtblTrans_1400c54c8 = (const void*)0x1400c54c8;
+const void* const g_pNpcVtblTrans_1400c58f8 = (const void*)0x1400c58f8;
+const void* const g_pNpcVtblTrans_1400c5d08 = (const void*)0x1400c5d08;
 const void* const g_pNpcVtblTrans_1400c5e40 = (const void*)0x1400c5e40;
+const void* const g_pNpcVtblTrans_1400c60c8 = (const void*)0x1400c60c8;
 const void* const g_pNpcVtblTrans_1400c61b0 = (const void*)0x1400c61b0;
+const void* const g_pNpcVtblTrans_1400c62b0 = (const void*)0x1400c62b0;
+const void* const g_pNpcVtblTrans_1400c6388 = (const void*)0x1400c6388;
+const void* const g_pNpcVtblTrans_1400c63d8 = (const void*)0x1400c63d8;
 const void* const g_pNpcVtblTrans_1400c64c8 = (const void*)0x1400c64c8;
+const void* const g_pNpcVtblTrans_1400c6de0 = (const void*)0x1400c6de0;
 const void* const g_pNpcVtblTrans_1400c70e8 = (const void*)0x1400c70e8;
 const void* const g_pNpcVtblTrans_1400c7250 = (const void*)0x1400c7250;
+const void* const g_pNpcVtblTrans_1400c7340 = (const void*)0x1400c7340;
+const void* const g_pNpcVtblTrans_1400c78c8 = (const void*)0x1400c78c8;
 const void* const g_pNpcVtblTrans_1400c85f8 = (const void*)0x1400c85f8;
+const void* const g_pNpcVtblTrans_1400c87f0 = (const void*)0x1400c87f0;
+const void* const g_pNpcVtblTrans_1400c88b8 = (const void*)0x1400c88b8;
 const void* const g_pNpcVtblTrans_1400c8a18 = (const void*)0x1400c8a18;
 const void* const g_pNpcVtblTrans_1400c8dd8 = (const void*)0x1400c8dd8;
+const void* const g_pNpcVtblTrans_1400c92f8 = (const void*)0x1400c92f8;
 const void* const g_pNpcVtblTrans_1400c9808 = (const void*)0x1400c9808;
+const void* const g_pNpcVtblTrans_1400c99c8 = (const void*)0x1400c99c8;
+const void* const g_pNpcVtblTrans_1400c9b88 = (const void*)0x1400c9b88;
+const void* const g_pNpcVtblTrans_1400c9c88 = (const void*)0x1400c9c88;
 const void* const g_pNpcVtblTrans_1400c9ec0 = (const void*)0x1400c9ec0;
 const void* const g_pNpcVtblTrans_1400ca010 = (const void*)0x1400ca010;
 const void* const g_pNpcVtblTrans_1400ca0b8 = (const void*)0x1400ca0b8;
 const void* const g_pNpcVtblTrans_1400ca160 = (const void*)0x1400ca160;
 const void* const g_pNpcVtblTrans_1400ca2c0 = (const void*)0x1400ca2c0;
 const void* const g_pNpcVtblTrans_1400ca508 = (const void*)0x1400ca508;
+const void* const g_pNpcVtblTrans_1400ca720 = (const void*)0x1400ca720;
+const void* const g_pNpcVtblTrans_1400ca890 = (const void*)0x1400ca890;
 const void* const g_pNpcVtblTrans_1400ca938 = (const void*)0x1400ca938;
 const void* const g_pNpcVtblTrans_1400caa68 = (const void*)0x1400caa68;
 const void* const g_pNpcVtblTrans_1400cab10 = (const void*)0x1400cab10;
+const void* const g_pNpcVtblTrans_1400cabb8 = (const void*)0x1400cabb8;
 const void* const g_pNpcVtblTrans_1400cacd8 = (const void*)0x1400cacd8;
 const void* const g_pNpcVtblTrans_1400cae78 = (const void*)0x1400cae78;
+const void* const g_pNpcVtblTrans_1400cafd8 = (const void*)0x1400cafd8;
+const void* const g_pNpcVtblTrans_1400cb158 = (const void*)0x1400cb158;
+const void* const g_pNpcVtblTrans_1400cb208 = (const void*)0x1400cb208;
 const void* const g_pNpcVtblTrans_1400cb708 = (const void*)0x1400cb708;
+const void* const g_pNpcVtblTrans_1400cb9f8 = (const void*)0x1400cb9f8;
+const void* const g_pNpcVtblTrans_1400cbba8 = (const void*)0x1400cbba8;
 const void* const g_pNpcVtblTrans_1400cbc90 = (const void*)0x1400cbc90;
 const void* const g_pNpcVtblTrans_1400cbe48 = (const void*)0x1400cbe48;
+const void* const g_pNpcVtblTrans_1400cc288 = (const void*)0x1400cc288;
+const void* const g_pNpcVtblTrans_1400cc7f8 = (const void*)0x1400cc7f8;
+const void* const g_pNpcVtblTrans_1400ccda0 = (const void*)0x1400ccda0;
+const void* const g_pNpcVtblTrans_1400cd5d8 = (const void*)0x1400cd5d8;
+const void* const g_pNpcVtblTrans_1400cdd10 = (const void*)0x1400cdd10;
+const void* const g_pNpcVtblTrans_1400cdd28 = (const void*)0x1400cdd28;
+const void* const g_pNpcVtblTrans_1400cdd70 = (const void*)0x1400cdd70;
+const void* const g_pNpcVtblTrans_1400cf2d0 = (const void*)0x1400cf2d0;
+const void* const g_pNpcVtblTrans_1400cf300 = (const void*)0x1400cf300;
+const void* const g_pNpcVtblTrans_1400cf330 = (const void*)0x1400cf330;
+const void* const g_pNpcVtblTrans_1400cf368 = (const void*)0x1400cf368;
+const void* const g_pNpcVtblTrans_1400cf3a0 = (const void*)0x1400cf3a0;
+const void* const g_pNpcVtblTrans_1400cf3d8 = (const void*)0x1400cf3d8;
+const void* const g_pNpcVtblTrans_1400cf3f8 = (const void*)0x1400cf3f8;
+const void* const g_pNpcVtblTrans_1400cf428 = (const void*)0x1400cf428;
+const void* const g_pNpcVtblTrans_1400cf440 = (const void*)0x1400cf440;
+const void* const g_pNpcVtblTrans_1400cf5a8 = (const void*)0x1400cf5a8;
+const void* const g_pNpcVtblTrans_1400cf828 = (const void*)0x1400cf828;
+const void* const g_pNpcVtblTrans_1400d0798 = (const void*)0x1400d0798;
+const void* const g_pNpcVtblTrans_1400d0b58 = (const void*)0x1400d0b58;
+const void* const g_pNpcVtblTrans_1400d16b8 = (const void*)0x1400d16b8;
 const void* const g_pNpcVtblTrans_1400d1780 = (const void*)0x1400d1780;
+const void* const g_pNpcVtblTrans_1400d17c0 = (const void*)0x1400d17c0;
 const void* const g_pNpcVtblTrans_1400d18b0 = (const void*)0x1400d18b0;
+const void* const g_pNpcVtblTrans_1400d19f8 = (const void*)0x1400d19f8;
 const void* const g_pNpcVtblTrans_1400d1cc8 = (const void*)0x1400d1cc8;
+const void* const g_pNpcVtblTrans_1400d1dc8 = (const void*)0x1400d1dc8;
+const void* const g_pNpcVtblTrans_1400d1e10 = (const void*)0x1400d1e10;
+const void* const g_pNpcVtblTrans_1400d1e80 = (const void*)0x1400d1e80;
+const void* const g_pNpcVtblTrans_1400d1ef0 = (const void*)0x1400d1ef0;
+const void* const g_pNpcVtblTrans_1400d2128 = (const void*)0x1400d2128;
 
 // Declarations first, so the call graph needs no ordering.
 unsigned long long FUN_140003300(void);
@@ -454,6 +539,7 @@ unsigned long long * FUN_1400419d0(unsigned long long * arg1, unsigned long long
 unsigned long long * FUN_140041a20(unsigned long long * arg1, unsigned long long * arg2);
 unsigned long long * FUN_140041a70(unsigned long long * arg1, unsigned long long * arg2);
 unsigned long long * FUN_140041ac0(unsigned long long * arg1, unsigned long long * arg2);
+unsigned long long FUN_140041e10(double * arg1, double * arg2, long long * arg3);
 unsigned long long * FUN_140042040(unsigned long long * arg1, unsigned long long arg2, unsigned long long * arg3);
 unsigned long long * FUN_1400420b0(unsigned long long * arg1, unsigned long long * arg2);
 unsigned long long * FUN_140042100(unsigned long long * arg1, unsigned long long * arg2);
@@ -468,6 +554,7 @@ unsigned long long * FUN_1400426b0(unsigned long long * arg1, unsigned long long
 unsigned long long * FUN_140042710(unsigned long long * arg1, unsigned long long arg2, unsigned long long * arg3);
 unsigned long long * FUN_140042770(unsigned long long * arg1, unsigned long long arg2, unsigned long long * arg3);
 void * FUN_1400428e0(unsigned long long arg1, void * arg2, long long arg3, void * arg4);
+void FUN_140042930(long long arg1, long long arg2, long long * arg3);
 unsigned long long * FUN_140042a30(unsigned long long * arg1, unsigned long long arg2, unsigned long long * arg3);
 void FUN_140042ac0(long long arg1);
 void * FUN_140042b10(unsigned long long arg1, long long arg2, long long arg3, void * arg4);
@@ -483,6 +570,7 @@ unsigned long long * FUN_140043050(unsigned long long * arg1, unsigned long long
 unsigned long long * FUN_1400430a0(unsigned long long * arg1, unsigned long long * arg2);
 unsigned long long * FUN_1400430f0(unsigned long long * arg1, unsigned long long * arg2, long long arg3);
 unsigned long long * FUN_140043150(unsigned long long * arg1, unsigned long long * arg2, long long arg3);
+unsigned long long FUN_1400431b0(long long arg1, long long * arg2);
 unsigned long long * FUN_1400432e0(unsigned long long * arg1, unsigned long long * arg2);
 unsigned long long * FUN_140043330(unsigned long long * arg1, unsigned long long * arg2);
 unsigned long long * FUN_140043380(unsigned long long * arg1, unsigned long long * arg2, long long arg3);
@@ -822,6 +910,7 @@ unsigned long long * FUN_140070e30(unsigned long long * arg1);
 long long * FUN_140071210(long long * arg1, unsigned long long * arg2, long long * arg3, long long * arg4);
 long long * FUN_1400712d0(long long * arg1, unsigned long long * arg2, long long * arg3, long long * arg4);
 void FUN_140074750(unsigned long long * arg1, unsigned long long arg2);
+unsigned FUN_140078830(unsigned arg1);
 unsigned long long * FUN_140078c10(unsigned long long * arg1, unsigned arg2);
 unsigned long long * FUN_140078cc0(unsigned long long * arg1, unsigned arg2);
 unsigned long long * FUN_140078ee0(unsigned long long * arg1, unsigned arg2);
@@ -1059,9 +1148,14 @@ void * FUN_140098314(unsigned long long arg1, size_t arg2);
 void FUN_140098330(unsigned long long arg1, void * arg2);
 void * FUN_14009833c(unsigned long long arg1, size_t arg2);
 void FUN_1400988c0(unsigned * arg1);
+unsigned long long FUN_140098a4c(long long * arg1, unsigned long long * arg2);
+unsigned long long FUN_140098b4c(long long * arg1, unsigned * arg2);
+unsigned long long FUN_140098bb4(long long * arg1);
+unsigned long long FUN_140098bf4(long long * arg1, unsigned long long arg2);
 int FUN_140098c6c(unsigned char * arg1, int arg2);
 unsigned long long FUN_140098edc(long long * arg1, unsigned arg2);
 unsigned long long FUN_1400993f8(unsigned long long * arg1, int arg2);
+unsigned long long FUN_140099b28(long long arg1, long long * arg2, unsigned * arg3);
 long long FUN_14009b5e4(long long arg1, long long arg2, unsigned short * arg3);
 void FUN_14009ba94(long long arg1);
 void FUN_14009cbd0(unsigned long long * arg1);
@@ -1074,6 +1168,7 @@ void FUN_14009d268(long long arg1);
 unsigned * FUN_14009d468(long long arg1, unsigned arg2);
 void FUN_14009d51c(long long arg1, unsigned arg2);
 unsigned * FUN_14009d574(long long arg1, unsigned * arg2, int arg3, int arg4);
+unsigned short * FUN_14009d828(unsigned long long * arg1, int arg2);
 unsigned short * FUN_14009e034(unsigned long long * arg1, unsigned arg2, int * arg3);
 unsigned long long FUN_14009e7ac(unsigned * arg1, unsigned long long arg2, unsigned char * arg3);
 void FUN_14009fd18(long long arg1, long long arg2);
@@ -1082,14 +1177,20 @@ unsigned FUN_14009fe48(char * arg1, unsigned char * arg2, long long arg3);
 void FUN_1400a0450(long long arg1, int arg2, int arg3);
 void FUN_1400a047c(long long arg1);
 void FUN_1400a0498(unsigned * arg1);
+bool FUN_1400a04ec(char * arg1, unsigned long long arg2, unsigned char * arg3, unsigned long long * arg4, int arg5, unsigned * arg6);
 unsigned long long FUN_1400a0954(unsigned * arg1, unsigned char * arg2, unsigned arg3);
 void FUN_1400a0df4(long long arg1);
 void FUN_1400a0f6c(long long arg1, void * arg2, size_t arg3);
+long long FUN_1400a1654(long long arg1, unsigned long long arg2, int arg3, unsigned * arg4, int arg5);
+unsigned long long FUN_1400a17cc(long long arg1, unsigned long long arg2, int arg3, int arg4);
 unsigned long long FUN_1400a1860(long long arg1, unsigned long long arg2, int arg3, int arg4);
+unsigned long long FUN_1400a1930(long long arg1, unsigned long long arg2, int arg3, int arg4);
+unsigned FUN_1400a19fc(long long arg1, unsigned long long arg2, int arg3, int arg4);
 void FUN_1400a1c7c(void * arg1);
 void FUN_1400a1e74(long long arg1);
 unsigned long long FUN_1400a1ea8(long long * arg1);
 bool FUN_1400a3670(long long arg1, int arg2);
+unsigned FUN_1400a36b0(long long arg1);
 void FUN_1400a3700(long long arg1);
 unsigned FUN_1400a3730(int arg1, unsigned arg2);
 unsigned FUN_1400a39c0(int arg1);
@@ -1309,6 +1410,10 @@ unsigned long long * FUN_140020f80(unsigned long long * arg1, unsigned arg2);
 unsigned long long * FUN_1400258a0(unsigned long long * arg1, unsigned arg2);
 unsigned long long * FUN_140025a10(void);
 unsigned long long * FUN_140025aa0(void);
+unsigned long long FUN_140028cb0(long long arg1, unsigned long long arg2);
+unsigned long long FUN_140028d30(long long arg1, unsigned long long arg2);
+unsigned long long FUN_1400292d0(long long arg1, unsigned long long arg2);
+unsigned long long FUN_140029380(long long arg1, unsigned long long arg2);
 long long * FUN_14002add0(long long * arg1, long long * arg2, long long * arg3, long long * arg4);
 unsigned long long * FUN_14002d0f0(unsigned long long * arg1, unsigned long long * arg2);
 unsigned long long * FUN_14002d250(unsigned long long * arg1, unsigned long long * arg2);
@@ -1356,6 +1461,7 @@ void FUN_140036400(long long * arg1);
 unsigned long long * FUN_140037800(long long * arg1, unsigned * arg2);
 long long FUN_140037900(long long * arg1, unsigned * arg2);
 bool FUN_140037c00(long long arg1, unsigned arg2);
+unsigned long long FUN_140039120(long long arg1, unsigned long long arg2);
 unsigned long long FUN_140039d50(long long * arg1, unsigned long long arg2);
 long long * FUN_140039fd0(long long * arg1, long long * arg2, long long * arg3, long long * arg4);
 void FUN_14003a700(long long * arg1);
@@ -1370,6 +1476,7 @@ unsigned long long * FUN_14003bf40(unsigned long long * arg1);
 unsigned long long * FUN_14003c190(unsigned long long * arg1, unsigned arg2);
 void FUN_14003c1c0(long long * arg1, unsigned long long * arg2);
 unsigned long long * FUN_14003cd50(unsigned long long * arg1, unsigned arg2);
+unsigned long long FUN_14003cec0(long long arg1, unsigned long long arg2);
 void FUN_14003dca0(long long arg1, long long arg2, unsigned long long arg3, unsigned long long * arg4);
 unsigned long long * FUN_14003e010(unsigned char arg1);
 long long * FUN_14003e320(long long * arg1, long long * arg2, long long * arg3, unsigned long long * arg4);
@@ -1379,15 +1486,19 @@ unsigned long long * FUN_14003e660(unsigned long long * arg1, unsigned arg2);
 unsigned long long * FUN_140040f30(unsigned long long * arg1, unsigned long long * arg2);
 unsigned long long * FUN_140040fa0(unsigned long long * arg1, unsigned long long * arg2);
 unsigned long long * FUN_140041000(unsigned long long * arg1, unsigned long long * arg2);
+unsigned long long FUN_140041120(long long arg1, unsigned long long arg2);
+unsigned long long FUN_1400411c0(long long arg1, unsigned long long arg2);
+unsigned long long FUN_1400412c0(long long arg1, unsigned long long arg2);
+unsigned long long FUN_140041360(long long arg1, unsigned long long arg2);
 unsigned long long * FUN_140041740(unsigned long long * arg1, unsigned long long * arg2);
 unsigned long long * FUN_140041830(unsigned long long * arg1, unsigned long long * arg2);
 void FUN_140041f20(unsigned long long * arg1, unsigned long long * arg2);
+unsigned long long FUN_140041fd0(long long arg1, unsigned long long arg2);
 unsigned long long * FUN_140042260(unsigned long long * arg1);
 unsigned long long FUN_140042360(long long * arg1, unsigned long long arg2);
 unsigned long long * FUN_140042530(unsigned long long * arg1);
 unsigned long long * FUN_1400427d0(unsigned long long * arg1, unsigned long long arg2);
 unsigned long long * FUN_1400427f0(unsigned long long * arg1, unsigned long long arg2);
-void FUN_140042930(long long arg1, long long arg2, long long * arg3);
 void FUN_1400429a0(unsigned long long arg1, unsigned long long * arg2, unsigned long long * arg3);
 unsigned long long * FUN_140043490(unsigned long long * arg1, unsigned long long * arg2);
 void FUN_140043b40(long long arg1, long long arg2, unsigned long long arg3, unsigned long long * arg4);
@@ -1445,6 +1556,9 @@ unsigned long long * FUN_140047440(unsigned long long * arg1, long long arg2);
 long long FUN_140047500(long long arg1, long long arg2);
 void * FUN_14004a960(void * arg1, unsigned arg2);
 bool FUN_14004b1c0(long long arg1, unsigned long long arg2);
+unsigned long long FUN_14004cdb0(long long arg1, unsigned long long arg2);
+unsigned long long FUN_14004ce20(long long arg1, unsigned long long arg2);
+unsigned long long FUN_14004cf10(long long arg1, unsigned long long arg2);
 void FUN_14004f320(long long arg1, long long arg2);
 long long * FUN_14004f9f0(long long * arg1, long long * arg2, long long * arg3, long long * arg4);
 unsigned long long * FUN_14004fcd0(unsigned long long * arg1, unsigned long long arg2, unsigned long long arg3);
@@ -1529,6 +1643,7 @@ long long * FUN_1400672b0(long long arg1, long long * arg2);
 long long * FUN_1400672f0(long long arg1, long long * arg2);
 unsigned long long * FUN_1400676a0(unsigned long long * arg1, long long arg2);
 unsigned long long * FUN_1400677c0(unsigned long long * arg1);
+unsigned long long FUN_140067cf0(long long arg1, unsigned long long arg2);
 void FUN_140068ad0(long long arg1, long long arg2, unsigned long long arg3, unsigned long long * arg4);
 unsigned long long * FUN_140068e40(unsigned char arg1);
 long long * FUN_140069150(long long * arg1, long long * arg2, long long * arg3, unsigned long long * arg4);
@@ -1572,6 +1687,7 @@ long long * FUN_14006d530(long long * arg1, long long * arg2, long long * arg3, 
 void FUN_14006d690(long long * arg1, unsigned * arg2);
 void FUN_14006d790(unsigned * arg1);
 unsigned * FUN_14006d9d0(unsigned * arg1, unsigned arg2, unsigned arg3, unsigned arg4, unsigned arg5);
+unsigned long long FUN_14006f3a0(long long arg1, unsigned long long arg2);
 void FUN_140070590(long long arg1, unsigned long long arg2);
 void FUN_140070780(long long arg1, long long arg2, unsigned long long arg3, unsigned long long * arg4);
 void FUN_140071010(long long arg1, unsigned long long * arg2);
@@ -1598,18 +1714,26 @@ void FUN_14007a030(long long arg1, unsigned long long arg2, unsigned long long a
 void FUN_14007a1f0(unsigned long long arg1, long long arg2, unsigned long long * arg3);
 void FUN_14007a3e0(unsigned long long arg1, long long arg2, unsigned long long * arg3);
 void FUN_14007a440(unsigned long long arg1, unsigned long long arg2, void * arg3, unsigned long long arg4);
+unsigned long long FUN_14007acc0(unsigned long long * arg1, unsigned long long * arg2, unsigned * arg3);
+unsigned long long FUN_14007af70(unsigned long long * arg1, unsigned * arg2);
+unsigned long long FUN_14007b0b0(unsigned long long * arg1, unsigned * arg2);
+unsigned long long FUN_14007b0f0(unsigned long long * arg1, unsigned * arg2);
 unsigned long long FUN_14007b190(unsigned long long * arg1);
 unsigned long long FUN_14007b260(unsigned long long * arg1);
+unsigned long long FUN_14007b420(unsigned long long * arg1, unsigned long long * arg2);
 unsigned long long * FUN_14007bbf0(unsigned long long * arg1, unsigned long long arg2);
+unsigned long long FUN_14007bd20(unsigned long long * arg1, unsigned long long * arg2, unsigned * arg3);
 void FUN_14007bd80(unsigned long long * arg1, void * arg2, int arg3);
 void FUN_14007bf80(unsigned long long * arg1, unsigned arg2);
 void FUN_14007eaf0(long long arg1);
+unsigned long long FUN_14007eb10(long long arg1, long long * arg2, int * arg3);
 unsigned long long * FUN_14007f010(unsigned long long * arg1, unsigned arg2);
 unsigned long long * FUN_14007f0c0(unsigned long long * arg1, unsigned arg2);
 unsigned long long * FUN_14007f100(unsigned long long * arg1, unsigned arg2);
 unsigned long long * FUN_14007f180(unsigned long long * arg1, unsigned arg2);
 unsigned long long * FUN_14007f200(unsigned long long * arg1, unsigned arg2);
 void FUN_140081d90(long long arg1, int arg2, int arg3);
+unsigned long long FUN_140082550(long long arg1, unsigned long long arg2);
 long long FUN_140083b90(unsigned long long * arg1, unsigned long long * arg2, unsigned long long * arg3);
 long long FUN_140084870(unsigned long long * arg1, unsigned long long * arg2, unsigned long long * arg3);
 unsigned short FUN_140084bc0(long long arg1, int arg2, int arg3);
@@ -1673,6 +1797,7 @@ unsigned long long * FUN_140093f20(unsigned long long * arg1);
 unsigned long long * FUN_140093f40(unsigned long long * arg1, unsigned long long arg2);
 void FUN_140094090(unsigned long long * arg1);
 unsigned long long * FUN_140094110(unsigned long long * arg1, unsigned arg2);
+unsigned long long FUN_140094c90(long long arg1, unsigned long long arg2);
 unsigned long long * FUN_140094f50(unsigned long long * arg1, unsigned long long * arg2);
 unsigned long long * FUN_140095010(unsigned long long * arg1);
 unsigned long long * FUN_1400950e0(unsigned long long * arg1, unsigned long long arg2);
@@ -1695,11 +1820,8 @@ unsigned long long FUN_140097710(unsigned long long * arg1, unsigned * arg2);
 unsigned * FUN_140097a60(unsigned long long * arg1, unsigned * arg2, unsigned arg3);
 unsigned long long FUN_140097b90(unsigned long long arg1);
 long long FUN_140097c10(void);
-unsigned long long FUN_140098b4c(long long * arg1, unsigned * arg2);
-unsigned long long FUN_140098bb4(long long * arg1);
-unsigned long long FUN_140098bf4(long long * arg1, unsigned long long arg2);
+unsigned long long FUN_140097c40(long long arg1, unsigned long long * arg2);
 void FUN_140098e78(long long * arg1, unsigned arg2, long long * arg3, unsigned long long * arg4);
-unsigned long long FUN_140099b28(long long arg1, long long * arg2, unsigned * arg3);
 unsigned long long FUN_140099e54(unsigned long long * arg1, long long * arg2, unsigned long long * arg3, unsigned arg4, long long arg5, unsigned * arg6, unsigned long long * arg7);
 unsigned long long FUN_14009aeec(unsigned * arg1, long long * arg2, unsigned long long * arg3, unsigned long long * arg4, unsigned long long * arg5);
 unsigned long long FUN_14009b330(unsigned * arg1, unsigned long long * arg2, unsigned long long * arg3, unsigned long long * arg4);
@@ -1734,6 +1856,7 @@ void FUN_1400a2c40(int arg1, unsigned arg2, unsigned long long * arg3);
 void FUN_1400a3610(unsigned long long * arg1, unsigned * arg2);
 void FUN_1400a3640(unsigned long long * arg1, unsigned long long * arg2);
 unsigned FUN_1400a3790(unsigned long long * arg1);
+unsigned long long FUN_1400a3820(unsigned long long * arg1, unsigned * arg2);
 void FUN_1400a3860(int arg1, unsigned arg2, unsigned long long * arg3);
 void FUN_1400a3890(unsigned long long * arg1, unsigned arg2);
 void FUN_1400a38b0(unsigned arg1, unsigned long long * arg2);
@@ -1897,23 +2020,22 @@ extern void FUN_14003eaf0(void);   // defined elsewhere in the port
 extern void FUN_14003ecb0(void);   // defined elsewhere in the port
 extern void FUN_14003ed30(void);   // defined elsewhere in the port
 extern void FUN_14003eda0(void);   // defined elsewhere in the port
+extern void FUN_14003ee20(void);   // defined elsewhere in the port
 extern void FUN_14003fa00(void);   // defined elsewhere in the port
 extern unsigned long long FUN_1400401e0(unsigned long long arg1, unsigned long long arg2);   // defined elsewhere in the port
 extern unsigned long long FUN_140040260(unsigned long long arg1, unsigned long long arg2);   // defined elsewhere in the port
 extern void FUN_1400402d0(unsigned long long * arg1, unsigned long long arg2, long long arg3);   // defined elsewhere in the port
 extern unsigned long long FUN_140040370(unsigned long long arg1, unsigned long long arg2);   // defined elsewhere in the port
+extern unsigned long long FUN_1400403f0(unsigned long long arg1, unsigned long long arg2);   // defined elsewhere in the port
 extern void FUN_140040460(unsigned long long * arg1, unsigned long long arg2, long long arg3);   // defined elsewhere in the port
 extern unsigned long long FUN_140040d80(unsigned long long arg1, unsigned long long arg2);   // defined elsewhere in the port
-extern unsigned long long FUN_140041120(long long arg1, unsigned long long arg2);   // defined elsewhere in the port
 extern void FUN_140041230(unsigned long long * arg1);   // defined elsewhere in the port
-extern unsigned long long FUN_1400412c0(long long arg1, unsigned long long arg2);   // defined elsewhere in the port
 extern void FUN_1400413d0(unsigned long long * arg1);   // defined elsewhere in the port
 extern unsigned long long FUN_140041860(void*, long long, void*);   // defined elsewhere in the port
 extern unsigned long long FUN_1400418e0(void*, long long, void*);   // defined elsewhere in the port
 extern unsigned long long FUN_140041990(void*, long long, long long);   // defined elsewhere in the port
 extern void FUN_140041b60(unsigned long long * arg1, unsigned long long arg2);   // defined elsewhere in the port
 extern void FUN_140041be0(unsigned long long * arg1, unsigned long long arg2);   // defined elsewhere in the port
-extern unsigned long long FUN_140041e10(double * arg1, double * arg2, long long * arg3);   // defined elsewhere in the port
 extern void FUN_140044940(unsigned long long arg1, long long * arg2, long long * arg3);   // defined elsewhere in the port
 extern void FUN_140044e70(long long arg1, long long arg2, unsigned long long arg3, long long * arg4);   // defined elsewhere in the port
 extern void FUN_140045820(unsigned long long * arg1);   // defined elsewhere in the port
@@ -1922,9 +2044,11 @@ extern long long * FUN_140047140(long long * arg1, long long * arg2);   // defin
 extern void FUN_140048f90(long long* pObject);   // defined elsewhere in the port
 extern void FUN_1400496c0(void);   // defined elsewhere in the port
 extern void FUN_1400497c0(void);   // defined elsewhere in the port
+extern void FUN_140049850(void);   // defined elsewhere in the port
 extern void FUN_140049a50(void);   // defined elsewhere in the port
 extern void FUN_140049bd0(void);   // defined elsewhere in the port
 extern unsigned long long FUN_14004b370(unsigned long long arg1, unsigned long long arg2);   // defined elsewhere in the port
+extern unsigned long long FUN_14004b3f0(unsigned long long arg1, unsigned long long arg2);   // defined elsewhere in the port
 extern unsigned long long FUN_14004b590(unsigned long long arg1, unsigned long long arg2);   // defined elsewhere in the port
 extern unsigned long long FUN_14004b7e0(unsigned long long arg1, unsigned long long arg2);   // defined elsewhere in the port
 extern void FUN_14004c6f0(long long * arg1, long long * arg2);   // defined elsewhere in the port
@@ -1989,10 +2113,11 @@ extern unsigned long long FUN_14007a480(unsigned long long*);   // defined elsew
 extern unsigned long long FUN_14007a520(unsigned long long);   // defined elsewhere in the port
 extern void FUN_14007a540(unsigned long long arg1, long long arg2, unsigned long long * arg3, unsigned char arg4);   // defined elsewhere in the port
 extern void FUN_14007a5b0(unsigned long long arg1, unsigned long long arg2, void * arg3, unsigned long long arg4);   // defined elsewhere in the port
-extern unsigned long long FUN_14007af70(unsigned long long * arg1, unsigned * arg2);   // defined elsewhere in the port
+extern unsigned long long FUN_14007ad30(unsigned long long * arg1, void * arg2, int arg3);   // defined elsewhere in the port
 extern unsigned long long FUN_14007b000(unsigned long long * arg1, unsigned long long * arg2);   // defined elsewhere in the port
-extern unsigned long long FUN_14007b0f0(unsigned long long * arg1, unsigned * arg2);   // defined elsewhere in the port
+extern unsigned long long FUN_14007b340(unsigned long long * arg1, unsigned long long * arg2);   // defined elsewhere in the port
 extern unsigned long long FUN_14007b7e0(unsigned long long * arg1);   // defined elsewhere in the port
+extern void FUN_14007bc70(unsigned long long * arg1);   // defined elsewhere in the port
 extern void FUN_14007be70(unsigned long long * arg1, void * arg2, int arg3);   // defined elsewhere in the port
 extern void FUN_14007c030(unsigned long long * arg1, unsigned long long arg2);   // defined elsewhere in the port
 extern unsigned long long FUN_14007c100(unsigned long long * arg1, unsigned arg2);   // defined elsewhere in the port
@@ -2005,12 +2130,15 @@ extern unsigned long long FUN_14007caf0(unsigned long long * arg1, unsigned long
 extern int* FUN_14007d140(int* pFirst, int* pSecond);   // defined elsewhere in the port
 extern void FUN_14007d290(unsigned long long * arg1);   // defined elsewhere in the port
 extern void FUN_14007d810(unsigned long long * arg1);   // defined elsewhere in the port
+extern unsigned long long * FUN_14007dbb0(unsigned long long * arg1, unsigned long long arg2);   // defined elsewhere in the port
 extern unsigned long long FUN_14007dc00(unsigned long long * arg1);   // defined elsewhere in the port
 extern unsigned long long FUN_14007dfd0(long long);   // defined elsewhere in the port
 extern void FUN_14007e1c0(unsigned long long * arg1);   // defined elsewhere in the port
 extern unsigned long long FUN_14007e970(long long);   // defined elsewhere in the port
 extern void FUN_14007ea50(unsigned long long * arg1);   // defined elsewhere in the port
 extern unsigned long long FUN_14007ee60(long long arg1);   // defined elsewhere in the port
+extern void FUN_14007ef20(long long arg1);   // defined elsewhere in the port
+extern unsigned long long FUN_14007f2e0(unsigned long long*);   // defined elsewhere in the port
 extern unsigned long long FUN_14007f440(long long);   // defined elsewhere in the port
 extern unsigned long long FUN_14007f460(long long);   // defined elsewhere in the port
 extern void                   FUN_140080300(void);   // defined elsewhere in the port
@@ -2050,6 +2178,8 @@ extern unsigned long long FUN_140093b80(long long);   // defined elsewhere in th
 extern void FUN_140093cf0(unsigned long long * arg1, unsigned long long arg2, long long arg3);   // defined elsewhere in the port
 extern void FUN_140093e10(unsigned long long * arg1);   // defined elsewhere in the port
 extern void FUN_140093ea0(unsigned long long * arg1, unsigned long long arg2);   // defined elsewhere in the port
+extern void FUN_140094770(void);   // defined elsewhere in the port
+extern unsigned long long FUN_140094b40(unsigned long long arg1, unsigned long long arg2);   // defined elsewhere in the port
 extern void FUN_140094d00(unsigned long long * arg1);   // defined elsewhere in the port
 extern void FUN_140094ed0(unsigned long long * arg1, unsigned long long arg2);   // defined elsewhere in the port
 extern void FUN_140095a00(unsigned long long arg1, long long * arg2, long long * arg3);   // defined elsewhere in the port
@@ -2059,7 +2189,6 @@ extern void FUN_1400978b0(unsigned long long * arg1);   // defined elsewhere in 
 extern void FUN_140097b20(void);   // defined elsewhere in the port
 extern void FUN_140098790(unsigned long long * arg1, long long arg2);   // defined elsewhere in the port
 extern void FUN_140098948(unsigned * arg1, long long arg2);   // defined elsewhere in the port
-extern unsigned long long FUN_140098a4c(long long * arg1, unsigned long long * arg2);   // defined elsewhere in the port
 extern unsigned long long FUN_140098ca8(long long * arg1, unsigned arg2, unsigned long long * arg3, unsigned long long * arg4);   // defined elsewhere in the port
 extern unsigned long long FUN_140098da0(unsigned long long * arg1, unsigned arg2, long long * arg3, unsigned long long * arg4);   // defined elsewhere in the port
 extern unsigned long long FUN_140099ce0(unsigned * arg1, long long * arg2, unsigned arg3, long long arg4, unsigned arg5, unsigned long long * arg6, unsigned * arg7, unsigned long long * arg8);   // defined elsewhere in the port
@@ -2293,6 +2422,10 @@ extern void FUN_1400a3c90(unsigned long long * arg1, int arg2);   // defined els
 // pending: FUN_1400258a0 needs FUN_140025340
 // pending: FUN_140025a10 needs FUN_140024e80
 // pending: FUN_140025aa0 needs FUN_140057400
+// pending: FUN_140028cb0 needs FUN_1400269c0, FUN_140027df0
+// pending: FUN_140028d30 needs FUN_140026a70, FUN_1400280e0
+// pending: FUN_1400292d0 needs FUN_140026ea0, FUN_1400285a0
+// pending: FUN_140029380 needs FUN_140026f30, FUN_140028660
 // pending: FUN_14002add0 needs FUN_140029570
 // pending: FUN_14002d0f0 needs FUN_1400269c0, FUN_140027df0
 // pending: FUN_14002d250 needs FUN_140026a70, FUN_1400280e0
@@ -2340,6 +2473,7 @@ extern void FUN_1400a3c90(unsigned long long * arg1, int arg2);   // defined els
 // pending: FUN_140037800 needs FUN_140037280
 // pending: FUN_140037900 needs FUN_140035f70
 // pending: FUN_140037c00 needs FUN_140037900
+// pending: FUN_140039120 needs FUN_1400387d0, FUN_140038e90
 // pending: FUN_140039d50 needs FUN_140038520
 // pending: FUN_140039fd0 needs FUN_1400397c0
 // pending: FUN_14003a700 needs FUN_140039fd0
@@ -2354,6 +2488,7 @@ extern void FUN_1400a3c90(unsigned long long * arg1, int arg2);   // defined els
 // pending: FUN_14003c190 needs FUN_14003bd70
 // pending: FUN_14003c1c0 needs FUN_14003bde0
 // pending: FUN_14003cd50 needs FUN_14003c9c0
+// pending: FUN_14003cec0 needs FUN_14003c850, FUN_14003ccd0
 // pending: FUN_14003dca0 needs FUN_14003c850, FUN_14003ccd0
 // pending: FUN_14003e010 needs FUN_14003d090
 // pending: FUN_14003e320 needs FUN_14003dca0
@@ -2363,15 +2498,19 @@ extern void FUN_1400a3c90(unsigned long long * arg1, int arg2);   // defined els
 // pending: FUN_140040f30 needs FUN_1400402d0
 // pending: FUN_140040fa0 needs FUN_1400402d0
 // pending: FUN_140041000 needs FUN_140040460
+// pending: FUN_140041120 needs FUN_14003ecb0, FUN_1400401e0
+// pending: FUN_1400411c0 needs FUN_14003ed30, FUN_140040260
+// pending: FUN_1400412c0 needs FUN_14003eda0, FUN_140040370
+// pending: FUN_140041360 needs FUN_14003ee20, FUN_1400403f0
 // pending: FUN_140041740 needs FUN_140040460
 // pending: FUN_140041830 needs FUN_1400402d0
 // pending: FUN_140041f20 needs FUN_140040460
+// pending: FUN_140041fd0 needs FUN_14003fa00, FUN_140040d80
 // pending: FUN_140042260 needs FUN_140041230
 // pending: FUN_140042360 needs FUN_14003eaf0
 // pending: FUN_140042530 needs FUN_1400413d0
 // pending: FUN_1400427d0 needs FUN_140041b60
 // pending: FUN_1400427f0 needs FUN_140041be0
-// pending: FUN_140042930 needs FUN_140041e10
 // pending: FUN_1400429a0 needs FUN_140040460
 // pending: FUN_140043490 needs FUN_14003ecb0, FUN_1400401e0
 // pending: FUN_140043b40 needs FUN_14003ecb0, FUN_1400401e0
@@ -2429,6 +2568,9 @@ extern void FUN_1400a3c90(unsigned long long * arg1, int arg2);   // defined els
 // pending: FUN_140047500 needs FUN_140047140
 // pending: FUN_14004a960 needs FUN_140067850
 // pending: FUN_14004b1c0 needs FUN_1400496c0
+// pending: FUN_14004cdb0 needs FUN_1400497c0, FUN_14004b370
+// pending: FUN_14004ce20 needs FUN_140049850, FUN_14004b3f0
+// pending: FUN_14004cf10 needs FUN_140049a50, FUN_14004b590
 // pending: FUN_14004f320 needs FUN_140067850
 // pending: FUN_14004f9f0 needs FUN_14004e9e0
 // pending: FUN_14004fcd0 needs FUN_14004f180
@@ -2513,6 +2655,7 @@ extern void FUN_1400a3c90(unsigned long long * arg1, int arg2);   // defined els
 // pending: FUN_1400672f0 needs FUN_14006bba0
 // pending: FUN_1400676a0 needs FUN_14006d9d0
 // pending: FUN_1400677c0 needs FUN_14006d9d0
+// pending: FUN_140067cf0 needs FUN_140067af0, FUN_140067c50
 // pending: FUN_140068ad0 needs FUN_140067af0, FUN_140067c50
 // pending: FUN_140068e40 needs FUN_140067ec0
 // pending: FUN_140069150 needs FUN_140068ad0
@@ -2556,6 +2699,7 @@ extern void FUN_1400a3c90(unsigned long long * arg1, int arg2);   // defined els
 // pending: FUN_14006d690 needs FUN_14006cf50, FUN_14006d530
 // pending: FUN_14006d790 needs FUN_140046ea0, FUN_14006cdb0, FUN_14006d690
 // pending: FUN_14006d9d0 needs FUN_14006d790
+// pending: FUN_14006f3a0 needs FUN_14006e1f0, FUN_14006ef40
 // pending: FUN_140070590 needs FUN_14006e150, FUN_14006eeb0
 // pending: FUN_140070780 needs FUN_14006e1f0, FUN_14006ef40
 // pending: FUN_140071010 needs FUN_140070590
@@ -2582,18 +2726,26 @@ extern void FUN_1400a3c90(unsigned long long * arg1, int arg2);   // defined els
 // pending: FUN_14007a1f0 needs FUN_14007a3e0
 // pending: FUN_14007a3e0 needs FUN_14007a540
 // pending: FUN_14007a440 needs FUN_14007a5b0
+// pending: FUN_14007acc0 needs FUN_14007b7e0
+// pending: FUN_14007af70 needs FUN_14007ad30
+// pending: FUN_14007b0b0 needs FUN_14007b420
+// pending: FUN_14007b0f0 needs FUN_14007b0b0
 // pending: FUN_14007b190 needs FUN_14007b7e0, FUN_14007caf0
 // pending: FUN_14007b260 needs FUN_14007b190
+// pending: FUN_14007b420 needs FUN_14007b340
 // pending: FUN_14007bbf0 needs FUN_14007c350
+// pending: FUN_14007bd20 needs FUN_14007c350
 // pending: FUN_14007bd80 needs FUN_14007c350
 // pending: FUN_14007bf80 needs FUN_14007bd80
 // pending: FUN_14007eaf0 needs FUN_14007ee60
+// pending: FUN_14007eb10 needs FUN_14007ee60, FUN_14007ef20
 // pending: FUN_14007f010 needs FUN_14007d290
 // pending: FUN_14007f0c0 needs FUN_14007d810
 // pending: FUN_14007f100 needs FUN_14007dc00
 // pending: FUN_14007f180 needs FUN_14007e1c0
 // pending: FUN_14007f200 needs FUN_14007ea50
 // pending: FUN_140081d90 needs FUN_1400906e0
+// pending: FUN_140082550 needs FUN_140081750
 // pending: FUN_140083b90 needs FUN_140082ef0
 // pending: FUN_140084870 needs FUN_140082ef0
 // pending: FUN_140084bc0 needs FUN_1400903e0
@@ -2657,6 +2809,7 @@ extern void FUN_1400a3c90(unsigned long long * arg1, int arg2);   // defined els
 // pending: FUN_140093f40 needs FUN_140093ea0
 // pending: FUN_140094090 needs FUN_1400867a0
 // pending: FUN_140094110 needs FUN_140094090
+// pending: FUN_140094c90 needs FUN_140094770, FUN_140094b40
 // pending: FUN_140094f50 needs FUN_140093cf0
 // pending: FUN_140095010 needs FUN_140094d00
 // pending: FUN_1400950e0 needs FUN_140094ed0
@@ -2679,12 +2832,9 @@ extern void FUN_1400a3c90(unsigned long long * arg1, int arg2);   // defined els
 // pending: FUN_140097a60 needs FUN_14007b260
 // pending: FUN_140097b90 needs FUN_140097b20
 // pending: FUN_140097c10 needs FUN_140097b20
-// pending: FUN_140098b4c needs FUN_140098a4c
-// pending: FUN_140098bb4 needs FUN_140098a4c
-// pending: FUN_140098bf4 needs FUN_140098a4c, FUN_140098bb4
+// pending: FUN_140097c40 needs FUN_14007b0f0, FUN_14007b260, FUN_14007bbf0, FUN_14007bc70, FUN_14007dbb0, FUN_14007dc00, FUN_1400a2330
 // pending: FUN_140098e78 needs FUN_140098790, FUN_140098ca8, FUN_140098da0
-// pending: FUN_140099b28 needs FUN_140098a4c, FUN_140098b4c, FUN_140098bb4
-// pending: FUN_140099e54 needs FUN_140098a4c, FUN_140099ce0, FUN_14009b63c, FUN_14009b7fc, FUN_14009ca6c, FUN_14009cbdc
+// pending: FUN_140099e54 needs FUN_140099ce0, FUN_14009b63c, FUN_14009b7fc, FUN_14009ca6c, FUN_14009cbdc
 // pending: FUN_14009aeec needs FUN_14009a294, FUN_14009cc24
 // pending: FUN_14009b330 needs FUN_140098948, FUN_14009afc8
 // pending: FUN_14009b8dc needs FUN_14009b870
@@ -2718,6 +2868,7 @@ extern void FUN_1400a3c90(unsigned long long * arg1, int arg2);   // defined els
 // pending: FUN_1400a3610 needs FUN_14007af70
 // pending: FUN_1400a3640 needs FUN_14007b000
 // pending: FUN_1400a3790 needs FUN_14007b260
+// pending: FUN_1400a3820 needs FUN_140097710
 // pending: FUN_1400a3860 needs FUN_1400a3890
 // pending: FUN_1400a3890 needs FUN_14007c100
 // pending: FUN_1400a38b0 needs FUN_1400a38d0
@@ -10162,6 +10313,47 @@ unsigned long long * FUN_140041ac0(unsigned long long * arg1, unsigned long long
 }
 //@END
 
+//@START 140041e10
+unsigned long long FUN_140041e10(double * arg1, double * arg2, long long * arg3) {
+  long long *plVar1;
+  long long lVar2;
+  unsigned long long uVar3;
+  long long lVar4;
+  long long lVar5;
+  
+  plVar1 = (long long *)*arg3;
+  lVar4 = 0;
+  lVar2 = arg3[1];
+  if (plVar1 == (long long *)0x0) {
+    _invalid_parameter_noinfo();
+    lVar5 = lVar4;
+  }
+  else {
+    lVar5 = *plVar1;
+  }
+  uVar3 = lVar2 + ((long long)arg2 - (long long)arg1 >> 3) * 8;
+  if (uVar3 <= *(unsigned long long *)(lVar5 + 0x20)) {
+    if (plVar1 != (long long *)0x0) {
+      lVar4 = *plVar1;
+    }
+    if (*(unsigned long long *)(lVar4 + 0x18) <= uVar3) goto LAB_140041e8b;
+  }
+  _invalid_parameter_noinfo();
+LAB_140041e8b:
+  uVar3 = arg3[1];
+  if (arg1 != arg2) {
+    uVar3 = uVar3 - (long long)arg1;
+    do {
+      if (*arg1 != *(double *)(uVar3 + (long long)arg1)) {
+        return uVar3 & 0xffffffffffffff00;
+      }
+      arg1 = arg1 + 1;
+    } while (arg1 != arg2);
+  }
+  return CONCAT71((int7)(uVar3 >> 8),1);
+}
+//@END
+
 //@START 140042040
 unsigned long long * FUN_140042040(unsigned long long * arg1, unsigned long long arg2, unsigned long long * arg3) {
   unsigned long long uVar1;
@@ -10415,6 +10607,18 @@ void * FUN_1400428e0(unsigned long long arg1, void * arg2, long long arg3, void 
     memmove_s(arg4,_DstSize,arg2,_DstSize);
   }
   return (void *)(_DstSize + (long long)arg4);
+}
+//@END
+
+//@START 140042930
+void FUN_140042930(long long arg1, long long arg2, long long * arg3) {
+  long long local_18;
+  long long local_10;
+  
+  local_18 = *arg3;
+  local_10 = arg3[1];
+  FUN_140041e10(*(double **)(arg1 + 8),*(double **)(arg2 + 8),&local_18);
+  return;
 }
 //@END
 
@@ -10690,6 +10894,40 @@ unsigned long long * FUN_140043150(unsigned long long * arg1, unsigned long long
   arg2[1] = uVar1;
   *arg2 = uVar2;
   return arg2;
+}
+//@END
+
+//@START 1400431b0
+unsigned long long FUN_1400431b0(long long arg1, long long * arg2) {
+  unsigned long long uVar1;
+  double *pdVar2;
+  double *pdVar3;
+  unsigned long long uVar4;
+  long long local_18;
+  unsigned long long uStack_10;
+  
+  uVar1 = arg2[3];
+  uVar4 = *(long long *)(arg1 + 0x20) - *(long long *)(arg1 + 0x18);
+  if (((arg2[4] - uVar1 ^ uVar4) & 0xfffffffffffffff8) == 0) {
+    if ((unsigned long long)arg2[4] < uVar1) {
+      _invalid_parameter_noinfo();
+    }
+    local_18 = *arg2;
+    pdVar2 = *(double **)(arg1 + 0x20);
+    uStack_10 = uVar1;
+    if (pdVar2 < *(double **)(arg1 + 0x18)) {
+      _invalid_parameter_noinfo();
+    }
+    pdVar3 = *(double **)(arg1 + 0x18);
+    if (*(double **)(arg1 + 0x20) < pdVar3) {
+      _invalid_parameter_noinfo();
+    }
+    uVar4 = FUN_140041e10(pdVar3,pdVar2,&local_18);
+    if ((char)uVar4 != '\0') {
+      return CONCAT71((int7)(uVar4 >> 8),1);
+    }
+  }
+  return uVar4 & 0xffffffffffffff00;
 }
 //@END
 
@@ -16561,6 +16799,18 @@ void FUN_140074750(unsigned long long * arg1, unsigned long long arg2) {
 }
 //@END
 
+//@START 140078830
+unsigned FUN_140078830(unsigned arg1) {
+  unsigned local_18;
+  
+  local_18 = CONCAT13((char)arg1,
+                      CONCAT12((char)((unsigned)arg1 >> 8),
+                               CONCAT11((char)((unsigned)arg1 >> 0x10),(char)((unsigned)arg1 >> 0x18))
+                              ));
+  return local_18;
+}
+//@END
+
 //@START 140078c10
 unsigned long long * FUN_140078c10(unsigned long long * arg1, unsigned arg2) {
   FUN_1400786c0(arg1);
@@ -21336,6 +21586,140 @@ void FUN_1400988c0(unsigned * arg1) {
 }
 //@END
 
+//@START 140098a4c
+unsigned long long FUN_140098a4c(long long * arg1, unsigned long long * arg2) {
+  unsigned char bVar1;
+  unsigned char bVar2;
+  long long lVar3;
+  unsigned char *pbVar4;
+  unsigned long long uVar5;
+  unsigned char bVar6;
+  unsigned char bVar7;
+  unsigned uVar8;
+  unsigned char bVar9;
+  
+  lVar3 = arg1[1];
+  if (lVar3 == 0) {
+LAB_140098a60:
+    uVar5 = 0x10;
+  }
+  else {
+    pbVar4 = (unsigned char *)*arg1;
+    arg1[1] = lVar3 + -1;
+    bVar1 = *pbVar4;
+    *arg1 = (long long)(pbVar4 + 1);
+    if ((char)bVar1 < '\0') {
+      if (lVar3 + -1 == 0) goto LAB_140098a60;
+      arg1[1] = lVar3 + -2;
+      bVar2 = pbVar4[1];
+      *arg1 = (long long)(pbVar4 + 2);
+      if ((bVar1 & 0x40) == 0) {
+        *arg2 = (unsigned long long)((bVar1 & 0x3f) << 8) | (unsigned long long)bVar2;
+      }
+      else {
+        if (lVar3 + -2 == 0) goto LAB_140098a60;
+        uVar8 = 0x10;
+        arg1[1] = lVar3 + -3;
+        bVar6 = pbVar4[2];
+        *arg1 = (long long)(pbVar4 + 3);
+        bVar9 = 2;
+        bVar7 = 0x20;
+        *arg2 = (unsigned long long)CONCAT11(bVar6,bVar2);
+        do {
+          if ((bVar1 & bVar7) == 0) {
+            *arg2 = *arg2 | ((unsigned long long)(bVar7 - 1) & (unsigned long long)bVar1) << ((bVar9 & 7) << 3);
+            break;
+          }
+          if (arg1[1] == 0) goto LAB_140098a60;
+          bVar7 = bVar7 >> 1;
+          bVar9 = bVar9 + 1;
+          arg1[1] = arg1[1] + -1;
+          bVar2 = *(unsigned char *)*arg1;
+          *arg1 = (long long)((unsigned char *)*arg1 + 1);
+          bVar6 = (unsigned char)uVar8;
+          uVar8 = uVar8 + 8;
+          *arg2 = *arg2 | (unsigned long long)bVar2 << (bVar6 & 0x3f);
+        } while (uVar8 < 0x40);
+      }
+    }
+    else {
+      *arg2 = (unsigned long long)bVar1;
+    }
+    uVar5 = 0;
+  }
+  return uVar5;
+}
+//@END
+
+//@START 140098b4c
+unsigned long long FUN_140098b4c(long long * arg1, unsigned * arg2) {
+  unsigned long long uVar1;
+  unsigned long long local_res8 [4];
+  
+  if (arg1[1] == 0) {
+    return 0x10;
+  }
+  if ((*(unsigned char *)*arg1 & 0x80) == 0) {
+    *arg2 = (unsigned)*(unsigned char *)*arg1;
+    *arg1 = *arg1 + 1;
+    arg1[1] = arg1[1] + -1;
+  }
+  else {
+    uVar1 = FUN_140098a4c(arg1,local_res8);
+    if ((int)uVar1 != 0) {
+      return uVar1;
+    }
+    if ((0x7ffffffe < local_res8[0]) || (0xfffffffffffffff < local_res8[0])) {
+      return 4;
+    }
+    *arg2 = (unsigned)local_res8[0];
+  }
+  return 0;
+}
+//@END
+
+//@START 140098bb4
+unsigned long long FUN_140098bb4(long long * arg1) {
+  unsigned long long uVar1;
+  unsigned long long local_res10 [3];
+  
+  uVar1 = FUN_140098a4c(arg1,local_res10);
+  if ((int)uVar1 == 0) {
+    if ((unsigned long long)arg1[1] < local_res10[0]) {
+      uVar1 = 0x10;
+    }
+    else {
+      *arg1 = *arg1 + local_res10[0];
+      arg1[1] = arg1[1] - local_res10[0];
+      uVar1 = 0;
+    }
+  }
+  return uVar1;
+}
+//@END
+
+//@START 140098bf4
+unsigned long long FUN_140098bf4(long long * arg1, unsigned long long arg2) {
+  unsigned long long uVar1;
+  unsigned long long local_res18 [2];
+  
+  do {
+    uVar1 = FUN_140098a4c(arg1,local_res18);
+    if ((int)uVar1 != 0) {
+      return uVar1;
+    }
+    if (local_res18[0] == arg2) {
+      return 0;
+    }
+    if (local_res18[0] == 0) {
+      return 0x10;
+    }
+    uVar1 = FUN_140098bb4(arg1);
+  } while ((int)uVar1 == 0);
+  return uVar1;
+}
+//@END
+
 //@START 140098c6c
 int FUN_140098c6c(unsigned char * arg1, int arg2) {
   int iVar1;
@@ -21443,6 +21827,110 @@ unsigned long long FUN_1400993f8(unsigned long long * arg1, int arg2) {
     }
     arg2 = arg2 + -1;
     pbVar3 = pbVar7;
+  } while( true );
+}
+//@END
+
+//@START 140099b28
+unsigned long long FUN_140099b28(long long arg1, long long * arg2, unsigned * arg3) {
+  unsigned uVar1;
+  int iVar2;
+  unsigned long long uVar3;
+  unsigned uVar4;
+  unsigned long long uVar5;
+  unsigned uVar6;
+  unsigned uVar7;
+  unsigned uVar8;
+  int iVar9;
+  unsigned local_res8 [2];
+  unsigned long long local_res20;
+  
+  uVar1 = *(unsigned *)(arg1 + 4);
+  local_res20 = 0;
+  uVar6 = 0;
+  iVar9 = 0;
+  uVar7 = uVar1;
+  do {
+    while( true ) {
+      uVar3 = FUN_140098a4c(arg2,&local_res20);
+      uVar5 = local_res20;
+      if ((int)uVar3 != 0) {
+        return uVar3;
+      }
+      if (local_res20 == 0xd) break;
+      if (((local_res20 == 10) || (local_res20 == 9)) || (local_res20 == 0)) {
+        if ((*(long long *)(arg3 + 2) == 0) &&
+           (uVar6 = uVar1, *(unsigned char **)(arg1 + 0x10) != (unsigned char *)0x0)) {
+          iVar2 = FUN_140098c6c(*(unsigned char **)(arg1 + 0x10),uVar1);
+          uVar6 = uVar1 - iVar2;
+        }
+        *arg3 = uVar7;
+        arg3[1] = uVar6;
+        if (uVar5 != 9) goto LAB_140099c8e;
+        *(long long *)(arg3 + 6) = *arg2;
+        uVar3 = FUN_1400993f8(arg2,iVar9);
+        if ((int)uVar3 != 0) {
+          return uVar3;
+        }
+        *(long long *)(arg3 + 8) = *arg2 - *(long long *)(arg3 + 6);
+        while( true ) {
+          uVar3 = FUN_140098a4c(arg2,&local_res20);
+          uVar5 = local_res20;
+          if ((int)uVar3 != 0) {
+            return uVar3;
+          }
+LAB_140099c8e:
+          if (uVar5 == 0) break;
+          if (uVar5 == 10) {
+            *(long long *)(arg3 + 10) = *arg2;
+            uVar3 = FUN_140098edc(arg2,uVar6);
+            if ((int)uVar3 != 0) {
+              return uVar3;
+            }
+            *(long long *)(arg3 + 0xc) = *arg2 - *(long long *)(arg3 + 10);
+          }
+          else {
+            uVar3 = FUN_140098bb4(arg2);
+            if ((int)uVar3 != 0) {
+              return uVar3;
+            }
+          }
+        }
+        return 0;
+      }
+      uVar3 = FUN_140098bb4(arg2);
+      if ((int)uVar3 != 0) {
+        return uVar3;
+      }
+    }
+    uVar7 = 0;
+    uVar6 = 0;
+    uVar4 = 0;
+    *(long long *)(arg3 + 2) = *arg2;
+    uVar8 = uVar7;
+    if (uVar1 != 0) {
+      do {
+        uVar3 = FUN_140098b4c(arg2,local_res8);
+        if ((int)uVar3 != 0) {
+          return uVar3;
+        }
+        uVar7 = local_res8[0] + uVar8;
+        if (uVar7 < uVar8) {
+          return 4;
+        }
+        if (local_res8[0] != 0) {
+          iVar9 = iVar9 + -1 + local_res8[0];
+        }
+        if (((local_res8[0] != 1) || (*(long long *)(arg1 + 0x10) == 0)) ||
+           ((*(unsigned char *)((unsigned long long)(uVar4 >> 3) + *(long long *)(arg1 + 0x10)) &
+            (unsigned char)(0x80 >> ((unsigned char)uVar4 & 7))) == 0)) {
+          uVar6 = uVar6 + local_res8[0];
+        }
+        uVar4 = uVar4 + 1;
+        uVar8 = uVar7;
+      } while (uVar4 < uVar1);
+    }
+    *(long long *)(arg3 + 4) = *arg2 - *(long long *)(arg3 + 2);
   } while( true );
 }
 //@END
@@ -21889,6 +22377,110 @@ unsigned * FUN_14009d574(long long arg1, unsigned * arg2, int arg3, int arg4) {
     }
   }
   return arg2;
+}
+//@END
+
+//@START 14009d828
+unsigned short * FUN_14009d828(unsigned long long * arg1, int arg2) {
+  char cVar1;
+  unsigned uVar2;
+  char *pcVar3;
+  unsigned uVar4;
+  unsigned short *puVar5;
+  int iVar6;
+  unsigned short *puVar7;
+  char **ppcVar8;
+  unsigned uVar9;
+  char cStackX_9;
+  unsigned short uStackX_a;
+  unsigned short local_resc;
+  char *local_218 [64];
+  
+  pcVar3 = (char *)arg1[2];
+  puVar7 = (unsigned short *)*arg1;
+  uVar2 = *(unsigned *)(pcVar3 + 2);
+  if (arg2 == 0) {
+    local_218[0] = pcVar3;
+  }
+  uVar9 = (unsigned)(arg2 == 0);
+  uVar4 = *(unsigned *)(puVar7 + 4);
+  if (uVar4 != 0) {
+    ppcVar8 = local_218 + (int)uVar9;
+    do {
+      puVar7 = (unsigned short *)((unsigned long long)uVar4 + arg1[8]);
+      if (*puVar7 == 1) {
+        puVar5 = puVar7 + 1;
+      }
+      else {
+        puVar5 = (unsigned short *)((unsigned long long)*(unsigned *)(puVar7 + 2) + arg1[8]);
+        cVar1 = (char)*puVar5;
+        while (cVar1 != *pcVar3) {
+          puVar5 = puVar5 + 3;
+          cVar1 = (char)*puVar5;
+        }
+      }
+      if (*(unsigned *)(puVar5 + 1) != uVar2) {
+        puVar7 = (unsigned short *)((unsigned long long)*(unsigned *)(puVar5 + 1) + arg1[8]);
+        if (uVar9 == 0) {
+          return puVar7;
+        }
+        break;
+      }
+      uVar4 = *(unsigned *)(puVar7 + 4);
+      *ppcVar8 = (char *)puVar5;
+      uVar9 = uVar9 + 1;
+      ppcVar8 = ppcVar8 + 1;
+    } while (uVar4 != 0);
+  }
+  cVar1 = *(char *)((unsigned long long)uVar2 + arg1[8]);
+  if (*puVar7 == 1) {
+    cStackX_9 = *(char *)((long long)puVar7 + 3);
+  }
+  else {
+    for (pcVar3 = (char *)((unsigned long long)*(unsigned *)(puVar7 + 2) + arg1[8]); *pcVar3 != cVar1;
+        pcVar3 = pcVar3 + 6) {
+    }
+    iVar6 = (unsigned char)pcVar3[1] - 1;
+    uVar4 = ((unsigned)puVar7[1] - (unsigned)*puVar7) - iVar6;
+    if (uVar4 < (unsigned)(iVar6 * 2)) {
+      cStackX_9 = (char)((uVar4 * 3 + -1 + iVar6 * 2) / (uVar4 * 2));
+    }
+    else {
+      cStackX_9 = uVar4 < (unsigned)(iVar6 * 5);
+    }
+    cStackX_9 = cStackX_9 + '\x01';
+  }
+  ppcVar8 = local_218 + (int)uVar9;
+  do {
+    local_resc = (unsigned short)(uVar2 + 1 >> 0x10);
+    uStackX_a = (unsigned short)(uVar2 + 1);
+    if (arg1[10] == arg1[9]) {
+      if (*(int *)((long long)arg1 + 0x114) == 0) {
+        puVar5 = (unsigned short *)FUN_14009d468((long long)arg1,0);
+        if (puVar5 == (unsigned short *)0x0) {
+          return (unsigned short *)0x0;
+        }
+      }
+      else {
+        puVar5 = (unsigned short *)((unsigned long long)*(unsigned *)((long long)arg1 + 0x114) + arg1[8]);
+        *(unsigned *)((long long)arg1 + 0x114) = *(unsigned *)puVar5;
+      }
+    }
+    else {
+      puVar5 = (unsigned short *)(arg1[10] + -0xc);
+      arg1[10] = puVar5;
+    }
+    *puVar5 = 1;
+    ppcVar8 = ppcVar8 + -1;
+    *(unsigned *)(puVar5 + 1) = CONCAT22(uStackX_a,CONCAT11(cStackX_9,cVar1));
+    pcVar3 = *ppcVar8;
+    puVar5[3] = local_resc;
+    *(int *)(puVar5 + 4) = (int)puVar7 - *(int *)(arg1 + 8);
+    uVar9 = uVar9 - 1;
+    *(int *)(pcVar3 + 2) = (int)puVar5 - *(int *)(arg1 + 8);
+    puVar7 = puVar5;
+  } while (uVar9 != 0);
+  return puVar5;
 }
 //@END
 
@@ -23421,6 +24013,192 @@ void FUN_1400a0498(unsigned * arg1) {
 }
 //@END
 
+//@START 1400a04ec
+bool FUN_1400a04ec(char * arg1, unsigned long long arg2, unsigned char * arg3, unsigned long long * arg4, int arg5, unsigned * arg6) {
+  unsigned char bVar1;
+  bool bVar2;
+  bool bVar3;
+  unsigned long long uVar4;
+  unsigned long long uVar5;
+  int iVar6;
+  unsigned uVar7;
+  unsigned long long uVar8;
+  unsigned long long uVar9;
+  unsigned uVar10;
+  unsigned short *puVar11;
+  unsigned char *pbVar12;
+  unsigned long long _Size;
+  unsigned uVar13;
+  bool bVar14;
+  unsigned char *local_res18;
+  
+  _Size = *arg4;
+  *arg4 = 0;
+  FUN_14009fd18((long long)arg1,arg2);
+  *arg6 = 0;
+  bVar14 = true;
+  do {
+    if (*(int *)(arg1 + 0x5c) == 0x112) {
+      bVar14 = false;
+      if (*(int *)(arg1 + 0x2c) == 0) {
+        *arg6 = 1;
+        bVar14 = *(int *)(arg1 + 0x2c) == 0;
+      }
+      return !bVar14;
+    }
+    local_res18 = arg3;
+    if (*(int *)(arg1 + 0x60) != 0) {
+      while ((_Size != 0 && (*(unsigned *)(arg1 + 0x6c) < 5))) {
+        bVar1 = *local_res18;
+        local_res18 = local_res18 + 1;
+        arg1[(unsigned long long)*(unsigned *)(arg1 + 0x6c) + 0x70] = bVar1;
+        *(int *)(arg1 + 0x6c) = *(int *)(arg1 + 0x6c) + 1;
+        *arg4 = *arg4 + 1;
+        _Size = _Size - 1;
+      }
+      if (*(unsigned *)(arg1 + 0x6c) < 5) goto LAB_1400a074b;
+      if (arg1[0x70] != '\0') {
+        return true;
+      }
+      arg1[0x60] = '\0';
+      arg1[0x61] = '\0';
+      arg1[0x62] = '\0';
+      arg1[99] = '\0';
+      arg1[0x6c] = '\0';
+      arg1[0x6d] = '\0';
+      arg1[0x6e] = '\0';
+      arg1[0x6f] = '\0';
+      arg1[0x28] = -1;
+      arg1[0x29] = -1;
+      arg1[0x2a] = -1;
+      arg1[0x2b] = -1;
+      *(unsigned *)(arg1 + 0x2c) =
+           CONCAT31(CONCAT21(CONCAT11(arg1[0x71],arg1[0x72]),arg1[0x73]),arg1[0x74]);
+    }
+    bVar3 = false;
+    bVar2 = false;
+    if (arg2 <= *(unsigned long long *)(arg1 + 0x30)) {
+      if ((*(int *)(arg1 + 0x5c) == 0) && (*(int *)(arg1 + 0x2c) == 0)) {
+        *arg6 = 4;
+        return false;
+      }
+      if (arg5 == 0) {
+        bVar14 = false;
+        goto LAB_1400a0761;
+      }
+      if (*(int *)(arg1 + 0x5c) != 0) goto LAB_1400a0761;
+      bVar3 = true;
+      bVar2 = true;
+    }
+    if (*(int *)(arg1 + 100) != 0) {
+      uVar9 = (unsigned long long)
+              ((0x300 << ((char)*(unsigned *)(arg1 + 4) + (char)*(unsigned *)arg1 & 0x1fU)
+               ) + 0x736);
+      if (uVar9 != 0) {
+        puVar11 = *(unsigned short **)(arg1 + 0x10);
+        for (; uVar9 != 0; uVar9 = uVar9 - 1) {
+          *puVar11 = 0x400;
+          puVar11 = puVar11 + 1;
+        }
+      }
+      arg1[0x58] = '\x01';
+      arg1[0x59] = '\0';
+      arg1[0x5a] = '\0';
+      arg1[0x5b] = '\0';
+      arg1[0x54] = '\x01';
+      arg1[0x55] = '\0';
+      arg1[0x56] = '\0';
+      arg1[0x57] = '\0';
+      arg1[0x50] = '\x01';
+      arg1[0x51] = '\0';
+      arg1[0x52] = '\0';
+      arg1[0x53] = '\0';
+      arg1[0x4c] = '\x01';
+      arg1[0x4d] = '\0';
+      arg1[0x4e] = '\0';
+      arg1[0x4f] = '\0';
+      arg1[0x48] = '\0';
+      arg1[0x49] = '\0';
+      arg1[0x4a] = '\0';
+      arg1[0x4b] = '\0';
+      arg1[100] = '\0';
+      arg1[0x65] = '\0';
+      arg1[0x66] = '\0';
+      arg1[0x67] = '\0';
+    }
+    uVar10 = *(unsigned *)(arg1 + 0x6c);
+    uVar9 = (unsigned long long)(int)uVar10;
+    uVar4 = uVar9;
+    uVar5 = 0;
+    pbVar12 = local_res18;
+    if (uVar10 == 0) {
+      if ((_Size < 0x14) || (bVar2)) {
+        iVar6 = FUN_14009fe48(arg1,local_res18,_Size);
+        if (iVar6 == 0) {
+          memcpy(arg1 + 0x70,local_res18,_Size);
+          *(int *)(arg1 + 0x6c) = (int)_Size;
+          *arg4 = *arg4 + _Size;
+LAB_1400a074b:
+          *arg6 = 3;
+          return false;
+        }
+        if ((bVar3) && (iVar6 != 2)) {
+LAB_1400a0761:
+          *arg6 = 2;
+          return bVar14;
+        }
+      }
+      else {
+        pbVar12 = local_res18 + (_Size - 0x14);
+      }
+      *(unsigned char **)(arg1 + 0x20) = local_res18;
+      uVar8 = FUN_14009fda8((unsigned *)arg1,arg2,pbVar12);
+      if ((int)uVar8 != 0) {
+        return true;
+      }
+      uVar9 = *(long long *)(arg1 + 0x20) - (long long)local_res18;
+      *arg4 = *arg4 + uVar9;
+    }
+    else {
+      while ((uVar13 = (unsigned)uVar5, uVar10 < 0x14 && (uVar10 = (unsigned)uVar4, uVar5 < _Size))) {
+        uVar10 = uVar10 + 1;
+        arg1[uVar9 + 0x70] = *pbVar12;
+        uVar9 = uVar9 + 1;
+        uVar4 = (unsigned long long)uVar10;
+        pbVar12 = pbVar12 + 1;
+        uVar5 = (unsigned long long)(uVar13 + 1);
+      }
+      *(unsigned *)(arg1 + 0x6c) = uVar10;
+      if ((uVar10 < 0x14) || (bVar2)) {
+        iVar6 = FUN_14009fe48(arg1,(unsigned char *)(arg1 + 0x70),(unsigned long long)uVar10);
+        if (iVar6 == 0) {
+          *arg4 = *arg4 + uVar5;
+          goto LAB_1400a074b;
+        }
+        if ((bVar3) && (iVar6 != 2)) goto LAB_1400a0761;
+      }
+      *(char **)(arg1 + 0x20) = arg1 + 0x70;
+      uVar8 = FUN_14009fda8((unsigned *)arg1,arg2,(unsigned char *)(arg1 + 0x70));
+      if ((int)uVar8 != 0) {
+        return true;
+      }
+      uVar7 = (*(int *)(arg1 + 0x20) - (int)arg1) - 0x70;
+      if ((uVar10 < uVar7) || (uVar10 = uVar10 - uVar7, uVar13 < uVar10)) {
+        return true;
+      }
+      uVar9 = (unsigned long long)(uVar13 - uVar10);
+      *arg4 = *arg4 + uVar9;
+      arg1[0x6c] = '\0';
+      arg1[0x6d] = '\0';
+      arg1[0x6e] = '\0';
+      arg1[0x6f] = '\0';
+    }
+    arg3 = local_res18 + uVar9;
+    _Size = _Size - uVar9;
+  } while( true );
+}
+//@END
+
 //@START 1400a0954
 unsigned long long FUN_1400a0954(unsigned * arg1, unsigned char * arg2, unsigned arg3) {
   unsigned uVar1;
@@ -23467,6 +24245,111 @@ void FUN_1400a0f6c(long long arg1, void * arg2, size_t arg3) {
 }
 //@END
 
+//@START 1400a1654
+long long FUN_1400a1654(long long arg1, unsigned long long arg2, int arg3, unsigned * arg4, int arg5) {
+  unsigned char *pbVar1;
+  int iVar2;
+  unsigned char *pbVar3;
+  signed char sVar4;
+  unsigned uVar5;
+  unsigned char *pbVar6;
+  int iVar7;
+  unsigned uVar8;
+  unsigned uVar9;
+  long long lVar10;
+  long long lVar11;
+  
+  lVar11 = 0;
+  uVar8 = *arg4 & 7;
+  if (arg2 < 5) {
+    lVar10 = 0;
+  }
+  else {
+    pbVar1 = (unsigned char *)(arg1 + -4 + arg2);
+    while( true ) {
+      for (pbVar6 = (unsigned char *)(lVar11 + arg1); (pbVar6 < pbVar1 && ((*pbVar6 & 0xfe) != 0xe8));
+          pbVar6 = pbVar6 + 1) {
+      }
+      lVar10 = (long long)pbVar6 - arg1;
+      pbVar3 = pbVar6 + (-arg1 - lVar11);
+      uVar9 = 0;
+      if (pbVar1 <= pbVar6) break;
+      if ((((pbVar3 < (unsigned char *)0x3) && (uVar9 = uVar8 >> ((unsigned char)pbVar3 & 0x1f), uVar9 != 0)) &&
+          ((4 < uVar9 || ((uVar9 == 3 || ((pbVar6[(uVar9 >> 1) + 1] + 1 & 0xfe) == 0)))))) ||
+         ((pbVar6[4] + 1 & 0xfe) != 0)) {
+        uVar8 = (uVar9 | 8) >> 1;
+        lVar11 = lVar10 + 1;
+      }
+      else {
+        iVar7 = (int)lVar10 + 5 + arg3;
+        lVar11 = lVar10 + 5;
+        iVar2 = iVar7;
+        if (arg5 == 0) {
+          iVar2 = -iVar7;
+        }
+        uVar5 = CONCAT31(CONCAT21(CONCAT11(pbVar6[4],pbVar6[3]),pbVar6[2]),pbVar6[1]) + iVar2;
+        if ((uVar9 != 0) && (sVar4 = (signed char)((uVar9 & 6) << 2), ((uVar5 >> sVar4) + 1 & 0xfe) == 0))
+        {
+          uVar5 = uVar5 ^ (0x100 << sVar4) - 1U;
+          if (arg5 == 0) {
+            uVar5 = uVar5 - iVar7;
+          }
+          else {
+            uVar5 = uVar5 + iVar7;
+          }
+        }
+        uVar8 = 0;
+        pbVar6[1] = (unsigned char)uVar5;
+        pbVar6[2] = (unsigned char)(uVar5 >> 8);
+        pbVar6[3] = (unsigned char)(uVar5 >> 0x10);
+        pbVar6[4] = -((unsigned char)(uVar5 >> 0x18) & 1);
+      }
+    }
+    uVar8 = uVar8 >> ((unsigned char)pbVar3 & 0x1f);
+    if ((unsigned char *)0x2 < pbVar3) {
+      uVar8 = uVar9;
+    }
+    *arg4 = uVar8;
+  }
+  return lVar10;
+}
+//@END
+
+//@START 1400a17cc
+unsigned long long FUN_1400a17cc(long long arg1, unsigned long long arg2, int arg3, int arg4) {
+  unsigned char *puVar1;
+  int iVar2;
+  unsigned uVar3;
+  unsigned long long uVar4;
+  
+  if (arg2 < 4) {
+    uVar4 = 0;
+  }
+  else {
+    uVar4 = 0;
+    do {
+      puVar1 = (unsigned char *)(uVar4 + arg1);
+      if (puVar1[3] == -0x15) {
+        iVar2 = (unsigned)CONCAT21(CONCAT11(*(unsigned char *)(uVar4 + 2 + arg1),
+                                        *(unsigned char *)(uVar4 + 1 + arg1)),*puVar1) * 4;
+        if (arg4 == 0) {
+          uVar3 = (iVar2 - (int)uVar4) - (arg3 + 8);
+        }
+        else {
+          uVar3 = iVar2 + (int)uVar4 + arg3 + 8;
+        }
+        uVar3 = uVar3 >> 2;
+        *puVar1 = (char)uVar3;
+        *(char *)(uVar4 + 2 + arg1) = (char)(uVar3 >> 0x10);
+        *(char *)(uVar4 + 1 + arg1) = (char)(uVar3 >> 8);
+      }
+      uVar4 = uVar4 + 4;
+    } while (uVar4 <= arg2 - 4);
+  }
+  return uVar4;
+}
+//@END
+
 //@START 1400a1860
 unsigned long long FUN_1400a1860(long long arg1, unsigned long long arg2, int arg3, int arg4) {
   int iVar1;
@@ -23500,6 +24383,86 @@ unsigned long long FUN_1400a1860(long long arg1, unsigned long long arg2, int ar
     } while (uVar2 <= arg2 - 4);
   }
   return uVar2;
+}
+//@END
+
+//@START 1400a1930
+unsigned long long FUN_1400a1930(long long arg1, unsigned long long arg2, int arg3, int arg4) {
+  unsigned long long uVar1;
+  unsigned uVar2;
+  int iVar3;
+  
+  if (arg2 < 4) {
+    uVar1 = 0;
+  }
+  else {
+    uVar1 = 0;
+    do {
+      if (((*(unsigned char *)(uVar1 + arg1) & 0xfc) == 0x48) &&
+         ((*(unsigned char *)(uVar1 + 3 + arg1) & 3) == 1)) {
+        uVar2 = (*(unsigned char *)(uVar1 + arg1) & 3) << 0x18 |
+                *(unsigned char *)(uVar1 + 3 + arg1) & 0xfffffffc |
+                (unsigned)CONCAT11(*(unsigned char *)(uVar1 + 1 + arg1),
+                               *(unsigned char *)(uVar1 + 2 + arg1)) << 8;
+        if (arg4 == 0) {
+          iVar3 = (uVar2 - (int)uVar1) - arg3;
+        }
+        else {
+          iVar3 = uVar2 + (int)uVar1 + arg3;
+        }
+        *(char *)(uVar1 + 1 + arg1) = (char)((unsigned)iVar3 >> 0x10);
+        *(unsigned char *)(uVar1 + 3 + arg1) = (unsigned char)iVar3 | 1;
+        *(unsigned char *)(uVar1 + arg1) = (unsigned char)((unsigned)iVar3 >> 0x18) & 3 | 0x48;
+        *(char *)(uVar1 + 2 + arg1) = (char)((unsigned)iVar3 >> 8);
+      }
+      uVar1 = uVar1 + 4;
+    } while (uVar1 <= arg2 - 4);
+  }
+  return uVar1;
+}
+//@END
+
+//@START 1400a19fc
+unsigned FUN_1400a19fc(long long arg1, unsigned long long arg2, int arg3, int arg4) {
+  unsigned uVar1;
+  long long lVar2;
+  unsigned char bVar3;
+  int iVar4;
+  unsigned uVar5;
+  unsigned uVar6;
+  
+  if (arg2 < 4) {
+    uVar1 = 0;
+  }
+  else {
+    uVar1 = 0;
+    lVar2 = 0;
+    do {
+      if (((*(char *)(lVar2 + arg1) == '@') &&
+          (bVar3 = *(unsigned char *)(lVar2 + 1 + arg1), (bVar3 & 0xc0) == 0)) ||
+         ((*(char *)(lVar2 + arg1) == '\x7f' &&
+          (bVar3 = *(unsigned char *)(lVar2 + 1 + arg1), (bVar3 & 0xc0) == 0xc0)))) {
+        iVar4 = CONCAT31(CONCAT21(CONCAT11(*(unsigned char *)(lVar2 + arg1),bVar3),
+                                  *(unsigned char *)(lVar2 + 2 + arg1)),
+                         *(unsigned char *)(lVar2 + 3 + arg1)) * 4;
+        if (arg4 == 0) {
+          uVar5 = (iVar4 - uVar1) - arg3;
+        }
+        else {
+          uVar5 = iVar4 + uVar1 + arg3;
+        }
+        uVar6 = uVar5 >> 2 & 0x3fffff;
+        iVar4 = (-(uVar5 >> 0x18 & 1) & 0xff | 0x100) << 0x16;
+        *(char *)(lVar2 + 3 + arg1) = (char)uVar6;
+        *(char *)(lVar2 + arg1) = (char)((unsigned)iVar4 >> 0x18);
+        *(unsigned char *)(lVar2 + 1 + arg1) = (unsigned char)((unsigned)iVar4 >> 0x10) | (unsigned char)(uVar6 >> 0x10);
+        *(char *)(lVar2 + 2 + arg1) = (char)(uVar6 >> 8);
+      }
+      uVar1 = uVar1 + 4;
+      lVar2 = lVar2 + 4;
+    } while ((unsigned long long)uVar1 <= arg2 - 4);
+  }
+  return uVar1;
 }
 //@END
 
@@ -23710,6 +24673,14 @@ LAB_1400a2173:
 //@START 1400a3670
 bool FUN_1400a3670(long long arg1, int arg2) {
   return *(int *)(arg1 + 0x20) == arg2;
+}
+//@END
+
+//@START 1400a36b0
+unsigned FUN_1400a36b0(long long arg1) {
+  *(int *)(arg1 + 0x38) = *(int *)(arg1 + 0x38) + 1;
+  return CONCAT31((int3)((unsigned)*(int *)(arg1 + 0x3c) >> 8),
+                  *(int *)(arg1 + 0x38) <= *(int *)(arg1 + 0x3c));
 }
 //@END
 
@@ -29559,6 +30530,102 @@ unsigned long long * FUN_140025aa0(void) {
   return puVar1;
 }
 
+//@PENDING 140028cb0
+unsigned long long FUN_140028cb0(long long arg1, unsigned long long arg2) {
+  long long lVar1;
+  unsigned long long uVar2;
+  
+  uVar2 = 0;
+  *(unsigned long long *)(arg1 + 0x18) = 0;
+  *(unsigned long long *)(arg1 + 0x20) = 0;
+  *(unsigned long long *)(arg1 + 0x28) = 0;
+  if (arg2 != 0) {
+    if (0x3fffffffffffffff < arg2) {
+                    /* WARNING: Subroutine does not return */
+      FUN_1400269c0();
+    }
+    lVar1 = FUN_140027df0(arg1 + 0x10,arg2);
+    *(long long *)(arg1 + 0x18) = lVar1;
+    *(long long *)(arg1 + 0x20) = lVar1;
+    lVar1 = lVar1 + arg2 * 4;
+    *(long long *)(arg1 + 0x28) = lVar1;
+    uVar2 = CONCAT71((int7)((unsigned long long)lVar1 >> 8),1);
+  }
+  return uVar2;
+}
+
+//@PENDING 140028d30
+unsigned long long FUN_140028d30(long long arg1, unsigned long long arg2) {
+  long long lVar1;
+  unsigned long long uVar2;
+  
+  uVar2 = 0;
+  *(unsigned long long *)(arg1 + 0x18) = 0;
+  *(unsigned long long *)(arg1 + 0x20) = 0;
+  *(unsigned long long *)(arg1 + 0x28) = 0;
+  if (arg2 != 0) {
+    if (0x1fffffffffffffff < arg2) {
+                    /* WARNING: Subroutine does not return */
+      FUN_140026a70();
+    }
+    lVar1 = FUN_1400280e0(arg1 + 0x10,arg2);
+    *(long long *)(arg1 + 0x18) = lVar1;
+    *(long long *)(arg1 + 0x20) = lVar1;
+    lVar1 = lVar1 + arg2 * 8;
+    *(long long *)(arg1 + 0x28) = lVar1;
+    uVar2 = CONCAT71((int7)((unsigned long long)lVar1 >> 8),1);
+  }
+  return uVar2;
+}
+
+//@PENDING 1400292d0
+unsigned long long FUN_1400292d0(long long arg1, unsigned long long arg2) {
+  long long lVar1;
+  unsigned long long uVar2;
+  
+  uVar2 = 0;
+  *(unsigned long long *)(arg1 + 0x18) = 0;
+  *(unsigned long long *)(arg1 + 0x20) = 0;
+  *(unsigned long long *)(arg1 + 0x28) = 0;
+  if (arg2 != 0) {
+    if (0x1fffffffffffffff < arg2) {
+                    /* WARNING: Subroutine does not return */
+      FUN_140026ea0();
+    }
+    lVar1 = FUN_1400285a0(arg1 + 0x10,arg2);
+    *(long long *)(arg1 + 0x18) = lVar1;
+    *(long long *)(arg1 + 0x20) = lVar1;
+    lVar1 = lVar1 + arg2 * 8;
+    *(long long *)(arg1 + 0x28) = lVar1;
+    uVar2 = CONCAT71((int7)((unsigned long long)lVar1 >> 8),1);
+  }
+  return uVar2;
+}
+
+//@PENDING 140029380
+unsigned long long FUN_140029380(long long arg1, unsigned long long arg2) {
+  long long lVar1;
+  unsigned long long uVar2;
+  
+  uVar2 = 0;
+  *(unsigned long long *)(arg1 + 0x18) = 0;
+  *(unsigned long long *)(arg1 + 0x20) = 0;
+  *(unsigned long long *)(arg1 + 0x28) = 0;
+  if (arg2 != 0) {
+    if (0x1fffffffffffffff < arg2) {
+                    /* WARNING: Subroutine does not return */
+      FUN_140026f30();
+    }
+    lVar1 = FUN_140028660(arg1 + 0x10,arg2);
+    *(long long *)(arg1 + 0x18) = lVar1;
+    *(long long *)(arg1 + 0x20) = lVar1;
+    lVar1 = lVar1 + arg2 * 8;
+    *(long long *)(arg1 + 0x28) = lVar1;
+    uVar2 = CONCAT71((int7)((unsigned long long)lVar1 >> 8),1);
+  }
+  return uVar2;
+}
+
 //@PENDING 14002add0
 long long * FUN_14002add0(long long * arg1, long long * arg2, long long * arg3, long long * arg4) {
   char cVar1;
@@ -31225,6 +32292,30 @@ bool FUN_140037c00(long long arg1, unsigned arg2) {
   return lVar1 != 0;
 }
 
+//@PENDING 140039120
+unsigned long long FUN_140039120(long long arg1, unsigned long long arg2) {
+  long long lVar1;
+  unsigned long long uVar2;
+  
+  uVar2 = 0;
+  *(unsigned long long *)(arg1 + 0x18) = 0;
+  *(unsigned long long *)(arg1 + 0x20) = 0;
+  *(unsigned long long *)(arg1 + 0x28) = 0;
+  if (arg2 != 0) {
+    if (0x1fffffffffffffff < arg2) {
+                    /* WARNING: Subroutine does not return */
+      FUN_1400387d0();
+    }
+    lVar1 = FUN_140038e90(arg1 + 0x10,arg2);
+    *(long long *)(arg1 + 0x18) = lVar1;
+    *(long long *)(arg1 + 0x20) = lVar1;
+    lVar1 = lVar1 + arg2 * 8;
+    *(long long *)(arg1 + 0x28) = lVar1;
+    uVar2 = CONCAT71((int7)((unsigned long long)lVar1 >> 8),1);
+  }
+  return uVar2;
+}
+
 //@PENDING 140039d50
 unsigned long long FUN_140039d50(long long * arg1, unsigned long long arg2) {
   unsigned long long uVar1;
@@ -31703,6 +32794,30 @@ unsigned long long * FUN_14003cd50(unsigned long long * arg1, unsigned arg2) {
   return arg1;
 }
 
+//@PENDING 14003cec0
+unsigned long long FUN_14003cec0(long long arg1, unsigned long long arg2) {
+  long long lVar1;
+  unsigned long long uVar2;
+  
+  uVar2 = 0;
+  *(unsigned long long *)(arg1 + 0x18) = 0;
+  *(unsigned long long *)(arg1 + 0x20) = 0;
+  *(unsigned long long *)(arg1 + 0x28) = 0;
+  if (arg2 != 0) {
+    if (0x1fffffffffffffff < arg2) {
+                    /* WARNING: Subroutine does not return */
+      FUN_14003c850();
+    }
+    lVar1 = FUN_14003ccd0(arg1 + 0x10,arg2);
+    *(long long *)(arg1 + 0x18) = lVar1;
+    *(long long *)(arg1 + 0x20) = lVar1;
+    lVar1 = lVar1 + arg2 * 8;
+    *(long long *)(arg1 + 0x28) = lVar1;
+    uVar2 = CONCAT71((int7)((unsigned long long)lVar1 >> 8),1);
+  }
+  return uVar2;
+}
+
 //@PENDING 14003dca0
 void FUN_14003dca0(long long arg1, long long arg2, unsigned long long arg3, unsigned long long * arg4) {
   unsigned long long uVar1;
@@ -31945,6 +33060,100 @@ unsigned long long * FUN_140041000(unsigned long long * arg1, unsigned long long
   return arg1;
 }
 
+//@PENDING 140041120
+unsigned long long FUN_140041120(long long arg1, unsigned long long arg2) {
+  long long lVar1;
+  unsigned long long uVar2;
+  
+  uVar2 = 0;
+  *(unsigned long long *)(arg1 + 0x18) = 0;
+  *(unsigned long long *)(arg1 + 0x20) = 0;
+  *(unsigned long long *)(arg1 + 0x28) = 0;
+  if (arg2 != 0) {
+    if (0x1fffffffffffffff < arg2) {
+                    /* WARNING: Subroutine does not return */
+      FUN_14003ecb0();
+    }
+    lVar1 = FUN_1400401e0(arg1 + 0x10,arg2);
+    *(long long *)(arg1 + 0x18) = lVar1;
+    *(long long *)(arg1 + 0x20) = lVar1;
+    lVar1 = lVar1 + arg2 * 8;
+    *(long long *)(arg1 + 0x28) = lVar1;
+    uVar2 = CONCAT71((int7)((unsigned long long)lVar1 >> 8),1);
+  }
+  return uVar2;
+}
+
+//@PENDING 1400411c0
+unsigned long long FUN_1400411c0(long long arg1, unsigned long long arg2) {
+  long long lVar1;
+  unsigned long long uVar2;
+  
+  uVar2 = 0;
+  *(unsigned long long *)(arg1 + 0x18) = 0;
+  *(unsigned long long *)(arg1 + 0x20) = 0;
+  *(unsigned long long *)(arg1 + 0x28) = 0;
+  if (arg2 != 0) {
+    if (0x492492492492492 < arg2) {
+                    /* WARNING: Subroutine does not return */
+      FUN_14003ed30();
+    }
+    lVar1 = FUN_140040260(arg1 + 0x10,arg2);
+    *(long long *)(arg1 + 0x18) = lVar1;
+    *(long long *)(arg1 + 0x20) = lVar1;
+    uVar2 = CONCAT71((int7)((unsigned long long)lVar1 >> 8),1);
+    *(unsigned long long *)(arg1 + 0x28) = arg2 * 0x38 + lVar1;
+  }
+  return uVar2;
+}
+
+//@PENDING 1400412c0
+unsigned long long FUN_1400412c0(long long arg1, unsigned long long arg2) {
+  long long lVar1;
+  unsigned long long uVar2;
+  
+  uVar2 = 0;
+  *(unsigned long long *)(arg1 + 0x18) = 0;
+  *(unsigned long long *)(arg1 + 0x20) = 0;
+  *(unsigned long long *)(arg1 + 0x28) = 0;
+  if (arg2 != 0) {
+    if (0x3fffffffffffffff < arg2) {
+                    /* WARNING: Subroutine does not return */
+      FUN_14003eda0();
+    }
+    lVar1 = FUN_140040370(arg1 + 0x10,arg2);
+    *(long long *)(arg1 + 0x18) = lVar1;
+    *(long long *)(arg1 + 0x20) = lVar1;
+    lVar1 = lVar1 + arg2 * 4;
+    *(long long *)(arg1 + 0x28) = lVar1;
+    uVar2 = CONCAT71((int7)((unsigned long long)lVar1 >> 8),1);
+  }
+  return uVar2;
+}
+
+//@PENDING 140041360
+unsigned long long FUN_140041360(long long arg1, unsigned long long arg2) {
+  long long lVar1;
+  unsigned long long uVar2;
+  
+  uVar2 = 0;
+  *(unsigned long long *)(arg1 + 0x18) = 0;
+  *(unsigned long long *)(arg1 + 0x20) = 0;
+  *(unsigned long long *)(arg1 + 0x28) = 0;
+  if (arg2 != 0) {
+    if (0xfffffffffffffff < arg2) {
+                    /* WARNING: Subroutine does not return */
+      FUN_14003ee20();
+    }
+    lVar1 = FUN_1400403f0(arg1 + 0x10,arg2);
+    *(long long *)(arg1 + 0x18) = lVar1;
+    *(long long *)(arg1 + 0x20) = lVar1;
+    *(unsigned long long *)(arg1 + 0x28) = arg2 * 0x10 + lVar1;
+    uVar2 = CONCAT71((int7)((unsigned long long)lVar1 >> 8),1);
+  }
+  return uVar2;
+}
+
 //@PENDING 140041740
 unsigned long long * FUN_140041740(unsigned long long * arg1, unsigned long long * arg2) {
   *arg1 = 0;
@@ -31969,6 +33178,29 @@ void FUN_140041f20(unsigned long long * arg1, unsigned long long * arg2) {
     FUN_140040460(arg1,*arg2,arg2[1]);
   }
   return;
+}
+
+//@PENDING 140041fd0
+unsigned long long FUN_140041fd0(long long arg1, unsigned long long arg2) {
+  long long lVar1;
+  unsigned long long uVar2;
+  
+  uVar2 = 0;
+  *(unsigned long long *)(arg1 + 0x18) = 0;
+  *(unsigned long long *)(arg1 + 0x20) = 0;
+  *(unsigned long long *)(arg1 + 0x28) = 0;
+  if (arg2 != 0) {
+    if (0x492492492492492 < arg2) {
+                    /* WARNING: Subroutine does not return */
+      FUN_14003fa00();
+    }
+    lVar1 = FUN_140040d80(arg1 + 0x10,arg2);
+    *(long long *)(arg1 + 0x18) = lVar1;
+    *(long long *)(arg1 + 0x20) = lVar1;
+    uVar2 = CONCAT71((int7)((unsigned long long)lVar1 >> 8),1);
+    *(unsigned long long *)(arg1 + 0x28) = arg2 * 0x38 + lVar1;
+  }
+  return uVar2;
 }
 
 //@PENDING 140042260
@@ -32047,17 +33279,6 @@ unsigned long long * FUN_1400427f0(unsigned long long * arg1, unsigned long long
   arg1[1] = 0;
   FUN_140041be0(arg1,arg2);
   return arg1;
-}
-
-//@PENDING 140042930
-void FUN_140042930(long long arg1, long long arg2, long long * arg3) {
-  long long local_18;
-  long long local_10;
-  
-  local_18 = *arg3;
-  local_10 = arg3[1];
-  FUN_140041e10(*(double **)(arg1 + 8),*(double **)(arg2 + 8),&local_18);
-  return;
 }
 
 //@PENDING 1400429a0
@@ -33159,6 +34380,76 @@ bool FUN_14004b1c0(long long arg1, unsigned long long arg2) {
     FUN_1400496c0();
   }
   return (*(unsigned *)(arg1 + (arg2 >> 5) * 4) >> ((unsigned char)arg2 & 0x1f) & 1) != 0;
+}
+
+//@PENDING 14004cdb0
+unsigned long long FUN_14004cdb0(long long arg1, unsigned long long arg2) {
+  long long lVar1;
+  unsigned long long uVar2;
+  
+  uVar2 = 0;
+  *(unsigned long long *)(arg1 + 0x18) = 0;
+  *(unsigned long long *)(arg1 + 0x20) = 0;
+  *(unsigned long long *)(arg1 + 0x28) = 0;
+  if (arg2 != 0) {
+    if (0x555555555555555 < arg2) {
+                    /* WARNING: Subroutine does not return */
+      FUN_1400497c0();
+    }
+    lVar1 = FUN_14004b370(arg1 + 0x10,arg2);
+    *(long long *)(arg1 + 0x18) = lVar1;
+    *(long long *)(arg1 + 0x20) = lVar1;
+    uVar2 = CONCAT71((int7)((unsigned long long)lVar1 >> 8),1);
+    *(unsigned long long *)(arg1 + 0x28) = arg2 * 0x30 + lVar1;
+  }
+  return uVar2;
+}
+
+//@PENDING 14004ce20
+unsigned long long FUN_14004ce20(long long arg1, unsigned long long arg2) {
+  long long lVar1;
+  unsigned long long uVar2;
+  
+  uVar2 = 0;
+  *(unsigned long long *)(arg1 + 0x18) = 0;
+  *(unsigned long long *)(arg1 + 0x20) = 0;
+  *(unsigned long long *)(arg1 + 0x28) = 0;
+  if (arg2 != 0) {
+    if (0x555555555555555 < arg2) {
+                    /* WARNING: Subroutine does not return */
+      FUN_140049850();
+    }
+    lVar1 = FUN_14004b3f0(arg1 + 0x10,arg2);
+    *(long long *)(arg1 + 0x18) = lVar1;
+    *(long long *)(arg1 + 0x20) = lVar1;
+    uVar2 = CONCAT71((int7)((unsigned long long)lVar1 >> 8),1);
+    *(unsigned long long *)(arg1 + 0x28) = arg2 * 0x30 + lVar1;
+  }
+  return uVar2;
+}
+
+//@PENDING 14004cf10
+unsigned long long FUN_14004cf10(long long arg1, unsigned long long arg2) {
+  long long lVar1;
+  unsigned long long uVar2;
+  
+  uVar2 = 0;
+  *(unsigned long long *)(arg1 + 0x18) = 0;
+  *(unsigned long long *)(arg1 + 0x20) = 0;
+  *(unsigned long long *)(arg1 + 0x28) = 0;
+  if (arg2 != 0) {
+    if (0xaaaaaaaaaaaaaaa < arg2) {
+                    /* WARNING: Subroutine does not return */
+      FUN_140049a50();
+    }
+    lVar1 = FUN_14004b590(arg1 + 0x10,arg2);
+    *(long long *)(arg1 + 0x18) = lVar1;
+    *(long long *)(arg1 + 0x20) = lVar1;
+    lVar1 = lVar1 + arg2 * 0x18;
+    *(long long *)(arg1 + 0x28) = lVar1;
+    uVar2 = CONCAT71((int7)((unsigned long long)lVar1 >> 8),1);
+  }
+  return uVar2;
 }
 
 //@PENDING 14004f320
@@ -35274,6 +36565,30 @@ unsigned long long * FUN_1400677c0(unsigned long long * arg1) {
   return arg1;
 }
 
+//@PENDING 140067cf0
+unsigned long long FUN_140067cf0(long long arg1, unsigned long long arg2) {
+  long long lVar1;
+  unsigned long long uVar2;
+  
+  uVar2 = 0;
+  *(unsigned long long *)(arg1 + 0x18) = 0;
+  *(unsigned long long *)(arg1 + 0x20) = 0;
+  *(unsigned long long *)(arg1 + 0x28) = 0;
+  if (arg2 != 0) {
+    if (0x1fffffffffffffff < arg2) {
+                    /* WARNING: Subroutine does not return */
+      FUN_140067af0();
+    }
+    lVar1 = FUN_140067c50(arg1 + 0x10,arg2);
+    *(long long *)(arg1 + 0x18) = lVar1;
+    *(long long *)(arg1 + 0x20) = lVar1;
+    lVar1 = lVar1 + arg2 * 8;
+    *(long long *)(arg1 + 0x28) = lVar1;
+    uVar2 = CONCAT71((int7)((unsigned long long)lVar1 >> 8),1);
+  }
+  return uVar2;
+}
+
 //@PENDING 140068ad0
 void FUN_140068ad0(long long arg1, long long arg2, unsigned long long arg3, unsigned long long * arg4) {
   unsigned long long uVar1;
@@ -36350,6 +37665,30 @@ unsigned * FUN_14006d9d0(unsigned * arg1, unsigned arg2, unsigned arg3, unsigned
   return arg1;
 }
 
+//@PENDING 14006f3a0
+unsigned long long FUN_14006f3a0(long long arg1, unsigned long long arg2) {
+  long long lVar1;
+  unsigned long long uVar2;
+  
+  uVar2 = 0;
+  *(unsigned long long *)(arg1 + 0x18) = 0;
+  *(unsigned long long *)(arg1 + 0x20) = 0;
+  *(unsigned long long *)(arg1 + 0x28) = 0;
+  if (arg2 != 0) {
+    if (0x1fffffffffffffff < arg2) {
+                    /* WARNING: Subroutine does not return */
+      FUN_14006e1f0();
+    }
+    lVar1 = FUN_14006ef40(arg1 + 0x10,arg2);
+    *(long long *)(arg1 + 0x18) = lVar1;
+    *(long long *)(arg1 + 0x20) = lVar1;
+    lVar1 = lVar1 + arg2 * 8;
+    *(long long *)(arg1 + 0x28) = lVar1;
+    uVar2 = CONCAT71((int7)((unsigned long long)lVar1 >> 8),1);
+  }
+  return uVar2;
+}
+
 //@PENDING 140070590
 void FUN_140070590(long long arg1, unsigned long long arg2) {
   void *pvVar1;
@@ -36912,6 +38251,87 @@ void FUN_14007a440(unsigned long long arg1, unsigned long long arg2, void * arg3
   return;
 }
 
+//@PENDING 14007acc0
+unsigned long long FUN_14007acc0(unsigned long long * arg1, unsigned long long * arg2, unsigned * arg3) {
+  long long lVar1;
+  unsigned long long uVar2;
+  
+  lVar1 = FUN_14007c650((long long)arg1);
+  if (((int)lVar1 == 0) && (uVar2 = FUN_14007b7e0(arg1), (uVar2 & 0xff) == 0)) {
+    return 0;
+  }
+  *arg2 = arg1[1];
+  lVar1 = FUN_14007c650((long long)arg1);
+  *arg3 = (int)lVar1;
+  return CONCAT71((int7)((unsigned long long)arg3 >> 8),1);
+}
+
+//@PENDING 14007af70
+unsigned long long FUN_14007af70(unsigned long long * arg1, unsigned * arg2) {
+  long long lVar1;
+  unsigned long long uVar2;
+  unsigned *puVar3;
+  unsigned *local_18;
+  unsigned local_10 [4];
+  
+  lVar1 = FUN_14007c650((long long)arg1);
+  if ((unsigned)lVar1 < 4) {
+    uVar2 = FUN_14007ad30(arg1,local_10,4);
+    if ((uVar2 & 0xff) == 0) {
+      return 0;
+    }
+    local_18 = local_10;
+  }
+  else {
+    local_18 = (unsigned *)arg1[1];
+    FUN_14007c740((long long)arg1,4);
+  }
+  puVar3 = FUN_14007c810(local_18,arg2);
+  return CONCAT71((int7)((unsigned long long)puVar3 >> 8),1);
+}
+
+//@PENDING 14007b0b0
+unsigned long long FUN_14007b0b0(unsigned long long * arg1, unsigned * arg2) {
+  unsigned long long uVar1;
+  unsigned long long uVar2;
+  unsigned local_18 [6];
+  
+  uVar1 = FUN_14007b420(arg1,(unsigned long long *)local_18);
+  if ((uVar1 & 0xff) == 0) {
+    uVar2 = 0;
+  }
+  else {
+    *arg2 = local_18[0];
+    uVar2 = CONCAT71((uint7)(uint3)((unsigned)local_18[0] >> 8),1);
+  }
+  return uVar2;
+}
+
+//@PENDING 14007b0f0
+unsigned long long FUN_14007b0f0(unsigned long long * arg1, unsigned * arg2) {
+  long long lVar1;
+  unsigned char *pbVar2;
+  unsigned long long uVar3;
+  
+  lVar1 = FUN_14007c650((long long)arg1);
+  if (((int)lVar1 < 10) &&
+     (((unsigned long long)arg1[2] <= (unsigned long long)arg1[1] || ((*(unsigned char *)(arg1[2] + -1) & 0x80) != 0))
+     )) {
+    uVar3 = FUN_14007b0b0(arg1,arg2);
+  }
+  else {
+    pbVar2 = FUN_14007c910((unsigned char *)arg1[1],arg2);
+    if (pbVar2 == (unsigned char *)0x0) {
+      uVar3 = 0;
+    }
+    else {
+      arg1[1] = pbVar2;
+      uVar3 = CONCAT71((int7)((unsigned long long)pbVar2 >> 8),1);
+    }
+  }
+  return uVar3;
+}
+
 //@PENDING 14007b190
 unsigned long long FUN_14007b190(unsigned long long * arg1) {
   unsigned long long uVar1;
@@ -36974,6 +38394,86 @@ unsigned long long FUN_14007b260(unsigned long long * arg1) {
   return uVar4;
 }
 
+//@PENDING 14007b420
+unsigned long long FUN_14007b420(unsigned long long * arg1, unsigned long long * arg2) {
+  unsigned char bVar1;
+  unsigned char *pbVar2;
+  long long lVar3;
+  unsigned long long uVar4;
+  unsigned local_28;
+  unsigned char *local_20;
+  unsigned local_14;
+  unsigned local_10;
+  
+  lVar3 = FUN_14007c650((long long)arg1);
+  if (((int)lVar3 < 10) &&
+     (((unsigned long long)arg1[2] <= (unsigned long long)arg1[1] || ((*(unsigned char *)(arg1[2] + -1) & 0x80) != 0))
+     )) {
+    uVar4 = FUN_14007b340(arg1,arg2);
+  }
+  else {
+    pbVar2 = (unsigned char *)arg1[1];
+    local_28 = 0;
+    local_14 = 0;
+    local_10 = (unsigned)*pbVar2;
+    local_20 = pbVar2 + 1;
+    if ((*pbVar2 & 0x80) != 0) {
+      bVar1 = *local_20;
+      local_20 = pbVar2 + 2;
+      local_10 = (local_10 - 0x80) + (unsigned)bVar1 * 0x80;
+      if ((bVar1 & 0x80) != 0) {
+        bVar1 = *local_20;
+        local_20 = pbVar2 + 3;
+        local_10 = (local_10 - 0x4000) + (unsigned)bVar1 * 0x4000;
+        if ((bVar1 & 0x80) != 0) {
+          bVar1 = *local_20;
+          local_20 = pbVar2 + 4;
+          local_10 = (local_10 - 0x200000) + (unsigned)bVar1 * 0x200000;
+          if ((bVar1 & 0x80) != 0) {
+            local_10 = local_10 + 0xf0000000;
+            bVar1 = *local_20;
+            local_28 = (unsigned)bVar1;
+            local_20 = pbVar2 + 5;
+            if ((bVar1 & 0x80) != 0) {
+              bVar1 = *local_20;
+              local_20 = pbVar2 + 6;
+              local_28 = (local_28 - 0x80) + (unsigned)bVar1 * 0x80;
+              if ((bVar1 & 0x80) != 0) {
+                bVar1 = *local_20;
+                local_20 = pbVar2 + 7;
+                local_28 = (local_28 - 0x4000) + (unsigned)bVar1 * 0x4000;
+                if ((bVar1 & 0x80) != 0) {
+                  bVar1 = *local_20;
+                  local_20 = pbVar2 + 8;
+                  local_28 = (local_28 - 0x200000) + (unsigned)bVar1 * 0x200000;
+                  if ((bVar1 & 0x80) != 0) {
+                    local_28 = local_28 + 0xf0000000;
+                    bVar1 = *local_20;
+                    local_14 = (unsigned)bVar1;
+                    local_20 = pbVar2 + 9;
+                    if ((bVar1 & 0x80) != 0) {
+                      bVar1 = *local_20;
+                      local_20 = pbVar2 + 10;
+                      local_14 = (local_14 - 0x80) + (unsigned)bVar1 * 0x80;
+                      if ((bVar1 & 0x80) != 0) {
+                        return 0;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    FUN_14007c740((long long)arg1,(int)local_20 - (int)arg1[1]);
+    *arg2 = (unsigned long long)local_10 | (unsigned long long)local_28 << 0x1c | (unsigned long long)local_14 << 0x38;
+    uVar4 = CONCAT71((int7)((unsigned long long)arg2 >> 8),1);
+  }
+  return uVar4;
+}
+
 //@PENDING 14007bbf0
 unsigned long long * FUN_14007bbf0(unsigned long long * arg1, unsigned long long arg2) {
   *arg1 = arg2;
@@ -36985,6 +38485,20 @@ unsigned long long * FUN_14007bbf0(unsigned long long * arg1, unsigned long long
   FUN_14007c350(arg1);
   *(unsigned char *)(arg1 + 3) = 0;
   return arg1;
+}
+
+//@PENDING 14007bd20
+unsigned long long FUN_14007bd20(unsigned long long * arg1, unsigned long long * arg2, unsigned * arg3) {
+  unsigned uVar1;
+  bool bVar2;
+  
+  if ((*(int *)(arg1 + 2) == 0) && (bVar2 = FUN_14007c350(arg1), !bVar2)) {
+    return 0;
+  }
+  *arg2 = arg1[1];
+  uVar1 = *(unsigned *)(arg1 + 2);
+  *arg3 = uVar1;
+  return CONCAT71((uint7)(uint3)((unsigned)uVar1 >> 8),1);
 }
 
 //@PENDING 14007bd80
@@ -37040,6 +38554,23 @@ void FUN_14007eaf0(long long arg1) {
   return;
 }
 
+//@PENDING 14007eb10
+unsigned long long FUN_14007eb10(long long arg1, long long * arg2, int * arg3) {
+  unsigned long long uVar1;
+  long long lVar2;
+  
+  if ((*(int *)(arg1 + 0x2c) == *(int *)(arg1 + 0x28)) &&
+     (uVar1 = FUN_14007ee60(arg1), (uVar1 & 0xff) == 0)) {
+    return 0;
+  }
+  FUN_14007ef20(arg1);
+  lVar2 = FUN_14007f2e0((unsigned long long *)(arg1 + 0x20));
+  *arg2 = lVar2 + *(int *)(arg1 + 0x2c);
+  *arg3 = *(int *)(arg1 + 0x28) - *(int *)(arg1 + 0x2c);
+  *(unsigned *)(arg1 + 0x2c) = *(unsigned *)(arg1 + 0x28);
+  return CONCAT71((uint7)(uint3)((unsigned)*(unsigned *)(arg1 + 0x28) >> 8),1);
+}
+
 //@PENDING 14007f010
 unsigned long long * FUN_14007f010(unsigned long long * arg1, unsigned arg2) {
   FUN_14007d290(arg1);
@@ -37089,6 +38620,30 @@ unsigned long long * FUN_14007f200(unsigned long long * arg1, unsigned arg2) {
 void FUN_140081d90(long long arg1, int arg2, int arg3) {
   FUN_1400906e0(*(long long *)(arg1 + 0x100),arg2,arg3);
   return;
+}
+
+//@PENDING 140082550
+unsigned long long FUN_140082550(long long arg1, unsigned long long arg2) {
+  long long lVar1;
+  unsigned long long uVar2;
+  
+  uVar2 = 0;
+  *(unsigned long long *)(arg1 + 0x18) = 0;
+  *(unsigned long long *)(arg1 + 0x20) = 0;
+  *(unsigned long long *)(arg1 + 0x28) = 0;
+  if (arg2 != 0) {
+    if (0x3fffffffffffffff < arg2) {
+                    /* WARNING: Subroutine does not return */
+      FUN_1400803c0();
+    }
+    lVar1 = FUN_140081750(arg1 + 0x10,arg2);
+    *(long long *)(arg1 + 0x18) = lVar1;
+    *(long long *)(arg1 + 0x20) = lVar1;
+    lVar1 = lVar1 + arg2 * 4;
+    *(long long *)(arg1 + 0x28) = lVar1;
+    uVar2 = CONCAT71((int7)((unsigned long long)lVar1 >> 8),1);
+  }
+  return uVar2;
 }
 
 //@PENDING 140083b90
@@ -38608,6 +40163,29 @@ unsigned long long * FUN_140094110(unsigned long long * arg1, unsigned arg2) {
   return arg1;
 }
 
+//@PENDING 140094c90
+unsigned long long FUN_140094c90(long long arg1, unsigned long long arg2) {
+  long long lVar1;
+  unsigned long long uVar2;
+  
+  uVar2 = 0;
+  *(unsigned long long *)(arg1 + 0x18) = 0;
+  *(unsigned long long *)(arg1 + 0x20) = 0;
+  *(unsigned long long *)(arg1 + 0x28) = 0;
+  if (arg2 != 0) {
+    if (0xfffffffffffffff < arg2) {
+                    /* WARNING: Subroutine does not return */
+      FUN_140094770();
+    }
+    lVar1 = FUN_140094b40(arg1 + 0x10,arg2);
+    *(long long *)(arg1 + 0x18) = lVar1;
+    *(long long *)(arg1 + 0x20) = lVar1;
+    *(unsigned long long *)(arg1 + 0x28) = arg2 * 0x10 + lVar1;
+    uVar2 = CONCAT71((int7)((unsigned long long)lVar1 >> 8),1);
+  }
+  return uVar2;
+}
+
 //@PENDING 140094f50
 unsigned long long * FUN_140094f50(unsigned long long * arg1, unsigned long long * arg2) {
   FUN_140093cf0(arg1,*arg2,arg2[1]);
@@ -38960,70 +40538,134 @@ long long FUN_140097c10(void) {
   return DAT_140104d50;
 }
 
-//@PENDING 140098b4c
-unsigned long long FUN_140098b4c(long long * arg1, unsigned * arg2) {
-  unsigned long long uVar1;
-  unsigned long long local_res8 [4];
+//@PENDING 140097c40
+unsigned long long FUN_140097c40(long long arg1, unsigned long long * arg2) {
+  unsigned char bVar1;
+  unsigned char *pbVar2;
+  char *pcVar3;
+  int iVar4;
+  char cVar5;
+  unsigned uVar6;
+  unsigned long long uVar7;
+  unsigned long long uVar8;
+  unsigned long long local_40 [2];
+  unsigned long long local_30 [5];
   
-  if (arg1[1] == 0) {
-    return 0x10;
-  }
-  if ((*(unsigned char *)*arg1 & 0x80) == 0) {
-    *arg2 = (unsigned)*(unsigned char *)*arg1;
-    *arg1 = *arg1 + 1;
-    arg1[1] = arg1[1] + -1;
-  }
-  else {
-    uVar1 = FUN_140098a4c(arg1,local_res8);
-    if ((int)uVar1 != 0) {
-      return uVar1;
+  FUN_14007dbb0(local_40,arg1 + 8);
+  FUN_14007bbf0(local_30,local_40);
+LAB_140097c80:
+  while ((pbVar2 = (unsigned char *)arg2[1], (unsigned char *)arg2[2] <= pbVar2 ||
+         (bVar1 = *pbVar2, (char)bVar1 < '\x01'))) {
+    uVar7 = FUN_14007b260(arg2);
+    uVar6 = (unsigned)uVar7;
+    uVar7 = uVar7 & 0xffffffff;
+    *(unsigned *)(arg2 + 4) = uVar6;
+    if (uVar6 - 1 < 0x7f) goto LAB_140097cbd;
+LAB_140097eba:
+    if ((uVar6 == 0) || (((unsigned char)uVar6 & 7) == 4)) goto LAB_140097f02;
+    cVar5 = FUN_1400a2330(arg2,uVar6,local_30);
+    if (cVar5 == '\0') {
+LAB_140097ee9:
+      FUN_14007bc70(local_30);
+      uVar7 = FUN_14007dc00(local_40);
+      return uVar7 & 0xffffffffffffff00;
     }
-    if ((0x7ffffffe < local_res8[0]) || (0xfffffffffffffff < local_res8[0])) {
-      return 4;
-    }
-    *arg2 = (unsigned)local_res8[0];
   }
-  return 0;
-}
-
-//@PENDING 140098bb4
-unsigned long long FUN_140098bb4(long long * arg1) {
-  unsigned long long uVar1;
-  unsigned long long local_res10 [3];
-  
-  uVar1 = FUN_140098a4c(arg1,local_res10);
-  if ((int)uVar1 == 0) {
-    if ((unsigned long long)arg1[1] < local_res10[0]) {
-      uVar1 = 0x10;
+  uVar7 = (unsigned long long)bVar1;
+  *(unsigned *)(arg2 + 4) = (unsigned)bVar1;
+  arg2[1] = pbVar2 + 1;
+LAB_140097cbd:
+  uVar6 = (unsigned)uVar7;
+  iVar4 = (int)(uVar7 >> 3);
+  if (iVar4 == 1) {
+    if (uVar6 != 8) goto LAB_140097eba;
+    if (((unsigned char *)arg2[1] < (unsigned char *)arg2[2]) && (bVar1 = *(unsigned char *)arg2[1], bVar1 < 0x80)) {
+      *(unsigned *)(arg1 + 0x38) = (unsigned)bVar1;
+      arg2[1] = arg2[1] + 1;
     }
     else {
-      *arg1 = *arg1 + local_res10[0];
-      arg1[1] = arg1[1] - local_res10[0];
-      uVar1 = 0;
+      uVar8 = FUN_14007b0f0(arg2,(unsigned *)(arg1 + 0x38));
+      if ((char)uVar8 == '\0') goto LAB_140097ee9;
     }
+    *(unsigned *)(arg1 + 0x30) = *(unsigned *)(arg1 + 0x30) | 1;
+    pcVar3 = (char *)arg2[1];
+    if (((char *)arg2[2] <= pcVar3) || (*pcVar3 != '\x10')) goto LAB_140097c80;
+    arg2[1] = pcVar3 + 1;
+LAB_140097d6f:
+    if (((unsigned char *)arg2[1] < (unsigned char *)arg2[2]) && (bVar1 = *(unsigned char *)arg2[1], bVar1 < 0x80)) {
+      *(unsigned *)(arg1 + 0x3c) = (unsigned)bVar1;
+      arg2[1] = arg2[1] + 1;
+    }
+    else {
+      uVar8 = FUN_14007b0f0(arg2,(unsigned *)(arg1 + 0x3c));
+      if ((char)uVar8 == '\0') goto LAB_140097ee9;
+    }
+    *(unsigned *)(arg1 + 0x30) = *(unsigned *)(arg1 + 0x30) | 2;
+    pcVar3 = (char *)arg2[1];
+    if (((char *)arg2[2] <= pcVar3) || (*pcVar3 != '\x18')) goto LAB_140097c80;
+    arg2[1] = pcVar3 + 1;
+LAB_140097dc2:
+    if (((unsigned char *)arg2[1] < (unsigned char *)arg2[2]) && (bVar1 = *(unsigned char *)arg2[1], bVar1 < 0x80)) {
+      *(unsigned *)(arg1 + 0x40) = (unsigned)bVar1;
+      arg2[1] = arg2[1] + 1;
+    }
+    else {
+      uVar8 = FUN_14007b0f0(arg2,(unsigned *)(arg1 + 0x40));
+      if ((char)uVar8 == '\0') goto LAB_140097ee9;
+    }
+    *(unsigned *)(arg1 + 0x30) = *(unsigned *)(arg1 + 0x30) | 4;
+    pcVar3 = (char *)arg2[1];
+    if (((char *)arg2[2] <= pcVar3) || (*pcVar3 != ' ')) goto LAB_140097c80;
+    arg2[1] = pcVar3 + 1;
+LAB_140097e15:
+    if (((unsigned char *)arg2[1] < (unsigned char *)arg2[2]) && (bVar1 = *(unsigned char *)arg2[1], bVar1 < 0x80)) {
+      *(unsigned *)(arg1 + 0x44) = (unsigned)bVar1;
+      arg2[1] = arg2[1] + 1;
+    }
+    else {
+      uVar8 = FUN_14007b0f0(arg2,(unsigned *)(arg1 + 0x44));
+      if ((char)uVar8 == '\0') goto LAB_140097ee9;
+    }
+    *(unsigned *)(arg1 + 0x30) = *(unsigned *)(arg1 + 0x30) | 8;
+    pcVar3 = (char *)arg2[1];
+    if (((char *)arg2[2] <= pcVar3) || (*pcVar3 != '(')) goto LAB_140097c80;
+    arg2[1] = pcVar3 + 1;
   }
-  return uVar1;
-}
-
-//@PENDING 140098bf4
-unsigned long long FUN_140098bf4(long long * arg1, unsigned long long arg2) {
-  unsigned long long uVar1;
-  unsigned long long local_res18 [2];
-  
-  do {
-    uVar1 = FUN_140098a4c(arg1,local_res18);
-    if ((int)uVar1 != 0) {
-      return uVar1;
+  else {
+    if (iVar4 == 2) {
+      if (uVar6 != 0x10) goto LAB_140097eba;
+      goto LAB_140097d6f;
     }
-    if (local_res18[0] == arg2) {
-      return 0;
+    if (iVar4 == 3) {
+      if (uVar6 != 0x18) goto LAB_140097eba;
+      goto LAB_140097dc2;
     }
-    if (local_res18[0] == 0) {
-      return 0x10;
+    if (iVar4 == 4) {
+      if (uVar6 != 0x20) goto LAB_140097eba;
+      goto LAB_140097e15;
     }
-    uVar1 = FUN_140098bb4(arg1);
-  } while ((int)uVar1 == 0);
-  return uVar1;
+    if ((iVar4 != 5) || (uVar6 != 0x28)) goto LAB_140097eba;
+  }
+  if (((unsigned char *)arg2[1] < (unsigned char *)arg2[2]) && (bVar1 = *(unsigned char *)arg2[1], bVar1 < 0x80)) {
+    *(unsigned *)(arg1 + 0x48) = (unsigned)bVar1;
+    arg2[1] = arg2[1] + 1;
+  }
+  else {
+    uVar8 = FUN_14007b0f0(arg2,(unsigned *)(arg1 + 0x48));
+    if ((char)uVar8 == '\0') goto LAB_140097ee9;
+  }
+  *(unsigned *)(arg1 + 0x30) = *(unsigned *)(arg1 + 0x30) | 0x10;
+  if ((arg2[1] == arg2[2]) &&
+     ((*(int *)((long long)arg2 + 0x2c) != 0 || (*(int *)(arg2 + 3) == *(int *)(arg2 + 5))))
+     ) {
+    *(unsigned *)(arg2 + 4) = 0;
+    *(unsigned char *)((long long)arg2 + 0x24) = 1;
+LAB_140097f02:
+    FUN_14007bc70(local_30);
+    uVar8 = FUN_14007dc00(local_40);
+    return CONCAT71((int7)((unsigned long long)uVar8 >> 8),1);
+  }
+  goto LAB_140097c80;
 }
 
 //@PENDING 140098e78
@@ -39036,109 +40678,6 @@ void FUN_140098e78(long long * arg1, unsigned arg2, long long * arg3, unsigned l
     FUN_140098da0(arg1,arg2,arg3,arg4);
   }
   return;
-}
-
-//@PENDING 140099b28
-unsigned long long FUN_140099b28(long long arg1, long long * arg2, unsigned * arg3) {
-  unsigned uVar1;
-  int iVar2;
-  unsigned long long uVar3;
-  unsigned uVar4;
-  unsigned long long uVar5;
-  unsigned uVar6;
-  unsigned uVar7;
-  unsigned uVar8;
-  int iVar9;
-  unsigned local_res8 [2];
-  unsigned long long local_res20;
-  
-  uVar1 = *(unsigned *)(arg1 + 4);
-  local_res20 = 0;
-  uVar6 = 0;
-  iVar9 = 0;
-  uVar7 = uVar1;
-  do {
-    while( true ) {
-      uVar3 = FUN_140098a4c(arg2,&local_res20);
-      uVar5 = local_res20;
-      if ((int)uVar3 != 0) {
-        return uVar3;
-      }
-      if (local_res20 == 0xd) break;
-      if (((local_res20 == 10) || (local_res20 == 9)) || (local_res20 == 0)) {
-        if ((*(long long *)(arg3 + 2) == 0) &&
-           (uVar6 = uVar1, *(unsigned char **)(arg1 + 0x10) != (unsigned char *)0x0)) {
-          iVar2 = FUN_140098c6c(*(unsigned char **)(arg1 + 0x10),uVar1);
-          uVar6 = uVar1 - iVar2;
-        }
-        *arg3 = uVar7;
-        arg3[1] = uVar6;
-        if (uVar5 != 9) goto LAB_140099c8e;
-        *(long long *)(arg3 + 6) = *arg2;
-        uVar3 = FUN_1400993f8(arg2,iVar9);
-        if ((int)uVar3 != 0) {
-          return uVar3;
-        }
-        *(long long *)(arg3 + 8) = *arg2 - *(long long *)(arg3 + 6);
-        while( true ) {
-          uVar3 = FUN_140098a4c(arg2,&local_res20);
-          uVar5 = local_res20;
-          if ((int)uVar3 != 0) {
-            return uVar3;
-          }
-LAB_140099c8e:
-          if (uVar5 == 0) break;
-          if (uVar5 == 10) {
-            *(long long *)(arg3 + 10) = *arg2;
-            uVar3 = FUN_140098edc(arg2,uVar6);
-            if ((int)uVar3 != 0) {
-              return uVar3;
-            }
-            *(long long *)(arg3 + 0xc) = *arg2 - *(long long *)(arg3 + 10);
-          }
-          else {
-            uVar3 = FUN_140098bb4(arg2);
-            if ((int)uVar3 != 0) {
-              return uVar3;
-            }
-          }
-        }
-        return 0;
-      }
-      uVar3 = FUN_140098bb4(arg2);
-      if ((int)uVar3 != 0) {
-        return uVar3;
-      }
-    }
-    uVar7 = 0;
-    uVar6 = 0;
-    uVar4 = 0;
-    *(long long *)(arg3 + 2) = *arg2;
-    uVar8 = uVar7;
-    if (uVar1 != 0) {
-      do {
-        uVar3 = FUN_140098b4c(arg2,local_res8);
-        if ((int)uVar3 != 0) {
-          return uVar3;
-        }
-        uVar7 = local_res8[0] + uVar8;
-        if (uVar7 < uVar8) {
-          return 4;
-        }
-        if (local_res8[0] != 0) {
-          iVar9 = iVar9 + -1 + local_res8[0];
-        }
-        if (((local_res8[0] != 1) || (*(long long *)(arg1 + 0x10) == 0)) ||
-           ((*(unsigned char *)((unsigned long long)(uVar4 >> 3) + *(long long *)(arg1 + 0x10)) &
-            (unsigned char)(0x80 >> ((unsigned char)uVar4 & 7))) == 0)) {
-          uVar6 = uVar6 + local_res8[0];
-        }
-        uVar4 = uVar4 + 1;
-        uVar8 = uVar7;
-      } while (uVar4 < uVar1);
-    }
-    *(long long *)(arg3 + 4) = *arg2 - *(long long *)(arg3 + 2);
-  } while( true );
 }
 
 //@PENDING 140099e54
@@ -39584,6 +41123,23 @@ unsigned FUN_1400a3790(unsigned long long * arg1) {
     uVar1 = *(unsigned *)(arg1 + 4);
   }
   return uVar1;
+}
+
+//@PENDING 1400a3820
+unsigned long long FUN_1400a3820(unsigned long long * arg1, unsigned * arg2) {
+  unsigned long long uVar1;
+  unsigned long long uVar2;
+  unsigned local_18 [6];
+  
+  uVar1 = FUN_140097710(arg1,local_18);
+  if ((uVar1 & 0xff) == 0) {
+    uVar2 = 0;
+  }
+  else {
+    *arg2 = local_18[0];
+    uVar2 = CONCAT71((uint7)(uint3)(local_18[0] >> 8),1);
+  }
+  return uVar2;
 }
 
 //@PENDING 1400a3860
@@ -40082,7 +41638,9 @@ extern const unsigned long long g_aNpcTranslitAddr[] = {
     (unsigned long long)0x140028ad0ULL,
     (unsigned long long)0x140028bf0ULL,
     (unsigned long long)0x140028c90ULL,
+    (unsigned long long)0x140028cb0ULL,
     (unsigned long long)0x140028d10ULL,
+    (unsigned long long)0x140028d30ULL,
     (unsigned long long)0x140028eb0ULL,
     (unsigned long long)0x140028f20ULL,
     (unsigned long long)0x140028fc0ULL,
@@ -40092,6 +41650,8 @@ extern const unsigned long long g_aNpcTranslitAddr[] = {
     (unsigned long long)0x140029190ULL,
     (unsigned long long)0x140029210ULL,
     (unsigned long long)0x140029270ULL,
+    (unsigned long long)0x1400292d0ULL,
+    (unsigned long long)0x140029380ULL,
     (unsigned long long)0x140029430ULL,
     (unsigned long long)0x140029520ULL,
     (unsigned long long)0x140029930ULL,
@@ -40287,6 +41847,7 @@ extern const unsigned long long g_aNpcTranslitAddr[] = {
     (unsigned long long)0x140039000ULL,
     (unsigned long long)0x140039020ULL,
     (unsigned long long)0x140039040ULL,
+    (unsigned long long)0x140039120ULL,
     (unsigned long long)0x140039180ULL,
     (unsigned long long)0x1400391a0ULL,
     (unsigned long long)0x1400391d0ULL,
@@ -40326,6 +41887,7 @@ extern const unsigned long long g_aNpcTranslitAddr[] = {
     (unsigned long long)0x14003c340ULL,
     (unsigned long long)0x14003c7b0ULL,
     (unsigned long long)0x14003cd50ULL,
+    (unsigned long long)0x14003cec0ULL,
     (unsigned long long)0x14003cf70ULL,
     (unsigned long long)0x14003cff0ULL,
     (unsigned long long)0x14003d050ULL,
@@ -40378,8 +41940,12 @@ extern const unsigned long long g_aNpcTranslitAddr[] = {
     (unsigned long long)0x140040fa0ULL,
     (unsigned long long)0x140041000ULL,
     (unsigned long long)0x140041020ULL,
+    (unsigned long long)0x140041120ULL,
     (unsigned long long)0x140041190ULL,
+    (unsigned long long)0x1400411c0ULL,
+    (unsigned long long)0x1400412c0ULL,
     (unsigned long long)0x140041330ULL,
+    (unsigned long long)0x140041360ULL,
     (unsigned long long)0x140041460ULL,
     (unsigned long long)0x1400414c0ULL,
     (unsigned long long)0x140041640ULL,
@@ -40394,7 +41960,9 @@ extern const unsigned long long g_aNpcTranslitAddr[] = {
     (unsigned long long)0x140041a20ULL,
     (unsigned long long)0x140041a70ULL,
     (unsigned long long)0x140041ac0ULL,
+    (unsigned long long)0x140041e10ULL,
     (unsigned long long)0x140041f20ULL,
+    (unsigned long long)0x140041fd0ULL,
     (unsigned long long)0x140042040ULL,
     (unsigned long long)0x1400420b0ULL,
     (unsigned long long)0x140042100ULL,
@@ -40431,6 +41999,7 @@ extern const unsigned long long g_aNpcTranslitAddr[] = {
     (unsigned long long)0x1400430a0ULL,
     (unsigned long long)0x1400430f0ULL,
     (unsigned long long)0x140043150ULL,
+    (unsigned long long)0x1400431b0ULL,
     (unsigned long long)0x1400432e0ULL,
     (unsigned long long)0x140043330ULL,
     (unsigned long long)0x140043380ULL,
@@ -40540,6 +42109,9 @@ extern const unsigned long long g_aNpcTranslitAddr[] = {
     (unsigned long long)0x14004b910ULL,
     (unsigned long long)0x14004ba90ULL,
     (unsigned long long)0x14004cd10ULL,
+    (unsigned long long)0x14004cdb0ULL,
+    (unsigned long long)0x14004ce20ULL,
+    (unsigned long long)0x14004cf10ULL,
     (unsigned long long)0x14004d020ULL,
     (unsigned long long)0x14004d040ULL,
     (unsigned long long)0x14004d060ULL,
@@ -40805,6 +42377,7 @@ extern const unsigned long long g_aNpcTranslitAddr[] = {
     (unsigned long long)0x1400677c0ULL,
     (unsigned long long)0x140067830ULL,
     (unsigned long long)0x1400678a0ULL,
+    (unsigned long long)0x140067cf0ULL,
     (unsigned long long)0x140067da0ULL,
     (unsigned long long)0x140067e20ULL,
     (unsigned long long)0x140067e80ULL,
@@ -40923,6 +42496,7 @@ extern const unsigned long long g_aNpcTranslitAddr[] = {
     (unsigned long long)0x14006f060ULL,
     (unsigned long long)0x14006f0c0ULL,
     (unsigned long long)0x14006f160ULL,
+    (unsigned long long)0x14006f3a0ULL,
     (unsigned long long)0x14006f470ULL,
     (unsigned long long)0x14006f4d0ULL,
     (unsigned long long)0x14006f570ULL,
@@ -40966,6 +42540,7 @@ extern const unsigned long long g_aNpcTranslitAddr[] = {
     (unsigned long long)0x140073920ULL,
     (unsigned long long)0x140073ab0ULL,
     (unsigned long long)0x140074750ULL,
+    (unsigned long long)0x140078830ULL,
     (unsigned long long)0x140078af0ULL,
     (unsigned long long)0x140078c10ULL,
     (unsigned long long)0x140078cc0ULL,
@@ -41013,9 +42588,15 @@ extern const unsigned long long g_aNpcTranslitAddr[] = {
     (unsigned long long)0x14007a980ULL,
     (unsigned long long)0x14007aa10ULL,
     (unsigned long long)0x14007aa80ULL,
+    (unsigned long long)0x14007acc0ULL,
+    (unsigned long long)0x14007af70ULL,
+    (unsigned long long)0x14007b0b0ULL,
+    (unsigned long long)0x14007b0f0ULL,
     (unsigned long long)0x14007b190ULL,
     (unsigned long long)0x14007b260ULL,
+    (unsigned long long)0x14007b420ULL,
     (unsigned long long)0x14007bbf0ULL,
+    (unsigned long long)0x14007bd20ULL,
     (unsigned long long)0x14007bd80ULL,
     (unsigned long long)0x14007be30ULL,
     (unsigned long long)0x14007bf80ULL,
@@ -41038,6 +42619,7 @@ extern const unsigned long long g_aNpcTranslitAddr[] = {
     (unsigned long long)0x14007db90ULL,
     (unsigned long long)0x14007e800ULL,
     (unsigned long long)0x14007eaf0ULL,
+    (unsigned long long)0x14007eb10ULL,
     (unsigned long long)0x14007ee40ULL,
     (unsigned long long)0x14007ef80ULL,
     (unsigned long long)0x14007efd0ULL,
@@ -41083,6 +42665,7 @@ extern const unsigned long long g_aNpcTranslitAddr[] = {
     (unsigned long long)0x1400821c0ULL,
     (unsigned long long)0x140082240ULL,
     (unsigned long long)0x140082350ULL,
+    (unsigned long long)0x140082550ULL,
     (unsigned long long)0x140082690ULL,
     (unsigned long long)0x140082740ULL,
     (unsigned long long)0x1400829c0ULL,
@@ -41263,6 +42846,7 @@ extern const unsigned long long g_aNpcTranslitAddr[] = {
     (unsigned long long)0x140094a60ULL,
     (unsigned long long)0x140094aa0ULL,
     (unsigned long long)0x140094bc0ULL,
+    (unsigned long long)0x140094c90ULL,
     (unsigned long long)0x140094dd0ULL,
     (unsigned long long)0x140094e70ULL,
     (unsigned long long)0x140094f50ULL,
@@ -41309,10 +42893,12 @@ extern const unsigned long long g_aNpcTranslitAddr[] = {
     (unsigned long long)0x140097a60ULL,
     (unsigned long long)0x140097b90ULL,
     (unsigned long long)0x140097c10ULL,
+    (unsigned long long)0x140097c40ULL,
     (unsigned long long)0x140098314ULL,
     (unsigned long long)0x140098330ULL,
     (unsigned long long)0x14009833cULL,
     (unsigned long long)0x1400988c0ULL,
+    (unsigned long long)0x140098a4cULL,
     (unsigned long long)0x140098b4cULL,
     (unsigned long long)0x140098bb4ULL,
     (unsigned long long)0x140098bf4ULL,
@@ -41338,6 +42924,7 @@ extern const unsigned long long g_aNpcTranslitAddr[] = {
     (unsigned long long)0x14009d51cULL,
     (unsigned long long)0x14009d574ULL,
     (unsigned long long)0x14009d7f8ULL,
+    (unsigned long long)0x14009d828ULL,
     (unsigned long long)0x14009e034ULL,
     (unsigned long long)0x14009e110ULL,
     (unsigned long long)0x14009e14cULL,
@@ -41352,11 +42939,16 @@ extern const unsigned long long g_aNpcTranslitAddr[] = {
     (unsigned long long)0x1400a0450ULL,
     (unsigned long long)0x1400a047cULL,
     (unsigned long long)0x1400a0498ULL,
+    (unsigned long long)0x1400a04ecULL,
     (unsigned long long)0x1400a0954ULL,
     (unsigned long long)0x1400a0a44ULL,
     (unsigned long long)0x1400a0df4ULL,
     (unsigned long long)0x1400a0f6cULL,
+    (unsigned long long)0x1400a1654ULL,
+    (unsigned long long)0x1400a17ccULL,
     (unsigned long long)0x1400a1860ULL,
+    (unsigned long long)0x1400a1930ULL,
+    (unsigned long long)0x1400a19fcULL,
     (unsigned long long)0x1400a1c7cULL,
     (unsigned long long)0x1400a1e74ULL,
     (unsigned long long)0x1400a1ea8ULL,
@@ -41382,9 +42974,11 @@ extern const unsigned long long g_aNpcTranslitAddr[] = {
     (unsigned long long)0x1400a3610ULL,
     (unsigned long long)0x1400a3640ULL,
     (unsigned long long)0x1400a3670ULL,
+    (unsigned long long)0x1400a36b0ULL,
     (unsigned long long)0x1400a3700ULL,
     (unsigned long long)0x1400a3730ULL,
     (unsigned long long)0x1400a3790ULL,
+    (unsigned long long)0x1400a3820ULL,
     (unsigned long long)0x1400a3860ULL,
     (unsigned long long)0x1400a3890ULL,
     (unsigned long long)0x1400a38b0ULL,
@@ -41414,8 +43008,8 @@ extern const unsigned long long g_aNpcTranslitAddr[] = {
     (unsigned long long)0x1400b5500ULL,
     (unsigned long long)0x1400bc070ULL,
 };
-extern const unsigned g_nNpcTranslitCount = 1669;
-extern const unsigned g_nNpcTranslitLinked = 1015;
-extern const unsigned g_nNpcTranslitPending = 654;
+extern const unsigned g_nNpcTranslitCount = 1707;
+extern const unsigned g_nNpcTranslitLinked = 1031;
+extern const unsigned g_nNpcTranslitPending = 676;
 
 }  // namespace tq

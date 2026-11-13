@@ -2501,3 +2501,22 @@ call `::tq::g_pfnNpcInlineLogError` - the seam the hand-ported bodies already us
 
 What is left on the wall is now measured rather than assumed: the bodies that still fail are 105 with `extraout_`
 (decompiler register recovery), 95 with `CONCAT`, 87 whose vftable the RTTI table lacks, 67 with `SUB168`.
+
+## D261 — the CONCAT macros, written from the definition instead of guessed
+
+`npc-concat.h` now defines the value-assembly macros the listing writes and the Ghidra slice types they use. The
+definition is the name: `CONCATxy(high, low)` shifts the high part into place, masks the low part to y bytes and ors
+them, so `CONCAT71(hi, lo) == ((unsigned long long)(hi) << 8) | (unsigned char)(lo)` and `CONCAT44` shifts 32. Nothing
+in the header decides what a value means; the body still says that. Eleven widths are defined because the listing uses
+eleven (`CONCAT71` 212 times, `CONCAT44` 110, `CONCAT62`/`31`/`22` 11 each, the rest a handful).
+
+    before: 1,669 bodies (1,015 linked, 654 pending)
+    after:  **1,707 bodies** (1,031 linked, 676 pending)      69 suites green, six cycles
+
+The vtable emission was widened at the same time: every slot the RTTI table knows now gets its symbol, not only the
+ones a given run happens to reference, so a body kept in the pending tier no longer fails on an undefined slot. That
+change cost nothing and added nothing - the 88 bodies still declined under "vftable not in table" are classes whose
+name form does not match a table entry, and widening the definition cannot fix a lookup.
+
+Remaining wall, measured again: `extraout_` 105, vftable-name mismatch 88, callee with no usable declaration 69,
+`SUB84`/`SUB168` 67.
