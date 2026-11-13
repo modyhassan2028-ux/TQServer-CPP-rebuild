@@ -2617,3 +2617,15 @@ Counting the real thing this time, over the whole listing rather than one tier:
 So the finish line is 846 bodies, and they are not 846 independent problems: they are one problem - the listing's
 untyped locals and untyped globals - seen from six sides. Every remaining body needs a width that only the instruction
 stream states, and there is no disassembly export in the tree to read it from.
+
+## D267 — Ghidra's bare `undefined` is a byte, and it was not the wall either
+
+Bare `undefined` is Ghidra's own one-byte type (`undefined1`), and it is also what the listing prints for a function
+whose return means nothing. Mapping it to `unsigned char` is reading the listing's own type system, not choosing a
+width, so the reject tokens for it are gone. Net **0** again: the 87 bodies it freed immediately meet the next wall
+(`callee has no usable declaration` 71 -> 77, `class used by value` 39, `Ordinal_` 33). The compile errors in the
+pending tier did fall 489 -> 463, so the mapping is right and should stay - it just is not what stands between the port
+and the last 846.
+
+`Docs/REMAINING_BODIES.md` is the new working list: all 846 remaining addresses, grouped by the tag that blocks them,
+generated from the listing against the definitions rather than counted by hand.

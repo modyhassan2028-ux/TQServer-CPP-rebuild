@@ -43,13 +43,16 @@ static size_t strlen(const char* pszText) { return ::strlen(pszText); }
 
 // Classes the listing names but this unit never defines; only ever used behind a pointer.
 struct CAsyncDBThread;
+struct CCriticalSection;
 struct CDialog;
 struct CEdit;
 struct CIniFile;
 struct CMyHeap;
 struct CStringPacker;
 struct CSyncObject;
+struct CThreadBase;
 struct CWinApp;
+struct CWnd;
 struct HANDLE;
 struct ILogKernel;
 struct ITerrainObjInfoMgr;

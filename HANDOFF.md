@@ -1128,7 +1128,14 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 67 suites green, six cycles. Total ported: 603 of 4099 bodies.
 - Next: `0x140025340` (the CInstanceMgr constructor/clear, 153 lines) and the rest of `0x140025xxx`, then `0x140026xxx`.
 
-## D266 (latest)
+## D267 (latest)
+
+- Bare `undefined` is mapped to `unsigned char` (Ghidra's `undefined1`, also its "no meaningful return" type); the
+  reject tokens are gone. Net **0**, pending-tier compile errors 489 -> 463.
+- `Docs/REMAINING_BODIES.md`: the full list of the 846 remaining bodies, grouped by blocking tag.
+- Standing count: **1,770 transliterated** (1,090 linked, 680 pending); **2,728 of 3,574 bodies** have definitions.
+
+## D266
 
 - `_DAT_` blobs are now written non-const (the body's own expression gives the width of a store) and
   `body_globals_ok` allows storing through a `_DAT_`; plain `DAT_` strings still wait. Net **0**.
