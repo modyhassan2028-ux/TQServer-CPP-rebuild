@@ -51,13 +51,7 @@ static void* FakeNew(long long nBytes) {
 }
 static void* FakeDelete(void* p) { ++g_deletes; g_pDeleted = p; return nullptr; }
 static void Invalid(void) { ++g_invalids; }
-static void RangeLookup(long long* pMap, long long* pOutRange, unsigned* pKey) {
-    assert(pMap == aMap); (void)pKey;
-    pOutRange[0] = aMap[0];
-    pOutRange[1] = (long long)g_pBegin;
-    pOutRange[2] = aMap[0];
-    pOutRange[3] = (long long)g_pEnd;
-}
+
 
 static void BuildTree() {
     FreePool();
@@ -106,7 +100,6 @@ static void ResetCase() {
 
 int main() {
     g_pfnNpcOperatorNew = &FakeNew;
-    g_pfnNpc_140023290 = &RangeLookup;
     g_pfnNpcOperatorDelete = &FakeDelete;
     g_pfnNpcInvalidParameter = &Invalid;
 
@@ -163,35 +156,27 @@ int main() {
             typedef long long (*EraseFn)(long long*, unsigned*);
             EraseFn pfn = (EraseFn)e.pfn;
 
-            // an empty range counts nothing and leaves the tree alone
+            // a key above everything: the range is empty, nothing is counted and nothing is freed
             BuildTree(); ResetCase();
-            g_pBegin = g_pNode30; g_pEnd = g_pNode30;
-            unsigned nKey30 = 30;
-            assert(pfn(aMap, &nKey30) == 0);
+            unsigned nKey99 = 99;
+            assert(pfn(aMap, &nKey99) == 0);
             assert(g_deletes == 0);
-            assert((long long*)aHeader[1] == g_pNode30);      // the root is untouched
 
-            // the whole tree: five nodes counted, five freed, the head closed on itself
+            // the range of an exact key covers just it: [30, 40) is one node, the root, and it goes
             BuildTree(); ResetCase();
-            g_pBegin = g_pNode10; g_pEnd = (long long*)aHeader;
-            unsigned nAny = 0;
-            assert(pfn(aMap, &nAny) == 5);
-            assert(g_deletes == 5);
-            assert((long long*)aHeader[1] == (long long*)aHeader);   // the head points at itself
-            assert((long long*)aHeader[0] == (long long*)aHeader);
-            assert((long long*)aHeader[2] == (long long*)aHeader);
-            assert(aMap[7] == 0);                                    // the size at +0x38 is zeroed
-
-            // a single red leaf-range: one node counted and erased, its child moved up
-            BuildTree(); ResetCase();
-            g_pBegin = g_pNode20; g_pEnd = g_pNode30;
-            unsigned nAny2 = 0;
-            assert(pfn(aMap, &nAny2) == 1);
+            unsigned nKey30 = 30;
+            assert(pfn(aMap, &nKey30) == 1);
             assert(g_deletes == 1);
-            assert(g_pDeleted == (void*)g_pNode20);
-            assert((long long*)aHeader[0] == g_pNode10);             // the leftmost is still 10
-            assert((long long*)g_pNode30[0] == g_pNode10);           // and it hangs off the root
-            assert((long long*)g_pNode10[1] == g_pNode30);
+            assert(g_pDeleted == (void*)g_pNode30);
+            assert((long long*)aHeader[1] != g_pNode30);             // the root moved
+
+            // [10, 20) is the leftmost node, and it is a leaf under a red parent
+            BuildTree(); ResetCase();
+            unsigned nKey10 = 10;
+            assert(pfn(aMap, &nKey10) == 1);
+            assert(g_deletes == 1);
+            assert(g_pDeleted == (void*)g_pNode10);
+            assert((long long*)aHeader[0] != g_pNode10);             // the leftmost follows the erase
             ++nErase;
 
         } else if (std::strcmp(e.pszKind, "find-value") == 0) {

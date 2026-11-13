@@ -7,8 +7,6 @@
 
 namespace tq {
 
-// The range lands as two iterator pairs: pOutRange[0..1] = begin, pOutRange[2..3] = end.
-extern void (*g_pfnNpc_140023290)(long long* pMap, long long* pOutRange, unsigned* pKey);
 
 // 0x140024970 - insert at the position the search found, answering {value, node} + a byte that says whether a new
 // node was made.

@@ -2240,3 +2240,33 @@ The seam `g_pfnNpc_140024000` is retired; `0x140024970` calls the real core and 
 produces (right child of 20, left child of 40, left child of 10 with the head following).
 
 66 suites green, six cycles. Total ported: 600 of 4099 bodies.
+
+## D251 — CInstanceMgr: lookup, CreateInstance, DestroyInstance (3 bodies)
+
+`modules/npcserver/unattributed/cinstancemgr.{h,cpp}`, manifest `g_aNpcInstanceMgr`. No seams: every callee was already
+ported.
+
+| address | body |
+|---|---|
+| 0x1400250e0 | the instance stored at `node+0x20` for a type id (same shape as `0x140024fe0`, head at `+0x78`) |
+| 0x140025690 | `CInstanceMgr::CreateInstance`: record lookup, `0x1400491b0`, then insert into the live map |
+| 0x140025750 | `DestroyInstance`: lookup, release the map (`0x140049050`), run the deleting destructor (`0x140048f90`), erase the entry (`0x140024b20`) |
+
+**The manager carries two maps**, told apart by their offsets: the instance-type records at `+8` (owner `+8`, head
+`+0x38`, reached through `0x140024fe0`) and the live instances at `+0x48` (owner `+0x48`, head `+0x78`, reached through
+`0x1400250e0` and the erase). Both are the same tree object, `0x30` bytes from owner to head — which is also why
+`0x140024fe0`, a body that only sees a map, is called with the manager and still lands on the record map.
+
+**The insert value pair.** `CreateInstance` builds `uint local_38[2]` then an `undefined8 *local_30`, and passes
+`local_38` as the value pair, so the inserted pair is `{instance type id, instance pointer}` read across the two locals.
+The port keeps that as an explicit two-slot array with the same contents.
+
+The seam `g_pfnNpc_140023290` is retired as well: `0x140024b20` now calls the ported `0x140023290`, so the counted erase
+in D246 drives the real equal range. Its suite now erases `[30,40)` (the black root) and `[10,20)` (a leaf) with the real
+repair.
+
+The D251 suite runs both trees: the lookup hit and miss, the record missing, the map refusing to come up, the happy path
+(the new node lands in the live map keyed by the instance's own type), and destroy (map released with the right id, the
+deleting destructor ran, the node freed, the tree empty).
+
+67 suites green, six cycles. Total ported: 603 of 4099 bodies.

@@ -1120,3 +1120,10 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 66 suites green, six cycles. Total ported: 600 of 4099 bodies.
 - Next: the `0x140025xxx` container family (`0x1400250e0`, `0x140025690`, `0x140025750`, `0x140025340`) now has no
   missing callee, then `0x14003ca10`'s neighbours and the `0x140026xxx` vtables.
+
+## D251 (latest)
+
+- `0x1400250e0`, `0x140025690`, `0x140025750` in `cinstancemgr.{h,cpp}`; the `g_pfnNpc_140023290` seam is retired too.
+- CInstanceMgr keeps two maps: records at `+8` (head `+0x38`) and live instances at `+0x48` (head `+0x78`).
+- 67 suites green, six cycles. Total ported: 603 of 4099 bodies.
+- Next: `0x140025340` (the CInstanceMgr constructor/clear, 153 lines) and the rest of `0x140025xxx`, then `0x140026xxx`.

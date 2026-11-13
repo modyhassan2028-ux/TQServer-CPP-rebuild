@@ -6,7 +6,6 @@
 
 namespace tq {
 
-void (*g_pfnNpc_140023290)(long long* pMap, long long* pOutRange, unsigned* pKey) = nullptr;
 
 // 0x140024970 - insert at the position the search found
 long long* FUN_140024970(long long* pMap, long long* pOut, unsigned* pKey) {
@@ -126,7 +125,7 @@ long long FUN_140024b20(long long* pMap, unsigned* pKey) {
     long long aEraseLast[2];  // local_58, local_50
 
     long long aRange[4];      // the two pairs as the lookup writes them: begin, then end
-    g_pfnNpc_140023290(pMap, aRange, pKey);
+    FUN_140023290(pMap, aRange, pKey);
     aBegin[0] = aRange[0];
     aBegin[1] = aRange[1];
     aEnd[0] = aRange[2];
