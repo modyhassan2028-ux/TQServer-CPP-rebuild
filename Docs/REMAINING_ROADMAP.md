@@ -1,39 +1,37 @@
+# Remaining roadmap
 
-## D128 (2026-10-30)
-أُغلق هيكل الموديول (CMsg/IModule/CModule). المتبقي في Syndicate: **IProvider**
-(0x141834928، 224 فتحة) فقط من الكلاسات الحقيقية؛ الباقي (protobuf/STL:
-ArrayInputStream, CopyingStream*, StringOutputStream, MessageLite, Closure,
-FatalException, bad_alloc…) مكتبات مغطاة ببدائلها القياسية.
+Measured from the listing itself (`Docs/reference/NpcServer_Ghidra`) against the bodies the port defines:
 
-## D129 (2026-10-30) — إقفال كلاسات Syndicate
-IProvider مغلق ⇒ لا كلاسات حقيقية متبقية في Syndicate.dll. المرحلة التالية:
-الوحدات الصغيرة (Flower, Sponsor, DetainEquip, …) من الـdecompiled + البايناري
-الجديد (بدون RTTI ⇒ الاستخراج بأنماط dtor/offset).
+| | count |
+|---|---|
+| bodies in the listing | 3,577 |
+| have a body in the port | 2,644 (73.9%) |
+| **left** | **933** |
 
-## D130 (2026-10-30)
-Flower.dll: مغلق 2/5 ملفات (msg/msgflower.cpp، msg/msglog.cpp). المتبقي:
-todayflower.cpp (CTodayFlower)، todayflowermgr.cpp (CTodayFlowerMgr)،
-flowerservice.cpp (CFlowerService)، module.cpp (flower::CModule 0x140d9bcb8).
+## What is holding the 933
 
-## D131 (2026-10-30)
-Flower.dll: 3/6 ملفات (msg/msgflower.cpp، msg/msglog.cpp، todayflowermgr.cpp).
-المتبقي: todayflower.cpp، module.cpp، flowerservice.cpp.
+| blocker | bodies | what unblocks it |
+|---|---|---|
+| waits on an unported callee | 455 | bottom-up peeling: no body is a leaf, so each pass unlocks the next layer |
+| global with no type | 185 | typing pass over `Docs/NPC_DATA_TYPING.md` (208 globals are used only by address) |
+| class missing from the RTTI table | 150 | complete the vtable table: these classes exist in the binary but not in the 1,079 harvested slots |
+| `CONCAT` intrinsics | 87 | translate each `CONCAT44(a,b)` into the shift-or it denotes; mechanical but per-site |
+| register recovery (`extraout_`) | 56 | read the register from the surrounding machine code by hand (the decompiler lost it) |
 
-## D132 (2026-10-30)
-Flower.dll: 4/6 ملفات (msg/msgflower، msg/msglog، todayflowermgr، module).
-المتبقي: todayflower.cpp، flowerservice.cpp.
+**No body left is a leaf**: every one of the 933 calls at least one other unported function, so the tail is a
+dependency web and has to be peeled from the top down rather than taken in address order.
 
-## D133 (2026-10-30)
-Flower.dll: 5/6 ملفات. المتبقي فقط بقية دوال todayflower.cpp.
-بعدها: البايناريهات الأخرى حسب الجرد الكامل في Docs/DLL_FULL_INVENTORY.md
-(48 بايناري، 128,853 دالة) — الأولوية للـDLLs متوسطة الحجم المكتملة الأطر
-(Family 2,039 · LeaveWord 1,803 · Status 1,559 · Totem 1,152 · Competion 1,088).
+## Order of attack
 
-## D163 — order of work after the family pass
+1. The RTTI table gap (~150 bodies): one tool fix, all at once.
+2. `CONCAT` (~87): a mechanical rewrite with a per-site check.
+3. The typing pass (~185 plus the shared blockers): the worksheet is already generated.
+4. Dependency peeling (the rest): each pass ports what is now unblocked, then re-measure.
+5. Register recovery (~56) last: those need the disassembly read by hand.
 
-1. Syndicate.dll families: forwarders done (126), next the destructors, the sized allocators
-   (`n*0x28`, `n*0x30`, `n*0x48`) and the `operator delete` thunks, which need those two seams.
-2. NpcServer.exe: scaffold is in place (56 paths, `Docs/NPCSERVER_PATHS.md`); port in the author's
-   sequence, `npckernel` first because 34 of the 56 paths live there.
-3. CQCrossServer.exe (19 paths), then the smaller DLLs as complete units.
-4. MsgServer.exe last: 59,977 functions, 6x Syndicate and the largest single binary in the tree.
+## Honest estimate
+
+The last three sessions moved 1,641 -> 1,669 bodies because the horizontal waves are exhausted. The four
+levers above are vertical and each is a day of work, not a batch: after them the number of remaining bodies
+should drop from 933 to the low hundreds. The final hundred are hand translations of long bodies and will take
+as long as everything above them combined.
