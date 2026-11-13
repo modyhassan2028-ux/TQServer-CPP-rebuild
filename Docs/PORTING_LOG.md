@@ -2560,3 +2560,20 @@ authority**, and any capture that cannot express a table key is a bug in the cap
 The 51 now led by `exception` are bodies that construct and throw a CRT exception object; they are the next batch and
 they are blocked by the same thing as everything else in that family - the throw sequence needs the object layout, and
 the listing only shows the writes.
+
+## D264 — the throw family, attempted, and the honest zero
+
+The 51 bodies that were declined as "exception" construct a CRT exception object and throw it. `exception` was a plain
+token in the reject list, so the first move was to stop rejecting the word and give the throw a seam:
+`log-stubs.h` now declares `g_pfnNpcCxxThrowException(void*, void*)` (`front-of-image.cpp` defines it as `nullptr`),
+and the rewrite sends `_CxxThrowException(` to it. The listing's call passes the object and the ThrowInfo blob by
+address; the seam keeps that shape and interprets neither.
+
+Result: **no change.** 1,770 before, 1,770 after. Every one of those bodies also reaches a `_DAT_` global - the
+compiler-generated blobs at the negative offsets - and the port does not carry them, so the batch simply moved from
+"declined: exception 51" to "declined: undefined 87". The seam stays, because it is the right call shape and will be
+needed the moment those blobs exist; it links and the suite is green, it just has no bodies yet.
+
+The lesson is worth writing down: removing a word from the reject list does not unblock a family if the family's real
+dependency is a global the port cannot name. `_DAT_` is the last structural hole - 87 bodies hang off it now, and it
+cannot be closed by declaring the blob opaque, because a body that does arithmetic on it would then be silently wrong.

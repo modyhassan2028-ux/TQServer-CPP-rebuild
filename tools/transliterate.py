@@ -65,7 +65,7 @@ REJECT = [
     "__fastcall", "_guard_", "in_EAX", "in_RAX", "SUB84", "SUB168", "ZEXT", "SEXT",
     "assert", "Ordinal_", "DWORD", "freeaddrinfo", "_open(", "_close(", "_read(", "_write(", "_lseek(", "_fstat64",
     "log_InlineLogWARNING", "log_InlineLogINFO", "TimeGet", "LPCRITICAL_SECTION",
-    "type_info", "_1_1_", "undefined)", "LPCSTR", "LPVOID", "HWND", "LPCVOID", "exception", "undefined ", "LPCSTR",
+    "type_info", "_1_1_", "undefined)", "LPCSTR", "LPVOID", "HWND", "LPCVOID", "undefined ", "LPCSTR",
     "va_list", "time_t", "FILE ", "(_locale_t)",
 ]
 
@@ -325,6 +325,7 @@ def rewrite_body(body):
             if not sym:
                 out = out[:j] + "\x00" + out[i + 9:]
                 return out.replace("\x00::vftable", "::vftable")
+    body = body.replace("_CxxThrowException(", "g_pfnNpcCxxThrowException(")
     body = _vtbl(body)
     for name in re.findall(r"\b([A-Z]\w* *)\*", body):
         pass

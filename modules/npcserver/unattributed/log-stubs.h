@@ -7,7 +7,11 @@
 
 namespace tq {
 
+
+// The CRT throw entry the original imports; the body passes it its object and its ThrowInfo blob by
+// address, exactly as the listing shows. Nothing here interprets either.
 extern void (*g_pfnNpcInlineLogError)(const void* pFormat, ...);
+extern void (*g_pfnNpcCxxThrowException)(void* pObject, void* pThrowInfo);
 
 unsigned char  FUN_14001bf80(void);   // line 35
 void           FUN_14001bfc0(void);   // line 36

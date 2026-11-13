@@ -52,6 +52,7 @@ struct CWinApp;
 struct HANDLE;
 struct ILogKernel;
 struct ITerrainObjInfoMgr;
+struct ThrowInfo;
 
 const void* const g_pNpcVtblTrans_1400be090 = (const void*)0x1400be090;
 const void* const g_pNpcVtblTrans_1400be3f0 = (const void*)0x1400be3f0;
