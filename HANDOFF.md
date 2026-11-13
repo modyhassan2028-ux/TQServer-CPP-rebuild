@@ -1128,7 +1128,21 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 67 suites green, six cycles. Total ported: 603 of 4099 bodies.
 - Next: `0x140025340` (the CInstanceMgr constructor/clear, 153 lines) and the rest of `0x140025xxx`, then `0x140026xxx`.
 
-## D254 (latest)
+## D255 (latest)
+
+- `modules/npcserver/unattributed/transliterated.{h,cpp}`: **1,418 bodies** copied from the listing by
+  `tools/transliterate.py` (782 linked, 636 pending behind `TQ_TRANSLIT_PENDING`). 2,511 of 4,099 decompiled bodies
+  now have source in the port.
+- The unit's accounting is exported (`g_aNpcTranslitAddr`, `g_nNpcTranslitCount/Linked/Pending`) and asserted by
+  `tests/npcserver_d255_test.cpp`. `tools/translit_loop.sh` regenerates, prunes what will not compile, and builds both
+  tiers; a declined body is recorded by address in `Docs/TRANSLIT_DENY.txt`.
+- `Docs/TRANSLIT_AVAILABLE.txt` (nm over the linked objects) and `Docs/TRANSLIT_SYMS.tsv` (demangled signatures) decide
+  what "already ported" means. Reading availability out of the runner instead of the tree is what removed a whole class
+  of duplicate-definition and signature-mismatch link errors.
+- Still declined: 577 `code *`, 298 `goto`, 162 `std::`, 128 `DAT_`, 51 vftable-not-in-table, 47 intrinsics, plus the
+  file-IO bodies that need the `_open/_read/_write/_close` shims.
+
+## D254
 
 - `small-bodies.{h,cpp}` regenerated to **290 bodies / 18 shapes** (move-a 33, move-c 22, refcount-dtor 20, identity 9,
   size-getter 9, log-clear-iter 6, zero 6, deref-get 6, ptr-add 4, move-b 4, plus the earlier families).

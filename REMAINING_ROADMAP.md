@@ -160,3 +160,15 @@
 Outstanding shapes by frequency: forwarding wrapper (10), iterator construct pair (8), vector::insert bounds (6+5),
 aligned allocate (4), memmove_s move (4), then the rest one template at a time. Extend
 `tools/gen_stl_family.py` with a new template per shape; it refuses to emit anything it cannot match exactly.
+
+## After D255
+
+The remaining 1,588 decompiled bodies are now grouped by what blocks them, in the order they should be taken:
+
+1. **code pointer bodies (577)** - need the function-pointer seams declared with the listing's own signature; the
+   transliterator already knows how to emit them once `code *` is expressible as a typed pointer.
+2. **goto bodies (298)** - the `goto` is a loop the decompiler flattened; these need reading, not translating.
+3. **DAT_ bodies (128)** - blocked on the data wave: the globals must be defined (address, width, type) before a body
+   that touches them can mean anything.
+4. **file-IO bodies** - blocked on `_open/_read/_write/_close` shims.
+5. **vftable-not-in-table (51), intrinsics (47), std:: (162)** - small, hand batches.

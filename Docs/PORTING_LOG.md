@@ -2348,3 +2348,34 @@ A note on the generator itself: `defined_bodies()` must skip `small-bodies.cpp` 
 the next run sees its own output and generates nothing. That bug cost a run and is now guarded in the code.
 
 68 suites green, six cycles.
+
+## D255 — the transliterator: 1,418 bodies in one wave
+
+The shape generator had run dry (every small leaf body was already in). What was left is the interior of the call
+graph, which defeated shape matching because the shapes are many and shallow. So the unit is now produced by a
+**transliterator** instead: it copies each body from the listing after a fixed substitution table, and never invents
+logic. `tools/transliterate.py` documents every rule it applies:
+
+1. **type names** - `undefined8`/`longlong`/`uint`/... become their C equivalents.
+2. **class names** - a class the unit does not define gets `struct Foo;`, and a body that uses one *by value* is
+   declined, since only a pointer can be forwarded.
+3. **vftable** - `Foo::vftable` becomes the address RTTI records for `Foo` (`Docs/VTABLE_SLOTS.tsv`); a class with no
+   row is declined rather than approximated.
+4. **void promotion** - a body the listing types `void` whose callers read the result is declared to return one
+   (the rule D201 established). A call that fills a whole statement is a discard and is not promoted.
+5. **tiers** - `linked` when the whole call graph is already in the linked objects; `pending` when a callee has not
+   landed, in which case the body compiles behind `TQ_TRANSLIT_PENDING` and is not linked into the tests yet.
+   Pending-ness propagates up the callers, so a linked body can never call a missing symbol.
+
+What the symbol table decides, not a guess: `docs/TRANSLIT_AVAILABLE.txt` is `nm` over exactly the objects the suite
+links, and `Docs/TRANSLIT_SYMS.tsv` carries their demangled signatures, so a call site written from the listing still
+matches the ported definition (the listing's `uint *` versus the port's `undefined8 *` was a real mismatch that this
+fixed).
+
+Result: **1,418 bodies** (782 linked, 636 pending), and 2,511 of the 4,099 decompiled bodies now have source here.
+Declined and reported, never approximated: 577 `code *` function-pointer bodies, 298 with `goto`, 162 `std::`,
+128 that touch `DAT_` globals, 51 whose vftable is not in the RTTI table, 47 `CONCAT`/`SUB` intrinsics, and the
+file-IO bodies waiting on the CRT shims.
+
+The unit is held to its own account: `tests/npcserver_d255_test.cpp` asserts the counts, that every address is inside
+the image, that the table is sorted and that no address appears twice. 69 suites green, six cycles.
