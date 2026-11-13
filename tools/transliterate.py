@@ -88,6 +88,18 @@ def load_typed_globals(raw):
     return set(re.findall(r"extern const (?:char|unsigned char) (DAT_[0-9a-f]{9})\[", raw))
 
 
+def blob_globals():
+    """Globals whose real bytes the port carries (`npc-underscore-data.h`): address or storage, both are faithful."""
+    try:
+        return set(re.findall(r"\b(_?DAT_[0-9a-f]{9})\b",
+                              open("modules/npcserver/unattributed/npc-underscore-data.h", errors="ignore").read()))
+    except FileNotFoundError:
+        return set()
+
+
+BLOB_GLOBALS = set()
+
+
 def body_globals_ok(body, typed):
     """A body may touch a global only if it is typed and only by address.
 
@@ -98,6 +110,8 @@ def body_globals_ok(body, typed):
         name = m.group(0)
         if name not in typed:
             return False, "global not typed"
+        if name in BLOB_GLOBALS:
+            continue
         before = body[:m.start()].rstrip()
         # A `_DAT_` symbol is carried as its real bytes, so a body that stores through it is writing to a faithful copy
         # of the original cell and the width comes from the body's own expression. A plain `DAT_` string constant has

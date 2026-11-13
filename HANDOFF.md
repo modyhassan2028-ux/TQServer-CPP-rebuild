@@ -1128,7 +1128,14 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 67 suites green, six cycles. Total ported: 603 of 4099 bodies.
 - Next: `0x140025340` (the CInstanceMgr constructor/clear, 153 lines) and the rest of `0x140025xxx`, then `0x140026xxx`.
 
-## D274 (latest)
+## D275 (latest)
+
+- **Build fix**: `npc-underscore-data.cpp` was missing from `run_npcserver_suites.sh`, so every `DAT_`/`_DAT_` body died
+  at link and was pruned. Now compiled and linked (`/tmp/npcsrv/blob.o`).
+- `tools/emit_data_blobs.py`: 85 new `DAT_` blobs cut from the image (214 referenced, 129 already carried).
+- Standing: **1,804 bodies** (1,110 linked, 694 pending). 69 suites green, six cycles.
+
+## D274
 
 - `npc-crt-seams.h`: `_invalid_parameter_noinfo`, `__security_check_cookie`, `LOCK`, `UNLOCK` as seams; `basic_string<...>`
   spelled `std::string`.

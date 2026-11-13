@@ -2769,3 +2769,19 @@ under another name, so the bodies that declare it are no longer rejected on a sp
 Neither moved the total much, and the reason is now visible in the census: the `basic_string` bodies that came through
 walked straight into `callee has no usable declaration`. `Docs/REMAINING_BODIES.md` is rewritten from that census - 800
 bodies left, grouped by what holds each one, with the three decisions that gate the rest.
+
+## D275 — the blobs existed but were never linked, and 85 more were cut
+
+`npc-underscore-data.cpp` was written two units ago and was **not in the test build**: `run_npcserver_suites.sh` compiles
+a fixed object list, and the blob file was not on it. So every body that touched a `_DAT_` symbol failed at *link* time
+and was pruned, which is why that unit and the one after it both measured zero gain. That was my error, twice, and it
+was invisible because the compile step is what the deny loop sees.
+
+Now fixed, and the tool extended: `tools/emit_data_blobs.py` cuts **every `DAT_<addr>`** the listing still needs out of
+`NpcServer.exe` (214 referenced, 129 already carried, **85 new blobs**, 32 bytes each, real contents). A symbol in
+`npc-underscore-data.h` is now allowed both by address and by storage in `body_globals_ok`, because the bytes are the
+original ones.
+
+    1,797 -> **1,804 bodies** (1,110 linked, 694 pending)     69 suites green, six cycles
+
+Small in bodies, large in kind: the data half of the last wave is no longer blocked on a build omission.

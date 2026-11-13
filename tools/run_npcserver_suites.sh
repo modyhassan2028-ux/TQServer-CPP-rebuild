@@ -21,6 +21,7 @@ g++ -std=c++17 $SAN $INC -c modules/npcserver/unattributed/vector-accessors.cpp 
 g++ -std=c++17 $SAN $INC -c modules/npcserver/unattributed/tree-links.cpp -o /tmp/npcsrv/tlink.o
 g++ -std=c++17 $SAN -fpermissive $INC -c modules/npcserver/unattributed/transliterated.cpp -o /tmp/npcsrv/translit.o
 g++ -std=c++17 $SAN $INC -c modules/npcserver/unattributed/npc-data.cpp -o /tmp/npcsrv/npcdata.o
+g++ -std=c++17 $SAN $INC -c modules/npcserver/unattributed/npc-underscore-data.cpp -o /tmp/npcsrv/blob.o
 g++ -std=c++17 $SAN $INC -c modules/npcserver/unattributed/tree-erase.cpp -o /tmp/npcsrv/terase.o
 g++ -std=c++17 $SAN $INC -c modules/npcserver/unattributed/tree-erase-range.cpp -o /tmp/npcsrv/terange.o
 g++ -std=c++17 $SAN $INC -c modules/npcserver/unattributed/cinstance.cpp -o /tmp/npcsrv/cinst.o
@@ -34,7 +35,7 @@ g++ -std=c++17 $SAN $INC -c modules/npcserver/src/version/cqserver-78.0.11-1204/
 for t in tests/npcserver_d*_test.cpp; do
     name=$(basename "$t" _test.cpp)
     g++ -std=c++17 $SAN $INC -c "$t" -o /tmp/npcsrv/$name.o
-    g++ -std=c++17 $SAN /tmp/npcsrv/$name.o /tmp/npcsrv/front.o /tmp/npcsrv/stl.o /tmp/npcsrv/iter.o /tmp/npcsrv/shapes.o /tmp/npcsrv/refs.o /tmp/npcsrv/tail.o /tmp/npcsrv/global.o /tmp/npcsrv/logstub.o /tmp/npcsrv/logget.o /tmp/npcsrv/cont.o /tmp/npcsrv/cnode.o /tmp/npcsrv/maptree.o /tmp/npcsrv/vacc.o /tmp/npcsrv/tlink.o /tmp/npcsrv/terase.o /tmp/npcsrv/terange.o /tmp/npcsrv/cinst.o /tmp/npcsrv/cminst.o /tmp/npcsrv/mins.o /tmp/npcsrv/msing.o /tmp/npcsrv/tins.o /tmp/npcsrv/cim.o /tmp/npcsrv/small.o /tmp/npcsrv/data.o /tmp/npcsrv/translit.o /tmp/npcsrv/npcdata.o -o /tmp/npcsrv/$name
+    g++ -std=c++17 $SAN /tmp/npcsrv/$name.o /tmp/npcsrv/front.o /tmp/npcsrv/stl.o /tmp/npcsrv/iter.o /tmp/npcsrv/shapes.o /tmp/npcsrv/refs.o /tmp/npcsrv/tail.o /tmp/npcsrv/global.o /tmp/npcsrv/logstub.o /tmp/npcsrv/logget.o /tmp/npcsrv/cont.o /tmp/npcsrv/cnode.o /tmp/npcsrv/maptree.o /tmp/npcsrv/vacc.o /tmp/npcsrv/tlink.o /tmp/npcsrv/terase.o /tmp/npcsrv/terange.o /tmp/npcsrv/cinst.o /tmp/npcsrv/cminst.o /tmp/npcsrv/mins.o /tmp/npcsrv/msing.o /tmp/npcsrv/tins.o /tmp/npcsrv/cim.o /tmp/npcsrv/small.o /tmp/npcsrv/data.o /tmp/npcsrv/translit.o /tmp/npcsrv/npcdata.o /tmp/npcsrv/blob.o -o /tmp/npcsrv/$name
 done
 cycle=1
 while [ $cycle -le 6 ]; do
