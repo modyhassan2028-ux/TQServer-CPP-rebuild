@@ -1128,7 +1128,17 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 67 suites green, six cycles. Total ported: 603 of 4099 bodies.
 - Next: `0x140025340` (the CInstanceMgr constructor/clear, 153 lines) and the rest of `0x140025xxx`, then `0x140026xxx`.
 
-## D258 (latest)
+## D259 (latest)
+
+- `Docs/NPC_DATA_TYPING.md` (from `tools/type_worksheet.py`): the evidence for all 214 globals - mentions, casts,
+  callers-by-address, image bytes. **208 of 214 are used only by address**, so a width cannot be derived from use.
+- Three consumers dominate: log format strings (317 bodies, `DAT_1400be0b0`), `_CxxThrowException` ThrowInfo blobs
+  (77 + 39 + 15 bodies), and data tables (`DAT_140103510`, 106 bodies, 4-byte entries).
+- Guard added: a body touching a global must have it typed in `npc-data.h` and must only take its address.
+  `log_InlineLogERROR` now routes to `::tq::g_pfnNpcInlineLogError`; `WARNING`/`INFO` stay rejected (no seam yet).
+- Standing count: **1,641 bodies** (994 linked, 647 pending). 69 suites green, six cycles.
+
+## D258
 
 - `rewrite_std_string()` in `tools/transliterate.py` maps the demangled `basic_string` instantiation onto the port's own
   `std::string` (members, `begin/end`, dtor, placement ctor, and the four operators). Unlisted members stay declined.

@@ -54,11 +54,13 @@ def main():
             missing.append(name)
             continue
         nul = blob.find(b"\x00")
-        printable = nul > 0 and all(32 <= b < 127 or b in (9, 10, 13) for b in blob[:nul])
-        if printable and nul <= 200:
-            text = blob[:nul].decode("ascii")
-            esc = text.replace("\\", "\\\\").replace('"', '\\"')
-            out_c.append('extern const char %s[%d] = "%s";' % (name, nul + 1, esc))
+        # a string is a run of bytes with no control character in it (high bytes included: this server logs in Korean),
+        # terminated by a NUL inside a plausible length
+        printable = nul > 0 and all(b >= 0x20 or b in (9, 10, 13) for b in blob[:nul])
+        if printable and nul <= 512:
+            chunk = read(data, base, secs, va, nul + 1)
+            bytes_txt = ", ".join("(char)0x%02x" % b for b in chunk)
+            out_c.append("extern const char %s[%d] = { %s };" % (name, nul + 1, bytes_txt))
             out_h.append("extern const char %s[%d];" % (name, nul + 1))
             strings += 1
             continue

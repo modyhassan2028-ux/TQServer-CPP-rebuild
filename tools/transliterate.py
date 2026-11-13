@@ -17,6 +17,7 @@ A body that uses anything the tables cannot express is declined and reported, ne
 
 Sections are marked //@START <addr> / //@END so a build loop can drop one body without touching its neighbours.
 """
+import os
 import re
 import sys
 
@@ -56,20 +57,51 @@ CRT = {
     "strcmp": ("int", "const char* pA, const char* pB", "return ::strcmp(pA, pB);"),
     "_invalid_parameter_noinfo": ("void", "void", "g_pfnNpcInvalidParameter();"),
     "__security_check_cookie": ("void", "unsigned long long nCookie", "(void)nCookie;"),
-    "log_InlineLogERROR": ("void", "const void* pMsg, ...", "(void)pMsg;"),
+
 }
 
 REJECT = [
     "switch", "unaff_", "in_stack_", "extraout_", "__thiscall",
-    "__fastcall", "DAT_", "_guard_", "in_EAX", "in_RAX", "CONCAT", "SUB84", "SUB168", "ZEXT", "SEXT",
+    "__fastcall", "_guard_", "in_EAX", "in_RAX", "CONCAT", "SUB84", "SUB168", "ZEXT", "SEXT",
     "assert", "Ordinal_", "DWORD", "freeaddrinfo", "_open(", "_close(", "_read(", "_write(", "_lseek(", "_fstat64",
     "log_InlineLogWARNING", "log_InlineLogINFO", "TimeGet", "LPCRITICAL_SECTION",
     "type_info", "_1_1_", "undefined)", "LPCSTR", "LPVOID", "HWND", "LPCVOID", "exception", "undefined ", "LPCSTR",
     "va_list", "time_t", "FILE ", "(_locale_t)",
 ]
 
+TYPED_GLOBALS = set()
 VTABLE = {}
+_H = "modules/npcserver/unattributed/npc-data.h"
+TYPED = set()
+
+
+def typed_globals():
+    global TYPED
+    if not TYPED and os.path.exists(_H):
+        TYPED = load_typed_globals(open(_H).read())
+    return TYPED
 CLASSES = set()
+
+
+def load_typed_globals(raw):
+    """The globals npc-data.h actually carries, with the bytes cut from the image."""
+    return set(re.findall(r"extern const (?:char|unsigned char) (DAT_[0-9a-f]{9})\[", raw))
+
+
+def body_globals_ok(body, typed):
+    """A body may touch a global only if it is typed and only by address.
+
+    A string constant is passed as &DAT_x; a body that stores through it, or adds to it, is treating it as a variable
+    of unknown width - that is the data wave still open, so the body waits instead of being approximated.
+    """
+    for m in re.finditer(r"\bDAT_([0-9a-f]{9})\b", body):
+        name = "DAT_" + m.group(1)
+        if name not in typed:
+            return False, "global not typed"
+        before = body[:m.start()].rstrip()
+        if not before.endswith("&"):
+            return False, "global used as storage"
+    return True, ""
 
 
 def normalise(name):
@@ -304,6 +336,7 @@ def main():
     lines.append("#include <string>")
     lines.append("#include <new>")
     lines.append("#include \"npc-data.h\"")
+    lines.append("#include \"log-stubs.h\"")
     lines.append("")
     lines.append("namespace tq {")
     lines.append("// An indirect call the listing types `code *`. The template fixes the arity from the call site, so every")

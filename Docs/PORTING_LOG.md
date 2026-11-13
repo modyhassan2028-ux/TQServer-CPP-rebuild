@@ -2444,3 +2444,36 @@ reconstruct. The std:: calls were the *visible* defect of bodies that also read 
 So the standing number is **1,645 bodies** (996 linked, 649 pending); the 1,738 recorded in D257 was a pre-prune count and
 is corrected here. The rewrite stays: it removes a whole category of noise from every future measurement, and the
 decline report now points at the real blockers instead of at the standard library.
+
+## D259 — the typing worksheet, and what it says about the wall
+
+`tools/type_worksheet.py` writes `Docs/NPC_DATA_TYPING.md`: for each of the 214 globals, how many bodies mention it,
+every cast the listing applies straight to it, every callee it is handed to by address, and the raw bytes at its
+address. It decides nothing; it puts the evidence in one place so a type can be decided instead of guessed.
+
+What it shows is a sharper wall than D257 assumed:
+
+    208 of 214 globals are used ONLY by address      (6 have a cast anywhere in the image)
+    317 bodies  DAT_1400be0b0  -> log_InlineLogERROR x377   bytes are '%%s(%%s) in %%s, %%d' (Korean quotes)
+     77 bodies  DAT_1400fed18  -> _CxxThrowException x77    ThrowInfo blob, unmapped to a ported CRT path
+     39 bodies  DAT_1400fee30  -> _CxxThrowException x39
+    106 bodies  DAT_140103510  -> no callee, 4-byte table
+     16 bodies  DAT_140104d10  -> a call table of 4-byte RVAs
+
+So the data wave is not "some globals need widths". The three biggest consumers of `DAT_` are (a) log format strings
+whose call seam exists, (b) MSVC ThrowInfo blobs that need `_CxxThrowException` before they mean anything, and (c) data
+tables indexed elsewhere. Only (a) is reachable today, which is why the log seam was wired next.
+
+Two changes landed with the measurement, and both cost bodies instead of adding them - deliberately:
+
+- `body_globals_ok()` now accepts a body that touches a global only if the global is typed in `npc-data.h` **and** the
+  body only takes its address. A body that stores through `DAT_x` is treating it as a variable of unknown width,
+  which is the open wave, so it waits. Four bodies that compiled before are now declined; they were compiling against
+  a definition whose width nothing established.
+- `log_InlineLogERROR(fmt, ...)` routes to the port's own seam, `::tq::g_pfnNpcInlineLogError`, the same pointer the
+  hand-ported bodies call and the tests hook. `WARNING`/`INFO` stay rejected: the port has no seam for them yet, and a
+  call to a seam that does not exist would be a guess dressed as a port.
+
+Standing number: **1,641 bodies** (994 linked, 647 pending). 69 suites green, six cycles. The next real step is not
+another rewrite: it is typing the 208 address-only globals from the worksheet, starting with the log strings (317
+bodies) and then the ThrowInfo blobs (116 bodies) once `_CxxThrowException` has a ported path.
