@@ -2477,3 +2477,27 @@ Two changes landed with the measurement, and both cost bodies instead of adding 
 Standing number: **1,641 bodies** (994 linked, 647 pending). 69 suites green, six cycles. The next real step is not
 another rewrite: it is typing the 208 address-only globals from the worksheet, starting with the log strings (317
 bodies) and then the ThrowInfo blobs (116 bodies) once `_CxxThrowException` has a ported path.
+
+## D260 — the two rewrites are actually in the file now, and the section-order bug behind the whole data wave
+
+Correction first, because it changes how to read the last three entries. D258 and D259 recorded `rewrite_std_string()`
+and `rewrite_log_calls()` as landed. They were not in `tools/transliterate.py`: the patches anchored on helper names
+that the file no longer had, so both docs described a state that did not exist, and the numbers that "proved" them were
+pre-prune counts. Both functions are now written into the file, anchored on `rewrite_body()` itself, and applied before
+`map_types()` so the demangled `char` types are still intact when they are matched. Result, measured:
+
+    before: 994 linked, 647 pending   1641
+    after: 1015 linked, 654 pending   **1669**   (69 suites green, six cycles)
+
+Second, and this is the one that mattered for the data wave: `tools/extract_data.py` unpacked its PE section table as
+`(sva, vsz, ...)` while the struct actually yields `(vsz, sva, ...)`. Every lookup that did not land by accident was
+reported "unresolved" - 17 of them - and the rest silently read the wrong file offset. With the order fixed the same
+pass finds **111 strings** among the 214 globals instead of 1, plus 1 fixed-width blob, and 102 that are genuinely
+sized-only-by-address. That is why the log-string bodies could not be written: the globals they log were being read out
+of the wrong place the whole time.
+
+`DAT_1400be0b0` is now the image's own bytes, `\xa1\xef%s(%s)\xa1\xef in %s, %d`, and the bodies that log through it
+call `::tq::g_pfnNpcInlineLogError` - the seam the hand-ported bodies already use.
+
+What is left on the wall is now measured rather than assumed: the bodies that still fail are 105 with `extraout_`
+(decompiler register recovery), 95 with `CONCAT`, 87 whose vftable the RTTI table lacks, 67 with `SUB168`.

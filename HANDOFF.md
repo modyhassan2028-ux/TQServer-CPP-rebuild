@@ -1128,7 +1128,17 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 67 suites green, six cycles. Total ported: 603 of 4099 bodies.
 - Next: `0x140025340` (the CInstanceMgr constructor/clear, 153 lines) and the rest of `0x140025xxx`, then `0x140026xxx`.
 
-## D259 (latest)
+## D260 (latest)
+
+- Correction: `rewrite_std_string()` and `rewrite_log_calls()` were documented in D258/D259 but were **not** in
+  `tools/transliterate.py` (patches anchored on names the file no longer had). They are in now, applied before
+  `map_types()`. Measured effect: 1,641 -> **1,669 bodies** (1,015 linked, 654 pending).
+- `tools/extract_data.py` had its PE section fields swapped; fixed, the same pass now resolves **111 strings** of the
+  214 globals instead of 1 (102 remain address-only). Log-string bodies log through `::tq::g_pfnNpcInlineLogError`.
+- Remaining top blockers, measured: `extraout_` 105, `CONCAT` 95, vftable-not-in-table 87, `SUB168` 67.
+- 69 suites green, six cycles.
+
+## D259
 
 - `Docs/NPC_DATA_TYPING.md` (from `tools/type_worksheet.py`): the evidence for all 214 globals - mentions, casts,
   callers-by-address, image bytes. **208 of 214 are used only by address**, so a width cannot be derived from use.

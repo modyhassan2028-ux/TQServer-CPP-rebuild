@@ -24,7 +24,7 @@ def sections():
 
 def read(data, base, secs, va, n):
     rva = va - base
-    for sva, vsz, rsz, rptr in secs:
+    for vsz, sva, rsz, rptr in secs:
         if sva <= rva < sva + max(vsz, rsz):
             fo = rptr + (rva - sva)
             return data[fo:fo + n]

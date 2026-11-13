@@ -183,7 +183,117 @@ def signature(name, ret, args, promote):
     return "%s %s(%s)" % (ret_c, name, ", ".join(params) if params else "void")
 
 
+
+# ---------------------------------------------------------------------------------------------------------------
+# Two call shapes the listing writes that the port already has an answer for. Both rewrites are mechanical: they
+# change the spelling of the call, never its arguments.
+# ---------------------------------------------------------------------------------------------------------------
+STD_STR = "std::basic_string<char,struct_std::char_traits<char>,class_std::allocator<char>_>::"
+STD_MEMBERS = {"size", "length", "data", "c_str", "clear", "empty", "append", "assign", "resize", "find", "rfind",
+               "substr", "compare", "push_back", "capacity", "reserve", "insert", "erase", "replace", "pop_back"}
+
+
+def _paren(text, i):
+    depth = 0
+    while i < len(text):
+        if text[i] == "(":
+            depth += 1
+        elif text[i] == ")":
+            depth -= 1
+            if depth == 0:
+                return i
+        i += 1
+    return -1
+
+
+def _args(text):
+    out, depth, cur = [], 0, ""
+    for ch in text:
+        if ch == "(":
+            depth += 1
+        elif ch == ")":
+            depth -= 1
+        if ch == "," and depth == 0:
+            out.append(cur.strip())
+            cur = ""
+        else:
+            cur += ch
+    if cur.strip():
+        out.append(cur.strip())
+    return out
+
+
+def rewrite_log_calls(text):
+    """log_InlineLogERROR(...) is the port's own seam, the pointer the hand-ported bodies call and the tests hook."""
+    return re.sub(r"\blog_InlineLogERROR\s*\(", "::tq::g_pfnNpcInlineLogError(", text)
+
+
+def rewrite_std_string(text):
+    out, i = [], 0
+    while True:
+        k = text.find(STD_STR, i)
+        if k < 0:
+            out.append(text[i:])
+            return "".join(out)
+        out.append(text[i:k])
+        j = k + len(STD_STR)
+        m = re.match(r"~?[A-Za-z_][A-Za-z0-9_]*|operator\s*[=!+\[\]]+", text[j:])
+        if not m:
+            out.append(STD_STR)
+            i = j
+            continue
+        name = m.group(0).strip()
+        j += m.end()
+        if j < len(text) and text[j] == "<":
+            depth = 0
+            while j < len(text):
+                if text[j] == "<":
+                    depth += 1
+                elif text[j] == ">":
+                    depth -= 1
+                    if depth == 0:
+                        j += 1
+                        break
+                j += 1
+        if j >= len(text) or text[j] != "(":
+            out.append(text[k:j])
+            i = j
+            continue
+        e = _paren(text, j)
+        if e < 0:
+            out.append(text[k:])
+            return "".join(out)
+        a = _args(text[j + 1:e])
+        first = a[0] if a else "0"
+        rest = a[1:]
+        dst = "(*((std::string *)(%s)))" % first
+        if name == "~basic_string":
+            rep = "((std::string *)(%s))->~basic_string()" % first
+        elif name in STD_MEMBERS:
+            rep = "((std::string *)(%s))->%s(%s)" % (first, name, ", ".join(rest))
+        elif name == "begin":
+            rep = "((std::string *)(%s))->data()" % first
+        elif name == "end":
+            rep = "((std::string *)(%s))->data() + ((std::string *)(%s))->size()" % (first, first)
+        elif name == "basic_string":
+            rep = "::new ((void *)(%s)) std::string(%s)" % (first, ", ".join(rest))
+        elif name == "operator=":
+            rep = "%s = *((std::string *)(%s))" % (dst, rest[0]) if rest else "%s.clear()" % first
+        elif name in ("operator==", "operator!=", "operator+", "operator<"):
+            rep = "%s %s *((std::string *)(%s))" % (dst, name[8:], rest[0])
+        elif name == "operator[]":
+            rep = "%s[%s]" % (dst, rest[0])
+        else:
+            out.append(text[k:j])
+            i = j
+            continue
+        out.append(rep)
+        i = e + 1
+
+
 def rewrite_body(body):
+    body = rewrite_log_calls(body)
+    body = rewrite_std_string(body)
     body = rename_params(map_types(body))
     body = re.sub(r"\b([A-Z]\w*)::vftable\b",
                   lambda m: ("g_pNpcVtblTrans_%x" % VTABLE[normalise(m.group(1))])
@@ -333,6 +443,10 @@ def main():
     lines.append("// not landed yet and is built only for a syntax check until then.")
     lines.append("#include <cstddef>")
     lines.append("#include <cstdio>")
+    lines.append("#include <string>")
+    lines.append("#include <new>")
+    lines.append("#include \"npc-data.h\"")
+    lines.append("#include \"log-stubs.h\"")
     lines.append("#include <string>")
     lines.append("#include <new>")
     lines.append("#include \"npc-data.h\"")
