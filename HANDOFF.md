@@ -1128,7 +1128,16 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 67 suites green, six cycles. Total ported: 603 of 4099 bodies.
 - Next: `0x140025340` (the CInstanceMgr constructor/clear, 153 lines) and the rest of `0x140025xxx`, then `0x140026xxx`.
 
-## D264 (latest)
+## D265 (latest)
+
+- `tools/emit_underscore_data.py` cuts the 20 `_DAT_` blobs out of `NpcServer.exe` (PE-mapped, 32 bytes each, exact
+  bytes) into `npc-underscore-data.{h,cpp}`.
+- `body_globals_ok` now applies the address-only rule to the `_DAT_` spelling too; storage users are declined instead
+  of silently approximated.
+- Net **0** (1,770). The 87 declined bodies are blocked by the bare Ghidra `undefined` type, not by missing globals.
+- Standing count: **1,770 bodies** (1,090 linked, 680 pending). 69 suites green, six cycles.
+
+## D264
 
 - Throw family attempted: `g_pfnNpcCxxThrowException` seam declared (`log-stubs.h`) and defined
   (`front-of-image.cpp`), `_CxxThrowException(` rewritten to it, `exception` removed from the reject list.

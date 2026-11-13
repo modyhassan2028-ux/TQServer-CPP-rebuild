@@ -2577,3 +2577,19 @@ needed the moment those blobs exist; it links and the suite is green, it just ha
 The lesson is worth writing down: removing a word from the reject list does not unblock a family if the family's real
 dependency is a global the port cannot name. `_DAT_` is the last structural hole - 87 bodies hang off it now, and it
 cannot be closed by declaring the blob opaque, because a body that does arithmetic on it would then be silently wrong.
+
+## D265 — the `_DAT_` blobs, cut from the image, and what the family actually wanted
+
+The 87 bodies led by "undefined" were assumed to be waiting on `_DAT_` globals. Most of that turned out to be wrong,
+but the blobs were cut anyway because cutting them is the only honest way to carry them: `tools/emit_underscore_data.py`
+reads `NpcServer.exe`, resolves each `_DAT_<addr>` through the PE section table and writes
+`modules/npcserver/unattributed/npc-underscore-data.{h,cpp}` - 32 bytes per symbol, the exact bytes at that address,
+exported as `extern "C" const unsigned char`. Twenty symbols, nothing interpreted.
+
+The same address-only rule now covers the underscore spelling: `body_globals_ok` matches `\b_?DAT_(...)` and refuses a
+body that stores through the symbol instead of passing its address. That is what turned the first attempt's 489 compile
+errors into a clean pending tier - the bodies that assign to a `_DAT_` are storage users and wait.
+
+Net: **1,770 bodies, unchanged.** The blobs are not what the 87 are missing. What they are missing is the bare Ghidra
+`undefined` type - a value of no width - and no declaration can honestly stand in for that. So the number stays where it
+is, and the blobs wait in the tree for the batch that needs them.

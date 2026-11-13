@@ -7,6 +7,7 @@
 #include <string>
 #include <new>
 #include "npc-data.h"
+#include "npc-underscore-data.h"
 #include "log-stubs.h"
 #include "npc-concat.h"
 #include <string>

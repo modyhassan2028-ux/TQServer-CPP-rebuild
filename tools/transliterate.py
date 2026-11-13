@@ -94,8 +94,8 @@ def body_globals_ok(body, typed):
     A string constant is passed as &DAT_x; a body that stores through it, or adds to it, is treating it as a variable
     of unknown width - that is the data wave still open, so the body waits instead of being approximated.
     """
-    for m in re.finditer(r"\bDAT_([0-9a-f]{9})\b", body):
-        name = "DAT_" + m.group(1)
+    for m in re.finditer(r"\b_?DAT_([0-9a-f]{9})\b", body):
+        name = m.group(0)
         if name not in typed:
             return False, "global not typed"
         before = body[:m.start()].rstrip()
@@ -475,6 +475,7 @@ def main():
     lines.append("#include <string>")
     lines.append("#include <new>")
     lines.append("#include \"npc-data.h\"")
+    lines.append("#include \"npc-underscore-data.h\"")
     lines.append("#include \"log-stubs.h\"")
     lines.append("#include \"npc-concat.h\"")
     lines.append("#include <string>")
