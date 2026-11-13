@@ -1127,3 +1127,15 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - CInstanceMgr keeps two maps: records at `+8` (head `+0x38`) and live instances at `+0x48` (head `+0x78`).
 - 67 suites green, six cycles. Total ported: 603 of 4099 bodies.
 - Next: `0x140025340` (the CInstanceMgr constructor/clear, 153 lines) and the rest of `0x140025xxx`, then `0x140026xxx`.
+
+## D252 (latest)
+
+- `tools/gen_small_bodies.py` + `Docs/` batch: **123 generated bodies** in `small-bodies.{h,cpp}` (53 iterator compares,
+  41 field getters, 22 empty bodies, 2 range predicates, 2 module-base getters, 2 stores, 1 compare), all driven from
+  `g_aNpcSmallBody` by `tests/npcserver_d252_test.cpp`.
+- **Count corrected:** the denominator is **7239** distinct functions (the listing and `index.tsv` agree; all status
+  `ok`), not 4099. `tools/count_bodies.py` prints the live numbers: 922 defined bodies (12.7%), 586 manifest entries.
+  The 336 bodies older than the manifest pattern are inside that 922 and are covered by their earlier suites only.
+- 68 suites green, six cycles.
+- Next: keep the generator running over the remaining recognised shapes, and hand-port the big families it refuses
+  (`memmove_s` wrappers, `_Ref_count` destructors, iterator assigns).

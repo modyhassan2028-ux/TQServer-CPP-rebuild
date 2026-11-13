@@ -2270,3 +2270,40 @@ The D251 suite runs both trees: the lookup hit and miss, the record missing, the
 deleting destructor ran, the node freed, the tree empty).
 
 67 suites green, six cycles. Total ported: 603 of 4099 bodies.
+
+## D252 — 123 generated small bodies, and a correction to the count
+
+`tools/gen_small_bodies.py` now generates every body whose shape is a single mechanical expression, and
+`modules/npcserver/unattributed/small-bodies.{h,cpp}` carries the batch with manifest `g_aNpcSmallBody`. The original
+expression is kept in the comment above each body, and the manifest carries the shape (width, offset, comparison kind)
+so the suite drives all 123 entries:
+
+| shape | count | body |
+|---|---|---|
+| `iter-cmp` | 53 | `if ((*p1 == 0) \|\| (*p1 != *p2)) invalid; return p1[1] == / != p2[1];` |
+| `get-offset` | 41 | `return *(T *)(param_1 + 0xNN);` |
+| `noop` | 22 | `return;` |
+| `range` | 2 | `return param_1 - 0xNNU < WIDTH;` |
+| `get-base` | 2 | `return *(T *)(DAT_1401045b8 + 0xNN);` |
+| `set-deref` | 2 | `*param_1 = param_2;` |
+| `compare` | 1 | `return *param_1 == *param_2;` |
+
+Anything the generator does not recognise verbatim is skipped, so a batch can never contain a guess.
+
+**The count correction.** The project has been quoting `4099` as the denominator. It came from an early partial
+inventory; the listing and `NpcServer.exe.index.tsv` both carry **7239** distinct function addresses, all with status
+`ok`. `tools/count_bodies.py` now derives the numbers from the listing itself:
+
+```
+total functions : 7239
+defined bodies  : 922   (12.7%)   <- was reported as 603 before this batch
+manifest entries: 586
+remaining       : 6317
+```
+
+Two honest notes about that: the defined figure (922) counts every `FUN_` definition in `modules/npcserver`, including
+the 336 bodies that were ported before the manifest pattern existed and are covered only by their older suites; and the
+per-batch "total ported" lines earlier in this file are on the old denominator, so they understate the count by the same
+margin. Every line from here uses 7239.
+
+68 suites green, six cycles.
