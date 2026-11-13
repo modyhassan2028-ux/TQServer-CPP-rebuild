@@ -2659,3 +2659,20 @@ decision rather than a template. The other four (`undefined` widths, `DAT_` stor
 are now readable line by line.
 
 Nothing was guessed to produce this file: it is the image's own bytes, decoded.
+
+## D270 — the tq imports, decoded from their own mangled names
+
+`TimeGet` was on the reject list, and the listing does not write it bare - it writes `tq::TimeGet(0)`, because Ghidra
+resolved the import. The port had no declaration for it, so every body that reads the clock waited.
+
+The import table has the answer, spelled exactly: `?TimeGet@tq@@YAKH@Z` is `unsigned long __cdecl tq::TimeGet(int)`,
+`?SysTimeGet@tq@@YAKXZ` is `unsigned long __cdecl tq::SysTimeGet(void)`, `?IsTimeRange@tq@@YA_NKK_J@Z` is
+`bool __cdecl(unsigned long, unsigned long, __int64)`, `?DateTime@tq@@YAXPEAD_J@Z` is `void __cdecl(char*, __int64)`.
+`npc-tq-imports.h` carries all four, and the bodies are seams - `g_pfnTimeGet` and friends, inline variables defaulting
+to null - because the real bodies live in the tq DLL that this port does not contain. A first attempt defined the hooks
+in `front-of-image.cpp` and failed to link where that object is not part of the suite; C++17 inline variables fixed it.
+
+    1,781 -> **1,793 bodies** (1,102 linked, 691 pending)     69 suites green, six cycles
+
+Also worth recording: `194 of the 467 imports are by ordinal` (`dll!#54`), and an ordinal carries no signature at all.
+Those bodies stay shut until the exporting DLL is in hand - that is the one thing still missing that I cannot derive.

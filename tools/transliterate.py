@@ -64,7 +64,7 @@ REJECT = [
     "switch", "unaff_", "in_stack_", "extraout_", "__thiscall",
     "__fastcall", "_guard_", "in_EAX", "in_RAX", "SUB84", "SUB168", "ZEXT", "SEXT",
     "assert", "Ordinal_", "freeaddrinfo", "_open(", "_close(", "_read(", "_write(", "_lseek(", "_fstat64",
-    "log_InlineLogWARNING", "log_InlineLogINFO", "TimeGet",
+    "log_InlineLogWARNING", "log_InlineLogINFO",
     "type_info", "_1_1_",
     "time_t", "FILE ", "(_locale_t)",
 ]
@@ -331,6 +331,8 @@ def rewrite_body(body):
     # Ghidra's bare `undefined` is its one-byte type (undefined1) and is also what it prints for a function that
     # returns nothing meaningful; both are `unsigned char` here, which is the width the listing itself states.
     body = re.sub(r"\bundefined\b(?!\d)", "unsigned char", body)
+    for n in ("SysTimeGet", "IsTimeRange", "DateTime"):
+        body = re.sub(r"(?<![\w:])%s\s*\(" % n, "tq::%s(" % n, body)
     body = body.replace("_CxxThrowException(", "g_pfnNpcCxxThrowException(")
     body = _vtbl(body)
     for name in re.findall(r"\b([A-Z]\w* *)\*", body):
@@ -487,6 +489,7 @@ def main():
     lines.append("#include \"npc-data.h\"")
     lines.append("#include \"npc-underscore-data.h\"")
     lines.append("#include \"npc-win-types.h\"")
+    lines.append("#include \"npc-tq-imports.h\"")
     lines.append("#include \"log-stubs.h\"")
     lines.append("#include \"npc-concat.h\"")
     lines.append("#include <string>")

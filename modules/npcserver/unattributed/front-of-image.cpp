@@ -24,6 +24,7 @@ void* (*g_pfnNpcOperatorDelete)(void* p) = nullptr;
 void* (*g_pfnNpcOperatorDelete2)(void* p) = nullptr;
 void (*g_pfnNpcInlineLogError)(const void* pMsg, ...) = nullptr;
 void (*g_pfnNpcCxxThrowException)(void* pObject, void* pThrowInfo) = nullptr;
+
 int (*g_pfnNpcWSAStartup)(int iVersion, void* pData) = nullptr;
 int (*g_pfnNpcWSACleanup)(void) = nullptr;
 void* (*g_pfnNpcFreeBufferevent)(void* p) = nullptr;

@@ -1128,7 +1128,14 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 67 suites green, six cycles. Total ported: 603 of 4099 bodies.
 - Next: `0x140025340` (the CInstanceMgr constructor/clear, 153 lines) and the rest of `0x140025xxx`, then `0x140026xxx`.
 
-## D269 (latest)
+## D270 (latest)
+
+- `npc-tq-imports.h`: `tq::TimeGet`, `SysTimeGet`, `IsTimeRange`, `DateTime` declared from their mangled import names
+  and wired as null-defaulted inline seam pointers (`g_pfnTimeGet`, ...).
+- Standing: **1,793 bodies** (1,102 linked, 691 pending). 69 suites green, six cycles.
+- Ordinal-only imports: 194 of 467 - no signature derivable, those bodies stay shut without the exporting DLL.
+
+## D269
 
 - `Docs/disasm/remaining.txt`: 830 remaining functions disassembled from the image by `tools/disasm_remaining.py`
   (capstone, entry to next entry, bytes + mnemonics). This is the evidence earlier batches said they lacked.
