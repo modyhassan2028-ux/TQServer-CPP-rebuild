@@ -2644,3 +2644,18 @@ attempt as `char*` collided with `<cstdarg>` (MSVC and GCC spell it differently;
 Also added: `TQ_ONLY` / `TQ_OUT` on `tools/transliterate.py` so a subset of addresses can be put through the same rules
 to see its decline reasons without touching the real output. Two runs clobbered `transliterated.cpp` before that guard
 existed; `git checkout --` restored it both times and the file is in the commit as the full 1,781.
+
+## D269 — the evidence the last 846 were missing, now in the tree
+
+Every batch since D264 ended on the same sentence: the remaining bodies need widths only the instruction stream states,
+and there was no disassembly in the tree. `tools/disasm_remaining.py` writes it: capstone over `NpcServer.exe`, each
+remaining function decoded from its entry to the next known entry, with the raw bytes beside every instruction.
+
+    Docs/disasm/remaining.txt   830 functions, 64,742 lines
+
+That is the unlock, not the work. Two of the six blockers stay shut even with it - `extraout_` (a second return value
+in RDX, which C cannot name) and `in_RAX` (a register value read before the prologue) - and they need a deliberate
+decision rather than a template. The other four (`undefined` widths, `DAT_` storage, `::vftable`, `_CxxThrowException`)
+are now readable line by line.
+
+Nothing was guessed to produce this file: it is the image's own bytes, decoded.

@@ -1128,7 +1128,13 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 67 suites green, six cycles. Total ported: 603 of 4099 bodies.
 - Next: `0x140025340` (the CInstanceMgr constructor/clear, 153 lines) and the rest of `0x140025xxx`, then `0x140026xxx`.
 
-## D268 (latest)
+## D269 (latest)
+
+- `Docs/disasm/remaining.txt`: 830 remaining functions disassembled from the image by `tools/disasm_remaining.py`
+  (capstone, entry to next entry, bytes + mnemonics). This is the evidence earlier batches said they lacked.
+- Standing count unchanged this unit: **1,781 bodies**, 69 suites green.
+
+## D268
 
 - `npc-win-types.h`: the Windows SDK types the listing names, documented definitions only; `CRITICAL_SECTION` forward
   declared (pointer use only); `va_list` = `__builtin_va_list`.
