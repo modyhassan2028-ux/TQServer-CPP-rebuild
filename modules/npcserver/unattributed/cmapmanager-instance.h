@@ -7,10 +7,11 @@
 
 namespace tq {
 
-extern long long* (*g_pfnNpc_14003ca10)(long long pManager, unsigned nMapId);
 extern void* (*g_pfnNpc_1400550f0)(void* pStorage);
+extern long long* (*g_pfnNpcInstanceGet)(long long pModule);   // the 0x14001c110 import thunk
 extern unsigned long long (*g_pfnNpc_140032e20)(long long pSingleton, unsigned nMapId, unsigned nLow);
 
+long long* FUN_14003ca10(long long pManager, int nMapId);
 long long* FUN_14003cd80(long long pManager, unsigned nMapId, unsigned nLow);
 
 struct NpcMapInstanceEntry {

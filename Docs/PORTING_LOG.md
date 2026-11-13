@@ -2185,3 +2185,30 @@ those callers now call the real bodies, and their suites prime `g_pNpcModuleBase
 function pointer jumps to the table itself.
 
 65 suites green, six cycles. Total ported: 596 of 4099 bodies.
+
+## D249 — CMapManager::FindMap and the module base (2 bodies)
+
+| address | where | body |
+|---|---|---|
+| 0x14003ca10 | `cmapmanager-instance.cpp` | FindMap: the cache first, then one row from `cq_dynamap` |
+| 0x14001c200 | `module-singletons.cpp` | the module base itself (`mov 0x1401045b8, %rax; ret`) |
+
+FindMap walks the collection at `pManager+8` with its own slots (0x10 count, 0x18 indexed getter, 0x20 add); the getter is
+handed `f:\version\cqserver-78.0.11-1204\npcserver\npckernel\mapmanager.cpp` and line `0x72`, which is what pins this
+body to `npckernel/mapmanager.cpp`. On a miss it formats
+`SELECT * FROM cq_dynamap WHERE id=%u && del_flag=0 LIMIT 1`, asks the database instance (mode 2) for the row, builds a
+0x90-byte instance, initialises it through slot 0x20 with `(row, 1)`, registers it on the cache's slot 0x20 and releases
+the row. A refusal logs `0x1400be0b0`, calls the instance's slot 0x38 and releases the row.
+
+**objdump checks that changed the port:**
+- `0x14001c110` and `0x14001c780` (`InstanceGet`) are import thunks: `jmp *0x1400bd190`. They cannot be transcribed as
+  bodies, so they are the seam `g_pfnNpcInstanceGet`.
+- the `sprintf`-looking call at `0x14003caeb` really is formatted: `r8d = param_2` (the id), `rdx = 0x1400c5e90` (the
+  format), `rcx = rsp+0x50` (the buffer), so the port uses `snprintf` with the id.
+- the two log sites pass `rcx = 0x1400be0b0`, `rdx = 0x1400be30c`/`0x1400be380`, `r8 = 0x1400c5ed0`/`0x1400c5e70`,
+  `r9 = 0x1400c5c60` and the line (`0x6e`, `0x85`) on the stack.
+
+The seam `g_pfnNpc_14003ca10` is gone: `0x14003cd80` calls the real body now, and the D245 suite drives both through a
+fake cache, a fake row, a fake database instance and a fake instance.
+
+65 suites green, six cycles. Total ported: 598 of 4099 bodies.

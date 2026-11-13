@@ -30,13 +30,16 @@ int main() {
     *(long long*)((char*)g_aBase + 0x40) = 0x4040;
     g_pNpcModuleBase_1401045b8 = g_aBase;
 
-    assert(g_nNpcModuleSingleton == 4);
-    int nGet28 = 0, nGet30 = 0, nGet40 = 0, nRelease = 0;
+    assert(g_nNpcModuleSingleton == 5);
+    int nGet28 = 0, nGet30 = 0, nGet40 = 0, nRelease = 0, nBase = 0;
 
     for (int i = 0; i < g_nNpcModuleSingleton; ++i) {
         const NpcModuleSingletonEntry& e = g_aNpcModuleSingleton[i];
 
-        if (std::strcmp(e.pszKind, "get-0x28") == 0) {
+        if (std::strcmp(e.pszKind, "module-base") == 0) {
+            assert(((long long (*)(void))e.pfn)() == (long long)g_aBase);
+            ++nBase;
+        } else if (std::strcmp(e.pszKind, "get-0x28") == 0) {
             assert(((long long (*)(void))e.pfn)() == 0x2828);
             ++nGet28;
         } else if (std::strcmp(e.pszKind, "get-0x30") == 0) {
@@ -89,7 +92,7 @@ int main() {
         }
     }
 
-    assert(nGet28 == 1 && nGet30 == 1 && nGet40 == 1 && nRelease == 1);
+    assert(nGet28 == 1 && nGet30 == 1 && nGet40 == 1 && nRelease == 1 && nBase == 1);
     std::printf("NPCSERVER_D248_OK: singleton getters and the counted release\n");
     return 0;
 }

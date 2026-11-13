@@ -222,13 +222,15 @@ objdump -d --start-address=0x1400491b0 --stop-address=0x140049260 /app/co_decomp
 
 ---
 
-## 9) الحالة الحالية (آخر تحديث: D248)
+## 9) الحالة الحالية (آخر تحديث: D249)
 
-- **596 من 4099 جسم** منقولة، **65 سويت** خضراء، 6 دورات، ASan+UBSan.
+- **598 من 4099 جسم** منقولة، **65 سويت** خضراء، 6 دورات، ASan+UBSan.
 - العناقيد المقفولة: `0x14000xxxx` (front/libevent/IOCP)، `0x14007xxxx` (coded streams + logging)،
   `0x14008xxxx` (STL shapes)، `0x14002xxxx` (RBT tree + erase + containers + CInstance + map factory).
 - التالي بالترتيب: `0x140024000` (نواة الإدراج + الـrebalance، الأكبر في العنقود) → `0x1400250e0/0x140025690/0x140025750`
   → `0x140026xxx` … وهكذا صاعدًا في النطاق.
+- **الدوال اللي الديكمبايل بيسيبها `InstanceGet` بـ"jumptable غير قابل للاسترجاع"** هي import thunks
+  (`jmp *ادرس_الـIAT`). متحاولش تنقلها كجسم؛ اعملها seam وسمّيها بـ`g_pfnNpcInstanceGet`، وسجّل الـIAT في التعليق.
 - أوامر التحقق السريع:
 ```bash
 cd /app/co_repo

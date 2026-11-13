@@ -9,6 +9,7 @@ namespace tq {
 
 extern void* g_pNpcModuleBase_1401045b8;   // DAT_1401045b8
 
+long long FUN_14001c200(void);             // the module base itself
 long long FUN_14001c790(void);             // *(base + 0x28)
 long long FUN_14001c7a0(void);             // *(base + 0x30)
 long long FUN_14001c7b0(void);             // *(base + 0x40)

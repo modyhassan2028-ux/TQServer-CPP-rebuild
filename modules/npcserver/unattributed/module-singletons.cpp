@@ -5,6 +5,11 @@ namespace tq {
 
 void* g_pNpcModuleBase_1401045b8 = nullptr;
 
+// 0x14001c200 - the module base
+long long FUN_14001c200(void) {
+    return (long long)g_pNpcModuleBase_1401045b8;
+}
+
 // 0x14001c790 - the kernel singleton at base+0x28
 long long FUN_14001c790(void) {
     return *(long long*)((char*)g_pNpcModuleBase_1401045b8 + 0x28);
@@ -42,12 +47,13 @@ void FUN_14001c7f0(long long pOwner) {
 }
 
 const NpcModuleSingletonEntry g_aNpcModuleSingleton[] = {
+    { "14001c200", "module-base", (void*)&FUN_14001c200 },
     { "14001c790", "get-0x28",  (void*)&FUN_14001c790 },
     { "14001c7a0", "get-0x30",  (void*)&FUN_14001c7a0 },
     { "14001c7b0", "get-0x40",  (void*)&FUN_14001c7b0 },
     { "14001c7f0", "release",   (void*)&FUN_14001c7f0 },
 };
 
-const int g_nNpcModuleSingleton = 4;
+const int g_nNpcModuleSingleton = 5;
 
 }  // namespace tq

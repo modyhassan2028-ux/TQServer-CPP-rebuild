@@ -1104,3 +1104,11 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 65 suites green, six cycles. Total ported: 596 of 4099 bodies.
 - Next: `0x14003ca10` (CMapManager::FindMap — needs the `InstanceGet` thunk from `objdump`, the decompile marks it
   unrecoverable) and `0x140024000` (the insert core with rebalance).
+
+## D249 (latest)
+
+- `0x14003ca10` (CMapManager::FindMap) and `0x14001c200` (module base) ported; the `g_pfnNpc_14003ca10` seam is retired
+  and only `g_pfnNpcInstanceGet` remains for that family (an import thunk: `jmp *0x1400bd190`).
+- 65 suites green, six cycles. Total ported: 598 of 4099 bodies.
+- Next: `0x140024000` (the insert core with the rebalance and the `map/set<T> too long` length_error) — it owns two seams
+  today (`0x140024970` and the hint path) and is the last big body of the 0x14002xxxx cluster.
