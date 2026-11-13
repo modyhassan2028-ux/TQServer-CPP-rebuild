@@ -1128,7 +1128,16 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 67 suites green, six cycles. Total ported: 603 of 4099 bodies.
 - Next: `0x140025340` (the CInstanceMgr constructor/clear, 153 lines) and the rest of `0x140025xxx`, then `0x140026xxx`.
 
-## D253 (latest)
+## D254 (latest)
+
+- `small-bodies.{h,cpp}` regenerated to **290 bodies / 18 shapes** (move-a 33, move-c 22, refcount-dtor 20, identity 9,
+  size-getter 9, log-clear-iter 6, zero 6, deref-get 6, ptr-add 4, move-b 4, plus the earlier families).
+- The two move spellings differ in what they return: `move-a` -> start of the copied block, `move-c` -> end. `move-c` may
+  also sit behind leading parameters; the manifest carries that count in `nExtra`.
+- Generator gotcha, now guarded: `defined_bodies()` must ignore `small-bodies.cpp` while rewriting it.
+- 68 suites green, six cycles.
+
+## D253
 
 - Generator grew `iter-assign` (18) and `vtable-set` (30, addresses resolved through the normalised RTTI names in
   `Docs/VTABLE_SLOTS.tsv`). `small-bodies.{h,cpp}` now carries **171** generated bodies, all driven by the suite.

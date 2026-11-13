@@ -2326,3 +2326,25 @@ Deliberately left out: the 79 `memmove_s` forward-move bodies. They come in seve
 generator; that is the next template job.
 
 68 suites green, six cycles.
+
+## D254 — the copy family and the rest of the small shapes: 290 bodies
+
+The generator now covers eighteen shapes and emits **290** bodies (it was 171). New this batch:
+
+| shape | count | note |
+|---|---|---|
+| `move-a` | 33 | `_Dst = pDst + count * -SIZE; if (0 < count) memmove(_Dst, ..., pFirst, ...); return _Dst;` — the block ends at the destination pointer and the body returns its **start** |
+| `move-c` | 22 | the same move through a byte count, parameter-shifted (`param_2..param_4`); block **starts** at the pointer and it returns the **end** |
+| `refcount-dtor` | 20 | `*pThis = <Class>::vftable; if ((flags & 1) != 0) operator_delete(pThis); return pThis;` |
+| `identity`, `size-getter` | 9 + 9 | `return param_1;` and `return *(long long*)(p+0xNN) - *(long long*)(p+0xMM) >> SHIFT;` |
+| `log-clear-iter` | 6 | `InlineLogERROR(&DAT_1400be0b0); pOut[0] = pOut[1] = 0; return pOut;` |
+| `zero`, `deref-get`, `ptr-add`, `move-b` | 6 + 6 + 4 + 4 | trivial returns and the two-object spelling of the forward move |
+
+Two things the running of this batch proved, both now in the suite: the two move spellings are **not** interchangeable
+(`move-a` hands back the start of the copied block, `move-c` its end), and a generated `move-c` may sit behind leading
+parameters the shape never touches, so the manifest carries that count (`nExtra`) and the suite passes a dummy lead.
+
+A note on the generator itself: `defined_bodies()` must skip `small-bodies.cpp` while it is being rewritten, otherwise
+the next run sees its own output and generates nothing. That bug cost a run and is now guarded in the code.
+
+68 suites green, six cycles.

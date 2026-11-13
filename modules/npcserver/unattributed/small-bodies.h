@@ -9,9 +9,9 @@ namespace tq {
 struct NpcSmallBodyEntry {
     const char* pszAddress;
     const char* pszKind;
-    int         nSize;      // the width the body reads or writes
-    long long   nOffset;    // the field the body reaches, or the range base
-    long long   nExtra;     // the comparison kind, or the range width
+    int         nSize;      // the width the body reads or writes, or the element size of a forward move
+    long long   nOffset;    // the field the body reaches, the range base, or the vtable address
+    long long   nExtra;     // the comparison kind, the range width, or a second field
     void*       pfn;
 };
 
