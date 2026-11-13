@@ -2785,3 +2785,18 @@ original ones.
     1,797 -> **1,804 bodies** (1,110 linked, 694 pending)     69 suites green, six cycles
 
 Small in bodies, large in kind: the data half of the last wave is no longer blocked on a build omission.
+
+## D276 — the `extraout_` sites are a low-byte test, not a 16-byte ABI
+
+The 106 `extraout_` declines were assumed to be the 16-byte return problem. Reading them shows something smaller:
+`(int)CONCAT71(extraout_var, bVar1) != 0` is how the listing renders `test al, al`. The callee returned a `bool` in the
+low byte; `extraout_` is the decompiler's name for the bytes it could not recover, and the comparison only ever reads
+the byte it did recover. So the rewrite keeps the test and drops the unrecovered bytes - which is what the instruction
+does - and the now-unused `extraout_` declarations are removed.
+
+    extraout_ declines 106 -> 100, bodies unchanged at **1,804** (1,110 linked, 694 pending)
+
+Net zero again, and the reason is now a pattern worth stating plainly: resolving a token does not free a body when the
+body still calls a function that is not ported. Six of the six bodies that came through walked into
+`callee has no usable declaration`. The remaining `extraout_` sites are the ones where the recovered value is *not* a
+low-byte test, and those genuinely need the ABI decision.

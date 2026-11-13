@@ -1128,7 +1128,13 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 67 suites green, six cycles. Total ported: 603 of 4099 bodies.
 - Next: `0x140025340` (the CInstanceMgr constructor/clear, 153 lines) and the rest of `0x140025xxx`, then `0x140026xxx`.
 
-## D275 (latest)
+## D276 (latest)
+
+- `(int)CONCAT(31|71)(extraout_*, v) {==,!=} 0` is a low-byte test; rewritten to the test alone, dead `extraout_`
+  declarations removed, and the token is now checked *after* the rewrite for this one pattern.
+- Standing: **1,804 bodies** (1,110 linked, 694 pending). 69 suites green, six cycles.
+
+## D275
 
 - **Build fix**: `npc-underscore-data.cpp` was missing from `run_npcserver_suites.sh`, so every `DAT_`/`_DAT_` body died
   at link and was pruned. Now compiled and linked (`/tmp/npcsrv/blob.o`).

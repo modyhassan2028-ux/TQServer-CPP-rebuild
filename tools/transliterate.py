@@ -350,6 +350,12 @@ def rewrite_body(body):
                 return out.replace("\x00::vftable", "::vftable")
     # Ghidra's bare `undefined` is its one-byte type (undefined1) and is also what it prints for a function that
     # returns nothing meaningful; both are `unsigned char` here, which is the width the listing itself states.
+    # `(int)CONCAT71(extraout_var, b) != 0` is how the listing renders `test al, al`: the callee returned a bool in the
+    # low byte and the extraout value is the decompiler's name for the bytes it could not recover. Where the result is
+    # only compared against zero, the comparison is the low byte - that is what the machine code tests - so the test is
+    # kept and the unrecovered bytes are dropped, which is exactly what the instruction does.
+    body = re.sub(r"\(int\)CONCAT(?:31|71)\(\s*extraout_\w+\s*,\s*(\w+)\s*\)\s*([!=]=)\s*0", r"\1 \2 0", body)
+    body = re.sub(r"(?m)^\s*(?:undefined\d*|int\d|uint\d|longlong|ulonglong)\s+extraout_\w+(?:\s*,\s*extraout_\w+)*;\s*$\n", "", body)
     body = re.sub(r"\bundefined\b(?!\d)", "unsigned char", body)
     for n in ("SysTimeGet", "IsTimeRange", "DateTime"):
         body = re.sub(r"(?<![\w:])%s\s*\(" % n, "tq::%s(" % n, body)
@@ -432,6 +438,13 @@ def main():
             promote.discard(name)
         raw = "%s %s(%s)\n{\n%s\n}" % (ret, name, args, body)
         bad = next((t for t in REJECT if t in raw), None)
+        early = None
+        if bad == "extraout_":
+            # the token is checked on the raw text, so give the one pattern we resolve a chance to resolve before the
+            # body is thrown out: if the rewrite leaves no extraout behind, the token is no longer a reason.
+            early = rewrite_body(body)
+            if "extraout_" not in early:
+                bad = next((t for t in REJECT if t in early), None)
         if bad:
             declined[bad] = declined.get(bad, 0) + 1
             continue
@@ -439,7 +452,7 @@ def main():
         if sig is None:
             declined["return type"] = declined.get("return type", 0) + 1
             continue
-        text = rewrite_body(body)
+        text = early if early is not None else rewrite_body(body)
         byval = False
         for cls in CLASSES:
             if re.search(r"\b%s\b(?!\s*\*)" % cls, text):
