@@ -63,10 +63,10 @@ CRT = {
 REJECT = [
     "switch", "unaff_", "in_stack_", "extraout_", "__thiscall",
     "__fastcall", "_guard_", "in_EAX", "in_RAX", "SUB84", "SUB168", "ZEXT", "SEXT",
-    "assert", "Ordinal_", "DWORD", "freeaddrinfo", "_open(", "_close(", "_read(", "_write(", "_lseek(", "_fstat64",
-    "log_InlineLogWARNING", "log_InlineLogINFO", "TimeGet", "LPCRITICAL_SECTION",
-    "type_info", "_1_1_", "LPCSTR", "LPVOID", "HWND", "LPCVOID", "LPCSTR",
-    "va_list", "time_t", "FILE ", "(_locale_t)",
+    "assert", "Ordinal_", "freeaddrinfo", "_open(", "_close(", "_read(", "_write(", "_lseek(", "_fstat64",
+    "log_InlineLogWARNING", "log_InlineLogINFO", "TimeGet",
+    "type_info", "_1_1_",
+    "time_t", "FILE ", "(_locale_t)",
 ]
 
 TYPED_GLOBALS = set()
@@ -343,9 +343,13 @@ def rewrite_body(body):
 
 
 def main():
+    import os
     global VTABLE
     VTABLE = load_vtables()
     bodies = load()
+    if os.environ.get("TQ_ONLY"):
+        keep = set(open(os.environ["TQ_ONLY"]).read().split())
+        bodies = {a: b for a, b in bodies.items() if a[4:] in keep}
     try:
         deny = set(open(DENY, errors="ignore").read().split())
     except FileNotFoundError:
@@ -482,6 +486,7 @@ def main():
     lines.append("#include <new>")
     lines.append("#include \"npc-data.h\"")
     lines.append("#include \"npc-underscore-data.h\"")
+    lines.append("#include \"npc-win-types.h\"")
     lines.append("#include \"log-stubs.h\"")
     lines.append("#include \"npc-concat.h\"")
     lines.append("#include <string>")

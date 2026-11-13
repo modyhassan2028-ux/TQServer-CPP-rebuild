@@ -1128,7 +1128,14 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 67 suites green, six cycles. Total ported: 603 of 4099 bodies.
 - Next: `0x140025340` (the CInstanceMgr constructor/clear, 153 lines) and the rest of `0x140025xxx`, then `0x140026xxx`.
 
-## D267 (latest)
+## D268 (latest)
+
+- `npc-win-types.h`: the Windows SDK types the listing names, documented definitions only; `CRITICAL_SECTION` forward
+  declared (pointer use only); `va_list` = `__builtin_va_list`.
+- Standing count: **1,781 bodies** (1,091 linked, 690 pending). 69 suites green, six cycles.
+- `tools/transliterate.py` accepts `TQ_ONLY` (address list) and `TQ_OUT` (scratch output) for subset experiments.
+
+## D267
 
 - Bare `undefined` is mapped to `unsigned char` (Ghidra's `undefined1`, also its "no meaningful return" type); the
   reject tokens are gone. Net **0**, pending-tier compile errors 489 -> 463.

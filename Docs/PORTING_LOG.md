@@ -2629,3 +2629,18 @@ and the last 846.
 
 `Docs/REMAINING_BODIES.md` is the new working list: all 846 remaining addresses, grouped by the tag that blocks them,
 generated from the listing against the definitions rather than counted by hand.
+
+## D268 — the Windows SDK types, written down instead of dodged
+
+`DWORD`, `LPCSTR`, `LPVOID`, `HWND`, `LPCVOID`, `LPCRITICAL_SECTION` and `va_list` were tokens on the reject list, which
+is why 12 + 8 + 5 and more bodies never got a chance: the listing names these types constantly and the port simply had
+no declaration for them. `npc-win-types.h` now carries the documented SDK definitions (`DWORD` = `unsigned long`,
+`LPCSTR` = `const char*`, ...), and `CRITICAL_SECTION` is forward declared only, because a pointer is all the listing
+declares. `va_list` is restated as `__builtin_va_list` - the same typedef the compiler already made - after a first
+attempt as `char*` collided with `<cstdarg>` (MSVC and GCC spell it differently; the collision is the evidence).
+
+    1,770 -> **1,781 bodies** (1,091 linked, 690 pending)     69 suites green, six cycles
+
+Also added: `TQ_ONLY` / `TQ_OUT` on `tools/transliterate.py` so a subset of addresses can be put through the same rules
+to see its decline reasons without touching the real output. Two runs clobbered `transliterated.cpp` before that guard
+existed; `git checkout --` restored it both times and the file is in the commit as the full 1,781.
