@@ -4,6 +4,7 @@
 #include <cstring>
 #include "modules/npcserver/unattributed/cmapmanager-instance.h"
 #include "modules/npcserver/unattributed/front-of-image.h"
+#include "modules/npcserver/unattributed/module-singletons.h"
 
 using namespace tq;
 
@@ -19,6 +20,7 @@ static long long g_aSlotsVt[8];
 static long long g_aSlots[2];
 static long long g_aManager[4];
 static long long g_singleton2 = 0x7A7A;
+static long long g_aModuleBase2[16];
 
 static void* FakeNew(long long n) { ++g_news; assert(n == 0x90); return g_newNull ? nullptr : g_aStorage; }
 static void Log(const void* pMsg, ...) { ++g_logs; g_pLastMsg = pMsg; }
@@ -30,7 +32,7 @@ static void* Construct(void* pStorage) {
     ++g_ctors; assert(pStorage == (void*)g_aStorage);
     return g_ctorNull ? nullptr : (void*)g_aInstance;
 }
-static long long Singleton2(void) { return g_singleton2; }
+
 static unsigned long long Record(long long pSingleton, unsigned nMapId, unsigned nLow) {
     ++g_records;
     g_aArgs[10] = pSingleton; g_aArgs[11] = (long long)nMapId; g_aArgs[12] = (long long)nLow;
@@ -75,7 +77,9 @@ int main() {
     g_pfnNpcInlineLogError = &Log;
     g_pfnNpc_14003ca10 = &FindMap;
     g_pfnNpc_1400550f0 = &Construct;
-    g_pfnNpc_14001c7a0 = &Singleton2;
+    std::memset(g_aModuleBase2, 0, sizeof g_aModuleBase2);
+    *(long long*)((char*)g_aModuleBase2 + 0x30) = g_singleton2;
+    g_pNpcModuleBase_1401045b8 = g_aModuleBase2;
     g_pfnNpc_140032e20 = &Record;
 
     assert(g_nNpcMapInstance == 1);

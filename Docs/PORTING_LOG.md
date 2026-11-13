@@ -2156,3 +2156,32 @@ The suite pins six positions: an exact key (`[30,40)`), a gap (`[30,30)`), the l
 (`[10,10)`), the rightmost (upper bound is `end()`), and above everything (`[head, head)`).
 
 64 suites green, six cycles. Total ported: 592 of 4099 bodies.
+
+## D248 — the kernel singleton getters and the counted release (4 bodies)
+
+New reference material and four bodies in the same batch.
+
+**Reference.** `Docs/reference/NpcServer_Ghidra/` is a class-organised Ghidra dump of the *same* image (base
+`0x140000000`): one file per class, `_INDEX.txt` (every string with its address), `_VTABLES.txt` (every vftable with its
+slots), and `_unnamed_N.cpp` for the bodies Ghidra could not attribute. It is the same binary: `CInstance::vftable @
+1400c7340` matches the address D243 recovered with `objdump`. `tools/build_name_map.py` turns it into
+`Docs/FUN_NAME_MAP.tsv` (7053 functions, 3479 named) and `Docs/VTABLE_SLOTS.tsv` (1079 slots), and
+`Docs/NAME_CROSSWALK.md` is the how-to.
+
+**Bodies.** `modules/npcserver/unattributed/module-singletons.{h,cpp}`, manifest `g_aNpcModuleSingleton`:
+
+| address | body |
+|---|---|
+| 0x14001c790 | `*(base + 0x28)` |
+| 0x14001c7a0 | `*(base + 0x30)` |
+| 0x14001c7b0 | `*(base + 0x40)` |
+| 0x14001c7f0 | drop a counted reference at `pOwner+8`: LOCK-decrement `+0x10`, at zero call vtable slot 0, then decrement `+0x14` and call slot 1 at zero |
+
+The first two replace the seams `g_pfnNpc_14001c790` and `g_pfnNpc_14001c7a0` in the CInstance and CMapManager files;
+those callers now call the real bodies, and their suites prime `g_pNpcModuleBase_1401045b8` instead of a fake.
+
+**Two traps, both caught by the suites:** `(int*)plVar3 + 2` is offset 8, not `0x10` (the image adds 2 to a
+`long long*`); and `(**(code **)*plVar3)` is the vtable's slot 0, not the vtable address — casting `*plVar3` to a
+function pointer jumps to the table itself.
+
+65 suites green, six cycles. Total ported: 596 of 4099 bodies.

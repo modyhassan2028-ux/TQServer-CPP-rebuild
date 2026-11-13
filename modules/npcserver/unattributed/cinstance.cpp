@@ -1,17 +1,17 @@
 // Transcribed from NpcServer.exe; see cinstance.h.
 #include "modules/npcserver/unattributed/cinstance.h"
 #include "modules/npcserver/unattributed/front-of-image.h"
+#include "modules/npcserver/unattributed/module-singletons.h"
 
 namespace tq {
 
 // The seams this file owns until their own batches land.
-long long (*g_pfnNpc_14001c790)(void) = nullptr;
 unsigned long long (*g_pfnNpc_14003cc10)(long long pSingleton, unsigned nId) = nullptr;
 unsigned long long (*g_pfnNpc_14003cd80)(long long pSingleton, unsigned nMapId, unsigned nLow) = nullptr;
 
 // 0x140049050 - hand the instance's map id to the module singleton
 void FUN_140049050(long long pInstance) {
-    long long lVar1 = g_pfnNpc_14001c790();
+    long long lVar1 = FUN_14001c790();
     g_pfnNpc_14003cc10(lVar1, *(unsigned*)(pInstance + 0xc));
     return;
 }
@@ -71,7 +71,7 @@ unsigned long long FUN_140048fb0(long long pInstance) {
     }
     void* pMap = (void*)*(long long*)(pInstance + 0x10);
     unsigned nMapId = (*(unsigned (**)(void*, long long))(*(long long*)pMap + 0x10))(pMap, 2);
-    lVar2 = g_pfnNpc_14001c790();
+    lVar2 = FUN_14001c790();
     plVar3 = (long long*)g_pfnNpc_14003cd80(lVar2, nMapId, *(unsigned*)(pInstance + 0xc));
     if (plVar3 == 0) {
         if (g_pfnNpcInlineLogError != nullptr) {

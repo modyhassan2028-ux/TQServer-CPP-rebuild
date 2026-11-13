@@ -4,6 +4,7 @@
 #include <cstring>
 #include "modules/npcserver/unattributed/cinstance.h"
 #include "modules/npcserver/unattributed/front-of-image.h"
+#include "modules/npcserver/unattributed/module-singletons.h"
 
 using namespace tq;
 
@@ -11,6 +12,7 @@ static int g_news = 0, g_logs = 0;
 static void* g_pNew = nullptr;
 static const void* g_pLastMsg = nullptr;
 static long long g_singleton = 0x5151;
+static long long g_aModuleBase[16];
 static long long g_nCcSingleton = 0;
 static unsigned g_nCcId = 0;
 static int g_releases = 0;
@@ -27,7 +29,7 @@ static int g_mapSlotArg = 0;
 static void* FakeNew(long long nBytes) { ++g_news; assert(nBytes == 0x18); return g_aObject; }
 static void* NoNew(long long) { return nullptr; }
 static void Log(const void* pMsg, ...) { ++g_logs; g_pLastMsg = pMsg; }
-static long long Singleton(void) { return g_singleton; }
+
 static unsigned long long ReleaseMap(long long pSingleton, unsigned nId) {
     ++g_releases; g_nCcSingleton = pSingleton; g_nCcId = nId; return 1;
 }
@@ -60,7 +62,9 @@ static void Reset() {
 int main() {
     g_pfnNpcOperatorNew = &FakeNew;
     g_pfnNpcInlineLogError = &Log;
-    g_pfnNpc_14001c790 = &Singleton;
+    std::memset(g_aModuleBase, 0, sizeof g_aModuleBase);
+    *(long long*)((char*)g_aModuleBase + 0x28) = g_singleton;   // the kernel singleton
+    g_pNpcModuleBase_1401045b8 = g_aModuleBase;
     g_pfnNpc_14003cc10 = &ReleaseMap;
     g_pfnNpc_14003cd80 = &CreateMap;
 

@@ -168,6 +168,16 @@ long long (*g_pfnNpc_14003cd80)(long long pSingleton, unsigned nMapId, unsigned 
 
 ---
 
+## 5.5) مرجع Ghidra الكلاسي (أسرع من أي تخمين)
+
+`Docs/reference/NpcServer_Ghidra/` = نفس البايناري مفكوك بترتيب كلاسي، ومعه:
+- `Docs/FUN_NAME_MAP.tsv` (7053 دالة، 3479 منهم باسم أصلي) — تبني بالـ`python3 tools/build_name_map.py`
+- `Docs/VTABLE_SLOTS.tsv` (1079 سلوت) — يحوّل `(**(code**)(*p+0xNN))` لاسم دالة وعنوانها
+- `_INDEX.txt` — كل النصوص مع عناوينها (لوسايط اللوج)
+
+قبل ما تبدأ أي جسم: `grep -P "^<addr>\t" Docs/FUN_NAME_MAP.tsv` تشوف لو له اسم. تفاصيل الاستخدام في
+`Docs/NAME_CROSSWALK.md`.
+
 ## 6) الحاجات المخفية (vtable / RTTI / نصوص)
 
 **vtable من غير فهرس:** لو الاسم `CInstance::vftable` مش موجود في الـindex، متخمّنش. افتح البايناري:
@@ -212,9 +222,9 @@ objdump -d --start-address=0x1400491b0 --stop-address=0x140049260 /app/co_decomp
 
 ---
 
-## 9) الحالة الحالية (آخر تحديث: D247)
+## 9) الحالة الحالية (آخر تحديث: D248)
 
-- **592 من 4099 جسم** منقولة، **64 سويت** خضراء، 6 دورات، ASan+UBSan.
+- **596 من 4099 جسم** منقولة، **65 سويت** خضراء، 6 دورات، ASan+UBSan.
 - العناقيد المقفولة: `0x14000xxxx` (front/libevent/IOCP)، `0x14007xxxx` (coded streams + logging)،
   `0x14008xxxx` (STL shapes)، `0x14002xxxx` (RBT tree + erase + containers + CInstance + map factory).
 - التالي بالترتيب: `0x140024000` (نواة الإدراج + الـrebalance، الأكبر في العنقود) → `0x1400250e0/0x140025690/0x140025750`

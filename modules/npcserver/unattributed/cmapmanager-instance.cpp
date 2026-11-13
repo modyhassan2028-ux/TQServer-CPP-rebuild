@@ -1,13 +1,13 @@
 // Transcribed from NpcServer.exe; see cmapmanager-instance.h.
 #include "modules/npcserver/unattributed/cmapmanager-instance.h"
 #include "modules/npcserver/unattributed/front-of-image.h"
+#include "modules/npcserver/unattributed/module-singletons.h"
 
 namespace tq {
 
 // The seams this file owns until their own batches land.
 long long* (*g_pfnNpc_14003ca10)(long long pManager, unsigned nMapId) = nullptr;
 void* (*g_pfnNpc_1400550f0)(void* pStorage) = nullptr;
-long long (*g_pfnNpc_14001c7a0)(void) = nullptr;
 unsigned long long (*g_pfnNpc_140032e20)(long long pSingleton, unsigned nMapId, unsigned nLow) = nullptr;
 
 // 0x14003cd80 - find the map, build its instance (0x90 bytes), initialise it, then register it on the manager
@@ -49,7 +49,7 @@ long long* FUN_14003cd80(long long pManager, unsigned nMapId, unsigned nLow) {
                 long long* pSlotVt = (long long*)*(long long*)pSlots;
                 void (*pfnRegister)(void*, long long*) = (void (*)(void*, long long*))pSlotVt[0x20 / 8];
                 pfnRegister(pSlots, plVar4);
-                lVar5 = g_pfnNpc_14001c7a0();
+                lVar5 = FUN_14001c7a0();
                 g_pfnNpc_140032e20(lVar5, nMapId, nLow);
             }
         }

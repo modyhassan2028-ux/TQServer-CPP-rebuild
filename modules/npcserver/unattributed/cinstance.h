@@ -7,7 +7,7 @@
 
 namespace tq {
 
-extern long long (*g_pfnNpc_14001c790)(void);                                  // the module singleton
+                                  // the module singleton
 extern unsigned long long (*g_pfnNpc_14003cc10)(long long pSingleton, unsigned nId);
 extern unsigned long long (*g_pfnNpc_14003cd80)(long long pSingleton, unsigned nMapId, unsigned nLow);
 

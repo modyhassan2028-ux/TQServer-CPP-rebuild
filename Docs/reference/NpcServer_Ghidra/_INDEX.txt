@@ -1,0 +1,1225 @@
+Program: NpcServer.exe  image base 140000000
+Groups (class / namespace) -> function count
+     1  CAIStrategyMgr
+     6  CAboutDlg
+     1  CAsyncDBThread
+     5  CCriticalSection
+     5  CDefaultAIStrategy
+     3  CEdit
+    19  CEmptyNpcGen
+    15  CGameData<&char*_szGenerator,&char*_szID>
+     1  CGameData<&char*_szInstanceTypeTable,&char*_szID>
+     6  CGameData<&char*_szMonsterClusterTable,&char*_szID>
+    15  CGameData<&char*_szNpcPath,&char*_szID>
+    15  CGameData<&char*_szNpcType,&char*_szID>
+     8  CGameMap
+     8  CGameObjSet<class_CGameMap>
+     8  CGameObjSet<class_CNpcType>
+     8  CGameObjSet<class_CUser>
+     8  CGameObjSet<class_IGenerator>
+     8  CGameObjSet<class_INpc>
+     1  CInstance
+     1  CInstanceMgr
+     1  CItemType
+    10  CKernelThread
+     4  CLogThread
+    14  CMapData
+     1  CMapManager
+     1  CMapObj
+    12  CMessagePort
+     3  CMsgAction
+     3  CMsgAiNpcInfo
+     3  CMsgDynaGenerator
+     3  CMsgInstance
+     3  CMsgInteract
+     3  CMsgLogin
+     3  CMsgMagicEffect
+     3  CMsgMapInfo
+     3  CMsgMonsterJump
+     3  CMsgMonsterTransform
+     3  CMsgNpcPath
+     3  CMsgPlayer
+     3  CMsgSyncAction
+     3  CMsgTalk
+     3  CMsgUserAttrib
+     3  CMsgWalk
+     9  CMsgWalkPB
+     5  CNetMsg
+     5  CNeuralAIStrategy
+    38  CNpc
+    19  CNpcGenerator
+     1  CNpcPath
+     7  CNpcServerApp
+     8  CNpcServerDlg
+     2  CNpcType
+     7  CNpcWorld
+     1  CSingleMap2<class_CConstGameData<&char*_szItemTypeTable,&char*_szItemTypeTableID>_>
+    10  CSingleMap<class_CNpcPath>
+    10  CSingleMap<class_INpc>
+     2  CTerrainObj
+     1  CTerrainObjPart
+    26  CUser
+     3  CUserManager
+     1  Define_the_symbol__ATL_MIXED__Thank_you
+     4  IDialog
+    15  IGameData
+     8  IGameObjSet<class_CGameMap>
+     8  IGameObjSet<class_CNpcType>
+     8  IGameObjSet<class_CUser>
+     8  IGameObjSet<class_IGenerator>
+     8  IGameObjSet<class_INpc>
+     6  IKernel
+    13  IMapData
+    11  IMessagePort
+    15  INpc
+    20  IRole
+     2  IShell
+     9  ISingleMap2<class_CConstGameData<&char*_szItemTypeTable,&char*_szItemTypeTableID>_>
+    10  ISingleMap<class_CNpcPath>
+    10  ISingleMap<class_INpc>
+     3  _anon_16C71DD6__C7zFile
+     3  _anon_16C71DD6__CGzFile
+     3  _anon_16C71DD6__CNormalFile
+    45  _crt_std
+    23  _global
+  6393  _unnamed
+     1  `void___cdecl___ArrayUnwind(void*___ptr64,unsigned___int64,int,void_(__cdecl*)(void*___ptr64))'____l1
+     1  `void___cdecl_`eh_vector_destructor_iterator'(void*___ptr64,unsigned___int64,int,void_(__cdecl*)(void*___ptr64))'____l1
+     1  google__protobuf__Closure
+     2  google__protobuf__FatalException
+     3  google__protobuf__MessageLite
+     2  google__protobuf__internal__FunctionClosure0
+     5  google__protobuf__io__ArrayInputStream
+     6  google__protobuf__io__ArrayOutputStream
+     2  google__protobuf__io__CopyingInputStream
+     5  google__protobuf__io__CopyingInputStreamAdaptor
+     1  google__protobuf__io__CopyingOutputStream
+     4  google__protobuf__io__CopyingOutputStreamAdaptor
+     4  google__protobuf__io__StringOutputStream
+     1  google__protobuf__io__ZeroCopyInputStream
+     1  google__protobuf__io__ZeroCopyOutputStream
+     1  tq__Singleton<class_CAIStrategyMgr>
+
+Strings:
+1400bdfb0  bad allocation
+1400be078  TQClient
+1400be0ba   in %s, %d
+1400be0c8  ERROR: WSAStartup Version not match 2.0
+1400be0f0  ERROR: Init WSAStartup() failed.
+1400be118  MYASSERT
+1400be128  nLen <= m_nLen
+1400be138  f:\version\cqserver-78.0.11-1204\npcserver\clientsocket.cpp
+1400be180  CClientSocket::SendPacket, bufferevent_write packet failed[%d].
+1400be1c0  CClientSocket::SendPacket, invalid socket failed.
+1400be1f8  CClientSocket::Open, bufferevent_getfd error[%d], at %s, %d.
+1400be240  CClientSocket::Open, bufferevent_socket_connect error[%d], at %s, %d.
+1400be290  CClientSocket::Open, bufferevent_socket_new error[%d], at %s, %d.
+1400be2f0  m_sock == INVALID_SOCKET
+1400be30c  CHECKF
+1400be318  m_pKernelThread
+1400be328  m_szIP[0]
+1400be360  pKernel->ProcessMsg() @%s,%d
+1400be380  IF_NOT
+1400be388  this->ClearPacket(nNetPacketSize)
+1400be3b0  pKernel
+1400be3b8  CHECK
+1400be488  CClientSocket::Create, NpcServer client socket Open error.
+1400be4ef  ! at %s, %d.
+1400be500  GAMESERVER_PORT
+1400be510  GAMESERVER_IP
+1400be520  config.ini
+1400be530  GameServer
+1400be540  CClientSocket::Create, m_pKernelThread is NULL.
+1400be570  CClientSocket::ProcessAllIncoming, bufferevent_read err[%d].
+1400be5b0  m_pBufferEvent
+1400be638  TQClient
+1400be670  !"PURE_VIRTUAL_FUNCTION"
+1400be690  f:\version\cqserver-78.0.11-1204\npcserver\i_shell.h
+1400be750  sck_client != INVALID_SOCKET
+1400be770  f:\version\cqserver-78.0.11-1204\npcserver\kernelthread.cpp
+1400be7b0  CKernelThread::BufferEventCb, events[%0x] error.
+1400be7f0  CKernelThread::BufferEventCb, client bufferevent_enable error[%d].
+1400be860  CKernelThread::EvnetRoutine
+1400be880  EvnetRoutine worker thread exited
+1400be8a8  EvnetRoutine worker thread is up and running
+1400be938  !"PURE_VIRTUAL_FUNCTION_0"
+1400be980  SAFE_RELEASE(m_pSockClient) @%s,%d
+1400be9a8  CKernelThread::OnDestroy, event_base_loopexit error.
+1400bea30  CKernelThread::OnProcess @%s,%d
+1400bea50  m_pKernel->OnTimer() @%s,%d
+1400bea70  CKernelThread::OnProcess, ProcessMsg packet:%d, port:%d.
+1400beab0  CKernelThread::OnProcess(), pointer is null.
+1400beb08  Connect to game server again . . .
+1400beb30  CKernelThread::OnProcess(), packet[%d].
+1400beb80  CKernelThread::Create event_config_new failed
+1400bebb0  CKernelThread::Create m_pEventBase is NULL
+1400bebe0  CNpcWorld::Create, cannot create NpcServer client socket.
+1400bec20  CSocketKernel::Create _beginthreadex failed with error code:%u
+1400bec60  NPC Server KernelThread
+1400bec78  thread %u created libevent worker thread %u
+1400beca8  libevent method: %s
+1400becc0  TQClient
+1400bed48  LogThread
+1400bed58  error:: LOG_MSG_PORT have %d LOG not print!
+1400bedb0  catch:: catch at CLogThread::OnProcess
+1400bedd8  catch:: catch at CLogThread::OnProcess m_pLogKernel->OnTimer
+1400bee18  error:: resync CLogThread::OnTimer cumulative deviation %ldms
+1400bf0b0  Invalid parameter!
+1400bf0c8  pure call handler!
+1400bf1f8  NpcServer is running, but I can't find its window.
+1400bf230  Create mutext failed.
+1400bf248  %s - %s
+1400bf250  Conquer Online NPC Server
+1400bf270  SERVERNAME
+1400bf280  shell.ini
+1400bf290  AccountServer
+1400bf2f0  syslog/npcanalyst
+1400bf668  CNpcWorld::SendMsg
+1400bf680      `-CNpc::OnTimer
+1400bf698      | `-CNpcGenerator::Generator
+1400bf6c0      |-CNpcGenerator::DoGenerator
+1400bf6e8    `-NpcManager::OnTimer
+1400bf700  `-CNpcWorld::OnTimer
+1400bf718  |-EVENTMSG
+1400bf728  | |-CNpcWorld::ProcessMsg
+1400bf748  |-READMSG
+1400bf758  CKernelThread::OnProcess
+1400bf778  `-CLogThread ProcessMsg
+1400bf790  CLogThread OnProcess
+1400bf7a8  kernel(ms): %d/%ld
+1400bfe88  SHELL: %s
+1400bff50  Create mutext failed!
+1400bff68  Initial intra message port failed!
+1400bff8c  System
+1400bff98  f:\version\cqserver-78.0.11-1204\npcserver\npcserverdlg.cpp
+1400bffe0  =================================================================
+1400c0028  syslog/npcserver
+1400c0040  syslog/npcdb
+1400c0050  syslog
+1400c0058  %s - %s - %s %s
+1400c0068  Dec  4 2015
+1400c0078  14:01:42
+1400c0088  Create exit event failed!
+1400c00a8  Are you CLOSE server new?
+1400c00c8  CLOSE button pressed.
+1400c0108  SAFE_DELETE(m_pAsyncDBThread) @%s,%d
+1400c0130  SAFE_DELETE(m_pLogThread) @%s,%d
+1400c0158  Create kernel thread ok.
+1400c0178  Can't create kernel thread!
+1400c0198  Cannot create async DB thread
+1400c01b8  AsyncDBThread
+1400c01c8  Cannot new async DB thread
+1400c0210  Cannot create log thread
+1400c0230  Cannot log thread
+1400c0248  Close kernel thread ok.
+1400c0277  waiting . . .
+1400c0288  Close log thread failed
+1400c02a0  Close log thread OK
+1400c02b8  Close async DB thread failed
+1400c02d8  Close async DB thread OK
+1400c03d0  Invalid DateTimeSpan
+1400c03e8  Invalid DateTime
+1400c05c0  UNLOCK_CALLBACKS requires DEFER_CALLBACKS
+1400c0910  fcntl(%d, F_GETFL)
+1400c0948  1.2.3.4
+1400c0950  temporary failure in name resolution
+1400c0978  non-recoverable failure in name resolution
+1400c09a8  nodename nor servname provided, or not known
+1400c09d8  ai_socktype not supported
+1400c09f8  ai_family not supported
+1400c0a10  servname not supported for ai_socktype
+1400c0a38  invalid value for ai_flags
+1400c0a58  No error
+1400c0a68  memory allocation failure
+1400c0a88  address family for nodename not supported
+1400c0ab8  Request canceled
+1400c0ad0  system error
+1400c0ae0  no address associated with nodename
+1400c0b0f  ?Couldn't allocate %s
+1400c0b28  windows_socket_errors_lock_
+1400c0b48  GetAdaptersAddresses
+1400c0b60  ihplapi.dll
+1400c0b70  ::%x:%d.%d.%d.%d
+1400c0b88  ::%d.%d.%d.%d
+1400c0b98  %d.%d.%d.%d
+1400c0ba8  %u.%u.%u.%u%c
+1400c0bb8  <addr with socktype %d>
+1400c0bd0  [%s]:%d
+1400c0bd8  %s:%d
+1400c0be0  2001:4860:b002::68
+1400c0bf8  18.244.0.188
+1400c0c08  malloc failed during Winsock error
+1400c0c30  winsock error 0x%08x
+1400c0c48  LocalAlloc failed during Winsock error
+1400c0c70  socket
+1400c0cd0  %s: out of memory
+1400c0ce8  APPEND_CHAIN_MULTICAST
+1400c0d00  evbuffer_pullup
+1400c0d10  evbuffer_readln
+1400c0d70  EVENT_NO%s
+1400c0d80  %s: Couldn't launch IOCP
+1400c0da0  event_base_start_iocp_
+1400c0dc0  %s: EV_SIGNAL is not compatible with EV_READ, EV_WRITE or EV_CLOSED
+1400c0e08  event_assign
+1400c0e28   Timeout=%ld.%06d
+1400c0e44   Read
+1400c0e50    %p [%s %I64d]%s%s%s%s%s%s
+1400c0e6c   Write
+1400c0e80   Signal
+1400c0e88   Persist
+1400c0e98   Internal
+1400c0ea8    %p [%s %I64d, priority=%d]%s%s%s%s%s active%s%s\n
+1400c0ee0   Timeout
+1400c0ef0   [Internal]
+1400c0f00   [NextTime]
+1400c0f10  Active events:\n
+1400c0f20  Inserted events:\n
+1400c0f38  %s: calloc
+1400c0f48  event_base_priority_init
+1400c0f68  %s: realloc
+1400c0f80  %s: Too many common timeouts already in use; we only support %d per event_base
+1400c0fd0  event_base_init_common_timeout
+1400c0ff0  %s: no base to free
+1400c1008  event_base_free_
+1400c1020  %s: could not reinitialize event mechanism
+1400c1050  event_reinit
+1400c1060  %s: reentrant invocation.  Only one event_base_loop can run on each event_base at once.
+1400c10b8  event_base_loop
+1400c10c8  %s: Unable to make base notifiable.
+1400c10f0  libevent using: %s
+1400c1108  EVENT_SHOW_METHOD
+1400c1120  %s: no event mechanism available
+1400c1148  EVENT_PRECISE_TIMER
+1400c1160  event_base_new_with_config
+1400c1180  %s: Unable to construct event_base
+1400c11a8  event_init
+1400c11be  .AGetTickCount
+1400c11d0  GetTickCount64
+1400c11e0  kernel32.dll
+1400c11f7  CCan't change lock callbacks once they have been initialized.
+1400c1240  Trying to disable lock functions after they have been set up will probaby not work.
+1400c12a0  Can't change condition callbacks once they have been initialized.
+1400c12f0  Trying to disable condition functions after they have been set up will probaby not work.
+1400c1350  [%s] %s\n
+1400c135c  debug
+1400c1380  arc4rand_lock
+1400c1390  Too many events reading or writing on fd %d
+1400c13bc  signal
+1400c1410  %s: recv
+1400c1420  evsig_cb
+1400c1430  %s: socketpair
+1400c1440  evsig_init_
+1400c144c  malloc
+1400c1458  realloc
+1400c1460  %s: received signal %d, but have no base configured
+1400c1498  evsig_handler
+1400c14a8  evsig_base_lock
+1400c14c0  Added a signal to event base %p with signals already added to event_base %p.  Only one can have signals at a time with the %s backend.  The base with the most recently added signal or the most recent event_base_loop() call gets preference; do not rely on this behavior in future Libevent versions.
+1400c15f0  TQClient
+1400c1728  SAFE_DELETE(pMsg) @%s,%d
+1400c1750  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\npcworld.cpp
+1400c1798  CGameSocket::ProcessMsg()! MsgType:%d, NpcID:%u
+1400c17f0  m_pShell->SendPacket() @%s,%d
+1400c1810  nNetPacketSize
+1400c1820  Login OK. generator monster after %d secs
+1400c1990  SAFE_RELEASE(m_pGameMapDataDefault) @%s,%d
+1400c19c0  SAFE_DELETE(m_pMapManager) @%s,%d
+1400c19e8  SAFE_DELETE(m_pUserManager) @%s,%d
+1400c1a10  SAFE_DELETE(m_pNpcManager) @%s,%d
+1400c1a38  SAFE_RELEASE(m_pInstanceMgr) @%s,%d
+1400c1af0  ======== Create cq server kernel ok! ========
+1400c1b20  Create NPC protect path...
+1400c1b40  Create npc set...
+1400c1b58  Create player set...
+1400c1b70  Create map set...
+1400c1b88  SELECT * FROM cq_map WHERE id=0 LIMIT 1
+1400c1bb0  pShell
+1400c1c30  CNpcWorld::OnTimer. Gen @%s,%d
+1400c1c50  CNpcWorld::OnTimer. m_pNpcManager->OnTimer @%s,%d
+1400c1c88  !"CNpcWorld::OnTimer"
+1400c1ca0  NpcServer Tqdig
+1400c1cb0  skl8934##VJICW 
+1400c1cc0  Login game server . . .
+1400c1ce0  Player + Pet + Other: %u + %u + %u\nNPC active / total: %u / %u\nNPC: in game / generated / limit\n	%d / %d / %d\nGenerator: active+full+over / total\n	%u + %u + %u / %u\nSynPet: %u
+1400c1d90  Generator begin.
+1400c1fc0  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\t_singlemap2.h
+1400c20a8  CItemType
+1400c21d0  invalid map/set<T> iterator
+1400c22e0  !"PURE_VIRTUAL_FUNCTION_()"
+1400c25e8  map/set<T> too long
+1400c2650  !DelObj(pObj->GetID())
+1400c26e0  IF_NOT_
+1400c26f0  SELECT * FROM cq_itemtype
+1400c2710  m_setType
+1400c2720  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\itemtype.cpp
+1400c27f0  f:\version\cqserver-78.0.11-1204\include\db\idb.h
+1400c2998  SELECT * FROM %s WHERE %s=%lu LIMIT 1
+1400c29c0  !m_bMemoryData
+1400c29d8  f:\version\cqserver-78.0.11-1204\include\db\gamedata.h
+1400c2e48  pData
+1400c2e50  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\instancemgr.cpp
+1400c2e98  SELECT * FROM cq_instancetype
+1400c2fd0  SAFE_RELEASE(pInstanceTypeData) @%s,%d
+1400c2ff8  SAFE_RELEASE(pInstance) @%s,%d
+1400c3028  pInstance
+1400c3038  CInstanceMgr::CreateInstance InstanceType:%u not find
+1400c3160  pMgr && pMgr->Create()
+1400c31a0  m_pMapSet
+1400c31b0  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\mapmanager.h
+1400c31f8  m_pNpcGenSet
+1400c3210  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\npcmanager.cpp
+1400c3258  m_pEmptyGenSet
+1400c3268  m_pNpcTypeSet
+1400c3278  m_pNpcSet
+1400c32f0  f:\version\cqserver-78.0.11-1204\include\basecode\t_singlemap.h
+1400c3378  f:\version\cqserver-78.0.11-1204\include\basecode\gameobjset.h
+1400c3430  vector<T> too long
+1400c3838  f:\version\cqserver-78.0.11-1204\include\basecode\mycom.h
+1400c4000   at %s, %d
+1400c4044   at %s, %d
+1400c40a0  CNpcManager::OnTimer(3) @%s,%d
+1400c40c0  CNpcManager::OnTimer(1) @%s,%d
+1400c40e0  pNpcGenerator
+1400c41c0  CGameObjSet GetObjByIndex index oversize idx=%d, size=%u, in line %d
+1400c4210  CGameObjSet GetObjByIndex index oversize idx=%d, size=%u, in %s, %d
+1400c4660  idObj
+1400c4668  m_bOwner
+1400c4958  pObj && pObj->GetID()
+1400c4ad8  SELECT * FROM cq_monstertype
+1400c4af8  SELECT * FROM cq_generator order by mask desc
+1400c4b50  SAFE_RELEASE(pCloneRec) @%s,%d
+1400c4b98  SAFE_RELEASE(pRec) @%s,%d
+1400c4bb8  cq_generator
+1400c4cb8  CNpcManager::~CNpcManager. DynaGen[%u] not release
+1400c4d40  MaxNpcPerTimer
+1400c4da0  Process Msg:%d, Size:%d
+1400c4de0  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\network\netmsg.cpp
+1400c4e28  m_pNpcPathMap
+1400c4e40  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\npcpathmanager.cpp
+1400c5028  pPath
+1400c50a8  SELECT * FROM cq_protect_path
+1400c5380  m_pInstance
+1400c53b0  m_pUserSet
+1400c53c0  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\usermanager.h
+1400c5430  CUserManager::OnTimer @%s,%d
+1400c5450  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\usermanager.cpp
+1400c5498  pUserAmount && pPetAmount
+1400c5530  invalid vector<T> subscript
+1400c5898  m_pObj
+1400c5aa0  AdditiveSize
+1400c5ab0  Transform%d
+1400c5ac0  Index%d
+1400c5ac8  Amount
+1400c5ad0  ini\AdditiveSize.ini
+1400c5ae8  Header
+1400c5bb8  SELECT * FROM cq_map LIMIT 1234567890
+1400c5be0  CMapManager::Create m_pTerrainObjInfoMgr init failed.
+1400c5c18  CMapManager::Create ITerrainObjInfoMgr::CreateNew failed.
+1400c5c60  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\mapmanager.cpp
+1400c5ca8  CMapManager::GetTerrainObjFileName idTerrainObj is 0.
+1400c5ce0  m_pTerrainObjInfoMgr
+1400c5d48  m_ptr
+1400c5d50  f:\version\cqserver-78.0.11-1204\include\basecode\autoptr.h
+1400c5e08  SAFE_RELEASE(m_pTerrainObjInfoMgr) @%s,%d
+1400c5e70  pMap->Create(pRes, true)
+1400c5e90  SELECT * FROM cq_dynamap WHERE id=%u && del_flag=0 LIMIT 1
+1400c5ed0  idMap != ID_NONE
+1400c5f10  CMapManager::DeleteDynaMap( %u ) @%s,%d
+1400c5f88  CMapManager::CreateNewInstanceMap error %u
+1400c5fc0  pRecordMap
+1400c6a40  CAIStrategyMgr::GetAIStrategy(%d) bad parameter.
+1400c6b68  %04d-%02d-%02d %02d:%02d:%02d
+1400c6b90  .\AIStrategy.dat
+1400c7188  CAIStrategyMgr::Process() update neural AI generation %d.
+1400c71c8  Epoch neural AI generation %d
+1400c71e8  ainpc
+1400c71f0  Gene[%d]	Generation[%d]	Fitness[%d]
+1400c72a0  !"CMsgLogin::Process()"
+1400c72c0  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\network\msglogin.cpp
+1400c7348  CInstance::Create NPCServer Map Create Error, map:%u
+1400c7380  m_pInstanceTypeData
+1400c73a0  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\instance.cpp
+1400c7410  pInstanceTypeData
+1400c7468  ini/GameMap.dat
+1400c7480  CGameMap::AddTerrainObj GetTerrainNpcFileName failed, item type:%u at %s, %d.
+1400c74d0  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\gamemap.cpp
+1400c7540  invalid bitset<N> position
+1400c76c8  nPosX >= 0 && nPosX < m_pMapData->GetMapWidth()
+1400c76f8  nPosY >= 0 && nPosY < m_pMapData->GetMapHeight()
+1400c7938  nSizeAdd >= 0
+1400c7950  CGameMap::LeaveMap. Flag[%d] User[%u][%u, %d, %d] MapID[%u][%d, %d]
+1400c79a0  pUser->GetPosY() >= 0 && pUser->GetPosY() < m_pMapData->GetMapHeight()
+1400c79f0  pNpc->GetPosX() >= 0 && pNpc->GetPosX() < m_pMapData->GetMapWidth()
+1400c7a40  pNpc->GetPosY() >= 0 && pNpc->GetPosY() < m_pMapData->GetMapHeight()
+1400c7c40  CGameMap::EnterMap. Npc[%u] Flag[%d] User[%u][%u, %d, %d] MapID[%u][%d, %d]
+1400c7c90  nOldPosX >= 0 && nOldPosX < m_pMapData->GetMapWidth()
+1400c7cc8  nOldPosY >= 0 && nOldPosY < m_pMapData->GetMapHeight()
+1400c7d00  nNewPosX >= 0 && nNewPosX < m_pMapData->GetMapWidth()
+1400c7d38  nNewPosY >= 0 && nNewPosY < m_pMapData->GetMapHeight()
+1400c81f8  IMapData cannot create map %d from file %s, gridsize=%d
+1400c8230  IMapData cannot find map %d
+1400c8250  IMapData cannot open file %s
+1400c83b8  IF_OK
+1400c83c0  idx >= 0 && idx < nBufSize
+1400c86b7  Can't load data file of map[%u]!
+1400c86d8  m_pData
+1400c8720  CGameMap::ChangeMapDoc. DelMonster[%u]
+1400c8748  CGameMap::ChangeMapDoc. DelUser[%u]
+1400c8810  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\npctype.cpp
+1400c8ad0  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\i_role.h
+1400c8b10  m_pMapData
+1400c8b20  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\gamemap.h
+1400c8b88  m_pMap
+1400c8b90  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\npc.cpp
+1400c8bd0  nDir >= 0 && nDir < MAX_DIRSIZE
+1400c8c18  ALLUSERS
+1400c8c24  szMsg
+1400c8c40  m_pNpcPathTask
+1400c8c78  m_pMap->IsValidPoint(usTargetPosX, usTargetPosY)
+1400c8cb0  m_pMap->IsStandEnable(usTargetPosX, usTargetPosY)
+1400c8d10  deque<T> too long
+1400c8d50  !IsMaster()
+1400c8d60  f:\version\cqserver-78.0.11-1204\include\basecode\autolink.h
+1400c8f48  m_pMap->IsValidPoint(nPosX, nPosY)
+1400c8fa0  msg.Create(GetID(), nTargX, nTargY, GetDir(), actionSynchro, nTargX, nTargY, GetMapID())
+1400c9030  msg.Create(GetID(), GetPosX(), GetPosY(), GetDir(), actionSynchro, GetPosX(), GetPosY(), GetMapID())
+1400c90c0  m_idActTarget != ID_NONE
+1400c90e0  Name:%s,ID:%d,Mode:%d,Coord(%d,%d),Target:%d,PathSize=%d,IsDie:%d
+1400c9128  CNpc::Transform, wrong monster transform flag:%u
+1400c9160  CNpc::Transform, wrong transform monster type: %d
+1400c9198  CNpc::Transform, wrong postion (%d, %d)
+1400c91c0  m_pType
+1400c91c8  CNpc::CheckTransform, wrong monster transform flag:%u
+1400c9200  !IsValid() && pOwner
+1400c9240  DEAD_LOOP_BREAK
+1400c9250  nCount
+1400c9258  pCurr->IsValid()
+1400c9468  m_pMap->IsValidPoint(nNewPosX, nNewPosY)
+1400c9498  msg.Create(GetID(), nDir, nMode)
+1400c94c0  STR_PPKER_CALL_s
+1400c94d8  STR_GUARD_CALL_s
+1400c9518  !"CNpc::ProcessEscape()"
+1400c9534  pRole
+1400c95f0  m_pAI
+1400c964b  GeneratorID[%u] MonsterType[%u] Map[%u][%d, %d].
+1400c9680  pGenerator
+1400c9690  CNpc::Create(), Create Npc(type:%d, name:%s) can't find map(%u) at %s, %d
+1400c96e0  idNpc != ID_NONE
+1400c9720  npc: [%d][%d], target id: [%d]
+1400c9740  msg.Create(GetID(), GetPosX(), GetPosY(), GetDir(), actionDie)
+1400c97a8  CNpc::OnLogout NpcId:%u @%s,%d
+1400c98d8  m_pClusterData
+1400c98f0  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\npcgenerator.cpp
+1400c9988  gmlog/npc_generator
+1400c99a0  generator:%-9u, monster:%-9d
+1400c9a70  GeneratorID[%u]: m_nGenAmount[%d] < m_nAmount[%d]
+1400c9aa8  GeneratorID[%u]: m_nAmount <= 0
+1400c9b18  GeneratorID[%u]: m_nGenAmount[%d] > m_nAmount[%d]
+1400c9e18  pRes->CountRecord() > 0
+1400c9e38  SELECT * FROM %s WHERE id = %d LIMIT 1
+1400c9e60  Error: npc generator [%u] got invalid map [%u]!
+1400c9f10  nAction == MSGAINPCINFO_CREATENEW
+1400c9f40  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\network\msgainpcinfo.cpp
+1400c9f90  info.usAction == MSGAINPCINFO_CREATENEW
+1400ca1b0  nAction >= 0 && nAction < _MAX_MSGATRRIB
+1400ca1e0  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\network\msguserattrib.cpp
+1400ca258  m_unMsgSize + sizeof(UserAttribStruct) < MAX_PACKETSIZE
+1400ca338  CMsgWalk_pb::CreateBufMsg SerializeToArray failed.
+1400ca3d8  CMsgWalk_pb::CreateBufMsg ParseFromArray failed.
+1400ca450  !"CMsgWalk"
+1400ca460  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\network\msgwalk.cpp
+1400ca580  NPC idUser=%u MapID=%d (%u, %u) invalid point at %s, %d
+1400ca5b8  NPC idUser=%u has no map at %s, %d
+1400ca5e0  UserID=%u MapID=%d (%u, %u) invalid point at %s, %d
+1400ca618  UserID=%u has no map at %s, %d
+1400ca638  !"actionQuitSyn"
+1400ca658  !"actionChgMap"
+1400ca668  !"actionSelfUnfreeze"
+1400ca680  !"actionDivorce"
+1400ca6a0  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\network\msgaction.cpp
+1400ca7c0  CMsgPlayer::Process. @%s,%d
+1400ca7e0  !"pUser->Create()"
+1400ca7f4  pUser
+1400ca7fc  idMap
+1400ca810  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\network\msgplayer.cpp
+1400ca988  !"CMsgSyncAction"
+1400ca9a0  m_pInfo->nCount > 1
+1400ca9c0  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\network\msgsyncaction.cpp
+1400cac08  nReason < NPCPATH_FAILED_REASON_END
+1400cac30  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\network\msgnpcpath.cpp
+1400cad28  idUser != ID_NONE && idTarget != ID_NONE
+1400cad60  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\network\msgmagiceffect.cpp
+1400cadb0  idUser != ID_NONE
+1400cadc8  idRole != ID_NONE
+1400caec8  unType && idSender && idTarget
+1400caef0  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\network\msginteract.cpp
+1400caf68  !"INTERACT_QUERYINFO"
+1400caf80  !"INTERACT_ABORTMAGIC"
+1400caf98  pRealNpc
+1400cb050  %u, %u, %u, %u, %u, %u
+1400cb068  receive error MSG.
+1400cb080  Login game server failed.
+1400cb0a0  ERROR: login refuse!
+1400cb0b8  Login game server ok.
+1400cb0d0  ANSWER_OK
+1400cb0dc  GUARD
+1400cb0e8  strlen(szWords) <= 255
+1400cb100  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\network\msgtalk.cpp
+1400cb160  pManager
+1400cb170  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\npcpath.cpp
+1400cb1b8  pRes && pRes->CountRecord() > 0
+1400cb448  CUser::OnLogout @%s,%d
+1400cb460  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\user.cpp
+1400cb4a0  CUser::Create. NotStandEnable User[%u][%d, %d], MapID[%u][%d, %d], MapDoc[%d]
+1400cb4f0  pTarget->IsValidPoint(nPosX, nPosY)
+1400cb520  CUser::FlyMap. NotStandEnable User[%u][%d, %d], MapID[%u][%d, %d], MapDoc[%d]
+1400cb570  pTarget
+1400cb580  CUser::MoveForward. User[%u][%d, %d] NewPos[%d, %d], MapID[%u][%d, %d], MapDoc[%d]
+1400cb5e0  CUser::JumpPos. User[%u][%d, %d] NewPos[%d, %d], MapID[%u][%d, %d]
+1400cb630  CUser::JumpPos. NotStandEnable User[%u][%d, %d], MapID[%u][%d, %d], MapDoc[%d]
+1400cb6a8  CUser::OnTimer(). @%s,%d
+1400cb920  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\neuralaistrategy.cpp
+1400cbcb0  NpcPathManager()->QueryPath(idPath)
+1400cbce0  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\npcpathtask.cpp
+1400cbd28  m_idCurrentPath != NPCPATH_NONE
+1400cbde8  pMonster
+1400cbdf8  gmlog/emptynpc_generator
+1400cbf70  f:\version\cqserver-78.0.11-1204\npcserver\npckernel\emptynpcgen.cpp
+1400cbfb8  ERROR: Can not find NPC: %u in empty generator id: %d
+1400cbff0  WARNING: empty generator id: %d, had been overflow, current amount: %d
+1400cc2e8  f:\version\cqserver-78.0.11-1204\comm\i_messageport.h
+1400cc320  IMessagePort::SIZE_OF_TYPE() has a bad type=%d
+1400cc468  CMessagePort::Init() failed with m_id=%d, error=%u
+1400cc8d0  CMessagePort::PushMsg() with bad port=%d
+1400cc900  CMessagePort::PushMsg() with bad packet size=%d
+1400cc95f  port=%d, packet=%d [%s]
+1400cc978  !"CMessagePort::PushMsg() failed to new CMessagePacket"
+1400cc9b8  f:\version\cqserver-78.0.11-1204\comm\source\messageport.cpp
+1400cca20  CMessagePort::Send() with bad port %d
+1400cca70  nPortNum >= 1
+1400cca80  pPort && pPacket && pVarType && pBuf
+1400ccad0  !"CMessagePort::Recv() with bad VarType"
+1400ccb50  TypeLib
+1400ccb58  Software
+1400ccb64  SYSTEM
+1400ccb70  SECURITY
+1400ccb88  Hardware
+1400ccb98  Interface
+1400ccba8  FileType
+1400ccbb8  Component Categories
+1400ccbd0  CLSID
+1400ccbd8  AppID
+1400ccbe0  Delete
+1400ccbe8  NoRemove
+1400ccbf8  ForceRemove
+1400ccdd0  socket_async
+1400cce28  GetQueuedCompletionStatus exited with no event.
+1400cce58  win32
+1400cce60  bad allocation
+1400cce70  (cannot determine missing fields for lite message)
+1400ccea8  F:\cq\64\develop\protobuf\src\google\protobuf\message_lite.cc
+1400ccef0  CHECK failed: (byte_size_before_serialization) == (byte_size_after_serialization): 
+1400ccf44  Can't 
+1400ccf50  Protocol message was modified concurrently during serialization.
+1400ccf98  F:\cq\64\develop\protobuf\src\google\protobuf\message_lite.cc
+1400ccfe0  CHECK failed: (bytes_produced_by_serialization) == (byte_size_before_serialization): 
+1400cd040  Byte size calculation and serialization were inconsistent.  This may indicate a bug in protocol buffers or it may be caused by concurrent modification of the message.
+1400cd0e8  F:\cq\64\develop\protobuf\src\google\protobuf\message_lite.cc
+1400cd128  This shouldn't be called if all the sizes are equal.
+1400cd160   message of type "
+1400cd178  " because it is missing required fields: 
+1400cd1a8  F:\cq\64\develop\protobuf\src\google\protobuf\message_lite.cc
+1400cd1e8  CHECK failed: !coded_out.HadError(): 
+1400cd210  F:\cq\64\develop\protobuf\src\google\protobuf\message_lite.cc
+1400cd250  CHECK failed: IsInitialized(): 
+1400cd270  serialize
+1400cd280  F:\cq\64\develop\protobuf\src\google\protobuf\message_lite.cc
+1400cd2c0  CHECK failed: IsInitialized(): 
+1400cd2e0  serialize
+1400cd2f0  F:\cq\64\develop\protobuf\src\google\protobuf\message_lite.cc
+1400cd330  CHECK failed: IsInitialized(): 
+1400cd350  serialize
+1400cd668  F:\cq\64\develop\protobuf\src\google\protobuf\message_lite.cc
+1400cd6a8  parse
+1400cd710  bad allocation
+1400cd720  F:\cq\64\develop\protobuf\src\google\protobuf\stubs\common.cc
+1400cd760  This program requires version 
+1400cd780   of the Protocol Buffer runtime library, but the installed version is 
+1400cd7d0  .  Please update your library.  If you compiled the program yourself, make sure that your headers are from the same version of Protocol Buffers as your link-time library.  (Version verification failed in "
+1400cd8a8  F:\cq\64\develop\protobuf\src\google\protobuf\stubs\common.cc
+1400cd8e8  This program was compiled against version 
+1400cd920   of the Protocol Buffer runtime library, which is not compatible with the installed version (
+1400cd980  ).  Contact the program author for an update.  If you compiled the program yourself, make sure that your headers are from the same version of Protocol Buffers as your link-time library.  (Version verification failed in "
+1400cda60  %d.%d.%d
+1400cda6c  FATAL
+1400cda74  ERROR
+1400cda80  WARNING
+1400cda90  [libprotobuf %s %s:%d] %s\n
+1400cdf60  bad allocation
+1400cdf70  F:\cq\64\develop\protobuf\src\google\protobuf\io\coded_stream.cc
+1400cdfb8  The total number of bytes read was 
+1400cdfe0  F:\cq\64\develop\protobuf\src\google\protobuf\io\coded_stream.cc
+1400ce030  A protocol message was rejected because it was too big (more than 
+1400ce080   bytes).  To increase the limit (or to disable these warnings), see CodedInputStream::SetTotalBytesLimit() in google/protobuf/io/coded_stream.h.
+1400ce120  F:\cq\64\develop\protobuf\src\google\protobuf\io\coded_stream.cc
+1400ce168  CHECK failed: (0) == (BufferSize()): 
+1400ce190  F:\cq\64\develop\protobuf\src\google\protobuf\io\coded_stream.cc
+1400ce1e0  Reading dangerously large protocol message.  If the message turns out to be larger than 
+1400ce240   bytes, parsing will be halted for security reasons.  To increase the limit (or to disable these warnings), see CodedInputStream::SetTotalBytesLimit() in google/protobuf/io/coded_stream.h.
+1400ce300  F:\cq\64\develop\protobuf\src\google\protobuf\io\coded_stream.cc
+1400ce348  CHECK failed: (buffer_size) >= (0): 
+1400ce370  F:\cq\64\develop\protobuf\src\google\protobuf\io\coded_stream.cc
+1400ce3b8  CHECK failed: (str.size()) <= (kuint32max): 
+1400ce4b8  Can't get here.
+1400ce4d0  F:\cq\64\develop\protobuf\src\google\protobuf\io\coded_stream.cc
+1400ce520  bad allocation
+1400ce530  F:\cq\64\develop\protobuf\src\google\protobuf\io\zero_copy_stream_impl_lite.cc
+1400ce580  CHECK failed: (last_returned_size_) > (0): 
+1400ce5b0  BackUp() can only be called after a successful Next().
+1400ce5f0  F:\cq\64\develop\protobuf\src\google\protobuf\io\zero_copy_stream_impl_lite.cc
+1400ce640  CHECK failed: (count) <= (last_returned_size_): 
+1400ce680  F:\cq\64\develop\protobuf\src\google\protobuf\io\zero_copy_stream_impl_lite.cc
+1400ce6d0  CHECK failed: (count) >= (0): 
+1400ce6f0  F:\cq\64\develop\protobuf\src\google\protobuf\io\zero_copy_stream_impl_lite.cc
+1400ce740  CHECK failed: (count) >= (0): 
+1400ce760  F:\cq\64\develop\protobuf\src\google\protobuf\io\zero_copy_stream_impl_lite.cc
+1400ce7b0  CHECK failed: (last_returned_size_) > (0): 
+1400ce7e0  BackUp() can only be called after a successful Next().
+1400ce820  F:\cq\64\develop\protobuf\src\google\protobuf\io\zero_copy_stream_impl_lite.cc
+1400ce870  CHECK failed: (count) <= (last_returned_size_): 
+1400ce8b0  F:\cq\64\develop\protobuf\src\google\protobuf\io\zero_copy_stream_impl_lite.cc
+1400ce900  CHECK failed: (count) >= (0): 
+1400ce920  F:\cq\64\develop\protobuf\src\google\protobuf\io\zero_copy_stream_impl_lite.cc
+1400ce970  Cannot allocate buffer larger than kint32max for 
+1400ce9a8  StringOutputStream.
+1400ce9c0  F:\cq\64\develop\protobuf\src\google\protobuf\io\zero_copy_stream_impl_lite.cc
+1400cea10  CHECK failed: (count) >= (0): 
+1400cea30  F:\cq\64\develop\protobuf\src\google\protobuf\io\zero_copy_stream_impl_lite.cc
+1400cea80  CHECK failed: (count) <= (target_->size()): 
+1400ceab0  F:\cq\64\develop\protobuf\src\google\protobuf\io\zero_copy_stream_impl_lite.cc
+1400ceb00  CHECK failed: backup_bytes_ == 0 && buffer_.get() != NULL: 
+1400ceb40   BackUp() can only be called after Next().
+1400ceb70  F:\cq\64\develop\protobuf\src\google\protobuf\io\zero_copy_stream_impl_lite.cc
+1400cebc0  CHECK failed: (count) <= (buffer_used_): 
+1400cebf0   Can't back up over more bytes than were returned by the last call to Next().
+1400cec40  F:\cq\64\develop\protobuf\src\google\protobuf\io\zero_copy_stream_impl_lite.cc
+1400cec90  CHECK failed: (count) >= (0): 
+1400cecb0   Parameter to BackUp() can't be negative.
+1400cece0  F:\cq\64\develop\protobuf\src\google\protobuf\io\zero_copy_stream_impl_lite.cc
+1400ced30  CHECK failed: (count) >= (0): 
+1400ced50  F:\cq\64\develop\protobuf\src\google\protobuf\io\zero_copy_stream_impl_lite.cc
+1400ceda0  CHECK failed: (backup_bytes_) == (0): 
+1400cedd0  F:\cq\64\develop\protobuf\src\google\protobuf\io\zero_copy_stream_impl_lite.cc
+1400cee20  CHECK failed: (count) >= (0): 
+1400cee40  F:\cq\64\develop\protobuf\src\google\protobuf\io\zero_copy_stream_impl_lite.cc
+1400cee90  CHECK failed: (buffer_used_) == (buffer_size_): 
+1400ceec8   BackUp() can only be called after Next().
+1400cef00  F:\cq\64\develop\protobuf\src\google\protobuf\io\zero_copy_stream_impl_lite.cc
+1400cef50  CHECK failed: (count) <= (buffer_used_): 
+1400cef80   Can't back up over more bytes than were returned by the last call to Next().
+1400cf470  bad allocation
+1400cf480  bad allocation
+1400cf490  F:\cq\64\develop\protobuf\src\google\protobuf\io\zero_copy_stream.cc
+1400cf4e0  This ZeroCopyOutputStream doesn't support aliasing. Reaching here usually means a ZeroCopyOutputStream implementation bug.
+1400cf588  bad allocation
+1400cf618  f:\version\cqserver-78.0.11-1204\mapdata\i_mapdata.h
+1400cf650  Bad call to IMapData::CreateNew()
+1400cf6f0  vector<bool> too long
+1400cfbe0  list<T> too long
+1400d0418  uLoopCount
+1400d0428  f:\version\cqserver-78.0.11-1204\mapdata\source\mapdata.cpp
+1400d0858  CMapData cannot load map %d from file %s, gridsize=%d
+1400d0908  CMapData cannot create layer data
+1400d0930  CMapData cannot create item from file %s for owner %u
+1400d0968  CMapData cannot find item %d, key %s, field %s
+1400d0998  ini\TerrainNpc.ini
+1400d09ac  Dir%lu
+1400d09b8  NpcType%lu
+1400d09f0  CMapData::AddTerrainObj cannot create layer data
+1400d0a30  CMapData::AddTerrainObj cannot create item from file %s for owner %u
+1400d0a78  CMapData::AddTerrainObj file name is null, owner:%u.
+1400d10a8  CMapStaticData cannot open puzzle file %s
+1400d13a8  CMapStaticData cannot create layer data
+1400d13f8  CMapStaticData file %s has a unknown map object type %d
+1400d1430  CMapStaticData file %s cannot create terrain from file %s
+1400d1470  CMapStaticData file %s cannot add obj from %s to (%d, %d)
+1400d14b8  CMapStaticData file %s cannot create cells(%d, %d)
+1400d14f0  CMapStaticData file %s has a bad size(%d, %d)
+1400d1520  CMapStaticData cannot open file %s
+1400d1598  CMapStaticData map %d (%s) cannot load puzzle %s, blocksize=%d
+1400d15e0  CMapStaticData cannot load map %d from file %s
+1400d1610  CMapStaticData cannot create map data
+1400d1910  CTerrainObjPart cannot create layer data
+1400d1940  CTerrainObjPart cannot create terrain obj part data
+1400d1d50  CTerrainObj %s added %d of %d parts
+1400d1d78  CTerrainObj cannot create terrain data
+1400d1da0  CTerrainObj cannot open file %s
+1400d2058  CHECK failed: (&from) != (this): 
+1400d2080  f:\version\cqserver-78.0.11-1204\protobuf\msgwalk.pb.cc
+1400d20e0  CMsgWalkPB
+1400d2400  GenuineIntelAuthenticAMDCentaurHauls
+1400d2470  bad allocation
+1400d2530  F:\cq\64\develop\protobuf\src\google\protobuf\wire_format_lite.cc
+1400d2578  CHECK failed: value.size() <= kint32max: 
+1400d25b0  F:\cq\64\develop\protobuf\src\google\protobuf\wire_format_lite.cc
+1400d25f8  CHECK failed: value.size() <= kint32max: 
+1400d2630  F:\cq\64\develop\protobuf\src\google\protobuf\wire_format_lite.cc
+1400d2678  CHECK failed: value.size() <= kint32max: 
+1400d26b0  F:\cq\64\develop\protobuf\src\google\protobuf\wire_format_lite.cc
+1400d26f8  CHECK failed: value.size() <= kint32max: 
+1400d2730  F:\cq\64\develop\protobuf\src\google\protobuf\wire_format_lite.cc
+1400d2778  CHECK failed: (end - target) == (size): 
+1400d27b0  F:\cq\64\develop\protobuf\src\google\protobuf\wire_format_lite.cc
+1400d27f8  CHECK failed: (end - target) == (size): 
+1400fff40  WS2_32.dll
+1400fff4e  CloseHandle
+1400fff5c  Sleep
+1400fff64  GetCurrentThreadId
+1400fff7a  GetThreadId
+1400fff88  GetSystemInfo
+1400fff98  DeleteCriticalSection
+1400fffb0  EnterCriticalSection
+1400fffc8  LeaveCriticalSection
+1400fffe0  GetLastError
+1400ffff0  CreateMutexA
+140100000  InitializeCriticalSection
+14010001c  CreateDirectoryA
+140100030  CreateEventA
+140100040  ReleaseMutex
+140100050  WaitForSingleObject
+140100066  InitializeCriticalSectionAndSpinCount
+14010008e  TryEnterCriticalSection
+1401000a8  SetEvent
+1401000b4  ResetEvent
+1401000c2  GetTickCount
+1401000d2  FormatMessageA
+1401000e4  LocalFree
+1401000f0  LoadLibraryA
+140100100  GetSystemDirectoryA
+140100116  FreeLibrary
+140100124  GetProcAddress
+140100136  LocalAlloc
+140100144  CreateFileMappingA
+14010015a  UnmapViewOfFile
+14010016c  MapViewOfFile
+14010017c  GetSystemTimeAsFileTime
+140100196  QueryPerformanceCounter
+1401001b0  QueryPerformanceFrequency
+1401001ca  KERNEL32.dll
+1401001da  SetForegroundWindow
+1401001f0  ShowWindow
+1401001fe  IsIconic
+14010020a  GetPropA
+140100216  IsWindow
+140100222  GetWindow
+14010022e  GetDesktopWindow
+140100242  MessageBoxA
+140100250  DrawIcon
+14010025c  AppendMenuA
+14010026a  SendMessageA
+14010027a  PostMessageA
+14010028a  GetSystemMenu
+14010029a  GetClientRect
+1401002aa  SetTimer
+1401002b6  KillTimer
+1401002c2  EnableWindow
+1401002d2  LoadIconA
+1401002de  GetSystemMetrics
+1401002f2  RemovePropA
+140100300  SetPropA
+14010030a  USER32.dll
+140100318  CryptGenRandom
+14010032a  CryptAcquireContextA
+140100340  ADVAPI32.dll
+140100350  ShellExecuteA
+14010035e  SHELL32.dll
+14010036c  ?log_InlineLogERROR@@YAXPEBDZZ
+14010038e  ?log_InlineLogCATCH_ERROR@@YAXPEBDZZ
+1401003b6  ??1CIniFile@@QEAA@XZ
+1401003ce  ?GetInt@CIniFile@@QEAAHPEBD@Z
+1401003ee  ?GetString@CIniFile@@QEAA_NPEADPEBDH@Z
+140100418  ??0CIniFile@@QEAA@PEBD0@Z
+140100434  ??1CThreadBase@@UEAA@XZ
+14010044e  ?TimeGet@tq@@YAKH@Z
+140100464  ?log_InlineLogMessage@@YAXPEBDZZ
+140100488  ??0CThreadBase@@QEAA@XZ
+1401004a2  ?log_InlineLogWARNING@@YAXPEBDZZ
+1401004c6  ?CreateThread@CThreadBase@@QEAA_NPEBD_N@Z
+1401004f2  ?SafeCopy@tq@@YA_NPEADPEBD_K@Z
+140100514  ?CreateNew@ILogKernel@@SAPEAV1@XZ
+140100538  ?DateTime@tq@@YAXPEAD_J@Z
+140100554  ?log_Save@tq@@YAXPEBD0H@Z
+140100570  ?InitLog@tq@@YAXPEBD00_J@Z
+14010058e  ?SetLogThreadStatus@tq@@YAXH@Z
+1401005b0  ?CloseThread@CThreadBase@@QEAA_NK@Z
+1401005d4  CQBase.dll
+1401005e2  ??1CTickAnalyst@@QEAA@XZ
+1401005fe  ??0CTickAnalyst@@QEAA@H@Z
+14010061a  ?Analyst@@YAPEAVIAnalyst@@XZ
+140100638  Analyst.dll
+140100646  ??0CAsyncDBThread@@QEAA@XZ
+140100664  DatabaseInit
+140100674  DatabaseUnInit
+140100686  ?OnDestroy@CAsyncDBThread@@UEAAXXZ
+1401006ac  ?OnInit@CAsyncDBThread@@UEAAXXZ
+1401006ce  ?OnProcess@CAsyncDBThread@@UEAA_NXZ
+1401006f4  ??1CAsyncDBThread@@UEAA@XZ
+140100710  DB.dll
+140100718  mfc90.dll
+140100724  _purecall
+140100730  memset
+14010073a  memcpy
+140100744  __CxxFrameHandler3
+14010075a  ??8type_info@@QEBA_NAEBV0@@Z
+14010077a  _CxxThrowException
+140100790  _errno
+14010079a  _beginthreadex
+1401007ac  _snprintf
+1401007b8  __C_specific_handler
+1401007d0  _set_purecall_handler
+1401007e8  _set_invalid_parameter_handler
+14010080a  _time32
+140100814  _open
+14010081c  _read
+140100824  _close
+14010082e  _fstat64
+14010083a  _strtoi64
+140100846  strtol
+140100850  _vscprintf
+14010085e  _vsnprintf
+14010086c  memcmp
+140100876  strchr
+140100880  getenv
+14010088a  _getpid
+140100894  memmove
+14010089e  sscanf
+1401008a8  atoi
+1401008b0  memchr
+1401008ba  _lseeki64
+1401008c6  _get_osfhandle
+1401008d8  _fstat64i32
+1401008e6  malloc
+1401008f0  calloc
+1401008fa  _strdup
+140100904  realloc
+14010090e  free
+140100916  fputc
+14010091e  fprintf
+140100928  abort
+140100930  exit
+140100938  __iob_func
+140100946  strerror
+140100952  signal
+14010095c  sprintf
+140100966  ??1exception@std@@UEAA@XZ
+140100982  ??0exception@std@@QEAA@AEBQEBD@Z
+1401009a6  ?what@exception@std@@UEBAPEBDXZ
+1401009c8  ??0exception@std@@QEAA@XZ
+1401009e4  _invalid_parameter_noinfo
+140100a00  ??0exception@std@@QEAA@AEBV01@@Z
+140100a24  memmove_s
+140100a30  rand
+140100a38  _localtime32
+140100a48  fread
+140100a50  fclose
+140100a5a  fopen
+140100a62  strstr
+140100a6c  _stricmp
+140100a78  strncpy
+140100a86  MSVCR90.dll
+140100a94  _unlock
+140100a9e  __dllonexit
+140100aac  _encode_pointer
+140100abe  _lock
+140100ac6  _onexit
+140100ad0  _decode_pointer
+140100ae2  _amsg_exit
+140100af0  __getmainargs
+140100b00  _XcptFilter
+140100b0e  _exit
+140100b16  _ismbblead
+140100b24  _cexit
+140100b2e  _acmdln
+140100b38  _initterm
+140100b44  _initterm_e
+140100b52  _configthreadlocale
+140100b68  __setusermatherr
+140100b7c  _commode
+140100b88  _fmode
+140100b92  __set_app_type
+140100ba4  ?terminate@@YAXXZ
+140100bb8  ?_type_info_dtor_internal_method@type_info@@QEAAXXZ
+140100bee  __crt_debugger_hook
+140100c04  ??1?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@QEAA@XZ
+140100c4e  ??0?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@QEAA@AEBV01@@Z
+140100ca0  ??0?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@QEAA@PEBD@Z
+140100cee  ??5?$basic_istream@DU?$char_traits@D@std@@@std@@QEAAAEAV01@AEAN@Z
+140100d32  ?_Lock@_Mutex@std@@QEAAXXZ
+140100d50  ?_Unlock@_Mutex@std@@QEAAXXZ
+140100d70  ?flush@?$basic_ostream@DU?$char_traits@D@std@@@std@@QEAAAEAV12@XZ
+140100db4  ?_Osfx@?$basic_ostream@DU?$char_traits@D@std@@@std@@QEAAXXZ
+140100df2  ?uncaught_exception@std@@YA_NXZ
+140100e14  ?setstate@?$basic_ios@DU?$char_traits@D@std@@@std@@QEAAXH_N@Z
+140100e54  ?sputc@?$basic_streambuf@DU?$char_traits@D@std@@@std@@QEAAHD@Z
+140100e96  ?sputn@?$basic_streambuf@DU?$char_traits@D@std@@@std@@QEAA_JPEBD_J@Z
+140100ede  ??6?$basic_ostream@DU?$char_traits@D@std@@@std@@QEAAAEAV01@N@Z
+140100f20  ?close@?$basic_ofstream@DU?$char_traits@D@std@@@std@@QEAAXXZ
+140100f60  ??6?$basic_ostream@DU?$char_traits@D@std@@@std@@QEAAAEAV01@P6AAEAV01@AEAV01@@Z@Z
+140100fb4  ?endl@std@@YAAEAV?$basic_ostream@DU?$char_traits@D@std@@@1@AEAV21@@Z
+140100ffc  ??_D?$basic_ofstream@DU?$char_traits@D@std@@@std@@QEAAXXZ
+140101038  ??0?$basic_ofstream@DU?$char_traits@D@std@@@std@@QEAA@PEBDHH@Z
+14010107a  ?close@?$basic_ifstream@DU?$char_traits@D@std@@@std@@QEAAXXZ
+1401010ba  ?ignore@?$basic_istream@DU?$char_traits@D@std@@@std@@QEAAAEAV12@_JH@Z
+140101102  ?clear@?$basic_ios@DU?$char_traits@D@std@@@std@@QEAAXH_N@Z
+140101140  ??_D?$basic_ifstream@DU?$char_traits@D@std@@@std@@QEAAXXZ
+14010117c  ??0?$basic_ifstream@DU?$char_traits@D@std@@@std@@QEAA@PEBDHH@Z
+1401011bc  MSVCP90.dll
+1401011ca  freeaddrinfo
+1401011da  getaddrinfo
+1401011e8  WSASend
+1401011f2  WSARecv
+1401011fc  timeGetTime
+140101208  WINMM.dll
+140101214  MulDiv
+14010121e  GetStartupInfoA
+140101230  TerminateProcess
+140101244  GetCurrentProcess
+140101258  UnhandledExceptionFilter
+140101274  SetUnhandledExceptionFilter
+140101292  IsDebuggerPresent
+1401012a6  RtlVirtualUnwind
+1401012ba  RtlLookupFunctionEntry
+1401012d4  RtlCaptureContext
+1401012e8  GetCurrentProcessId
+1401012fe  ReleaseSemaphore
+140101312  GetQueuedCompletionStatus
+14010132e  CreateIoCompletionPort
+140101348  CreateSemaphoreA
+14010135c  PostQueuedCompletionStatus
+140101378  OLEAUT32.dll
+140101388  ??0CMyHeap@@QEAA@PEBD@Z
+1401013a2  ?Alloc@CMyHeap@@QEAAPEAX_K@Z
+1401013c2  ?Free@CMyHeap@@QEAAXPEAX@Z
+1401013e0  ?IsValidPt@CMyHeap@@QEBA_NPEBX@Z
+140101404  ??1CMyHeap@@QEAA@XZ
+14010141a  ?SetSection@CIniFile@@QEAAXPEBD@Z
+14010143e  ?CreateNew@ITerrainObjInfoMgr@@SAPEAV1@XZ
+14010146a  ?SysLogSave@tq@@YAXPEBD0ZZ
+140101488  ?RandGet@tq@@YAHH@Z
+14010149e  ?theInstance@@YAAEAVIStringManager@@XZ
+1401014c8  ?log_InlineLogDBERROR@@YAXPEBDZZ
+1401014ec  ?MyLogSave@tq@@YAXPEBD0ZZ
+140101508  ?IsTimeRange@tq@@YA_NKK_J@Z
+140101526  ??1CStringPacker@tq@@UEAA@XZ
+140101546  ?SetBuf@CStringPacker@tq@@QEAAXPEADI_N@Z
+140101572  ??0CStringPacker@tq@@QEAA@XZ
+140101592  ?GetString@CStringPacker@tq@@QEAA_NIPEADI@Z
+1401015c0  ?GetSize@CStringPacker@tq@@QEAAIXZ
+1401015e6  ?AddString@CStringPacker@tq@@QEAA_NPEBD@Z
+140101612  ?SysTimeGet@tq@@YAKXZ
+14010162a  ?DumpBuffer@tq@@YA?AVString@@PEBDH@Z
+140101652  ?GetString@CIniMgr@tq@@QEAAPEBDPEBD00_N@Z
+14010167e  ?GetInstance@tq@@YAAEAVCIniMgr@1@XZ
+1401016a4  InstanceGet
+1401016b2  _beginthread
+1401016c2  fflush
+1401016cc  fseek
+1401016d4  _splitpath
+1401016e2  tolower
+1401016ec  _setmbcp
+1401016f8  ??Y?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@QEAAAEAV01@AEBV01@@Z
+140101750  ??Y?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@QEAAAEAV01@PEBD@Z
+1401017a4  ??0?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@QEAA@XZ
+1401017ee  ?data@?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@QEBAPEBDXZ
+14010183e  ?size@?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@QEBA_KXZ
+14010188c  ?resize@?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@QEAAX_K@Z
+1401018de  ?begin@?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@QEAA?AV?$_String_iterator@DU?$char_traits@D@std@@V?$allocator@D@2@@2@XZ
+14010196c  ?empty@?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@QEBA_NXZ
+1401019bc  ?clear@?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@QEAAXXZ
+140101a0a  ?_Myptr@?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@IEAAPEADXZ
+140101a5c  ?c_str@?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@QEBAPEBDXZ
+140101aae  ?append@?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@QEAAAEAV12@PEBD_K@Z
+140101b0a  ?reserve@?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@QEAAX_K@Z
+140101b5c  ?max@?$numeric_limits@H@std@@SAHXZ
+140101b82  ?capacity@?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@QEBA_KXZ
+140101bd4  ??$?MDU?$char_traits@D@std@@V?$allocator@D@1@@std@@YA_NAEBV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@0@0@Z
+140101c50  ?end@?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@QEAA?AV?$_String_iterator@DU?$char_traits@D@std@@V?$allocator@D@2@@2@XZ
+140101cdc  ?npos@?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@2_KB
+140101d26  ?find@?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@QEBA_KPEBD_K1@Z
+140101d7c  ?append@?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@QEAAAEAV12@AEBV12@@Z
+140101dd8  ?swap@?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@QEAAXAEAV12@@Z
+140101e2c  WSAGetOverlappedResult
+140101e46  WSAIoctl
+140101e50  zlibwapi.dll
+140101e60  CreateFileA
+140101e6e  CreateFileW
+140101e7c  ReadFile
+140101e88  WriteFile
+140101e94  SetFilePointer
+140101ea6  GetFileSize
+140102018  .?AV_Ref_count_base@tr1@std@@
+140102050  .?AV?$_Ref_count_d@DP6AXPEAD@ZV?$allocator@H@std@@@tr1@std@@
+1401020a0  .P6AXPEAD@Z
+1401020c8  .?AVIDialog@@
+1401020e8  .?AVCKernelThread@@
+140102110  .?AVCThreadBase@@
+140102138  .?AVIShell@@
+140102168  .?AVCLogThread@@
+140102198  .?AVCNpcServerApp@@
+1401021c0  .?AVCWinApp@@
+1401021e0  .?AVCWinThread@@
+140102208  .?AVCCmdTarget@@
+140102230  .?AVCObject@@
+140102250  .PEAD
+140102268  .PEAX
+140102280  .?AVCCriticalSection@@
+1401022a8  .?AVCSyncObject@@
+1401022d8  .?AVCAboutDlg@@
+1401022f8  .?AVCDialog@@
+140102318  .?AVCWnd@@
+140102338  .?AVCEdit@@
+140102358  .?AVCNpcServerDlg@@
+140102380  .?AVCAsyncDBThread@@
+1401023b0  .?AUThank_you@Define_the_symbol__ATL_MIXED@@
+140102520  .?AVIKernel@@
+140102540  .?AV?$_Ref_count@VCAIStrategyMgr@@@tr1@std@@
+140102580  .?AV?$_Ref_count_d@VCItemType@@V?$TReleaseDeleter@VCItemType@@@@V?$allocator@H@std@@@tr1@std@@
+1401025f0  .?AV?$TReleaseDeleter@VCItemType@@@@
+140102628  .?AVCNpcWorld@@
+140102640  cq_itemtype
+140102660  .?AVbad_alloc@std@@
+140102688  .?AVexception@std@@
+1401026b0  .?AVlogic_error@std@@
+1401026d8  .?AVout_of_range@std@@
+140102700  .?AVCItemType@@
+140102720  .?AV?$ISingleMap2@V?$CConstGameData@$1?szItemTypeTable@@3PADA$1?szItemTypeTableID@@3PADA@@@@
+140102790  .?AV?$CSingleMap2@V?$CConstGameData@$1?szItemTypeTable@@3PADA$1?szItemTypeTableID@@3PADA@@@@
+140102800  .?AVlength_error@std@@
+140102830  .?AVIGameData@@
+140102850  .?AV?$CGameData@$1?szInstanceTypeTable@@3PADA$1?szID@@3PADA@@
+1401028a0  .?AVCInstanceMgr@@
+1401028d8  .?AV?$ISingleMap@VINpc@@@@
+140102908  .?AV?$IGameObjSet@VIGenerator@@@@
+140102940  .?AV?$IGameObjSet@VCNpcType@@@@
+140102970  .?AV?$CGameObjSet@VIGenerator@@@@
+1401029a8  .?AV?$CGameObjSet@VCNpcType@@@@
+1401029d8  .?AV?$CSingleMap@VINpc@@@@
+140102a10  .?AVCNetMsg@@
+140102a28  cq_protect_path
+140102a48  .?AV?$ISingleMap@VCNpcPath@@@@
+140102a78  .?AV?$CSingleMap@VCNpcPath@@@@
+140102ab0  .?AVCUserManager@@
+140102ad8  .?AV?$IGameObjSet@VCUser@@@@
+140102b08  .?AV?$CGameObjSet@VCUser@@@@
+140102b40  .?AV?$IGameObjSet@VCGameMap@@@@
+140102b70  .?AVCMapManager@@
+140102b98  .?AV?$CGameObjSet@VCGameMap@@@@
+140102bd0  .?AVIAIStrategy@@
+140102bf8  .?AV?$Singleton@VCAIStrategyMgr@@@tq@@
+140102c30  .?AV?$_Ref_count@VCNeuralAIStrategy@@@tr1@std@@
+140102c70  .?AV?$_Ref_count@VCDefaultAIStrategy@@@tr1@std@@
+140102cb8  .?AVCDefaultAIStrategy@@
+140102ce8  .?AVCAIStrategyMgr@@
+140102d10  .?AVCNeuralAIStrategy@@
+140102d40  .?AVCMsgLogin@@
+140102d58  cq_instancetype
+140102d78  .?AVCInstance@@
+140102d94  cq_map
+140102db0  .?AV?$_Ref_count_d@U_iobuf@@P6AHPEAU1@@ZV?$allocator@H@std@@@tr1@std@@
+140102e08  .P6AHPEAU_iobuf@@@Z
+140102e30  .?AVCGameMap@@
+140102e50  .?AVCGameObj@@
+140102e68  cq_monstertype
+140102e88  .?AVCNpcType@@
+140102eb0  .?AV?$CGameData@$1?szNpcType@@3PADA$1?szID@@3PADA@@
+140102f00  .?AVIRole@@
+140102f20  .?AVINpc@@
+140102f40  .?AVCNpc@@
+140102f58  cq_generator
+140102f68  cq_monster_cluster
+140102f90  .?AVIGenerator@@
+140102fb8  .?AVCNpcGenerator@@
+140102fe0  .?AV?$CGameData@$1?szGenerator@@3PADA$1?szID@@3PADA@@
+140103030  .?AV?$CGameData@$1?szMonsterClusterTable@@3PADA$1?szID@@3PADA@@
+140103088  .?AVCMsgAiNpcInfo@@
+1401030b8  .?AVCMsgMonsterJump@@
+1401030e8  .?AVCMsgDynaGenerator@@
+140103118  .?AVCMsgUserAttrib@@
+140103148  .?AVCMsgWalk@@
+140103170  .?AVCMsgAction@@
+1401031a0  .?AVCMsgPlayer@@
+1401031d0  .?AVCMsgInstance@@
+140103200  .?AVCMsgSyncAction@@
+140103230  .?AVCMsgMapInfo@@
+140103260  .?AVCMsgMonsterTransform@@
+140103298  .?AVCMsgNpcPath@@
+1401032c8  .?AVCMsgMagicEffect@@
+1401032f8  .?AVCMsgInteract@@
+140103328  .?AVCMsgTalk@@
+140103350  .?AVCNpcPath@@
+140103370  .?AV?$CGameData@$1?szNpcPath@@3PADA$1?szID@@3PADA@@
+1401033c0  .?AVCUser@@
+1401033f8  .?AV?$IGameObjSet@VINpc@@@@
+140103428  .?AV?$CGameObjSet@VINpc@@@@
+140103478  .?AVCEmptyNpcGen@@
+1401034b0  .?AVIMessagePort@@
+1401034d8  .?AVCMessagePort@@
+140103500  .?AVtype_info@@
+140103598  .?AVMessageLite@protobuf@google@@
+140103600  .?AVFunctionClosure0@internal@protobuf@google@@
+140103640  .?AVClosure@protobuf@google@@
+140103670  .?AVFatalException@protobuf@google@@
+1401036c0  .?AVArrayInputStream@io@protobuf@google@@
+140103700  .?AVZeroCopyInputStream@io@protobuf@google@@
+140103740  .?AVArrayOutputStream@io@protobuf@google@@
+140103780  .?AVZeroCopyOutputStream@io@protobuf@google@@
+1401037c0  .?AVStringOutputStream@io@protobuf@google@@
+140103800  .?AVCopyingInputStream@io@protobuf@google@@
+140103840  .?AVCopyingInputStreamAdaptor@io@protobuf@google@@
+140103888  .?AVCopyingOutputStream@io@protobuf@google@@
+1401038d0  .?AVCopyingOutputStreamAdaptor@io@protobuf@google@@
+140103938  .?AVIMapData@@
+140103958  .?AV?$_Ref_count@UNodeInfo@@@tr1@std@@
+140103990  .?AVCMapData@@
+1401039b8  .?AV?$_Ref_count@VCMapStaticData@@@tr1@std@@
+140103a00  .?AV?$_Ref_count@VCLayer@@@tr1@std@@
+140103a38  .?AVCMapObj@@
+140103a60  .?AV?$_Ref_count@VCTerrainObjPart@@@tr1@std@@
+140103aa0  .?AVCTerrainObjPart@@
+140103ad0  .?AV?$_Ref_count@VCTerrainObj@@@tr1@std@@
+140103b10  .?AVCTerrainObj@@
+140103b40  .?AVIFile@@
+140103b60  .?AVC7zFile@?A0x16c71dd6@@
+140103b90  .?AVCGzFile@?A0x16c71dd6@@
+140103bc0  .?AVCNormalFile@?A0x16c71dd6@@
+140103bf8  .?AVCMsgWalkPB@@
+14011f630  Dialog
+14011f744  Dialog
+14011f85e  关于 NpcServer(&A)...
+14011f89c  GroupIcon
+14011f922  StringFileInfo
+14011f946  080404b0
+14011f95e  Comments
+14011f970  Dec. 10, 2007
+14011f992  CompanyName
+14011f9ac  TQ Digital Entertainment
+14011f9e6  FileDescription
+14011fa08  Conquer Online NPC Server
+14011fa42  FileVersion
+14011fa5c  2007, 1210, 0, 123
+14011fa8a  InternalName
+14011faa4  NpcServer
+14011fabe  LegalCopyright
+14011fadc  Copyright (C) 2002-2007
+14011fb12  LegalTrademarks
+14011fb3a  OriginalFilename
+14011fb5c  NpcServer.exe
+14011fb7e  PrivateBuild
+14011fb9e  ProductName
+14011fbb8  Conquer Online NPC Server
+14011fbf2  ProductVersion
+14011fc10  2007, 1210, 0, 123
+14011fc3e  SpecialBuild
+14011fc5e  VarFileInfo
+14011fc7e  Translation
+ff00001710  00000000-0000-0000-0000-000000000000

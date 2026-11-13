@@ -1093,3 +1093,14 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 64 suites green, six cycles. Total ported: 592 of 4099 bodies.
 - Next: `0x140024000` — the insert core with the rebalance (the big one, ~600 lines including the length_error throw).
   After it the `0x140024970` seam goes away, and `0x1400250e0` / `0x140025690` / `0x140025750` close out clean.
+
+## D248 (latest)
+
+- New reference: `Docs/reference/NpcServer_Ghidra/` (class-level Ghidra dump of the same image) + `tools/build_name_map.py`
+  → `Docs/FUN_NAME_MAP.tsv` (7053 functions, 3479 named) and `Docs/VTABLE_SLOTS.tsv` (1079 slots); how-to in
+  `Docs/NAME_CROSSWALK.md`.
+- 4 bodies in `module-singletons.{h,cpp}` (`0x14001c790`, `0x14001c7a0`, `0x14001c7b0`, `0x14001c7f0`); the first two
+  retire seams in the CInstance and CMapManager files.
+- 65 suites green, six cycles. Total ported: 596 of 4099 bodies.
+- Next: `0x14003ca10` (CMapManager::FindMap — needs the `InstanceGet` thunk from `objdump`, the decompile marks it
+  unrecoverable) and `0x140024000` (the insert core with rebalance).
