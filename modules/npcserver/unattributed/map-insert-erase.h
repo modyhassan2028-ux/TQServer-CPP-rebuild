@@ -7,8 +7,6 @@
 
 namespace tq {
 
-extern long long* (*g_pfnNpc_140024000)(long long* pMap, long long* pOutOwner, char bInsert,
-                                        long long* pHint, unsigned long long* pKey);
 // The range lands as two iterator pairs: pOutRange[0..1] = begin, pOutRange[2..3] = end.
 extern void (*g_pfnNpc_140023290)(long long* pMap, long long* pOutRange, unsigned* pKey);
 

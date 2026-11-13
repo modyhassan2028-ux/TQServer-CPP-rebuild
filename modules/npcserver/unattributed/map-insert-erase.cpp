@@ -2,12 +2,10 @@
 #include "modules/npcserver/unattributed/map-insert-erase.h"
 #include "modules/npcserver/unattributed/front-of-image.h"
 #include "modules/npcserver/unattributed/tree-erase-range.h"
+#include "modules/npcserver/unattributed/tree-insert.h"
 
 namespace tq {
 
-// The seams this file owns until their own batches land.
-long long* (*g_pfnNpc_140024000)(long long* pMap, long long* pOutOwner, char bInsert,
-                                 long long* pHint, unsigned long long* pKey) = nullptr;
 void (*g_pfnNpc_140023290)(long long* pMap, long long* pOutRange, unsigned* pKey) = nullptr;
 
 // 0x140024970 - insert at the position the search found
@@ -19,7 +17,7 @@ long long* FUN_140024970(long long* pMap, long long* pOut, unsigned* pKey) {
     long long* plVar5;
     long long* plVar6;
     bool bVar7;
-    long long local_38;
+    long long aPair[2];        // local_38, local_30: the two slots the insert writes as a pair
     long long* local_30;
 
     plVar6 = (long long*)pMap[6];
@@ -38,14 +36,14 @@ long long* FUN_140024970(long long* pMap, long long* pOut, unsigned* pKey) {
     }
     lVar2 = pMap[0];
     plVar5 = plVar6;
-    local_38 = lVar2;
+    aPair[0] = lVar2;
     plVar4 = plVar6;
     if (!bVar7) {
     label_acd:
         local_30 = plVar4;
         if (*pKey <= *(unsigned*)(plVar5 + 3)) {
             *(unsigned char*)(pOut + 2) = 0;
-            *pOut = local_38;
+            *pOut = aPair[0];
             goto label_afc;
         }
     } else {
@@ -98,10 +96,11 @@ long long* FUN_140024970(long long* pMap, long long* pOut, unsigned* pKey) {
         }
         bVar7 = true;
     }
-    plVar6 = g_pfnNpc_140024000(pMap, &local_38, bVar7, plVar6, (unsigned long long*)pKey);
+    FUN_140024000(pMap, (unsigned long long*)aPair, bVar7, (unsigned long long*)plVar6,
+                  (unsigned long long*)pKey);
     *(unsigned char*)(pOut + 2) = 1;
-    local_30 = (long long*)plVar6[1];
-    *pOut = *plVar6;
+    local_30 = (long long*)aPair[1];
+    *pOut = aPair[0];
 label_afc:
     pOut[1] = (long long)local_30;
     return pOut;

@@ -25,11 +25,12 @@ g++ -std=c++17 $SAN $INC -c modules/npcserver/unattributed/cinstance.cpp -o /tmp
 g++ -std=c++17 $SAN $INC -c modules/npcserver/unattributed/cmapmanager-instance.cpp -o /tmp/npcsrv/cminst.o
 g++ -std=c++17 $SAN $INC -c modules/npcserver/unattributed/map-insert-erase.cpp -o /tmp/npcsrv/mins.o
 g++ -std=c++17 $SAN $INC -c modules/npcserver/unattributed/module-singletons.cpp -o /tmp/npcsrv/msing.o
+g++ -std=c++17 $SAN $INC -c modules/npcserver/unattributed/tree-insert.cpp -o /tmp/npcsrv/tins.o
 g++ -std=c++17 $SAN $INC -c modules/npcserver/src/version/cqserver-78.0.11-1204/npcserver/clientsocket.cpp -o /tmp/npcsrv/data.o
 for t in tests/npcserver_d*_test.cpp; do
     name=$(basename "$t" _test.cpp)
     g++ -std=c++17 $SAN $INC -c "$t" -o /tmp/npcsrv/$name.o
-    g++ -std=c++17 $SAN /tmp/npcsrv/$name.o /tmp/npcsrv/front.o /tmp/npcsrv/stl.o /tmp/npcsrv/iter.o /tmp/npcsrv/shapes.o /tmp/npcsrv/refs.o /tmp/npcsrv/tail.o /tmp/npcsrv/global.o /tmp/npcsrv/logstub.o /tmp/npcsrv/logget.o /tmp/npcsrv/cont.o /tmp/npcsrv/cnode.o /tmp/npcsrv/maptree.o /tmp/npcsrv/vacc.o /tmp/npcsrv/tlink.o /tmp/npcsrv/terase.o /tmp/npcsrv/terange.o /tmp/npcsrv/cinst.o /tmp/npcsrv/cminst.o /tmp/npcsrv/mins.o /tmp/npcsrv/msing.o /tmp/npcsrv/data.o -o /tmp/npcsrv/$name
+    g++ -std=c++17 $SAN /tmp/npcsrv/$name.o /tmp/npcsrv/front.o /tmp/npcsrv/stl.o /tmp/npcsrv/iter.o /tmp/npcsrv/shapes.o /tmp/npcsrv/refs.o /tmp/npcsrv/tail.o /tmp/npcsrv/global.o /tmp/npcsrv/logstub.o /tmp/npcsrv/logget.o /tmp/npcsrv/cont.o /tmp/npcsrv/cnode.o /tmp/npcsrv/maptree.o /tmp/npcsrv/vacc.o /tmp/npcsrv/tlink.o /tmp/npcsrv/terase.o /tmp/npcsrv/terange.o /tmp/npcsrv/cinst.o /tmp/npcsrv/cminst.o /tmp/npcsrv/mins.o /tmp/npcsrv/msing.o /tmp/npcsrv/tins.o /tmp/npcsrv/data.o -o /tmp/npcsrv/$name
 done
 cycle=1
 while [ $cycle -le 6 ]; do

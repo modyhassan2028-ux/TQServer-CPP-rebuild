@@ -40,14 +40,14 @@ static long long* NewNode(unsigned nKey) {
     SetNil(p, 0);                   // a real node
     return p;
 }
-static long long* InsertCore(long long* pMap, long long* pOutOwner, char bInsert,
-                             long long* pHint, unsigned long long* pKey) {
+static long long* g_aNodePool[64];
+static int g_nNodePool = 0;
+static void* FakeNew(long long nBytes) {
+    assert(nBytes == 0x30);
     ++g_inserts;
-    g_insertFlag = bInsert;
-    g_pInsertHint = pHint;
-    (void)pOutOwner; (void)pKey;
-    assert(pMap == aMap);
-    return g_aInsertAns;
+    long long* p = (long long*)std::calloc(6, 8);
+    g_aNodePool[g_nNodePool++] = p;
+    return p;
 }
 static void* FakeDelete(void* p) { ++g_deletes; g_pDeleted = p; return nullptr; }
 static void Invalid(void) { ++g_invalids; }
@@ -76,8 +76,8 @@ static void BuildTree() {
     aHeader[1] = (long long)g_pNode30;   // root
     aHeader[2] = (long long)g_pNode50;   // rightmost
     aHeader[3] = 0;                      // the end value's key
-    SetColor((long long*)aHeader, 0);
-    SetNil((long long*)aHeader, 1);      // the head is nil
+    SetColor((long long*)aHeader, 1);    // the head is black, as 0x140022a40 builds it
+    SetNil((long long*)aHeader, 1);      // and nil
 
     std::memset(aMap, 0, sizeof aMap);
     aMap[0] = (long long)aMap;           // the owner an iterator carries
@@ -105,7 +105,7 @@ static void ResetCase() {
 }
 
 int main() {
-    g_pfnNpc_140024000 = &InsertCore;
+    g_pfnNpcOperatorNew = &FakeNew;
     g_pfnNpc_140023290 = &RangeLookup;
     g_pfnNpcOperatorDelete = &FakeDelete;
     g_pfnNpcInvalidParameter = &Invalid;
@@ -123,39 +123,40 @@ int main() {
 
             // a key that is already there: no new node, the pair carries the owner and the node found
             BuildTree(); ResetCase();
-            unsigned nKey30 = 30;
-            assert(pfn(aMap, aOut, &nKey30) == aOut);
-            assert(g_inserts == 0);
+            unsigned long long aKey30[2] = { 30, 0x1fe };   // {key, value}
+            assert(pfn(aMap, aOut, (unsigned*)aKey30) == aOut);
+            assert(g_inserts == 0);                       // nothing was allocated
             assert(aOut[0] == aMap[0]);
             assert((long long*)aOut[1] == g_pNode30);
             assert(((unsigned char*)aOut)[0x10] == 0);
 
-            // a gap: the search hands 20 to the insert core with the "went left" answer
+            // a gap: the new node becomes 20's right child and the tree still links up
             BuildTree(); ResetCase();
-            unsigned nKey25 = 25;
-            pfn(aMap, aOut, &nKey25);
+            unsigned long long aKey25[2] = { 25, 0x1a9 };
+            pfn(aMap, aOut, (unsigned*)aKey25);
             assert(g_inserts == 1);
-            assert((long long*)g_pInsertHint == g_pNode20);
-            assert(g_insertFlag == false);
-            assert(aOut[0] == g_aInsertAns[0] && aOut[1] == g_aInsertAns[1]);
             assert(((unsigned char*)aOut)[0x10] == 1);
+            assert((long long*)aOut[1] == (long long*)g_aNodePool[g_nNodePool - 1]);
+            assert(((long long*)aOut[1])[3] == 25);       // the key landed in the value pair
+            assert((long long*)g_pNode20[2] == (long long*)aOut[1]);
+            assert(((long long*)aOut[1])[1] == (long long)g_pNode20);
 
-            // above the root: the hint is 40 and the flag says the search went right
+            // above the root: the new node becomes 40's left child
             BuildTree(); ResetCase();
-            unsigned nKey35 = 35;
-            pfn(aMap, aOut, &nKey35);
+            unsigned long long aKey35[2] = { 35, 0x253 };
+            pfn(aMap, aOut, (unsigned*)aKey35);
             assert(g_inserts == 1);
-            assert((long long*)g_pInsertHint == g_pNode40);
-            assert(g_insertFlag == true);
+            assert((long long*)g_pNode40[0] == (long long*)aOut[1]);
 
-            // below the leftmost: the search stops on 10, which is the head's left child
+            // below the leftmost: the new node becomes 10's left child and the head follows it
             BuildTree(); ResetCase();
-            unsigned nKey5 = 5;
-            pfn(aMap, aOut, &nKey5);
+            unsigned long long aKey5[2] = { 5, 0x55 };
+            pfn(aMap, aOut, (unsigned*)aKey5);
             assert(g_inserts == 1);
-            assert((long long*)g_pInsertHint == g_pNode10);
-            assert(g_insertFlag == true);
-            assert(nInsert == 0);
+            assert((long long*)g_pNode10[0] == (long long*)aOut[1]);
+            assert((long long*)aHeader[0] == (long long*)aOut[1]);   // the new leftmost
+            for (int i = 0; i < g_nNodePool; ++i) std::free(g_aNodePool[i]);
+            g_nNodePool = 0;
             ++nInsert;
 
         } else if (std::strcmp(e.pszKind, "erase-counted") == 0) {
@@ -218,16 +219,16 @@ int main() {
             long long aOut[4];
 
             BuildTree(); ResetCase();
-            unsigned nKey30 = 30;
-            assert(pfn(aMap, aOut, &nKey30) == aOut);
+            unsigned long long aKey30[2] = { 30, 0x1fe };   // {key, value}
+            assert(pfn(aMap, aOut, (unsigned*)aKey30) == aOut);
             assert((long long*)aOut[1] == g_pNode30);     // lower bound is the node itself
             assert((long long*)aOut[3] == g_pNode40);     // upper bound is its successor
             assert(aOut[0] == aMap[0] && aOut[2] == aMap[0]);
 
             // a key between two nodes: both bounds collapse on the upper neighbour
             BuildTree(); ResetCase();
-            unsigned nKey25 = 25;
-            pfn(aMap, aOut, &nKey25);
+            unsigned long long aKey25b[2] = { 25, 0x1a9 };
+            pfn(aMap, aOut, (unsigned*)aKey25b);
             assert((long long*)aOut[1] == g_pNode30);
             assert((long long*)aOut[3] == g_pNode30);
 
@@ -240,8 +241,8 @@ int main() {
 
             // below everything: an empty range standing on the leftmost node
             BuildTree(); ResetCase();
-            unsigned nKey5 = 5;
-            pfn(aMap, aOut, &nKey5);
+            unsigned long long aKey5b[2] = { 5, 0x55 };
+            pfn(aMap, aOut, (unsigned*)aKey5b);
             assert((long long*)aOut[1] == g_pNode10);
             assert((long long*)aOut[3] == g_pNode10);
 

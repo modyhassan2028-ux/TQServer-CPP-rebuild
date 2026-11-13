@@ -2212,3 +2212,31 @@ The seam `g_pfnNpc_14003ca10` is gone: `0x14003cd80` calls the real body now, an
 fake cache, a fake row, a fake database instance and a fake instance.
 
 65 suites green, six cycles. Total ported: 598 of 4099 bodies.
+
+## D250 — the node builder and the insert repair (2 bodies)
+
+`modules/npcserver/unattributed/tree-insert.{h,cpp}`, manifest `g_aNpcTreeInsert`.
+
+| address | body |
+|---|---|
+| 0x1400228f0 | `operator_new(0x30)`, then left, parent, right, the 16-byte value pair, `+0x28 = colour 0` (red) and `+0x29 = 0` |
+| 0x140024000 | the size guard, the link at the hint, and the red-black repair |
+
+`0x140024000` throws while `pMap[7] > 0xffffffffffffffd` — the guard is strict, so the port throws `std::length_error`
+only above that value (the suite caught my first attempt, which threw at equality). The link branch has three shapes:
+hint == head (the first node becomes root, leftmost and rightmost at once), `bWentLeft == 0` (right child, and the
+rightmost follows it) and otherwise the left child with the leftmost following.
+
+The suite validates the tree instead of the steps: after **every** insert in an ascending (7), descending (7) and mixed
+(13) sequence it walks the result and checks the BST order, black heights, red-red adjacency, black root, the leftmost
+and rightmost links and the size. It also covers the head-first insert, the value pair travelling intact, and the throw.
+
+**Fixture trap:** the sentinel head's `+0x28` is **1** (black), as `0x140022a40` builds it. With a red head the repair
+walks past the root and rotates (my first D246 fixture did exactly that and the key-35 case failed). Same for the
+two-slot result pair: `FUN_140024000(pMap, &local_38, ...)` writes `local_38`/`local_30` as an array, so the caller in
+`0x140024970` now keeps them in `aPair[2]`.
+
+The seam `g_pfnNpc_140024000` is retired; `0x140024970` calls the real core and its suite now checks the links the insert
+produces (right child of 20, left child of 40, left child of 10 with the head following).
+
+66 suites green, six cycles. Total ported: 600 of 4099 bodies.

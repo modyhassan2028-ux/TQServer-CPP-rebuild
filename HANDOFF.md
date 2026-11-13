@@ -1112,3 +1112,11 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 65 suites green, six cycles. Total ported: 598 of 4099 bodies.
 - Next: `0x140024000` (the insert core with the rebalance and the `map/set<T> too long` length_error) — it owns two seams
   today (`0x140024970` and the hint path) and is the last big body of the 0x14002xxxx cluster.
+
+## D250 (latest)
+
+- `0x1400228f0` (node builder) and `0x140024000` (insert + red-black repair) in `tree-insert.{h,cpp}`; the
+  `g_pfnNpc_140024000` seam is retired and `0x140024970` now inserts for real.
+- 66 suites green, six cycles. Total ported: 600 of 4099 bodies.
+- Next: the `0x140025xxx` container family (`0x1400250e0`, `0x140025690`, `0x140025750`, `0x140025340`) now has no
+  missing callee, then `0x14003ca10`'s neighbours and the `0x140026xxx` vtables.
