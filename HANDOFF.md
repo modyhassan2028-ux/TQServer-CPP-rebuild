@@ -1077,3 +1077,12 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - `Docs/WORKING_METHOD.md` added: the full working method in Arabic, written for a fresh agent on another account.
 - 63 suites green, six cycles. Total ported: 588 of 4099 bodies.
 - Next: `0x140024fe0` / `0x140024970` / `0x140024b20`, then `0x1400250e0` / `0x140025690` / `0x140025750`.
+
+## D246 (latest)
+
+- `0x140024970`, `0x140024b20`, `0x140024fe0` in `map-insert-erase.{h,cpp}`: hinted insert, counted range erase, and
+  the key lookup. Seams: `g_pfnNpc_140024000`, `g_pfnNpc_140023290`.
+- Iterator pairs are declared as arrays now; separate locals broke the callee's two-slot layout (see PORTING_LOG).
+- 64 suites green, six cycles. Total ported: 591 of 4099 bodies.
+- Next: `0x140024000` (the insert core, needs `0x140024970`'s caller shape) and `0x140023290` (the range lookup), then
+  `0x1400250e0` / `0x140025690` / `0x140025750` close out with no missing callees.

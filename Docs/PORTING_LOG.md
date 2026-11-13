@@ -2122,3 +2122,25 @@ Seams added: `g_pfnNpc_14003ca10`, `g_pfnNpc_1400550f0`, `g_pfnNpc_14001c7a0`, `
 and the fix is to read the slot value: `pVt[0x28 / 8]`.
 
 63 suites green, six cycles. Total ported: 588 of 4099 bodies.
+
+## D246 — the map's hinted insert, counted erase and lookup (3 bodies)
+
+`modules/npcserver/unattributed/map-insert-erase.{h,cpp}`, manifest `g_aNpcMapInsert`.
+
+| address | body |
+|---|---|
+| 0x140024970 | search for the key, then either answer the node found (byte at +0x10 = 0) or insert through `0x140024000` (byte 1); the hint and the "went left" flag come from the search |
+| 0x140024b20 | count the nodes between begin and end by stepping successors, then erase exactly that range through `0x140023df0` (already ported) and answer the count |
+| 0x140024fe0 | the value at `node + 0x20` for a key, or 0 |
+
+Seams added: `g_pfnNpc_140024000` (insert core), `g_pfnNpc_140023290` (range lookup).
+
+**Layout rule that this batch forced:** the image keeps two iterators in adjacent stack slots (`local_38)/(local_30`) and
+passes `&local_38` to a callee that reads it as a two-slot array. Declaring them as separate locals is not the same
+program — the compiler is free to order the slots, and ASan caught exactly that here. Every such pair is now a real
+array (`aBegin`, `aEnd`, `aEraseFirst`, `aEraseLast`, `aRange`, `aMain`, `aAlt`), so the layout the callee depends on is
+guaranteed.
+
+The suite runs over a real five-node red/black tree: the four hint positions, the empty range, the whole-tree range
+(count 5, cleared through the head), a single red leaf range (count 1, child transplanted) and the six lookup answers.
+64 suites green, six cycles. Total ported: 591 of 4099 bodies.

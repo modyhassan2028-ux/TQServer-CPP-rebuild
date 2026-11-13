@@ -124,6 +124,9 @@ git add -A && git commit -m "D###: <سطر واحد>" && git push origin HEAD
 - في "copy-then-step" الحركة بتحصل **قبل** تحديث الـiterator.
 - قيمة راجعة 8 بايت من دالة الـdecompiler كاتبها `void` (tail call) — اتبع الـlisting.
 - vtable slot أحيانًا على مستويين: `(**(code**)(*(long long*)*param_1 + 0x10))(*param_1, i)`.
+- **الـlocalات اللي بتتبعت بالعنوان كـpair لازم تكون array.** `long long local_38; long long* local_30;` وبعدها
+  `FUN(&local_38)` معناه إن الكالي بيقرا الأربع سلوتس متجاورة. الكمبايلر مش ملزم يرتبهم كده → ASan هيمسك stack
+  overflow. الحل: `long long aPair[2];` وبعتها بالعنوان. حصلت فعليًا في D246.
 - **الـvtable دايمًا double dereference.** `(**(code **)(*pObj + 0x28))(...)` معناه: اقرأ *قيمة* الفتحة. لو كتبتها
   `(char (*)(...))(*(long long*)pObj + 0x28)` هتـjump على **عنوان** الفتحة نفسها (pc = 0x28 أو pc = عنوان الجدول).
   الصح: `long long* pVt = (long long*)*pObj; pVt[0x28/8]`. حصلت فعليًا في D245.
@@ -209,12 +212,12 @@ objdump -d --start-address=0x1400491b0 --stop-address=0x140049260 /app/co_decomp
 
 ---
 
-## 9) الحالة الحالية (آخر تحديث: D245)
+## 9) الحالة الحالية (آخر تحديث: D246)
 
-- **588 من 4099 جسم** منقولة، **63 سويت** خضراء، 6 دورات، ASan+UBSan.
+- **591 من 4099 جسم** منقولة، **64 سويت** خضراء، 6 دورات، ASan+UBSan.
 - العناقيد المقفولة: `0x14000xxxx` (front/libevent/IOCP)، `0x14007xxxx` (coded streams + logging)،
   `0x14008xxxx` (STL shapes)، `0x14002xxxx` (RBT tree + erase + containers + CInstance + map factory).
-- التالي بالترتيب: `0x140024970` / `0x140024b20` / `0x140024fe0` → `0x1400250e0/0x140025690/0x140025750`
+- التالي بالترتيب: `0x140024000` (نواة الإدراج) و`0x140023290` (بحث المدى) → `0x1400250e0/0x140025690/0x140025750`
   → `0x140026xxx` … وهكذا صاعدًا في النطاق.
 - أوامر التحقق السريع:
 ```bash
