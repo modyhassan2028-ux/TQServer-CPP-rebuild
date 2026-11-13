@@ -1128,7 +1128,16 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 67 suites green, six cycles. Total ported: 603 of 4099 bodies.
 - Next: `0x140025340` (the CInstanceMgr constructor/clear, 153 lines) and the rest of `0x140025xxx`, then `0x140026xxx`.
 
-## D262 (latest)
+## D263 (latest)
+
+- vftable capture now reads the class name backwards with angle brackets balanced, so template keys
+  (`CGameData<&char*_szGenerator,...>`) match the way `VTABLE_SLOTS.tsv` spells them. Third fix of the same class of
+  bug; the table's spelling is the authority.
+- Standing count: **1,770 bodies** (1,090 linked, 680 pending). 69 suites green, six cycles.
+- "vftable not in table" is now 0. Top declines: `extraout_` 105, callee with no usable declaration 69, `SUB168` 67,
+  exception objects 51.
+
+## D262
 
 - The vftable lookup could not see scoped names (`std::bad_alloc::vftable`, `std::tr1::_Ref_count_base::vftable`);
   the table always had them. Capture widened to the full scope, matched whole then by last component.

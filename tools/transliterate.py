@@ -295,14 +295,37 @@ def rewrite_body(body):
     body = rewrite_log_calls(body)
     body = rewrite_std_string(body)
     body = rename_params(map_types(body))
-    # The RTTI table names some classes with a scope (std::tr1::_Ref_count_base) and some without, so the class is
-    # captured with its scope and matched whole first, then by its last component.
-    def _vtl(mo):
-        for cand in (mo.group(1), mo.group(1).split("::")[-1]):
-            if normalise(cand) in VTABLE:
-                return "g_pNpcVtblTrans_%x" % VTABLE[normalise(cand)]
-        return mo.group(0)
-    body = re.sub(r"((?:[A-Za-z_]\w*::)*[A-Za-z_]\w*)::vftable\b", _vtl, body)
+    # The RTTI table names some classes with a scope and some with template arguments
+    # (`CGameData<&char*_szGenerator,&char*_szID>`, `std::tr1::_Ref_count_base`), so the class name is read backwards
+    # from `::vftable` with angle brackets balanced, then matched whole and by its last component.
+    def _vtbl(body):
+        out = body
+        while True:
+            i = out.find("::vftable")
+            if i < 0:
+                return out
+            j, depth = i, 0
+            while j > 0:
+                ch = out[j - 1]
+                if ch == ">":
+                    depth += 1
+                elif ch == "<":
+                    depth -= 1
+                elif depth == 0 and not (ch.isalnum() or ch in "_:*& ,"):
+                    break
+                j -= 1
+            name = out[j:i]
+            sym = None
+            for cand in (name, name.split("::")[-1]):
+                key = normalise(cand)
+                if key in VTABLE:
+                    sym = "g_pNpcVtblTrans_%x" % VTABLE[key]
+                    break
+            out = out[:j] + (sym if sym else "::vftable") + out[i + 9:]
+            if not sym:
+                out = out[:j] + "\x00" + out[i + 9:]
+                return out.replace("\x00::vftable", "::vftable")
+    body = _vtbl(body)
     for name in re.findall(r"\b([A-Z]\w* *)\*", body):
         pass
     for name in re.findall(r"\(([A-Z]\w*) \*\)", body):

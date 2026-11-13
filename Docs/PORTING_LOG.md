@@ -2541,3 +2541,22 @@ declined until the harvest is widened - not to point them at the nearest slot.
 `SUB84`/`SUB168` (67 bodies) are deliberately untouched. Ghidra's `SUBabc` describes a slice of a value whose source
 width Ghidra chose, and the listing does not say which half the first operand already points at. Writing a macro for it
 would be deciding the convention by eye for 67 call sites, which is exactly the kind of guess this unit refuses.
+
+## D263 — the same lookup, blind again: template arguments
+
+D262 widened the vftable capture to scopes and left 65 bodies declined. Checking those 65 against the table directly
+found **zero** unmapped names, which meant the tally label was lying: the leftover `::vftable` was coming from classes
+whose name carries template arguments - `CGameData<&char*_szGenerator,&char*_szID>::vftable`, which is exactly how the
+table spells them, and which a regex of the form `(?:\w+::)*\w+` can never reach because `<` ends the match.
+
+The name is now read backwards from `::vftable` with the angle brackets balanced, then matched whole and by its last
+component. That is the third round of the same mistake, so it is written down here: **the table's spelling is the
+authority**, and any capture that cannot express a table key is a bug in the capture, not a missing class.
+
+    1,720 -> **1,770 bodies** (1,090 linked, 680 pending)     69 suites green, six cycles
+    declined "vftable not in table": 65 -> 0
+    new top decline: "exception" 51
+
+The 51 now led by `exception` are bodies that construct and throw a CRT exception object; they are the next batch and
+they are blocked by the same thing as everything else in that family - the throw sequence needs the object layout, and
+the listing only shows the writes.
