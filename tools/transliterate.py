@@ -64,7 +64,7 @@ REJECT = [
     "unaff_", "in_stack_", "extraout_", "__thiscall",
     "__fastcall", "_guard_", "in_EAX", "in_RAX", "SUB84", "SUB168", "ZEXT", "SEXT",
     "assert", "Ordinal_", "freeaddrinfo", "_open(", "_close(", "_read(", "_write(", "_lseek(", "_fstat64",
-    "log_InlineLogWARNING", "log_InlineLogINFO",
+    "log_InlineLogWARNING", "log_InlineLogINFO", "basic_string",
     "type_info", "_1_1_",
     "time_t", "FILE ", "(_locale_t)",
 ]
@@ -131,11 +131,7 @@ def load_vtables():
 def load():
     # The consolidated listing is the base, but a body that only appears in one of the split files still belongs to this
     # image and still has to be ported: read every reference file and keep the first body found for each address.
-    import glob as _glob
     src = open(SRC, errors="ignore").read()
-    for extra in sorted(_glob.glob(SRC.rsplit("/", 1)[0] + "/_unnamed_*.c*")):
-        if extra != SRC:
-            src += "\n" + open(extra, errors="ignore").read()
     out = {}
     for part in re.split(r"\n(?=[a-zA-Z_][\w \*]*\bFUN_[0-9a-fA-F]{9}\()", src):
         part = part.split("\n// ====")[0].strip()

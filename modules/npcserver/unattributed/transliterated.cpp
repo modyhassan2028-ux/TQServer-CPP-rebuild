@@ -67,7 +67,6 @@ struct ILogKernel;
 struct ITerrainObjInfoMgr;
 struct LPARAM;
 struct LPCSTR;
-struct ThrowInfo;
 
 const void* const g_pNpcVtblTrans_1400be090 = (const void*)0x1400be090;
 const void* const g_pNpcVtblTrans_1400be3f0 = (const void*)0x1400be3f0;
@@ -1940,7 +1939,6 @@ void FUN_14009e218(unsigned long long * arg1);
 void FUN_14009e238(long long * arg1);
 bool FUN_14009e378(long long arg1, int arg2);
 void FUN_1400a0a44(unsigned long long * arg1, unsigned char * arg2, unsigned arg3, unsigned long long * arg4);
-unsigned char FUN_1400a2330(unsigned long long * arg1, unsigned arg2, unsigned long long * arg3);
 void FUN_1400a26f0(unsigned long long arg1, unsigned long long * arg2, unsigned arg3);
 void FUN_1400a2720(unsigned long long arg1, unsigned long long * arg2);
 void FUN_1400a2770(long long arg1, unsigned long long * arg2, unsigned arg3);
@@ -2243,7 +2241,6 @@ extern unsigned long long FUN_14007a520(unsigned long long);   // defined elsewh
 extern void FUN_14007a540(unsigned long long arg1, long long arg2, unsigned long long * arg3, unsigned char arg4);   // defined elsewhere in the port
 extern void FUN_14007a5b0(unsigned long long arg1, unsigned long long arg2, void * arg3, unsigned long long arg4);   // defined elsewhere in the port
 extern unsigned long long FUN_14007ad30(unsigned long long * arg1, void * arg2, int arg3);   // defined elsewhere in the port
-extern unsigned long long FUN_14007adf0(unsigned long long * arg1, basic_string<char, std::char_traits<char>, std::allocator<char>_> * arg4, int arg5);   // defined elsewhere in the port
 extern unsigned long long FUN_14007b000(unsigned long long * arg1, unsigned long long * arg2);   // defined elsewhere in the port
 extern unsigned long long FUN_14007b340(unsigned long long * arg1, unsigned long long * arg2);   // defined elsewhere in the port
 extern unsigned long long FUN_14007b7e0(unsigned long long * arg1);   // defined elsewhere in the port
@@ -2329,9 +2326,9 @@ extern void FUN_14009de28(long long * arg1);   // defined elsewhere in the port
 extern void FUN_14009e2fc(long long arg1);   // defined elsewhere in the port
 extern unsigned long long FUN_1400a09d4(long long arg1, unsigned * arg2, unsigned long long * arg3);   // defined elsewhere in the port
 extern unsigned long long FUN_1400a21b0(unsigned long long * arg1, unsigned arg2);   // defined elsewhere in the port
+extern unsigned char FUN_1400a2330(unsigned long long * arg1, unsigned arg2, unsigned long long * arg3);   // defined elsewhere in the port
 extern unsigned long long FUN_1400a2600(unsigned long long * arg1);   // defined elsewhere in the port
 extern unsigned long long FUN_1400a2670(unsigned long long * arg1, unsigned long long * arg2);   // defined elsewhere in the port
-extern void FUN_1400a3750(unsigned long long * arg1, basic_string<char, std::char_traits<char>, std::allocator<char>_> * arg4);   // defined elsewhere in the port
 extern unsigned long long FUN_1400a3b00(unsigned long long);   // defined elsewhere in the port
 extern unsigned long long FUN_1400a3b50(unsigned long long);   // defined elsewhere in the port
 extern void FUN_1400a3c90(unsigned long long * arg1, int arg2);   // defined elsewhere in the port
@@ -2988,7 +2985,6 @@ extern void FUN_1400a3c90(unsigned long long * arg1, int arg2);   // defined els
 // pending: FUN_14009e238 needs FUN_14009da40, FUN_14009de28
 // pending: FUN_14009e378 needs FUN_14009e2fc
 // pending: FUN_1400a0a44 needs FUN_1400a09d4
-// pending: FUN_1400a2330 needs FUN_14007adf0, FUN_14007bf80, FUN_14007c030, FUN_14007c100, FUN_14007c220, FUN_14007caf0, FUN_140097710, FUN_1400a2670, FUN_1400a3610, FUN_1400a3640, FUN_1400a3750
 // pending: FUN_1400a26f0 needs FUN_1400a21b0
 // pending: FUN_1400a2720 needs FUN_1400a2600
 // pending: FUN_1400a2770 needs FUN_1400a2330
@@ -43279,120 +43275,6 @@ void FUN_1400a0a44(unsigned long long * arg1, unsigned char * arg2, unsigned arg
   return;
 }
 
-//@PENDING 1400a2330
-unsigned char FUN_1400a2330(unsigned long long * arg1, unsigned arg2, unsigned long long * arg3) {
-  bool bVar1;
-  char cVar2;
-  unsigned uVar3;
-  unsigned long long uVar4;
-  unsigned char auStack_98 [32];
-  unsigned long long local_78;
-  unsigned long long local_70;
-  unsigned local_68 [4];
-  basic_string<char,std::char_traits<char>,std::allocator<char>_> local_58 [40];
-  unsigned local_30;
-  unsigned char local_2c;
-  unsigned char local_2b;
-  unsigned long long local_28;
-  unsigned local_20;
-  unsigned long long local_18;
-  
-  local_28 = 0xfffffffffffffffe;
-  local_18 = DAT_140103510 ^ (unsigned long long)auStack_98;
-  local_20 = FUN_140097280(arg2);
-  switch(local_20) {
-  case 0:
-    uVar4 = FUN_14007caf0(arg1,&local_78);
-    if ((uVar4 & 0xff) == 0) {
-      local_2c = 0;
-    }
-    else {
-      FUN_14007c100(arg3,arg2);
-      FUN_14007c220(arg3,local_78);
-      local_2c = 1;
-    }
-    break;
-  case 1:
-    cVar2 = FUN_1400a3640(arg1,&local_70);
-    if (cVar2 == '\0') {
-      local_2c = 0;
-    }
-    else {
-      FUN_14007c100(arg3,arg2);
-      FUN_14007c030(arg3,local_70);
-      local_2c = 1;
-    }
-    break;
-  case 2:
-    uVar4 = FUN_140097710(arg1,local_68);
-    if ((uVar4 & 0xff) == 0) {
-      local_2c = 0;
-    }
-    else {
-      FUN_14007c100(arg3,arg2);
-      FUN_14007c100(arg3,local_68[0]);
-      std::basic_string<char,std::char_traits<char>,std::allocator<char>_>::
-      basic_string<char,std::char_traits<char>,std::allocator<char>_>(local_58);
-      uVar4 = FUN_14007adf0(arg1,local_58,local_68[0]);
-      if ((uVar4 & 0xff) == 0) {
-        local_2c = 0;
-        std::basic_string<char,std::char_traits<char>,std::allocator<char>_>::
-        ~basic_string<char,std::char_traits<char>,std::allocator<char>_>(local_58);
-      }
-      else {
-        FUN_1400a3750(arg3,local_58);
-        local_2b = 1;
-        std::basic_string<char,std::char_traits<char>,std::allocator<char>_>::
-        ~basic_string<char,std::char_traits<char>,std::allocator<char>_>(local_58);
-        local_2c = local_2b;
-      }
-    }
-    break;
-  case 3:
-    FUN_14007c100(arg3,arg2);
-    uVar3 = FUN_1400a36b0((long long)arg1);
-    if ((uVar3 & 0xff) == 0) {
-      local_2c = 0;
-    }
-    else {
-      uVar4 = FUN_1400a2670(arg1,arg3);
-      if ((uVar4 & 0xff) == 0) {
-        local_2c = 0;
-      }
-      else {
-        FUN_1400a3700((long long)arg1);
-        uVar3 = FUN_140097290(arg2);
-        uVar3 = FUN_1400a3730(uVar3,4);
-        bVar1 = FUN_1400a3670((long long)arg1,uVar3);
-        if (bVar1) {
-          local_2c = 1;
-        }
-        else {
-          local_2c = 0;
-        }
-      }
-    }
-    break;
-  case 4:
-    local_2c = 0;
-    break;
-  case 5:
-    cVar2 = FUN_1400a3610(arg1,&local_30);
-    if (cVar2 == '\0') {
-      local_2c = 0;
-    }
-    else {
-      FUN_14007c100(arg3,arg2);
-      FUN_14007bf80(arg3,local_30);
-      local_2c = 1;
-    }
-    break;
-  default:
-    local_2c = 0;
-  }
-  return local_2c;
-}
-
 //@PENDING 1400a26f0
 void FUN_1400a26f0(unsigned long long arg1, unsigned long long * arg2, unsigned arg3) {
   FUN_1400a21b0(arg2,arg3);
@@ -45469,7 +45351,6 @@ extern const unsigned long long g_aNpcTranslitAddr[] = {
     (unsigned long long)0x1400a1c7cULL,
     (unsigned long long)0x1400a1e74ULL,
     (unsigned long long)0x1400a1ea8ULL,
-    (unsigned long long)0x1400a2330ULL,
     (unsigned long long)0x1400a26f0ULL,
     (unsigned long long)0x1400a2720ULL,
     (unsigned long long)0x1400a2770ULL,
@@ -45526,8 +45407,8 @@ extern const unsigned long long g_aNpcTranslitAddr[] = {
     (unsigned long long)0x1400b5500ULL,
     (unsigned long long)0x1400bc070ULL,
 };
-extern const unsigned g_nNpcTranslitCount = 1798;
+extern const unsigned g_nNpcTranslitCount = 1797;
 extern const unsigned g_nNpcTranslitLinked = 1102;
-extern const unsigned g_nNpcTranslitPending = 696;
+extern const unsigned g_nNpcTranslitPending = 695;
 
 }  // namespace tq

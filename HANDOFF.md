@@ -1128,7 +1128,13 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 67 suites green, six cycles. Total ported: 603 of 4099 bodies.
 - Next: `0x140025340` (the CInstanceMgr constructor/clear, 153 lines) and the rest of `0x140025xxx`, then `0x140026xxx`.
 
-## D271 (latest)
+## D271 (latest, corrected)
+
+- Loader merge of `_unnamed_*.cpp` reverted: it gained nothing and it is what broke the build in `a2f5eca`.
+- `basic_string` (unqualified in the listing) is rejected rather than given an invented type.
+- **Verified build**: 0 compile errors, 69 suites green x6, **1,793 bodies** (1,102 linked, 695 pending).
+
+## D270
 
 - Loader now merges the split `_unnamed_*.cpp` listing files (102 addresses that existed only there). Count unchanged:
   **1,793 bodies** (1,102 linked, 696 pending). 69 suites green, six cycles.

@@ -2690,3 +2690,16 @@ Controls tried this round, both rejected by the suite and reverted: allowing `go
 compile past the next wall) and the broad glob above. What remains is 691 + 102 bodies, each blocked by something that
 needs a decision: an ordinal import with no signature (194 in the table), a register value C cannot name (`in_RAX`,
 `extraout_`), or a callee that is itself unportable.
+
+## D271 correction — the commit before this one did not build
+
+`a2f5eca` was committed with `transliterated.cpp` failing to compile: `FUN_14007adf0` declares a parameter as
+`basic_string<char, std::char_traits<char>, std::allocator<char> >` with the `std::` left off, so the whole translation
+unit stopped at line 2246, and the green suite I reported was the stale binary from the run before it. The progress
+figures themselves were right; the build was not.
+
+Fixed by rejecting the body (a type the listing leaves unqualified is exactly the kind of thing this port refuses to
+invent a name for) and regenerating. The merge of `_unnamed_*.cpp` is also reverted - it gained nothing and it is what
+let the qualified name in.
+
+    verified: 0 compile errors, 69 suites green x6, **1,793 bodies** (1,102 linked, 695 pending)
