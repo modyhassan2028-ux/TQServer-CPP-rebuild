@@ -2703,3 +2703,24 @@ invent a name for) and regenerating. The merge of `_unnamed_*.cpp` is also rever
 let the qualified name in.
 
     verified: 0 compile errors, 69 suites green x6, **1,793 bodies** (1,102 linked, 695 pending)
+
+## D272 — the v6159 archive, opened: it is the server package, not the source
+
+Downloaded `Conquer_Online_Source_v6159.7z` (829 MB, 3,063 entries) and read it end to end. It contains **no C++ at all** -
+zero `.cpp`, `.h`, `.c` files. What it is: a running server package - `Source/map` (2,242 files), `lua`, `ini`,
+`syslog`, the data files, and 50 module DLLs. So the port still has no original source to copy, which is why the
+transliteration stays the method.
+
+What it does give us, and this is real:
+
+- `Docs/NPCSERVER_EXPORT_MAP.tsv` - all **467 imports of `NpcServer.exe`**, joined to the export tables of the DLLs in
+  the package: 273 named, 194 by ordinal, with each import's IAT address.
+- The 194 ordinals are not the game's code at all: **165 are `mfc90.dll`, 25 are `ws2_32.dll`**, 1 `oleaut32.dll`, and
+  the last 3 (`zlibwapi.dll`) resolved by name out of the package's own copy.
+- `Docs/CO_MODULE_EXPORTS.md` - the modules NpcServer actually calls: `CQBase.dll` 306 exports, `DB.dll` 36,
+  `Analyst.dll` 12, `zlibwapi.dll` 160. `?TimeGet@tq@@YAKH@Z` sits at 0x140b82df0, `?SysTimeGet@tq@@YAKXZ` at
+  0x140b87940, `?IsTimeRange@tq@@YA_NKK_J@Z` at 0x140b877d0, `?DateTime@tq@@YAXPEAD_J@Z` at 0x140b878c0.
+
+Disassembling `tq::TimeGet` shows what it is - a six-way jump table over the time type, calling into CQBase's own
+imports - and that settles a policy question: the four `tq::` entry points stay **seams** in this port, because their
+bodies belong to another module, and `g_pfnTimeGet` is where a host that has CQBase would plug the real thing in.

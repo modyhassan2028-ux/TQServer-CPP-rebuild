@@ -1128,7 +1128,16 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 67 suites green, six cycles. Total ported: 603 of 4099 bodies.
 - Next: `0x140025340` (the CInstanceMgr constructor/clear, 153 lines) and the rest of `0x140025xxx`, then `0x140026xxx`.
 
-## D271 (latest, corrected)
+## D272 (latest)
+
+- The v6159 archive is a **server package with no C++ source** (0 code files); porting stays transliteration-based.
+- `Docs/NPCSERVER_EXPORT_MAP.tsv`: 467 imports joined to real export tables (273 named / 194 ordinal).
+- The 194 ordinals are system libs: mfc90 165, ws2_32 25, oleaut32 1; the 3 zlibwapi ones resolved by name.
+- `Docs/CO_MODULE_EXPORTS.md`: CQBase 306 exports (tq::TimeGet @0x140b82df0, SysTimeGet @0x140b87940,
+  IsTimeRange @0x140b877d0, DateTime @0x140b878c0), DB 36, Analyst 12, zlibwapi 160.
+- Decision: `tq::` entry points stay seam hooks; their bodies belong to another module.
+
+## D271 (corrected)
 
 - Loader merge of `_unnamed_*.cpp` reverted: it gained nothing and it is what broke the build in `a2f5eca`.
 - `basic_string` (unqualified in the listing) is rejected rather than given an invented type.
