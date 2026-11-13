@@ -1128,7 +1128,13 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 67 suites green, six cycles. Total ported: 603 of 4099 bodies.
 - Next: `0x140025340` (the CInstanceMgr constructor/clear, 153 lines) and the rest of `0x140025xxx`, then `0x140026xxx`.
 
-## D272 (latest)
+## D273 (latest)
+
+- `Docs/MODULE_RTTI.md`: image has 125 RTTI classes, table covers them; package DLLs add 1,030 unrelated classes.
+- `::vftable` rejections are module-boundary (`std::` exceptions from msvcp90), not missing rows. Not fixable here.
+- ws2_32 ordinals (1..116 gap-toothed) cannot be mapped honestly: the package ships no ws2_32/mfc90/oleaut32.
+
+## D272
 
 - The v6159 archive is a **server package with no C++ source** (0 code files); porting stays transliteration-based.
 - `Docs/NPCSERVER_EXPORT_MAP.tsv`: 467 imports joined to real export tables (273 named / 194 ordinal).

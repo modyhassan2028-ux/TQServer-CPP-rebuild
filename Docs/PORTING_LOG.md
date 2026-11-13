@@ -2724,3 +2724,19 @@ What it does give us, and this is real:
 Disassembling `tq::TimeGet` shows what it is - a six-way jump table over the time type, calling into CQBase's own
 imports - and that settles a policy question: the four `tq::` entry points stay **seams** in this port, because their
 bodies belong to another module, and `g_pfnTimeGet` is where a host that has CQBase would plug the real thing in.
+
+## D273 — the vftable wall is a module wall, and the ws2_32 idea dies here
+
+Two things were checked against real artifacts this round, and both change the plan:
+
+**The vtable table is nearly complete.** `NpcServer.exe` carries 125 RTTI class names; `Docs/VTABLE_SLOTS.tsv` covers
+them, and of the 104 class names the listing references through `::vftable`, all but four regex artifacts resolve to a
+row. So "vftable not in table" is not missing data - the rows that fail are `std::logic_error`, `std::bad_alloc`,
+`std::tr1::_Ref_count_base`, `std::out_of_range`, which live in **msvcp90/msvcr90 and are not in the package at all**.
+`Docs/MODULE_RTTI.md` records the census: 46 package DLLs carry 1,030 classes, none overlapping the image's 125.
+
+**The ws2_32 idea I floated last round does not survive contact.** The ordinals this image imports are
+`1 2 3 4 6 7 8 9 10 11 13 14 15 16 18 19 21 23 52 54 55 111 112 115 116` - the tail past 25 rules out the short list
+anyone quotes from memory, and the package contains no `ws2_32.dll`, no `mfc90.dll`, no `oleaut32.dll`. Mapping those 25
+from recollection would be inventing signatures, which is the one thing this port does not do. They stay shut until the
+real DLLs are in hand.
