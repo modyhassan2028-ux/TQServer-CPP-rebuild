@@ -2420,3 +2420,27 @@ section table. So the data wave is not a translation problem, it is a typing pro
 `modules/npcserver/unattributed/npc-data.{h,cpp}` carries the 7 that are settled, and `Docs/NPC_DATA_WIDTHS.tsv` records
 each one's evidence (the function address the evidence came from). `DAT_` bodies stay declined until that typing pass
 lands - reported, not approximated.
+
+## D258 — the std::string wave: mapped, and it bought nothing
+
+The 176 bodies typed `std::` are not a family, they are a *symptom*. Measured before writing code:
+
+    std::basic_string<char,...>::size        21
+    std::basic_string<char,...>::operator*   14
+    ...::data 6, clear 6, begin 4, append 3, resize 2, find 2, the rest singletons
+
+They call members of a type the port already uses (`front-of-image.cpp` carries `std::string` by value), so the fix is
+a mechanical rewrite of the demangled instantiation into a member call on the port's own type: `size/length/data/c_str/
+clear/empty/append/assign/resize/find/substr/compare/push_back/capacity/reserve/insert/erase/replace/pop_back` become
+`((std::string *)a0)->member(rest...)`; `begin`/`end` become `data()` and `data() + size()`; `~basic_string` becomes the
+destructor call; the ctor becomes a placement `new`; `operator= == != + []` become the corresponding expression. Anything
+not on that list keeps the text and is declined by the compiler, not by a guess.
+
+What it bought: **zero net bodies**, and that is the useful result. Re-measuring the 176 after the rewrite, they did not
+become transliterable - they moved to the blockers underneath them: `DAT_` 287 -> 394, `vftable not in table` 63 -> 86,
+`CONCAT` 72 -> 73, `extraout_` 105 unchanged, and a new 51 that call a function whose declaration the port cannot
+reconstruct. The std:: calls were the *visible* defect of bodies that also read globals and vtables.
+
+So the standing number is **1,645 bodies** (996 linked, 649 pending); the 1,738 recorded in D257 was a pre-prune count and
+is corrected here. The rewrite stays: it removes a whole category of noise from every future measurement, and the
+decline report now points at the real blockers instead of at the standard library.

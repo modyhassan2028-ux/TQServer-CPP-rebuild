@@ -1128,14 +1128,24 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 67 suites green, six cycles. Total ported: 603 of 4099 bodies.
 - Next: `0x140025340` (the CInstanceMgr constructor/clear, 153 lines) and the rest of `0x140025xxx`, then `0x140026xxx`.
 
-## D257 (latest)
+## D258 (latest)
+
+- `rewrite_std_string()` in `tools/transliterate.py` maps the demangled `basic_string` instantiation onto the port's own
+  `std::string` (members, `begin/end`, dtor, placement ctor, and the four operators). Unlisted members stay declined.
+- It unlocked **no** bodies: re-measured, the 176 `std::` bodies simply re-sort onto their real blockers (`DAT_` 394,
+  vftable-not-in-table 86, `CONCAT` 73, `extraout_` 105, 51 with no usable callee declaration). The std:: call was the
+  visible defect of bodies that also touch globals and vtables.
+- Standing count: **1,645 bodies** (996 linked, 649 pending). The 1,738 in D257 was a pre-prune figure; corrected here.
+- 69 suites green, six cycles.
+
+## D257
 
 - `tools/harvest_data.py` + `tools/extract_data.py` open the data wave: widths from the listing's own casts, bytes from
   the image via the PE section table. `Docs/NPC_DATA_WIDTHS.tsv` records the evidence per global.
 - Measured scope: 214 `DAT_` names, only 7 sizeable today (1 string, 6 blobs), 190 with no width evidence, 17
   unresolvable. `npc-data.{h,cpp}` carries the 7; `DAT_` bodies stay declined until a typing pass decides what each
   global is.
-- 1,738 bodies transliterated (996 linked, 742 pending); 69 suites green, six cycles.
+- 1,645 bodies transliterated (996 linked, 649 pending) after pruning; 69 suites green, six cycles.
 
 ## D256
 

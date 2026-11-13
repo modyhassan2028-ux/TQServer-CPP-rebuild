@@ -4,6 +4,8 @@
 // not landed yet and is built only for a syntax check until then.
 #include <cstddef>
 #include <cstdio>
+#include <string>
+#include <new>
 #include "npc-data.h"
 
 namespace tq {

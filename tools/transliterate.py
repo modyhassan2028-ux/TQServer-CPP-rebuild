@@ -60,7 +60,7 @@ CRT = {
 }
 
 REJECT = [
-    "switch", "unaff_", "in_stack_", "extraout_", "std::", "__thiscall",
+    "switch", "unaff_", "in_stack_", "extraout_", "__thiscall",
     "__fastcall", "DAT_", "_guard_", "in_EAX", "in_RAX", "CONCAT", "SUB84", "SUB168", "ZEXT", "SEXT",
     "assert", "Ordinal_", "DWORD", "freeaddrinfo", "_open(", "_close(", "_read(", "_write(", "_lseek(", "_fstat64",
     "log_InlineLogWARNING", "log_InlineLogINFO", "TimeGet", "LPCRITICAL_SECTION",
@@ -301,6 +301,8 @@ def main():
     lines.append("// not landed yet and is built only for a syntax check until then.")
     lines.append("#include <cstddef>")
     lines.append("#include <cstdio>")
+    lines.append("#include <string>")
+    lines.append("#include <new>")
     lines.append("#include \"npc-data.h\"")
     lines.append("")
     lines.append("namespace tq {")
