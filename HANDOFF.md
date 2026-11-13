@@ -1128,7 +1128,15 @@ way `g_pfnLogic_141779400` was wired, keeping the pointer so a test can still wa
 - 67 suites green, six cycles. Total ported: 603 of 4099 bodies.
 - Next: `0x140025340` (the CInstanceMgr constructor/clear, 153 lines) and the rest of `0x140025xxx`, then `0x140026xxx`.
 
-## D265 (latest)
+## D266 (latest)
+
+- `_DAT_` blobs are now written non-const (the body's own expression gives the width of a store) and
+  `body_globals_ok` allows storing through a `_DAT_`; plain `DAT_` strings still wait. Net **0**.
+- **Real remaining count over the whole listing: 846 of 3,574 bodies** (port has 2,728 = 76.3%). The six decline
+  labels all reduce to one missing thing: widths that only the instruction stream states.
+- Nothing to read those widths from is in the tree yet - a disassembly export (or the PDB) is the unlock.
+
+## D265
 
 - `tools/emit_underscore_data.py` cuts the 20 `_DAT_` blobs out of `NpcServer.exe` (PE-mapped, 32 bytes each, exact
   bytes) into `npc-underscore-data.{h,cpp}`.

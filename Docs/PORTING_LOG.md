@@ -2593,3 +2593,27 @@ errors into a clean pending tier - the bodies that assign to a `_DAT_` are stora
 Net: **1,770 bodies, unchanged.** The blobs are not what the 87 are missing. What they are missing is the bare Ghidra
 `undefined` type - a value of no width - and no declaration can honestly stand in for that. So the number stays where it
 is, and the blobs wait in the tree for the batch that needs them.
+
+## D266 — the blobs become writable, and the storage half stays shut
+
+`_DAT_` symbols are carried as their real bytes, so a body that stores through one is writing to a faithful copy of the
+original cell and the width comes from the body's own expression - `*(undefined4 *)_DAT_x = 1;` becomes a 4-byte store
+into the copy. The blobs are therefore no longer `const`, and `body_globals_ok` lets a `_DAT_` body store while a plain
+`DAT_` string constant still waits. Net **0** again (1,770): the storage bodies fall to the bare `undefined` type before
+they can be emitted, which is the same wall as D265 and does not move for a data change.
+
+Counting the real thing this time, over the whole listing rather than one tier:
+
+    bodies in the Ghidra listing                     3,574
+    bodies with a definition in the port             2,728     (76.3%)
+    remaining                                          846
+      blocked by bare `undefined` type                467
+      blocked by DAT/_DAT storage                     298   (overlaps the above)
+      blocked by ::vftable                            105
+      blocked by the CRT throw                         58
+      blocked by extraout_                             56
+      blocked by SUB84/SUB168                          44
+
+So the finish line is 846 bodies, and they are not 846 independent problems: they are one problem - the listing's
+untyped locals and untyped globals - seen from six sides. Every remaining body needs a width that only the instruction
+stream states, and there is no disassembly export in the tree to read it from.

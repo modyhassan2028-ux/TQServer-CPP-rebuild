@@ -99,7 +99,10 @@ def body_globals_ok(body, typed):
         if name not in typed:
             return False, "global not typed"
         before = body[:m.start()].rstrip()
-        if not before.endswith("&"):
+        # A `_DAT_` symbol is carried as its real bytes, so a body that stores through it is writing to a faithful copy
+        # of the original cell and the width comes from the body's own expression. A plain `DAT_` string constant has
+        # no such backing and still waits.
+        if not before.endswith("&") and not name.startswith("_DAT_"):
             return False, "global used as storage"
     return True, ""
 
